@@ -34,14 +34,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SynchroCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    protected static $defaultName = 'myddleware:synchro';
+
+    private LoggerInterface $logger;
+
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -55,9 +52,7 @@ class SynchroCommand extends Command
 
     protected function configure()
     {
-        $this
-            ->setName('myddleware:synchro')
-            ->setDescription('Synchronisation des données')
+        $this->setDescription('Synchronisation des données')
             ->addArgument('rule', InputArgument::REQUIRED, 'Alias de la règle')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;

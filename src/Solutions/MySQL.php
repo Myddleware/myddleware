@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -27,40 +30,22 @@ namespace App\Solutions;
 
 class MySQL extends Database
 {
-    protected $driver = 'mysql';
+    protected string $driver = 'mysql';
 
-    protected $fieldName = 'Field';
-    protected $fieldLabel = 'Field';
-    protected $fieldType = 'Type';
+    protected string $fieldName = 'Field';
+
+    protected string $fieldLabel = 'Field';
+
+    protected string $fieldType = 'Type';
 
     // Enable to delete data
-    protected $sendDeletion = true;
-    protected $readDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected function generatePdo()
-    {
-        return new \PDO($this->driver.':host='.$this->connectionParam['host'].';port='.$this->connectionParam['port'].';dbname='.$this->connectionParam['database_name'].';charset='.$this->charset, $this->connectionParam['login'], $this->connectionParam['password']);
-    }
+    protected bool $readDeletion = true;
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function getQueryShowTables(): string
     {
         return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->connectionParam['database_name'].$this->stringSeparatorClose;
-    }
-
-    // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
-    {
-        return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
-    }
-
-    // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
-    {
-        if (empty($param['offset'])) {
-            $param['offset'] = 0;
-        }
-
-        return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
 }

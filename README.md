@@ -12,7 +12,7 @@ This community is ours : let’s all contribute, make it a friendly, helpful spa
 
 Please don’t hide any precious skills from us, whether it is coding, translation, connectors creation, .... the list goes on! The whole community could then benefit from these!
 
-Applications connected : SAP CRM, SuiteCRM, Prestashop, Bittle, Dolist, Salesforce, SuiteCRM, SugarCRM, Mailchimp, Sage CRM, Moodle, Eventbrite, ERPNext, Facebook, Hubspot, Magento, Mautic, Microsoft SQL, MySQL, OracleDB, Vtiger, Wordpress, Woocommerce, Zuora.  We also connect File via ftp and Database.
+Applications connected : SAP CRM, SuiteCRM, Prestashop, Bittle, Dolist, Salesforce, SuiteCRM, SugarCRM, Mailchimp, Sage CRM, Moodle, Eventbrite, ERPNext, Facebook, Hubspot, Magento, Mautic, Microsoft SQL, MySQL, OracleDB, Vtiger, Wordpress, Woocommerce.  We also connect File via ftp and Database.
 
 Find us here : [www.myddleware.com](https://www.myddleware.com)
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -24,7 +26,9 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
+
     private LoggerInterface $logger;
+
     private MailerInterface $mailer;
 
     public function __construct(EmailVerifier $emailVerifier, LoggerInterface $logger, MailerInterface $mailer)

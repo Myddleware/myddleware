@@ -15,7 +15,7 @@
 
 namespace App\Solutions\lib;
 
-class curl_cache
+class CurlCache
 {
     /** @var string */
     public $dir = '';

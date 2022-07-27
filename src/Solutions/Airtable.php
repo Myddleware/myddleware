@@ -25,25 +25,38 @@
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class Airtable extends Solution
 {
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
+
     protected string $airtableURL = 'https://api.airtable.com/v0/';
+
     protected string $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
-    protected $required_fields = ['default' => ['createdTime', 'Last Modified']];
+
+    protected array $requiredFields = ['default' => ['createdTime', 'Last Modified']];
+
     /**
      * Airtable base.
      */
     protected string $projectID;
+
     /**
      * API key (provided by Airtable).
      */
     protected string $token;
+
     protected string $delaySearch = '-1 month';
+
     /**
      * Name of the table / module that will be used as the default table to access the login() method
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
@@ -58,10 +71,8 @@ class Airtable extends Solution
 
     /**
      * Max number of records posted by call.
-     *
-     * @var string
      */
-    protected string|int $callPostLimit = 10;
+    protected int $callPostLimit = 10;
 
     // Log in form parameters
     public function getFieldsLogin(): array
@@ -86,9 +97,13 @@ class Airtable extends Solution
     /**
      * Request to attempt to log in to Airtable.
      *
-     * @return void
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
      */
-    public function login(array $connectionParam)
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -104,11 +119,9 @@ class Airtable extends Solution
             if (!empty($content) && 200 === $statusCode) {
                 $this->isConnectionValid = true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -117,7 +130,7 @@ class Airtable extends Solution
      *
      * @param string $type source|target
      */
-    public function get_modules(string $type = 'source'): array
+    public function getModules(string $type = 'source'): array
     {
         if (!empty($this->modules[$this->projectID])) {
             return $this->modules[$this->projectID];
@@ -131,17 +144,17 @@ class Airtable extends Solution
      *
      * @param null $param
      */
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         require 'lib/airtable/metadata.php';
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = $moduleFields[$module];
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return null;
@@ -150,6 +163,8 @@ class Airtable extends Solution
 
     /**
      * Read records in source application & transform them to fit standard Myddleware format.
+     *
+     * @throws TransportExceptionInterface
      */
     public function readData(array $param): array
     {
@@ -233,12 +248,12 @@ class Airtable extends Solution
                             $dateModified = $record['fields'][$dateRefField];
                         // createdTime not allowed for reading action, only to get an history or a duplicate field
                         } elseif (
-                                !empty($record['createdTime'])
+                            !empty($record['createdTime'])
                             and !empty($param['query'])
                         ) {
                             $dateModified = $record['createdTime'];
                         } else {
-                            throw new \Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
+                            throw new Exception('No reference found. Please enable <Last Modified> field in your table '.$param['module'].'. ');
                         }
                         $result['values'][$record['id']]['date_modified'] = $this->dateTimeToMyddleware($dateModified);
                         $result['values'][$record['id']]['id'] = $record['id'];
@@ -261,7 +276,7 @@ class Airtable extends Solution
                 and $result['count'] < $param['limit'] // count < rule limit
                 and !empty($offset) // Only if there is more data to be read
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
@@ -303,8 +318,6 @@ class Airtable extends Solution
 
     /**
      * Create data into target app.
-     *
-     * @return void
      */
     public function createData(array $param): ?array
     {
@@ -313,18 +326,14 @@ class Airtable extends Solution
 
     /**
      * Update existing data into target app.
-     *
-     * @param [type] $param
-     *
-     * @return void
      */
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         return $this->upsert('update', $param);
     }
 
     // Delete a record
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         return $this->upsert('delete', $param);
     }
@@ -334,7 +343,7 @@ class Airtable extends Solution
      *
      * @param string $method create|update
      */
-    public function upsert(string $method, array $param)
+    public function upsert(string $method, array $param): array
     {
         // Init parameters
         $baseID = $this->connectionParam['projectid'];
@@ -345,11 +354,11 @@ class Airtable extends Solution
         /**
          * In order to load relationships, we MUST first load all fields.
          */
-        $allFields = $this->get_module_fields($param['module'], 'source');
-        // $relationships = $this->get_module_fields_relate($param['module'], 'source');
+        $allFields = $this->getModuleFields($param['module'], 'source');
+        // $relationships = $this->getModuleFieldsRelate($param['module'], 'source');
 
-        // Group records for each calls
-        // Split the data into several array using the limite size
+        // Group records for each call
+        // Split the data into several arrays using the limite size
         $recordsArray = array_chunk($param['data'], $this->callPostLimit, true);
         foreach ($recordsArray as $records) {
             // Airtable expects data to come in a 'records' array
@@ -365,8 +374,7 @@ class Airtable extends Solution
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
                         $data = $this->checkDataBeforeUpdate($param, $data);
-                    }
-                    // Recard are stored in the URL for a deletionj
+                    } // Records are stored in the URL for a deletion
                     elseif ('delete' === $method) {
                         $data = $this->checkDataBeforeDelete($param, $data);
                         $urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
@@ -428,9 +436,9 @@ class Airtable extends Solution
                         $record = $content['records'][$i];
                         if (!empty($record['id'])) {
                             $result[$idDoc] = [
-                                                    'id' => $record['id'],
-                                                    'error' => false,
-                                            ];
+                                'id' => $record['id'],
+                                'error' => false,
+                            ];
                         } else {
                             $result[$idDoc] = [
                                 'id' => '-1',
@@ -442,9 +450,9 @@ class Airtable extends Solution
                         $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
                     }
                 } else {
-                    throw new \Exception('Failed to send the record but no error returned by Airtable. ');
+                    throw new Exception('Failed to send the record but no error returned by Airtable. ');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 foreach ($records as $idDoc => $data) {
                     $result[$idDoc] = [
@@ -465,14 +473,17 @@ class Airtable extends Solution
         return $response;
     }
 
-    // retrun the reference date field name
-    public function getDateRefName($moduleSource, $ruleMode)
+    // rerun the reference date field name
+    public function getDateRefName($moduleSource, $ruleMode): string
     {
         return 'Last Modified';
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06 to 2020-07-08 12:33:06
+    /**
+     * @throws Exception
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06 to 2020-07-08 12:33:06
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -480,7 +491,10 @@ class Airtable extends Solution
         return $dto->format('Y-m-d H:i:s');  // TODO: FIND THE EXACT FORMAT : 2015-08-29T07:00:00.000Z
     }
 
-    // convert from Myddleware format to Airtable format
+    /**
+     * @throws Exception
+     *                   convert from Myddleware format to Airtable format
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);

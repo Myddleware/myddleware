@@ -14,6 +14,7 @@ use Doctrine\Persistence\ObjectManager;
 class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $manager;
+
     protected $functionData = [
         'mathematical' => ['round', 'ceil', 'abs'],
         'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray'],
@@ -21,6 +22,7 @@ class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, 
     ];
 
     protected $functionCats = [];
+
     protected $functions = [];
 
     public function load(ObjectManager $manager)

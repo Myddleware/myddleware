@@ -1,27 +1,27 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Manager;
 
@@ -32,9 +32,10 @@ use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
-use App\Repository\RuleRelationShipRepository;
+use App\Repository\RuleRelationshipRepository;
 use App\Repository\RuleRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -44,77 +45,76 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 class RuleManager
 {
-    protected $connection;
-    protected $logger;
-    protected $ruleId;
-    protected $rule;
-    protected $ruleFields;
-    protected $ruleParams;
-    protected $sourceFields;
-    protected $targetFields;
-    protected $ruleRelationships;
-    protected $ruleFilters;
-    protected $solutionSource;
-    protected $solutionTarget;
-    protected $jobId;
-    protected $manual;
-    protected $key;
-    protected $limit = 100;
-    protected $offset = 0;
-    protected $limitReadCommit = 1000;
-    protected $tools;
-    protected $configParams;
-    protected $api;    // Specify if the class is called by the API
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBagInterface;
-    /**
-     * @var DocumentManager
-     */
-    protected $documentManager;
-    /**
-     * @var string
-     */
-    private $env;
-    /**
-     * @var RouterInterface
-     */
-    private $router;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var RuleRelationShipRepository
-     */
-    private $ruleRelationShipRepository;
-    /**
-     * @var SolutionManager
-     */
-    protected $solutionManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var RuleOrderRepository
-     */
-    private $ruleOrderRepository;
-    private $requestStack;
+    protected Connection $connection;
 
-    /**
-     * @var FormulaManager
-     */
-    protected $formulaManager;
+    protected LoggerInterface $logger;
+
+    protected $ruleId;
+
+    protected $rule;
+
+    protected $ruleFields;
+
+    protected $ruleParams;
+
+    protected $sourceFields;
+
+    protected $targetFields;
+
+    protected $ruleRelationships;
+
+    protected $ruleFilters;
+
+    protected $solutionSource;
+
+    protected $solutionTarget;
+
+    protected $jobId;
+
+    protected $manual;
+
+    protected $key;
+
+    protected int $limit = 100;
+
+    protected int $offset = 0;
+
+    protected int $limitReadCommit = 1000;
+
+    protected ?ToolsManager $tools;
+
+    protected $configParams;
+
+    protected $api;    // Specify if the class is called by the API
+
+    protected EntityManagerInterface $entityManager;
+
+    protected ParameterBagInterface $parameterBagInterface;
+
+    protected DocumentManager $documentManager;
+
+    private string|array|bool|int|null|float|\UnitEnum $env;
+
+    private ?RouterInterface $router;
+
+    private RuleRepository $ruleRepository;
+
+    private RuleRelationshipRepository $ruleRelationshipRepository;
+
+    protected SolutionManager $solutionManager;
+
+    private DocumentRepository $documentRepository;
+
+    private RuleOrderRepository $ruleOrderRepository;
+
+    private ?RequestStack $requestStack;
+
+    protected FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -126,7 +126,7 @@ class RuleManager
         DocumentManager $documentManager,
         RequestStack $requestStack = null,
         RuleRepository $ruleRepository = null,
-        RuleRelationShipRepository $ruleRelationShipRepository = null,
+        RuleRelationshipRepository $ruleRelationshipRepository = null,
         RuleOrderRepository $ruleOrderRepository = null,
         DocumentRepository $documentRepository = null,
         RouterInterface $router = null,
@@ -136,7 +136,7 @@ class RuleManager
         $this->connection = $connection;
         $this->entityManager = $entityManager;
         $this->ruleRepository = $ruleRepository;
-        $this->ruleRelationShipRepository = $ruleRelationShipRepository;
+        $this->ruleRelationshipRepository = $ruleRelationshipRepository;
         $this->ruleOrderRepository = $ruleOrderRepository;
         $this->documentRepository = $documentRepository;
         $this->tools = $tools;
@@ -152,14 +152,15 @@ class RuleManager
     /**
      * Since SF5.4, the way to load the session has changed.
      */
-    public function getSession()
+    public function getSession(): SessionInterface
     {
-        $session = $this->requestStack->getSession();
-
-        return $session;
+        return $this->requestStack->getSession();
     }
 
-    public function setRule($idRule)
+    /**
+     * @throws Exception
+     */
+    public function setRule($idRule): void
     {
         $this->ruleId = $idRule;
         if (!empty($this->ruleId)) {
@@ -182,24 +183,30 @@ class RuleManager
         return $this->rule;
     }
 
-    public function setJobId($jobId)
+    public function setJobId($jobId): void
     {
         $this->jobId = $jobId;
     }
 
-    public function setManual($manual)
+    public function setManual($manual): void
     {
         $this->manual = $manual;
     }
 
-    public function setApi($api)
+    public function setApi($api): void
     {
         $this->api = $api;
     }
 
-    // Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
-    // If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application
-    public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id')
+    /**
+     * Generate a document for the current rule for a specific id in the source application. We don't use the reference
+     * for the function read.
+     * If parameter readSource is false, it means that the data source are already in the parameter param, so no need to
+     * read in the source application.
+     *
+     * @throws Exception
+     */
+    public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id'): array|\stdClass
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
         try {
@@ -272,7 +279,7 @@ class RuleManager
     }
 
     // Connect to the source or target application
-    public function connectionSolution($type)
+    public function connectionSolution($type): bool
     {
         try {
             if ('source' == $type) {
@@ -313,12 +320,12 @@ class RuleManager
                 $this->solutionSource = $this->solutionManager->get($r['name']);
                 $this->solutionSource->setApi($this->api);
                 $loginResult = $this->solutionSource->login($params);
-                $c = (($this->solutionSource->connection_valide) ? true : false);
+                $c = (bool) $this->solutionSource->connection_valide;
             } else {
                 $this->solutionTarget = $this->solutionManager->get($r['name']);
                 $this->solutionTarget->setApi($this->api);
                 $loginResult = $this->solutionTarget->login($params);
-                $c = (($this->solutionTarget->connection_valide) ? true : false);
+                $c = (bool) $this->solutionTarget->connection_valide;
             }
             if (!empty($loginResult['error'])) {
                 return $loginResult;
@@ -334,22 +341,25 @@ class RuleManager
 
     // Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
     // Cette fonction retourne le nombre d'enregistrements lus
+    /**
+     * @throws Exception
+     */
     public function createDocuments()
     {
         $readSource = null;
         // Si la lecture pour la règle n'est pas désactivée
         // Et si la règle est active et pas supprimée ou bien le lancement est en manuel
         if (
-                empty($this->ruleParams['disableRead'])
+            empty($this->ruleParams['disableRead'])
             && (
-                    (
-                            0 == $this->rule['deleted']
-                        && 1 == $this->rule['active']
-                    )
-                    || (
-                        1 == $this->manual
-                    )
+                (
+                    0 == $this->rule['deleted']
+                    && 1 == $this->rule['active']
                 )
+                || (
+                    1 == $this->manual
+                )
+            )
         ) {
             // lecture des données dans la source
             $readSource = $this->readSource();
@@ -412,8 +422,7 @@ class RuleManager
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
-        }
-        // On affiche pas d'erreur si la lecture est désactivée
+        } // On affiche pas d'erreur si la lecture est désactivée
         elseif (empty($this->ruleParams['disableRead'])) {
             $readSource['error'] = 'The rule '.$this->rule['name_slug'].(1 == $this->rule['deleted'] ? ' is deleted.' : ' is disabled.');
         }
@@ -441,10 +450,9 @@ class RuleManager
     {
         $param = $this->entityManager->getRepository(RuleParam::class)
             ->findOneBy([
-                    'rule' => $this->ruleId,
-                    'name' => 'datereference',
-                ]
-            );
+                'rule' => $this->ruleId,
+                'name' => 'datereference',
+            ]);
         // Every rules should have the param datereference
         if (empty($param)) {
             throw new \Exception('No reference date for the rule '.$this->ruleId.'.');
@@ -473,11 +481,10 @@ class RuleManager
             foreach ($this->dataSource['ruleParams'] as $ruleParam) {
                 // Search to check if the param already exists
                 $paramEntity = $this->entityManager->getRepository(RuleParam::class)
-                        ->findOneBy([
-                                    'rule' => $this->ruleId,
-                                    'name' => $ruleParam['name'],
-                                ]
-                        );
+                    ->findOneBy([
+                        'rule' => $this->ruleId,
+                        'name' => $ruleParam['name'],
+                    ]);
                 // Update or create the new param
                 if (!empty($paramEntity)) {
                     if ($ruleParam['value'] != $paramEntity->getValue()) {
@@ -492,10 +499,9 @@ class RuleManager
                     $paramEntity->setValue($ruleParam['value']);
                 } else {
                     $rule = $this->entityManager->getRepository(Rule::class)
-                                            ->findOneBy([
-                                                'id' => $this->ruleId,
-                                            ]
-                                            );
+                        ->findOneBy([
+                            'id' => $this->ruleId,
+                        ]);
 
                     $paramEntity = new RuleParam();
                     $paramEntity->setRule($rule);
@@ -534,7 +540,7 @@ class RuleManager
                 $this->dataSource = $this->solutionSource->readData($read);
                 // If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
                 if (
-                        !empty($this->dataSource['count'])
+                    !empty($this->dataSource['count'])
                     && $this->dataSource['count'] == $this->limit
                 ) {
                     // Check and clean data source
@@ -581,11 +587,11 @@ class RuleManager
                 // Check if the previous record has the same date_modified than the current record
                 // Check only if offset isn't managed into the source application connector
                 if (
-                        empty($this->dataSource['ruleParams']['offset'])
+                    empty($this->dataSource['ruleParams']['offset'])
                     and (
-                            empty($previousValue)   // first call
+                        empty($previousValue)   // first call
                         or (
-                                !empty($previousValue['date_modified'])
+                            !empty($previousValue['date_modified'])
                             and $previousValue['date_modified'] == $value['date_modified']
                         )
                     )
@@ -603,13 +609,13 @@ class RuleManager
 
             // If no result => it means that all value have the same reference date
             // If reference date hasn't changed => it means that we reached the read limit and there are only 2 reference dates in the records,
-            //									=> we removed the most recent ones (to be sure to miss no records) and only one reference date remain
-            //									=> If we don't stop the process, Myddleware will always read the same records
+            //                                  => we removed the most recent ones (to be sure to miss no records) and only one reference date remain
+            //                                  => If we don't stop the process, Myddleware will always read the same records
             // Check only if offset isn't managed into the source application connector
             if (
-                    empty($this->dataSource['ruleParams']['offset'])
+                empty($this->dataSource['ruleParams']['offset'])
                 and (
-                        empty($this->dataSource['values'])
+                    empty($this->dataSource['values'])
                     or $this->ruleParams['datereference'] == $this->dataSource['date_ref']
                 )
             ) {
@@ -621,7 +627,11 @@ class RuleManager
     }
 
     // Permet de filtrer les nouveau documents d'une règle
-    public function filterDocuments($documents = null)
+
+    /**
+     * @throws Exception
+     */
+    public function filterDocuments($documents = null): array
     {
         // include_once 'document.php';
         $response = [];
@@ -663,7 +673,10 @@ class RuleManager
 
     // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
     // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckPredecessorDocuments($documents = null)
+    /**
+     * @throws Exception
+     */
+    public function checkPredecessorDocuments($documents = null): array
     {
         // include_once 'document.php';
         $response = [];
@@ -689,7 +702,7 @@ class RuleManager
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
+                    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -704,7 +717,10 @@ class RuleManager
 
     // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
     // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckParentDocuments($documents = null)
+    /**
+     * @throws Exception
+     */
+    public function checkParentDocuments($documents = null): array
     {
         // include_once 'document.php';
         // Permet de charger dans la classe toutes les relations de la règle
@@ -718,20 +734,7 @@ class RuleManager
             $param['jobId'] = $this->jobId;
             $param['ruleRelationships'] = $this->ruleRelationships;
             // Set all config parameters
-            $this->setConfigParam();
-            // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-            if (!empty($this->configParams['migration_mode'])) {
-                if (!empty($this->ruleRelationships)) {
-                    // Get all documents of every rules linked
-                    foreach ($this->ruleRelationships as $ruleRelationship) {
-                        // Get documents only if we don't have them yet (we could have several relationship to the same rule)
-                        if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-                            $param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'], true, true);
-                        }
-                    }
-                }
-            }
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+            $param = $this->getDocuments($param); // -- BEGIN TRANSACTION suspend auto-commit
             try {
                 $i = 0;
                 // Pour tous les docuements sélectionnés on vérifie les parents
@@ -747,7 +750,7 @@ class RuleManager
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckParentDocument();
+                    $response[$document['id']] = $this->documentManager->checkParentDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -762,7 +765,10 @@ class RuleManager
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function transformDocuments($documents = null)
+    /**
+     * @throws Exception
+     */
+    public function transformDocuments($documents = null): array
     {
         // include_once 'document.php';
 
@@ -779,20 +785,7 @@ class RuleManager
             $param['jobId'] = $this->jobId;
             $param['api'] = $this->api;
             // Set all config parameters
-            $this->setConfigParam();
-            // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-            if (!empty($this->configParams['migration_mode'])) {
-                if (!empty($this->ruleRelationships)) {
-                    // Get all documents of every rules linked
-                    foreach ($this->ruleRelationships as $ruleRelationship) {
-                        // Get documents only if we don't have them yet (we could have several relationship to the same rule)
-                        if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-                            $param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'], true, true);
-                        }
-                    }
-                }
-            }
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+            $param = $this->getDocuments($param); // -- BEGIN TRANSACTION suspend auto-commit
             try {
                 $i = 0;
                 // Transformation de tous les docuements sélectionnés
@@ -822,7 +815,10 @@ class RuleManager
     // 2 cas de figure :
     //     - Le document est un document de modification
     //     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
-    public function getTargetDataDocuments($documents = null)
+    /**
+     * @throws Exception
+     */
+    public function getTargetDataDocuments($documents = null): array
     {
         // include_once 'document.php';
 
@@ -869,7 +865,7 @@ class RuleManager
         return $response;
     }
 
-    public function sendDocuments()
+    public function sendDocuments(): array
     {
         // creation into the target application
         $sendTarget = $this->sendTarget('C');
@@ -894,42 +890,24 @@ class RuleManager
 
     public function actionDocument($id_document, $event, $param1 = null)
     {
-        switch ($event) {
-            case 'rerun':
-                return $this->rerun($id_document);
-                break;
-            case 'cancel':
-                return $this->cancel($id_document);
-                break;
-            case 'remove':
-                return $this->changeDeleteFlag($id_document, true);
-                break;
-            case 'restore':
-                return $this->changeDeleteFlag($id_document, false);
-                break;
-            case 'changeStatus':
-                return $this->changeStatus($id_document, $param1);
-                break;
-            default:
-                return 'Action '.$event.' unknown. Failed to run this action. ';
-        }
+        return match ($event) {
+            'rerun' => $this->rerun($id_document),
+            'cancel' => $this->cancel($id_document),
+            'remove' => $this->changeDeleteFlag($id_document, true),
+            'restore' => $this->changeDeleteFlag($id_document, false),
+            'changeStatus' => $this->changeStatus($id_document, $param1),
+            default => 'Action '.$event.' unknown. Failed to run this action. ',
+        };
     }
 
-    public function actionRule($event, $jobName = null)
+    public function actionRule($event, $jobName = null): bool|string
     {
-        switch ($event) {
-            case 'ALL':
-                return $this->runMyddlewareJob('ALL');
-                break;
-            case 'ERROR':
-                return $this->runMyddlewareJob('ERROR');
-                break;
-            case 'runMyddlewareJob':
-                return $this->runMyddlewareJob($this->ruleId, $jobName);
-                break;
-            default:
-                return 'Action '.$event.' unknown. Failed to run this action. ';
-        }
+        return match ($event) {
+            'ALL' => $this->runMyddlewareJob('ALL'),
+            'ERROR' => $this->runMyddlewareJob('ERROR'),
+            'runMyddlewareJob' => $this->runMyddlewareJob($this->ruleId, $jobName),
+            default => 'Action '.$event.' unknown. Failed to run this action. ',
+        };
     }
 
     // Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
@@ -943,7 +921,7 @@ class RuleManager
     // [params] => Array ( [mode] => 0 ) )
     // [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
     // [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
-    // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
+    // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');  ou array('done'=>true, 'message'=>'')
     public static function beforeSave($solutionManager, $data)
     {
         // Contrôle sur la solution source
@@ -960,7 +938,7 @@ class RuleManager
 
     // Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
     // Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté les entrées ruleId et date de référence au tableau
-    public function afterSave($solutionManager, $data)
+    public function afterSave($solutionManager, $data): void
     {
         // Contrôle sur la solution source
         $solutionSource = $solutionManager->get($data['module']['source']['solution']);
@@ -991,7 +969,9 @@ class RuleManager
         }
     }
 
-    // Get all document of the rule
+    /**
+     * @throws Exception
+     */
     protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false)
     {
         $sql = 'SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId AND deleted = 0';
@@ -1005,7 +985,7 @@ class RuleManager
             foreach ($documents as $document) {
                 $documentResult['sourceId'][$document['source_id']][] = $document;
                 if (
-                        $targetId
+                    $targetId
                     and !empty($document['source_id'])
                 ) {
                     $documentResult['targetId'][$document['target_id']][] = $document;
@@ -1069,8 +1049,10 @@ class RuleManager
         return null;
     }
 
-    // Permet d'annuler un docuement
-    protected function cancel($id_document)
+    /**
+     * @throws Exception
+     */
+    protected function cancel($id_document): void
     {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
@@ -1092,8 +1074,12 @@ class RuleManager
         }
     }
 
-    // Remove a document
-    protected function changeDeleteFlag($id_document, $deleteFlag)
+    /**
+     * Remove a document.
+     *
+     * @throws Exception
+     */
+    protected function changeDeleteFlag($id_document, $deleteFlag): void
     {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
@@ -1115,8 +1101,10 @@ class RuleManager
         }
     }
 
-    // Remove a document
-    protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null)
+    /**
+     * @throws Exception
+     */
+    protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null): void
     {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
@@ -1132,7 +1120,7 @@ class RuleManager
         $this->documentManager->updateStatus($toStatus);
     }
 
-    protected function runMyddlewareJob($ruleId, $event = null)
+    protected function runMyddlewareJob($ruleId, $event = null): bool|string
     {
         try {
             $session = $this->getSession();
@@ -1201,8 +1189,10 @@ class RuleManager
         }
     }
 
-    // Permet de relancer un document quelque soit son statut
-    protected function rerun($id_document)
+    /**
+     * @throws Exception
+     */
+    protected function rerun($id_document): array
     {
         $session = $this->getSession();
         $msg_error = [];
@@ -1239,7 +1229,7 @@ class RuleManager
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments([['id' => $id_document]]);
+            $response = $this->checkPredecessorDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
             } else {
@@ -1249,7 +1239,7 @@ class RuleManager
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments([['id' => $id_document]]);
+            $response = $this->checkParentDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
@@ -1271,11 +1261,7 @@ class RuleManager
         if (in_array($status, ['Transformed', 'Error_checking', 'Not_found'])) {
             $response = $this->getTargetDataDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
-                if ('S' == $this->rule['mode']) {
-                    $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
-                } else {
-                    $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
-                }
+                $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
             } else {
                 $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
             }
@@ -1285,15 +1271,15 @@ class RuleManager
         // Si la règle est en mode recherche alors on n'envoie pas de données
         // Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
         if (
-                'S' != $this->rule['mode']
+            'S' != $this->rule['mode']
             && (
-                    in_array($status, ['Ready_to_send', 'Error_sending'])
+                in_array($status, ['Ready_to_send', 'Error_sending'])
                 || (
-                        true === $response[$id_document]
+                    true === $response[$id_document]
                     && (
-                            empty($response['doc_status'])
+                        empty($response['doc_status'])
                         || (
-                                !empty($response['doc_status'])
+                            !empty($response['doc_status'])
                             && 'No_send' != $response['doc_status']
                         )
                     )
@@ -1302,7 +1288,7 @@ class RuleManager
         ) {
             $response = $this->sendTarget('', $id_document);
             if (
-                    !empty($response[$id_document]['id'])
+                !empty($response[$id_document]['id'])
                 && empty($response[$id_document]['error'])
                 && empty($response['error']) // Error can be on the document or can be a general error too
             ) {
@@ -1350,7 +1336,7 @@ class RuleManager
     }
 
     // Check if the rule is a child rule
-    public function isChild()
+    public function isChild(): bool
     {
         try {
             $queryChild = '	SELECT rule.id 
@@ -1376,7 +1362,7 @@ class RuleManager
         return false;
     }
 
-    protected function sendTarget($type, $documentId = null)
+    protected function sendTarget($type, $documentId = null): array
     {
         try {
             // Permet de charger dans la classe toutes les relations de la règle
@@ -1421,16 +1407,14 @@ class RuleManager
                         $send['data'] = $this->checkDuplicate($send['data']);
                         $send['data'] = $this->clearSendData($send['data']);
                         $response = $this->solutionTarget->createData($send);
-                    }
-                    // Modification des données dans la cible
+                    } // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
                         // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
                         $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
                         $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
                         $response = $this->solutionTarget->updateData($send);
-                    }
-                    // Delete data from target application
+                    } // Delete data from target application
                     elseif ('D' == $type) {
                         $send = $this->checkBeforeDelete($send);
                         if (empty($send['error'])) {
@@ -1644,7 +1628,10 @@ class RuleManager
         }
     }
 
-    public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = '')
+    /**
+     * @throws Exception
+     */
+    public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
     {
         // Init $limit parameter
         $limit = ' LIMIT '.$this->limit;
@@ -1655,8 +1642,7 @@ class RuleManager
             $documentFilter = " document.parent_id = '$parentDocId' AND document.rule_id = '$parentRuleId' ";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
-        }
-        // Sinon on récupère tous les documents élligible pour l'envoi
+        } // Sinon on récupère tous les documents élligible pour l'envoi
         else {
             $documentFilter = "	document.rule_id = '$this->ruleId'
 								AND document.status = 'Ready_to_send'
@@ -1667,7 +1653,7 @@ class RuleManager
         $sql = "SELECT document.id id_doc_myddleware, document.target_id, document.source_date_modified
 				FROM document
 				WHERE $documentFilter 
-				ORDER BY document.source_date_modified ASC
+				ORDER BY document.source_date_modified
 				$limit";
         $stmt = $this->connection->prepare($sql);
         $result = $stmt->executeQuery();
@@ -1679,14 +1665,13 @@ class RuleManager
             if (!empty($childRules)) {
                 foreach ($childRules as $childRule) {
                     $childRuleObj = new RuleManager(
-                    $this->logger,
-                    $this->connection,
-                    $this->entityManager,
-                    $this->parameterBagInterface,
-                    $this->formulaManager,
-                    $this->solutionManager,
-                    $this->documentManager,
-                    // $this->requestStack,
+                        $this->logger,
+                        $this->connection,
+                        $this->entityManager,
+                        $this->parameterBagInterface,
+                        $this->formulaManager,
+                        $this->solutionManager,
+                        $this->documentManager
                     );
                     $childRuleObj->setRule($childRule['field_id']);
                     $childRuleObj->setJobId($this->jobId);
@@ -1722,7 +1707,7 @@ class RuleManager
     }
 
     // Permet de charger tous les champs de la règle
-    protected function setRuleField()
+    protected function setRuleField(): void
     {
         try {
             $this->sourceFields = [];
@@ -1766,7 +1751,7 @@ class RuleManager
     }
 
     // Set rule param from the database
-    protected function setRuleParam()
+    protected function setRuleParam(): void
     {
         try {
             $this->ruleParams = [];
@@ -1788,7 +1773,7 @@ class RuleManager
     }
 
     // Permet de charger toutes les relations de la règle
-    protected function setRuleRelationships()
+    protected function setRuleRelationships(): void
     {
         try {
             $sqlFields = 'SELECT * 
@@ -1806,7 +1791,7 @@ class RuleManager
     }
 
     // Set the limit rule
-    protected function setLimit()
+    protected function setLimit(): void
     {
         // Change the default value if a limit exists on the rule
         if (!empty($this->ruleParams['limit'])) {
@@ -1818,7 +1803,7 @@ class RuleManager
     }
 
     // Permet de charger toutes les filtres de la règle
-    protected function setRuleFilter()
+    protected function setRuleFilter(): void
     {
         try {
             $sqlFields = 'SELECT * 
@@ -1834,9 +1819,13 @@ class RuleManager
         }
     }
 
-    // Get the child rules of the current rule
-    // Return the relationships between the parent and the clild rules
-    public function getChildRules()
+    /**
+     * Get the child rules of the current rule
+     * Return the relationships between the parent and the child rules.
+     *
+     * @throws \Exception
+     */
+    public function getChildRules(): array
     {
         try {
             // get the rule linked to the current rule and check if they have the param child
@@ -1860,11 +1849,10 @@ class RuleManager
     {
         try {
             $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
-                                    ->findOneBy([
-                                        'doc_id' => $documentId,
-                                        'type' => $type,
-                                        ]
-                                );
+                ->findOneBy([
+                    'doc_id' => $documentId,
+                    'type' => $type,
+                ]);
             // Generate data array
             if (!empty($documentDataEntity)) {
                 return json_decode($documentDataEntity->getData(), true);
@@ -1877,7 +1865,7 @@ class RuleManager
     }
 
     // Get the content of the table config
-    protected function setConfigParam()
+    protected function setConfigParam(): void
     {
         if (empty($this->configParams)) {
             $configRepository = $this->entityManager->getRepository(Config::class);
@@ -1890,12 +1878,17 @@ class RuleManager
         }
     }
 
-    // Commit function with check if job is still active
-    protected function commit($newTransaction)
+    /**
+     * Commit function with check if job is still active.
+     *
+     * @throws Exception
+     * @throws \Exception
+     */
+    protected function commit($newTransaction): void
     {
         // Rollback if the job has been manually stopped
         if ('Start' != $this->getJobStatus()) {
-            throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+            throw new \Exception('The task has been stopped manually during the document creation. No document generated');
         }
         $this->connection->commit(); // -- COMMIT TRANSACTION
         $this->entityManager->flush();
@@ -1907,14 +1900,14 @@ class RuleManager
     // Parametre de la règle choix utilisateur
     /*
     array(
-        'id' 		=> 'datereference',
-        'name' 		=> 'datereference',
-        'required'	=> true,
-        'type'		=> 'text',
+        'id'        => 'datereference',
+        'name'      => 'datereference',
+        'required'  => true,
+        'type'      => 'text',
         'label' => 'solution.params.dateref',
         'readonly' => true
-    ),	*/
-    public static function getFieldsParamUpd()
+    ),  */
+    public static function getFieldsParamUpd(): array
     {
         return [];
     }
@@ -1933,7 +1926,7 @@ class RuleManager
     }
 
     // Parametre de la règle en modification dans la fiche
-    public static function getFieldsParamView($idRule = '')
+    public static function getFieldsParamView($idRule = ''): array
     {
         return [
             [
@@ -1957,13 +1950,13 @@ class RuleManager
                 'type' => 'option',
                 'label' => 'solution.params.delete',
                 'option' => [
-                                '0' => 'solution.params.0_day',
-                                '1' => 'solution.params.1_day',
-                                '7' => 'solution.params.7_day',
-                                '14' => 'solution.params.14_day',
-                                '30' => 'solution.params.30_day',
-                                '60' => 'solution.params.60_day',
-                            ],
+                    '0' => 'solution.params.0_day',
+                    '1' => 'solution.params.1_day',
+                    '7' => 'solution.params.7_day',
+                    '14' => 'solution.params.14_day',
+                    '30' => 'solution.params.30_day',
+                    '60' => 'solution.params.60_day',
+                ],
             ],
             [
                 'id' => 'description',
@@ -1973,5 +1966,28 @@ class RuleManager
                 'label' => 'solution.params.description',
             ],
         ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getDocuments(array $param): array
+    {
+        $this->setConfigParam();
+        // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
+        if (!empty($this->configParams['migration_mode'])) {
+            if (!empty($this->ruleRelationships)) {
+                // Get all documents of every rules linked
+                foreach ($this->ruleRelationships as $ruleRelationship) {
+                    // Get documents only if we don't have them yet (we could have several relationship to the same rule)
+                    if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
+                        $param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'], true, true);
+                    }
+                }
+            }
+        }
+        $this->connection->beginTransaction();
+
+        return $param;
     }
 }

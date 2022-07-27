@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -32,11 +35,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class VtigerCRM extends Solution
 {
     // Enable to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $limitPerCall = 100;
+    protected int $limitPerCall = 100;
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'default' => [
             'id',
             'modifiedtime',
@@ -44,7 +47,7 @@ class VtigerCRM extends Solution
         ],
     ];
 
-    protected $fieldsDuplicate = [
+    protected array $fieldsDuplicate = [
         'Contacts' => ['email', 'lastname'],
         'CompanyDetails' => ['organizationname'],
         'Accounts' => ['accountname'],
@@ -52,13 +55,13 @@ class VtigerCRM extends Solution
         'default' => [''],
     ];
 
-    protected $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => ['Users', 'Documents'],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [
+    protected array $excludedFields = [
         'default' => [
             'default' => [
                 'id',
@@ -75,7 +78,7 @@ class VtigerCRM extends Solution
         ],
     ];
 
-    protected $inventoryModules = [
+    protected array $inventoryModules = [
         'Invoice',
         'SalesOrder',
         'Quotes',
@@ -85,15 +88,13 @@ class VtigerCRM extends Solution
     ];
 
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Quotes', 'SalesOrder'];
+    protected array $allowParentRelationship = ['Quotes', 'SalesOrder'];
 
-    /** @var array */
-    protected $moduleList;
+    protected array $moduleList;
 
-    /** @var VtigerClient */
-    protected $vtigerClient;
+    protected VtigerClient $vtigerClient;
 
-    public function login(array $connectionParam): ?array
+    public function login(array $connectionParam): void
     {
         parent::login($connectionParam);
 
@@ -113,8 +114,6 @@ class VtigerCRM extends Solution
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
@@ -152,7 +151,7 @@ class VtigerCRM extends Solution
         ];
     }
 
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         try {
             if (empty($this->vtigerClient)) {
@@ -161,7 +160,7 @@ class VtigerCRM extends Solution
 
             $result = $this->vtigerClient->listTypes();
 
-            if (!$result['success'] || ($result['success'] && 0 == count($result['result']))) {
+            if (!$result['success'] || (0 == count($result['result']))) {
                 return null;
             }
 
@@ -171,10 +170,10 @@ class VtigerCRM extends Solution
                 return null;
             }
 
-            $escludedModule = $this->exclude_module_list[$type] ?: $this->exclude_module_list['default'];
+            $excludedModule = $this->excludedModules[$type] ?: $this->excludedModules['default'];
             $options = [];
             foreach ($modules['information'] as $moduleName => $moduleInfo) {
-                if (!in_array($moduleName, $escludedModule)) {
+                if (!in_array($moduleName, $excludedModule)) {
                     $options[$moduleName] = $moduleInfo['label'];
                     $this->setModulePrefix($moduleName);
                 }
@@ -182,7 +181,9 @@ class VtigerCRM extends Solution
 
             return $options ?: null;
         } catch (\Exception $e) {
-            return $e->getMessage();
+            $this->logger->error($e->getMessage());
+
+            return ['error' => $e->getMessage()];
         }
     }
 
@@ -191,7 +192,7 @@ class VtigerCRM extends Solution
         if (empty($moduleName)) {
             $result = $this->vtigerClient->listTypes();
 
-            if (!$result['success'] || ($result['success'] && 0 == count($result['result']))) {
+            if (!$result['success'] || (0 == count($result['result']))) {
                 return false;
             }
 
@@ -215,37 +216,32 @@ class VtigerCRM extends Solution
 
     /**
      * Return the fields for a specific module without the specified ones.
-     *
-     * @param string $module
-     * @param string $type
-     *
-     * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (empty($this->vtigerClient)) {
-                return false;
+                return null;
             }
 
             $describe = $this->vtigerClient->describe($module);
 
-            if (!$describe['success'] || ($describe['success'] && 0 == count($describe['result']))) {
-                return false;
+            if (!$describe['success'] || (0 == count($describe['result']))) {
+                return null;
             }
 
             $fields = $describe['result']['fields'] ?? null;
 
             if (empty($fields)) {
-                return false;
+                return null;
             }
 
-            $escludeField = $this->exclude_field_list[$module] ?? $this->exclude_field_list['default'];
-            $escludeField = $escludeField[$type] ?? $escludeField['default'];
+            $excludedFields = $this->excludedFields[$module] ?? $this->excludedFields['default'];
+            $excludedFields = $excludedFields[$type] ?? $excludedFields['default'];
             $this->moduleFields = [];
             foreach ($fields as $field) {
-                if (!in_array($field['name'], $escludeField)) {
+                if (!in_array($field['name'], $excludedFields)) {
                     if ('reference' == $field['type']['name'] || 'owner' == $field['type']['name']) {
                         $this->moduleFields[$field['name']] = [
                             'label' => $field['label'],
@@ -272,20 +268,15 @@ class VtigerCRM extends Solution
                 }
             }
 
-            return $this->moduleFields ?: false;
+            return $this->moduleFields ?: null;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return null;
         }
     }
 
-    /**
-     * @param array $param
-     *
-     * @return array
-     */
-    public function readData($param)
+    public function readData(array $param): ?array
     {
         try {
             if (empty($this->vtigerClient)) {
@@ -311,7 +302,7 @@ class VtigerCRM extends Solution
 
             $queryParam = implode(',', $param['fields'] ?? '') ?: '*';
             if ('*' != $queryParam) {
-                $requiredField = $this->required_fields[$param['module']] ?? $this->required_fields['default'];
+                $requiredField = $this->requiredFields[$param['module']] ?? $this->requiredFields['default'];
                 $queryParam = implode(',', $requiredField).','.$queryParam;
                 $queryParam = str_replace(['my_value,', 'my_value'], '', $queryParam);
             }
@@ -326,23 +317,21 @@ class VtigerCRM extends Solution
                         $where = " WHERE id = '$item' ";
                         break;
                     }
-                    if ("'" === substr($where, -strlen("'"))) {
+                    if (str_ends_with($where, "'")) {
                         $where .= ' AND ';
                     }
                     $where .= "$key = '$item'";
                 }
             }
 
-            /** @var array $result */
             $result = [
                 'count' => 0,
             ];
 
-            $orderby = 'ORDER BY modifiedtime ASC';
+            $orderBy = 'ORDER BY modifiedtime ASC';
             if (in_array($param['module'], $this->inventoryModules, true)) {
-                $orderby = '';
+                $orderBy = '';
             }
-
             $dataLeft = $param['limit'];
             do {
                 $nDataCall = $dataLeft - $this->limitPerCall <= 0 ? $dataLeft : $this->limitPerCall;
@@ -362,32 +351,32 @@ class VtigerCRM extends Solution
                         }
                     }
 
-                    $entitys = [];
+                    $entities = [];
                     foreach ($parentModules as $moduleName) {
-                        $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderby LIMIT $param[offset], $nDataCall;");
+                        $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderBy LIMIT $param[offset], $nDataCall;");
                         if (empty($query) || !$query['success']) {
                             continue;
                         }
 
                         foreach ($query['result'] as $parentElement) {
-                            $retrive = $this->vtigerClient->retrieve($parentElement['id']);
-                            foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
+                            $retrieve = $this->vtigerClient->retrieve($parentElement['id']);
+                            foreach ($retrieve['result']['LineItems'] as $index => $lineItem) {
                                 if (0 == $index) {
                                     continue;
                                 }
-                                $lineitem['parent_id'] = $parentElement['id'];
-                                $lineitem['modifiedtime'] = $parentElement['modifiedtime'];
-                                $lineitem['createdtime'] = $parentElement['createdtime'];
-                                $entitys[] = $lineitem;
+                                $lineItem['parent_id'] = $parentElement['id'];
+                                $lineItem['modifiedtime'] = $parentElement['modifiedtime'];
+                                $lineItem['createdtime'] = $parentElement['createdtime'];
+                                $entities[] = $lineItem;
                             }
                         }
                     }
 
-                    $query = ['success' => true, 'result' => $entitys];
+                    $query = ['success' => true, 'result' => $entities];
                 } else {
-                    $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;");
+                    $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderBy LIMIT $param[offset], $nDataCall;");
                 }
-                if (empty($query) || (!empty($query) && !$query['success'])) {
+                if (empty($query) || (!$query['success'])) {
                     return [
                         'error' => 'Error: Request Failed! ('.($query['error']['message'] ?? 'Error').')',
                         'count' => 0,
@@ -399,9 +388,9 @@ class VtigerCRM extends Solution
                 }
 
                 $countResult = 0;
-                $entitys = $query['result'];
-                foreach ($entitys as $value) {
-                    if (!isset($result['values']) || !array_key_exists($value['id'], $result['values'])) {
+                $entities = $query['result'];
+                foreach ($entities as $value) {
+                    if (!isset($result['values']) || !array_key_exists($value['id'], (array) $result['values'])) {
                         $result['date_ref'] = $value['modifiedtime'];
                         $result['values'][$value['id']] = $value;
                         if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
@@ -521,10 +510,7 @@ class VtigerCRM extends Solution
         return $result;
     }
 
-    /**
-     * @return array
-     */
-    public function updateData(array $param): ?array
+    public function updateData(array $param): array
     {
         try {
             $subDocIdArray = [];
@@ -584,7 +570,7 @@ class VtigerCRM extends Solution
                             }
                             $parent = $this->vtigerClient->retrieve($resultUpdate['result']['parent_id']);
                             $parent = $parent['result'];
-                            if (!isset($parent['invoicestatus']) || empty($parent['invoicestatus'])) {
+                            if (empty($parent['invoicestatus'])) {
                                 $parent['invoicestatus'] = 'AutoCreated';
                             }
                             unset($parent['LineItems_FinalDetails']);
@@ -605,7 +591,7 @@ class VtigerCRM extends Solution
                 }
                 // Transfert status update
                 if (
-                        !empty($subDocIdArray)
+                    !empty($subDocIdArray)
                     and empty($result[$idDoc]['error'])
                 ) {
                     foreach ($subDocIdArray as $idSubDoc => $valueSubDoc) {
@@ -622,8 +608,10 @@ class VtigerCRM extends Solution
         return $result;
     }
 
-    public function deleteData(array $param)
+    public function deleteData(array $param): array
     {
+        $result = [];
+
         try {
             foreach ($param['data'] as $idDoc => $data) {
                 try {
@@ -639,14 +627,14 @@ class VtigerCRM extends Solution
                     }
                     // Generate return for Myddleware
                     $result[$idDoc] = [
-                                            'id' => $data['target_id'],
-                                            'error' => false,
-                                        ];
+                        'id' => $data['target_id'],
+                        'error' => false,
+                    ];
                 } catch (\Exception $e) {
                     $error = 'Error : '.$e->getMessage();
                     $result[$idDoc] = [
-                            'id' => '-1',
-                            'error' => $error,
+                        'id' => '-1',
+                        'error' => $error,
                     ];
                 }
                 // Status modification for the transfer
@@ -655,8 +643,8 @@ class VtigerCRM extends Solution
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
-                    'id' => '-1',
-                    'error' => $error,
+                'id' => '-1',
+                'error' => $error,
             ];
         }
 
@@ -677,16 +665,16 @@ class VtigerCRM extends Solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): ?string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {
             $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-            $module = $rule->getModuleSource();
+            $module = $rule->getSourceModule();
             $recordId = $document->getSource();
         } else {
             $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-            $module = $rule->getModuleTarget();
+            $module = $rule->getTargetModule();
             $recordId = $document->gettarget();
         }
 
@@ -696,5 +684,7 @@ class VtigerCRM extends Solution
             // Build the URL (delete if exists / to be sure to not have 2 / in a row)
             return rtrim($url, '/').'/index.php?module='.$module.'&view=Detail&record='.$recordIdArray[1];
         }
+
+        return null;
     }
 }

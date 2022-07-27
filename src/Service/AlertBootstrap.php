@@ -17,6 +17,7 @@ class AlertBootstrap implements AlertBootstrapInterface
     public const ALERT_DARK = 'dark';
 
     private $flashBag;
+
     private $translator;
 
     public function __construct(FlashBagInterface $flashBag, TranslatorInterface $translator)

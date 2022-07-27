@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Manager\DocumentManager;
@@ -12,6 +14,8 @@ use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,22 +27,31 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/api", name="api_")
- */
+#[Route(path: '/api', name: 'api_')]
 class ApiController extends AbstractController
 {
     public ParameterBagInterface $parameterBag;
+
     private RuleRepository $ruleRepository;
+
     private JobRepository $jobRepository;
+
     private DocumentRepository $documentRepository;
+
     private string $env;
+
     private KernelInterface $kernel;
+
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
+
     private EntityManagerInterface $entityManager;
+
     private FormulaManager $formulaManager;
+
     private SolutionManager $solutionManager;
+
     private DocumentManager $documentManager;
 
     public function __construct(
@@ -52,7 +65,7 @@ class ApiController extends AbstractController
         EntityManagerInterface $entityManager,
         FormulaManager $formulaManager,
         SolutionManager $solutionManager,
-        documentManager $documentManager
+        DocumentManager $documentManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
@@ -68,9 +81,7 @@ class ApiController extends AbstractController
         $this->documentManager = $documentManager;
     }
 
-    /**
-     * @Route("/synchro", name="synchro", methods={"POST"})
-     */
+    #[Route(path: '/synchro', name: 'synchro', methods: ['POST'])]
     public function synchroAction(Request $request): JsonResponse
     {
         try {
@@ -127,9 +138,7 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/read_record", name="read_record", methods={"POST"})
-     */
+    #[Route(path: '/read_record', name: 'read_record', methods: ['POST'])]
     public function readRecordAction(Request $request): JsonResponse
     {
         try {
@@ -181,8 +190,10 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/delete_record", name="delete_record", methods={"POST"})
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
+    #[Route(path: '/delete_record', name: 'delete_record', methods: ['POST'])]
     public function deleteRecordAction(Request $request): JsonResponse
     {
         $return = [];
@@ -219,7 +230,7 @@ class ApiController extends AbstractController
             $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
 
             // Create job instance
-            $job = $this->container->get('myddleware_job.job');
+            $job = $this->container->getParameter('myddleware_job.job');
             $job->setApi(1);
             $job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
 
@@ -251,7 +262,6 @@ class ApiController extends AbstractController
             // Stop the process if document hasn't been created
             return $this->json($return);
         }
-
         // Send the document just created
         try {
             // db transaction managed into the method actionDocument
@@ -265,7 +275,6 @@ class ApiController extends AbstractController
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
         }
-
         // Close job if it has been created
         try {
             $connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -291,9 +300,7 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/mass_action", name="mass_action", methods={"POST"})
-     */
+    #[Route(path: '/mass_action', name: 'mass_action', methods: ['POST'])]
     public function massActionAction(Request $request): JsonResponse
     {
         try {
@@ -349,9 +356,7 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/rerun_error", name="rerun_error", methods={"POST"})
-     */
+    #[Route(path: '/rerun_error', name: 'rerun_error', methods: ['POST'])]
     public function rerunErrorAction(Request $request): JsonResponse
     {
         try {
@@ -396,9 +401,7 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/statistics", name="statistics", methods={"POST"})
-     */
+    #[Route(path: '/statistics', name: 'statistics', methods: ['POST'])]
     public function statisticsAction(Request $request): JsonResponse
     {
         try {

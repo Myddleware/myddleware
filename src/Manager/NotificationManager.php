@@ -1,27 +1,26 @@
 <?php
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Manager;
 
@@ -35,52 +34,41 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class NotificationManager
 {
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
+
     protected $emailAddresses;
+
     protected $configParams;
-    protected $tools;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var ParameterBagInterface
-     */
-    private $params;
-    /**
-     * @var Connection
-     */
-    private $connection;
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var mixed|string
-     */
-    private $fromEmail;
-    /**
-     * @var Environment
-     */
-    private $twig;
+
+    protected ToolsManager $tools;
+
+    private LoggerInterface $logger;
+
+    private ParameterBagInterface $params;
+
+    private Connection $connection;
+
+    private UserRepository $userRepository;
+
+    private TranslatorInterface $translator;
+
+    private JobRepository $jobRepository;
+
+    private RuleRepository $ruleRepository;
+
+    private mixed $fromEmail;
+
+    private Environment $twig;
+    private MailerInterface $mailer;
 
     public function __construct(
         LoggerInterface $logger,
@@ -92,7 +80,8 @@ class NotificationManager
         RuleRepository $ruleRepository,
         ToolsManager $tools,
         ParameterBagInterface $params,
-        Environment $twig
+        Environment $twig,
+        MailerInterface $mailer
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -104,10 +93,16 @@ class NotificationManager
         $this->tools = $tools;
         $this->params = $params;
         $this->twig = $twig;
+        $this->mailer = $mailer;
     }
 
     // Send alert if a job is running too long
-    public function sendAlert()
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    public function sendAlert(): bool
     {
         try {
             // Get the email adresses of all ADMIN
@@ -115,7 +110,7 @@ class NotificationManager
             // Set all config parameters
             $this->setConfigParam();
             if (empty($this->configParams['alert_time_limit'])) {
-                throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
+                throw new Exception('No alert time set in the parameters file. Please set the alert_limit_minute parameter in config/services.yaml');
             }
             // Calculate the date corresponding to the beginning still authorised
             $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
@@ -124,7 +119,7 @@ class NotificationManager
             // Search if a job is lasting more time that the limit authorized
             $job = $this->jobRepository->findJobStarted($timeLimit);
             // If a job is found, we send the alert
-            if (!$job) {
+            if ($job) {
                 // Create text
                 $textMail = $this->translator->trans('email_alert.body', [
                     '%min%' => $this->configParams['alert_time_limit'],
@@ -133,17 +128,18 @@ class NotificationManager
                     'base_uri' => $this->configParams['base_uri'] ?? '',
                 ]);
 
-                $message =
-                    (new Swift_Message($this->translator->trans('email_alert.subject')))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setBody($textMail);
+                $email = new TemplatedEmail();
+                $email->subject($this->translator->trans('email_alert.subject'));
+                $email->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+                $email->text($textMail);
+
                 // Send the message to all admins
                 foreach ($this->emailAddresses as $emailAddress) {
-                    $message->setTo($emailAddress);
-                    $send = $this->mailer->send($message);
-                    if (!$send) {
+                    $email->to($emailAddress);
+                    try {
+                        $this->mailer->send($email);
+                    } catch (TransportExceptionInterface $e) {
                         $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
-                        throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
                     }
                 }
             }
@@ -157,7 +153,12 @@ class NotificationManager
     }
 
     // Send notification to receive statistique about myddleware data transfer
-    public function sendNotification()
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws Exception
+     */
+    public function sendNotification(): bool
     {
         try {
             // Set all config parameters
@@ -232,7 +233,7 @@ class NotificationManager
             if ($job_error > 0) {
                 $logs = $this->jobRepository->getErrorsSinceLastNotification();
                 if (100 == count($logs)) {
-                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', '100_first_erros']).chr(10);
+                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', '100_first_errors']).chr(10);
                 } else {
                     $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', 'error_list']).chr(10);
                 }
@@ -248,18 +249,15 @@ class NotificationManager
             // Create text
             $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
 
-            $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
-            $message
-                ->setFrom((!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'))
-                ->setBody($textMail);
+            $email = new TemplatedEmail();
+            $email->subject($this->tools->getTranslation(['email_notification', 'subject']));
+            $email->from((!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'));
+            $email->text($textMail);
+
             // Send the message to all admins
             foreach ($this->emailAddresses as $emailAddress) {
-                $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);
-                if (!$send) {
-                    $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
-                    throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
-                }
+                $email->to($emailAddress);
+                $this->mailer->send($email);
             }
 
             return true;
@@ -271,7 +269,7 @@ class NotificationManager
     }
 
     // Add every admin email in the notification list
-    private function setEmailAddresses()
+    private function setEmailAddresses(): void
     {
         $users = $this->userRepository->findEmailsToNotification();
         foreach ($users as $user) {
@@ -279,22 +277,21 @@ class NotificationManager
         }
     }
 
-    public function resetPassword(User $user)
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function resetPassword(User $user): void
     {
-        $message = (new Swift_Message('Initialisation du mot de passe'))
-            ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-            ->setTo($user->getEmail())
-            ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
-
-        $send = $this->mailer->send($message);
-        if (!$send) {
-            $this->logger->error('Failed to send email');
-            throw new Exception('Failed to send email');
-        }
+        $email = new TemplatedEmail();
+        $email->subject('Init password');
+        $email->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+        $email->htmlTemplate('reset_password/email.html.twig');
+        $email->context(['user' => $user]);
+        $this->mailer->send($email);
     }
 
     // Get the content of the table config
-    protected function setConfigParam()
+    protected function setConfigParam(): void
     {
         if (empty($this->configParams)) {
             $configRepository = $this->entityManager->getRepository(Config::class);

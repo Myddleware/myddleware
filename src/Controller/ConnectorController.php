@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Form\DataTransformer\ConnectorParamsValueTransformer;
@@ -18,6 +20,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
+    private mixed $secret;
+
+    private mixed $secret;
+
+    public function __construct()
+    {
+        $this->secret = $this->getParameter('secret');
+    }
+
     /**
      * @throws Exception
      */

@@ -18,6 +18,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ConnectorParamFormType extends AbstractType
 {
     private ConnectorParamsValueTransformer $transformer;
+
     private array $solutionLoginFields;
 
     public function __construct(

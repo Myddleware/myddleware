@@ -48,9 +48,13 @@ class AddUserCommand extends Command
     private $io;
 
     private $entityManager;
+
     private $passwordHasher;
+
     private $validator;
+
     private $user;
+
     private $configRepository;
 
     public function __construct(

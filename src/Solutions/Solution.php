@@ -1,27 +1,29 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
@@ -30,75 +32,67 @@ use App\Entity\Document;
 use App\Entity\Rule;
 use App\Manager\DocumentManager;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class Solution
 {
-    public $isConnectionValid = false;
-    public $js = 0;
-    public $refresh_token = false;
-    public $callback = false;
+    public bool $isConnectionValid = false;
 
-    // Session de la connexion webservice
+    public int $js = 0;
+
+    public bool $refreshToken = false;
+
+    public bool $callback = false;
+
     protected $session;
 
-    // Liste des champs d'un module
-    protected $moduleFields = [];
+    protected array $moduleFields = [];
 
-    // Permet d'ajouter des champs nécessaires lorsque l'on va lire les données dans la solution source
-    // Tableau de type array('id','date_modified')
-    protected $required_fields = [];
+    protected array $requiredFields = [];
 
-    // URL de la solution pour atteindre les webservices
-    protected $connectionParam;
+    protected array $fieldsRelate = [];
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected array $requiredRelationships = [];
 
-    // Tableau comportant les différents types de BDD valides
-    protected $type_valide = ['text'];
+    protected array $connectionParam;
+
+    protected LoggerInterface $logger;
+
+    protected array $validDatabaseTypes = ['text'];
 
     // Liste des modules à exclure pour chaque solution
-    protected $exclude_module_list = [
+    protected array $excludedModules = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
 
-    // Liste des champs à exclure pour chaque solution
-    protected $exclude_field_list = [];
+    protected array $excludedFields = [];
 
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = [];
+    protected array $allowParentRelationship = [];
 
     // Enable the read record button on the data transfer detail view for the source solution
-    protected $readRecord = true;
+    protected bool $readRecord = true;
 
     // Disable to read deletion and to delete data
-    protected $readDeletion = false;
-    protected $sendDeletion = false;
+    protected bool $readDeletion = false;
+
+    protected bool $sendDeletion = false;
 
     // Specify if the class is called by the API
     protected $api;
 
     protected $message;
 
-    /**
-     * @var Connection
-     */
-    protected $connection;
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBagInterface;
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    protected Connection $connection;
+
+    protected ParameterBagInterface $parameterBagInterface;
+
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -113,13 +107,11 @@ class Solution
     }
 
     /**
-     * Fonction permettant de se loguer à la solution
-     * Param est un tableau contenant tous les paramètres nécessaires à la connexion
      * Cette méthode doit mettre à jour les attributs :
      * $this->session avec la session de la solution
      * $this->isConnectionValid (true si la connexion est réussie, false sinon).
      */
-    public function login(array $connectionParam)
+    public function login(array $connectionParam): void
     {
         // Instanciate object to decrypte data
         $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
@@ -128,12 +120,13 @@ class Solution
             if (is_string($value)) {
                 try {
                     $connectionParam[$key] = $encrypter->decrypt($value);
-                } catch (\Exception $e) { // No error if decrypt failed because some data aren't crypted (eg reference date)
+                } catch (\Exception $e) {
+                    // No error if decrypt failed because some data aren't crypted (eg reference date)
                 }
             }
         }
         // Check whether the URL input ends with /, if yes, remove it before making the call
-        if (isset($connectionParam['url']) && '/' === substr($connectionParam['url'], -1)) {
+        if (isset($connectionParam['url']) && str_ends_with($connectionParam['url'], '/')) {
             $connectionParam['url'] = substr($connectionParam['url'], 0, -1);
         }
 
@@ -156,14 +149,16 @@ class Solution
         return $this->connection;
     }
 
-    // Permet de mettre à jour le statut d'un document après création ou modification dans la cible
-    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
+    /**
+     * @throws Exception
+     */
+    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array
     {
         $this->connection->beginTransaction();
+        $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
             $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
@@ -178,7 +173,8 @@ class Solution
                 } else {
                     $status = $forceStatus;
                 }
-                // In cas of a child document, it is possible to have $value['id'] empty, we just set an error because the document can't be sent again (parent document successfully sent)
+                // In cas of a child document, it is possible to have $value['id'] empty,
+                // we just set an error because the document can't be sent again (parent document successfully sent)
                 if (!empty($value['id'])) {
                     $documentManager->updateTargetId($value['id']);
                 } else {
@@ -200,12 +196,13 @@ class Solution
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
-            echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $errorMessage = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            echo 'Failed to send document : '.$errorMessage;
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $documentManager->setMessage('Failed to send document : '.$errorMessage);
             $documentManager->setTypeError('E');
             $documentManager->updateStatus('Error_sending');
-            $this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->logger->error('Failed to send document : '.$errorMessage);
             $response[$idDoc] = false;
         }
 
@@ -260,18 +257,13 @@ class Solution
      *   nom_module2 => libellé module 2
      * ).
      */
-    public function get_modules(string $type = 'source'): ?array
+    public function getModules(string $type = 'source'): ?array
     {
         return [];
     }
 
-    /**
-     * Cette méthode doit remplir les attributs :
-     * moduleFields avec le tableu ci-dessus.
-     */
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
-        $this->moduleFields = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
         $this->moduleFields['Myddleware_element_id'] = [
             'label' => 'ID '.$module,
@@ -288,12 +280,13 @@ class Solution
      * Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
      * Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées.
      */
-    public function get_rule_custom_relationship($module, $type)
+    public function getRuleCustomRelationship($module, $type, array $parameters = []): ?array
     {
+        return null;
     }
 
     // Helper function for the read call
-    public function readData(array $param)
+    public function readData(array $param): ?array
     {
         try {
             $result['count'] = 0;
@@ -303,7 +296,7 @@ class Solution
             if (empty($param['offset'])) {
                 $param['offset'] = 0;
             }
-            // Add requiered fields based on attribute $required_fields
+            // Add requiered fields based on attribute $requiredFields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
             $param['fields'] = array_unique($param['fields']);
             // Remove Myddleware specific fields (not existing in the solution)
@@ -377,12 +370,12 @@ class Solution
     /**
      * Get the new records from the solution
      * Param's content :
-     * 		date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
-     * 		module : module called
-     * 		fields : rule field list, example : array('name','date_entered')
-     * 		limit : max records that the rule can read (default limit is 100)
+     *      date_ref : the oldest reference in the last call YYYY-MM-JJ hh:mm:ss
+     *      module : module called
+     *      fields : rule field list, example : array('name','date_entered')
+     *      limit : max records that the rule can read (default limit is 100)
      * Expected output :
-     * 		Array with the list of records.
+     *      Array with the list of records.
      */
     public function read(array $param): ?array
     {
@@ -502,7 +495,7 @@ class Solution
      *   [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
      * ).
      */
-    public function updateData(array $param)
+    public function updateData(array $param): array
     {
         try {
             // For every document
@@ -554,7 +547,7 @@ class Solution
         return null;
     }
 
-    public function deleteData(array $param)
+    public function deleteData(array $param): array
     {
         try {
             // For every document
@@ -598,10 +591,13 @@ class Solution
         return $result;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function delete($param, $data)
     {
         // Set an error by default
-        throw new \Exception('Delete function not developped for this connector. Failed to delete this record in the target application. ');
+        throw new \Exception('Delete method not developed for this connector. Failed to delete this record in the target application.');
     }
 
     /**
@@ -617,24 +613,24 @@ class Solution
         ];
     }
 
-    public function setMessageCreateRule($module)
+    public function setMessageCreateRule($module): void
     {
     }
 
-    public function setApi($api)
+    public function setApi($api): void
     {
         $this->api = $api;
     }
 
     // Permet d'ajouter des boutoon sur la page flux en fonction de la solution source ou targe
     // Type : source ou target
-    public function getDocumentButton($type)
+    public function getDocumentButton($type): array
     {
         return [];
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
-    public function referenceIsDate($module)
+    public function referenceIsDate($module): bool
     {
         return true;
     }
@@ -646,19 +642,19 @@ class Solution
     }
 
     // Return if the read record button has to be display on the data transfert view
-    public function getReadRecord()
+    public function getReadRecord(): bool
     {
         return $this->readRecord;
     }
 
     // Return if the connector can read deletion
-    public function getReadDeletion($module)
+    public function getReadDeletion($module): bool
     {
         return $this->readDeletion;
     }
 
     // Return if the connector can send deletion
-    public function getSendDeletion($module)
+    public function getSendDeletion($module): bool
     {
         return $this->sendDeletion;
     }
@@ -674,7 +670,7 @@ class Solution
      * [params] => Array ( [mode] => 0 ) )
      * [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
      * [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
-     * La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
+     * La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');  ou array('done'=>true, 'message'=>'')
      * Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle.
      */
     public function beforeRuleSave($data, $type)
@@ -687,21 +683,22 @@ class Solution
      * Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté l'entrée ruleId au tableau
      * Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');.
      */
-    public function afterRuleSave($data, $type)
+    public function afterRuleSave($data, $type): array
     {
         return [];
     }
 
     // Fonction permettant de faire l'appel REST
-    protected function call($method, $parameters)
+    protected function call(string $url, string $method = 'GET', mixed $parameters = []): mixed
     {
+        return null;
     }
 
     // Permet d'ajouter les champs obligatoires dans la listes des champs pour la lecture dans le système cible
     protected function addRequiredField($fields, $module = 'default', $mode = null)
     {
         // If no entry for the module we put default
-        if (empty($this->required_fields[$module])) {
+        if (empty($this->requiredFields[$module])) {
             $module = 'default';
         }
 
@@ -711,8 +708,8 @@ class Solution
         }
 
         // Boucle sur tous les champs obligatoires
-        if (!empty($this->required_fields[$module])) {
-            foreach ($this->required_fields[$module] as $required_field) {
+        if (!empty($this->requiredFields[$module])) {
+            foreach ($this->requiredFields[$module] as $required_field) {
                 // Vérification de la présence du champs obligatoire
                 $search_field = array_search($required_field, $fields);
                 if (false === $search_field) {
@@ -724,8 +721,8 @@ class Solution
         // Add the ref field if it isn't already in the array
         $dateRefField = $this->getRefFieldName($module, $mode);
         if (
-                !empty($dateRefField)
-            and false === array_search($dateRefField, $fields)
+            !empty($dateRefField)
+            and !in_array($dateRefField, $fields)
         ) {
             $fields[] = $dateRefField;
         }
@@ -733,17 +730,15 @@ class Solution
         return $fields;
     }
 
-    // Permet d'ajouter les relations obligatoires dans la listes des relations
-    protected function addRequiredRelationship($module)
+    protected function addRequiredRelationship($module): void
     {
-        if (!isset($this->required_relationships[$module])) {
-            $this->required_relationships[$module] = [];
+        if (!isset($this->requiredRelationships[$module])) {
+            $this->requiredRelationships[$module] = [];
         }
-        // Boucle sur tous les champs obligatoires
-        foreach ($this->required_relationships[$module] as $required_relationship) {
-            if (!in_array($required_relationship, array_keys($this->moduleFields))) {
-                $this->moduleFields[$required_relationship] = [
-                    'label' => $required_relationship,
+        foreach ($this->requiredRelationships[$module] as $requiredRelationship) {
+            if (!in_array($requiredRelationship, array_keys($this->moduleFields))) {
+                $this->moduleFields[$requiredRelationship] = [
+                    'label' => $requiredRelationship,
                     'type' => 'text',
                     'type_bdd' => 'varchar(255)',
                     'required' => false,
@@ -751,7 +746,7 @@ class Solution
                     'relate' => true,
                 ];
             } else {
-                $this->moduleFields[$required_relationship]['required_relationship'] = 1;
+                $this->moduleFields[$requiredRelationship]['required_relationship'] = 1;
             }
         }
 
@@ -789,7 +784,7 @@ class Solution
     }
 
     // Calculate the date modified of the current record
-    protected function getModifiedDate($param, $record, $dateRefField)
+    protected function getModifiedDate($param, $record, $dateRefField): string
     {
         return $this->dateTimeToMyddleware($record[$dateRefField]);
     }
@@ -806,7 +801,10 @@ class Solution
         return $dateTime;
     }
 
-    protected function getInfoDocument($idDocument)
+    /**
+     * @throws Exception
+     */
+    protected function getInfoDocument($idDocument): array|bool
     {
         $connection = $this->getConn();
         $sqlParams = '	SELECT *
@@ -814,16 +812,17 @@ class Solution
 							INNER JOIN rule
 								 ON document.rule_id = Rule.id
 								AND document.deleted = 0
-						WHERE id = :id_doc';
+						WHERE document.id = :id_doc';
         $stmt = $connection->prepare($sqlParams);
         $stmt->bindValue(':id_doc', $idDocument);
         $result = $stmt->executeQuery();
-        $documentData = $result->fetchAssociative();
 
-        return $documentData;
+        return $result->fetchAssociative();
     }
 
-    // Permet de récupérer la source ID du document en paramètre
+    /**
+     * @throws Exception
+     */
     protected function getSourceId($idDoc)
     {
         // Récupération du source_id
@@ -837,14 +836,15 @@ class Solution
     }
 
     // Ajout de champ personnalisé dans la target ex : bittle
-    public function getFieldMappingAdd($moduleTarget)
+    public function getFieldMappingAdd($moduleTarget): bool
     {
         return false;
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName(string $moduleSource, $ruleMode)
+    public function getRefFieldName(string $moduleSource, $ruleMode): string
     {
+        return '';
     }
 
     // Return the name of the field used for the id
@@ -857,8 +857,8 @@ class Solution
     public function allowParentRelationship(string $module): bool
     {
         if (
-                !empty($this->allowParentRelationship)
-             && in_array($module, $this->allowParentRelationship)
+            !empty($this->allowParentRelationship)
+            && in_array($module, $this->allowParentRelationship)
         ) {
             return true;
         }
@@ -868,8 +868,9 @@ class Solution
 
     // Build the direct link to the record (used in data transfer view)
     // Type : source or target
-    public function getDirectLink(Rule $rule, Document $document, string $type)
+    public function getDirectLink(Rule $rule, Document $document, string $type): ?string
     {
+        return null;
     }
 
     // Get a connector param decrypted
@@ -890,7 +891,9 @@ class Solution
         }
     }
 
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeCreate(array $param, array $data, $idDoc): ?array
     {
         // Exception if the job has been stopped manually
@@ -903,7 +906,9 @@ class Solution
         return $data;
     }
 
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeUpdate(array $param, array $data): ?array
     {
         // Exception if the job has been stopped manually
@@ -912,7 +917,9 @@ class Solution
         return $data;
     }
 
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeDelete(array $param, array $data): ?array
     {
         // Exception if the job has been stopped manually
@@ -921,7 +928,11 @@ class Solution
         return $data;
     }
 
-    protected function isJobActive(array $param)
+    /**
+     * @throws Exception
+     * @throws \Exception
+     */
+    protected function isJobActive(array $param): void
     {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
@@ -929,40 +940,43 @@ class Solution
         $result = $stmt->executeQuery();
         $job = $result->fetchAssociative(); // 1 row
         if (
-                empty($job['status'])
+            empty($job['status'])
             || 'Start' != $job['status']
         ) {
             throw new \Exception('The task has been manually stopped. ');
         }
     }
 
-    // Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule
-    protected function getParamLogin($connId): ?array
+    /**
+     * Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule.
+     *
+     * @throws Exception
+     */
+    protected function getLoginParameters($connId): ?array
     {
-        // RECUPERE LE NOM DE LA SOLUTION
-        $sql = 'SELECT solution.name  
+        // Is this used anywhere?
+        $sqlSolutionName = 'SELECT solution.name  
 				FROM connector
 					INNER JOIN solution 
-						ON solution.id  = connector.sol_id
+						ON solution.id  = connector.solution_id
 				WHERE connector.id = :connId';
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($sqlSolutionName);
         $stmt->bindValue('connId', $connId);
         $result = $stmt->executeQuery();
         $r = $result->fetchAssociative();
 
-        // RECUPERE LES PARAMS DE CONNEXION
-        $sql = 'SELECT id, conn_id, name, value
+        $sqlConnectorParams = 'SELECT id, conn_id, name, value
 				FROM connectorparam 
 				WHERE conn_id = :connId';
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $this->connection->prepare($sqlConnectorParams);
         $stmt->bindValue('connId', $connId);
         $result = $stmt->executeQuery();
-        $tab_params = $result->fetchAllAssociative();
+        $connectorParams = $result->fetchAllAssociative();
 
         $params = [];
 
-        if (!empty($tab_params)) {
-            foreach ($tab_params as $key => $value) {
+        if (!empty($connectorParams)) {
+            foreach ($connectorParams as $value) {
                 $params[$value['name']] = $value['value'];
                 $params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
             }

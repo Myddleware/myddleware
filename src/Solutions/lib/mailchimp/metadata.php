@@ -23,13 +23,12 @@
     along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
  *********************************************************************************/
 
-// List of fields for each modules
 $moduleFields = [
     'lists' => [
         'name' => ['label' => 'Name', 'type' => 'text', 'required' => 1],
         'contact__company' => ['label' => 'Contact - Company', 'type' => 'text', 'required' => 1],
-        'contact__address1' => ['label' => 'Contact - Adsress1', 'type' => 'text', 'required' => 1],
-        'contact__address2' => ['label' => 'Contact - address2', 'type' => 'text', 'required' => 0],
+        'contact__address1' => ['label' => 'Contact - Address 1', 'type' => 'text', 'required' => 1],
+        'contact__address2' => ['label' => 'Contact - Address 2', 'type' => 'text', 'required' => 0],
         'contact__city' => ['label' => 'Contact - city', 'type' => 'text', 'required' => 1],
         'contact__state' => ['label' => 'Contact - state', 'type' => 'text', 'required' => 1],
         'contact__zip' => ['label' => 'Contact - zip', 'type' => 'text', 'required' => 1],
@@ -74,7 +73,7 @@ $moduleFields = [
         'rss_opts__frequency' => ['label' => 'Frequency', 'type' => 'text', 'required' => 0, 'option' => ['daily' => 'daily', 'weekly' => 'weekly', 'monthly' => 'monthly']],
         'rss_opts__constrain_rss_img' => ['label' => 'Constrain RSS Images', 'type' => 'bool', 'required' => 0, 'option' => ['1' => 'True', '2' => 'False']],
         'social_card__title' => ['label' => 'Social card title', 'type' => 'text', 'required' => 0],
-        'social_card__description' => ['label' => 'Social card description', 'type' => TextType::class, 'required' => 0],
+        'social_card__description' => ['label' => 'Social card description', 'type' => 'text', 'required' => 0],
         'social_card__image_url' => ['label' => 'Social card image_url', 'type' => 'text', 'required' => 0],
         'type' => ['label' => 'Campaign Type', 'type' => 'text', 'required' => 1, 'option' => ['regular' => 'regular', 'plaintext' => 'plaintext', 'absplit' => 'absplit', 'rss' => 'rss', 'variate' => 'variate']],
         'recipients__list_id' => ['label' => 'List ID', 'type' => 'text', 'required' => 0, 'required_relationship' => 0, 'relate' => true],

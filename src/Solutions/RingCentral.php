@@ -1,29 +1,33 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
-
  * @package Myddleware
  * @copyright Copyright (C) 2015 - 2017  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
+use DateTime;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -40,12 +44,18 @@ class RingCentral extends Solution
     public const API_VERSION = '/v1.0';
 
     protected $apiKey;
-    protected $token;
-    protected $server;
-    protected $callLimit = 100;
-    protected $readLimit = 1000;
 
-    protected $required_fields = [
+    protected $token;
+
+    protected $server;
+
+    protected int $callLimit = 100;
+
+    protected int $readLimit = 1000;
+
+    protected array $moduleFields;
+
+    protected array $requiredFields = [
         'default' => ['id'],
         'call-log' => ['id', 'startTime'],
         'message-store' => ['id', 'lastModifiedTime'],
@@ -83,7 +93,7 @@ class RingCentral extends Solution
         ];
     }
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -100,39 +110,32 @@ class RingCentral extends Solution
                 if (!empty($this->token->access_token)) {
                     $this->isConnectionValid = true;
                 } elseif (!empty($this->token->error)) {
-                    throw new \Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
+                    throw new Exception($this->token->error.(!empty($this->token->error_description) ? ': '.$this->token->error_description : ''));
                 } else {
-                    throw new \Exception('Result from Ring Central : '.print_r($this->token, true));
+                    throw new Exception('Result from Ring Central : '.print_r($this->token, true));
                 }
             } else {
-                throw new \Exception('No response from Ring Central. ');
+                throw new Exception('No response from Ring Central. ');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Get the modules available
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
-        try {
-            return [
-                'call-log' => 'Call log',
-                'message-store' => 'Messages',
-                'presence' => 'Presence',
-            ];
-        } catch (\Exception $e) {
-            return $e->getMessage();
-        }
+        return [
+            'call-log' => 'Call log',
+            'message-store' => 'Messages',
+            'presence' => 'Presence',
+        ];
     }
 
-    // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
-        parent::get_module_fields($module, $type);
+        $moduleFields = [];
+        parent::getModuleFields($module, $type);
         try {
             require 'lib/ringcentral/metadata.php';
             if (!empty($moduleFields[$module])) {
@@ -140,12 +143,14 @@ class RingCentral extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+
+            return null;
         }
     }
 
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             // Init the result date ref even if the date_ref isn't updated here. Indeed, the date ref is requiered in output of this function.
@@ -170,7 +175,7 @@ class RingCentral extends Solution
                 $extensionIds[] = '~';
             }
             if (empty($extensionIds)) {
-                throw new \Exception('Failed to get the extension ID. Failed to read data from RingCentral. Please make sur the rule parameter Extension ID is correct.');
+                throw new Exception('Failed to get the extension ID. Failed to read data from RingCentral. Please make sur the rule parameter Extension ID is correct.');
             }
             $result['count'] = 0;
             $i = 0;
@@ -198,7 +203,7 @@ class RingCentral extends Solution
                     ++$pageNum;
                     // Error managment
                     if (!empty($records->errorCode)) {
-                        throw new \Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
+                        throw new Exception($records->errorCode.(!empty($records->message) ? ': '.$records->message : ''));
                     }
 
                     // Transform result by adding a dimension for the presence module (only one record for each call)
@@ -225,14 +230,14 @@ class RingCentral extends Solution
                                     $subEntryName = $fieldStructure[1];
 
                                     // If the field is empty, Ringcentral return nothing but we need to set the field empty in Myddleware
-                                    $record->$field = (isset($record->$entryName->$subEntryName) ? $record->$entryName->$subEntryName : '');
+                                    $record->$field = ($record->$entryName->$subEntryName ?? '');
                                 }
                                 if (isset($record->$field)) {
                                     if ($field == $dateRefField) {
                                         $dateMyddlewareFormat = $this->dateTimeToMyddleware($record->$field);
                                         // Add one second to the date modified (and so reference date) to not read the last record 2 times
                                         // Read function for Ring central allows only ">=" not ">"
-                                        $date = new \DateTime($dateMyddlewareFormat);
+                                        $date = new DateTime($dateMyddlewareFormat);
                                         $date = date_modify($date, '+1 seconde');
                                         $row['date_modified'] = $date->format('Y-m-d H:i:s');
                                     }
@@ -243,7 +248,7 @@ class RingCentral extends Solution
                             }
                             // date ref management
                             if (
-                                    !empty($row['date_modified'])
+                                !empty($row['date_modified'])
                                 && $dateRefExt[$extensionId] <= $row['date_modified']
                             ) {
                                 $dateRefExt[$extensionId] = $row['date_modified'];
@@ -266,16 +271,14 @@ class RingCentral extends Solution
                     break;
                 }
             }
-        } catch (\Exception $e) {
-            $result = '';
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         if ('call-log' == $moduleSource) {
             return 'startTime';
@@ -284,33 +287,32 @@ class RingCentral extends Solution
         } elseif ('presence' == $moduleSource) {
             return 'date_modified';
         }
+
+        return '';
     }
 
     // Add the filed extensionId on the rule
     public function getFieldsParamUpd($type, $module): array
     {
-        try {
-            $params[] = [
-                'id' => 'extensionId',
-                'name' => 'extensionId',
-                'type' => TextType::class,
-                'label' => 'Extension Id',
-                'required' => false,
-            ];
+        $params[] = [
+            'id' => 'extensionId',
+            'name' => 'extensionId',
+            'type' => TextType::class,
+            'label' => 'Extension Id',
+            'required' => false,
+        ];
 
-            return $params;
-        } catch (\Exception $e) {
-            return [];
-            // return $e->getMessage();
-        }
+        return $params;
     }
 
-    // Function de conversion de datetime format Myddleware à un datetime format solution
+    /**
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         try {
             if (empty($dateTime)) {
-                throw new \Exception('Date empty. Failed to send data. ');
+                throw new Exception('Date empty. Failed to send data. ');
             }
             if (date_create_from_format('Y-m-d H:i:s', $dateTime)) {
                 $date = date_create_from_format('Y-m-d H:i:s', $dateTime);
@@ -319,27 +321,29 @@ class RingCentral extends Solution
                 if ($date) {
                     $date->setTime(0, 0, 0);
                 } else {
-                    throw new \Exception('Wrong format for your date. Please check your date format. Contact us for help.');
+                    throw new Exception('Wrong format for your date. Please check your date format. Contact us for help.');
                 }
             }
 
             return $date->format('Y-m-d\TH:i:s.Z\Z');
-        } catch (\Exception $e) {
-            $result['error'] = $e->getMessage();
-
-            return $result;
+        } catch (Exception $e) {
+            return $e->getMessage();
         }
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+    /**
+     * @throws Exception
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
-        $date = new \DateTime($dateTime);
+        $date = new DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
 
-    // HTTP Request function
+    /**
+     * @throws Exception
+     */
     public function makeRequest($server, $token, $path, $args = null, $method = 'GET', $data = null)
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
@@ -366,16 +370,12 @@ class RingCentral extends Solution
             }
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                $authHeader, ]
-            );
-            // Execute request
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [$authHeader]);
             $result = curl_exec($ch);
-            // Close Connection
             curl_close($ch);
 
             return $result ? json_decode($result) : false;
         }
-        throw new \Exception('curl extension is missing!');
+        throw new Exception('curl extension is missing!');
     }
 }

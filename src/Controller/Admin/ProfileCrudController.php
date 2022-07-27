@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Admin;
 
 use App\Entity\User;
@@ -27,26 +29,25 @@ class ProfileCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
-        ->setPaginatorRangeSize(0);
+            ->setPaginatorRangeSize(0);
     }
 
     public function configureActions(Actions $actions): Actions
     {
         return $actions
             ->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->remove(Crud::PAGE_INDEX, Action::DELETE)
-            ;
+            ->remove(Crud::PAGE_INDEX, Action::DELETE);
     }
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, CollectionFilterCollection $filters): QueryBuilder
     {
-        $querybuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+        $queryBuilder = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
-        $querybuilder
+        $queryBuilder
             ->andwhere('entity.id = :id')
             ->setParameter('id', $this->getUser());
 
-        return $querybuilder;
+        return $queryBuilder;
     }
 
     public function configureFields(string $pageName): iterable

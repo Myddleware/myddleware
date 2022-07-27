@@ -79,7 +79,7 @@ Now we need to create a new connector class, in ```myddleware/src/Solutions```, 
         protected $readDeletion = true;
         protected $sendDeletion = true;
 
-        protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+        protected $requiredFields = ['default' => ['id', 'date_modified', 'date_entered']];
         
         ...
         }
@@ -177,9 +177,9 @@ To debug this function, you can click on the button "Test" and check the result 
 
 *Let's now create the first rule*
 
-### Method get_modules
+### Method getModules
 
-Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "get_modules" function.
+Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "getModules" function.
 
 Here, you have to add the module you want to connect in the method.
 
@@ -209,11 +209,11 @@ Now you can debug (with firebug for example) your function when the module list 
 
 Next step is the fields mapping, we now need to create a function for it.
 
-### Method get_module_fields
+### Method getModuleFields
 
 You have to indicate to Myddleware what fields are available for each module. If your application has a function which describe all fields for every module, you should use it. For example, we did it for Salesforce or Prestashop. Otherwise you have to describe every field.
 
-- Add the function get_module_fields in you class.
+- Add the function getModuleFields in you class.
 
 <!-- tabs:start -->
 
@@ -270,7 +270,7 @@ Parameters :
 
 Myddleware has to be able to read records from the source application. The list of fields returns must be the ones in the rule field mapping (input entry : fields). But some other fields are requiered : the id of the record and its reference (usually the modified record datetime). But the id and reference can be named differently depending on the application and the module.
 
-> It is the reason why you have to create the attribute required_fields in your class :
+> It is the reason why you have to create the attribute requiredFields in your class :
 
 IMAGE
 

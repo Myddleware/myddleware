@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -25,49 +28,57 @@
 namespace App\Solutions;
 
 use Automattic\WooCommerce\Client;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class WooCommerce extends Solution
 {
-    protected $apiUrlSuffix = '/wp-json/wc/v3/';
-    protected $url;
-    protected $consumerKey;
-    protected $consumerSecret;
-    protected $woocommerce;
-    protected $callLimit = 100;       // WooCommerce API only allows 100 records per page read
-    protected $delaySearch = '-1 month';
-    protected $subModules = [
-                                'line_items' => [
-                                    'parent_module' => 'orders',
-                                    'parent_id' => 'order_id',
-                                ],
-                            ];
+    protected string $apiUrlSuffix = '/wp-json/wc/v3/';
+
+    protected string $url;
+
+    protected string $consumerKey;
+
+    protected string $consumerSecret;
+
+    protected Client $woocommerce;
+
+    protected int $callLimit = 100;       // WooCommerce API only allows 100 records per page read
+
+    protected string $delaySearch = '-1 month';
+
+    protected array $subModules = [
+        'line_items' => [
+            'parent_module' => 'orders',
+            'parent_id' => 'order_id',
+        ],
+    ];
 
     // Log in form parameters
     public function getFieldsLogin(): array
     {
         return [
-                    [
-                        'name' => 'url',
-                        'type' => TextType::class,
-                        'label' => 'solution.fields.url',
-                    ],
-                    [
-                        'name' => 'consumerkey',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumerkey',
-                    ],
-                    [
-                        'name' => 'consumersecret',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumersecret',
-                    ],
-                ];
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+            [
+                'name' => 'consumerkey',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumerkey',
+            ],
+            [
+                'name' => 'consumersecret',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumersecret',
+            ],
+        ];
     }
 
     // Logging in to Woocommerce
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
@@ -79,19 +90,17 @@ class WooCommerce extends Solution
                     'wp_api' => true,
                     'version' => 'wc/v3',
                 ]
-                );
+            );
             if ($this->woocommerce->get('data')) {
                 $this->isConnectionValid = true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    public function get_modules($type = 'source'): ?array
+    public function getModules($type = 'source'): ?array
     {
         return [
             'customers' => 'Customers',
@@ -108,51 +117,44 @@ class WooCommerce extends Solution
         ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null): ?array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
+        $moduleFields = [];
         require 'lib/woocommerce/metadata.php';
-        parent::get_module_fields($module, $type);
+        parent::getModuleFields($module, $type);
         try {
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
 
-            // if (!empty($fieldsRelate[$module])) {
-            // 	$this->fieldsRelate = $fieldsRelate[$module];
-            // }
-            // // Includ relate fields into moduleFields to display them in the field mapping tab
-            // if (!empty($this->fieldsRelate)) {
-            // 	$this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
-            // }
             // include custom fields that could have been added with a plugin
             // (for instance Checkout Field Editor for WooCommerce allows you to create custom fields for your order forms)
-            // the custom fields need to be added manually in src/Myddleware/RegleBundle/Custom/Solutions/woocommerce.php
+            // the custom fields need to be added manually in src/Custom/Solutions/woocommerce.php
             if (!empty($this->customFields)) {
                 foreach ($this->customFields as $customModuleKey => $customModule) {
                     foreach ($customModule as $customField) {
                         if ($module === $customModuleKey) {
                             $this->moduleFields[$customField] = [
-                                                                    'label' => ucfirst($customField),
-                                                                    'type' => 'varchar(255)',
-                                                                    'type_bdd' => 'varchar(255)',
-                                                                    'required' => 0,
-                                                                ];
+                                'label' => ucfirst($customField),
+                                'type' => 'varchar(255)',
+                                'type_bdd' => 'varchar(255)',
+                                'required' => 0,
+                            ];
                         }
                     }
                 }
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return null;
         }
     }
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
-    // public function readData($param) {
     public function read($param): ?array
     {
         try {
@@ -171,14 +173,10 @@ class WooCommerce extends Solution
                 foreach ($param['query'] as $key => $value) {
                     if ('id' === $key) {
                         $query = strval('/'.$value);
-                    } else {
+                    } elseif (!empty($this->subModules[$param['module']])
+                        and $this->subModules[$param['module']]['parent_id'] == $key) {
                         // in case of query on sub module, we check if that the search field is the parent id
-                        if (
-                                !empty($this->subModules[$param['module']])
-                            and $this->subModules[$param['module']]['parent_id'] == $key
-                        ) {
-                            $query = strval('/'.$value);
-                        }
+                        $query = strval('/'.$value);
                     }
                 }
             }
@@ -195,7 +193,7 @@ class WooCommerce extends Solution
                 // for specific requests (e.g. readrecord with an id)
                 if (!empty($query)) {
                     $response = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
-                                                                              'page' => $page, ]);
+                        'page' => $page, ]);
                     // when reading a specific record only we need to add a layer to the array
                     $records = $response;
                     $response = [];
@@ -203,14 +201,14 @@ class WooCommerce extends Solution
                 } elseif ('customers' === $module) {
                     // orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, ['orderby' => 'registered_date',
-                                                                                    'order' => 'asc',
-                                                                                    'per_page' => $this->callLimit,
-                                                                                    'page' => $page, ]);
+                        'order' => 'asc',
+                        'per_page' => $this->callLimit,
+                        'page' => $page, ]);
                 // get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, ['orderby' => 'modified',
-                                                                                'per_page' => $this->callLimit,
-                                                                                'page' => $page, ]);
+                        'per_page' => $this->callLimit,
+                        'page' => $page, ]);
                 }
                 if (!empty($response)) {
                     // used for submodules (e.g. line_items)
@@ -247,7 +245,7 @@ class WooCommerce extends Solution
                 }
                 ++$page;
             } while (!$stop && $count < $param['limit']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
@@ -255,7 +253,7 @@ class WooCommerce extends Solution
     }
 
     // for specific modules (e.g. : line_items)
-    public function convertResponse($param, $response)
+    public function convertResponse($param, $response): array
     {
         if (array_key_exists($param['module'], $this->subModules)) {
             $subModule = $param['module'];   // line_items
@@ -279,11 +277,7 @@ class WooCommerce extends Solution
     }
 
     /**
-     * Function create data.
-     *
-     * @param $param
-     *
-     * @return mixed
+     * @throws \Doctrine\DBAL\Exception
      */
     public function createData($param): ?array
     {
@@ -291,19 +285,19 @@ class WooCommerce extends Solution
     }
 
     /**
-     * Function update data.
-     *
-     * @param $param
-     *
-     * @return mixed
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function updateData($param)
+    public function updateData($param): array
     {
         return $this->upsert('update', $param);
     }
 
-    public function upsert($method, $param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function upsert($method, $param): array
     {
+        $result = [];
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 $result = [];
@@ -325,19 +319,19 @@ class WooCommerce extends Solution
                     $record = $response;
                     if (!empty($record->id)) {
                         $result[$idDoc] = [
-                                            'id' => $record->id,
-                                            'error' => false,
-                                    ];
+                            'id' => $record->id,
+                            'error' => false,
+                        ];
                     } else {
-                        throw new \Exception('Error during '.print_r($response));
+                        throw new Exception('Error during '.print_r($response));
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
-                                        'id' => '-1',
-                                        'error' => $error,
-                                        ];
+                    'id' => '-1',
+                    'error' => $error,
+                ];
             }
             // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
@@ -346,8 +340,6 @@ class WooCommerce extends Solution
         return $result;
     }
 
-    // Check data before update
-    // Add a throw exeption if error
     protected function checkDataBeforeUpdate($param, $data): ?array
     {
         // Exception if the job has been stopped manually
@@ -356,8 +348,6 @@ class WooCommerce extends Solution
         return $data;
     }
 
-    // Check data before update
-    // Add a throw exeption if error
     protected function checkDataBeforeDelete($param, $data): ?array
     {
         // Exception if the job has been stopped manually
@@ -366,8 +356,11 @@ class WooCommerce extends Solution
         return $data;
     }
 
-    // Convert date to Myddleware format
-    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    /**
+     * @throws Exception
+     *                   Convert date to Myddleware format
+     *                   2020-07-08T12:33:06 to 2020-07-08 10:33:06
+     */
     protected function dateTimeToMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -375,7 +368,11 @@ class WooCommerce extends Solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    // convert from Myddleware format to Woocommerce format
+    /**
+     * convert from Myddleware format to Woocommerce format.
+     *
+     * @throws Exception
+     */
     protected function dateTimeFromMyddleware(string $dateTime): string
     {
         $dto = new \DateTime($dateTime);
@@ -384,7 +381,7 @@ class WooCommerce extends Solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         return 'date_modified';
     }

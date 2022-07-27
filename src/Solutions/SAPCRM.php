@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -7,31 +10,32 @@
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
-    This file is part of Myddleware.
+This file is part of Myddleware.
 
-    Myddleware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    Myddleware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SAPCRM extends SAPRoot
 {
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
-    protected $keySubStructure = ['CRMD_ORDER' => [
+    protected array $keySubStructure = ['CRMD_ORDER' => [
         'ET_PARTNER' => 'PARTNER_FCT',
         'ET_STATUS' => 'USER_STAT_PROC',
         'ET_APPOINTMENT' => 'APPT_TYPE',
@@ -45,13 +49,13 @@ class SAPCRM extends SAPRoot
     ];
 
     // Permet d'ajouter des filtres sur les tables, on ne prend que les partenaires principaux sur la table des partenaire par exemple
-    protected $subStructureFilter = ['CRMD_ORDER' => [
+    protected array $subStructureFilter = ['CRMD_ORDER' => [
         'ET_PARTNER' => ['MAINPARTNER' => 'X'],
     ],
     ];
 
     // Permet d'avoir les GUID pour chaque sous-structure et ainsi de savoirà quel partner/order... appartiennent les autre sstructures
-    protected $guidName = ['CRMD_ORDER' => [
+    protected array $guidName = ['CRMD_ORDER' => [
         'ET_ORDERADM_H' => 'GUID',
         'ET_ACTIVITY_H' => 'GUID',
         'ET_STATUS' => 'GUID',
@@ -63,17 +67,17 @@ class SAPCRM extends SAPRoot
     ];
 
     // Permet d'indiquer quel est l'id pour chaque module
-    protected $idName = [
+    protected array $idName = [
         'CRMD_ORDER' => ['ET_ORDERADM_H' => 'OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000' => 'PARTNER'],
     ];
 
-    protected $required_fields = [
+    protected array $requiredFields = [
         'CRMD_ORDER' => ['ET_ORDERADM_H__CHANGED_AT', 'ET_ORDERADM_H__OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000__CHDAT', 'ET_BUT000__CHTIM', 'ET_BUT000__PARTNER'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'CRMD_ORDER' => [
             // 'ET_ORDERADM_H' => array('OBJECT_ID'=> array('label' =>  'Object ID','required_relationship' => false)),
             'ET_PARTNER' => ['PARTNER_NO' => ['label' => 'Partner number', 'required_relationship' => false]],
@@ -83,14 +87,14 @@ class SAPCRM extends SAPRoot
         // )
     ];
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         $connectionParam['wsdl'] = __DIR__.'/../Custom/Solutions/sapcrm/wsdl/'.$connectionParam['wsdl'];
         parent::login($connectionParam);
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source'): array
+    public function getModules($type = 'source'): array
     {
         if ($type = 'source') {
             return [
@@ -105,7 +109,7 @@ class SAPCRM extends SAPRoot
         ];
     }
 
-    public function get_module_fields(string $module, string $type = 'source', $param = null): ?array
+    public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
         if ('target' == $type) {
             switch ($module) {
@@ -192,32 +196,30 @@ class SAPCRM extends SAPRoot
             return $this->moduleFields;
         }
 
-        return parent::get_module_fields($module, $type);
+        return parent::getModuleFields($module, $type);
     }
 
     // Permet de modifier les nom des champs pour le read_last
     // Dans SAP les champs en lecture et en écriture ne sont pas toujours identiques pour le même module, les structures peuvent être différentes
-    protected function convertFieldReadLast($param, $values, $mode)
+    protected function convertFieldReadLast($param, $values, $mode): array
     {
         try {
-            $this->get_module_fields($param['module'], 'target');
+            $convertFields = [];
+            $this->getModuleFields($param['module'], 'target');
             if (!empty($this->moduleFields)) {
                 if (!empty($param['fields'])) {
-                    $convertFields = [];
                     foreach ($param['fields'] as $field) {
                         // Si on a pas de données alors on a à mettre les noms de champ attendus par le SEARCH_BP de SAP
                         if ('1' == $mode) {
                             if (!empty($this->moduleFields[$field]['readName'])) {
                                 $convertFields[] = $this->moduleFields[$field]['readName'];
                             } else {
-                                throw new \Exception('The field '.$field.' has no readName. Failed to read data in SAP CRM. ');
+                                throw new Exception('The field '.$field.' has no readName. Failed to read data in SAP CRM. ');
                             }
-                        }
-
-                        // Sinon c'est que l'on a eu le retour de SAP et que l'on doit remettre les nom d'orgine des champs
+                        } // Sinon c'est que l'on a eu le retour de SAP et que l'on doit remettre les nom d'orgine des champs
                         elseif ('2' == $mode) {
                             if (
-                                    !empty($this->moduleFields[$field]['readName'])
+                                !empty($this->moduleFields[$field]['readName'])
                                 && !empty($values[$this->moduleFields[$field]['readName']])
                             ) {
                                 $convertFields[$field] = $values[$this->moduleFields[$field]['readName']];
@@ -232,15 +234,17 @@ class SAPCRM extends SAPRoot
             }
 
             return ['done' => 1, 'fields' => $convertFields];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Failed to read the record from sapcrm : '.$e->getMessage().' '.__CLASS__.' Line : '.$e->getLine().'. ';
 
             return ['done' => -1, 'error' => $error];
         }
     }
 
-    // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    /**
+     * @throws Exception
+     */
+    public function readData($param): array
     {
         // Initialisation de la limit
         if (empty($param['limit'])) {
@@ -260,7 +264,7 @@ class SAPCRM extends SAPRoot
                 'IvProcessType' => '',
                 'IvTypeDate' => ('C' == $param['ruleParams']['mode'] ? 'C' : 'U'),
             ];
-            // return $this->readOrder($param,false);
+
             return $this->readMultiStructure($param, 'ZmydSearchOrders', $parameters, false);
         }
         if ('BU_PARTNER' == $param['module']) {
@@ -276,21 +280,27 @@ class SAPCRM extends SAPRoot
 
             return $this->readMultiStructure($param, 'ZmydSearchBp', $parameters, false);
         }
+
+        return [];
     }
 
-    // Permet de créer des données
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
+        $result = [];
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
             try {
+                $dataSapCrm = [];
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 foreach ($data as $key => $value) {
                     $tabValue = explode('__', $key);
                     if (
-                            empty($tabValue[0])
-                         || empty($tabValue[1])
+                        empty($tabValue[0])
+                        || empty($tabValue[1])
                     ) {
                         $result[$idDoc] = [
                             'id' => $idDoc,
@@ -308,7 +318,7 @@ class SAPCRM extends SAPRoot
                 if ('BU_PARTNER' == $param['module']) {
                     $response = $this->client->ZmydCreateBp($parameters);
                     if ('E' == $response->EvTypeMessage) {
-                        throw new \Exception('Failed to create partner : '.utf8_encode($response->EvMessage).'.');
+                        throw new Exception('Failed to create partner : '.utf8_encode($response->EvMessage).'.');
                     }
                     if (!empty($response->EvPartner)) {
                         $result[$idDoc] = [
@@ -324,7 +334,7 @@ class SAPCRM extends SAPRoot
                 } elseif ('CRMD_ORDER' == $param['module']) {
                     $response = $this->client->ZmydCreateOrder($parameters);
                     if ('E' == $response->EvTypeMessage) {
-                        throw new \Exception('Failed to create order : '.utf8_encode($response->EvMessage).'.');
+                        throw new Exception('Failed to create order : '.utf8_encode($response->EvMessage).'.');
                     }
                     if (!empty($response->EvObjectId)) {
                         $result[$idDoc] = [
@@ -338,9 +348,9 @@ class SAPCRM extends SAPRoot
                         ];
                     }
                 } else {
-                    throw new \Exception('Module '.$param['module'].' unknown for create function. ');
+                    throw new Exception('Module '.$param['module'].' unknown for create function. ');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => -1,
@@ -354,9 +364,13 @@ class SAPCRM extends SAPRoot
         return $result;
     }
 
-    // Permet de créer des données
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
+        $result = [];
+        $dataSapCrm = [];
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -367,8 +381,8 @@ class SAPCRM extends SAPRoot
                 foreach ($diff as $key => $value) {
                     $tabValue = explode('__', $key);
                     if (
-                            empty($tabValue[0])
-                         || empty($tabValue[1])
+                        empty($tabValue[0])
+                        || empty($tabValue[1])
                     ) {
                         $result[$idDoc] = [
                             'id' => $idDoc,
@@ -387,7 +401,7 @@ class SAPCRM extends SAPRoot
                     ];
                     $response = $this->client->ZmydUpdateBp($parameters);
                     if ('E' == $response->EvTypeMessage) {
-                        throw new \Exception('Failed to update partner : '.utf8_encode($response->EvMessage).'.');
+                        throw new Exception('Failed to update partner : '.utf8_encode($response->EvMessage).'.');
                     }
                     if (!empty($response->EvPartner)) {
                         $result[$idDoc] = [
@@ -407,7 +421,7 @@ class SAPCRM extends SAPRoot
                     ];
                     $response = $this->client->ZmydUpdateOrder($parameters);
                     if ('E' == $response->EvTypeMessage) {
-                        throw new \Exception('Failed to update order : '.utf8_encode($response->EvMessage).'.');
+                        throw new Exception('Failed to update order : '.utf8_encode($response->EvMessage).'.');
                     }
                     if (!empty($response->EvObjectId)) {
                         $result[$idDoc] = [
@@ -421,9 +435,9 @@ class SAPCRM extends SAPRoot
                         ];
                     }
                 } else {
-                    throw new \Exception('Module '.$param['module'].' unknown for create function. ');
+                    throw new Exception('Module '.$param['module'].' unknown for create function. ');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 $result[$idDoc] = [
                     'id' => -1,
@@ -444,7 +458,7 @@ class SAPCRM extends SAPRoot
             $params = [];
             if ('source' == $type) {
                 // Ajout du paramètre de l'organisation commerciale pour le partenaire
-                if (in_array($module, ['BU_PARTNER'])) {
+                if ('BU_PARTNER' == $module) {
                     $params[] = [
                         'id' => 'SALES_ORG',
                         'name' => 'SALES_ORG',
@@ -462,7 +476,7 @@ class SAPCRM extends SAPRoot
                         'required' => false,
                     ];
                 }
-                if (in_array($module, ['CRMD_ORDER'])) {
+                if ('CRMD_ORDER' == $module) {
                     // Ajout du paramètre de type d'opération
                     $params[] = [
                         'id' => 'PROCESS_TYPE',
@@ -483,7 +497,7 @@ class SAPCRM extends SAPRoot
             }
 
             return $params;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
             return [];
