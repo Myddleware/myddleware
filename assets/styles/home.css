@@ -2,11 +2,9 @@
 *{
     text-decoration: none !important;
 }
-
 header{
     border-bottom: groove 1px;
     border-color: rgb(32 32 32 / 18%);
-    /* box-shadow: 0px -13px 37px; */
 }
 .logo{
     width: 250px;
@@ -56,18 +54,14 @@ main p{
 }
 .main_home{
     padding-top: 30px;
-    background-image:linear-gradient(306deg, rgba(0, 157, 255, 0) 100%, #ffffff 50%),linear-gradient(113deg, #ffffff 50%, #14b3d6 50%)
-    /* background-image:linear-gradient(180deg, rgb(255 255 255 / 24%) 0%,
-     #ffffff 80%),linear-gradient(180deg, #cdf3ff 29%, #ffffff 95%); */
-     /* background-image: linear-gradient(180deg, rgb(255 255 255 / 0%) 0%, #ffffff 80%),linear-gradient(135deg, #8bd8ff 50%, #ffffff 50%); */
-     /* background-image: linear-gradient(175deg, rgb(255 255 255 / 24%) 94%, #ffffff 80%),linear-gradient(151deg, #cdf3ff 50%, #ffffff 50%); */
+    background-image: url(../images/home-background.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
+
 .main-content{
-    /* text-align: center; */
     font-family: sans-serif;
-    /* width: 90%;
-    margin: auto;
-    margin-top: 100px; */
     width: 40%;
     margin: 60px;
 }
@@ -94,7 +88,6 @@ footer{
     background-color: white;
     border-top: groove 1px;
     border-color: rgb(32 32 32 / 18%);
-    /* box-shadow: 0px 13px 37px; */
 }
 
 footer p {
@@ -106,9 +99,7 @@ footer p span{
    color: #14b3d6;
 }
 
-
-
-/* CAROUSEL */
+/* CAROUSEL HOME */
 .main-carousel {
     border-top: groove 1px;
     border-color: rgb(32 32 32 / 18%);
@@ -124,7 +115,7 @@ footer p span{
 	height: 100px;
 	overflow:hidden;
 	position: relative;
-    width: 1800px;
+    width: 1903px;
 }
 .slide-track {
     animation: scroll 40s linear infinite;
