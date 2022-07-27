@@ -82,7 +82,6 @@ class Mailchimp extends Solution
 
     public function getModules($type = 'source'): ?array
     {
-        try {
             if ('target' == $type) {
                 $modules = [
                     'campaigns' => 'Campaigns',
@@ -93,11 +92,6 @@ class Mailchimp extends Solution
                 return null;
             }
             return $modules;
-        } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            return null;
-        }
     }
 
     public function getModuleFields($module, $type = 'source', $param = null): ?array
