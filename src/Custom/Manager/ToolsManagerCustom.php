@@ -77,6 +77,10 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
 			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
 		}
+		
+		if (current(array_keys($data['source'])) == 'CRMC__etablissement_sup') {
+			$data['lst_rule']['5cddddcce2e3e'] = 'REEC - Poles';
+		}
 		return $data;
 	}
 } 
