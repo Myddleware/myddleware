@@ -663,16 +663,15 @@ twitter:
         ref: >
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
 
-messages:
-    rule:
-        failed_running_job: Failed to run the task.
-        failed_get_task_id: Failed to get the task id.
-        open_running_task: Click here if you want to open the running task.
-        another_task_running: Failed to create the task because another task is already running. Please wait for the end of this task or you can stop it manually.
-        failed_create_directory: An error occured while creating your directory.
-    template:
-        nb_rule: Number of generated rules
-        help: Please, read this tutorial to help you to activate your rules <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
+
+failed_running_job: Failed to run the task.
+failed_get_task_id: Failed to get the task id.
+open_running_task: Click here if you want to open the running task.
+another_task_running: Failed to create the task because another task is already running. Please wait for the end of this task or you can stop it manually.
+failed_create_directory: An error occurred while creating your directory.
+template:
+    nb_rule: Number of generated rules
+    help: Please, read this tutorial to help you to activate your rules <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.
 
 email_notification:
     subject: Myddleware notification

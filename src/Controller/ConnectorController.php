@@ -98,7 +98,7 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/connector/test-connexion', name: 'test_connexion', methods: ['POST'])]
-    public function testConnection(Request $request, SolutionManager $solutionManager)
+    public function testConnection(Request $request, SolutionManager $solutionManager): Response
     {
         $content = json_decode($request->getContent(), true);
 

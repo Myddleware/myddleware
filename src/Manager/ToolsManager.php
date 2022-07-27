@@ -35,23 +35,20 @@ use Symfony\Component\Yaml\Yaml;
 
 class ToolsManager
 {
-    protected $connection;
+    protected Connection $connection;
 
     protected $container;
 
-    protected $logger;
+    protected LoggerInterface $logger;
 
     protected $language;
 
-    protected $translations;
+    protected mixed $translations;
 
-    /**
-     * @var string
-     */
-    private $projectDir;
+    private string $projectDir;
 
-    // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-    protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
+    // Standard rule param list to avoid to delete specific rule param (eg : filename for file connector)
+    protected array $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -65,39 +62,6 @@ class ToolsManager
         $request = $requestStack->getCurrentRequest();
         $language = $request ? $request->getLocale() : 'en';
         $this->translations = Yaml::parse(file_get_contents($this->projectDir.'/translations/messages.'.$language.'.yml'));
-    }
-
-    // Compose une liste html avec les options
-    public static function composeListHtml($array, $phrase = false)
-    {
-        $r = '';
-        if ($array) {
-            asort($array);
-            if ($phrase) {
-                $r .= '<option value="" selected="selected">'.$phrase.'</option>';
-                $r .= '<option value="" disabled="disabled">- - - - - - - -</option>';
-            }
-
-            foreach ($array as $k => $v) {
-                if ('' != $v) {
-                    $r .= '<option value="'.$k.'">'.str_replace([';', '\'', '\"'], ' ', $v).'</option>';
-                }
-            }
-        } else {
-            $r .= '<option value="" selected="selected">'.$phrase.'</option>';
-        }
-
-        return $r;
-    }
-
-    public function beforeRuleEditViewRender($data)
-    {
-        return $data;
-    }
-
-    public function getRuleParam()
-    {
-        return $this->ruleParam;
     }
 
     // Allow translation from php classes
@@ -133,29 +97,9 @@ class ToolsManager
         return $result;
     }
 
-    // Change Myddleware parameters
-    public function changeMyddlewareParameter($nameArray, $value)
-    {
-        $myddlewareParameters = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_public.yml'));
-        // Search the translation
-        if (!empty($myddlewareParameters)) {
-            $nbLevel = sizeof($nameArray);
-            switch ($nbLevel) {
-                case 1:
-                    $myddlewareParameters['parameters'][$nameArray[0]] = $value;
-                    break;
-                case 2:
-                    $myddlewareParameters['parameters'][$nameArray[0]][$nameArray[1]] = $value;
-                    break;
-                case 3:
-                    $myddlewareParameters['parameters'][$nameArray[0]][$nameArray[1]][$nameArray[2]] = $value;
-                    break;
-            }
-        }
-        $new_yaml = Yaml::dump($myddlewareParameters, 4);
-        file_put_contents($this->projectDir.'/config/packages/public/parameters_public.yml', $new_yaml);
-    }
-
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function getPhpVersion()
     {
         // Get the custom php version first

@@ -34,6 +34,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ERPNext extends Solution
 {
@@ -68,6 +69,8 @@ class ERPNext extends Solution
 
     // Get isTable parameter for each module
     protected array $isTableModule = [];
+
+    private TranslatorInterface $translator;
 
     public function getFieldsLogin(): array
     {
@@ -435,34 +438,34 @@ class ERPNext extends Solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): ?string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {
             $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
-            $module = $rule->getModuleSource();
+            $module = $rule->getSourceModule();
             $recordId = $document->getSource();
         } else {
             $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
-            $module = $rule->getModuleTarget();
+            $module = $rule->getTargetModule();
             $recordId = $document->gettarget();
         }
 
         // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-        return rtrim($url, '/').'/desk#Form/'.rawurlencode($module).'/'.rawurlencode($recordId);
+        // Unsure whether we should replace $module with $module->getId() - stringified - or $module->getName()
+        return rtrim($url, '/').'/desk#Form/'.rawurlencode($module->getName()).'/'.rawurlencode($recordId);
     }
 
     /**
-     * @param $url
+     * @param string $url
      * @param string $method
-     * @param array  $parameters
-     * @param int    $timeout
-     *
-     * @return mixed|void
+     * @param array $parameters
+     * @param int $timeout
+     * @return mixed
      *
      * @throws Exception
      */
-    protected function call($url, $method = 'GET', $parameters = [], $timeout = 300)
+    protected function call(string $url, string $method = 'GET', $parameters = [], int $timeout = 300): mixed
     {
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
             throw new Exception('curl extension is missing!');
@@ -472,7 +475,7 @@ class ERPNext extends Solution
         try {
             $fs->mkdir(dirname($fileTmp));
         } catch (IOException $e) {
-            throw new Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
+            throw new Exception($this->translator->trans('failed_create_directory').': '.$e->getMessage());
         }
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -490,7 +493,7 @@ class ERPNext extends Solution
         // if Traceback found, we have an error
         if (
                 'GET' != $method
-            and false !== strpos($response, 'Traceback')
+            and str_contains($response, 'Traceback')
         ) {
             // Extraction of the Traceback : Get the lenth between 'Traceback' and '</pre>'
             return substr($response, strpos($response, 'Traceback'), strpos(substr($response, strpos($response, 'Traceback')), '</pre>'));
