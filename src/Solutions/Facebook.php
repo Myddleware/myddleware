@@ -33,13 +33,13 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Facebook extends Solution
 {
-    protected $baseUrl = 'https://graph.facebook.com';
+    protected string $baseUrl = 'https://graph.facebook.com';
 
-    protected $apiVersion = 'v11.0';
+    protected string $apiVersion = 'v11.0';
 
     protected $facebook;
 
-    protected $readLast = false;
+    protected bool $readLast = false;
 
     protected array $requiredFields = ['default' => ['id', 'created_time']];
 
@@ -64,12 +64,10 @@ class Facebook extends Solution
         ];
     }
 
-    // login to Facebook
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
-            // Create Facebook object
             $this->facebook = new \Facebook\Facebook([
                 'app_id' => $this->connectionParam['clientid'],
                 'app_secret' => $this->connectionParam['clientsecret'],
@@ -98,10 +96,8 @@ class Facebook extends Solution
         }
         $this->logger->error($error);
 
-        return ['error' => $error];
     }
 
-    // Get available modules
     public function getModules($type = 'source'): array
     {
         try {
@@ -125,11 +121,11 @@ class Facebook extends Solution
 
             return $modules;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            return ['error' => $error];
         }
     }
 
-    // Get the fields available for the module in input
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
@@ -167,12 +163,12 @@ class Facebook extends Solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage(). $e->getFile(). $e->getLine();
+            return ['error' => $error];
         }
     }
 
-    // Permet de lire les données
-    public function readData($param)
+    public function readData($param): ?array
     {
         try {
             $result = [];
@@ -296,18 +292,18 @@ class Facebook extends Solution
     }
 
     // Transform Facebook data structure to a json type key => value
-    protected function formatToArray($fbDataObject)
+    protected function formatToArray($fbDataObject): array
     {
+        $data = [];
         if (!empty($fbDataObject)) {
             foreach ($fbDataObject as $field) {
                 $data[$field->getField('name')] = $field->getField('values')->getField('0');
             }
-
-            return $data;
         }
+        return $data;
     }
 
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Only leads module for now
         return 'created_time';
