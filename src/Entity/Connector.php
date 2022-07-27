@@ -49,7 +49,7 @@ class Connector implements \Stringable
     /**
      * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
-    private ?string $name;
+    private ?string $name = null;
 
     /**
      * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector", cascade={"persist"})
@@ -297,7 +297,7 @@ class Connector implements \Stringable
 
     public function __toString(): string
     {
-        return $this->name;
+        return $this->name ?? '';
     }
 
     public function addRulesWhereIsSource(Rule $rulesWhereIsSource): self

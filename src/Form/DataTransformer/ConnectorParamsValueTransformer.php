@@ -3,18 +3,16 @@
 namespace App\Form\DataTransformer;
 
 use Illuminate\Encryption\Encrypter;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\DataTransformerInterface;
 
 class ConnectorParamsValueTransformer implements DataTransformerInterface
 {
-    private ?string $secret;
-
+    private string $secret;
     private Encrypter $encrypter;
 
-    public function __construct(ParameterBagInterface $parameterBag)
+    public function __construct(string $secret)
     {
-        $this->secret = $parameterBag->get('secret');
+        $this->secret = $secret;
         $this->encrypter = new Encrypter(substr($this->secret, -16));
     }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Connector;
-use App\Form\ConnectorParamFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -19,10 +18,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ConnectorCrudController extends AbstractCrudController
 {
-    public function __construct()
-    {
-    }
-
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
@@ -50,6 +45,7 @@ class ConnectorCrudController extends AbstractCrudController
         if (!$entityInstance instanceof Connector) {
             return;
         }
+
         $user = $this->getUser();
         $entityInstance->setModifiedBy($user);
         parent::updateEntity($entityManager, $entityInstance);
@@ -69,34 +65,36 @@ class ConnectorCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         $credentialsFormController = $this->generateUrl('credentials_form');
+        $credentialsFormEditController = $this->generateUrl('credentials_form_edit');
 
-        return [
-            IdField::new('id')->onlyOnDetail(),
+        $fields = [
+            IdField::new('id')->hideOnForm(),
             TextField::new('name'),
             AssociationField::new('solution')
                 ->addCssClass('solution')
                 ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'solution',
-                        'data-solution-info-url-value' => $credentialsFormController,
+                        'data-solution-info-url-value' => $pageName === 'edit' ? $credentialsFormEditController : $credentialsFormController,
                     ],
                     'attr' => [
                         'data-action' => 'change->solution#onSelect',
                         'data-solution-target' => 'credential',
                     ],
-                ])->setHelp('login fields: '),
-            // CollectionField::new('connectorParams', 'Credentials')
-            //     ->setEntryIsComplex(true)
-            //     ->setEntryType(ConnectorParamFormType::class)
-            //     ->setTemplatePath('admin/credentials.html.twig'),
+                ])->setHelp('login fields: ')
+                ->setFormTypeOption('disabled','edit' === $pageName ? 'disabled' : '')
+            ,
             AssociationField::new('rulesWhereIsSource')->hideOnForm(),
             AssociationField::new('rulesWhereIsTarget')->hideOnForm(),
             AssociationField::new('createdBy')->hideOnForm(),
-            AssociationField::new('modifiedBy')->hideOnForm(),
+            AssociationField::new('modifiedBy')->hideOnForm()->hideOnIndex(),
             DateTimeField::new('createdAt')->hideOnForm(),
-            DateTimeField::new('updatedAt')->hideOnForm(),
+            DateTimeField::new('updatedAt')->hideOnForm()->hideOnIndex(),
             BooleanField::new('deleted')->hideOnForm()->renderAsSwitch(false),
+            CollectionField::new('connectorParams')->onlyOnDetail(),
         ];
+
+        return $fields;
     }
 
     public function configureFilters(Filters $filters): Filters
