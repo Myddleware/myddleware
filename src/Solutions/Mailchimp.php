@@ -28,17 +28,19 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class Mailchimp extends Solution
 {
-    protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+    protected string $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
 
     protected $apiKey;
 
-    protected $verify_ssl = true;
+    protected bool $verify_ssl = true;
 
-    protected $update = false;
+    protected bool $update = false;
+
     public const TIMEOUT = 60;
 
     public function getFieldsLogin(): array
@@ -52,15 +54,15 @@ class Mailchimp extends Solution
         ];
     }
 
-    public function login($connectionParam)
+    public function login($connectionParam): void
     {
         parent::login($connectionParam);
         try {
             // Get the api key
             $this->apiKey = $this->connectionParam['apikey'];
             // Api key has to cointain "-"
-            if (false === strpos($this->apiKey, '-')) {
-                throw new \Exception('Invalid MailChimp API key supplied.');
+            if (!str_contains($this->apiKey, '-')) {
+                throw new Exception('Invalid MailChimp API key supplied.');
             }
             // Add the dc in the endpoint
             [, $data_center] = explode('-', $this->apiKey);
@@ -68,19 +70,16 @@ class Mailchimp extends Solution
             // Call the root function to check the API
             $result = $this->call($this->apiEndpoint);
             if (empty($result['account_id'])) {
-                throw new \Exception('login error');
+                throw new Exception('login error');
             }
             // Connection validation
             $this->isConnectionValid = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // Renvoie les modules passés en paramètre
     public function getModules($type = 'source'): ?array
     {
         try {
@@ -93,16 +92,17 @@ class Mailchimp extends Solution
             } else {
                 return null;
             }
-
             return $modules;
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return null;
         }
     }
 
-    // Renvoie les champs du module passé en paramètre
-    public function getModuleFields($module, $type = 'source', $param = null): array
+    public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
+        $moduleFields = [];
         parent::getModuleFields($module, $type);
         try {
             require 'lib/mailchimp/metadata.php';
@@ -112,26 +112,29 @@ class Mailchimp extends Solution
             }
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
-            return false;
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return null;
         }
     }
 
-    // Permet de créer des données
-    public function createUpdate($method, $param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createUpdate($method, $param): array
     {
+        $result = [];
         // Get module fields to check if the fiels is a boolean
         $this->getModuleFields($param['module'], 'target');
 
-        // Tranform Myddleware data to Mailchimp data
         foreach ($param['data'] as $idDoc => $data) {
             try {
-                // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataMailchimp = [];
 
                 foreach ($data as $key => $value) {
-                    // We jump the filed target_id for creation
+                    // We skip the filed target_id for creation
                     if ('target_id' == $key) {
                         continue;
                     }
@@ -145,7 +148,7 @@ class Mailchimp extends Solution
                     } elseif (!empty($filedStructure[0])) {
                         $dataMailchimp[$filedStructure[0]] = $value;
                     } else {
-                        throw new \Exception('Field '.$filedStructure.' invalid');
+                        throw new Exception('Field '.$filedStructure.' invalid');
                     }
                 }
 
@@ -164,7 +167,7 @@ class Mailchimp extends Solution
                             $errorMsg .= print_r($error, true).' ';
                         }
                     }
-                    throw new \Exception((!empty($resultMailchimp['title']) ? $resultMailchimp['title'] : 'Error').' ('.$resultMailchimp['status'].'): '.(!empty($resultMailchimp['detail']) ? $resultMailchimp['detail'] : '').(!empty($errorMsg) ? ' => '.$errorMsg : ''));
+                    throw new Exception((!empty($resultMailchimp['title']) ? $resultMailchimp['title'] : 'Error').' ('.$resultMailchimp['status'].'): '.(!empty($resultMailchimp['detail']) ? $resultMailchimp['detail'] : '').(!empty($errorMsg) ? ' => '.$errorMsg : ''));
                 }
                 // Save Mailchimp record ID to Myddleware
                 if (!empty($resultMailchimp['id'])) {
@@ -173,36 +176,37 @@ class Mailchimp extends Solution
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception("Error webservice. There is no ID in the result of the function $param[module]. ");
+                    throw new Exception("Error webservice. There is no ID in the result of the function $param[module]. ");
                 }
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-                $result[$idDoc] = [
-                    'id' => '-1',
-                    'error' => $error,
-                ];
+            } catch (Exception $e) {
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $result['error'] = $error;
+                $this->logger->error($error);
             }
-            // Change the transfer status in Myddleware
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Create data to Mailchimp
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
         return $this->createUpdate('POST', $param);
     }
 
-    // Update data to Mailchimp
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         return $this->createUpdate('PATCH', $param);
     }
 
     // Transform data, for example for the type boolean : from 1 to true and from 0 to false
-    protected function transformValueType($key, $value)
+    protected function transformValueType($key, $value): bool
     {
         if (
                 !empty($this->moduleFields[$key]['type'])
@@ -218,13 +222,15 @@ class Mailchimp extends Solution
         return $value;
     }
 
-    // Create the url parameters depending the module
-    protected function createUrlParam($param, $data, $method)
+    /**
+     * @throws Exception
+     */
+    protected function createUrlParam($param, $data, $method): string
     {
         // Manage parameters for list
         if ('members' == $param['module']) {
             if (empty($data['list_id'])) {
-                throw new \Exception('No list id in the data transfer. Failed to create or update member.');
+                throw new Exception('No list id in the data transfer. Failed to create or update member.');
             }
 
             $urlParam = 'lists/'.$data['list_id'].'/'.$param['module'];
@@ -234,7 +240,7 @@ class Mailchimp extends Solution
         // Manage update param
         if ('PATCH' == $method) {
             if (empty($data['target_id'])) {
-                throw new \Exception('No record ID in the data. Failed to update the record.');
+                throw new Exception('No record ID in the data. Failed to update the record.');
             }
             $urlParam .= '/'.$data['target_id'];
         }
@@ -243,16 +249,9 @@ class Mailchimp extends Solution
     }
 
     /**
-     * Performs the underlying HTTP request. Not very exciting.
-     *
-     * @param string $method  The API method to be called
-     * @param array  $args    Assoc array of parameters to be passed
-     * @param mixed  $url
-     * @param mixed  $timeout
-     *
-     * @return array Assoc array of decoded result
+     * @throws Exception
      */
-    protected function call($url, $method = 'GET', $args = [], $timeout = self::TIMEOUT)
+    protected function call($url, $method = 'GET', $args = [], $timeout = self::TIMEOUT): bool|array
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
             $ch = curl_init();
@@ -277,6 +276,6 @@ class Mailchimp extends Solution
 
             return $result ? json_decode($result, true) : false;
         }
-        throw new \Exception('curl extension is missing!');
+        throw new Exception('curl extension is missing!');
     }
 }
