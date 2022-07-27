@@ -33,6 +33,7 @@ namespace App\Solutions;
 
 use Exception;
 use Mautic\Auth\ApiAuth;
+use Mautic\Exception\ContextNotFoundException;
 use Mautic\MauticApi;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -44,9 +45,9 @@ class Mautic extends Solution
 
     // Modules name depending on the context (call to create date, result of a search, result of a creation/update)
     protected array $moduleParameters = [
-        'contact' => ['plurial' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
-        'company' => ['plurial' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
-        'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
+        'contact' => ['plural' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
+        'company' => ['plural' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
+        'segment' => ['plural' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
     ];
 
     protected array $requiredFields = [
@@ -180,6 +181,7 @@ class Mautic extends Solution
                     }
                 }
             } else {
+                $moduleFields = [];
                 // Use Mautic metadata (field added manually in metadata file)
                 require 'lib/mautic/metadata.php';
                 if (!empty($moduleFields[$module])) {
@@ -196,6 +198,10 @@ class Mautic extends Solution
         }
     }
 
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createData($param): array
     {
         return match ($param['module']) {
@@ -205,6 +211,10 @@ class Mautic extends Solution
         };
     }
 
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function updateData($param): array
     {
         return match ($param['module']) {
@@ -214,6 +224,10 @@ class Mautic extends Solution
         };
     }
 
+    /**
+     * @throws ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function deleteData($param): array
     {
         return match ($param['module']) {
@@ -225,14 +239,14 @@ class Mautic extends Solution
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * @throws \Mautic\Exception\ContextNotFoundException
+     * @throws ContextNotFoundException
      */
     public function createUpdate($action, $param): array
     {
         $result = [];
         // Create API object depending on the module
         $api = new MauticApi();
-        $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
+        $moduleName = (!empty($this->moduleParameters[$param['module']]['plural']) ? $this->moduleParameters[$param['module']]['plural'] : $param['module']);
         $moduleResultKey = (!empty($this->moduleParameters[$param['module']]['resultKeyUpsert']) ? $this->moduleParameters[$param['module']]['resultKeyUpsert'] : $param['module']);
         $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
@@ -281,14 +295,14 @@ class Mautic extends Solution
     }
 
     /**
-     * @throws \Mautic\Exception\ContextNotFoundException
+     * @throws ContextNotFoundException
      * @throws \Doctrine\DBAL\Exception
      */
     public function manageRelationship($action, $param, $module1, $module2): array
     {
         $result = [];
         $api = new MauticApi();
-        $moduleName = (!empty($this->moduleParameters[$module1]['plurial']) ? $this->moduleParameters[$module1]['plurial'] : $param['module']);
+        $moduleName = (!empty($this->moduleParameters[$module1]['plural']) ? $this->moduleParameters[$module1]['plural'] : $param['module']);
         $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -339,7 +353,7 @@ class Mautic extends Solution
         $result = [];
         try {
             $api = new MauticApi();
-            $moduleName = (!empty($this->moduleParameters[$param['module']]['plurial']) ? $this->moduleParameters[$param['module']]['plurial'] : $param['module']);
+            $moduleName = (!empty($this->moduleParameters[$param['module']]['plural']) ? $this->moduleParameters[$param['module']]['plural'] : $param['module']);
             $moduleApi = $api->newApi($moduleName, $this->auth, $this->connectionParam['url']);
 
             foreach ($param['data'] as $idDoc => $data) {
@@ -377,10 +391,8 @@ class Mautic extends Solution
             }
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $result[$idDoc] = [
-                'id' => '-1',
-                'error' => $error,
-            ];
+            $this->logger->error($error);
+            $result['error'] = $error;
         }
 
         return $result;
@@ -402,8 +414,12 @@ class Mautic extends Solution
             }
 
             // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-            return rtrim($url, '/').'/s/'.$this->moduleParameters[$module]['plurial'].'/view/'.$recordId;
+            return rtrim($url, '/').'/s/'.$this->moduleParameters[$module]['plural'].'/view/'.$recordId;
         } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return null;
         }
     }
 
