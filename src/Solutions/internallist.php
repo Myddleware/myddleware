@@ -26,43 +26,56 @@
 
 namespace App\Solutions;
 
+use App\Entity\InternalList as EntityInternalList;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class internallistcore extends mysql
 {
-
-
     public function getFieldsLogin()
     {
-        return [
-            [
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url',
-            ],
-        ];
+        try {
+            return [
+                [
+                    'name' => 'url',
+                    'type' => TextType::class,
+                    'label' => 'solution.fields.url',
+                ],
+            ];
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $this->logger->error($error);
+            return array('Login field error: ' => $error);
+        }
     }
 
 
     public function get_modules($type = 'source')
     {
-        return [
-            'internal_list' => 'InternalList'
-            // 'internal_list_value' => 'InternalListValue'
-        ];
+        try {
+            $modules = [];
+            for ($i = 1; $i <= 2; $i++) {
+                $id = $this->entityManager->getRepository(EntityInternalList::class)->find($i)->getId();
+                $name = $this->entityManager->getRepository(EntityInternalList::class)->find($i)->getName();
+                $modules[(string)$id] = $name;
+            }
+            return $modules;
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $this->logger->error($error);
+            return array('module error: ' => $error);
+        }
     }
 
     public function get_module_fields($module, $type = 'source', $extension = false)
     {
-        parent::get_module_fields($module, $type);
-        require 'lib/woocommerce/metadata.php';
         try {
-            if (!empty($moduleFields[$module])) {
-                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
-            }
+            require 'lib/internallist/metadata.php';
+            $this->moduleFields = $moduleFields[$module];
+            return $this->moduleFields;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
-            return false;
+            $error = $e->getMessage();
+            $this->logger->error($error);
+            return array('module fileds error: ' => $error);
         }
     }
 
@@ -84,6 +97,10 @@ class internallistcore extends mysql
 
             return ['error' => $error];
         }
+    }
+
+    public function read($params)
+    {
     }
 } // class mysqlcore
 
