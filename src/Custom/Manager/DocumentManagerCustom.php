@@ -64,35 +64,49 @@ class DocumentManagerCustom extends DocumentManager {
 		// We cancel the relation pôle - contact partenaire if he has been filtered
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	$this->document_data['rule_id'] == '62743060350ed' // REEC - Contact partenaire - Pôle
+			AND	$this->document_data['rule_id'] == '62743060350ed' // Esp Rep - Contact repérant - Pôle
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule REEC - Contacts Partenaires.') !== false	
+				AND strpos($this->message, 'in the rule Esp Rep - Contact rep') !== false
 			) {				
 				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
+				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme l\'epace repérant ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
+			}
+		}
+		
+		// We cancel the relation Contact repérant - Pôle if he has been filtered
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '62743060350ed' // Esp Rep - Contact repérant - Pôle
+		) {			
+			if (
+					strpos($this->message, 'No data for the field record_id.') !== false
+				AND strpos($this->message, 'in the rule Esp Rep - Contact rep') !== false	
+			) {				
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme epace repérant ou n\'est pas un contact de type contact repérant. Le lien contact - pôle ne sera donc pas créé dans l\'espace repérant. Ce transfert de données est annulé. '); 
 			}
 		}
 		
 		// If we don't found the contact (COMET) in the coupon (REEC), we cancel the data transfer. 
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	$this->document_data['rule_id'] == '6273b3b11c63e' // REEC - Relation Contacts Coupons
+			AND	$this->document_data['rule_id'] == '6273b3b11c63e' // Esp Rep - Relation Contacts Coupons
 			AND $new_status == 'Not_found'
 		) {			
 			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans REEC. Ce transfert de données est annulé. '); 
+			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans l\'epace repérant. Ce transfert de données est annulé. '); 
 		}
 		
 		// If we don't found the coupon (REEC) corresponding to the contact (COMET), we cancel the data transfer. 
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	in_array($this->document_data['rule_id'], array('6274428910b18','62744b95de96f')) // REEC - Fiche évaluation début/fin vers REEC
+			AND	in_array($this->document_data['rule_id'], array('6274428910b18','62744b95de96f')) // Esp Rep - Fiche évaluation fin vers Esp Rep
 			AND $new_status == 'Relate_KO'
 		) {			
 			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans REEC. Ce transfert de données est annulé. '); 
+			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans l\'epace repérant. Ce transfert de données est annulé. '); 
 		}
 	
 		/* if (
@@ -130,7 +144,7 @@ class DocumentManagerCustom extends DocumentManager {
 		// If we don't found the coupon (REEC) corresponding to the contact (COMET), we cancel the data transfer. 
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	in_array($this->document_data['rule_id'], array('628cdd961b093')) // REEC - Coupon - Pôles
+			AND	in_array($this->document_data['rule_id'], array('628cdd961b093')) // Esp Rep - Coupon - Pôles
 			AND $new_status == 'Relate_KO'
 		) {			
 			$new_status = 'Error_expected';
@@ -165,7 +179,7 @@ class DocumentManagerCustom extends DocumentManager {
 		// En effet des la majorité des relations accounts_contacts ne sont pas des composante - Contact partenaire
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	$this->document_data['rule_id'] == '62790c7db0a87' // REEC - Composante - Contact partenaire
+			AND	$this->document_data['rule_id'] == '62790c7db0a87' // Esp Rep - Composante - Contact partenaire
 			AND $new_status == 'Relate_KO'
 		) {
 			$new_status = 'Error_expected';
@@ -199,7 +213,7 @@ class DocumentManagerCustom extends DocumentManager {
 		// No error if the coupon doesn't exist in REEC (no update in this case)
 		if (
 				!empty($this->document_data['rule_id'])
-			AND	$this->document_data['rule_id'] == '62739b419755f' // REEC - Coupons vers REEC
+			AND	$this->document_data['rule_id'] == '62739b419755f' // Esp Rep - Coupons vers Esp Rep
 			AND $new_status == 'Relate_KO'
 		) {
 			if (
@@ -207,7 +221,7 @@ class DocumentManagerCustom extends DocumentManager {
 				AND strpos($this->message, ' in the rule REEC - Coupons vers comet.') !== false	
 			) {	
 				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le coupon n\existe pas dans de la platforme REEC, la mise à jour est donc interrompue. '); 
+				$this->message .= utf8_decode('Le coupon n\existe pas dans de la platforme epace repérant, la mise à jour est donc interrompue. '); 
 			}
 		}
 

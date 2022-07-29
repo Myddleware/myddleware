@@ -24,9 +24,9 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce454613bb17'] = 'REEC - Formation';
 			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
 			$data['lst_rule']['5f847b2242138'] = 'REEC - Etablissement sup';
-			$data['lst_rule']['62738aabafcd2'] = 'REEC - Quartiers';
-			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
-			$data['lst_rule']['62739b419755f'] = 'REEC - Coupons vers REEC';
+			$data['lst_rule']['62738aabafcd2'] = 'Esp Rep - Quartiers';
+			$data['lst_rule']['6273905a05cb2'] = 'Esp Rep - Contacts repérants';
+			$data['lst_rule']['62739b419755f'] = 'Esp Rep - Coupons vers Esp Rep';
 			$data['lst_rule']['61a920fae25c5'] = 'Aiko Contacts';
 			$data['lst_rule']['61a900506e8f1'] = 'Aiko Pôles';
 			$data['lst_rule']['61a930273441b'] = 'Aiko Binomes';
@@ -75,7 +75,7 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
 			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
 			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
-			$data['lst_rule']['6273905a05cb2'] = 'REEC - Contacts Partenaires';
+			$data['lst_rule']['6273905a05cb2'] = 'Esp Rep - Contacts repérants';
 		}
 		
 		if (current(array_keys($data['source'])) == 'CRMC__etablissement_sup') {

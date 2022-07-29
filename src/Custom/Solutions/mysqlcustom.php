@@ -579,7 +579,7 @@ class mysqlcustom extends mysql {
 		}
 		
 		// Add record type filter for rule coupon - pole vers COMET
-		if (in_array($param['rule']['id'], array('62b30d5c4a3fe'))) { // règle coupon - pole vers COMET	
+		if (in_array($param['rule']['id'], array('62b30d5c4a3fe'))) { // Esp Rep - Coupon - Pôles vers COMET
 			$query['where'] .= " AND record_type = 'Leads' ";
 		}
 		return parent::buildQuery($param, $query);
@@ -588,7 +588,7 @@ class mysqlcustom extends mysql {
 	
 	public function createData($param) {	
 		// Myddleware can change the email only if compte_reec_ok = 0
-		// règle REEC - users, REEC - Composante, REEC - Coupons vers REEC
+		// règle REEC - users, REEC - Composante, Esp Rep - Coupons vers Esp Rep
 		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63', '62739b419755f'))) {	
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {				
@@ -607,7 +607,7 @@ class mysqlcustom extends mysql {
 				}
 				// Do not send an empty jeune on the coupon
 				if (
-						$param['rule']['id'] == '62739b419755f' // REEC - Coupons vers REEC
+						$param['rule']['id'] == '62739b419755f' // Esp Rep - Coupons vers Esp Rep
 					AND empty($data['jeune_id'])
 				) {
 					unset($param['data'][$idDoc]['jeune_id']);
@@ -619,7 +619,7 @@ class mysqlcustom extends mysql {
 	
 	public function updateData($param) {		
 		// Myddleware can change the email only if compte_reec_ok = 0
-		// règle users , engagé , REEC - Composante, REEC - Coupons vers REEC
+		// règle users , engagé , REEC - Composante, Esp Rep - Coupons vers Esp Rep
 		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63','62739b419755f'))) {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {	
@@ -654,7 +654,7 @@ class mysqlcustom extends mysql {
 				}
 				// Do not send an empty jeune on the coupon
 				if (
-						$param['rule']['id'] == '62739b419755f' // REEC - Coupons vers REEC
+						$param['rule']['id'] == '62739b419755f' // Esp Rep - Coupons vers Esp Rep
 					AND empty($data['jeune_id'])
 				) {
 					unset($param['data'][$idDoc]['jeune_id']);

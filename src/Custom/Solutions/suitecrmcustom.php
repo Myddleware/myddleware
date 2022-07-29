@@ -296,7 +296,7 @@ class suitecrmcustom extends suitecrm {
 		// Add a filter for contact reperant 
 		if (
 				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '6273905a05cb2' // REEC - Contacts repérants
+			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'contact_reperant' ";
 		}	
