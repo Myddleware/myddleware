@@ -1,36 +1,137 @@
 /* HEADER */
-
-header{
-    border-bottom: groove 1px;
-    border-color: black;
-}
-
-.logo{
-    width: 200px;
-}
-
-.home_container a{
-    color: white !important;
+*{
     text-decoration: none !important;
 }
-.first_home_item{
-margin-left: 1050px;
+header{
+    border-bottom: groove 1px;
+    border-color: rgb(32 32 32 / 18%);
+}
+.logo{
+    width: 250px;
+    margin-left: 15px;
+    margin-top: 5px;
+}
+.connection{
+    color: #282828 !important;
+}
+.home-button{
+    float: right;
+    margin: 30px;
+    font-size: larger;
+}
+.btn-home{
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4;
+    cursor: pointer;
+    background-color: #282828;
+    color: white;
+    padding: 15px;
+    border-radius: 30px;
+    margin-left: 30px;
+    margin-right: 30px;
+    
+}
+.btn-home:hover{
+    background-color: white;
+    border: 2px solid #282828;
+    color:#282828;
 }
 
 /* MAIN */
 
+body {          
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+    
+main {
+    flex: 1;
+}
+main p{
+    font-size: 1.3em;
+    margin-bottom: 65px;
+}
 .main_home{
-    font-family: sans-serif;
-    width: 80%;
-    margin: auto;
-    margin-top: 78px;
+    padding-top: 30px;
+    background-image: url(../images/home-background.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
 
+.main-content{
+    font-family: sans-serif;
+    width: 40%;
+    margin: 60px;
+}
+.main_home h2{
+    font-size: 3rem;
+}
+span{
+    color: #14b3d6;
+}
+.btn-doc{
+    padding: 18px;
+    padding-left: 250px;
+    padding-right: 250px;
+    text-align: center;
+    margin-left: 0px;
+}
 /* FOOTER */
 
 footer{
-    /* position: absolute; */
+    position: absolute;
     bottom: 0;
     width: 100%;
     height: 2.5rem;
+    background-color: white;
+    border-top: groove 1px;
+    border-color: rgb(32 32 32 / 18%);
+}
+
+footer p {
+    margin-top: 10px;
+    color: #282828;
+}
+
+footer p span{
+   color: #14b3d6;
+}
+
+/* CAROUSEL HOME */
+.main-carousel {
+    border-top: groove 1px;
+    border-color: rgb(32 32 32 / 18%);
+	align-items: center;
+	display: flex;
+	justify-content: center;
+    position: absolute;
+    bottom: 40px;
+}
+
+.slider {
+	background: white;
+	height: 100px;
+	overflow:hidden;
+	position: relative;
+    width: 1903px;
+}
+.slide-track {
+    animation: scroll 40s linear infinite;
+    display: flex;
+    width: calc(250px * 14);
+}
+
+.slide {
+    height: 100px;
+    width: 250px;
+}
+ .slide img{
+    height: 100;
+    margin-top: 20px;
+ }
+@keyframes scroll {
+	0% { transform: translateX(0); }
+	100% { transform: translateX(calc(-250px * 7))}
 }
