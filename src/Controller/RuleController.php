@@ -15,7 +15,7 @@ class RuleController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/get-modules/{origin?null}/{connectorId<\d+>?null}', name: 'get-modules', methods: ['GET'])]
+    #[Route('/get-modules/{origin?null}/{connectorId<\d+>?null}', name: 'get_modules', methods: ['GET'])]
     public function getCredentialsForm(string $origin, string $connectorId, ConnectorRepository $connectorRepository, ModuleRepository $moduleRepository): Response
     {
         $connector = $connectorRepository->find($connectorId);
@@ -43,7 +43,7 @@ class RuleController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/get-fields/{connectorId<\d+>?null}', name: 'get-modules', methods: ['GET'])]
+    #[Route('/get-fields/{connectorId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
     public function getFieldsForm(string $origin, string $connectorId, ConnectorRepository $connectorRepository, ModuleRepository $moduleRepository): Response
     {
         $connector = $connectorRepository->find($connectorId);

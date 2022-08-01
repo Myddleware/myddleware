@@ -226,7 +226,7 @@ create_connector:
     title: Creation of a connector
     save: Save the connection
     connection: Name of the connection
-    test: Test
+    test: Test connection
     valid: Click here to create an other connector
     help: Need assistance ?
     source: Source
@@ -238,7 +238,9 @@ create_connector:
     upload_success: The file has been successfully upload
     upload_delete: Deleting file
     params_error: An error occurred while saving the settings
-    form_error : Cannot get connector data (solution, fields & parent) 
+    form_error : Cannot get connector data (solution, fields & parent)
+    connection_valid: OK ! You may now save your connector.
+    connection_invalid: Oops! there was an error. Please check your connector credentials and try again.
 
 list_connector:
     empty: You do not have any connectors yet !

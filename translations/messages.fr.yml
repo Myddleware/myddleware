@@ -226,7 +226,7 @@ create_connector:
     title: Création d'un connecteur
     save: Enregistrer la connexion
     connection: Nom de la connexion
-    test: Tester
+    test: Tester la connexion
     valid: Cliquez-ici pour créer un autre connecteur
     help: Besoin d'aide ?
     source: Source
@@ -237,8 +237,10 @@ create_connector:
     upload_error_ext: L'extension n'est pas autorisée
     upload_success: Le fichier a bien été transféré
     upload_delete: Suppression du fichier
-    params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
+    params_error: Une erreur s'est produite lors de l'enregistrement des paramètres
     form_error : Impossible de récupérer les informations du connecteur (solution, champs & parent)
+    connection_valid: Paramètres de connexion OK ! Cliquer sur 'Créer' pour enregistrer le connecteur.
+    connection_invalid: Oups! il semble qu'il y ait une erreur. Veuillez vérifier les identifiants de connexion et réessayez.
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
