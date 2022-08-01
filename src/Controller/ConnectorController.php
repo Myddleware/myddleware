@@ -19,12 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-    private mixed $secret;
-
-    public function __construct()
-    {
-        $this->secret = $this->getParameter('secret');
-    }
 
     /**
      * @throws Exception
@@ -51,11 +45,14 @@ class ConnectorController extends AbstractController
         return $this->renderForm('connector/index.html.twig', [
             'form' => $form,
             'loginFields' => $loginFields,
-            'urlTest' => $this->generateUrl('test_connexion'),
+            'urlTest' => $this->generateUrl('test_connection'),
             'solution' => $solution->getName(),
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/credentials/get-form-edit/{connectorId}', name: 'credentials_form_edit', methods: ['GET', 'POST', 'PUT'])]
     public function getCredentialsEditForm(ConnectorRepository $connectorRepository, ConnectorParamRepository $connectorParamRepository, ConnectorParamsValueTransformer $connectorParamsValueTransformer, SolutionManager $solutionManager, ?string $connectorId = null): Response
     {
@@ -92,12 +89,15 @@ class ConnectorController extends AbstractController
         return $this->renderForm('connector/index.html.twig', [
             'form' => $form,
             'loginFields' => $loginFields,
-            'urlTest' => $this->generateUrl('test_connexion'),
+            'urlTest' => $this->generateUrl('test_connection'),
             'solution' => $connector->getSolution()->getName(),
         ]);
     }
 
-    #[Route('/connector/test-connexion', name: 'test_connexion', methods: ['POST'])]
+    /**
+     * @throws Exception
+     */
+    #[Route('/connector/test-connection', name: 'test_connection', methods: ['POST'])]
     public function testConnection(Request $request, SolutionManager $solutionManager): Response
     {
         $content = json_decode($request->getContent(), true);

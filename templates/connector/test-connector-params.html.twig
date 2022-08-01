@@ -1,11 +1,11 @@
-<div style="margin-top:20px;">
+<div class="mt-3">
     {% if isCredentialsValid %}
         <div class="alert alert-success" role="alert">
-            Paramètres de connexion OK !
+            {{ 'create_connector.connection_valid' | trans }}
         </div>
     {% else %}
         <div class="alert alert-danger" role="alert">
-            Impossible de se connecter
+            {{ 'create_connector.connection_invalid' | trans }}
         </div>
     {% endif %}
 </div>
