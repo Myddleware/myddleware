@@ -26,6 +26,7 @@
 
 namespace App\Solutions;
 
+use App\Entity\InternalListValue as EntityInternalListValue;
 use App\Entity\InternalList as EntityInternalList;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -53,10 +54,10 @@ class internallistcore extends mysql
     {
         try {
             $modules = [];
-            for ($i = 1; $i <= 2; $i++) {
-                $id = $this->entityManager->getRepository(EntityInternalList::class)->find($i)->getId();
-                $name = $this->entityManager->getRepository(EntityInternalList::class)->find($i)->getName();
-                $modules[(string)$id] = $name;
+            $table = $this->entityManager->getRepository(EntityInternalList::class)->findAll();
+            dump($table);
+            foreach ($table as $column) {
+                $modules[$column->getId()] = $column->getName();
             }
             return $modules;
         } catch (\Exception $e) {
@@ -81,6 +82,7 @@ class internallistcore extends mysql
 
     public function login($paramConnexion)
     {
+
         parent::login($paramConnexion);
         try {
             try {
@@ -101,6 +103,11 @@ class internallistcore extends mysql
 
     public function read($params)
     {
+        /* $data = $this->entityManager->getRepository(EntityInternalListValue::class)->find('1')->getData();
+        $unserializedData = unserialize($data);
+        $jsondata = json_decode($unserializedData); */
+
+        $data = $this->entityManager->getRepository(EntityInternalListValue::class)->findAll();
     }
 } // class mysqlcore
 

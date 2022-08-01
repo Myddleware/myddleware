@@ -3,7 +3,6 @@
 
 $moduleFields = [
     $module => [
-        // '1' => [
         'id' => array('label' => 'Id', 'type' => 'int(255)', 'type_bdd' => 'int(11)', 'required' => 1, 'relate' => false),
         'name' => array('label' => 'Name', 'type' => 'varchar(50)', 'type_bdd' => 'varchar(50)', 'required' => 1, 'relate' => false),
         'type' => array('label' => 'Status', 'type' => 'varchar(50)', 'type_bdd' => 'varchar(50)', 'required' => 1, 'relate' => false),
