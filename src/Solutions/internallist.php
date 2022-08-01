@@ -55,7 +55,6 @@ class internallistcore extends mysql
         try {
             $modules = [];
             $table = $this->entityManager->getRepository(EntityInternalList::class)->findAll();
-            dump($table);
             foreach ($table as $column) {
                 $modules[$column->getId()] = $column->getName();
             }
@@ -70,8 +69,12 @@ class internallistcore extends mysql
     public function get_module_fields($module, $type = 'source', $extension = false)
     {
         try {
-            require 'lib/internallist/metadata.php';
-            $this->moduleFields = $moduleFields[$module];
+            $data = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getData();
+            $unserializedData = unserialize($data);
+            $jsondata = json_decode($unserializedData);
+            foreach ($jsondata as $keydata => $valuedata) {
+                $this->moduleFields[$keydata] = array('label' => $keydata, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false);
+            }
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -79,6 +82,8 @@ class internallistcore extends mysql
             return array('module fileds error: ' => $error);
         }
     }
+
+
 
     public function login($paramConnexion)
     {
@@ -99,15 +104,6 @@ class internallistcore extends mysql
 
             return ['error' => $error];
         }
-    }
-
-    public function read($params)
-    {
-        /* $data = $this->entityManager->getRepository(EntityInternalListValue::class)->find('1')->getData();
-        $unserializedData = unserialize($data);
-        $jsondata = json_decode($unserializedData); */
-
-        $data = $this->entityManager->getRepository(EntityInternalListValue::class)->findAll();
     }
 } // class mysqlcore
 
