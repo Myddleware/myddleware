@@ -824,6 +824,7 @@ class PrestaShop extends Solution
         }
 
         foreach ($param['data'] as $idDoc => $data) {
+            $targetIdResult = '';
             try {
                 try {
                     $data = $this->checkDataBeforeUpdate($param, $data);

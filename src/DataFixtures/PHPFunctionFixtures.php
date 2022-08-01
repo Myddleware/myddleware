@@ -15,15 +15,15 @@ class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, 
 {
     private $manager;
 
-    protected $functionData = [
+    protected array $functionData = [
         'mathematical' => ['round', 'ceil', 'abs'],
         'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray'],
         'date' => ['date', 'microtime', 'changeTimeZone', 'changeFormatDate'],
     ];
 
-    protected $functionCats = [];
+    protected array $functionCats = [];
 
-    protected $functions = [];
+    protected array $functions = [];
 
     public function load(ObjectManager $manager)
     {
@@ -72,7 +72,7 @@ class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, 
         // Check each function of the category
         foreach ($functions as $function) {
             // Ff the function  doesn't exist in Myddleware, then we create it
-            if (empty($this->functions[$cat]) || false === array_search($function, $this->functions[$cat])) {
+            if (empty($this->functions[$cat]) || !in_array($function, $this->functions[$cat])) {
                 $func = new PHPFunction();
                 $func->setName($function);
                 $func->setCategory($funcCat);
@@ -86,7 +86,7 @@ class PHPFunctionFixtures extends Fixture implements DependentFixtureInterface, 
         return ['functions', 'mydconfig'];
     }
 
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [
             PHPFunctionCategoryFixtures::class,

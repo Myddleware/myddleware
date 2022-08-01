@@ -192,25 +192,26 @@ class WooCommerce extends Solution
             do {
                 // for specific requests (e.g. readrecord with an id)
                 if (!empty($query)) {
-                    $response = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
-                        'page' => $page, ]);
+                    $records = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
+                        'page' => $page,
+                        ]);
                     // when reading a specific record only we need to add a layer to the array
-                    $records = $response;
-                    $response = [];
                     $response[] = $records;
                 } elseif ('customers' === $module) {
                     // orderby modified isn't available for customers in the API filters so we sort by creation date
                     $response = $this->woocommerce->get($module, ['orderby' => 'registered_date',
                         'order' => 'asc',
                         'per_page' => $this->callLimit,
-                        'page' => $page, ]);
+                        'page' => $page,
+                        ]);
                 // get all data, sorted by date_modified
                 } else {
                     $response = $this->woocommerce->get($module, ['orderby' => 'modified',
                         'per_page' => $this->callLimit,
-                        'page' => $page, ]);
+                        'page' => $page,
+                        ]);
                 }
-                if (!empty($response)) {
+                if (null !== $response) {
                     // used for submodules (e.g. line_items)
                     $response = $this->convertResponse($param, $response);
                     foreach ($response as $record) {

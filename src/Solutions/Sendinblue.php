@@ -67,7 +67,6 @@ class Sendinblue extends Solution
         ];
     }
 
-    // connect to Sendinblue
     public function login($connectionParam): void
     {
         parent::login($connectionParam);
@@ -90,7 +89,6 @@ class Sendinblue extends Solution
         }
     }
 
-    // Get module list
     public function getModules($type = 'source'): array
     {
         if ('source' == $type) {
@@ -106,7 +104,6 @@ class Sendinblue extends Solution
         ];
     }
 
-    // Returns the fields of the module passed in parameter
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         $moduleFields = [];

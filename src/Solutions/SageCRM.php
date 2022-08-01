@@ -509,7 +509,7 @@ class SageCRM extends Solution
                     }
                 }
                 $record['assigneduserid'] = '1';
-                if (empty($record)) {
+                if (null === $record) {
                     throw new Exception('Values missing for create');
                 }
                 // create soap variable to send
@@ -536,7 +536,7 @@ class SageCRM extends Solution
                 } else {
                     $result[$idDoc] = [
                         'id' => '-1',
-                        'error' => 'Failed to create Data in Salesforce '.curl_error($ch),
+                        'error' => 'Failed to create Data in Salesforce',
                     ];
                 }
             } catch (Exception $e) {
@@ -545,8 +545,8 @@ class SageCRM extends Solution
                     'id' => '-1',
                     'error' => $error,
                 ];
+                $this->logger->error($error);
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
@@ -656,7 +656,6 @@ class SageCRM extends Solution
                     'error' => $error,
                 ];
             }
-            // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
@@ -677,8 +676,6 @@ class SageCRM extends Solution
     }
 
     /**
-     * Function de conversion de date format solution à une date format Myddleware.
-     *
      * @throws Exception
      */
     protected function dateConverter($dateTime, $sens = 0): string

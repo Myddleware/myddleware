@@ -146,19 +146,14 @@ class Airtable extends Solution
      */
     public function getModuleFields(string $module, string $type = 'source', $param = null): ?array
     {
+        $moduleFields = [];
         require 'lib/airtable/metadata.php';
         parent::getModuleFields($module, $type);
-        try {
-            if (!empty($moduleFields[$module])) {
-                $this->moduleFields = $moduleFields[$module];
-            }
-
-            return $this->moduleFields;
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
-            return null;
+        if (!empty($moduleFields[$module])) {
+            $this->moduleFields = $moduleFields[$module];
         }
+
+        return $this->moduleFields;
     }
 
     /**
