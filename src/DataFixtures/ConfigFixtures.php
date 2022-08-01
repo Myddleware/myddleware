@@ -36,7 +36,7 @@ class ConfigFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
 
-    protected $configData = [
+    protected array $configData = [
         ['name' => 'allow_install', 'value' => true, 'update' => false],
         ['name' => 'extension_allowed', 'value' => '["xml","wsdl"]', 'update' => false],
         ['name' => 'pager', 'value' => 20, 'update' => false],
@@ -71,10 +71,7 @@ class ConfigFixtures extends Fixture implements FixtureGroupInterface
                 }
             }
             // Update only if the config has the flag update = true
-            if (
-                $foundConfig
-                and !$configData['update']
-            ) {
+            if ($foundConfig && !$configData['update']) {
                 continue;
             }
 

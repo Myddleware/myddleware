@@ -143,7 +143,6 @@ class Solution
         return $this->logger;
     }
 
-    // Permet de se connecter à la base de données
     protected function getConn(): Connection
     {
         return $this->connection;
@@ -411,6 +410,7 @@ class Solution
      */
     public function createData(array $param): ?array
     {
+        $result = [];
         try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
@@ -497,6 +497,7 @@ class Solution
      */
     public function updateData(array $param): array
     {
+        $result = [];
         try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
@@ -549,6 +550,8 @@ class Solution
 
     public function deleteData(array $param): array
     {
+        $result = [];
+
         try {
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
@@ -605,7 +608,7 @@ class Solution
      * Valeur par défaut "0"
      * Si la règle n'est qu'en création, pas en modicication alors le mode est C.
      */
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         return [
             '0' => 'create_modify',
@@ -673,7 +676,7 @@ class Solution
      * La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');  ou array('done'=>true, 'message'=>'')
      * Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle.
      */
-    public function beforeRuleSave($data, $type)
+    public function beforeRuleSave($data, $type): array
     {
         return ['done' => true, 'message' => ''];
     }

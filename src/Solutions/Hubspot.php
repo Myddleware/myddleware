@@ -340,6 +340,7 @@ class Hubspot extends Solution
     public function readData($param): ?array
     {
         try {
+            $identifyProfiles = [];
             $result = [];
             $result['count'] = 0;
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
@@ -509,6 +510,7 @@ class Hubspot extends Solution
                 return $this->updateData($param);
             }
             foreach ($param['data'] as $idDoc => $data) {
+                $property = '';
                 $dataHubspot = [];
                 $records = [];
                 $module = $this->formatModuleName($param['module']);
@@ -665,7 +667,6 @@ class Hubspot extends Solution
                 } else {
                     $result[$idDoc] = [
                         'id' => '-1',
-
                         'error' => 'Failed to create data in hubspot. '.(!empty($resultQuery['exec']['validationResults'][0]['message']) ? $resultQuery['exec']['validationResults'][0]['message'] : (!empty($resultQuery['exec']['message']) ? $resultQuery['exec']['message'] : '')),
                     ];
                 }

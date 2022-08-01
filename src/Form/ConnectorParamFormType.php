@@ -54,7 +54,6 @@ class ConnectorParamFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            // 'data_class' => ConnectorParam::class,
             'inherit_data' => true,
         ]);
     }

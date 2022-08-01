@@ -180,6 +180,7 @@ class Moodle extends Solution
             // Transform the data to Myddleware format
             if (!empty($xml->MULTIPLE->SINGLE)) {
                 foreach ($xml->MULTIPLE->SINGLE as $data) {
+                    $row = [];
                     foreach ($data as $field) {
                         // Get all the requested fields
                         if (in_array($field->attributes()->__toString(), $param['fields'])) {
@@ -204,6 +205,7 @@ class Moodle extends Solution
         $result = [];
         foreach ($param['data'] as $idDoc => $data) {
             try {
+                $methodName = '';
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $obj = new \stdClass();
