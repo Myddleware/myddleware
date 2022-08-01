@@ -10,8 +10,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class suitecrmcustom extends suitecrm {
 	
 	protected $limitCall = 100;
-	public $anneeScolaire = '2021_2022';
-	public $anneeScolaire2 = '2021'; // used to select 2 years
+	public $anneeScolaire = '2022_2023';
+	public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
 	protected $moduleWithAnnee = array('Contacts', 'FP_events');
 	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';

@@ -68,7 +68,7 @@ class DocumentManagerCustom extends DocumentManager {
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule Esp Rep - Contact rep') !== false
+				AND strpos($this->message, 'Esp Rep - Contact rep') !== false
 			) {				
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme l\'epace repérant ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
@@ -82,7 +82,7 @@ class DocumentManagerCustom extends DocumentManager {
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'in the rule Esp Rep - Contact rep') !== false	
+				AND strpos($this->message, 'in the rule Esp Rep - Contacts rep') !== false	
 			) {				
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme epace repérant ou n\'est pas un contact de type contact repérant. Le lien contact - pôle ne sera donc pas créé dans l\'espace repérant. Ce transfert de données est annulé. '); 
