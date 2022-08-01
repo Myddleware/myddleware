@@ -85,9 +85,35 @@ class internallistcore extends mysql
 
 
 
+    public function readData($params)
+    {
+        $result = [];
+        //required module id to get the records
+        $module = $params['module'];
+
+        //get the data from the serialized json in the data column
+        $getRecords = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getData();
+        $unserializedData = unserialize($getRecords);
+        $jsondata = json_decode($unserializedData);
+        $dateresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getDateModified();
+        $refresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getReference();
+        $createdbyresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getCreatedBy();
+        $modifiedbyresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getModifiedBy();
+        foreach ($jsondata as $keydata => $valuedata) {
+            $result['values'][$keydata] = [$valuedata];
+        }
+
+        $result['values']['date_modified'] = $dateresult;
+        $result['values']['reference'] = $refresult;
+        $result['values']['created_by'] = $createdbyresult->id;
+        $result['values']['modified_by'] = $modifiedbyresult->id;
+
+        dd($result);
+        return $result;
+    }
+
     public function login($paramConnexion)
     {
-
         parent::login($paramConnexion);
         try {
             try {
