@@ -481,9 +481,9 @@ class sendinbluecore extends solution
     }
 
     // Check data before create
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate($param, $data, $idDoc)
     {
-        $data = parent::checkDataBeforeUpdate($param, $data);
+        $data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 
         return $this->setBooleanValues($data);
     }

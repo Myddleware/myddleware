@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Manager;
 
@@ -130,12 +131,12 @@ class NotificationManager
             }
             // Calculate the date corresponding to the beginning still authorised
             $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
-            $timeLimit->modify('-'.$this->configParams['alert_time_limit'].' minutes');
+            $timeLimit->modify('-' . $this->configParams['alert_time_limit'] . ' minutes');
 
             // Search if a job is lasting more time that the limit authorized
             $job = $this->jobRepository->findJobStarted($timeLimit);
             // If a job is found, we send the alert
-            if (!$job) {
+            if (!empty($job)) {
                 // Create text
                 $textMail = $this->translator->trans('email_alert.body', [
                     '%min%' => $this->configParams['alert_time_limit'],
@@ -153,15 +154,15 @@ class NotificationManager
                     $message->setTo($emailAddress);
                     $send = $this->mailer->send($message);
                     if (!$send) {
-                        $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
-                        throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                        $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
+                        throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
                     }
                 }
             }
 
             return true;
         } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
             throw new Exception($error);
         }
@@ -223,41 +224,41 @@ class NotificationManager
                 }
             }
 
-            $textMail = $this->tools->getTranslation(['email_notification', 'hello']).chr(10).chr(10).$this->tools->getTranslation(['email_notification', 'introduction']).chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_success']).' '.$job_close.chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_error']).' '.$job_error.chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_open']).' '.$job_open.chr(10);
+            $textMail = $this->tools->getTranslation(['email_notification', 'hello']) . chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', 'introduction']) . chr(10);
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_success']) . ' ' . $job_close . chr(10);
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_error']) . ' ' . $job_error . chr(10);
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_open']) . ' ' . $job_open . chr(10);
 
             // Récupération des règles actives
             $activeRules = $this->ruleRepository->findBy(['active' => true, 'deleted' => false]);
             if (!empty($activeRules)) {
-                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);
+                $textMail .= chr(10) . $this->tools->getTranslation(['email_notification', 'active_rule']) . chr(10);
                 foreach ($activeRules as $activeRule) {
-                    $textMail .= ' - '.$activeRule->getName().chr(10);
+                    $textMail .= ' - ' . $activeRule->getName() . chr(10);
                 }
             } else {
-                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'no_active_rule']).chr(10);
+                $textMail .= chr(10) . $this->tools->getTranslation(['email_notification', 'no_active_rule']) . chr(10);
             }
 
             // Get errors since the last notification
             if ($job_error > 0) {
                 $logs = $this->jobRepository->getErrorsSinceLastNotification();
                 if (100 == count($logs)) {
-                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', '100_first_erros']).chr(10);
+                    $textMail .= chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', '100_first_erros']) . chr(10);
                 } else {
-                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', 'error_list']).chr(10);
+                    $textMail .= chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', 'error_list']) . chr(10);
                 }
                 foreach ($logs as $log) {
-                    $textMail .= " - Règle $log[name], id transfert $log[id], le $log[begin] : $log[message]".chr(10);
+                    $textMail .= " - Règle $log[name], id transfert $log[id], le $log[begin] : $log[message]" . chr(10);
                 }
             }
 
             // Add url if the parameter base_uri is defined in app\config\public
             if (!empty($this->configParams['base_uri'])) {
-                $textMail .= chr(10).$this->configParams['base_uri'].chr(10);
+                $textMail .= chr(10) . $this->configParams['base_uri'] . chr(10);
             }
             // Create text
-            $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
+            $textMail .= chr(10) . $this->tools->getTranslation(['email_notification', 'best_regards']) . chr(10) . $this->tools->getTranslation(['email_notification', 'signature']);
 
             $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
             $message
@@ -268,14 +269,14 @@ class NotificationManager
                 $message->setTo($emailAddress);
                 $send = $this->mailer->send($message);
                 if (!$send) {
-                    $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
-                    throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
+                    $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $emailAddress);
+                    throw new Exception('Failed to send email : ' . $textMail . ' to ' . $emailAddress);
                 }
             }
 
             return true;
         } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
             throw new Exception($error);
         }

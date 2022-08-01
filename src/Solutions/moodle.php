@@ -314,7 +314,7 @@ class moodlecore extends solution
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
-                $data = $this->checkDataBeforeUpdate($param, $data);
+                $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {

@@ -405,7 +405,7 @@ class databasecore extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= "'".$this->escape($value)."',";
+            $values .= ($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
@@ -445,7 +445,7 @@ class databasecore extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."='".$this->escape($value)."',";
+            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."=".($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
