@@ -36,7 +36,7 @@ class RuleCrudController extends AbstractCrudController
         return Rule::class;
     }
 
-    public function createEntity(string $entityFqcn)
+    public function createEntity(string $entityFqcn): Rule
     {
         $user = $this->getUser();
         $rule = new Rule();

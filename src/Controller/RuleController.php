@@ -20,14 +20,14 @@ class RuleController extends AbstractController
     {
         $connector = $connectorRepository->find($connectorId);
         // handle the case when the user clicks on the little cross which makes $connector = null to avoid a 500 error
-        if(null === $connector){
+        if (null === $connector) {
             return new Response();
         }
         $modules = $moduleRepository->findBy(['solution' => $connector->getSolution()]);
 
         // Not all modules have been converted into an actual Module object yet, therefore for some solutions we will still resort to calling
         // the old getModules() method from the Solution class while we find a way to get all modules transferred to the new architecture
-        if(empty($modules)){
+        if (empty($modules)) {
             $modules = $connector->getSolution()->getModules();
         }
 
