@@ -123,7 +123,7 @@ class RingCentral extends Solution
         }
     }
 
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         return [
             'call-log' => 'Call log',

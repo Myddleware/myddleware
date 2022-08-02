@@ -127,9 +127,8 @@ class SuiteCRM extends Solution
             $this->connectionParam['url'] = str_replace('index.php', '', $this->connectionParam['url']);
             // Add the suffix with rest parameters to the url
             $this->connectionParam['url'] .= $this->urlSuffix;
-
-            $result = $this->call(url: $this->connectionParam['url'], method: 'login', parameters: $loginParameters);
-
+            $url = urlencode($this->connectionParam['url']);
+            $result = $this->call(url: $url, method: 'login', parameters: $loginParameters);
             if ($result) {
                 if (empty($result->id)) {
                     throw new Exception($result->description);
@@ -182,7 +181,7 @@ class SuiteCRM extends Solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         try {
             $get_available_modules_parameters = [

@@ -161,7 +161,7 @@ class Salesforce extends Solution
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         $token = $this->getToken();
         $instance_url = $token['sf_instance_url'];

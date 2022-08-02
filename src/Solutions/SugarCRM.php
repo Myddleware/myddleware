@@ -111,7 +111,7 @@ class SugarCRM extends Solution
         }
     }
 
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         $modules = [];
         try {
@@ -598,7 +598,7 @@ class SugarCRM extends Solution
     }
 
     /**
-     *  Used only for metadata (getModules and ).
+     *  Used only for metadata (getSolutionModules and ).
      *
      * @throws Exception
      */

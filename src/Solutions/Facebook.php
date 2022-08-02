@@ -97,7 +97,7 @@ class Facebook extends Solution
         $this->logger->error($error);
     }
 
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         try {
             $modules = [];

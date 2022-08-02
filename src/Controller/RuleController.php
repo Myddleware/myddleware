@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Manager\SolutionManager;
 use App\Repository\ConnectorRepository;
 use App\Repository\ModuleRepository;
 use Exception;
@@ -16,19 +17,24 @@ class RuleController extends AbstractController
      * @throws Exception
      */
     #[Route('/get-modules/{origin?null}/{connectorId<\d+>?null}', name: 'get_modules', methods: ['GET'])]
-    public function getModulesForm(string $origin, string $connectorId, ConnectorRepository $connectorRepository, ModuleRepository $moduleRepository): Response
-    {
+    public function getModulesForm(
+        string $origin,
+        string $connectorId,
+        ConnectorRepository $connectorRepository,
+        ModuleRepository $moduleRepository,
+        SolutionManager $solutionManager
+    ): Response {
         $connector = $connectorRepository->find($connectorId);
         // handle the case when the user clicks on the little cross which makes $connector = null to avoid a 500 error
         if (null === $connector) {
             return new Response();
         }
         $modules = $moduleRepository->findBy(['solution' => $connector->getSolution()]);
-
         // Not all modules have been converted into an actual Module object yet, therefore for some solutions we will still resort to calling
-        // the old getModules() method from the Solution class while we find a way to get all modules transferred to the new architecture
+        // the old getSolutionModules() method from the Solution class while we find a way to get all modules transferred to the new architecture
         if (empty($modules)) {
-            $modules = $connector->getSolution()->getModules();
+            $solution = $solutionManager->get($connector->getSolution()->getName());
+            $modules = $solution->getSolutionModules();
         }
 
         $choices = [];

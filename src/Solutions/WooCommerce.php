@@ -100,7 +100,7 @@ class WooCommerce extends Solution
         }
     }
 
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         return [
             'customers' => 'Customers',

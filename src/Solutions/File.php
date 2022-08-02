@@ -119,7 +119,7 @@ class File extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         try {
             // Get the subfolders of the current directory

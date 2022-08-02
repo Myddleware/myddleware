@@ -256,7 +256,7 @@ class Solution
      *   nom_module2 => libellé module 2
      * ).
      */
-    public function getModules(string $type = 'source'): ?array
+    public function getSolutionModules(string $type = 'source'): ?array
     {
         return [];
     }

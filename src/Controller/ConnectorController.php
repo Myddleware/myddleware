@@ -118,6 +118,7 @@ class ConnectorController extends AbstractController
             $statusCode = Response::HTTP_FORBIDDEN;
         }
 
+
         return $this->render('connector/test-connector-params.html.twig', [
             'isCredentialsValid' => $isValid,
         ], new Response(null, $statusCode));

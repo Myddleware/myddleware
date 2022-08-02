@@ -177,9 +177,9 @@ To debug this function, you can click on the button "Test" and check the result 
 
 *Let's now create the first rule*
 
-### Method getModules
+### Method getSolutionModules
 
-Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "getModules" function.
+Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "getSolutionModules" function.
 
 Here, you have to add the module you want to connect in the method.
 

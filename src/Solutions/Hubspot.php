@@ -106,7 +106,7 @@ class Hubspot extends Solution
         }
     }
 
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         $modules = [
             'companies' => 'Companies',

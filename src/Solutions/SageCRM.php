@@ -151,7 +151,7 @@ class SageCRM extends Solution
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         try {
             try {

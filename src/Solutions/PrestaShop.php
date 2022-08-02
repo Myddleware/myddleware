@@ -141,14 +141,14 @@ class PrestaShop extends Solution
         ];
     }
 
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         if ('source' == $type) {
             try { // try-catch Myddleware
                 try { // try-catch PrestashopWebservice
                     $opt['resource'] = '';
                     // Function to modify opt (used for custom needs)
-                    $opt = $this->updateOptions('getModules', $opt, $type);
+                    $opt = $this->updateOptions('getSolutionModules', $opt, $type);
 
                     $xml = $this->webService->get($opt);
                     $presta_data = json_decode(json_encode((array) $xml), true);
@@ -182,7 +182,7 @@ class PrestaShop extends Solution
                 return ['error' => $e->getMessage()];
             }
         } else {
-            $modulesSource = $this->getModules('source');
+            $modulesSource = $this->getSolutionModules('source');
             $authorized = [
                 'categories' => 'The product categories',
                 'customers' => 'The e-shop customers',
