@@ -73,8 +73,8 @@ class RuleController extends AbstractController
         // Bonne continuation !
 
         $form = $this->createFormBuilder([]);
-        if (method_exists($connector, 'get_module_fields')) {
-            $fields = $solution->get_module_fields();
+        if (method_exists($connector, 'getModuleFields')) {
+            $fields = $solution->getModuleFields();
 
             $choices = [];
             foreach ($fields as $fieldId => $field) {

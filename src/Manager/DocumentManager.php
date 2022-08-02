@@ -1631,7 +1631,7 @@ class DocumentManager
             // if all fields are requested
             if ($all) {
                 $rule = $this->getRule();
-                $targetFields = $this->solutionTarget->get_module_fields($rule['module_target']);
+                $targetFields = $this->solutionTarget->getModuleFields($rule['module_target']);
                 if (!empty($targetFields)) {
                     foreach ($targetFields as $fieldname => $value) {
                         $fields[] = $fieldname;
