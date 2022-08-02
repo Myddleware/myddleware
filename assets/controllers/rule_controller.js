@@ -58,4 +58,18 @@ export default class extends Controller {
                 console.log('Failed to fetch response: ', err);
             });
     }
+
+    async onSelectModuleSource(event) {
+        console.log('i have changed source module');
+        // TODO
+        // this.connectorSourceIdValue = event.currentTarget.value;
+        // const response = await this.loadSource();
+    }
+
+    async onSelectModuleTarget(event) {
+        console.log('i have changed target module');
+        // TODO
+        // this.connectorSourceIdValue = event.currentTarget.value;
+        // const response = await this.loadSource();
+    }
 }

@@ -46,6 +46,13 @@ class RuleController extends AbstractController
         $form->add($origin, ChoiceType::class, [
             'choices' => $choices,
             'label' => sprintf('Module %s', $origin),
+            'row_attr' => [
+                'data-controller' => 'rule'
+            ],
+            'attr' => [
+                'data-action' => 'change->rule#onSelectModule'.ucfirst($origin),
+                'data-rule-target' => 'field'
+            ]
         ]);
 
         $form = $form->getForm();
@@ -60,10 +67,16 @@ class RuleController extends AbstractController
      * @throws Exception
      */
     #[Route('/get-fields/{connectorId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
-    public function getFieldsForm(string $origin, string $connectorId, ConnectorRepository $connectorRepository, ModuleRepository $moduleRepository): Response
+    public function getFieldsForm(
+        string $origin,
+        string $connectorId,
+        ConnectorRepository $connectorRepository,
+        ModuleRepository $moduleRepository,
+        SolutionManager $solutionManager
+    ): Response
     {
         $connector = $connectorRepository->find($connectorId);
-        $solution = $connector->getSolution();
+        $solution = $solutionManager->get($connector->getSolution()->getName());
 
         // @todo Je n'ai pas pu finir il me manque les module fields
         // mais l'idée serait d'utiliser ce controller pour renvoyer la liste des fields par connector
@@ -75,7 +88,7 @@ class RuleController extends AbstractController
         $form = $this->createFormBuilder([]);
         if (method_exists($connector, 'getModuleFields')) {
             $fields = $solution->getModuleFields();
-
+            dd($fields);
             $choices = [];
             foreach ($fields as $fieldId => $field) {
                 $choices[$field['label']] = $fieldId;
