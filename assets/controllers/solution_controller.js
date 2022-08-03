@@ -24,7 +24,7 @@ export default class extends Controller {
     }
 
     async onSelect(event) {
-        // // Solution ID 
+        // Solution ID
         this.solutionIdValue = event.currentTarget.value;
         const response = await this.load();
     }

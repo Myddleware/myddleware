@@ -31,7 +31,6 @@ export default class extends Controller {
             connectorSourceId: this.connectorSourceIdValue,
         })
 
-
         const response = await fetch(`get-modules/source/${this.connectorSourceIdValue.toString()}`)
             .then(response => response.text())
             .then((html) => {
@@ -40,7 +39,7 @@ export default class extends Controller {
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
-            });
+        });
     }
 
     async loadTarget() {
@@ -56,11 +55,12 @@ export default class extends Controller {
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
-            });
+        });
     }
 
     async onSelectModuleSource(event) {
         console.log('i have changed source module');
+        console.log(event.target.value);
         // TODO
         // this.connectorSourceIdValue = event.currentTarget.value;
         // const response = await this.loadSource();
@@ -68,6 +68,7 @@ export default class extends Controller {
 
     async onSelectModuleTarget(event) {
         console.log('i have changed target module');
+        console.log(event.target.value);
         // TODO
         // this.connectorSourceIdValue = event.currentTarget.value;
         // const response = await this.loadSource();

@@ -955,24 +955,13 @@ class Solution
      *
      * @throws Exception
      */
-    protected function getLoginParameters($connId): ?array
+    public function getLoginParameters($connectorId): ?array
     {
-        // Is this used anywhere?
-        $sqlSolutionName = 'SELECT solution.name  
-				FROM connector
-					INNER JOIN solution 
-						ON solution.id  = connector.solution_id
-				WHERE connector.id = :connId';
-        $stmt = $this->connection->prepare($sqlSolutionName);
-        $stmt->bindValue('connId', $connId);
-        $result = $stmt->executeQuery();
-        $r = $result->fetchAssociative();
-
         $sqlConnectorParams = 'SELECT id, conn_id, name, value
 				FROM connectorparam 
 				WHERE conn_id = :connId';
         $stmt = $this->connection->prepare($sqlConnectorParams);
-        $stmt->bindValue('connId', $connId);
+        $stmt->bindValue('connId', $connectorId);
         $result = $stmt->executeQuery();
         $connectorParams = $result->fetchAllAssociative();
 
@@ -994,4 +983,5 @@ class Solution
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
+
 }

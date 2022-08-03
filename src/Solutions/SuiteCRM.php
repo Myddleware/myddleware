@@ -912,7 +912,7 @@ class SuiteCRM extends Solution
             $result = curl_exec($curl_request);
             curl_close($curl_request);
             if (empty($result)) {
-                return false;
+                return null;
             }
             $result = explode("\r\n\r\n", $result, 2);
             $response = json_decode($result[1]);
@@ -920,7 +920,8 @@ class SuiteCRM extends Solution
 
             return $response;
         } catch (Exception $e) {
-            return false;
+            $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+            return null;
         }
     }
 }

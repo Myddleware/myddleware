@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Module;
 use App\Manager\SolutionManager;
 use App\Repository\ConnectorRepository;
 use App\Repository\ModuleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -22,7 +24,8 @@ class RuleController extends AbstractController
         string $connectorId,
         ConnectorRepository $connectorRepository,
         ModuleRepository $moduleRepository,
-        SolutionManager $solutionManager
+        SolutionManager $solutionManager,
+        EntityManagerInterface $entityManager
     ): Response {
         $connector = $connectorRepository->find($connectorId);
         // handle the case when the user clicks on the little cross which makes $connector = null to avoid a 500 error
@@ -34,12 +37,29 @@ class RuleController extends AbstractController
         // the old getSolutionModules() method from the Solution class while we find a way to get all modules transferred to the new architecture
         if (empty($modules)) {
             $solution = $solutionManager->get($connector->getSolution()->getName());
+            $loginParams = $solution->getLoginParameters($connectorId);
+            $login = $solution->login($loginParams);
             $modules = $solution->getSolutionModules();
+            // for now, modules will be pushed into database here, but of course this will
+            // need to be moved to a different location for performance reasons
+            foreach ($modules as $moduleKey => $moduleName) {
+                $module = new Module();
+                $module->setName($moduleName);
+                $module->setNameKey($moduleKey);
+                $module->setSolution($connector->getSolution());
+                // for now, I'm hard-coding this as source by default, but we need to find a
+                // way to determine this parameter properly
+                $module->setDirection('source');
+                $entityManager->persist($module);
+            }
+            $entityManager->flush();
         }
 
         $choices = [];
         foreach ($modules as $module) {
-            $choices[$module->__toString()] = $module->getId();
+            if (!is_string($module)) {
+                $choices[$module->__toString()] = $module->getId();
+            }
         }
 
         $form = $this->createFormBuilder([]);
@@ -47,12 +67,12 @@ class RuleController extends AbstractController
             'choices' => $choices,
             'label' => sprintf('Module %s', $origin),
             'row_attr' => [
-                'data-controller' => 'rule'
+                'data-controller' => 'rule',
             ],
             'attr' => [
                 'data-action' => 'change->rule#onSelectModule'.ucfirst($origin),
-                'data-rule-target' => 'field'
-            ]
+                'data-rule-target' => 'field',
+            ],
         ]);
 
         $form = $form->getForm();
@@ -73,8 +93,7 @@ class RuleController extends AbstractController
         ConnectorRepository $connectorRepository,
         ModuleRepository $moduleRepository,
         SolutionManager $solutionManager
-    ): Response
-    {
+    ): Response {
         $connector = $connectorRepository->find($connectorId);
         $solution = $solutionManager->get($connector->getSolution()->getName());
 
@@ -87,8 +106,9 @@ class RuleController extends AbstractController
 
         $form = $this->createFormBuilder([]);
         if (method_exists($connector, 'getModuleFields')) {
+            $loginParams = $solution->getLoginParameters($connectorId);
+            $login = $solution->login($loginParams);
             $fields = $solution->getModuleFields();
-            dd($fields);
             $choices = [];
             foreach ($fields as $fieldId => $field) {
                 $choices[$field['label']] = $fieldId;
