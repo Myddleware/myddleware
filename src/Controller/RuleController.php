@@ -40,14 +40,15 @@ class RuleController extends AbstractController
             $loginParams = $solution->getLoginParameters($connectorId);
             $login = $solution->login($loginParams);
             $modules = $solution->getSolutionModules();
-            // for now, modules will be pushed into database here, but of course this will
-            // need to be moved to a different location for performance reasons
-            foreach ($modules as $moduleKey => $moduleName) {
+            // TODO: for now, modules will be pushed into database here (only the 1st time a user clicks on select)
+            // but of course this will need to be moved to a different location for performance reasons
+            // maybe on connector creation submit ?
+            foreach ($modules as $moduleName => $moduleLabelName) {
                 $module = new Module();
                 $module->setName($moduleName);
-                $module->setNameKey($moduleKey);
+                $module->setNameKey($moduleLabelName);
                 $module->setSolution($connector->getSolution());
-                // for now, I'm hard-coding this as source by default, but we need to find a
+                // TODO: for now, I'm hard-coding this as source by default, but we need to find a
                 // way to determine this parameter properly
                 $module->setDirection('source');
                 $entityManager->persist($module);
@@ -86,7 +87,7 @@ class RuleController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/get-fields/{connectorId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
+    #[Route('/get-fields/{origin?null}/{connectorId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
     public function getFieldsForm(
         string $origin,
         string $connectorId,
@@ -95,6 +96,11 @@ class RuleController extends AbstractController
         SolutionManager $solutionManager
     ): Response {
         $connector = $connectorRepository->find($connectorId);
+        // handle the case when the user clicks on the little cross which makes $connector = null to avoid a 500 error
+        if (null === $connector) {
+            return new Response();
+        }
+
         $solution = $solutionManager->get($connector->getSolution()->getName());
 
         // @todo Je n'ai pas pu finir il me manque les module fields
@@ -109,6 +115,7 @@ class RuleController extends AbstractController
             $loginParams = $solution->getLoginParameters($connectorId);
             $login = $solution->login($loginParams);
             $fields = $solution->getModuleFields();
+            var_dump($fields);
             $choices = [];
             foreach ($fields as $fieldId => $field) {
                 $choices[$field['label']] = $fieldId;
@@ -117,7 +124,7 @@ class RuleController extends AbstractController
             $form->add('fieldSelect', ChoiceType::class, [
                 'choices' => $choices,
                 'expanded' => true,
-                'multiple' => true,
+//                'multiple' => true,
             ]);
         }
 

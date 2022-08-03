@@ -3,11 +3,13 @@ import { Controller } from '@hotwired/stimulus';
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
 
-    static targets = ['rule', 'module'];
+    static targets = ['rule', 'module', 'field'];
     static values = {
         infoUrl: String,
         connectorSourceId: Number,
         connectorTargetId: Number,
+        sourceModuleId: Number,
+        targetModuleId: Number
     }
 
     htmlOutput = null;
@@ -59,18 +61,52 @@ export default class extends Controller {
     }
 
     async onSelectModuleSource(event) {
-        console.log('i have changed source module');
-        console.log(event.target.value);
-        // TODO
-        // this.connectorSourceIdValue = event.currentTarget.value;
-        // const response = await this.loadSource();
+        this.sourceModuleIdValue = event.currentTarget.value;
+        console.log(event.currentTarget.value);
+        console.log(this.sourceModuleIdValue);
+         const response = await this.loadSourceFields();
+         console.log(response);
     }
 
     async onSelectModuleTarget(event) {
-        console.log('i have changed target module');
-        console.log(event.target.value);
-        // TODO
-        // this.connectorSourceIdValue = event.currentTarget.value;
-        // const response = await this.loadSource();
+        this.targetModuleIdValue = event.currentTarget.value;
+         const response = await this.loadTargetFields();
+    }
+
+    async loadSourceFields() {
+        const params = new URLSearchParams({
+            sourceModuleId: this.sourceModuleIdValue,
+            connectorSourceId: this.connectorSourceIdValue,
+        })
+    console.log(params);
+
+        // TODO TBC : at the moment, connectorSourceId value remains empty (instead of the ID & isn't sent to the controller)
+        const response = await fetch(`get-fields/source/${this.connectorSourceIdValue.toString()}`)
+            .then(response => response.text())
+            .then((html) => {
+                console.log(response.text())
+                this.htmlOutput.innerHTML = html;
+                this.element.append(this.htmlOutput);
+            })
+            .catch(function(err) {
+                console.log('Failed to fetch response: ', err);
+            });
+    }
+
+    async loadTargetFields() {
+        const params = new URLSearchParams({
+            connectorTargetId: this.connectorTargetIdValue,
+            targetModuleId: this.targetModuleIdValue,
+        })
+
+        const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}`)
+            .then(response => response.text())
+            .then((html) => {
+                this.htmlOutput.innerHTML = html;
+                this.element.append(this.htmlOutput);
+            })
+            .catch(function(err) {
+                console.log('Failed to fetch response: ', err);
+            });
     }
 }
