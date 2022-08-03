@@ -37,6 +37,7 @@ class internallistcore extends solution
         try {
             return [
                 [
+                    //fake url because of minimum required field
                     'name' => 'url',
                     'type' => TextType::class,
                     'label' => 'solution.fields.url',
@@ -54,8 +55,10 @@ class internallistcore extends solution
     {
         try {
             $modules = [];
+            //get all the modules
             $table = $this->entityManager->getRepository(InternalListEntity::class)->findAll();
             foreach ($table as $column) {
+                //get the id and the name
                 $modules[$column->getId()] = $column->getName();
             }
             return $modules;
@@ -69,7 +72,10 @@ class internallistcore extends solution
     public function get_module_fields($module, $type = 'source', $extension = false)
     {
         try {
+            //get the data to obtain the fields of the row
             $data = $this->entityManager->getRepository(InternalListValueEntity::class)->find($module)->getData();
+
+            //from serialized json to fileds
             $unserializedData = unserialize($data);
             $jsondata = json_decode($unserializedData);
             foreach ($jsondata as $keydata => $valuedata) {
@@ -79,7 +85,7 @@ class internallistcore extends solution
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
-            return array('module fileds error: ' => $error);
+            return array('module fields error: ' => $error);
         }
     }
 
@@ -87,37 +93,51 @@ class internallistcore extends solution
 
     public function read($params)
     {
-        //return value
-        $result = [];
 
-        //counter for the number of records read
-        $recordread = 0;
+        try {
+            //return value
+            $result = [];
 
-        //query choice
-        if (!empty($param['query'])) {
-            // for special query with specified record id
-            $idValue = $param['query']['id'];
-            $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int)$params['limit']]);
-        } else {
-            //standard query using reference
-            $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
+            //counter for the number of records read
+            $recordread = 0;
+
+            //query choice
+            if (!empty($param['query'])) {
+                // for special query with specified record id
+                $idValue = $param['query']['id'];
+                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int)$params['limit']]);
+            } else {
+                //standard query using reference
+                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $this->logger->error($error);
+            return array('error getting the records' => $error);
         }
 
 
 
+
         foreach ($table as $row) {
-            //get the data
-            $getRecords = $row->getData();
-            $unserializedData = unserialize($getRecords);
-            $jsondata = json_decode($unserializedData);
-            $result[$recordread] = (array)$jsondata;
+            try {
+                //get the data
+                $getRecords = $row->getData();
+                $unserializedData = unserialize($getRecords);
+                $jsondata = json_decode($unserializedData);
+                $result[$recordread] = (array)$jsondata;
 
-            //get the reference and the modified date
-            $result[$recordread]['id'] = $row->getRecordId();
-            $result[$recordread]['date_modified'] = $row->getDateModified();
+                //get the reference and the modified date
+                $result[$recordread]['id'] = $row->getRecordId();
+                $result[$recordread]['date_modified'] = $row->getDateModified();
 
-            //we increment the number of record read
-            $recordread++;
+                //we increment the number of record read
+                $recordread++;
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+                $this->logger->error($error);
+                return array('error getting the data from the records' => $error);
+            }
         };
         return $result;
     }
