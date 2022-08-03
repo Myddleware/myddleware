@@ -26,8 +26,8 @@
 
 namespace App\Solutions;
 
-use App\Entity\InternalListValue as EntityInternalListValue;
-use App\Entity\InternalList as EntityInternalList;
+use App\Entity\InternalListValue as InternalListValueEntity;
+use App\Entity\InternalList as InternalListEntity;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class internallistcore extends solution
@@ -54,7 +54,7 @@ class internallistcore extends solution
     {
         try {
             $modules = [];
-            $table = $this->entityManager->getRepository(EntityInternalList::class)->findAll();
+            $table = $this->entityManager->getRepository(InternalListEntity::class)->findAll();
             foreach ($table as $column) {
                 $modules[$column->getId()] = $column->getName();
             }
@@ -69,7 +69,7 @@ class internallistcore extends solution
     public function get_module_fields($module, $type = 'source', $extension = false)
     {
         try {
-            $data = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getData();
+            $data = $this->entityManager->getRepository(InternalListValueEntity::class)->find($module)->getData();
             $unserializedData = unserialize($data);
             $jsondata = json_decode($unserializedData);
             foreach ($jsondata as $keydata => $valuedata) {
@@ -87,62 +87,41 @@ class internallistcore extends solution
 
     public function read($params)
     {
-
-        /* $compteur = 0;
-        do {
-            $compteur++;
-        } while ($compteur < 10); */
-
-
-
+        //return value
         $result = [];
-        $valuecount = 0;
-        //required module id to get the records
-        $module = $params['module'];
-        //list of record data with the id of the module
-        $table = $this->entityManager->getRepository(EntityInternalListValue::class)->findBy(['listId' => $module]);
+
+        //counter for the number of records read
+        $recordread = 0;
+
+        //query choice
+        if (!empty($param['query'])) {
+            // for special query with specified record id
+            $idValue = $param['query']['id'];
+            $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int)$params['limit']]);
+        } else {
+            //standard query using reference
+            $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
+        }
+
+
+
         foreach ($table as $row) {
             //get the data
             $getRecords = $row->getData();
             $unserializedData = unserialize($getRecords);
             $jsondata = json_decode($unserializedData);
-            $result[$valuecount] = (array)$jsondata;
+            $result[$recordread] = (array)$jsondata;
 
-            //get the reference
-            $result[$valuecount]['reference'] = $row->getReference();
-            $result[$valuecount]['date_modified'] = $row->getDateModified();
+            //get the reference and the modified date
+            $result[$recordread]['id'] = $row->getRecordId();
+            $result[$recordread]['date_modified'] = $row->getDateModified();
 
-            //increment the counter
-            $valuecount++;
+            //we increment the number of record read
+            $recordread++;
         };
-
-        //get the data from the serialized json in the data column
-        // $getRecords = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getData();
-
-
-        // $dateresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getDateModified();
-        // $refresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getReference();
-        // $createdbyresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getCreatedBy();
-        // $modifiedbyresult = $this->entityManager->getRepository(EntityInternalListValue::class)->find($module)->getModifiedBy();
-
-        // foreach ($jsondata as $keydata => $valuedata) {
-        //     $result[$valuecount][$keydata] = [$valuedata];
-        // }
-        // $result[$valuecount]['date_modified'] = $dateresult;
-        // $result[$valuecount]['reference'] = $refresult;
-        /* $result[$valuecount]['created_by'] = $createdbyresult->getId();
-        $result[$valuecount]['modified_by'] = $modifiedbyresult->getId(); */
         return $result;
     }
 
-
-    // Permet de créer des données
-    public function createData($param)
-    {
-        dump($param);
-        $result = $param;
-        return $result;
-    }
 
 
     public function login($paramConnexion)

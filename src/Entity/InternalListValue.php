@@ -60,6 +60,11 @@ class InternalListValue
      */
     private $data;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $record_id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -157,6 +162,18 @@ class InternalListValue
     public function setData(string $data): self
     {
         $this->data = $data;
+
+        return $this;
+    }
+
+    public function getRecordId(): ?string
+    {
+        return $this->record_id;
+    }
+
+    public function setRecordId(string $record_id): self
+    {
+        $this->record_id = $record_id;
 
         return $this;
     }

@@ -47,6 +47,20 @@ class InternalListValueRepository extends ServiceEntityRepository
         }
     }
 
+    public function searchRecords($params): array
+    {
+        $tablequery = $this->createQueryBuilder('internal_list_value')
+            ->Where('internal_list_value.reference >= :dateref')
+            ->andWhere('internal_list_value.listId = :module')
+            ->getQuery()
+            ->setMaxResults((int)$params['limit'])
+            ->setParameter('module', $params['module'])
+            ->setParameter('dateref', $params['date_ref'])
+            ->getResult();
+
+        return $tablequery;
+    }
+
     // /**
     //  * @return InternalListValue[] Returns an array of InternalListValue objects
     //  */
