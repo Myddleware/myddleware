@@ -102,7 +102,10 @@ class SynchroCommand extends Command
             // alias de la règle en params
             $rule = $input->getArgument('rule');
             $api = $input->getArgument('api');
-            $force = $input->getArgument('forceRun');
+            $force = $input->getArgument('force');
+			if (empty($force)) {
+				$force = false;
+			}
             // Récupération du Job
             // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.

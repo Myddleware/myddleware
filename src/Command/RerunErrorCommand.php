@@ -74,7 +74,10 @@ class RerunErrorCommand extends Command
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
         $api = $input->getArgument('api');
-		$force = $input->getArgument('forceRun');
+		$force = $input->getArgument('force');
+		if (empty($force)) {
+			$force = false;
+		}
 
         // Set the API value
         $this->jobManager->setApi((bool) $api);

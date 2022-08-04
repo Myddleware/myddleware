@@ -100,6 +100,7 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:synchro',
+                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];

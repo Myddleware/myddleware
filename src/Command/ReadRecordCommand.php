@@ -83,7 +83,10 @@ class ReadRecordCommand extends Command
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');
         $filterValues = $input->getArgument('filterValues');
-		$force = $input->getArgument('forceRun');
+		$force = $input->getArgument('force');
+		if (empty($force)) {
+			$force = false;
+		}
 
         $rule = $this->ruleRepository->findOneBy(['id' => $ruleId, 'deleted' => false]);
         if (null === $rule) {
