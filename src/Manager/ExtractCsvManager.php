@@ -8,7 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 
 //progress bar
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class extractcsvcore
 {
@@ -29,9 +32,14 @@ class extractcsvcore
         $this->entityManager = $entityManager;
     }
 
-    public function extractCsv($file)
+    //for progress bar
+    /**
+     * @var SymfonyStyle
+     */
+    private $io;
+
+    public function extractCsv($file, InputInterface $input, OutputInterface $output)
     {
-        // ####################################################################################################
         //section for future csv handling
         $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
         //extract the data from the csv
@@ -58,9 +66,10 @@ class extractcsvcore
         $user = ($this->entityManager->getRepository(User::class)->findBy(['id' => 1])[0]);
 
         //progress bar
-        // $progressBar = new ProgressBar($output, 10);
+        $progressBar = new ProgressBar($output);
+        $progressBar->setFormat('debug');
         // starts and displays the progress bar
-        // $progressBar->start();
+        $progressBar->start();
 
         foreach ($csv as $etablissement) {
             //we loop through the csv data to add etablissements
@@ -79,17 +88,11 @@ class extractcsvcore
             $this->entityManager->persist($newRow);
 
             //progress bar advancement
-            // $progressBar->advance();
+            $progressBar->advance();
         }
-        // ####################################################################################################
-
-        //! warning don't use simulation, use simulation wih id !
-        // ####################################################################################################
-        // $this->extractCsv($row);
         // ensures that the progress bar is at 100%
-        // $progressBar->finish();
+        $progressBar->finish();
         $this->entityManager->flush();
-        // ####################################################################################################
     }
 }
 

@@ -119,7 +119,7 @@ class ExtractCsvCommand extends Command
 
             //################################################################
             $manager = new ExtractCsvManager($this->entityManager);
-            $manager->extractcsv($file);
+            $manager->extractcsv($file, $input, $output);
             $output->writeln([
                 '',
                 '============',
