@@ -130,13 +130,6 @@ class internallistcore extends solution
 
                 //we increment the number of record read
                 $recordRead++;
-
-                // ####################################################################################################
-                $this->extractCsv($row);
-                $this->entityManager->flush();
-                // ####################################################################################################
-
-
             } catch (\Exception $e) {
                 $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $this->logger->error($error);
@@ -147,61 +140,6 @@ class internallistcore extends solution
 
         return $result;
     }
-
-    public function extractCsv($row)
-    {
-        // ####################################################################################################
-        //section for future csv handling
-        $file = "C:\laragon\www\myddleware\src\localfiles\\educationwithlabel.csv";
-        //extract the data from the csv
-        //use the array map: this will use a function and iterate over an array of element instead of using a for loop
-        $csvRows = array_map(function ($csv) {
-            //convert the csv to a string, using ; as a separator
-            return str_getcsv($csv, ";");
-            //using file path
-        }, file($file));
-        //we generate a header which use the array shift method
-        //array_shift takes of the 1st element of an array and returns it
-        //so header will be the 1st element of the array rows
-        $header = array_shift($csvRows);
-        //initiate an empty array
-        $csv    = [];
-        //we loop through the rows
-        foreach ($csvRows as $csvRow) {
-            //we combine each row with the header
-            $csv[] = array_combine($header, $csvRow);
-        }
-
-
-        //csv
-        // var_dump($csv);
-        // $jsoncsv = json_encode($csv);
-        // dump($jsoncsv);
-
-
-        // serialize
-        // $serializedcsv = serialize($csv);
-        // dump($serializedcsv);
-
-        $newRow = new InternalListValueEntity();
-        $rowDate = gmdate('Y-m-d h:i:s');
-        $newRow->setReference($rowDate);
-        $newRowId = $csv['1']['Identifiant_de_l_etablissement'];
-        $firstRowData = $csv["1"];
-        $firstRowSerialized = serialize($firstRowData);
-        $newRow->setData($firstRowSerialized);
-        $newRow->setDeleted(false);
-        $newRow->setRecordId($newRowId);
-        $newRow->setListId($row->getListId());
-        $newRow->setCreatedBy($row->getCreatedBy());
-        $newRow->setModifiedBy($row->getModifiedBy());
-
-
-        $this->entityManager->persist($newRow);
-        // die('fin du programme');
-        // ####################################################################################################
-    }
-
 
     public function login($paramConnexion)
     {
