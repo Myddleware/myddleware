@@ -73,6 +73,7 @@ class RuleController extends AbstractController
             'attr' => [
                 'data-action' => 'change->rule#onSelectModule'.ucfirst($origin),
                 'data-rule-target' => 'field',
+                'data-rule-connector-value' => $connectorId,
             ],
         ]);
 
@@ -87,12 +88,13 @@ class RuleController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/get-fields/{origin?null}/{connectorId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
+    #[Route('/get-fields/{origin?null}/{connectorId<\d+>?null}/module/{moduleId<\d+>?null}', name: 'get_fields', methods: ['GET'])]
     public function getFieldsForm(
         string $origin,
         string $connectorId,
-        ConnectorRepository $connectorRepository,
+        string $moduleId,
         ModuleRepository $moduleRepository,
+        ConnectorRepository $connectorRepository,
         SolutionManager $solutionManager
     ): Response {
         $connector = $connectorRepository->find($connectorId);
@@ -108,14 +110,15 @@ class RuleController extends AbstractController
         // et ensuite pouvoir manipuler ça côté JS
         // Si on veut rester à utiliser les formulaires symfony je vous invite à lire le code que j'ai mis dans le subscriber EASY ADMIN
         // la logique des 2 eventsubscriber devrait vous permettre de faire la même chose pour la suite
+
         // Bonne continuation !
 
         $form = $this->createFormBuilder([]);
-        if (method_exists($connector, 'getModuleFields')) {
+        if (method_exists($solution, 'getModuleFields')) {
             $loginParams = $solution->getLoginParameters($connectorId);
             $login = $solution->login($loginParams);
-            $fields = $solution->getModuleFields();
-            var_dump($fields);
+            $module = $moduleRepository->find($moduleId)->getName();
+            $fields = $solution->getModuleFields($module, $origin);
             $choices = [];
             foreach ($fields as $fieldId => $field) {
                 $choices[$field['label']] = $fieldId;

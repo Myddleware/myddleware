@@ -1,4 +1,4 @@
-import { Controller } from '@hotwired/stimulus';
+import {Controller} from '@hotwired/stimulus';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
@@ -9,7 +9,7 @@ export default class extends Controller {
         connectorSourceId: Number,
         connectorTargetId: Number,
         sourceModuleId: Number,
-        targetModuleId: Number
+        targetModuleId: Number,
     }
 
     htmlOutput = null;
@@ -32,7 +32,7 @@ export default class extends Controller {
         const params = new URLSearchParams({
             connectorSourceId: this.connectorSourceIdValue,
         })
-
+    // console.log(params.get('connectorSourceId'));
         const response = await fetch(`get-modules/source/${this.connectorSourceIdValue.toString()}`)
             .then(response => response.text())
             .then((html) => {
@@ -62,29 +62,28 @@ export default class extends Controller {
 
     async onSelectModuleSource(event) {
         this.sourceModuleIdValue = event.currentTarget.value;
-        console.log(event.currentTarget.value);
-        console.log(this.sourceModuleIdValue);
-         const response = await this.loadSourceFields();
-         console.log(response);
+         const response = await this.loadSourceFields(this.sourceModuleIdValue);
     }
 
     async onSelectModuleTarget(event) {
         this.targetModuleIdValue = event.currentTarget.value;
-         const response = await this.loadTargetFields();
+         const response = await this.loadTargetFields(this.targetModuleIdValue);
     }
 
-    async loadSourceFields() {
+    async loadSourceFields(sourceModuleId) {
         const params = new URLSearchParams({
             sourceModuleId: this.sourceModuleIdValue,
             connectorSourceId: this.connectorSourceIdValue,
         })
-    console.log(params);
-
+        const connectorIdDiv = document.querySelector('[data-rule-connector-source-id-value]');
+        this.connectorSourceIdValue = connectorIdDiv.getAttribute("data-rule-connector-source-id-value");
+//         console.log(connectorIdDiv.getAttribute("data-rule-connector-source-id-value"));
+//         console.log(params.get('connectorSourceId'));
+// console.log(params.keys());
         // TODO TBC : at the moment, connectorSourceId value remains empty (instead of the ID & isn't sent to the controller)
-        const response = await fetch(`get-fields/source/${this.connectorSourceIdValue.toString()}`)
+        const response = await fetch(`get-fields/source/${this.connectorSourceIdValue.toString()}/module/${sourceModuleId.toString()}`)
             .then(response => response.text())
             .then((html) => {
-                console.log(response.text())
                 this.htmlOutput.innerHTML = html;
                 this.element.append(this.htmlOutput);
             })
@@ -93,13 +92,16 @@ export default class extends Controller {
             });
     }
 
-    async loadTargetFields() {
+    async loadTargetFields(targetModuleId) {
         const params = new URLSearchParams({
             connectorTargetId: this.connectorTargetIdValue,
             targetModuleId: this.targetModuleIdValue,
         })
 
-        const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}`)
+        const connectorIdDiv = document.querySelector('[data-rule-connector-target-id-value]');
+        this.connectorTargetIdValue = connectorIdDiv.getAttribute("data-rule-connector-target-id-value");
+
+        const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}/module/${targetModuleId.toString()}`)
             .then(response => response.text())
             .then((html) => {
                 this.htmlOutput.innerHTML = html;
