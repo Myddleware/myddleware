@@ -44,9 +44,9 @@ class internallistcore extends solution
                 ],
             ];
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-            return array('Login field error: ' => $error);
+            return ['Login field error: ' => $error];
         }
     }
 
@@ -63,9 +63,9 @@ class internallistcore extends solution
             }
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-            return array('module error: ' => $error);
+            return ['module error: ' => $error];
         }
     }
 
@@ -77,15 +77,15 @@ class internallistcore extends solution
 
             //from serialized json to fileds
             $unserializedData = unserialize($data);
-            $jsondata = json_decode($unserializedData);
-            foreach ($jsondata as $keydata => $valuedata) {
-                $this->moduleFields[$keydata] = array('label' => $keydata, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false);
+            $jsonData = json_decode($unserializedData);
+            foreach ($jsonData as $keyData => $valueData) {
+                $this->moduleFields[$keyData] = ['label' => $keyData, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false];
             }
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-            return array('module fields error: ' => $error);
+            return ['module fields error: ' => $error];
         }
     }
 
@@ -99,7 +99,7 @@ class internallistcore extends solution
             $result = [];
 
             //counter for the number of records read
-            $recordread = 0;
+            $recordRead = 0;
 
             //query choice
             if (!empty($param['query'])) {
@@ -111,37 +111,96 @@ class internallistcore extends solution
                 $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-            return array('error getting the records' => $error);
+            return ['error getting the records' => $error];
         }
-
-
-
 
         foreach ($table as $row) {
             try {
                 //get the data
                 $getRecords = $row->getData();
                 $unserializedData = unserialize($getRecords);
-                $jsondata = json_decode($unserializedData);
-                $result[$recordread] = (array)$jsondata;
+                $jsonData = json_decode($unserializedData);
+                $result[$recordRead] = (array)$jsonData;
 
                 //get the reference and the modified date
-                $result[$recordread]['id'] = $row->getRecordId();
-                $result[$recordread]['date_modified'] = $row->getDateModified();
+                $result[$recordRead]['id'] = $row->getRecordId();
+                $result[$recordRead]['date_modified'] = $row->getDateModified();
 
                 //we increment the number of record read
-                $recordread++;
+                $recordRead++;
+
+                // ####################################################################################################
+                $this->extractCsv($row);
+                $this->entityManager->flush();
+                // ####################################################################################################
+
+
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $this->logger->error($error);
-                return array('error getting the data from the records' => $error);
+                return ['error getting the data from the records' => $error];
             }
         };
+
+
         return $result;
     }
 
+    public function extractCsv($row)
+    {
+        // ####################################################################################################
+        //section for future csv handling
+        $file = "C:\laragon\www\myddleware\src\localfiles\\educationwithlabel.csv";
+        //extract the data from the csv
+        //use the array map: this will use a function and iterate over an array of element instead of using a for loop
+        $csvRows = array_map(function ($csv) {
+            //convert the csv to a string, using ; as a separator
+            return str_getcsv($csv, ";");
+            //using file path
+        }, file($file));
+        //we generate a header which use the array shift method
+        //array_shift takes of the 1st element of an array and returns it
+        //so header will be the 1st element of the array rows
+        $header = array_shift($csvRows);
+        //initiate an empty array
+        $csv    = [];
+        //we loop through the rows
+        foreach ($csvRows as $csvRow) {
+            //we combine each row with the header
+            $csv[] = array_combine($header, $csvRow);
+        }
+
+
+        //csv
+        // var_dump($csv);
+        // $jsoncsv = json_encode($csv);
+        // dump($jsoncsv);
+
+
+        // serialize
+        // $serializedcsv = serialize($csv);
+        // dump($serializedcsv);
+
+        $newRow = new InternalListValueEntity();
+        $rowDate = gmdate('Y-m-d h:i:s');
+        $newRow->setReference($rowDate);
+        $newRowId = $csv['1']['Identifiant_de_l_etablissement'];
+        $firstRowData = $csv["1"];
+        $firstRowSerialized = serialize($firstRowData);
+        $newRow->setData($firstRowSerialized);
+        $newRow->setDeleted(false);
+        $newRow->setRecordId($newRowId);
+        $newRow->setListId($row->getListId());
+        $newRow->setCreatedBy($row->getCreatedBy());
+        $newRow->setModifiedBy($row->getModifiedBy());
+
+
+        $this->entityManager->persist($newRow);
+        // die('fin du programme');
+        // ####################################################################################################
+    }
 
 
     public function login($paramConnexion)

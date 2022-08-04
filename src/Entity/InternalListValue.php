@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\InternalListValueRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -64,6 +65,13 @@ class InternalListValue
      * @ORM\Column(type="string", length=255)
      */
     private $record_id;
+
+
+    public function __construct()
+    {
+        $this->setDateCreated(new DateTime());
+        $this->setDateModified(new DateTime());
+    }
 
     public function getId(): ?int
     {
