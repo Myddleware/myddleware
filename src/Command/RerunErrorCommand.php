@@ -64,6 +64,7 @@ class RerunErrorCommand extends Command
             ->setDescription('Synchronisation des données')
             ->addArgument('limit', InputArgument::REQUIRED, 'Nombre maximum de flux en erreur traité')
             ->addArgument('attempt', InputArgument::REQUIRED, 'Nombre maximum de tentative')
+			->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -73,11 +74,12 @@ class RerunErrorCommand extends Command
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
         $api = $input->getArgument('api');
+		$force = $input->getArgument('forceRun');
 
         // Set the API value
         $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('Rerun error : limit '.$limit.', attempt '.$attempt);
+        $data = $this->jobManager->initJob('Rerun error : limit '.$limit.', attempt '.$attempt, $force);
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');

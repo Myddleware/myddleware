@@ -89,6 +89,7 @@ class SynchroCommand extends Command
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
             ->addArgument('rule', InputArgument::REQUIRED, 'Rule alias')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -101,12 +102,13 @@ class SynchroCommand extends Command
             // alias de la règle en params
             $rule = $input->getArgument('rule');
             $api = $input->getArgument('api');
+            $force = $input->getArgument('forceRun');
             // Récupération du Job
             // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
             $this->jobManager->message = '';
             $this->jobManager->setApi($api);
-            $data = $this->jobManager->initJob('Synchro : '.$rule);
+            $data = $this->jobManager->initJob('Synchro : '.$rule, $force);
             if (true === $data['success']) {
                 $output->writeln('1;'.$this->jobManager->getId());  // Not removed, user for manual job and webservices
 
