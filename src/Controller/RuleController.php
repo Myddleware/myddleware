@@ -97,6 +97,7 @@ class RuleController extends AbstractController
         ConnectorRepository $connectorRepository,
         SolutionManager $solutionManager
     ): Response {
+        $placeholderMessage = "Oops! looks like this module doesn't contain any fields.";
         $connector = $connectorRepository->find($connectorId);
         // handle the case when the user clicks on the little cross which makes $connector = null to avoid a 500 error
         if (null === $connector) {
@@ -118,13 +119,19 @@ class RuleController extends AbstractController
             $loginParams = $solution->getLoginParameters($connectorId);
             $login = $solution->login($loginParams);
             $module = $moduleRepository->find($moduleId)->getName();
-            $fields = $solution->getModuleFields($module, $origin);
+            $fields = $solution->getModuleFields($module, $origin) ?: [];
+
             $choices = [];
             foreach ($fields as $fieldId => $field) {
                 $choices[$field['label']] = $fieldId;
             }
 
+            if (!empty($choices)) {
+                $placeholderMessage = 'Select 1 or more fields you wish to map';
+            }
+
             $form->add('fieldSelect', ChoiceType::class, [
+                'label' => sprintf('%s fields', $origin),
                 'choices' => $choices,
                 'expanded' => true,
                 'multiple' => true,
@@ -135,6 +142,7 @@ class RuleController extends AbstractController
 
         return $this->renderForm('rule/module_field_form.html.twig', [
             'form' => $form,
+            'placeholder' => $placeholderMessage,
         ]);
     }
 }

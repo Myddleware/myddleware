@@ -81,6 +81,7 @@ export default class extends Controller {
             .then((html) => {
                 this.htmlOutput.innerHTML = html;
                 this.element.append(this.htmlOutput);
+                this.appendButton(this.element);
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
@@ -101,9 +102,47 @@ export default class extends Controller {
             .then((html) => {
                 this.htmlOutput.innerHTML = html;
                 this.element.append(this.htmlOutput);
+                this.appendButton(this.element);
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
             });
+    }
+
+    // TODO: 1) each time a pair of source/target fields are chosen, a '+' button must also be displayed at the end of
+    // the row to provide the user with the opportunity to add morer pairs of source/target fields
+    // 2) when clicking this button, a new row (pair of source/target inputs + same button) must be displayed to allow user
+    // to add as many pairs as they wish
+    // we could even display an arrow between source & target inputs for each pair to clearly signify that this source field is linked to that target field
+
+    appendButton(element) {
+        this.deletePreviousButton();
+        const addButton = document.createElement('button');
+        addButton.classList.add('ms-3');
+        addButton.classList.add('btn');
+        addButton.classList.add('btn-warning');
+        addButton.classList.add('add-more');
+        addButton.innerText = '+';
+        element.appendChild(addButton);
+    }
+
+    // avoids having multiple buttons displayed on page
+    deletePreviousButton() {
+        const addMoreButtons = document.getElementsByClassName('add-more');
+        const buttonsToBeRemoved = [];
+        for (let i = 0 ; i < addMoreButtons.length; i++) {
+            if (i > 0) {
+                buttonsToBeRemoved[i] = addMoreButtons[i];
+            }
+        }
+        buttonsToBeRemoved.forEach((btn) => {
+           btn.remove();
+        });
+
+    }
+
+    addMoreFields(event) {
+        event.preventDefault();
+        console.log(event);
     }
 }
