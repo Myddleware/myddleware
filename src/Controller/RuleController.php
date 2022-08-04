@@ -127,7 +127,7 @@ class RuleController extends AbstractController
             $form->add('fieldSelect', ChoiceType::class, [
                 'choices' => $choices,
                 'expanded' => true,
-//                'multiple' => true,
+                'multiple' => true,
             ]);
         }
 

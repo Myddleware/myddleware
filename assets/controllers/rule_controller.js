@@ -32,7 +32,6 @@ export default class extends Controller {
         const params = new URLSearchParams({
             connectorSourceId: this.connectorSourceIdValue,
         })
-    // console.log(params.get('connectorSourceId'));
         const response = await fetch(`get-modules/source/${this.connectorSourceIdValue.toString()}`)
             .then(response => response.text())
             .then((html) => {
@@ -77,10 +76,6 @@ export default class extends Controller {
         })
         const connectorIdDiv = document.querySelector('[data-rule-connector-source-id-value]');
         this.connectorSourceIdValue = connectorIdDiv.getAttribute("data-rule-connector-source-id-value");
-//         console.log(connectorIdDiv.getAttribute("data-rule-connector-source-id-value"));
-//         console.log(params.get('connectorSourceId'));
-// console.log(params.keys());
-        // TODO TBC : at the moment, connectorSourceId value remains empty (instead of the ID & isn't sent to the controller)
         const response = await fetch(`get-fields/source/${this.connectorSourceIdValue.toString()}/module/${sourceModuleId.toString()}`)
             .then(response => response.text())
             .then((html) => {
