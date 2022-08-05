@@ -1152,6 +1152,9 @@ class rulecore
             //if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' 1 Y --env='.$this->env.' > '.$fileTmp.' &', $output);
+            } elseif ($ruleId == 'ALL') {
+                // We don't set the parameter force to 1 when we synchronize all rules
+				exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
             } else {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }

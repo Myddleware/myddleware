@@ -369,7 +369,7 @@ class jobcore
             // Formatage des paramètres
             if (!empty($param)) {
                 foreach ($param as $valueParam) {
-                    $params .= "'".$valueParam."' ";
+                    $params .= $valueParam.' ';
                 }
             }
             // Get the php executable
@@ -383,7 +383,7 @@ class jobcore
             } catch (IOException $e) {
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
+            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' 1 --env='.$this->env.'  > '.$fileTmp.' &');
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {
