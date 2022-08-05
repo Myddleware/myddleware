@@ -6,6 +6,7 @@ use App\Entity\InternalListValue as InternalListValueEntity;
 use App\Entity\InternalList as InternalListEntity;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
+use Exception;
 
 //progress bar
 use Symfony\Component\Console\Input\InputInterface;
@@ -65,34 +66,55 @@ class extractcsvcore
         $internalList = ($this->entityManager->getRepository(InternalListEntity::class)->findBy(['id' => 1])[0]);
         $user = ($this->entityManager->getRepository(User::class)->findBy(['id' => 1])[0]);
 
-        //progress bar
+        //progress bar settings
         $progressBar = new ProgressBar($output);
         $progressBar->setFormat('debug');
+
         // starts and displays the progress bar
         $progressBar->start();
 
-        foreach ($csv as $etablissement) {
-            //we loop through the csv data to add etablissements
-            $newRow = new InternalListValueEntity();
-            $rowDate = gmdate('Y-m-d h:i:s');
-            $newRow->setReference($rowDate);
-            $newRowId = $etablissement['Identifiant_de_l_etablissement'];
-            $firstRowData = $etablissement;
-            $firstRowSerialized = serialize($firstRowData);
-            $newRow->setData($firstRowSerialized);
-            $newRow->setDeleted(false);
-            $newRow->setRecordId($newRowId);
-            $newRow->setListId($internalList);
-            $newRow->setCreatedBy($user);
-            $newRow->setModifiedBy($user);
-            $this->entityManager->persist($newRow);
+        //transaction start
+        $this->entityManager->getConnection()->beginTransaction();
 
-            //progress bar advancement
-            $progressBar->advance();
+        try {
+            foreach ($csv as $etablissement) {
+
+                //we loop through the csv data to add etablissements
+                $newRow = new InternalListValueEntity();
+                $rowDate = gmdate('Y-m-d h:i:s');
+                $newRow->setReference($rowDate);
+                $newRowId = $etablissement['Identifiant_de_l_etablissement'];
+                $firstRowData = $etablissement;
+                $firstRowSerialized = serialize($firstRowData);
+                $newRow->setData($firstRowSerialized);
+                $newRow->setDeleted(false);
+                $newRow->setRecordId($newRowId);
+                $newRow->setListId($internalList);
+                $newRow->setCreatedBy($user);
+                $newRow->setModifiedBy($user);
+
+                //progress bar advancement
+                $progressBar->advance();
+                //apply change to bdd every row
+                $this->entityManager->persist($newRow);
+            }
+
+            //final push to the bdd and commit
+            $this->entityManager->flush();
+            $this->entityManager->getConnection()->commit();
+
+            // $this->entityManager->flush();
+        } catch (Exception $e) {
+            $this->entityManager->getConnection()->rollBack();
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->logger->error($error);
+            throw $e;
         }
+
+
+
         // ensures that the progress bar is at 100%
         $progressBar->finish();
-        $this->entityManager->flush();
     }
 }
 

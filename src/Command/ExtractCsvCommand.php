@@ -84,47 +84,23 @@ class ExtractCsvCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $output->writeln([
             '',
-            '============',
+            '##############',
             'CSV EXTRACTOR',
-            '============',
+            '##############',
             '',
         ]);
         try {
             // Source -------------------------------------------------
             // alias de la règle en params
             $file = $input->getArgument('file');
-
-            //################################################################
-
-
-            /* //progress bar
-
-            $progressBar = new ProgressBar($output, 10);
-            // starts and displays the progress bar
-            $progressBar->start();
-            $i = 0;
-            while ($i++ < 10) {
-                // ... do some work
-                echo "toto";
-                // advances the progress bar 1 unit
-                $progressBar->advance();
-
-                // you can also advance the progress bar by more than 1 unit
-                // $progressBar->advance(3);
-            }
-
-            // ensures that the progress bar is at 100%
-            $progressBar->finish(); */
-
-
             //################################################################
             $manager = new ExtractCsvManager($this->entityManager);
             $manager->extractcsv($file, $input, $output);
-            $output->writeln([
+            $io->success([
                 '',
-                '============',
+                '##############',
                 'THE CSV WAS EXTRACTED !',
-                '============',
+                '##############',
                 '',
             ]);
             return 0;
@@ -136,7 +112,8 @@ class ExtractCsvCommand extends Command
                 '##############',
                 '',
             ]);
-            $io->error(sprintf('The user command could not be ran.', $e));
+            $io->getErrorStyle()->warning('Debugging information or errors: ' . $e);
+            $io->error(sprintf('The user command did not work'));
             return 1;
         }
         // Retour en console --------------------------------------
