@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class extractcsvcore
+class loadexternallistcore
 {
 
     /**
@@ -39,10 +39,10 @@ class extractcsvcore
      */
     private $io;
 
-    public function extractCsv($file, InputInterface $input, OutputInterface $output)
+    public function loadExternalList($file, InputInterface $input, OutputInterface $output)
     {
         //section for future csv handling
-        $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
+        // $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
         //extract the data from the csv
         //use the array map: this will use a function and iterate over an array of element instead of using a for loop
         $csvRows = array_map(function ($csv) {
@@ -118,6 +118,6 @@ class extractcsvcore
     }
 }
 
-class ExtractCsvManager extends extractcsvcore
+class LoadExternalListManager extends loadexternallistcore
 {
 }

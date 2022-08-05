@@ -27,7 +27,7 @@
 namespace App\Command;
 
 use Psr\Log\LoggerInterface;
-use App\Manager\ExtractCsvManager;
+use App\Manager\LoadExternalListManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -37,7 +37,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class ExtractCsvCommand extends Command
+class LoadExternalListCommand extends Command
 {
 
     /**
@@ -59,7 +59,7 @@ class ExtractCsvCommand extends Command
     private $io;
 
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'myddleware:extractcsv';
+    protected static $defaultName = 'myddleware:loadexternallist';
     protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
 
 
@@ -75,7 +75,7 @@ class ExtractCsvCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('myddleware:extractcsv')
+            ->setName('myddleware:loadexternallist')
             ->addArgument('file', InputArgument::REQUIRED, 'selected file');
     }
 
@@ -85,7 +85,7 @@ class ExtractCsvCommand extends Command
         $output->writeln([
             '',
             '##############',
-            'CSV EXTRACTOR',
+            'INTERNALLIST LOADER',
             '##############',
             '',
         ]);
@@ -94,12 +94,12 @@ class ExtractCsvCommand extends Command
             // alias de la règle en params
             $file = $input->getArgument('file');
             //################################################################
-            $manager = new ExtractCsvManager($this->entityManager);
-            $manager->extractcsv($file, $input, $output);
+            $manager = new LoadExternalListManager($this->entityManager);
+            $manager->loadExternalList($file, $input, $output);
             $io->success([
                 '',
                 '##############',
-                'THE CSV WAS EXTRACTED !',
+                'THE LIST WAS LOADED !',
                 '##############',
                 '',
             ]);
@@ -108,7 +108,7 @@ class ExtractCsvCommand extends Command
             $output->writeln([
                 '',
                 '##############',
-                'THE CSV COULD NOT BE EXTRACTED !',
+                'THE LIST COULD NOT BE LOADED !',
                 '##############',
                 '',
             ]);
