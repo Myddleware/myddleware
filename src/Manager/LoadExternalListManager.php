@@ -46,7 +46,7 @@ class loadexternallistcore
         $csvRows = array_map(function ($csv) {
             //convert the csv to a string, using ; as a separator
             return str_getcsv($csv, ';');
-        //using file path
+            //using file path
         }, file($file));
         //we generate a header which use the array shift method
         //array_shift takes of the 1st element of an array and returns it
@@ -75,13 +75,13 @@ class loadexternallistcore
         $this->entityManager->getConnection()->beginTransaction();
 
         try {
-            foreach ($csv as $etablissement) {
-                //we loop through the csv data to add etablissements
+            foreach ($csv as $value) {
+                //we loop through the csv data to add values
                 $newRow = new InternalListValueEntity();
                 $rowDate = gmdate('Y-m-d h:i:s');
                 $newRow->setReference($rowDate);
-                $newRowId = $etablissement['Identifiant_de_l_etablissement'];
-                $firstRowData = $etablissement;
+                $newRowId = $value['Identifiant_de_l_etablissement'];
+                $firstRowData = $value;
                 $firstRowSerialized = serialize($firstRowData);
                 $newRow->setData($firstRowSerialized);
                 $newRow->setDeleted(false);
@@ -92,18 +92,16 @@ class loadexternallistcore
 
                 //progress bar advancement
                 $progressBar->advance();
-                //apply change to bdd every row
+                //apply change to database every row
                 $this->entityManager->persist($newRow);
             }
 
-            //final push to the bdd and commit
+            //final push to the database and commit
             $this->entityManager->flush();
             $this->entityManager->getConnection()->commit();
-
-            // $this->entityManager->flush();
         } catch (Exception $e) {
             $this->entityManager->getConnection()->rollBack();
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
             throw $e;
         }
