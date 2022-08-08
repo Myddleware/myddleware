@@ -214,7 +214,7 @@ class filecore extends solution
     public function get_module_fields_relate($module, $param)
     {
         // Get the rule list with the same connectors (both directions) to get the relate ones
-        $ruleListRelation = $this->getEntityManager->getRepository(Rule::class)->createQueryBuilder('r')
+        $ruleListRelation = $this->entityManager->getRepository(Rule::class)->createQueryBuilder('r')
                         ->select('r.id')
                         ->where('(
 											r.connectorSource= ?1 

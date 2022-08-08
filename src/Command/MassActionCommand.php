@@ -60,6 +60,7 @@ class MassActionCommand extends Command
             ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore or changeStatus)')
             ->addArgument('dataType', InputArgument::REQUIRED, 'Data type (rule or document)')
             ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ";"
+			->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('forceAll', InputArgument::OPTIONAL, 'Set Y to process action on all documents (not only open and error ones)')
             ->addArgument('fromStatus', InputArgument::OPTIONAL, 'Get all document with this status(Only with changeStatus action)')
             ->addArgument('toStatus', InputArgument::OPTIONAL, 'Set this status (Only with changeStatus action)')
@@ -79,6 +80,10 @@ class MassActionCommand extends Command
         $fromStatus = $input->getArgument('fromStatus');
         $toStatus = $input->getArgument('toStatus');
         $api = $input->getArgument('api');
+		$force = $input->getArgument('force');
+		if (empty($force)) {
+			$force = false;
+		}
 
         // to avoid unwanted apostrophes in SQL queries
         $action = str_replace('\'', '', $action);
@@ -94,7 +99,7 @@ class MassActionCommand extends Command
 
         $paramJobString = "Mass $action on data type $dataType";
 
-        $data = $this->jobManager->initJob($paramJobString);
+        $data = $this->jobManager->initJob($paramJobString, $force);
 
         if (false === $data['success']) {
             $output->writeln('1;<error>'.$data['message'].'</error>');
