@@ -53,7 +53,7 @@ class InternalListValueRepository extends ServiceEntityRepository
             ->Where('internal_list_value.reference >= :dateref')
             ->andWhere('internal_list_value.listId = :module')
             ->getQuery()
-            ->setMaxResults((int)$params['limit'])
+            ->setMaxResults((int) $params['limit'])
             ->setParameter('module', $params['module'])
             ->setParameter('dateref', $params['date_ref'])
             ->getResult();

@@ -248,7 +248,6 @@ class TemplateManager
         int $connectorTargetId,
         User $user
     ) {
-
         /** @var ConnectorRepository $connectorRepository */
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
         $connectorSource = $connectorRepository->find($connectorSourceId);
@@ -258,7 +257,7 @@ class TemplateManager
         $solutionSourceName = $connectorSource->getSolution()->getName();
         $solutionTargetName = $connectorTarget->getSolution()->getName();
 
-        $this->entityManager->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION      
+        $this->entityManager->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $sourceSolution = $this->solutionManager->get($solutionSourceName);
             $targetSolution = $this->solutionManager->get($solutionTargetName);

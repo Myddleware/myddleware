@@ -26,27 +26,21 @@
 
 namespace App\Command;
 
-use Psr\Log\LoggerInterface;
 use App\Manager\LoadExternalListManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class LoadExternalListCommand extends Command
 {
-
     /**
      * @var EntityManagerInterface
      */
     private $entityManager;
-
-
-
 
     /**
      * @var LoggerInterface
@@ -61,7 +55,6 @@ class LoadExternalListCommand extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:loadexternallist';
     protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
-
 
     public function __construct(
         LoggerInterface $logger,
@@ -103,6 +96,7 @@ class LoadExternalListCommand extends Command
                 '##############',
                 '',
             ]);
+
             return 0;
         } catch (\Exception $e) {
             $output->writeln([
@@ -112,8 +106,9 @@ class LoadExternalListCommand extends Command
                 '##############',
                 '',
             ]);
-            $io->getErrorStyle()->warning('Debugging information or errors: ' . $e);
+            $io->getErrorStyle()->warning('Debugging information or errors: '.$e);
             $io->error(sprintf('The user command did not work'));
+
             return 1;
         }
         // Retour en console --------------------------------------

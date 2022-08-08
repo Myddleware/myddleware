@@ -33,6 +33,7 @@ use App\Solutions\eventbrite;
 use App\Solutions\facebook;
 use App\Solutions\file;
 use App\Solutions\hubspot;
+use App\Solutions\internallist;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
@@ -55,7 +56,6 @@ use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\zuora;
-use App\Solutions\internallist;
 use Exception;
 
 /**
@@ -134,7 +134,7 @@ class SolutionManager
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new Exception('Solution ' . $name . ' not found. Please make sure that you have added this solution into Myddleware. ');
+            throw new Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware. ');
         }
 
         return $this->classes[$name];

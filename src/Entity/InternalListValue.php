@@ -66,7 +66,6 @@ class InternalListValue
      */
     private $record_id;
 
-
     public function __construct()
     {
         $this->setDateCreated(new DateTime());

@@ -26,8 +26,8 @@
 
 namespace App\Solutions;
 
-use App\Entity\InternalListValue as InternalListValueEntity;
 use App\Entity\InternalList as InternalListEntity;
+use App\Entity\InternalListValue as InternalListValueEntity;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class internallistcore extends solution
@@ -44,12 +44,12 @@ class internallistcore extends solution
                 ],
             ];
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return ['Login field error: ' => $error];
         }
     }
-
 
     public function get_modules($type = 'source')
     {
@@ -61,10 +61,12 @@ class internallistcore extends solution
                 //get the id and the name
                 $modules[$column->getId()] = $column->getName();
             }
+
             return $modules;
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return ['module error: ' => $error];
         }
     }
@@ -81,19 +83,18 @@ class internallistcore extends solution
             foreach ($jsonData as $keyData => $valueData) {
                 $this->moduleFields[$keyData] = ['label' => $keyData, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false];
             }
+
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return ['module fields error: ' => $error];
         }
     }
 
-
-
     public function read($params)
     {
-
         try {
             //return value
             $result = [];
@@ -105,14 +106,15 @@ class internallistcore extends solution
             if (!empty($param['query'])) {
                 // for special query with specified record id
                 $idValue = $param['query']['id'];
-                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int)$params['limit']]);
+                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int) $params['limit']]);
             } else {
                 //standard query using reference
                 $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
             }
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return ['error getting the records' => $error];
         }
 
@@ -122,21 +124,21 @@ class internallistcore extends solution
                 $getRecords = $row->getData();
                 $unserializedData = unserialize($getRecords);
                 $jsonData = json_decode($unserializedData);
-                $result[$recordRead] = (array)$jsonData;
+                $result[$recordRead] = (array) $jsonData;
 
                 //get the reference and the modified date
                 $result[$recordRead]['id'] = $row->getRecordId();
                 $result[$recordRead]['date_modified'] = $row->getDateModified();
 
                 //we increment the number of record read
-                $recordRead++;
+                ++$recordRead;
             } catch (\Exception $e) {
-                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
+
                 return ['error getting the data from the records' => $error];
             }
-        };
-
+        }
 
         return $result;
     }
@@ -148,13 +150,13 @@ class internallistcore extends solution
             try {
                 $this->connexion_valide = true;
             } catch (\PDOException $e) {
-                $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
 
                 return ['error' => $error];
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];

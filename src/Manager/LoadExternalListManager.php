@@ -2,21 +2,19 @@
 
 namespace App\Manager;
 
-use App\Entity\InternalListValue as InternalListValueEntity;
 use App\Entity\InternalList as InternalListEntity;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\InternalListValue as InternalListValueEntity;
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-
 //progress bar
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class loadexternallistcore
 {
-
     /**
      * @var EntityManagerInterface
      */
@@ -47,15 +45,15 @@ class loadexternallistcore
         //use the array map: this will use a function and iterate over an array of element instead of using a for loop
         $csvRows = array_map(function ($csv) {
             //convert the csv to a string, using ; as a separator
-            return str_getcsv($csv, ";");
-            //using file path
+            return str_getcsv($csv, ';');
+        //using file path
         }, file($file));
         //we generate a header which use the array shift method
         //array_shift takes of the 1st element of an array and returns it
         //so header will be the 1st element of the array rows
         $header = array_shift($csvRows);
         //initiate an empty array
-        $csv    = [];
+        $csv = [];
         //we loop through the rows
         foreach ($csvRows as $csvRow) {
             //we combine each row with the header
@@ -78,7 +76,6 @@ class loadexternallistcore
 
         try {
             foreach ($csv as $etablissement) {
-
                 //we loop through the csv data to add etablissements
                 $newRow = new InternalListValueEntity();
                 $rowDate = gmdate('Y-m-d h:i:s');
@@ -106,12 +103,10 @@ class loadexternallistcore
             // $this->entityManager->flush();
         } catch (Exception $e) {
             $this->entityManager->getConnection()->rollBack();
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             throw $e;
         }
-
-
 
         // ensures that the progress bar is at 100%
         $progressBar->finish();
