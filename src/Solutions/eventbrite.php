@@ -385,10 +385,10 @@ class eventbritecore extends solution
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
-        foreach ($param['data'] as $parametersEvent) {
+        foreach ($param['data'] as $idDoc => $parametersEvent) {
             try {
                 // Check control before update
-                $parametersEvent = $this->checkDataBeforeUpdate($param, $parametersEvent);
+                $parametersEvent = $this->checkDataBeforeUpdate($param, $parametersEvent, $idDoc);
                 $idDoc = '';
                 // array_shift permet de supprimer la première entrée du tableau contenant l'id du docuement et de la sauvegarder dans la variable idDoc
                 $idDoc = array_shift($parametersEvent);

@@ -1012,6 +1012,13 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
+			// Error if rule mode is update only and the document is a creation
+			if (
+                    $this->documentType == 'C'
+                and $this->ruleMode == 'U'
+            ) {
+                throw new \Exception('The document is a creation but the rule mode is UPDATE ONLY. ');
+            }
         } catch (\Exception $e) {
             $this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -1153,6 +1160,8 @@ class documentcore
         $read['call_type'] = 'history';
         $read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
         $read['document']['type'] = $this->documentType;
+		$read['document']['id'] = $this->id;
+        $read['jobId'] = $this->jobId;
         $dataTarget = $this->solutionTarget->readData($read);
         // If read method returns no result with no error
 
@@ -2024,6 +2033,8 @@ class documentcore
             $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
+			// Change the document type for the current process
+			$this->documentType = $new_type;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

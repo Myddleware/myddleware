@@ -192,7 +192,7 @@ class airtablecore extends solution
             // In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
             foreach ($param['fields'] as $field) {
                 if ('fld' == substr($field, 0, 3)) {
-                    include_once 'lib/airtable/metadata.php';
+                    include 'lib/airtable/metadata.php';
                     if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
                         $fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
                         continue;
@@ -375,7 +375,7 @@ class airtablecore extends solution
                         // trigger to add custom code if needed
                         $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     } elseif ('update' === $method) {
-                        $data = $this->checkDataBeforeUpdate($param, $data);
+                        $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                     }
                     // Recard are stored in the URL for a deletionj
                     elseif ('delete' === $method) {
@@ -413,7 +413,9 @@ class airtablecore extends solution
                     // Add the record id in the body if update
                     if ('update' == $method) {
                         $body['records'][$i]['id'] = $data['target_id'];
-                        unset($body['records'][$i]['fields']['target_id']);
+                        if (isset($body['records'][$i]['fields']['target_id'])) {
+							unset($body['records'][$i]['fields']['target_id']);
+						}
                     }
                     ++$i;
                 }

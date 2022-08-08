@@ -497,7 +497,7 @@ class solutioncore
                         throw new \Exception('No target id found. Failed to update the record.');
                     }
                     // Check control before create
-                    $record = $this->checkDataBeforeUpdate($param, $record);
+                    $record = $this->checkDataBeforeUpdate($param, $record, $idDoc);
                     // Call create methode
                     $recordId = $this->update($param, $record, $idDoc);
 
@@ -596,6 +596,7 @@ class solutioncore
         return [
             '0' => 'create_modify',
             'C' => 'create_only',
+			'U' => 'update_only',
         ];
     }
 
@@ -888,7 +889,7 @@ class solutioncore
 
     // Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
         $this->isJobActive($param);

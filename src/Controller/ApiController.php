@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ApiController extends AbstractController
 {
+
     private RuleRepository $ruleRepository;
 
     private JobRepository $jobRepository;
@@ -111,7 +112,7 @@ class ApiController extends AbstractController
             // Get the job statistics
             $jobData = $this->jobManager->getLogData($job);
             if (!empty($jobData['jobError'])) {
-                throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
+                throw new Exception('Failed to get the job statistics. ' . $jobData['jobError']);
             }
             $return['jobData'] = $jobData;
         } catch (Exception $e) {
@@ -179,7 +180,7 @@ class ApiController extends AbstractController
             $job = $this->jobRepository->find($return['jobId']);
             $jobData = $this->jobManager->getLogData($job);
             if (!empty($jobData['jobError'])) {
-                throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
+                throw new Exception('Failed to get the job statistics. ' . $jobData['jobError']);
             }
             $return['jobData'] = $jobData;
         } catch (Exception $e) {
@@ -233,7 +234,7 @@ class ApiController extends AbstractController
             // Create job instance
             $job = $this->container->get('myddleware_job.job');
             $job->setApi(1);
-            $job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
+            $job->initJob('Delete record ' . $data['recordId'] . ' in rule ' . $data['rule']);
 
             // Instantiate the rule
             $ruleParam['ruleId'] = $data['rule'];
@@ -253,7 +254,7 @@ class ApiController extends AbstractController
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
             if (!empty($document->error)) {
-                throw new Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
+                throw new Exception('Error during data transfer creation (rule ' . $data['rule'] . ')  : ' . $document->error . '. ');
             }
             $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
@@ -271,7 +272,7 @@ class ApiController extends AbstractController
             // Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it.
             // We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
             if (!empty($errors)) {
-                throw new Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
+                throw new Exception('Document in error (rule ' . $data['rule'] . ')  : ' . $errors[0] . '. ');
             }
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
@@ -296,8 +297,8 @@ class ApiController extends AbstractController
             $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
             $connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->logger->error('Failed to get the job statistics. '.$e->getMessage());
-            $return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
+            $this->logger->error('Failed to get the job statistics. ' . $e->getMessage());
+            $return['error'] .= 'Failed to get the job statistics. ' . $e->getMessage();
         }
         // Send the response
         return $this->json($return);
@@ -364,7 +365,7 @@ class ApiController extends AbstractController
             $job->id = $return['jobId'];
             $jobData = $job->getLogData(1);
             if (!empty($jobData['jobError'])) {
-                throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
+                throw new Exception('Failed to get the job statistics. ' . $jobData['jobError']);
             }
             $return['jobData'] = $jobData;
         } catch (Exception $e) {

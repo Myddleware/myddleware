@@ -368,7 +368,7 @@ class sapcrmcore extends saproot
         foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before update
-                $data = $this->checkDataBeforeUpdate($param, $data);
+                $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                 $dataSugar = [];
                 // Récupération des modifications seulement
                 $diff = array_diff($data, $param['dataHistory'][$idDoc]);
