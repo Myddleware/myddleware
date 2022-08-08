@@ -83,10 +83,7 @@ class LoadExternalListCommand extends Command
             '',
         ]);
         try {
-            // Source -------------------------------------------------
-            // alias de la règle en params
             $file = $input->getArgument('file');
-            //################################################################
             $manager = new LoadExternalListManager($this->entityManager);
             $manager->loadExternalList($file, $input, $output);
             $io->success([
@@ -106,11 +103,10 @@ class LoadExternalListCommand extends Command
                 '##############',
                 '',
             ]);
-            $io->getErrorStyle()->warning('Debugging information or errors: '.$e);
+            $io->getErrorStyle()->warning('Debugging information or errors: ' . $e);
             $io->error(sprintf('The user command did not work'));
 
             return 1;
         }
-        // Retour en console --------------------------------------
     }
 }
