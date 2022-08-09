@@ -15,7 +15,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -68,7 +67,8 @@ class RuleCrudController extends AbstractCrudController
 
         return $actions->add(Crud::PAGE_EDIT, $duplicate)
             ->add(Crud::PAGE_DETAIL, $duplicate)
-            ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE]);
+            ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE])
+         ;
     }
 
     public function configureFields(string $pageName): iterable
@@ -108,7 +108,7 @@ class RuleCrudController extends AbstractCrudController
                 ->setHelp('Modules disponibles: '),
             AssociationField::new('sourceModule')->hideOnForm(),
             AssociationField::new('targetModule')->hideOnForm(),
-            CollectionField::new('fields')->onlyOnDetail(),
+            AssociationField::new('fields')->hideOnForm(),
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
