@@ -27,6 +27,9 @@
 # Custom directory
 /src/Custom/*
 
+# localfiles
+/src/localfiles
+
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
