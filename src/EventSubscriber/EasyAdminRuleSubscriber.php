@@ -138,5 +138,15 @@ class EasyAdminRuleSubscriber implements EventSubscriberInterface
         $moduleSource = $rule->getSourceModule();
         $moduleTarget = $rule->getTargetModule();
         $fields = $rule->getFields();
+        $displayFields = [];
+        foreach ($fields->getValues() as $key => $field) {
+            $target = $field->getTarget();
+            $source = $field->getSource();
+            $displayFieldsString = "Target field(s): $target ; Source field(s): $source";
+            if (null !== $field->getFormula()) {
+                $displayFieldsString .= "; Formula: $field->getFormula()";
+            }
+            $displayFields[$key] = $displayFieldsString;
+        }
     }
 }
