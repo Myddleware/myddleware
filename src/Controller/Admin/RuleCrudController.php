@@ -15,6 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -87,10 +88,12 @@ class RuleCrudController extends AbstractCrudController
                     'attr' => [
                         'data-action' => 'change->rule#onSelectSource',
                         'data-solution-target' => 'module',
+                        'class' => 'd-flex',
                     ],
                 ])
                 ->setHelp('Modules disponibles: '),
             AssociationField::new('connectorTarget')
+                ->addCssClass('rule')
                 ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'rule',
@@ -99,11 +102,14 @@ class RuleCrudController extends AbstractCrudController
                     'attr' => [
                         'data-action' => 'change->rule#onSelectTarget',
                         'data-solution-target' => 'module',
+                        'class' => 'd-flex',
                     ],
                 ])
                 ->setHelp('Modules disponibles: '),
-            // AssociationField::new('sourceModule'),
-            // AssociationField::new('targetModule'),
+            AssociationField::new('sourceModule')->hideOnForm(),
+            AssociationField::new('targetModule')->hideOnForm(),
+            CollectionField::new('targetField')->onlyOnDetail(),
+            CollectionField::new('sourceField')->onlyOnDetail(),
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),

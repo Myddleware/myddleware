@@ -1,3 +1,24 @@
 input[type=text], input[type=password], input[type=email] {
     color:black;
 }
+
+/* Create Rule Form in RuleCrudController */
+
+#new-Rule-form {
+    margin-bottom: 25vh;
+}
+
+
+
+/* TODO: find a way to display both source & target connector inputs on the same ROW */
+#new-Rule-form>.row {
+
+}
+
+/*#new-Rule-form>.row>div {*/
+/*    width: 100%;*/
+/*}*/
+
+/*.rule {*/
+/*    display:inline-block;*/
+/*}*/

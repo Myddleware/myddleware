@@ -189,7 +189,7 @@ class JobManager
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+     *                                  Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
      */
     public function checkPredecessorDocuments(): void
     {
@@ -206,7 +206,7 @@ class JobManager
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet de contrôler si un document a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
+     *                                  Permet de contrôler si un document a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
      */
     public function checkParentDocuments(): void
     {
@@ -215,7 +215,7 @@ class JobManager
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet de transformer les documents
+     *                                  Permet de transformer les documents
      */
     public function transformDocuments(): void
     {
@@ -224,10 +224,10 @@ class JobManager
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Permet de récupérer les données de la cible avant modification des données
-     * 2 cas de figure :
-     * - Le document est un document de modification
-     * - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
+     *                                  Permet de récupérer les données de la cible avant modification des données
+     *                                  2 cas de figure :
+     *                                  - Le document est un document de modification
+     *                                  - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
      */
     public function getTargetDataDocuments(): void
     {

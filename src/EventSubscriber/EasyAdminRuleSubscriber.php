@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\Rule;
 use App\Repository\ModuleRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeCrudActionEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -24,6 +25,7 @@ class EasyAdminRuleSubscriber implements EventSubscriberInterface
     {
         return [
             BeforeEntityPersistedEvent::class => ['addModules'],
+            BeforeCrudActionEvent::class => ['beforeShow'],
         ];
     }
 
@@ -39,9 +41,8 @@ class EasyAdminRuleSubscriber implements EventSubscriberInterface
 
         if ($currentRequest->request->has('form')) {
             $ruleModulesForm = $currentRequest->request->get('form');
-
             if (!is_array($ruleModulesForm)) {
-                throw new BadRequestException('Modules source IDS missing');
+                throw new BadRequestException('Modules source IDs missing');
             }
 
             if (array_key_exists('source', $ruleModulesForm)) {
@@ -53,5 +54,22 @@ class EasyAdminRuleSubscriber implements EventSubscriberInterface
                 $entity->setTargetModule($moduleTarget);
             }
         }
+    }
+
+    public function beforeShow(BeforeCrudActionEvent $event)
+    {
+        $crud = $event->getAdminContext()->getCrud();
+        if (Rule::class !== $crud->getEntityFqcn() || 'detail' !== $crud->getCurrentAction()) {
+            return;
+        }
+        $entityDto = $event->getAdminContext()->getEntity();
+        /** @var Rule $rule */
+        $rule = $entityDto->getInstance();
+        $moduleSource = $rule->getSourceModule();
+        $moduleTarget = $rule->getTargetModule();
+        /**
+         * @TODO : add a property & getter for rulefields on Rule entity
+         */
+        $fields = $rule->getRuleFields();
     }
 }

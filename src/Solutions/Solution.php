@@ -983,5 +983,4 @@ class Solution
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
-
 }

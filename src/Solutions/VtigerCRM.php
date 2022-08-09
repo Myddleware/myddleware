@@ -28,12 +28,8 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Javanile\VtigerClient\VtigerClient;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 

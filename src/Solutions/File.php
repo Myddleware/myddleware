@@ -69,7 +69,7 @@ class File extends Solution
                 throw new \Exception('Please enable extension ssh2. Help here : http://php.net/manual/fr/ssh2.installation.php');
             }
             // Connect to the server
-            $this->connection = ssh2_connect($this->connectionParam['host'], (int)$this->connectionParam['port']);
+            $this->connection = ssh2_connect($this->connectionParam['host'], (int) $this->connectionParam['port']);
             ssh2_auth_password($this->connection, $this->connectionParam['login'], $this->connectionParam['password']);
 
             // Check if the directory exist

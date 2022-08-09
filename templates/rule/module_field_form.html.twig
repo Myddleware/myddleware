@@ -1,4 +1,10 @@
-<section class="ms-2 d-flex">
-    <p class="lead"> {{ placeholder }}</p>
-    {{ form_row(form.fieldSelect) }}
+<section class="mt-2 p-3 bg-primary rounded">
+    <p class="lead text-white"> {{ placeholder }}</p>
+    {% if form.fieldSelect_source is defined %}
+       {{ form_row(form.fieldSelect_source) }}
+    {% elseif form.fieldSelect_target is defined %}
+        {{ form_row(form.fieldSelect_target) }}
+    {% else %}
+        {{ form_row(form.fieldSelect_) }}
+   {% endif %}
 </section>

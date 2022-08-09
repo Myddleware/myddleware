@@ -110,7 +110,7 @@ export default class extends Controller {
     }
 
     // TODO: 1) each time a pair of source/target fields are chosen, a '+' button must also be displayed at the end of
-    // the row to provide the user with the opportunity to add morer pairs of source/target fields
+    // the row to provide the user with the opportunity to add more pairs of source/target fields
     // 2) when clicking this button, a new row (pair of source/target inputs + same button) must be displayed to allow user
     // to add as many pairs as they wish
     // we could even display an arrow between source & target inputs for each pair to clearly signify that this source field is linked to that target field

@@ -19,7 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-
     /**
      * @throws Exception
      */
@@ -117,7 +116,6 @@ class ConnectorController extends AbstractController
         } else {
             $statusCode = Response::HTTP_FORBIDDEN;
         }
-
 
         return $this->render('connector/test-connector-params.html.twig', [
             'isCredentialsValid' => $isValid,

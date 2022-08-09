@@ -127,14 +127,30 @@ class RuleController extends AbstractController
             }
 
             if (!empty($choices)) {
-                $placeholderMessage = 'Select 1 or more fields you wish to map';
+                $placeholderMessage = sprintf('Select 1 or more field(s) you wish to map as a %s', $origin);
+                // user should only be able to select 1 field as a target
+                if ('target' === $origin) {
+                    $placeholderMessage = sprintf('Select a field you wish to map as a %s', $origin);
+                }
             }
 
-            $form->add('fieldSelect', ChoiceType::class, [
+            // TODO: sort fields by origin inside the form in order to be able to generate the
+            // appropriate relationships between Rule, Module & Fields inside the Rule object generated
+            $fieldSelectWithOrigin = sprintf('fieldSelect_%s', $origin);
+            // user should only be able to select 1 field as a target
+            $multiple = true;
+            if ('target' === $origin) {
+                $multiple = false;
+            }
+            $form->add($fieldSelectWithOrigin, ChoiceType::class, [
+//            $form->add('fieldSelect', ChoiceType::class, [
                 'label' => sprintf('%s fields', $origin),
                 'choices' => $choices,
                 'expanded' => true,
-                'multiple' => true,
+                'multiple' => $multiple,
+                'row_attr' => [
+                   'class' => 'p-3',
+                ],
             ]);
         }
 
@@ -143,6 +159,7 @@ class RuleController extends AbstractController
         return $this->renderForm('rule/module_field_form.html.twig', [
             'form' => $form,
             'placeholder' => $placeholderMessage,
+            'origin' => $origin,
         ]);
     }
 }

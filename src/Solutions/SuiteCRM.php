@@ -54,7 +54,7 @@ class SuiteCRM extends Solution
         'default' => ['name'],
     ];
 
-    protected array $required_relationships = [
+    protected array $requiredRelationships = [
         'default' => [],
         'Contacts' => [],
         'Cases' => [],
@@ -184,12 +184,12 @@ class SuiteCRM extends Solution
     public function getSolutionModules($type = 'source'): ?array
     {
         try {
-            $get_available_modules_parameters = [
+            $availableModulesParameters = [
                 'session' => $this->session,
             ];
-            $get_available_modules = $this->call(method: 'get_available_modules', parameters: $get_available_modules_parameters);
-            if (!empty($get_available_modules->modules)) {
-                foreach ($get_available_modules->modules as $module) {
+            $availableModules = $this->call(method: 'get_available_modules', parameters: $availableModulesParameters);
+            if (!empty($availableModules->modules)) {
+                foreach ($availableModules->modules as $module) {
                     // On ne renvoie que les modules autorisés
                     if (
                         !in_array($module->module_key, $this->excludedModules['default'])
@@ -214,7 +214,6 @@ class SuiteCRM extends Solution
         }
     }
 
-    // Permet de récupérer tous les champs d'un module
     public function getModuleFields($module, $type = 'source', $param = null): ?array
     {
         parent::getModuleFields($module, $type);
@@ -241,13 +240,14 @@ class SuiteCRM extends Solution
                     ];
                 }
             } else {
-                $get_module_fields_parameters = [
+                $moduleFieldsParameters = [
                     'session' => $this->session,
                     'module_name' => $module,
                 ];
 
-                $get_module_fields = $this->call(method: 'getModuleFields', parameters: $get_module_fields_parameters);
-                foreach ($get_module_fields->module_fields as $field) {
+                $moduleFields = $this->call(method: 'get_module_fields', parameters: $moduleFieldsParameters);
+                // TODO: fix this :  Warning: Undefined property: stdClass::$module_fields on some modules such as ProspectLists
+                foreach ($moduleFields->module_fields as $field) {
                     if (isset($this->excludedFields['default'])) {
                         // Certains champs ne peuvent pas être modifiés
                         if (in_array($field->name, $this->excludedFields['default']) && 'target' == $type) {
@@ -307,8 +307,8 @@ class SuiteCRM extends Solution
                     }
                 }
                 // Ajout des champ type link (custom relationship ou custom module souvent)
-                if (!empty($get_module_fields->link_fields)) {
-                    foreach ($get_module_fields->link_fields as $field) {
+                if (!empty($moduleFields->link_fields)) {
+                    foreach ($moduleFields->link_fields as $field) {
                         if (isset($this->excludedFields['default'])) {
                             if (in_array($field->name, $this->excludedFields['default']) && 'target' == $type) {
                                 continue;
@@ -855,7 +855,7 @@ class SuiteCRM extends Solution
             'session' => $this->session,
             'module_name' => $module,
         ];
-        $get_module_fields = $this->call(method: 'getModuleFields', parameters: $get_module_fields_parameters);
+        $get_module_fields = $this->call(method: 'get_module_fields', parameters: $get_module_fields_parameters);
         // Get all custom relationship fields
         if (!empty($get_module_fields->link_fields)) {
             foreach ($get_module_fields->link_fields as $field) {
@@ -921,6 +921,7 @@ class SuiteCRM extends Solution
             return $response;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+
             return null;
         }
     }
