@@ -81,7 +81,6 @@ export default class extends Controller {
             .then((html) => {
                 this.htmlOutput.innerHTML = html;
                 this.element.append(this.htmlOutput);
-                this.appendButton(this.element);
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
@@ -117,13 +116,17 @@ export default class extends Controller {
 
     appendButton(element) {
         this.deletePreviousButton();
+        const buttonDiv = document.createElement('div');
+        buttonDiv.classList.add('d-grid');
         const addButton = document.createElement('button');
-        addButton.classList.add('ms-3');
+        addButton.classList.add('mt-5');
         addButton.classList.add('btn');
         addButton.classList.add('btn-warning');
+        addButton.classList.add('btn-lg');
         addButton.classList.add('add-more');
-        addButton.innerText = '+';
-        element.appendChild(addButton);
+        addButton.innerText = 'Add more fields to map';
+        buttonDiv.appendChild(addButton);
+        element.appendChild(buttonDiv);
     }
 
     // avoids having multiple buttons displayed on page
@@ -141,8 +144,19 @@ export default class extends Controller {
 
     }
 
-    addMoreFields(event) {
-        event.preventDefault();
+    async addMoreFields(event) {
         console.log(event);
+        throw new Error("my error message " + event);
+        event.preventDefault();
+        const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}/module/${targetModuleId.toString()}`)
+            .then(response => response.text())
+            .then((html) => {
+                this.htmlOutput.innerHTML = html;
+                this.element.append(this.htmlOutput);
+                this.appendButton(this.element);
+            })
+            .catch(function(err) {
+                console.log('Failed to fetch response: ', err);
+            });
     }
 }
