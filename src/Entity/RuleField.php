@@ -41,34 +41,34 @@ class RuleField
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="fields")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private ?Rule $rule;
 
     /**
      * @var string
      *
      * @ORM\Column(name="target_field_name", type="text", nullable=false)
      */
-    private $target;
+    private string $target;
 
     /**
      * @var string
      *
      * @ORM\Column(name="source_field_name", type="text", nullable=false)
      */
-    private $source;
+    private string $source;
 
     /**
      * @var string
      *
      * @ORM\Column(name="formula", type="text", nullable=true)
      */
-    private $formula;
+    private string $formula;
 
     public function getId(): int
     {
