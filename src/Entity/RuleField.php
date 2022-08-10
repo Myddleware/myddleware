@@ -50,22 +50,16 @@ class RuleField
     private ?Rule $rule;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="target_field_name", type="text", nullable=false)
      */
     private string $target;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="source_field_name", type="text", nullable=false)
      */
     private string $source;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="formula", type="text", nullable=true)
      */
     private string $formula;

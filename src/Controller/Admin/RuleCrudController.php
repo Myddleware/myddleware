@@ -68,7 +68,7 @@ class RuleCrudController extends AbstractCrudController
         return $actions->add(Crud::PAGE_EDIT, $duplicate)
             ->add(Crud::PAGE_DETAIL, $duplicate)
             ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE])
-         ;
+        ;
     }
 
     public function configureFields(string $pageName): iterable
