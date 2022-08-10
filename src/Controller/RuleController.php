@@ -151,6 +151,9 @@ class RuleController extends AbstractController
                 'row_attr' => [
                    'class' => 'p-3',
                 ],
+                'attr' => [
+                    'data-rule-target' => 'field',
+                ],
             ]);
         }
 

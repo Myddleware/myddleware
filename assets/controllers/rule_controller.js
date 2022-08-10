@@ -3,7 +3,7 @@ import {Controller} from '@hotwired/stimulus';
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
 
-    static targets = ['rule', 'module', 'field'];
+    static targets = ['rule', 'module', 'field', 'connector'];
     static values = {
         infoUrl: String,
         connectorSourceId: Number,
@@ -148,6 +148,7 @@ export default class extends Controller {
 
     async addMoreFields(event) {
         console.log(event.currentTarget);
+        event.stopPropagation();
         // @TODO: this currently sends event.currentTarget as null which then stops execution inside PHP controller
         const source = await this.onSelectModuleSource(event);
         const target = await this.onSelectModuleTarget(event);

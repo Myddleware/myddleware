@@ -87,7 +87,7 @@ class RuleCrudController extends AbstractCrudController
                     ],
                     'attr' => [
                         'data-action' => 'change->rule#onSelectSource',
-                        'data-solution-target' => 'module',
+                        'data-rule-target' => 'connector',
                         'class' => 'd-flex',
                     ],
                 ])
@@ -101,7 +101,7 @@ class RuleCrudController extends AbstractCrudController
                     ],
                     'attr' => [
                         'data-action' => 'change->rule#onSelectTarget',
-                        'data-solution-target' => 'module',
+                        'data-rule-target' => 'connector',
                         'class' => 'd-flex',
                     ],
                 ])
