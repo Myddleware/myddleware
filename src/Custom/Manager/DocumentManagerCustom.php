@@ -302,7 +302,9 @@ class DocumentManagerCustom extends DocumentManager
 
 	public function transformDocument()
 	{
-
+		$idrule = $this->document_data['rule_id'];
+		$docParams = $this->documentManager->getParam();
+		// $docParams = $this->documentManager->setParam($param, true);
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
