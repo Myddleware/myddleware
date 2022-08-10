@@ -314,20 +314,22 @@ class DocumentManagerCustom extends DocumentManager
 					try {
 						//get all the school facilities
 						$table = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
-
+						$rowschecked = 0;
+						$matchingrows = [];
 						//code witth this->sourceData to check the source and compare with the externallist
 						// $this->sourceData
 
 						foreach ($table as $row) {
 							$data = $row->getData();
 							$unserializedData = unserialize($data);
-							$validname = ($unserializedData['Nom_etablissement'] == $this->sourceData['name']);
+							$validname = ($unserializedData['Nom_etablissement'] == $this->sourceData['name'] && ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode'] || $this->sourceData['billing_address_postalcode'] == ""));
 							if ($validname == true) {
 								//rechercher l'établissement dans l'externallist
 								$found = true;
+								$matchingrows[$unserializedData['Identifiant_de_l_etablissement']] = $unserializedData['Nom_etablissement'];
 							} else {
-								$found = false;
 							}
+							$rowschecked++;
 						}
 						//si trouvé
 						if ($found == true) {
