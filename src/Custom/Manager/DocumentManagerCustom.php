@@ -370,9 +370,31 @@ class DocumentManagerCustom extends DocumentManager
 							}
 
 							//phone number
-							if ($this->sourceData['phone_office'] == "" || $this->sourceData['account_type'] != $unserializedData['Telephone']) {
+							if ($this->sourceData['phone_office'] == "" || $this->sourceData['phone_office'] != $unserializedData['Telephone']) {
 								$this->sourceData['phone_office'] = $unserializedData['Telephone'];
 							}
+
+							//email
+							if ($this->sourceData['email1'] == "" || $this->sourceData['email1'] != $unserializedData['Mail']) {
+								$this->sourceData['email1'] = $unserializedData['Mail'];
+							}
+
+							//rep+
+							if ($this->sourceData['rep_c'] == "" || $this->sourceData['rep_c'] != $unserializedData['Appartenance_Education_Prioritaire']) {
+								$this->sourceData['rep_c'] = $unserializedData['Appartenance_Education_Prioritaire'];
+							}
+
+							//commune
+							if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
+								$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+							}
+
+							//adresse postale 1 et 2
+							if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
+								$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+							}
+
+
 
 							return parent::transformDocument();
 						} else {
