@@ -91,7 +91,7 @@ class CirrusShield extends Solution
         }
     }
 
-    public function getModules(string $type = 'source'): ?array
+    public function getSolutionModules(string $type = 'source'): ?array
     {
         try {
             $modules = [];

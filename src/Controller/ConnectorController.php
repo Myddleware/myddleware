@@ -19,7 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConnectorController extends AbstractController
 {
-
     /**
      * @throws Exception
      */

@@ -89,7 +89,7 @@ class Sendinblue extends Solution
         }
     }
 
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         if ('source' == $type) {
             return [

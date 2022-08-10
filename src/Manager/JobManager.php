@@ -25,6 +25,7 @@
 
 namespace App\Manager;
 
+use DateTime;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -32,25 +33,28 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Yaml\Yaml;
+use UnitEnum;
 
 class JobManager
 {
     protected $id;
 
-    public $message = '';
+    public string $message = '';
 
-    public $createdJob = false;
+    public bool $createdJob = false;
 
     protected $container;
 
-    protected $connection;
+    protected DriverConnection $connection;
 
-    protected $logger;
+    protected LoggerInterface $logger;
 
-    protected $tools;
+    protected ToolsManager $tools;
 
-    protected $ruleManager;
+    protected RuleManager $ruleManager;
 
     protected $ruleId;
 
@@ -62,31 +66,21 @@ class JobManager
 
     protected $manual;
 
-    protected $api = 0; 	// Specify if the class is called by the API
+    protected int $api = 0; 	// Specify if the class is called by the API
 
-    protected $env;
+    protected string|int|bool|array|null|float|UnitEnum $env;
 
-    protected $nbDayClearJob = 7;
+    protected int $nbDayClearJob = 7;
 
-    /**
-     * @var ParameterBagInterface
-     */
-    private $parameterBagInterface;
+    private ParameterBagInterface $parameterBagInterface;
 
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
 
-    /**
-     * @var TemplateManager
-     */
-    private $templateManager;
+    private TemplateManager $templateManager;
 
-    /**
-     * @var UpgradeManager
-     */
-    private $upgrade;
+    private UpgradeManager $upgrade;
+
+    private RequestStack $requestStack;
 
     public function __construct(
         LoggerInterface $logger,
@@ -117,18 +111,18 @@ class JobManager
         return $this->id;
     }
 
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    public function setMessage($message)
+    public function setMessage($message): void
     {
         $this->message = $message;
     }
 
-    // Set the rule data in the current inctance of the rule
-    public function setRule($filter)
+    // Set the rule data in the current instance of the rule
+    public function setRule($filter): bool
     {
         try {
             // Get the connector ID
@@ -146,14 +140,14 @@ class JobManager
             $result = $stmt->executeQuery();
             $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
-                throw new \Exception('Rule '.$filter.' doesn\'t exist or is deleted.');
+                throw new Exception('Rule '.$filter.' doesn\'t exist or is deleted.');
             }
             // Error if the rule is inactive and if we try to run it from a job (not manually)
             elseif (
                 empty($rule['active'])
                 && 0 == $this->manual
             ) {
-                throw new \Exception('Rule '.$filter.' is inactive.');
+                throw new Exception('Rule '.$filter.' is inactive.');
             }
 
             $this->ruleId = $rule['id'];
@@ -164,11 +158,11 @@ class JobManager
             $this->ruleManager->setApi($this->api);
 
             if ($this->ruleManager->isChild()) {
-                throw new \Exception('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
+                throw new Exception('Rule '.$filter.' is a child rule. Child rules can only be run by the parent rule.');
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= $e->getMessage();
 
@@ -176,7 +170,10 @@ class JobManager
         }
     }
 
-    // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+     */
     public function createDocuments()
     {
         $createDocuments = $this->ruleManager->createDocuments();
@@ -190,41 +187,55 @@ class JobManager
         }
     }
 
-    // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-    public function ckeckPredecessorDocuments()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+     */
+    public function checkPredecessorDocuments(): void
     {
         $this->ruleManager->checkPredecessorDocuments();
     }
 
-    // Permet de filtrer les documents en fonction des filtres de la règle
-    public function filterDocuments()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function filterDocuments(): void
     {
         $this->ruleManager->filterDocuments();
     }
 
-    // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function ckeckParentDocuments()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet de contrôler si un document a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
+     */
+    public function checkParentDocuments(): void
     {
         $this->ruleManager->checkParentDocuments();
     }
 
-    // Permet de trasformer les documents
-    public function transformDocuments()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet de transformer les documents
+     */
+    public function transformDocuments(): void
     {
         $this->ruleManager->transformDocuments();
     }
 
-    // Permet de récupérer les données de la cible avant modification des données
-    // 2 cas de figure :
-    //     - Le document est un document de modification
-    //     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
-    public function getTargetDataDocuments()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Permet de récupérer les données de la cible avant modification des données
+     *                                  2 cas de figure :
+     *                                  - Le document est un document de modification
+     *                                  - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
+     */
+    public function getTargetDataDocuments(): void
     {
         $this->ruleManager->getTargetDataDocuments();
     }
 
-    // Ecriture dans le système source et mise à jour de la table document
-    public function sendDocuments()
+    // Écriture dans le système source et mise à jour de la table document
+    public function sendDocuments(): void
     {
         $sendDocuments = $this->ruleManager->sendDocuments();
         if (!empty($sendDocuments['error'])) {
@@ -232,8 +243,8 @@ class JobManager
         }
     }
 
-    // Ecriture dans le système source et mise à jour de la table document
-    public function runError($limit, $attempt)
+    // Écriture dans le système source et mise à jour de la table document
+    public function runError($limit, $attempt): void
     {
         try {
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
@@ -263,14 +274,16 @@ class JobManager
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
     }
 
-    // Fonction permettant d'initialiser le job
-    public function initJob($paramJob)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function initJob($paramJob): array
     {
         $this->paramJob = $paramJob;
         $this->id = uniqid('', true);
@@ -299,8 +312,10 @@ class JobManager
         }
     }
 
-    // Permet de clôturer un job
-    public function closeJob()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function closeJob(): bool
     {
         // Get job data
         $this->logData = $this->getLogData();
@@ -310,7 +325,7 @@ class JobManager
     }
 
     // Permet d'exécuter des jobs manuellement depuis Myddleware
-    public function actionMassTransfer($event, $datatype, $param)
+    public function actionMassTransfer($event, $datatype, $param): bool|string
     {
         if (in_array($event, ['rerun', 'cancel'])) {
             // Pour ces 2 actions, l'event est le premier paramètre, le type de donnée est le deuxième
@@ -325,8 +340,7 @@ class JobManager
         }
     }
 
-    // Lancement d'un job manuellement en arrière plan
-    public function runBackgroundJob($job, $param)
+    public function runBackgroundJob($job, $param): bool|string
     {
         try {
             // Création d'un fichier temporaire
@@ -334,7 +348,7 @@ class JobManager
             $php = 'php';
             $params = '';
 
-            // If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
+            // If cancel job, we force the Y (used for super admin because the cancel button is also displayed for the closed documents)
             if ('cancel' == $param[0]) {
                 $param[] = 'Y';
             }
@@ -353,14 +367,14 @@ class JobManager
             try {
                 $fs->mkdir(dirname($fileTmp));
             } catch (IOException $e) {
-                throw new \Exception('An error occured while creating your directory');
+                $this->logger->error($e->getMessage().$e->getFile().$e->getLine());
+                throw new Exception('An error occurred while creating your directory'.$e->getMessage());
             }
             exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &', $output);
             $cpt = 0;
-            // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {
                 if ($cpt >= 29) {
-                    throw new \Exception('Failed to run the job.');
+                    throw new Exception('Failed to run the job.');
                 }
                 sleep(1);
                 ++$cpt;
@@ -373,7 +387,7 @@ class JobManager
             fclose($file);
             while (empty($idJob)) {
                 if ($cpt >= 29) {
-                    throw new \Exception('No task id given.');
+                    throw new Exception('No task id given.');
                 }
                 sleep(1);
                 $file = fopen($fileTmp, 'r');
@@ -381,12 +395,12 @@ class JobManager
                 fclose($file);
                 ++$cpt;
             }
-            // Renvoie du message en session
+            // Renvoi du message en session
             $session = $this->getSession();
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $session = $this->requestStack->getSession();
             $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
 
@@ -394,15 +408,13 @@ class JobManager
         }
     }
 
-    // Function to modify a group of documents
-    public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus)
+    public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus): bool
     {
         try {
             if (empty($ids)) {
                 throw new Exception('No ids in the input parameter of the function massAction.');
             }
             // Build IN parameter
-            // $idsDocArray = explode(',',$ids);
             $queryIn = '(';
             foreach ($ids as $idDoc) {
                 $queryIn .= "'".$idDoc."',";
@@ -410,8 +422,8 @@ class JobManager
             $queryIn = rtrim($queryIn, ',');
             $queryIn .= ')';
 
-            // Buid WHERE section
-            // Filter on rule or docuement depending on the data type
+            // Build WHERE section
+            // Filter on rule or document depending on the data type
             $where = ' WHERE ';
             if ('rule' == $dataType) {
                 $where .= " rule.id IN $queryIn ";
@@ -451,7 +463,6 @@ class JobManager
             $documents = $result->fetchAllAssociative();
 
             if (!empty($documents)) {
-                // include_once 'rule.php';
                 $param['ruleId'] = '';
                 foreach ($documents as $document) {
                     // If new rule, we create a new instance of RuleManager
@@ -463,9 +474,9 @@ class JobManager
                     $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
                 }
             } else {
-                throw new \Exception('No document found corresponding to the input parameters. No action done in the job massAction. ');
+                throw new Exception('No document found corresponding to the input parameters. No action done in the job massAction. ');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
@@ -475,14 +486,13 @@ class JobManager
         return true;
     }
 
-    // Fonction permettant d'annuler massivement des documents
     public function readRecord($ruleId, $filterQuery, $filterValues)
     {
         try {
-            // Get the fielter values
+            // Get the fielder values
             $filterValuesArray = explode(',', $filterValues);
             if (empty($filterValuesArray)) {
-                throw new \Exception('Invalide filter value. Failed to read data.');
+                throw new Exception('Invalide filter value. Failed to read data.');
             }
 
             // Check that the rule value is valid
@@ -492,10 +502,10 @@ class JobManager
             $result = $stmt->executeQuery();
             $rule = $result->fetchAssociative(); // 1 row
             if (empty($rule['id'])) {
-                throw new \Exception('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
+                throw new Exception('Rule '.$ruleId.' doesn\'t exist or is deleted. Failed to read data.');
             }
 
-            // We instanciate the rule
+            // We instantiate the rule
             $this->ruleManager->setRule($ruleId);
             $this->ruleManager->setJobId($this->id);
             $this->ruleManager->setApi($this->api);
@@ -505,7 +515,7 @@ class JobManager
                 // Generate documents
                 $documents = $this->ruleManager->generateDocuments($value, true, '', $filterQuery);
                 if (!empty($documents->error)) {
-                    throw new \Exception($documents->error);
+                    throw new Exception($documents->error);
                 }
                 // Run documents
                 if (!empty($documents)) {
@@ -518,7 +528,7 @@ class JobManager
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
@@ -527,7 +537,7 @@ class JobManager
     }
 
     // Remove all data flagged deleted in the database
-    public function pruneDatabase()
+    public function pruneDatabase(): void
     {
         // Documents
 
@@ -536,7 +546,7 @@ class JobManager
         // Connectors
     }
 
-    public function getRules()
+    public function getRules(): bool|array|null
     {
         try {
             $sqlParams = '	SELECT name_slug 
@@ -546,7 +556,7 @@ class JobManager
 							WHERE 
 									rule.active = 1
 								AND	rule.deleted = 0
-							ORDER BY ruleorder.order ASC';
+							ORDER BY ruleorder.order';
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
             $rules = $result->fetchAllAssociativeIndexed();
@@ -555,7 +565,7 @@ class JobManager
                     $ruleOrder[] = $rule['name_slug'];
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
             return false;
@@ -567,13 +577,15 @@ class JobManager
         return $ruleOrder;
     }
 
-    // Fonction permettant de définir un ordre dans le lancement des règles
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function orderRules()
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             // Récupération de toutes les règles avec leurs règles liées (si plusieurs elles sont toutes au même endroit)
-            // Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
+            // Si la règle n'a pas de relation, on initialise l'ordre à 1 sinon on met 99
             $sql = "SELECT
 						rule.id,
 						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id
@@ -589,7 +601,7 @@ class JobManager
 
             if (!empty($rules)) {
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
-                $ruleKeyVakue = [];
+                $ruleKeyValue = [];
                 foreach ($rules as $key => $rule) {
                     // Init order depending on the field_id value
                     if (empty($rule['field_id'])) {
@@ -597,16 +609,16 @@ class JobManager
                     } else {
                         $rules[$key]['rule_order'] = 99;
                     }
-                    $ruleKeyVakue[$rule['id']] = $rules[$key]['rule_order'];
+                    $ruleKeyValue[$rule['id']] = $rules[$key]['rule_order'];
                     $rulesRef[$rule['id']] = $rule;
                 }
 
-                // On calcule les priorité tant que l'on a encore des priorité 99
+                // On calcule les priorités tant que l'on a encore des priorités 99
                 // On fait une condition sur le $i pour éviter une boucle infinie
                 $i = 0;
-                while ($i < 20 && false !== array_search('99', $ruleKeyVakue)) {
+                while ($i < 20 && in_array('99', $ruleKeyValue)) {
                     ++$i;
-                    // Boucles sur les régles
+                    // Boucles sur les règles
                     foreach ($rules as $rule) {
                         $order = 0;
                         // Si on est une règle sans ordre
@@ -618,15 +630,15 @@ class JobManager
                             $rulesLink = explode(';', $rule['field_id']);
                             foreach ($rulesLink as $ruleLink) {
                                 if (
-                                    !empty($ruleKeyVakue[$ruleLink])
-                                    && $ruleKeyVakue[$ruleLink] > $order
+                                    !empty($ruleKeyValue[$ruleLink])
+                                    && $ruleKeyValue[$ruleLink] > $order
                                 ) {
-                                    $order = $ruleKeyVakue[$ruleLink];
+                                    $order = $ruleKeyValue[$ruleLink];
                                 }
                             }
                             // Si toutes les règles trouvées ont une priorité autre que 99 alors on affecte à la règle la piorité +1 dans les tableaux de références
                             if ($order < 99) {
-                                $ruleKeyVakue[$rule['id']] = $order + 1;
+                                $ruleKeyValue[$rule['id']] = $order + 1;
                                 $rulesRef[$rule['id']]['rule_order'] = $order + 1;
                             }
                         }
@@ -641,7 +653,7 @@ class JobManager
 
                 // Mise à jour de la table
                 $insert = 'INSERT INTO ruleorder VALUES ';
-                foreach ($ruleKeyVakue as $key => $value) {
+                foreach ($ruleKeyValue as $key => $value) {
                     $insert .= "('$key','$value'),";
                 }
                 // Suppression de la dernière virgule
@@ -650,7 +662,7 @@ class JobManager
                 $result = $stmt->executeQuery();
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
@@ -659,7 +671,7 @@ class JobManager
         }
     }
 
-    public function generateTemplate($nomTemplate, $descriptionTemplate, $rulesId)
+    public function generateTemplate($nomTemplate, $descriptionTemplate, $rulesId): array
     {
         try {
             // Init array
@@ -673,11 +685,11 @@ class JobManager
                     // Generate array with all rules parameters
                     $templateArray['rules'][] = $this->templateManager->extractRule($rulesOrderId['rule_id']);
                 }
-                // Ecriture du fichier
-                $yaml = \Symfony\Component\Yaml\Yaml::dump($templateArray, 4);
+                // Écriture du fichier
+                $yaml = Yaml::dump($templateArray, 4);
                 file_put_contents($this->parameterBagInterface->get('kernel.root_dir').'/Templates/'.$nomTemplate.'.yml', $yaml);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
 
@@ -688,7 +700,7 @@ class JobManager
     }
 
     // Permet d'indiquer que le job est lancé manuellement
-    protected function setManual()
+    protected function setManual(): void
     {
         if ('background' == $this->env) {
             $this->manual = 0;
@@ -697,23 +709,26 @@ class JobManager
         }
     }
 
-    // Set webserice flag
-    public function setApi($value)
+    // Set webservice flag
+    public function setApi($value): void
     {
         // default value = 0
         $this->api = (!empty($value) ? $value : 0);
     }
 
     // Myddleware upgrade
-    public function upgrade($output)
+    public function upgrade($output): void
     {
-        // $upgrade = new Upgrade($this->logger, $this->container, $this->connection);
         $upgrade = $this->upgrade;
         $this->message = $upgrade->processUpgrade($output);
     }
 
-    // Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
-    public function clearData()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     *                                  Permet de supprimer toutes les données des tables source, target et history en fonction des paramètres de chaque règle
+     */
+    public function clearData(): void
     {
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "	SELECT 
@@ -731,8 +746,8 @@ class JobManager
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
-                // Calculate the date corresponding depending the rule parameters
-                $limitDate = new \DateTime('now', new \DateTimeZone('GMT'));
+                // Calculate the date corresponding depending on the rule parameters
+                $limitDate = new DateTime('now', new \DateTimeZone('GMT'));
                 $limitDate->modify('-'.$rule['days'].' days');
                 // Delete document data
                 $this->connection->beginTransaction();
@@ -741,7 +756,7 @@ class JobManager
 						DELETE documentdata
 						FROM document
 							INNER JOIN documentdata
-								ON document.id = documentdata.doc_id
+								ON document.id = documentdata.document
 						WHERE 
 								document.rule_id = :ruleId
 							AND document.global_status IN ('Close','Cancel')
@@ -755,7 +770,7 @@ class JobManager
                         $this->message .= $result->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
                     }
                     $this->connection->commit(); // -- COMMIT TRANSACTION
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                     $this->message .= 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->logger->error($this->message);
@@ -783,7 +798,7 @@ class JobManager
                         $this->message .= $result->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';
                     }
                     $this->connection->commit(); // -- COMMIT TRANSACTION
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                     $this->message .= 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->logger->error($this->message);
@@ -792,7 +807,7 @@ class JobManager
         }
         $this->connection->beginTransaction();
         try {
-            $limitDate = new \DateTime('now', new \DateTimeZone('GMT'));
+            $limitDate = new DateTime('now', new \DateTimeZone('GMT'));
             $limitDate->modify('-'.$this->nbDayClearJob.' days');
             // Suppression des jobs de transfert vide
             $deleteJob = " 	
@@ -815,7 +830,7 @@ class JobManager
                 $this->message .= $result->rowCount().' rows deleted in the table Job. ';
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
@@ -826,7 +841,7 @@ class JobManager
     public function getLogData($documentDetail = false)
     {
         try {
-            // Récupération du nombre de document envoyé et en erreur pour ce job
+            // Récupération du nombre de documents envoyés et en erreur pour ce job
             $this->logData['Close'] = 0;
             $this->logData['Cancel'] = 0;
             $this->logData['Open'] = 0;
@@ -861,8 +876,8 @@ class JobManager
 
             // Récupération des solutions du job
             $sqlParams = '	SELECT 
-								Connector_target.sol_id sol_id_target,
-								Connector_source.sol_id sol_id_source
+								Connector_target.solution_id sol_id_target,
+								Connector_source.solution_id sol_id_source
 							FROM (SELECT DISTINCT rule_id FROM log WHERE job_id = :id) rule_job
 								INNER JOIN rule
 									ON rule_job.rule_id = rule.id
@@ -887,7 +902,7 @@ class JobManager
             }
 
             // Get the document detail if requested
-            if (true == $documentDetail) {
+            if ($documentDetail) {
                 $sqlParamsDoc = '	SELECT DISTINCT document.*
 								FROM log
 									INNER JOIN document
@@ -913,7 +928,7 @@ class JobManager
 
             // Récupération des erreurs
             $this->logData['jobError'] = $this->message;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->logData['jobError'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
@@ -921,10 +936,12 @@ class JobManager
         return $this->logData;
     }
 
-    // Mise à jour de la table Job
-    protected function updateJob()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function updateJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+        $this->connection->beginTransaction();
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -954,9 +971,9 @@ class JobManager
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
-        } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $this->connection->commit();
+        } catch (Exception $e) {
+            $this->connection->rollBack();
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 
@@ -966,17 +983,20 @@ class JobManager
         return true;
     }
 
-    protected function insertJob()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function insertJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+        $this->connection->beginTransaction();
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
-        } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $this->connection->commit();
+        } catch (Exception $e) {
+            $this->connection->rollBack();
             $this->logger->error('Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 
@@ -989,10 +1009,8 @@ class JobManager
     /**
      * Since SF5.4, the way to load the session has changed.
      */
-    public function getSession()
+    public function getSession(): SessionInterface
     {
-        $session = $this->requestStack->getSession();
-
-        return $session;
+        return $this->requestStack->getSession();
     }
 }

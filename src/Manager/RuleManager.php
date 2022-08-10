@@ -294,7 +294,7 @@ class RuleManager
             $sql = 'SELECT solution.name  
 		    		FROM connector
 						INNER JOIN solution 
-							ON solution.id  = connector.sol_id
+							ON solution.id  = connector.solution_id
 		    		WHERE connector.id = :connId';
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':connId', $connId);

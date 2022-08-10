@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace App\Solutions;
 
+use Exception;
 use Javanile\VtigerClient\VtigerClient;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -103,13 +104,13 @@ class VtigerCRM extends Solution
             $result = $client->login(trim($this->connectionParam['username']), trim($this->connectionParam['accesskey']));
 
             if (!$result['success']) {
-                throw new \Exception($result['error']['message']);
+                throw new Exception($result['error']['message']);
             }
 
             $this->session = $client->getSessionName();
             $this->isConnectionValid = true;
             $this->vtigerClient = $client;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
         }
@@ -141,9 +142,11 @@ class VtigerCRM extends Solution
         ];
     }
 
-    public function getModules(string $type = 'source'): ?array
+    public function getSolutionModules(string $type = 'source'): ?array
     {
         try {
+            // TODO: at the moment, when trying to access modules from the rule creation page, vtigerClient is empty so
+            // execution stops here => need to find why / how to get the vtigerClient instanciation working from login
             if (empty($this->vtigerClient)) {
                 return null;
             }
@@ -170,7 +173,7 @@ class VtigerCRM extends Solution
             }
 
             return $options ?: null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage());
 
             return ['error' => $e->getMessage()];
@@ -258,7 +261,7 @@ class VtigerCRM extends Solution
             }
 
             return $this->moduleFields ?: null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return null;
@@ -395,7 +398,7 @@ class VtigerCRM extends Solution
                 $param['offset'] += $nDataCall;
                 $dataLeft -= $nDataCall;
             } while ($dataLeft > 0 && $countResult >= $nDataCall);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' '.$e->getLine();
         }
 
@@ -472,9 +475,9 @@ class VtigerCRM extends Solution
                             'error' => false,
                         ];
                     } else {
-                        throw new \Exception($resultCreate['error']['message'] ?? 'Error');
+                        throw new Exception($resultCreate['error']['message'] ?? 'Error');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => $e->getMessage(),
@@ -491,7 +494,7 @@ class VtigerCRM extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['error'] = $error;
         }
@@ -570,9 +573,9 @@ class VtigerCRM extends Solution
                             'error' => false,
                         ];
                     } else {
-                        throw new \Exception($resultUpdate['error']['message'] ?? 'Error');
+                        throw new Exception($resultUpdate['error']['message'] ?? 'Error');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => $e->getMessage(),
@@ -589,7 +592,7 @@ class VtigerCRM extends Solution
                 }
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $result['error'] = $error;
         }
@@ -607,19 +610,19 @@ class VtigerCRM extends Solution
                     // Check control before delete
                     $data = $this->checkDataBeforeDelete($param, $data);
                     if (empty($data['target_id'])) {
-                        throw new \Exception('No target id found. Failed to delete the record.');
+                        throw new Exception('No target id found. Failed to delete the record.');
                     }
                     // Delete the record
                     $resultDelete = $this->vtigerClient->delete($data['target_id']);
                     if (empty($resultDelete['success'])) {
-                        throw new \Exception($resultDelete['error']['message'] ?? 'Error');
+                        throw new Exception($resultDelete['error']['message'] ?? 'Error');
                     }
                     // Generate return for Myddleware
                     $result[$idDoc] = [
                         'id' => $data['target_id'],
                         'error' => false,
                     ];
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $error = 'Error : '.$e->getMessage();
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -629,7 +632,7 @@ class VtigerCRM extends Solution
                 // Status modification for the transfer
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $result[$idDoc] = [
                 'id' => '-1',

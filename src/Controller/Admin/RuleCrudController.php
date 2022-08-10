@@ -36,7 +36,7 @@ class RuleCrudController extends AbstractCrudController
         return Rule::class;
     }
 
-    public function createEntity(string $entityFqcn)
+    public function createEntity(string $entityFqcn): Rule
     {
         $user = $this->getUser();
         $rule = new Rule();
@@ -67,7 +67,8 @@ class RuleCrudController extends AbstractCrudController
 
         return $actions->add(Crud::PAGE_EDIT, $duplicate)
             ->add(Crud::PAGE_DETAIL, $duplicate)
-            ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE]);
+            ->reorder(Crud::PAGE_DETAIL, [Action::EDIT, self::ACTION_DUPLICATE])
+        ;
     }
 
     public function configureFields(string $pageName): iterable
@@ -86,11 +87,13 @@ class RuleCrudController extends AbstractCrudController
                     ],
                     'attr' => [
                         'data-action' => 'change->rule#onSelectSource',
-                        'data-solution-target' => 'module',
+                        'data-rule-target' => 'connector',
+                        'class' => 'd-flex',
                     ],
                 ])
                 ->setHelp('Modules disponibles: '),
             AssociationField::new('connectorTarget')
+                ->addCssClass('rule')
                 ->setFormTypeOptions([
                     'row_attr' => [
                         'data-controller' => 'rule',
@@ -98,12 +101,14 @@ class RuleCrudController extends AbstractCrudController
                     ],
                     'attr' => [
                         'data-action' => 'change->rule#onSelectTarget',
-                        'data-solution-target' => 'module',
+                        'data-rule-target' => 'connector',
+                        'class' => 'd-flex',
                     ],
                 ])
                 ->setHelp('Modules disponibles: '),
-            // AssociationField::new('sourceModule'),
-            // AssociationField::new('targetModule'),
+            AssociationField::new('sourceModule')->hideOnForm(),
+            AssociationField::new('targetModule')->hideOnForm(),
+            AssociationField::new('fields')->hideOnForm(),
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),

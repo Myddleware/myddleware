@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace App\Solutions;
 
 use App\Entity\Rule;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -42,7 +43,7 @@ class File extends Solution
 
     protected array $duplicateDoc = [];
 
-    protected \Doctrine\DBAL\Connection $connection;
+    protected Connection $connection;
 
     protected string $delimiter = ';';
 
@@ -68,7 +69,7 @@ class File extends Solution
                 throw new \Exception('Please enable extension ssh2. Help here : http://php.net/manual/fr/ssh2.installation.php');
             }
             // Connect to the server
-            $this->connection = ssh2_connect($this->connectionParam['host'], $this->connectionParam['port']);
+            $this->connection = ssh2_connect($this->connectionParam['host'], (int) $this->connectionParam['port']);
             ssh2_auth_password($this->connection, $this->connectionParam['login'], $this->connectionParam['password']);
 
             // Check if the directory exist
@@ -119,7 +120,7 @@ class File extends Solution
     }
 
     // Renvoie les modules passés en paramètre
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         try {
             // Get the subfolders of the current directory

@@ -130,7 +130,7 @@ class Airtable extends Solution
      *
      * @param string $type source|target
      */
-    public function getModules(string $type = 'source'): array
+    public function getSolutionModules(string $type = 'source'): array
     {
         if (!empty($this->modules[$this->projectID])) {
             return $this->modules[$this->projectID];

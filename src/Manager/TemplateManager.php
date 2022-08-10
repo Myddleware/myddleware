@@ -345,14 +345,14 @@ class TemplateManager
                     $rule['sourceSolution'] == $solutionSourceName
                     && $rule['targetSolution'] == $solutionTargetName
                 ) {
-                    $sourceFieldsList = $sourceSolution->get_module_fields($rule['sourceModule']);
-                    $targetFieldsList = $targetSolution->get_module_fields($rule['targetModule']);
+                    $sourceFieldsList = $sourceSolution->getModuleFields($rule['sourceModule']);
+                    $targetFieldsList = $targetSolution->getModuleFields($rule['targetModule']);
                 } elseif (
                     $rule['sourceSolution'] == $solutionSourceName
                     && $rule['targetSolution'] == $solutionTargetName
                 ) {
-                    $sourceFieldsList = $targetSolution->get_module_fields($rule['sourceModule']);
-                    $targetFieldsList = $sourceSolution->get_module_fields($rule['targetModule']);
+                    $sourceFieldsList = $targetSolution->getModuleFields($rule['sourceModule']);
+                    $targetFieldsList = $sourceSolution->getModuleFields($rule['targetModule']);
                 } else {
                     throw new Exception('No correspondance between source solutions. Failed to get the field list. ');
                 }

@@ -74,7 +74,7 @@ class SAPECC extends SAP
     }
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',

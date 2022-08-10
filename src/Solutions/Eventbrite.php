@@ -84,7 +84,7 @@ class Eventbrite extends Solution
         }
     }
 
-    public function getModules(string $type = 'source'): array
+    public function getSolutionModules(string $type = 'source'): array
     {
         try {
             // Le module attendee n'est accessible d'en source

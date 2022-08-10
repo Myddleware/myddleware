@@ -169,16 +169,16 @@
         },
         {
             "name": "async-aws/core",
-            "version": "1.16.0",
+            "version": "1.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/async-aws/core.git",
-                "reference": "f5a69caba5ddee8475c90b7ee1b6f6dfdfac4f53"
+                "reference": "3b58a4b3ddace0a9616028bde8f596fa7d7a2d7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/async-aws/core/zipball/f5a69caba5ddee8475c90b7ee1b6f6dfdfac4f53",
-                "reference": "f5a69caba5ddee8475c90b7ee1b6f6dfdfac4f53",
+                "url": "https://api.github.com/repos/async-aws/core/zipball/3b58a4b3ddace0a9616028bde8f596fa7d7a2d7e",
+                "reference": "3b58a4b3ddace0a9616028bde8f596fa7d7a2d7e",
                 "shasum": ""
             },
             "require": {
@@ -199,7 +199,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.16-dev"
+                    "dev-master": "1.17-dev"
                 }
             },
             "autoload": {
@@ -220,7 +220,7 @@
                 "sts"
             ],
             "support": {
-                "source": "https://github.com/async-aws/core/tree/1.16.0"
+                "source": "https://github.com/async-aws/core/tree/1.17.0"
             },
             "funding": [
                 {
@@ -232,7 +232,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-07-01T15:02:57+00:00"
+            "time": "2022-08-01T16:46:07+00:00"
         },
         {
             "name": "async-aws/ses",

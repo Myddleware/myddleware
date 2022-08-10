@@ -116,7 +116,7 @@ class ERPNext extends Solution
         }
     }
 
-    public function getModules(string $type = 'source'): array
+    public function getSolutionModules(string $type = 'source'): array
     {
         $modules = [];
         try {
@@ -145,7 +145,7 @@ class ERPNext extends Solution
         parent::getModuleFields($module, $type);
         try {
             // Call get modules to fill the isTableModule array and ge the module list.
-            $modules = $this->getModules();
+            $modules = $this->getSolutionModules();
 
             // Get the list field for a module
             $url = $this->connectionParam['url'].'/api/method/frappe.desk.form.load.getdoctype?doctype='.rawurlencode($module);

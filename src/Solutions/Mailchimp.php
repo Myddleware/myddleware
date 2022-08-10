@@ -80,7 +80,7 @@ class Mailchimp extends Solution
         }
     }
 
-    public function getModules($type = 'source'): ?array
+    public function getSolutionModules($type = 'source'): ?array
     {
         if ('target' == $type) {
             $modules = [

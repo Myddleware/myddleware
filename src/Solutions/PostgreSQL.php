@@ -51,7 +51,7 @@ class PostgreSQL extends Database
     }
 
     // Get all tables from the database
-    public function getModules($type = 'source'): array
+    public function getSolutionModules($type = 'source'): array
     {
         try {
             $modules = [];
