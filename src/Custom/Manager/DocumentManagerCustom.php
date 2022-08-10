@@ -356,17 +356,22 @@ class DocumentManagerCustom extends DocumentManager
 								// $this->sourceData['account_type'] = $unserializedData['Type_etablissement'];
 
 								switch ($unserializedData['libelle_nature']) {
-									case "Collège":
+									case "COLLEGE":
 										//collège is integer
 										$this->sourceData['account_type'] = 8;
 										break;
 									case "ECOLE DE NIVEAU ELEMENTAIRE":
-										$this->sourceData['account_type'] = 8;
+										$this->sourceData['account_type'] = 10;
 										break;
-									case 2:
-										echo "i equals 2";
+									case "ECOLE MATERNELLE":
+										$this->sourceData['account_type'] = 'ecole_maternelle';
 										break;
 								}
+							}
+
+							//phone number
+							if ($this->sourceData['phone_office'] == "" || $this->sourceData['account_type'] != $unserializedData['Telephone']) {
+								$this->sourceData['phone_office'] = $unserializedData['Telephone'];
 							}
 
 							return parent::transformDocument();
