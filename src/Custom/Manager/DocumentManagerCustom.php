@@ -347,6 +347,28 @@ class DocumentManagerCustom extends DocumentManager
 						if ($found == true) {
 							//in database externalgouvid_c
 							$this->sourceData['externalgouvid'] = reset($matchingrows);
+
+							//modify source data to match internallist
+							$this->sourceData['externalgouvid'] = reset($matchingrows);
+
+							//account type
+							if ($this->sourceData['account_type'] == "") {
+								// $this->sourceData['account_type'] = $unserializedData['Type_etablissement'];
+
+								switch ($unserializedData['libelle_nature']) {
+									case "Collège":
+										//collège is integer
+										$this->sourceData['account_type'] = 8;
+										break;
+									case "ECOLE DE NIVEAU ELEMENTAIRE":
+										$this->sourceData['account_type'] = 8;
+										break;
+									case 2:
+										echo "i equals 2";
+										break;
+								}
+							}
+
 							return parent::transformDocument();
 						} else {
 							// throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
