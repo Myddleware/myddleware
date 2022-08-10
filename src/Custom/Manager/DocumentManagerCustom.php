@@ -303,13 +303,12 @@ class DocumentManagerCustom extends DocumentManager
 
 	public function transformDocument()
 	{
-		$idrule = $this->document_data['rule_id'];
-		// $docParams = $this->documentManager->getParam();
-		// $docParams = $this->documentManager->setParam($param, true);
+		// $idrule = $this->document_data['rule_id'];
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
-			if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
+			if ($this->ruleId == '62f34a724a381') {
+				// if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
 
 				//we look for an existing gouv id to see if compare has already been done
 				if (empty($externalgouvid)) {
@@ -319,11 +318,13 @@ class DocumentManagerCustom extends DocumentManager
 							//get all the school facilities
 							$this->etabExternallist = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
 						}
+						//to check if all rows of the table were looked at
 						$rowschecked = 0;
+						//to avoid too many choices, this array must have only one element
 						$matchingrows = [];
-						//code witth this->sourceData to check the source and compare with the externallist
-						// $this->sourceData
 
+
+						//compsite checker for account
 						foreach ($this->etabExternallist as $row) {
 							$data = $row->getData();
 							$unserializedData = unserialize($data);
@@ -335,29 +336,26 @@ class DocumentManagerCustom extends DocumentManager
 								if (count($matchingrows) > 1) {
 									// throw new \Exception("Il y a trop d'établissements possibles");
 								}
-								//rechercher l'établissement dans l'externallist
+								//at least one match has been found
 								$found = true;
+								//add the match to the array of matches
 								$matchingrows[$unserializedData['Nom_etablissement']] = $unserializedData['Identifiant_de_l_etablissement'];
 							} else {
 								// throw new \Exception("Cet établissement n'a pas assez de champs");
 							}
 							$rowschecked++;
 						}
-						//si trouvé
+
 						if ($found == true) {
-							//in database externalgouvid_c
-							$this->sourceData['externalgouvid'] = reset($matchingrows);
 
 							//modify source data to match internallist
 							$this->sourceData['externalgouvid'] = reset($matchingrows);
 
 							//account type
 							if ($this->sourceData['account_type'] == "") {
-								// $this->sourceData['account_type'] = $unserializedData['Type_etablissement'];
-
 								switch ($unserializedData['libelle_nature']) {
 									case "COLLEGE":
-										//collège is integer
+										//some types are integer in suitecrm
 										$this->sourceData['account_type'] = 8;
 										break;
 									case "ECOLE DE NIVEAU ELEMENTAIRE":
@@ -384,17 +382,27 @@ class DocumentManagerCustom extends DocumentManager
 								$this->sourceData['rep_c'] = $unserializedData['Appartenance_Education_Prioritaire'];
 							}
 
-							//commune
+							//city
 							if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
 								$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
 							}
 
-							//adresse postale 1 et 2
-							if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
-								$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+							//billing address 1
+							if ($this->sourceData['billing_address_street'] == "" || $this->sourceData['billing_address_street'] != $unserializedData['Adresse_1']) {
+								$this->sourceData['billing_address_street'] = $unserializedData['Adresse_1'];
 							}
 
 
+							//billing address 2
+							//unlike billing address 1, we do not add an address if the internal list field is empty
+							if (($this->sourceData['billing_address_street_2'] == "" || $this->sourceData['billing_address_street_2'] != $unserializedData['Nom_commune']) && $unserializedData['Adresse_2'] != "") {
+								$this->sourceData['billing_address_street_2'] = $unserializedData['Adresse_2'];
+							}
+
+							//postal code
+							if ($this->sourceData['billing_address_postalcode'] == "" || $this->sourceData['billing_address_postalcode'] != $unserializedData['Code postal']) {
+								$this->sourceData['billing_address_postalcode'] = $unserializedData['Code postal'];
+							}
 
 							return parent::transformDocument();
 						} else {
