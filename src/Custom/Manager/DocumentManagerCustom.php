@@ -306,21 +306,13 @@ class DocumentManagerCustom extends DocumentManager
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
-			if ($this->ruleId == '62f0c136caa75') {
+			if ($this->ruleId == '62f34a724a381') {
 
-				//init gouvid for testing
-				// $externalGouvId = 3892;
-
-
+				//we look for an existing gouv id to see if compare has already been done
 				if (empty($externalgouvid)) {
 
 					try {
-
-						//test to see if there is already an id
-						//break or something to cancel the code below
-
-
-
+						//get all the school facilities
 						$table = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
 
 						foreach ($table as $row) {
