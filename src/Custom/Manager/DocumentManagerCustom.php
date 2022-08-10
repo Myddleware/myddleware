@@ -315,28 +315,27 @@ class DocumentManagerCustom extends DocumentManager
 						//get all the school facilities
 						$table = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
 
-						foreach ($table as $row) {
-							$data = $row->getData();
-							$unserializedData = unserialize($data);
-							$jsonData = json_decode($unserializedData);
-							$validname = ($jsonData['Nom_etablissement'] == $this->sourceData['name']);
-							if ($validname == true) {
-								//rechercher l'établissement dans l'externallist
-								$found = true;
-							}
-
-							//si trouvé
-							if ($found == true) {
-								//in database externalgouvid_c
-								return parent::transformDocument();
-							} else {
-								throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
-							}
-						}
 						//code witth this->sourceData to check the source and compare with the externallist
 						// $this->sourceData
 
-
+						foreach ($table as $row) {
+							$data = $row->getData();
+							$unserializedData = unserialize($data);
+							$validname = ($unserializedData['Nom_etablissement'] == $this->sourceData['name']);
+							if ($validname == true) {
+								//rechercher l'établissement dans l'externallist
+								$found = true;
+							} else {
+								$found = false;
+							}
+						}
+						//si trouvé
+						if ($found == true) {
+							//in database externalgouvid_c
+							return parent::transformDocument();
+						} else {
+							throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
+						}
 					} catch (\Exception $e) {
 						$this->message .= 'Failed to get document with custom id' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
 						$this->typeError = 'E';
