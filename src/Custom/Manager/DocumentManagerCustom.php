@@ -6,6 +6,8 @@ use App\Manager\ruleManager;
 
 class DocumentManagerCustom extends DocumentManager {
 	
+	protected $emailCoupon = array();
+	
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
 		if (
@@ -294,5 +296,64 @@ class DocumentManagerCustom extends DocumentManager {
 		return $updateStatus;
 	}
 	
+	public function ckeckParentDocument() {
+		try {				
+			// If the sendinblue contact is not found in the contact rule, we search in the coupon rule
+			if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
+				$chekParent = parent::ckeckParentDocument();	
+				if ($chekParent) {
+					return $chekParent;
+				}
+				// Change relationship if not found
+				$keyRelParent = array_search('parent_id', array_column($this->ruleRelationships, 'field_name_target'));
+				if ($keyRelParent === false) {
+					throw new \Exception('Relatiobnship with contact id missing for this rule.');	
+				}
+				$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->typeError = 'E';
+			$this->updateStatus('Relate_KO');
+			$this->logger->error($this->message);
+			return false;
+		}	
+		$chekParent = parent::ckeckParentDocument();
+		return $chekParent;
+	}
+	
+	public function transformDocument() {				
+		// If the sendinblue contact is not found in the contact rule, we search in the coupon rule
+		if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
+			$transform = parent::transformDocument();			
+			if ($transform) {
+				return $transform;
+			}
+			// Refresh the error flag
+			$this->transformError = false;
+			
+			// Change relationship if not found
+			$keyRelParent = array_search('parent_id', array_column($this->ruleRelationships, 'field_name_target'));
+			if ($keyRelParent === false) {
+				throw new \Exception('Relatiobnship with contact id missing for this rule.');	
+			}
+			$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
+			// Save the email id linked to a coupon to change the parent type in function insertDataTable 
+			$this->emailCoupon[$this->sourceData['messageId']] = true;
+		}
+			
+		$transform = parent::transformDocument();
+		return $transform;
+	}
+	
+	protected function insertDataTable($data, $type) {
+		if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
+			// Change parent type if email linked to a coupon
+			if (!empty($this->emailCoupon[$data['sendinblue_msg_id_c']])) {
+				$data['parent_type'] = 'Leads';
+			}
+		}
+		return parent::insertDataTable($data, $type);
+	}
 } 
 
