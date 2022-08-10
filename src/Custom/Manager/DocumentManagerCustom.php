@@ -309,7 +309,7 @@ class DocumentManagerCustom extends DocumentManager
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
-			if ($this->ruleId == '62f34a724a381') {
+			if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
 
 				//we look for an existing gouv id to see if compare has already been done
 				if (empty($externalgouvid)) {
@@ -330,12 +330,16 @@ class DocumentManagerCustom extends DocumentManager
 							$validName = ($unserializedData['Nom_etablissement'] == $this->sourceData['name']);
 							$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
-							$validRow = ($validName || $validPostalCode || $validAddress);
+							$validRow = ($validName && ($validPostalCode || $validAddress));
 							if ($validRow == true) {
+								if (count($matchingrows) > 1) {
+									// throw new \Exception("Il y a trop d'établissements possibles");
+								}
 								//rechercher l'établissement dans l'externallist
 								$found = true;
-								$matchingrows[$unserializedData['Identifiant_de_l_etablissement']] = $unserializedData['Nom_etablissement'];
+								$matchingrows[$unserializedData['Nom_etablissement']] = $unserializedData['Identifiant_de_l_etablissement'];
 							} else {
+								// throw new \Exception("Cet établissement n'a pas assez de champs");
 							}
 							$rowschecked++;
 						}
@@ -345,7 +349,7 @@ class DocumentManagerCustom extends DocumentManager
 							$this->sourceData['externalgouvid'] = reset($matchingrows);
 							return parent::transformDocument();
 						} else {
-							throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
+							// throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
 						}
 					} catch (\Exception $e) {
 						$this->message .= 'Failed to get document with custom id' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
