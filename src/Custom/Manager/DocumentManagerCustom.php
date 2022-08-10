@@ -331,6 +331,11 @@ class DocumentManagerCustom extends DocumentManager
 							$validName = ($unserializedData['Nom_etablissement'] == $this->sourceData['name']);
 							$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
+							//name
+							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
+							if ($namecompare >= 60) {
+								$validName = true;
+							}
 							$validRow = ($validName && ($validPostalCode || $validAddress));
 							if ($validRow == true) {
 								if (count($matchingrows) > 1) {
@@ -352,7 +357,7 @@ class DocumentManagerCustom extends DocumentManager
 							$this->sourceData['externalgouvid'] = reset($matchingrows);
 
 							//account type
-							if ($this->sourceData['account_type'] == "") {
+							if ($this->sourceData['type_de_partenaire_c'] == "") {
 								switch ($unserializedData['libelle_nature']) {
 									case "COLLEGE":
 										//some types are integer in suitecrm
@@ -364,6 +369,8 @@ class DocumentManagerCustom extends DocumentManager
 									case "ECOLE MATERNELLE":
 										$this->sourceData['account_type'] = 'ecole_maternelle';
 										break;
+									default:
+										throw new \Exception("Error reading school type");
 								}
 							}
 
@@ -379,7 +386,21 @@ class DocumentManagerCustom extends DocumentManager
 
 							//rep+
 							if ($this->sourceData['rep_c'] == "" || $this->sourceData['rep_c'] != $unserializedData['Appartenance_Education_Prioritaire']) {
-								$this->sourceData['rep_c'] = $unserializedData['Appartenance_Education_Prioritaire'];
+								switch ($unserializedData['Appartenance_Education_Prioritaire']) {
+									case "REP+":
+										//some types are integer in suitecrm
+										$this->sourceData['rep_c'] = 'REP_PLUS';
+										break;
+									case "REP":
+										$this->sourceData['account_type'] = "REP";
+										break;
+									case "":
+										$this->sourceData['account_type'] = '';
+										break;
+									default:
+										throw new \Exception("Error reading REP");
+										break;
+								}
 							}
 
 							//city
