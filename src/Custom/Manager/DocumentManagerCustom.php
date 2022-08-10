@@ -9,6 +9,7 @@ use App\Entity\InternalListValue as InternalListValueEntity;
 class DocumentManagerCustom extends DocumentManager
 {
 
+	protected $etabExternallist;
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
 		if (
@@ -314,14 +315,16 @@ class DocumentManagerCustom extends DocumentManager
 				if (empty($externalgouvid)) {
 
 					try {
-						//get all the school facilities
-						$table = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
+						if (empty($this->etabExternallist)) {
+							//get all the school facilities
+							$this->etabExternallist = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
+						}
 						$rowschecked = 0;
 						$matchingrows = [];
 						//code witth this->sourceData to check the source and compare with the externallist
 						// $this->sourceData
 
-						foreach ($table as $row) {
+						foreach ($this->etabExternallist as $row) {
 							$data = $row->getData();
 							$unserializedData = unserialize($data);
 							$validname = ($unserializedData['Nom_etablissement'] == $this->sourceData['name'] && ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode'] || $this->sourceData['billing_address_postalcode'] == ""));
@@ -336,6 +339,7 @@ class DocumentManagerCustom extends DocumentManager
 						//si trouvé
 						if ($found == true) {
 							//in database externalgouvid_c
+							$this->sourceData['externalgouvid'] = reset($matchingrows);
 							return parent::transformDocument();
 						} else {
 							throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
