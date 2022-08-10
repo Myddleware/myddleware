@@ -118,13 +118,15 @@ export default class extends Controller {
         this.deletePreviousButton();
         const buttonDiv = document.createElement('div');
         buttonDiv.classList.add('d-grid');
+        buttonDiv.classList.add('add-more');
         const addButton = document.createElement('button');
         addButton.classList.add('mt-5');
         addButton.classList.add('btn');
         addButton.classList.add('btn-warning');
         addButton.classList.add('btn-lg');
-        addButton.classList.add('add-more');
+        addButton.setAttribute('data-action', 'click->rule#addMoreFields');
         addButton.innerText = 'Add more fields to map';
+        this.deletePreviousButton();
         buttonDiv.appendChild(addButton);
         element.appendChild(buttonDiv);
     }
@@ -134,29 +136,20 @@ export default class extends Controller {
         const addMoreButtons = document.getElementsByClassName('add-more');
         const buttonsToBeRemoved = [];
         for (let i = 0 ; i < addMoreButtons.length; i++) {
-            if (i > 0) {
+            if (i >= 0) {
                 buttonsToBeRemoved[i] = addMoreButtons[i];
             }
         }
-        buttonsToBeRemoved.forEach((btn) => {
-           btn.remove();
+        buttonsToBeRemoved.forEach((div) => {
+           div.remove();
         });
 
     }
 
     async addMoreFields(event) {
-        console.log(event);
-        throw new Error("my error message " + event);
-        event.preventDefault();
-        const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}/module/${targetModuleId.toString()}`)
-            .then(response => response.text())
-            .then((html) => {
-                this.htmlOutput.innerHTML = html;
-                this.element.append(this.htmlOutput);
-                this.appendButton(this.element);
-            })
-            .catch(function(err) {
-                console.log('Failed to fetch response: ', err);
-            });
+        console.log(event.currentTarget);
+        // @TODO: this currently sends event.currentTarget as null which then stops execution inside PHP controller
+        const source = await this.onSelectModuleSource(event);
+        const target = await this.onSelectModuleTarget(event);
     }
 }
