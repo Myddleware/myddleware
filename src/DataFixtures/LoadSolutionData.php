@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\DataFixtures;
 

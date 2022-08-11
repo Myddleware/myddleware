@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Controller;
 
@@ -191,7 +192,8 @@ class FluxController extends AbstractController
                 ->findBy(['deleted' => 0]);
         } else {
             $list_fields_sql =
-                ['createdBy' => $this->getUser()->getId(),
+                [
+                    'createdBy' => $this->getUser()->getId(),
                 ];
 
             $rule = $em->getRepository(Rule::class)->findBy($list_fields_sql);
@@ -222,25 +224,30 @@ class FluxController extends AbstractController
 
             ->add('source_content', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCSourceContentExist() ? $this->sessionService->getFluxFilterSourceContent() : false),
-                'required' => false, ])
+                'required' => false,
+            ])
 
             ->add('target_content', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCTargetContentExist() ? $this->sessionService->getFluxFilterTargetContent() : false),
-                'required' => false, ])
+                'required' => false,
+            ])
 
             ->add('date_modif_start', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCDateModifStartExist() ? $this->sessionService->getFluxFilterDateModifStart() : false),
                 'required' => false,
-                'attr' => ['class' => 'calendar'], ])
+                'attr' => ['class' => 'calendar'],
+            ])
 
             ->add('date_modif_end', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCDateModifEndExist() ? $this->sessionService->getFluxFilterDateModifEnd() : false),
                 'required' => false,
-                'attr' => ['class' => 'calendar'], ])
+                'attr' => ['class' => 'calendar'],
+            ])
 
             ->add('rule', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('rule', ChoiceType::class, [
                 'choices' => $lstRuleName,
@@ -268,11 +275,13 @@ class FluxController extends AbstractController
 
             ->add('source_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCSourceIdExist() ? $this->sessionService->getFluxFilterSourceId() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('target_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCTargetIdExist() ? $this->sessionService->getFluxFilterTargetId() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('click_filter', SubmitType::class, [
                 'attr' => [
@@ -293,78 +302,76 @@ class FluxController extends AbstractController
 
         $conditions = 0;
         //---[ FORM ]-------------------------
-        if ($form->get('click_filter')->isClicked()) {
-            $data = $form->getData();
-            $data['user'] = $this->getUser();
-            $data['search'] = $search;
-            $data['page'] = $page;
+        $data = $form->getData();
+        $data['user'] = $this->getUser();
+        $data['search'] = $search;
+        $data['page'] = $page;
 
-            // Get the limit parameter
-            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-            if (!empty($searchLimit)) {
-                $data['limit'] = $searchLimit->getValue();
-            }
+        // Get the limit parameter
+        $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+        $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+        if (!empty($searchLimit)) {
+            $data['limit'] = $searchLimit->getValue();
+        }
 
-            $r = $this->documentRepository->getFluxPagination($data);
-            if (empty($data['source_content'])) {
-                $this->sessionService->removeFluxFilterSourceContent();
-            }
+        $r = $this->documentRepository->getFluxPagination($data);
+        if (empty($data['source_content'])) {
+            $this->sessionService->removeFluxFilterSourceContent();
+        }
 
-            if (!empty($data['target_content']) && is_string($data['target_content'])) {
-                $this->sessionService->setFluxFilterTargetContent($data['target_content']);
-            } else {
-                $this->sessionService->removeFluxFilterTargetContent();
-            }
+        if (!empty($data['target_content']) && is_string($data['target_content'])) {
+            $this->sessionService->setFluxFilterTargetContent($data['target_content']);
+        } else {
+            $this->sessionService->removeFluxFilterTargetContent();
+        }
 
-            if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-                $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
-            } else {
-                $this->sessionService->removeFluxFilterDateModifStart();
-            }
+        if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+            $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+        } else {
+            $this->sessionService->removeFluxFilterDateModifStart();
+        }
 
-            if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-                $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
-            } else {
-                $this->sessionService->removeFluxFilterDateModifEnd();
-            }
+        if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+            $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
+        } else {
+            $this->sessionService->removeFluxFilterDateModifEnd();
+        }
 
-            if (!empty($data['rule']) && is_string($data['rule'])) {
-                $this->sessionService->setFluxFilterRuleName($data['rule']);
-            } else {
-                $this->sessionService->removeFluxFilterRuleName();
-            }
+        if (!empty($data['rule']) && is_string($data['rule'])) {
+            $this->sessionService->setFluxFilterRuleName($data['rule']);
+        } else {
+            $this->sessionService->removeFluxFilterRuleName();
+        }
 
-            if (!empty($data['status'])) {
-                $this->sessionService->setFluxFilterStatus($data['status']);
-            } else {
-                $this->sessionService->removeFluxFilterStatus();
-            }
+        if (!empty($data['status'])) {
+            $this->sessionService->setFluxFilterStatus($data['status']);
+        } else {
+            $this->sessionService->removeFluxFilterStatus();
+        }
 
-            if (!empty($data['gblstatus'])) {
-                $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
-            } else {
-                $this->sessionService->removeFluxFilterGblStatus();
-            }
+        if (!empty($data['gblstatus'])) {
+            $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+        } else {
+            $this->sessionService->removeFluxFilterGblStatus();
+        }
 
-            if (!empty($data['type'])) {
-                $this->sessionService->setFluxFilterType($data['type']);
-            } else {
-                $this->sessionService->removeFluxFilterGblStatus();
-            }
+        if (!empty($data['type'])) {
+            $this->sessionService->setFluxFilterType($data['type']);
+        } else {
+            $this->sessionService->removeFluxFilterGblStatus();
+        }
 
-            if (!empty($data['target_id'])) {
-                $this->sessionService->setFluxFilterTargetId($data['target_id']);
-            } else {
-                $this->sessionService->removeFluxFilterTargetId();
-            }
+        if (!empty($data['target_id'])) {
+            $this->sessionService->setFluxFilterTargetId($data['target_id']);
+        } else {
+            $this->sessionService->removeFluxFilterTargetId();
+        }
 
-            if (!empty($data['source_id'])) {
-                $this->sessionService->setFluxFilterSourceId($data['source_id']);
-            } else {
-                $this->sessionService->removeFluxFilterSourceId();
-            }
-        } // end clicked
+        if (!empty($data['source_id'])) {
+            $this->sessionService->setFluxFilterSourceId($data['source_id']);
+        } else {
+            $this->sessionService->removeFluxFilterSourceId();
+        }
         //---[ FORM ]-------------------------
 
         $r = $this->documentRepository->getFluxPagination($data);
@@ -394,14 +401,16 @@ class FluxController extends AbstractController
                 $timezone = $this->getUser()->getTimezone();
             }
 
-            return $this->render('Flux/list.html.twig', [
-                'nb' => $compact['nb'],
-                'entities' => $compact['entities'],
-                'pager' => $compact['pager'],
-                'form' => $form->createView(),
-                'condition' => $conditions,
-                'timezone' => $timezone,
-            ]
+            return $this->render(
+                'Flux/list.html.twig',
+                [
+                    'nb' => $compact['nb'],
+                    'entities' => $compact['entities'],
+                    'pager' => $compact['pager'],
+                    'form' => $form->createView(),
+                    'condition' => $conditions,
+                    'timezone' => $timezone,
+                ]
             );
         }
 
@@ -482,8 +491,8 @@ class FluxController extends AbstractController
             // Get the post documents (Document coming from a child rule)
             $postDocuments = $em->getRepository(Document::class)->findBy(
                 ['parentId' => $id],
-                ['dateCreated' => 'DESC'],	// order
-                10								// limit
+                ['dateCreated' => 'DESC'],    // order
+                10                                // limit
             );
             // Get the rule name of every child doc
             $postDocumentsRule = [];
@@ -495,8 +504,8 @@ class FluxController extends AbstractController
             // Document link to other document, the parent ones
             $parentRelationships = $em->getRepository(DocumentRelationship::class)->findBy(
                 ['doc_id' => $doc[0]->getId()],
-                ['dateCreated' => 'DESC'],		// order
-                10									// limit
+                ['dateCreated' => 'DESC'],        // order
+                10                                    // limit
             );
             // Get the detail of documents related
             $i = 0;
@@ -516,8 +525,8 @@ class FluxController extends AbstractController
             // Document link to other document, the child ones
             $childRelationships = $em->getRepository(DocumentRelationship::class)->findBy(
                 ['doc_rel_id' => $doc[0]->getId()],
-                ['dateCreated' => 'DESC'],			// order
-                10										// limit
+                ['dateCreated' => 'DESC'],            // order
+                10                                        // limit
             );
             // Get the detail of documents related
             $i = 0;
@@ -575,31 +584,33 @@ class FluxController extends AbstractController
                 $timezone = $this->getUser()->getTimezone();
             }
             // Call the view
-            return $this->render('Flux/view/view.html.twig', [
-                'current_document' => $id,
-                'source' => $sourceData,
-                'target' => $targetData,
-                'history' => $historyData,
-                'doc' => $doc[0],
-                'nb' => $compact['nb'],
-                'entities' => $compact['entities'],
-                'pager' => $compact['pager'],
-                'rule' => $rule,
-                'post_documents' => $postDocuments,
-                'post_Documents_Rule' => $postDocumentsRule,
-                'nb_post_documents' => count($postDocuments),
-                'child_documents' => $childDocuments,
-                'child_Documents_Rule' => $childDocumentsRule,
-                'nb_child_documents' => count($childDocuments),
-                'parent_documents' => $parentDocuments,
-                'parent_Documents_Rule' => $parentDocumentsRule,
-                'nb_parent_documents' => count($parentDocuments),
-                'history_documents' => $historyDocuments,
-                'nb_history_documents' => count($historyDocuments),
-                'ctm_btn' => $list_btn,
-                'read_record_btn' => $solution_source->getReadRecord(),
-                'timezone' => $timezone,
-            ]
+            return $this->render(
+                'Flux/view/view.html.twig',
+                [
+                    'current_document' => $id,
+                    'source' => $sourceData,
+                    'target' => $targetData,
+                    'history' => $historyData,
+                    'doc' => $doc[0],
+                    'nb' => $compact['nb'],
+                    'entities' => $compact['entities'],
+                    'pager' => $compact['pager'],
+                    'rule' => $rule,
+                    'post_documents' => $postDocuments,
+                    'post_Documents_Rule' => $postDocumentsRule,
+                    'nb_post_documents' => count($postDocuments),
+                    'child_documents' => $childDocuments,
+                    'child_Documents_Rule' => $childDocumentsRule,
+                    'nb_child_documents' => count($childDocuments),
+                    'parent_documents' => $parentDocuments,
+                    'parent_Documents_Rule' => $parentDocumentsRule,
+                    'nb_parent_documents' => count($parentDocuments),
+                    'history_documents' => $historyDocuments,
+                    'nb_history_documents' => count($historyDocuments),
+                    'ctm_btn' => $list_btn,
+                    'read_record_btn' => $solution_source->getReadRecord(),
+                    'timezone' => $timezone,
+                ]
             );
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
@@ -624,10 +635,11 @@ class FluxController extends AbstractController
                 $em = $this->getDoctrine()->getManager();
                 // Get target data for the document
                 $documentDataEntity = $em->getRepository(DocumentData::class)
-                    ->findOneBy([
-                        'doc_id' => $request->request->get('flux'),
-                        'type' => 'T',
-                    ]
+                    ->findOneBy(
+                        [
+                            'doc_id' => $request->request->get('flux'),
+                            'type' => 'T',
+                        ]
                     );
                 if (!empty($documentDataEntity)) {
                     $target = json_decode($documentDataEntity->getData(), true);
@@ -652,7 +664,7 @@ class FluxController extends AbstractController
                 }
             }
         }
-        throw $this->createNotFoundException('Failed to modify the field '.$fields);
+        throw $this->createNotFoundException('Failed to modify the field ' . $fields);
     }
 
     /**
@@ -798,7 +810,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
                 $compact['entities'] = $compact['pager']->getCurrentPageResults();
             } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+                throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
             }
 
             return $compact;
@@ -813,10 +825,11 @@ class FluxController extends AbstractController
         try {
             // Get document data
             $documentDataEntity = $this->getDoctrine()->getManager()->getRepository(DocumentData::class)
-                ->findOneBy([
-                    'doc_id' => $id,
-                    'type' => $type,
-                ]
+                ->findOneBy(
+                    [
+                        'doc_id' => $id,
+                        'type' => $type,
+                    ]
                 );
             if (!empty($documentDataEntity)) {
                 $data = json_decode($documentDataEntity->getData(), true);
