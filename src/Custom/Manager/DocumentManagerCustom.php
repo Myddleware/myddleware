@@ -307,8 +307,8 @@ class DocumentManagerCustom extends DocumentManager
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
-			if ($this->ruleId == '62f34a724a381') {
-				// if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
+			// if ($this->ruleId == '62f34a724a381') {
+			if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
 
 				//we look for an existing gouv id to see if compare has already been done
 				if (empty($externalgouvid)) {
@@ -333,18 +333,19 @@ class DocumentManagerCustom extends DocumentManager
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
 							//name
 							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
-							if ($namecompare >= 60) {
+							if ($perc >= 60) {
 								$validName = true;
 							}
 							$validRow = ($validName && ($validPostalCode || $validAddress));
 							if ($validRow == true) {
-								if (count($matchingrows) > 1) {
-									// throw new \Exception("Il y a trop d'établissements possibles");
-								}
+
+								$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
+								// throw new \Exception("Il y a trop d'établissements possibles");
+
 								//at least one match has been found
 								$found = true;
 								//add the match to the array of matches
-								$matchingrows[$unserializedData['Nom_etablissement']] = $unserializedData['Identifiant_de_l_etablissement'];
+								// $matchingrows[$unserializedData['Nom_etablissement']] = $unserializedData['Identifiant_de_l_etablissement'];
 							} else {
 								// throw new \Exception("Cet établissement n'a pas assez de champs");
 							}
@@ -352,6 +353,12 @@ class DocumentManagerCustom extends DocumentManager
 						}
 
 						if ($found == true) {
+
+							if (count($matchingrows) > 1) {
+								// $matchingrows = krsort($matchingrows);
+								krsort($matchingrows);
+								// $correctRow = $sortedRows[-1];
+							}
 
 							//modify source data to match internallist
 							$this->sourceData['externalgouvid'] = reset($matchingrows);
