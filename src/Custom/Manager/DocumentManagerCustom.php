@@ -81,6 +81,7 @@ class DocumentManagerCustom extends DocumentManager {
 		if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '62743060350ed' // Esp Rep - Contact repérant - Pôle
+			AND $this->attempt > 3  // To be sure the the relake ko isn't due because this rule run before the contact reperant's rule
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
@@ -273,6 +274,17 @@ class DocumentManagerCustom extends DocumentManager {
 		) {
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('Les contacts partenaires ne sont pas envoyés dans Airtable, la relation pôle tombe logiquement en relate_KO. Ce transfert de données est annulé. ');
+		}
+		
+		// Cancel if the doc is related KO and the email linked to a user (afev.org)
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '6210fcbe4d654' // Sendinblue - email delivered
+			AND $new_status == 'Relate_KO'
+			AND strpos($this->sourceData['email'], '@afev.org') !== false
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('L\email n\'appartient pas à un contact dans la COMET mais à un salarié (domaine afev.org). Ce transfert de données est annulé. ');
 		}
 		
 		return $new_status;
