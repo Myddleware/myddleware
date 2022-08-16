@@ -303,12 +303,11 @@ class DocumentManagerCustom extends DocumentManager
 
 	public function transformDocument()
 	{
-		// $idrule = $this->document_data['rule_id'];
 		try {
 			// if the id of the rule we work with matches the rule we want
 			//for our filter
-			// if ($this->ruleId == '62f34a724a381') {
-			if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
+			if ($this->ruleId == '62f34a724a381') {
+				// if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
 
 				//we look for an existing gouv id to see if compare has already been done
 				if (empty($externalgouvid)) {
@@ -318,6 +317,7 @@ class DocumentManagerCustom extends DocumentManager
 							//get all the school facilities
 							$this->etabExternallist = $this->entityManager->getRepository(InternalListValueEntity::class)->findAll();
 						}
+						$found = false;
 						//to check if all rows of the table were looked at
 						$rowschecked = 0;
 						//to avoid too many choices, this array must have only one element
@@ -334,7 +334,7 @@ class DocumentManagerCustom extends DocumentManager
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
 							//use algorithm to compare similarity of 2 names, threshold is 60% similar
 							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
-							if ($perc >= 60) {
+							if ($perc >= 80) {
 								$validName = true;
 							}
 							//to have a match, we need a similar name and at least the same address or postal code
@@ -345,6 +345,7 @@ class DocumentManagerCustom extends DocumentManager
 								$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
 								$found = true;
 							} else {
+								$found = false;
 								// throw new \Exception("Cet établissement n'a pas assez de champs");
 							}
 							$rowschecked++;
