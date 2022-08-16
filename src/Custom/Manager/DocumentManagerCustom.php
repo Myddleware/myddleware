@@ -351,7 +351,7 @@ class DocumentManagerCustom extends DocumentManager
 							$rowschecked++;
 						}
 
-						if ($found == true) {
+						if ($found === true) {
 							//if we have more than one match, then we sort by percentage of matching
 							//and use the closest match
 							if (count($matchingrows) > 1) {
