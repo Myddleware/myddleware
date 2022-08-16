@@ -188,6 +188,11 @@ class Rule
      */
     private $documents;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Project::class, inversedBy="rules")
+     */
+    private $project_id;
+
     public function __construct()
     {
         $this->params = new ArrayCollection();
@@ -197,6 +202,7 @@ class Rule
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->project_id = new ArrayCollection();
     }
 
     /**
@@ -811,5 +817,29 @@ class Rule
     public function __toString()
     {
         return $this->id;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjectId(): Collection
+    {
+        return $this->project_id;
+    }
+
+    public function addProjectId(Project $projectId): self
+    {
+        if (!$this->project_id->contains($projectId)) {
+            $this->project_id[] = $projectId;
+        }
+
+        return $this;
+    }
+
+    public function removeProjectId(Project $projectId): self
+    {
+        $this->project_id->removeElement($projectId);
+
+        return $this;
     }
 }
