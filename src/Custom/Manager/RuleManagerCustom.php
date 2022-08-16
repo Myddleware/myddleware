@@ -113,6 +113,15 @@ class RuleManagerCustom extends RuleManager {
 					$this->generatePoleRelationship('5d08e425e49ea', $document['source_id'], 'record_id', false);  // Formation - pôle
 				}
 				
+				// If a coupon is created to Airtable, we send the pole relationship too
+				// It fix a bug when the coupon has been removed from Airtable and créated again by Myddleware, the pole wasn't sent again
+				if (
+						$this->ruleId == '625fcd2ed442f' // Mobilisation - Coupons
+					AND	$type == 'C'
+				) {
+					$this->generatePoleRelationship('626931ebbff78', $document['source_id'], 'record_id', false);  // Mobilisation - Relations pôles Coupons
+				}
+				
 				/****************************************/ 
 				/************** AirTable Aiko ****************/ 
 				/****************************************/ 
