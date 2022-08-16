@@ -324,28 +324,26 @@ class DocumentManagerCustom extends DocumentManager
 						$matchingrows = [];
 
 
-						//compsite checker for account
+						//check for row match using the name, the postal code, and the address
 						foreach ($this->etabExternallist as $row) {
 							$data = $row->getData();
 							$unserializedData = unserialize($data);
-							$validName = ($unserializedData['Nom_etablissement'] == $this->sourceData['name']);
+							//init name as false at the beginning of the loop
+							$validName = false;
 							$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
-							//name
+							//use algorithm to compare similarity of 2 names, threshold is 60% similar
 							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
 							if ($perc >= 60) {
 								$validName = true;
 							}
+							//to have a match, we need a similar name and at least the same address or postal code
 							$validRow = ($validName && ($validPostalCode || $validAddress));
 							if ($validRow == true) {
 
+								//we append the array of matches
 								$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
-								// throw new \Exception("Il y a trop d'établissements possibles");
-
-								//at least one match has been found
 								$found = true;
-								//add the match to the array of matches
-								// $matchingrows[$unserializedData['Nom_etablissement']] = $unserializedData['Identifiant_de_l_etablissement'];
 							} else {
 								// throw new \Exception("Cet établissement n'a pas assez de champs");
 							}
@@ -353,11 +351,10 @@ class DocumentManagerCustom extends DocumentManager
 						}
 
 						if ($found == true) {
-
+							//if we have more than one match, then we sort by percentage of matching
+							//and use the closest match
 							if (count($matchingrows) > 1) {
-								// $matchingrows = krsort($matchingrows);
 								krsort($matchingrows);
-								// $correctRow = $sortedRows[-1];
 							}
 
 							//modify source data to match internallist
@@ -434,7 +431,7 @@ class DocumentManagerCustom extends DocumentManager
 
 							return parent::transformDocument();
 						} else {
-							// throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
+							throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
 						}
 					} catch (\Exception $e) {
 						$this->message .= 'Failed to get document with custom id' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
@@ -443,7 +440,6 @@ class DocumentManagerCustom extends DocumentManager
 						$this->logger->error($this->message);
 						//make logs
 						$this->createDocLog();
-
 						return false;
 					}
 				}
