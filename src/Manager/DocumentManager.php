@@ -1463,7 +1463,8 @@ class documentcore
                 $targetId = $this->getTargetId($ruleField, $source[$ruleField['field_name_source']]);
                 if (!empty($targetId['record_id'])) {
                     return $targetId['record_id'];
-                } else {
+                // No need of relate field in case of deletion
++				} elseif ($this->documentType != 'D') {
                     throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
                 }
             }
