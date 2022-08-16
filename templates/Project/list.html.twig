@@ -26,4 +26,43 @@
 {% block titlesm %}
 	{{'title.index.panel'|trans}}
 {% endblock titlesm %}
-{% block body %}{% endblock %}
+{% block body %}
+	<div id="fd-title-small" class="left">
+		<p>{{ 'jobscheduler.total'|trans }}</p>
+		<p>
+			<span class="nb"></span>
+		</p>
+	</div>
+	<div class="container">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">Id</th>
+					<th scope="col">Name</th>
+					<th scope="col">Description</th>
+					<th scope="col">Rules</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">1</th>
+					<td>Mark</td>
+					<td>Otto</td>
+					<td>2</td>
+				</tr>
+				<tr>
+					<th scope="row">2</th>
+					<td>Jacob</td>
+					<td>Thornton</td>
+					<td>3</td>
+				</tr>
+				<tr>
+					<th scope="row">3</th>
+					<td>woody</td>
+					<td>Jessie</td>
+					<td>3</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
