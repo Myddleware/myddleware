@@ -328,17 +328,22 @@ class DocumentManagerCustom extends DocumentManager
 						foreach ($this->etabExternallist as $row) {
 							$data = $row->getData();
 							$unserializedData = unserialize($data);
+
+
 							//init name as false at the beginning of the loop
 							$validName = false;
-							$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
+							$weakValidPostalCode = (substr($unserializedData['Code postal'], 0, 2) == substr($this->sourceData['billing_address_postalcode'], 0, 2));
 							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
+							$validCity = ($unserializedData['Nom_commune'] == $this->sourceData['billing_address_city']);
+
+
 							//use algorithm to compare similarity of 2 names, threshold is 60% similar
 							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
 							if ($perc >= 80) {
 								$validName = true;
 							}
 							//to have a match, we need a similar name and at least the same address or postal code
-							$validRow = ($validName && ($validPostalCode || $validAddress));
+							$validRow = ($validName && (($weakValidPostalCode && $validAddress) || ($validCity && $validAddress)));
 							if ($validRow == true) {
 
 								//we append the array of matches
@@ -443,6 +448,62 @@ class DocumentManagerCustom extends DocumentManager
 						$this->createDocLog();
 						return false;
 					}
+				} else {
+
+					//mettre a jour les champs
+					//account type
+					switch ($unserializedData['libelle_nature']) {
+						case "COLLEGE":
+							//some types are integer in suitecrm
+							$this->sourceData['account_type'] = 8;
+							break;
+						case "ECOLE DE NIVEAU ELEMENTAIRE":
+							$this->sourceData['account_type'] = 10;
+							break;
+						case "ECOLE MATERNELLE":
+							$this->sourceData['account_type'] = 'ecole_maternelle';
+							break;
+						default:
+							throw new \Exception("Error reading school type");
+					}
+
+					//phone number
+					$this->sourceData['phone_office'] = $unserializedData['Telephone'];
+
+					//email
+					$this->sourceData['email1'] = $unserializedData['Mail'];
+
+					//rep+
+					switch ($unserializedData['Appartenance_Education_Prioritaire']) {
+						case "REP+":
+							//some types are integer in suitecrm
+							$this->sourceData['rep_c'] = 'REP_PLUS';
+							break;
+						case "REP":
+							$this->sourceData['account_type'] = "REP";
+							break;
+						case "":
+							$this->sourceData['account_type'] = '';
+							break;
+						default:
+							throw new \Exception("Error reading REP");
+							break;
+					}
+
+					//city
+					$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+
+					//billing address 1
+					$this->sourceData['billing_address_street'] = $unserializedData['Adresse_1'];
+
+					//billing address 2
+					//unlike billing address 1, we do not add an address if the internal list field is empty
+					if (($this->sourceData['billing_address_street_2'] == "" || $this->sourceData['billing_address_street_2'] != $unserializedData['Nom_commune']) && $unserializedData['Adresse_2'] != "") {
+						$this->sourceData['billing_address_street_2'] = $unserializedData['Adresse_2'];
+					}
+
+					//postal code
+					$this->sourceData['billing_address_postalcode'] = $unserializedData['Code postal'];
 				}
 			} else {
 				return parent::transformDocument();
