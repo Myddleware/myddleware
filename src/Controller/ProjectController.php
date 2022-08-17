@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Project;
+use App\Form\ProjectFormType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProjectController extends AbstractController
 {
@@ -13,8 +15,29 @@ class ProjectController extends AbstractController
      */
     public function index(): Response
     {
-        return $this->render('project/list.html.twig', [
-            'controller_name' => 'ProjectController',
+        return $this->render('project/list.html.twig');
+    }
+
+    /**
+     * @Route("/project/create", name="app_create_project")
+     */
+    public function create_project(): Response
+    {
+
+        $project = new Project();
+        $form = $this->createForm(ProjectFormType::class, $project);
+        // $form->handleRequest($request);
+
+        // dd($form);
+
+        // if ($form->isSubmitted() && $form->isValid()) {
+        // $this->entityManager->flush();
+        // return $this->redirectToRoute('app_project');
+        // }
+
+        return $this->render('project/create.html.twig', [
+            'form' => $form->createView()
+
         ]);
     }
 }
