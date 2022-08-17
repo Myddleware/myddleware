@@ -3,19 +3,38 @@
 {% block title %}Install Myddleware{% endblock %}
 
 {% block body %}
-    {# Logo myddleware #}
-<div>
-	<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
-
-    </div>
-    <div class="install">
-        <div class="card-body">
-            <h3 class="install-title">Install Step 4 : uploading database tables</h3>
-            <h5>Loading database tables</h5>
-            <p>You can now go to the next page to set up your Myddleware use</p>
-
-              <button class="home_item btn btn-primary"><a href="{{path('app_register')}}">Next</a></button>
-        </div>   
-    </div>
-    
+    <section class="container">
+       <div class="row justify-content-center">
+				<div class="col text-center pt-5">
+					<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+				</div>
+			</div>
+        <div class="row justify-content-center">
+            <div class="card shadow rounded p-5 col-lg-8">
+                <h3 class="card-title">{{'install.install_step_4' | trans }}</h3>
+                <h5>{{'install.step_4_loading' | trans }}</h5>
+                {% if connection_failed_message %}
+                    <p class="alert-danger">{{ connection_failed_message }}</p>
+                    <p>{{'install.step_3_go_back' | trans }}</p>
+                {% else %}
+                    <p class="alert-success">{{ connection_success_message }}</p>
+                    {% if connection_success_message %}
+                        <p class="text-center">{{'install.next_step' | trans }}</p>
+                    {% endif %}
+                {% endif %}
+                    <a href="{{ path('app_database_connection') }}" id="previous" role="button" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i>{{ 'install.previous' | trans }}
+                    </a>
+                {% if connection_failed_message %}
+                    <button class="btn btn-outline-secondary btn-lg mt-3" id="next-btn" disabled>
+                        <i class="fas fa-arrow-right"></i>{{ 'install.next' | trans }}
+                    </button>
+                {% elseif connection_success_message %}
+                    <a href="{{ path('app_register') }}" id="next" class="btn btn-primary btn-lg mt-3" role="button">
+                        <i class="fas fa-arrow-right"></i>{{ 'install.next' | trans }}
+                    </a>
+                {% endif %}                            
+            </div>   
+        </div>  
+    </section>  
 {% endblock %}

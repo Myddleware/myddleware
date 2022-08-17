@@ -26,7 +26,7 @@ class ExceptionEventSubscriber implements EventSubscriberInterface
         // we intercept exceptions to do with the fact that the app cannot access the database
         if ($exception instanceof ConnectionException || $exception instanceof TableNotFoundException) {
             // this will redirect to install if no DB set in .env.local or to login if DB set but not accessible
-            $urlInstall = $this->router->generate('app_setup');
+            $urlInstall = $this->router->generate('app_install_requirements');
             // redirect to installation page
             $response = new RedirectResponse($urlInstall);
             $event->setResponse($response);

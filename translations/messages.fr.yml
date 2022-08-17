@@ -801,6 +801,16 @@ password_reset:
 
 install:
     title: Installation de Myddleware
+    install_step_1: Installation Étape 1 :\ vérification de la configuration requise pour Myddleware
+    install_step_2: Installation étape 2 - configuration de votre base de données Myddleware
+    install_step_3: Installation étape 3 - vérifier que Myddleware est connecté à la base de données
+    install_step_4: Installation étape 4 - téléchargement des tables de la base de données
+    step_2_go_back: Retourner au contrôle de la configuration requise
+    step_3_check: Vérification de la connexion à la base de données
+    step_3_go_back: Retournez à la page précédente pour réinitialiser votre connexion à la base de données
+    step_4_loading: Chargement des tables de la base de données
+    connection_failed_message: Base de données inconnue. Veuillez vous assurer que votre base de données existe
+    
     database_setup : Configuration de la base de données
     test_button: Se connecter à la base de données
     user_setup: Création de vos identifiants utilisateur Myddleware

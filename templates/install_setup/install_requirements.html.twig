@@ -1,40 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Install Myddleware
-{% endblock %}
+{% block title %}Install Myddleware{% endblock %}
 
 {% block body %}
-	{# Logo myddleware #}
-	<div>
-		<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
-	</div>
-	<div class="install">
-		<h3 class="install-title">Install Step 1 : checking Myddleware requirements</h3>
-		<h4 class="install-check">Myddleware requirements checker</h4>
-		<p>Let's check wheter your server meets the requirements to run a Myddleware project.</p>
-		{% if php_version %}
-			<p>Php version :
-			</p>
-			{{ php_version }}
-		{% else %}
-			<p>
-				WARNING ! Could not find your PHP version</p>
-		{% endif %}
-		<p>Your system is ready to run Myddleware</p>
-		<p>Optional recommendations to improve your setup</p>
-
-		<div>
-			<h4>NOTE</h4>
-			<p>The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory</p>
-			<p>symfony check:requirements</p>
+    <section class="container">
+		<div class="row justify-content-center">
+			<div class="col text-center pt-5">
+				<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+			</div>
 		</div>
+		<div class="row justify-content-center">
+			<div class="card shadow rounded p-5 col-lg-8">
+				<h3 class="install-title">{{ 'install.install_step_1' | trans }}</h3>
+				<h4 class="install-check">{{ 'install.requirements_checker' | trans }}</h4>
+				<p>{{ 'install.requirements_info' | trans }}</p>        
+				{% if php_version %}
+					<p>Php version : </p>
+					<strong class="php-version">{{ php_version }}</strong>
+				{% else %}
+					<p>{{ 'install.php_version_not_found' | trans }}</p>
+				{% endif %}
+				<p>{{ system_status }}</p>
+				<p>{{ 'install.recommendations_to_do_message' | trans }}</p> 
 
-		<button class="home_item btn btn-primary">
-			<a href="">Check now</a>
-		</button>
-		<button class="home_item btn btn-primary">
-			<a href="{{path('app_database_setup')}}">Next</a>
-		</button>
-	</div>
-
+				<div class="p-3 m-3 bg-warning bg-opacity-10">  
+					<h4 class="row justify-content-center">NOTE</h4>
+					<p>{{ 'install.note_message' | trans }}</p>
+					<p><i>symfony check:requirements</i></p>
+					<a class="btn btn-primary btn-lg" href="">{{ 'install.check_button' | trans }}</a>
+					<a class="btn btn-primary btn-lg" href="{{path('app_database_setup')}}">{{ 'install.next' | trans }}</a>
+				</div> 
+			</div>
+		</div> 
+	</section>    
 {% endblock %}

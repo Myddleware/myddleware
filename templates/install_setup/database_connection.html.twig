@@ -1,23 +1,41 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Install Myddleware
-{% endblock %}
+{% block title %}Install Myddleware{% endblock %}
 
 {% block body %}
-	{# Logo myddleware #}
-	<div>
-		<img src="build/images/logo/logo1.png" alt="Myddleware" class="logo-register">
-	</div>
-	<div class="install">
-		<div class="card-body">
-			<h3 class="install-title">Install Step 3 : checking Myddleware is connected to the database</h3>
-			<p>Database connection check</p>
-			<p></p>
-
-			<button class="home_item btn btn-primary">
-				<a href="{{path('app_database_')}}">Next</a>
-			</button>
+	<section class="container">
+		<div class="row justify-content-center">
+			<div class="col text-center pt-5">
+				<img src="{{ asset('build/images/logo/logo1.png') }}" alt="Myddleware logo" class="w-25" />
+			</div>
 		</div>
-	</div>
-
+			<div class="row justify-content-center">
+				<div class="card shadow rounded p-5 col-lg-8">
+					<h3 class="install-title">{{ 'install.install_step_3' | trans }}</h3>
+					<p>{{ 'install.step_3_check' | trans }}</p>
+					{% if connection_failed_message %}
+						<p class="alert-danger">{{ connection_failed_message }}</p>
+						<p>{{ 'install.step_3_go_back' | trans }}</p>
+					{% elseif connection_success_message %}
+						<p class="alert-success">{{ connection_success_message }}</p>
+					{% endif %}
+						<a href="{{ path('app_database_setup') }}" id="previous" role="button" class="btn btn-outline-secondary mt-4 mb-4">
+							<i class="fas fa-arrow-left"></i>
+							{{ 'install.previous' | trans }}
+						</a>
+					{% if connection_failed_message %}
+						<button type="button" class="btn btn-light btn-lg" id="next-btn" disabled>
+							{{ 'install.next' | trans }}
+							<i class="fas fa-arrow-right"></i>
+						</button>
+					{% elseif connection_success_message %}
+						<a href="{{ path('app_load_fixtures') }}" id="next" role="button"  class="btn btn-primary btn-lg">
+							{{ 'install.next' | trans }}
+							<i class="fas fa-arrow-right"></i>
+						</a>
+					{% endif %}
+        		</div>
+        	</div>   
+    	</div>  
+	</section>                    
 {% endblock %}
