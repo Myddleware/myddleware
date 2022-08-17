@@ -42,7 +42,8 @@ class RuleManagerCustom extends RuleManager {
 							'5ce454613bb17', // Formation
 							'61a920fae25c5', // Aiko - Contact 
 							'61a930273441b', // Aiko Binomes
-							'61a9190e40965' // Aiko Referent
+							'61a9190e40965', // Aiko Referent
+							'625fcd2ed442f' // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
 		if (
