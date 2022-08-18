@@ -959,6 +959,11 @@ class documentcore
                 }
                 // Prepare the search array with teh value for each duplicate field
                 foreach ($duplicate_fields as $duplicate_field) {
+					// In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
+					if ($duplicate_field == 'Myddleware_element_id') {
+						$searchFields['id'] = $target[$duplicate_field];
+						continue;
+					}
                     $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
