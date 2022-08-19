@@ -79,8 +79,7 @@ class internallistcore extends solution
 
             //from serialized json to fileds
             $unserializedData = unserialize($data);
-            $jsonData = json_decode($unserializedData);
-            foreach ($jsonData as $keyData => $valueData) {
+            foreach ($unserializedData as $keyData => $valueData) {
                 $this->moduleFields[$keyData] = ['label' => $keyData, 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false];
             }
 
@@ -123,8 +122,7 @@ class internallistcore extends solution
                 //get the data
                 $getRecords = $row->getData();
                 $unserializedData = unserialize($getRecords);
-                $jsonData = json_decode($unserializedData);
-                $result[$recordRead] = (array) $jsonData;
+                $result[$recordRead] = (array) $unserializedData;
 
                 //get the reference and the modified date
                 $result[$recordRead]['id'] = $row->getRecordId();
