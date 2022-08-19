@@ -9,13 +9,15 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=ProjectRepository::class)
+ * @ORM\Table(name="project", indexes={
+ *  @ORM\Index(name="project_template", columns={"name"})
+ *})
  */
 class Project
 {
     /**
      * @var string
-     *
-     * @ORM\Column(name="id", type="string")
+     * @ORM\Column(name="id", type="string", nullable=false)
      * @ORM\Id
      */
     private $id;
@@ -45,6 +47,13 @@ class Project
         $this->rules = new ArrayCollection();
         $this->jobs = new ArrayCollection();
     }
+
+    //todo
+    public static function create(string $command, string $period): self
+    {
+        return new self($command, $period);
+    }
+    //todo
 
     public function getId(): ?int
     {

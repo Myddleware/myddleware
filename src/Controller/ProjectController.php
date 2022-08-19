@@ -8,7 +8,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 
 class ProjectController extends AbstractController
 {
@@ -39,15 +41,9 @@ class ProjectController extends AbstractController
         $form = $this->createForm(ProjectFormType::class, $project);
         $form->handleRequest($request);
 
-        // dd($form);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // $project->setName($form->getData('name'));
             $project = $form->getData();
-            // $project->setDescription($form->getData('description'));
-            // $project->setName($form->getName());
-            // dd($form->getData());
-            // dd($project);
             $this->entityManager->persist($project);
             $this->entityManager->flush();
             return $this->redirectToRoute('app_project');
