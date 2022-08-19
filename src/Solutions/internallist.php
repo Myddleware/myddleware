@@ -126,7 +126,9 @@ class internallistcore extends solution
 
                 //get the reference and the modified date
                 $result[$recordRead]['id'] = $row->getRecordId();
-                $result[$recordRead]['date_modified'] = $row->getDateModified();
+                //todo handle datetime format and string ???
+                // $result[$recordRead]['date_modified'] = $row->getDateModified();
+                $result[$recordRead]['date_modified'] = $row->getDateModified()->format('Y-m-d H:i:s');
 
                 //we increment the number of record read
                 ++$recordRead;
