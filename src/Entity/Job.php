@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
     You should have received a copy of the GNU General Public License
     along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Entity;
 
@@ -129,6 +130,12 @@ class Job
      * @ORM\OneToMany(targetEntity="Log", mappedBy="job")
      */
     private $logs;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="jobs")
+     */
+    private $project;
+
 
     public function __construct()
     {
@@ -451,6 +458,18 @@ class Job
                 $log->setJob(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
+
+    public function setProject(?Project $project): self
+    {
+        $this->project = $project;
 
         return $this;
     }

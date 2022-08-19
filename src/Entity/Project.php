@@ -13,9 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
 class Project
 {
     /**
+     * @var string
+     *
+     * @ORM\Column(name="id", type="string")
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
      */
     private $id;
 
@@ -30,13 +31,19 @@ class Project
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="project_id")
+     * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="project")
      */
     private $rules;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Job::class, mappedBy="project")
+     */
+    private $jobs;
 
     public function __construct()
     {
         $this->rules = new ArrayCollection();
+        $this->jobs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -80,7 +87,7 @@ class Project
     {
         if (!$this->rules->contains($rule)) {
             $this->rules[] = $rule;
-            $rule->setProjectId($this);
+            $rule->setProject($this);
         }
 
         return $this;
@@ -90,8 +97,38 @@ class Project
     {
         if ($this->rules->removeElement($rule)) {
             // set the owning side to null (unless already changed)
-            if ($rule->getProjectId() === $this) {
-                $rule->setProjectId(null);
+            if ($rule->getProject() === $this) {
+                $rule->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Job>
+     */
+    public function getJobs(): Collection
+    {
+        return $this->jobs;
+    }
+
+    public function addJob(Job $job): self
+    {
+        if (!$this->jobs->contains($job)) {
+            $this->jobs[] = $job;
+            $job->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeJob(Job $job): self
+    {
+        if ($this->jobs->removeElement($job)) {
+            // set the owning side to null (unless already changed)
+            if ($job->getProject() === $this) {
+                $job->setProject(null);
             }
         }
 

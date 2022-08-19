@@ -192,7 +192,8 @@ class Rule
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="rules")
      */
-    private $project_id;
+    private $project;
+
 
 
     public function __construct()
@@ -820,14 +821,14 @@ class Rule
         return $this->id;
     }
 
-    public function getProjectId(): ?Project
+    public function getProject(): ?Project
     {
-        return $this->project_id;
+        return $this->project;
     }
 
-    public function setProjectId(?Project $project_id): self
+    public function setProject(?Project $project): self
     {
-        $this->project_id = $project_id;
+        $this->project = $project;
 
         return $this;
     }
