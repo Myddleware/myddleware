@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Entity;
 
@@ -189,9 +190,10 @@ class Rule
     private $documents;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Project::class, inversedBy="rules")
+     * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="rules")
      */
     private $project_id;
+
 
     public function __construct()
     {
@@ -202,7 +204,6 @@ class Rule
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
-        $this->project_id = new ArrayCollection();
     }
 
     /**
@@ -819,26 +820,14 @@ class Rule
         return $this->id;
     }
 
-    /**
-     * @return Collection<int, Project>
-     */
-    public function getProjectId(): Collection
+    public function getProjectId(): ?Project
     {
         return $this->project_id;
     }
 
-    public function addProjectId(Project $projectId): self
+    public function setProjectId(?Project $project_id): self
     {
-        if (!$this->project_id->contains($projectId)) {
-            $this->project_id[] = $projectId;
-        }
-
-        return $this;
-    }
-
-    public function removeProjectId(Project $projectId): self
-    {
-        $this->project_id->removeElement($projectId);
+        $this->project_id = $project_id;
 
         return $this;
     }

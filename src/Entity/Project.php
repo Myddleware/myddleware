@@ -30,7 +30,7 @@ class Project
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Rule::class, mappedBy="project_id")
+     * @ORM\OneToMany(targetEntity=Rule::class, mappedBy="project_id")
      */
     private $rules;
 
@@ -80,7 +80,7 @@ class Project
     {
         if (!$this->rules->contains($rule)) {
             $this->rules[] = $rule;
-            $rule->addProjectId($this);
+            $rule->setProjectId($this);
         }
 
         return $this;
@@ -89,7 +89,10 @@ class Project
     public function removeRule(Rule $rule): self
     {
         if ($this->rules->removeElement($rule)) {
-            $rule->removeProjectId($this);
+            // set the owning side to null (unless already changed)
+            if ($rule->getProjectId() === $this) {
+                $rule->setProjectId(null);
+            }
         }
 
         return $this;
