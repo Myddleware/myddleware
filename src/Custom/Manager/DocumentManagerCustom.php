@@ -316,11 +316,6 @@ class DocumentManagerCustom extends DocumentManager
 			$this->$suiteCrmData['externalgouvid'] = $internalListData['Identifiant_de_l_etablissement'];
 		}
 
-		//* update existing document ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-		//update fields
-
-
-
 		//account type
 		if ($suiteCrmData['type_de_partenaire_c'] == "") {
 			switch ($internalListData['libelle_nature']) {
@@ -389,11 +384,6 @@ class DocumentManagerCustom extends DocumentManager
 		if ($suiteCrmData['billing_address_postalcode'] == "" || $suiteCrmData['billing_address_postalcode'] != $internalListData['Code postal']) {
 			$suiteCrmData['billing_address_postalcode'] = $internalListData['Code postal'];
 		}
-
-
-
-		//* update existing document ████████████████████████████████████████████████████████████████████████████████████
-
 	} //end define mapTargetFields
 
 
@@ -409,32 +399,109 @@ class DocumentManagerCustom extends DocumentManager
 	//todo find the right kind of source
 	public function findMatchCrm($internalListData, $suiteCrmData)
 	{
-		//init name as false at the beginning of the loop
-		$validName = false;
-		$validPostalCode = ($internalListData['Code postal'] == $suiteCrmData['billing_address_postalcode']);
-		$validAddress = ($internalListData['Adresse_1'] == $suiteCrmData['billing_address_street']);
-		$validCity = ($internalListData['Nom_commune'] == $suiteCrmData['billing_address_city']);
 
-		//use algorithm to compare similarity of 2 names, threshold is 60% similar
-		$namecompare = similar_text($suiteCrmData['name'], $internalListData['Nom_etablissement'], $perc);
-		if ($perc >= 80) {
-			$validName = true;
-		}
-		//to have a match, we need a similar name and at least the same address or postal code
-		$validRow = ($validName && ($validPostalCode || $validAddress));
-		if ($validRow == true) {
+		//todo we try to find the school by name etc
+		//todo start the treatment to check if the school is present in the suiteCrm database
+		//to check if all rows of the table were looked at
+		$rowschecked = 0;
+		//to avoid too many choices, this array must have only one element
+		$matchingrows = [];
+		//! is it ok to reinitialize the rowschecked ?
 
-			//we append the array of matches
-			$matchingrows[(int)$perc] = $internalListData['Identifiant_de_l_etablissement'];
-			$found = true;
-		} else {
-			$found = false;
-			// throw new \Exception("Cet établissement n'a pas assez de champs");
-		}
-		$rowschecked++;
+
+		//we loop through the suiteCrm accounts
+		foreach ($dataSuiteCrm as $suiteCrmSchool) {
+			//todo find  the right source : the name of the Etablissement ?
+			//todo test if this way of handling serialized data is good or not
+			//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
+			//todo return type of findmatch ?
+			//init name as false at the beginning of the loop
+			$validName = false;
+			$validPostalCode = ($internalListData['Code postal'] == $suiteCrmData['billing_address_postalcode']);
+			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmData['billing_address_street']);
+			$validCity = ($internalListData['Nom_commune'] == $suiteCrmData['billing_address_city']);
+
+			//use algorithm to compare similarity of 2 names, threshold is 60% similar
+			$namecompare = similar_text($suiteCrmData['name'], $internalListData['Nom_etablissement'], $perc);
+			if ($perc >= 80) {
+				$validName = true;
+			}
+			//to have a match, we need a similar name and at least the same address or postal code
+			$validRow = ($validName && ($validPostalCode || $validAddress));
+			if ($validRow == true) {
+
+				//we append the array of matches
+				$matchingrows[(int)$perc] = $internalListData['Identifiant_de_l_etablissement'];
+			} else {
+				// throw new \Exception("Cet établissement n'a pas assez de champs");
+			}
+			$rowschecked++;
+		} // end foreach dataSuiteCrm to find school
 
 		//todo find the good return type ?
 		return $matchingrows;
+	}
+
+
+	public function connexionSolution($type)
+	{
+		try {
+			if ('source' == $type) {
+				$connId = $this->rule['conn_id_source'];
+			} elseif ('target' == $type) {
+				$connId = $this->rule['conn_id_target'];
+			} else {
+				return false;
+			}
+
+			// Get the name of the application
+			$sql = 'SELECT solution.name  
+		    		FROM connector
+						INNER JOIN solution 
+							ON solution.id  = connector.sol_id
+		    		WHERE connector.id = :connId';
+			$stmt = $this->connection->prepare($sql);
+			$stmt->bindValue(':connId', $connId);
+			$result = $stmt->executeQuery();
+			$r = $result->fetchAssociative();
+			// Get params connection
+			$sql = 'SELECT id, conn_id, name, value
+		    		FROM connectorparam 
+		    		WHERE conn_id = :connId';
+			$stmt = $this->connection->prepare($sql);
+			$stmt->bindValue(':connId', $connId);
+			$result = $stmt->executeQuery();
+			$tab_params = $result->fetchAllAssociative();
+			$params = [];
+			if (!empty($tab_params)) {
+				foreach ($tab_params as $key => $value) {
+					$params[$value['name']] = $value['value'];
+					$params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
+				}
+			}
+
+			// Connect to the application
+			if ('source' == $type) {
+				$this->solutionSource = $this->solutionManager->get($r['name']);
+				$this->solutionSource->setApi($this->api);
+				$loginResult = $this->solutionSource->login($params);
+				$c = (($this->solutionSource->connexion_valide) ? true : false);
+			} else {
+				$this->solutionTarget = $this->solutionManager->get($r['name']);
+				$this->solutionTarget->setApi($this->api);
+				$loginResult = $this->solutionTarget->login($params);
+				$c = (($this->solutionTarget->connexion_valide) ? true : false);
+			}
+			if (!empty($loginResult['error'])) {
+				return $loginResult;
+			}
+
+			return $c;
+		} catch (\Exception $e) {
+			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+
+			return false;
+		}
 	}
 
 
@@ -481,78 +548,57 @@ class DocumentManagerCustom extends DocumentManager
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
 
+					if (
+						$param['module'] == "Accounts" && !empty($param['rule']['id'])
+						and $param['rule']['id'] == '62ff32cd9b6fb'
+					) {
 
-					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-					//todo : before getting ready to send then we do the treatment with the suiteCrm
-					//todo we start by pulling the id from the suitCrm accounts
+						//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+						//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-					//todo we do a foreach that encapsulates everything and we do it for every
-					//todo etablissement of the internallist
-					foreach ($internalListTables as $govschool) {
-						//todo we do a custom search for the gouv id in the row of the suiteCrm
-						//!GET THE RIGTH SYNTAX !
-						$findGovId = $govschool['externalgouvid']->findAll();
-						if (!empty($findGovId)) {
-							//!or false check the return type if we didn't find a
 
-							//if we found the id, that means that we only have to update the fields using the target
-							//! not the right way to go, instead return parent ?
-							return parent::getTargetDataDocument();
-							// $this->mapTargetFields($source, $target, $findGovId);
+						$findSuiteCrmId = 'c28c855d-12f9-b8bd-c593-616ebcf16635';
+						// we do a custom search for the gouv id in the rows of the suiteCrm
 
-							//todo set status to update ?
-							//todo the id of the document should be put in the target id of myddleware
-							//todo use the parent ?
-						} else { // if govid is empty
-							//if we didn't find the exteralgoivid in the suiteCrm database it means that we have to either find the school
+						if (!empty($findSuiteCrmId)) {
+							$this->updateType('U');
+							$this->updateTargetId($findSuiteCrmId);
+						} else {
+							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 							// by name and other fields, or it doesn't exist at all and we need to create it
 
 							if (empty($dataSuiteCrm)) {
 								//we fetch the full Accounts table from the suiteCrm
 								$dataSuiteCrm = ["we get the result of the full data query from the suiteCrm accounts"];
-							} //end if dataSuiteCrm
-
-							//todo we try to find the school by name etc
-							//? we are already in the loop !!!
-							//todo start the treatment to check if the etablissement is present in the suiteCrm database
-							$found = false;
-							//to check if all rows of the table were looked at
-							$rowschecked = 0;
-							//to avoid too many choices, this array must have only one element
-							$matchingrows = [];
-							//! is it ok to reinitialize the rowschecked ?
+							}
 
 
-							//we loop through the suiteCrm accounts
-							foreach ($dataSuiteCrm as $suiteCrmSchool) {
-								//todo find  the right source : the name of the Etablissement ?
+							//! data type : does ! empty work if we get an empty array ?
+							$matchingrows = $this->findMatchCrm($this->sourceData, $dataSuiteCrm);
 
-								$data = $this->suiteCrmSchool->getData();
-								$internalListData = unserialize($data);
-
-								//todo test if this way of handling serialized data is good or not
-								//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
-								$this->findMatchCrm($this->unserializeData($internalListData), $suiteCrmSchool);
-							} // end foreach dataSuiteCrm to find school
-
-							if ($found === true) {
+							if (count($matchingrows) == 0) {
 								//if we have more than one match, then we sort by percentage of matching
 								//and use the closest match
+								return parent::getTargetDataDocument();
+							} else {
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								} // find if matchingrows
-							} else {
 								//todo create an entry: what are the right fields ?
 								//todo test if this way of handling serialized data is good or not
 								//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
-								$this->mapTargetFields($this->unserializeData($source), $target, true);
+								// $this->mapTargetFields($this->unserializeData($source), $target, true);
+								// return parent::getTargetDataDocument();
+								// $this->udpdateStatus('Update')
+								$this->updateType('U');
+								// $this->updateTargetId($matchingrows[0]);
+								$this->updateTargetId('c28c855d-12f9-b8bd-c593-616ebcf16635');
 							} //end if found
 						}	// end else empty find gouv
 
-					} //end foreach internallist
 
+					}
 
 					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
