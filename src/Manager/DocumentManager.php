@@ -196,6 +196,7 @@ class documentcore
 								rule.name_slug,
 								ruleparam.value mode,
 								rule.conn_id_source,
+								rule.conn_id_target,
 								rule.module_source
 							FROM document 
 								INNER JOIN rule

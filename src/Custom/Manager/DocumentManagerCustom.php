@@ -7,6 +7,7 @@ use App\Manager\ruleManager;
 class DocumentManagerCustom extends DocumentManager {
 	
 	protected $emailCoupon = array();
+	protected $toBeCancel = array();
 	
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
@@ -286,6 +287,16 @@ class DocumentManagerCustom extends DocumentManager {
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('L\email n\'appartient pas à un contact dans la COMET mais à un salarié (domaine afev.org). Ce transfert de données est annulé. ');
 		}
+
+		// Cancel if the doc is related KO and the email linked to a user (afev.org)
+		if (
+				!empty($this->toBeCancel[$this->id])
+			AND	$this->document_data['rule_id'] == '6210fcbe4d654' // Sendinblue - email delivered
+			AND $new_status == 'Relate_KO'
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('L\email n\'a pas été trouvé dans les contacts et les coupons de la COMET. Ce transfert de données est annulé. ');
+		}
 		
 		return $new_status;
 	}
@@ -331,6 +342,39 @@ class DocumentManagerCustom extends DocumentManager {
 			return false;
 		}	
 		$chekParent = parent::ckeckParentDocument();
+
+		// In case there is no contact or coupon found in Myddlewarere for the email, we try to find the email address directly from SuiteCRM
+		// If we don't find the email address we cancel the document 
+		if (
+				$chekParent == false 
+			AND $this->ruleId == '6210fcbe4d654' // Sendinblue - email delivered
+		) {
+			if (empty($this->solutionTarget)) {
+				$this->connexionSolution('target');
+			}
+			// Search email from SuiteCRM, module Contacts
+			$read['module'] = 'Contacts';
+			$read['ruleParams']['mode'] = '0';
+			$read['query']['email1'] = $this->sourceData['email'];
+			$read['rule'] = $this->rule;
+			$read['limit'] = 1;
+			$read['date_ref'] = '1970-01-01 00:00:00';
+			$read['call_type'] = 'read';
+			$read['jobId'] = $this->jobId;
+			$result = $this->solutionTarget->read($read);
+			// If no result found, we search email from SuiteCRM, module Leads
+			if (empty($result)){
+				$read['module'] = 'Leads';
+				$result = $this->solutionTarget->read($read);
+				// If no email found, we cancel the document
+				if (empty($result)){
+					$this->toBeCancel[$this->id] = true;
+					// Call again the check parent function to cancel the document using the attribut toBeCancel
+					parent::ckeckParentDocument();
+				}
+			}
+		}
+			
 		return $chekParent;
 	}
 	
@@ -367,5 +411,67 @@ class DocumentManagerCustom extends DocumentManager {
 		}
 		return parent::insertDataTable($data, $type);
 	}
+	
+	// Connect to the source or target application
+    public function connexionSolution($type)
+    {
+        try {
+            if ('source' == $type) {
+                $connId = $this->document_data['conn_id_source'];
+            } elseif ('target' == $type) {
+                $connId = $this->document_data['conn_id_target'];
+            } else {
+                return false;
+            }
+
+            // Get the name of the application
+            $sql = 'SELECT solution.name  
+		    		FROM connector
+						INNER JOIN solution 
+							ON solution.id  = connector.sol_id
+		    		WHERE connector.id = :connId';
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bindValue(':connId', $connId);
+            $result = $stmt->executeQuery();
+            $r = $result->fetchAssociative();
+            // Get params connection
+            $sql = 'SELECT id, conn_id, name, value
+		    		FROM connectorparam 
+		    		WHERE conn_id = :connId';
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bindValue(':connId', $connId);
+            $result = $stmt->executeQuery();
+            $tab_params = $result->fetchAllAssociative();
+            $params = [];
+            if (!empty($tab_params)) {
+                foreach ($tab_params as $key => $value) {
+                    $params[$value['name']] = $value['value'];
+                    $params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
+                }
+            }
+
+            // Connect to the application
+            if ('source' == $type) {
+                $this->solutionSource = $this->solutionManager->get($r['name']);
+                $this->solutionSource->setApi($this->api);
+                $loginResult = $this->solutionSource->login($params);
+                $c = (($this->solutionSource->connexion_valide) ? true : false);
+            } else {
+                $this->solutionTarget = $this->solutionManager->get($r['name']);
+                $this->solutionTarget->setApi($this->api);
+                $loginResult = $this->solutionTarget->login($params);
+                $c = (($this->solutionTarget->connexion_valide) ? true : false);
+            }
+            if (!empty($loginResult['error'])) {
+                return $loginResult;
+            }
+
+            return $c;
+        } catch (\Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+
+            return false;
+        }
+    }
 } 
 
