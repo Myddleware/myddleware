@@ -302,39 +302,37 @@ class DocumentManagerCustom extends DocumentManager
 		return $updateStatus;
 	}
 
-	//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
+	//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+	//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//todo create a function that must be in the scope of the target data document and update the fields
-	//todo it has a isCreate argument true or false because if it is false then we don't create the field ['externalgouvid']
+	//todo it has a createId argument true or false because if it is false then we don't create the field ['externalgouvid']
 	//todo instead we just update the fields
 	//todo reverse so the source data is internal list
-	public function mapTargetFields($sourceData, $target, $isCreate)
+	public function mapTargetFields($internalListData, $suiteCrmData, $externalgouvid = null)
 	{
-		if ($isCreate === true) {
-			//todo find the right syntax to target field
+		if (null !== $externalgouvid) {
+			//todo find the right syntax to targetData field
 			//create a new field for the new school
-			$targetSuiteCrm['externalgouvid'] = $this->sourceData['externalgouvid'];
+			$this->$suiteCrmData['externalgouvid'] = $internalListData['Identifiant_de_l_etablissement'];
 		}
 
 		//* update existing document ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 		//update fields
 
-		//todo simply update the values
-		//modify source data to match internallist
-		$this->sourceData['externalgouvid'] = reset($matchingrows);
+
 
 		//account type
-		if ($this->sourceData['type_de_partenaire_c'] == "") {
-			switch ($unserializedData['libelle_nature']) {
+		if ($suiteCrmData['type_de_partenaire_c'] == "") {
+			switch ($internalListData['libelle_nature']) {
 				case "COLLEGE":
 					//some types are integer in suitecrm
-					$this->sourceData['account_type'] = 8;
+					$suiteCrmData['account_type'] = 8;
 					break;
 				case "ECOLE DE NIVEAU ELEMENTAIRE":
-					$this->sourceData['account_type'] = 10;
+					$suiteCrmData['account_type'] = 10;
 					break;
 				case "ECOLE MATERNELLE":
-					$this->sourceData['account_type'] = 'ecole_maternelle';
+					$suiteCrmData['account_type'] = 'ecole_maternelle';
 					break;
 				default:
 					throw new \Exception("Error reading school type");
@@ -342,27 +340,27 @@ class DocumentManagerCustom extends DocumentManager
 		}
 
 		//phone number
-		if ($this->sourceData['phone_office'] == "" || $this->sourceData['phone_office'] != $unserializedData['Telephone']) {
-			$this->sourceData['phone_office'] = $unserializedData['Telephone'];
+		if ($suiteCrmData['phone_office'] == "" || $suiteCrmData['phone_office'] != $internalListData['Telephone']) {
+			$suiteCrmData['phone_office'] = $internalListData['Telephone'];
 		}
 
 		//email
-		if ($this->sourceData['email1'] == "" || $this->sourceData['email1'] != $unserializedData['Mail']) {
-			$this->sourceData['email1'] = $unserializedData['Mail'];
+		if ($suiteCrmData['email1'] == "" || $suiteCrmData['email1'] != $internalListData['Mail']) {
+			$suiteCrmData['email1'] = $internalListData['Mail'];
 		}
 
 		//rep+
-		if ($this->sourceData['rep_c'] == "" || $this->sourceData['rep_c'] != $unserializedData['Appartenance_Education_Prioritaire']) {
-			switch ($unserializedData['Appartenance_Education_Prioritaire']) {
+		if ($suiteCrmData['rep_c'] == "" || $suiteCrmData['rep_c'] != $internalListData['Appartenance_Education_Prioritaire']) {
+			switch ($internalListData['Appartenance_Education_Prioritaire']) {
 				case "REP+":
 					//some types are integer in suitecrm
-					$this->sourceData['rep_c'] = 'REP_PLUS';
+					$suiteCrmData['rep_c'] = 'REP_PLUS';
 					break;
 				case "REP":
-					$this->sourceData['account_type'] = "REP";
+					$suiteCrmData['account_type'] = "REP";
 					break;
 				case "":
-					$this->sourceData['account_type'] = '';
+					$suiteCrmData['account_type'] = '';
 					break;
 				default:
 					throw new \Exception("Error reading REP");
@@ -371,25 +369,25 @@ class DocumentManagerCustom extends DocumentManager
 		}
 
 		//city
-		if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
-			$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+		if ($suiteCrmData['billing_address_city'] == "" || $suiteCrmData['billing_address_city'] != $internalListData['Nom_commune']) {
+			$suiteCrmData['billing_address_city'] = $internalListData['Nom_commune'];
 		}
 
 		//billing address 1
-		if ($this->sourceData['billing_address_street'] == "" || $this->sourceData['billing_address_street'] != $unserializedData['Adresse_1']) {
-			$this->sourceData['billing_address_street'] = $unserializedData['Adresse_1'];
+		if ($suiteCrmData['billing_address_street'] == "" || $suiteCrmData['billing_address_street'] != $internalListData['Adresse_1']) {
+			$suiteCrmData['billing_address_street'] = $internalListData['Adresse_1'];
 		}
 
 
 		//billing address 2
 		//unlike billing address 1, we do not add an address if the internal list field is empty
-		if (($this->sourceData['billing_address_street_2'] == "" || $this->sourceData['billing_address_street_2'] != $unserializedData['Nom_commune']) && $unserializedData['Adresse_2'] != "") {
-			$this->sourceData['billing_address_street_2'] = $unserializedData['Adresse_2'];
+		if (($suiteCrmData['billing_address_street_2'] == "" || $suiteCrmData['billing_address_street_2'] != $internalListData['Nom_commune']) && $internalListData['Adresse_2'] != "") {
+			$suiteCrmData['billing_address_street_2'] = $internalListData['Adresse_2'];
 		}
 
 		//postal code
-		if ($this->sourceData['billing_address_postalcode'] == "" || $this->sourceData['billing_address_postalcode'] != $unserializedData['Code postal']) {
-			$this->sourceData['billing_address_postalcode'] = $unserializedData['Code postal'];
+		if ($suiteCrmData['billing_address_postalcode'] == "" || $suiteCrmData['billing_address_postalcode'] != $internalListData['Code postal']) {
+			$suiteCrmData['billing_address_postalcode'] = $internalListData['Code postal'];
 		}
 
 
@@ -399,20 +397,26 @@ class DocumentManagerCustom extends DocumentManager
 	} //end define mapTargetFields
 
 
+	//function to get the data of a row of internalListValue in the correct format
+	public function unserializeData($serializedData)
+	{
+		$data = $serializedData->getData();
+		$unserializeData = unserialize($data);
+		return $unserializeData;
+	}
+
 	//function that reads a row from the internallist and trys to find a match in the target
 	//todo find the right kind of source
-	public function findMatchCrm($internallist, $sourceData)
+	public function findMatchCrm($internalListData, $suiteCrmData)
 	{
-		$data = $internallist->getData();
-		$unserializedData = unserialize($data);
 		//init name as false at the beginning of the loop
 		$validName = false;
-		$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
-		$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
-		$validCity = ($unserializedData['Nom_commune'] == $this->sourceData['billing_address_city']);
+		$validPostalCode = ($internalListData['Code postal'] == $suiteCrmData['billing_address_postalcode']);
+		$validAddress = ($internalListData['Adresse_1'] == $suiteCrmData['billing_address_street']);
+		$validCity = ($internalListData['Nom_commune'] == $suiteCrmData['billing_address_city']);
 
 		//use algorithm to compare similarity of 2 names, threshold is 60% similar
-		$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
+		$namecompare = similar_text($suiteCrmData['name'], $internalListData['Nom_etablissement'], $perc);
 		if ($perc >= 80) {
 			$validName = true;
 		}
@@ -421,7 +425,7 @@ class DocumentManagerCustom extends DocumentManager
 		if ($validRow == true) {
 
 			//we append the array of matches
-			$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
+			$matchingrows[(int)$perc] = $internalListData['Identifiant_de_l_etablissement'];
 			$found = true;
 		} else {
 			$found = false;
@@ -434,9 +438,8 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 
-	//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
-
+	//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+	//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
@@ -478,19 +481,26 @@ class DocumentManagerCustom extends DocumentManager
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
 
-					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 					//todo : before getting ready to send then we do the treatment with the suiteCrm
-					//todo we start by using the data from the suiteCrm
+					//todo we start by pulling the id from the suitCrm accounts
 
 					//todo we do a foreach that encapsulates everything and we do it for every
 					//todo etablissement of the internallist
 					foreach ($internalListTables as $govschool) {
 						//todo we do a custom search for the gouv id in the row of the suiteCrm
-						$findGovId = $govschool['externalgouvid'];
+						//!GET THE RIGTH SYNTAX !
+						$findGovId = $govschool['externalgouvid']->findAll();
 						if (!empty($findGovId)) {
-							//3rd argument, isCreate is on false because since we have a gouv id then we just update the fields
-							$this->mapTargetFields($source, $target, false);
+							//!or false check the return type if we didn't find a
+
+							//if we found the id, that means that we only have to update the fields using the target
+							//! not the right way to go, instead return parent ?
+							return parent::getTargetDataDocument();
+							// $this->mapTargetFields($source, $target, $findGovId);
 
 							//todo set status to update ?
 							//todo the id of the document should be put in the target id of myddleware
@@ -518,7 +528,13 @@ class DocumentManagerCustom extends DocumentManager
 							//we loop through the suiteCrm accounts
 							foreach ($dataSuiteCrm as $suiteCrmSchool) {
 								//todo find  the right source : the name of the Etablissement ?
-								$this->findMatchCrm($source, $suiteCrmSchool);
+
+								$data = $this->suiteCrmSchool->getData();
+								$internalListData = unserialize($data);
+
+								//todo test if this way of handling serialized data is good or not
+								//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
+								$this->findMatchCrm($this->unserializeData($internalListData), $suiteCrmSchool);
 							} // end foreach dataSuiteCrm to find school
 
 							if ($found === true) {
@@ -529,14 +545,17 @@ class DocumentManagerCustom extends DocumentManager
 								} // find if matchingrows
 							} else {
 								//todo create an entry: what are the right fields ?
-								$this->mapTargetFields($source, $target, true);
+								//todo test if this way of handling serialized data is good or not
+								//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
+								$this->mapTargetFields($this->unserializeData($source), $target, true);
 							} //end if found
 						}	// end else empty find gouv
 
 					} //end foreach internallist
 
 
-					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 					$this->updateStatus('Ready_to_send');
 				} else {
 					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : ' . $this->targetId . '. Check this record is not deleted.');
