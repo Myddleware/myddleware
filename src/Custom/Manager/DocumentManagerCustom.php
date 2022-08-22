@@ -313,7 +313,7 @@ class DocumentManagerCustom extends DocumentManager
 		if ($isCreate === true) {
 			//todo find the right syntax to target field
 			//create a new field for the new school
-			$targetAfev['externalgouvid'] = $this->sourceData['externalgouvid'];
+			$targetSuiteCrm['externalgouvid'] = $this->sourceData['externalgouvid'];
 		}
 
 		//* update existing document ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -398,6 +398,42 @@ class DocumentManagerCustom extends DocumentManager
 
 	} //end define mapTargetFields
 
+
+	//function that reads a row from the internallist and trys to find a match in the target
+	//todo find the right kind of source
+	public function findMatchCrm($internallist, $sourceData)
+	{
+		$data = $internallist->getData();
+		$unserializedData = unserialize($data);
+		//init name as false at the beginning of the loop
+		$validName = false;
+		$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
+		$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
+		$validCity = ($unserializedData['Nom_commune'] == $this->sourceData['billing_address_city']);
+
+		//use algorithm to compare similarity of 2 names, threshold is 60% similar
+		$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
+		if ($perc >= 80) {
+			$validName = true;
+		}
+		//to have a match, we need a similar name and at least the same address or postal code
+		$validRow = ($validName && ($validPostalCode || $validAddress));
+		if ($validRow == true) {
+
+			//we append the array of matches
+			$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
+			$found = true;
+		} else {
+			$found = false;
+			// throw new \Exception("Cet établissement n'a pas assez de champs");
+		}
+		$rowschecked++;
+
+		//todo find the good return type ?
+		return $matchingrows;
+	}
+
+
 	//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 
@@ -444,13 +480,13 @@ class DocumentManagerCustom extends DocumentManager
 
 					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
-					//todo : before getting ready to send then we do the treatment with the afev
-					//todo we start by using the data from the afev
+					//todo : before getting ready to send then we do the treatment with the suiteCrm
+					//todo we start by using the data from the suiteCrm
 
 					//todo we do a foreach that encapsulates everything and we do it for every
 					//todo etablissement of the internallist
 					foreach ($internalListTables as $govschool) {
-						//todo we do a custom search for the gouv id in the row of the afev
+						//todo we do a custom search for the gouv id in the row of the suiteCrm
 						$findGovId = $govschool['externalgouvid'];
 						if (!empty($findGovId)) {
 							//3rd argument, isCreate is on false because since we have a gouv id then we just update the fields
@@ -460,17 +496,17 @@ class DocumentManagerCustom extends DocumentManager
 							//todo the id of the document should be put in the target id of myddleware
 							//todo use the parent ?
 						} else { // if govid is empty
-							//if we didn't find the exteralgoivid in the afev database it means that we have to either find the school
+							//if we didn't find the exteralgoivid in the suiteCrm database it means that we have to either find the school
 							// by name and other fields, or it doesn't exist at all and we need to create it
 
-							if (empty($dataAfev)) {
-								//we fetch the full Accounts table from the afev
-								$dataAfev = ["we get the result of the full data query from the afev accounts"];
-							} //end if dataAfev
+							if (empty($dataSuiteCrm)) {
+								//we fetch the full Accounts table from the suiteCrm
+								$dataSuiteCrm = ["we get the result of the full data query from the suiteCrm accounts"];
+							} //end if dataSuiteCrm
 
 							//todo we try to find the school by name etc
 							//? we are already in the loop !!!
-							//todo start the treatment to check if the etablissement is present in the afev database
+							//todo start the treatment to check if the etablissement is present in the suiteCrm database
 							$found = false;
 							//to check if all rows of the table were looked at
 							$rowschecked = 0;
@@ -479,34 +515,11 @@ class DocumentManagerCustom extends DocumentManager
 							//! is it ok to reinitialize the rowschecked ?
 
 
-							//we loop through the afev accounts
-							foreach ($dataAfev as $afevSchool) {
-								$data = $row->getData();
-								$unserializedData = unserialize($data);
-								//init name as false at the beginning of the loop
-								$validName = false;
-								$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
-								$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
-								$validCity = ($unserializedData['Nom_commune'] == $this->sourceData['billing_address_city']);
-
-								//use algorithm to compare similarity of 2 names, threshold is 60% similar
-								$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
-								if ($perc >= 80) {
-									$validName = true;
-								}
-								//to have a match, we need a similar name and at least the same address or postal code
-								$validRow = ($validName && ($validPostalCode || $validAddress));
-								if ($validRow == true) {
-
-									//we append the array of matches
-									$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
-									$found = true;
-								} else {
-									$found = false;
-									// throw new \Exception("Cet établissement n'a pas assez de champs");
-								}
-								$rowschecked++;
-							} // end foreach dataAfev to find school
+							//we loop through the suiteCrm accounts
+							foreach ($dataSuiteCrm as $suiteCrmSchool) {
+								//todo find  the right source : the name of the Etablissement ?
+								$this->findMatchCrm($source, $suiteCrmSchool);
+							} // end foreach dataSuiteCrm to find school
 
 							if ($found === true) {
 								//if we have more than one match, then we sort by percentage of matching
@@ -514,16 +527,13 @@ class DocumentManagerCustom extends DocumentManager
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								} // find if matchingrows
+							} else {
+								//todo create an entry: what are the right fields ?
+								$this->mapTargetFields($source, $target, true);
 							} //end if found
 						}	// end else empty find gouv
 
 					} //end foreach internallist
-
-
-
-
-
-
 
 
 					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
