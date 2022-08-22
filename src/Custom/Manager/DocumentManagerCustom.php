@@ -571,6 +571,18 @@ class DocumentManagerCustom extends DocumentManager
 							if (empty($dataSuiteCrm)) {
 								//we fetch the full Accounts table from the suiteCrm
 								$dataSuiteCrm = ["we get the result of the full data query from the suiteCrm accounts"];
+								$dataSuiteCrm = [
+									"name" => "Maison de quartier Billard",
+									"account_type" => "8",
+									"billing_address_city" => "Vénissieux ",
+									"billing_address_postalcode" => "69200",
+									"billing_address_street" => "3 rue Georges Lyvet",
+									"billing_address_street_2" => "",
+									"email1" => "TEST-benedicte.gastellu@ac-lyon.fr-TEST",
+									"phone_office" => "0478701622 ",
+									"rep_c" => "REP_PLUS",
+									"type_de_partenaire_c" => "8",
+								];
 							}
 
 
