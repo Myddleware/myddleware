@@ -134,7 +134,15 @@ class suitecrmcustom extends suitecrm {
 		return $read;
 	}
 	
-	   // Permet de mettre à jour un enregistrement
+	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null) {
+		if ($param['rule']['id'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
+			// Change id and use event_id and lead_id
+			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
+		}
+		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
+	}
+	
+	// Permet de mettre à jour un enregistrement
     public function updateData($param)
     {
 		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
