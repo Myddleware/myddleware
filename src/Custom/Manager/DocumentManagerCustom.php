@@ -2,8 +2,10 @@
 
 namespace App\Custom\Manager;
 
-use App\Manager\DocumentManager;
+use App\Solutions\suitecrm;
 use App\Manager\ruleManager;
+use App\Manager\DocumentManager;
+use App\Manager\LoadExternalListManager;
 use App\Entity\InternalListValue as InternalListValueEntity;
 
 class DocumentManagerCustom extends DocumentManager
@@ -300,6 +302,84 @@ class DocumentManagerCustom extends DocumentManager
 		return $updateStatus;
 	}
 
+	//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+	//todo create a function that must be in the scope of the target data document and update the fields
+	//todo it has a isCreate argument true or false because if it is false then we don't create the field ['externalgouvid']
+	//todo instead we just update the fields
+	public function mapTargetFields($source, $target, $isCreate)
+	{
+		if ($isCreate === true) {
+			//todo find the right syntax to target field
+			//create a new field for the new school
+			$targetAfev['externalgouvid'] = $this->sourceData['externalgouvid'];
+		}
+
+		//* update existing document ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+		//update fields
+		//account type
+		switch ($unserializedData['libelle_nature']) {
+			case "COLLEGE":
+				//some types are integer in suitecrm
+				$this->sourceData['account_type'] = 8;
+				break;
+			case "ECOLE DE NIVEAU ELEMENTAIRE":
+				$this->sourceData['account_type'] = 10;
+				break;
+			case "ECOLE MATERNELLE":
+				$this->sourceData['account_type'] = 'ecole_maternelle';
+				break;
+			default:
+				throw new \Exception("Error reading school type");
+		}
+
+		//phone number
+		$this->sourceData['phone_office'] = $unserializedData['Telephone'];
+
+		//email
+		$this->sourceData['email1'] = $unserializedData['Mail'];
+
+		//rep+
+		switch ($unserializedData['Appartenance_Education_Prioritaire']) {
+			case "REP+":
+				//some types are integer in suitecrm
+				$this->sourceData['rep_c'] = 'REP_PLUS';
+				break;
+			case "REP":
+				$this->sourceData['account_type'] = "REP";
+				break;
+			case "":
+				$this->sourceData['account_type'] = '';
+				break;
+			default:
+				throw new \Exception("Error reading REP");
+				break;
+		}
+
+		//city
+		$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+
+		//billing address 1
+		$this->sourceData['billing_address_street'] = $unserializedData['Adresse_1'];
+
+		//billing address 2
+		//unlike billing address 1, we do not add an address if the internal list field is empty
+		if (($this->sourceData['billing_address_street_2'] == "" || $this->sourceData['billing_address_street_2'] != $unserializedData['Nom_commune']) && $unserializedData['Adresse_2'] != "") {
+			$this->sourceData['billing_address_street_2'] = $unserializedData['Adresse_2'];
+		}
+
+		//postal code
+		$this->sourceData['billing_address_postalcode'] = $unserializedData['Code postal'];
+		//todo simply update the values
+
+
+
+		//* update existing document ████████████████████████████████████████████████████████████████████████████████████
+
+	}
+
+	//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
 
 
 	// Permet de transformer les données source en données cibles
@@ -341,6 +421,191 @@ class DocumentManagerCustom extends DocumentManager
 
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
+
+					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+					//todo : before getting ready to send then we do the treatment with the afev
+					//todo we start by using the data from the afev
+
+					//todo we do a foreach that encapsulates everything and we do it for every
+					//todo etablissement of the internallist
+					foreach ($internalListTables as $internaltable) {
+						//todo we do a custom search for the gouv id in the row of the afev
+						$findGovId = $internaltable['externalgouvid'];
+						if (!empty($findGovId)) {
+							//3rd argument, isCreate is on false because since we have a gouv id then 
+							//we just update the fields
+							//? Why do we get an error if function is in the same scope ?
+							mapTargetFields($source, $target, false);
+
+							//todo set status to update ?
+							//todo the id of the document should be put in the target id of myddleware
+							//todo use the parent ?
+						} else {
+							//if we didn't find the exteralgoivid in the afev database it means that we have to either find the school
+							// by name and other fields, or it doesn't exist at all and we need to create it
+
+							if (empty($dataAfev)) {
+								//we fetch the full Accounts table from the afev
+								$dataAfev = "we get the result of the query from the afev";
+							}
+
+							//todo we try to find the school by name etc
+							//? we are already in the loop !!!
+							//todo start the treatment to check if the etablissement is present in the afev database
+							$found = false;
+							//to check if all rows of the table were looked at
+							$rowschecked = 0;
+							//to avoid too many choices, this array must have only one element
+							$matchingrows = [];
+
+
+							//! is it ok to re
+							foreach ($dataAfev as $afevSchool) {
+							$data = $row->getData();
+							$unserializedData = unserialize($data);
+							//init name as false at the beginning of the loop
+							$validName = false;
+							$validPostalCode = ($unserializedData['Code postal'] == $this->sourceData['billing_address_postalcode']);
+							$validAddress = ($unserializedData['Adresse_1'] == $this->sourceData['billing_address_street']);
+							$validCity = ($unserializedData['Nom_commune'] == $this->sourceData['billing_address_city']);
+
+							//use algorithm to compare similarity of 2 names, threshold is 60% similar
+							$namecompare = similar_text($this->sourceData['name'], $unserializedData['Nom_etablissement'], $perc);
+							if ($perc >= 80) {
+								$validName = true;
+							}
+							//to have a match, we need a similar name and at least the same address or postal code
+							$validRow = ($validName && ($validPostalCode || $validAddress));
+							if ($validRow == true) {
+
+								//we append the array of matches
+								$matchingrows[(int)$perc] = $unserializedData['Identifiant_de_l_etablissement'];
+								$found = true;
+							} else {
+								$found = false;
+								// throw new \Exception("Cet établissement n'a pas assez de champs");
+							}
+							$rowschecked++;
+						}
+
+						if ($found === true) {
+							//if we have more than one match, then we sort by percentage of matching
+							//and use the closest match
+							if (count($matchingrows) > 1) {
+								krsort($matchingrows);
+							}
+						} //end afev loop
+					}
+
+
+					
+							//todo start the treatment to check if the etablissement is present in the afev database
+									//* transform section ████████████████████████████████████████████████████████████████████████████████████
+									
+										// if ($this->ruleId == '62f34a724a381' && $this->sourceData['id'] == 'c28c855d-12f9-b8bd-c593-616ebcf16635') {
+										//we look for an existing gouv id to see if compare has already been done
+												
+												//check for row match using the name, the postal code, and the address
+												foreach ($this->etabExternallist as $row) {
+													
+
+													//modify source data to match internallist
+													$this->sourceData['externalgouvid'] = reset($matchingrows);
+
+													//account type
+													if ($this->sourceData['type_de_partenaire_c'] == "") {
+														switch ($unserializedData['libelle_nature']) {
+															case "COLLEGE":
+																//some types are integer in suitecrm
+																$this->sourceData['account_type'] = 8;
+																break;
+															case "ECOLE DE NIVEAU ELEMENTAIRE":
+																$this->sourceData['account_type'] = 10;
+																break;
+															case "ECOLE MATERNELLE":
+																$this->sourceData['account_type'] = 'ecole_maternelle';
+																break;
+															default:
+																throw new \Exception("Error reading school type");
+														}
+													}
+
+													//phone number
+													if ($this->sourceData['phone_office'] == "" || $this->sourceData['phone_office'] != $unserializedData['Telephone']) {
+														$this->sourceData['phone_office'] = $unserializedData['Telephone'];
+													}
+
+													//email
+													if ($this->sourceData['email1'] == "" || $this->sourceData['email1'] != $unserializedData['Mail']) {
+														$this->sourceData['email1'] = $unserializedData['Mail'];
+													}
+
+													//rep+
+													if ($this->sourceData['rep_c'] == "" || $this->sourceData['rep_c'] != $unserializedData['Appartenance_Education_Prioritaire']) {
+														switch ($unserializedData['Appartenance_Education_Prioritaire']) {
+															case "REP+":
+																//some types are integer in suitecrm
+																$this->sourceData['rep_c'] = 'REP_PLUS';
+																break;
+															case "REP":
+																$this->sourceData['account_type'] = "REP";
+																break;
+															case "":
+																$this->sourceData['account_type'] = '';
+																break;
+															default:
+																throw new \Exception("Error reading REP");
+																break;
+														}
+													}
+
+													//city
+													if ($this->sourceData['billing_address_city'] == "" || $this->sourceData['billing_address_city'] != $unserializedData['Nom_commune']) {
+														$this->sourceData['billing_address_city'] = $unserializedData['Nom_commune'];
+													}
+
+													//billing address 1
+													if ($this->sourceData['billing_address_street'] == "" || $this->sourceData['billing_address_street'] != $unserializedData['Adresse_1']) {
+														$this->sourceData['billing_address_street'] = $unserializedData['Adresse_1'];
+													}
+
+
+													//billing address 2
+													//unlike billing address 1, we do not add an address if the internal list field is empty
+													if (($this->sourceData['billing_address_street_2'] == "" || $this->sourceData['billing_address_street_2'] != $unserializedData['Nom_commune']) && $unserializedData['Adresse_2'] != "") {
+														$this->sourceData['billing_address_street_2'] = $unserializedData['Adresse_2'];
+													}
+
+													//postal code
+													if ($this->sourceData['billing_address_postalcode'] == "" || $this->sourceData['billing_address_postalcode'] != $unserializedData['Code postal']) {
+														$this->sourceData['billing_address_postalcode'] = $unserializedData['Code postal'];
+													}
+												} else {
+													throw new \Exception("Établissement non trouvé dans la liste gouvernementale");
+												}
+											} catch (\Exception $e) {
+												$this->message .= 'Failed to get document with custom id' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+												$this->typeError = 'E';
+												$this->updateStatus('Error_transformed');
+												$this->logger->error($this->message);
+												//make logs
+												$this->createDocLog();
+											}
+										} else {
+										}
+									} else {
+										return parent::transformDocument();
+									}
+									//* transform section ████████████████████████████████████████████████████████████████████████████████████
+								}
+							}
+							//todo if we have gone through all the rows of the afev and we haven't found the etablissement, then we simply create the entry
+							//todo put the status to create, that way it will make a new row in the afev database
+						}
+					}
+
+					//! ALERT NEW UNTESTED CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 					$this->updateStatus('Ready_to_send');
 				} else {
 					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : ' . $this->targetId . '. Check this record is not deleted.');
@@ -372,6 +637,10 @@ class DocumentManagerCustom extends DocumentManager
 						$this->typeError = 'E';
 						$this->updateStatus('Not_found');
 					} else {
+
+
+
+
 						$this->updateStatus('Ready_to_send');
 					}
 				}
@@ -388,6 +657,8 @@ class DocumentManagerCustom extends DocumentManager
 					if ('S' == $this->documentType) {
 						$this->updateStatus('Found');
 					} else {
+
+
 						$this->updateStatus('Ready_to_send');
 						$this->updateType('U');
 					}
