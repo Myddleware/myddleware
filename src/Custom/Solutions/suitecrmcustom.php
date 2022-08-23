@@ -258,24 +258,6 @@ class suitecrmcustom extends suitecrm
 		$query = parent::generateQuery($param, $method);
 		// Add filter on contact type when the contacts are read from SuiteCRM
 
-		//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-		//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-		if (
-			$param['module'] == "Accounts" && !empty($param['rule']['id'])
-			and $param['rule']['id'] == '62ff32cd9b6fb'
-		) {
-
-			//todo: query
-			//todo get a query that gets all the rows from the account table
-			//todo is query the complete query or is this just a fragment ? then where is the rest ?
-			//todo the query should not get every row but every row that has the following type:
-			//todo 8(college), 10(ecole elementaire), ecole maternelle
-			$query = "* from accounts";
-
-
-			//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-			//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-		}
 
 		if (
 			$param['module'] == 'Contacts'

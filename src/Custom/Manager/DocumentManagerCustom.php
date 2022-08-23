@@ -505,12 +505,14 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 
+
 	//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
+
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -526,7 +528,7 @@ class DocumentManagerCustom extends DocumentManager
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
 				('U' == $this->documentType
-					or 'D' == $this->documentType
+					or 'D' == $this->documentType or 'C' == $this->documentType
 				)
 				&& !$this->isChild()
 			) {
@@ -549,11 +551,50 @@ class DocumentManagerCustom extends DocumentManager
 				if (-1 !== $history) {
 
 					if (
-						$param['module'] == "Accounts" && !empty($param['rule']['id'])
-						and $param['rule']['id'] == '62ff32cd9b6fb'
+						// $param['module'] == "Accounts" && !empty($param['rule']['id'])
+						// and $param['rule']['id'] == '62ff32cd9b6fb'
+						1 == 1
 					) {
+						if (empty($this->solutionTarget)) {
+							$this->connexionSolution('target');
+						}
+						$param['rule']['id'] = '62ff32cd9b6fb';
+						$read['fields'] = [
+							'name',
+							'account_type',
+							'billing_address_city',
+							'billing_address_postalcode',
+							'billing_address_street',
+							'billing_address_street_2',
+							'email1',
+							'phone_office',
+							'rep_c',
+							'type_de_partenaire_c',
+						];
+
+						//recreate param
+						// $param['solutionTarget'] = $this->solutionTarget;
+						// $param['id_doc_myddleware'] = $this->jobId;
+						// $param['jobId'] = $this->jobId;
+
+						$param['id_doc_myddleware'] = $this->id;
+						$param['solutionTarget'] = $this->solutionTarget;
+						$param['ruleFields'] = $this->ruleFields;
+						$param['ruleRelationships'] = $this->ruleRelationships;
+						$param['jobId'] = $this->jobId;
+						$param['api'] = $this->api;
 
 
+						$read['offset'] = 0;
+						$read['module'] = 'Accounts';
+						$read['ruleParams']['mode'] = '0';
+						$read['query']['email1'] = $this->sourceData['Mail'];
+						$read['rule'] = $this->ruleId;
+						$read['limit'] = 10000;
+						$read['date_ref'] = '1970-01-01 00:00:00';
+						$read['call_type'] = 'read';
+						$read['jobId'] = $this->jobId;
+						$result = $this->solutionTarget->read($read);
 						//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 						//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
