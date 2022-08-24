@@ -138,6 +138,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
+            //use request content
             $rawData = $request->getContent();
             $data = json_decode($rawData, true);
 
