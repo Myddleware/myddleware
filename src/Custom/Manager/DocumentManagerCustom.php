@@ -228,6 +228,21 @@ class DocumentManagerCustom extends DocumentManager {
 				$this->message .= utf8_decode('Le coupon n\existe pas dans de la platforme epace repérant, la mise à jour est donc interrompue. '); 
 			}
 		}
+		
+		// We cancel the relation Coupon - Pôle if he has been filtered
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '626931ebbff78' // Mobilisation - Relations pôles Coupons
+		) {			
+			if (
+					strpos($this->message, 'No data for the field record_id.') !== false
+				AND strpos($this->message, ' in the rule Mobilisation - Coupons') !== false	
+			) {				
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le coupon lié à ce pôle est absent de Airtable. Il s\'agit probablement d\'un coupon d\'un type filtré. Le lien coupon - pôle ne sera donc pas créé dans Airtable. Ce transfert de données est annulé. '); 
+			}
+		}
+		
 
 		/************************************************/
 		/************         AIKO         **************/
