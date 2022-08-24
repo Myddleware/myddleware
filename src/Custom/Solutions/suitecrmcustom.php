@@ -20,7 +20,7 @@ class suitecrmcustom extends suitecrm {
 	protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
-        'Leads' => ['email1', 'last_name'],
+        'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Prospects' => ['email1', 'name'],
         'default' => ['name'],
     ];
