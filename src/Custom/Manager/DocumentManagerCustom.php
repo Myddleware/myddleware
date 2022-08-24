@@ -559,7 +559,7 @@ class DocumentManagerCustom extends DocumentManager
 							$this->connexionSolution('target');
 						}
 						$param['rule']['id'] = '62ff32cd9b6fb';
-						$read['fields'] = [
+						$param['fields'] = [
 							'name',
 							'account_type',
 							'billing_address_city',
@@ -584,17 +584,17 @@ class DocumentManagerCustom extends DocumentManager
 						$param['jobId'] = $this->jobId;
 						$param['api'] = $this->api;
 
-
-						$read['offset'] = 0;
-						$read['module'] = 'Accounts';
-						$read['ruleParams']['mode'] = '0';
-						$read['query']['email1'] = $this->sourceData['Mail'];
-						$read['rule'] = $this->ruleId;
-						$read['limit'] = 10000;
-						$read['date_ref'] = '1970-01-01 00:00:00';
-						$read['call_type'] = 'read';
-						$read['jobId'] = $this->jobId;
-						$result = $this->solutionTarget->read($read);
+						// $param['fields'] = $this->ruleFields;
+						$param['offset'] = 0;
+						$param['module'] = 'Accounts';
+						$param['ruleParams']['mode'] = '0';
+						$param['query']['type_de_partenaire_c'] = 8;
+						$param['rule']['id'] = $this->ruleId;
+						$param['limit'] = 10000;
+						$param['date_ref'] = '1970-01-01 00:00:00';
+						$param['call_type'] = 'read';
+						// $read['jobId'] = $this->jobId;
+						$result = $this->solutionTarget->read($param);
 						//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 						//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
