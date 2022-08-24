@@ -15,12 +15,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Project
 {
-    /**
-     * @var string
-     * @ORM\Column(name="id", type="string", nullable=false)
+  /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
+
 
     /**
      * @ORM\Column(type="string", length=100)

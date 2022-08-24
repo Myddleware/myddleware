@@ -28,7 +28,11 @@ class ProjectController extends AbstractController
      */
     public function index(): Response
     {
-        return $this->render('project/list.html.twig');
+        $projects = $this->entityManager->getRepository(Project::class)->findAll();
+        dump($projects);
+        return $this->render('project/list.html.twig', [
+            'projects' => $projects
+        ]);
     }
 
     /**
@@ -54,4 +58,33 @@ class ProjectController extends AbstractController
 
         ]);
     }
+
+    /**
+     * @Route("/{id}/edit", name="project_edit")
+     *
+     * @param mixed $id
+     */
+    public function editAction($id)
+    {
+        $entity = $this->entityManager->getRepository(Project::class)->find($id);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find JobScheduler entity.');
+        }
+
+        return $this->render('project/edit.html.twig');
+    }
+
+    /**
+     * @Route("/{id}/show", name="project_show")
+     *
+     * @param mixed $id
+     */
+    public function showAction($id)
+    {
+        $entity = $this->entityManager->getRepository(Project::class)->find($id);
+
+        return $this->render('project/show.html.twig');
+    }
+    
 }

@@ -877,3 +877,9 @@ duplicate_rule:
     current_rule: règle actuelle
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
+project:
+    create: Créer un projet
+    name: Nom
+    description: Description
+    rulenb: nombre de règles
+
