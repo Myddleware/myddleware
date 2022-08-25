@@ -882,4 +882,5 @@ project:
     name: Nom
     description: Description
     rulenb: nombre de règles
+    delete: Etes-vous sûr de vouloir supprimer ce projet ?
 

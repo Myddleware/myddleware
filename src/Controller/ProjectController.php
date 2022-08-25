@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Rule;
 use App\Entity\Project;
 use App\Form\ProjectFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,7 +43,9 @@ class ProjectController extends AbstractController
     {
 
         $project = new Project();
+
         $form = $this->createForm(ProjectFormType::class, $project);
+        $rules = $this->entityManager->getRepository(Rule::class)->findAll();
         $form->handleRequest($request);
 
 
@@ -54,8 +57,23 @@ class ProjectController extends AbstractController
         }
 
         return $this->render('project/create.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'rules'=> $rules
 
+        ]);
+    }
+
+      /**
+     * @Route("/{id}/show", name="project_show")
+     *
+     * @param mixed $id
+     */
+    public function showAction($id)
+    {
+        $project = $this->entityManager->getRepository(Project::class)->find($id);
+
+        return $this->render('project/show.html.twig', [
+            'project' => $project
         ]);
     }
 
@@ -66,25 +84,56 @@ class ProjectController extends AbstractController
      */
     public function editAction($id)
     {
-        $entity = $this->entityManager->getRepository(Project::class)->find($id);
+        $project = $this->entityManager->getRepository(Project::class)->find($id);
 
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find JobScheduler entity.');
+        if (!$project) {
+            throw $this->createNotFoundException('Unable to find project entity.');
         }
 
-        return $this->render('project/edit.html.twig');
-    }
+        $deleteFormProject = $this->createDeleteFormProject($id);
 
-    /**
-     * @Route("/{id}/show", name="project_show")
+        return $this->render('project/edit.html.twig', [
+            'project' => $project,
+            'delete_form' => $deleteFormProject->createView(),
+        ]);
+    }
+ 
+
+     /**
+     * @Route("/{id}/delete_project", name="delete_project", methods={"GET", "DELETE"})
      *
      * @param mixed $id
      */
-    public function showAction($id)
+    public function deleteActionProject(Request $request, $id)
     {
-        $entity = $this->entityManager->getRepository(Project::class)->find($id);
+        $id = $request->get('id');
+        $project = $this->entityManager->getRepository(Project::class)->find($id);
 
-        return $this->render('project/show.html.twig');
+        if (!$project) {
+            throw $this->createNotFoundException('Unable to find project.');
+        }
+
+        $this->entityManager->remove($project);
+        $this->entityManager->flush();
+
+        return $this->redirect($this->generateUrl('app_project'));
     }
+
+    /**
+     * Creates a form to delete a project entity by id.
+     *
+     * @param mixed $id The entity id
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteFormProject($id)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('delete_project', ['id' => $id]))
+            ->setMethod('DELETE')
+            ->add('submit', SubmitType::class, ['label' => 'Delete'])
+            ->getForm();
+    }
+
     
 }
