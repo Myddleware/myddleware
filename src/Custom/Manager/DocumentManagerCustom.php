@@ -422,6 +422,7 @@ class DocumentManagerCustom extends DocumentManager
 			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmSchool['billing_address_street']);
 			// $validCity = ($internalListData['Nom_commune'] == $suiteCrmSchool['billing_address_city']);
 
+
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
 			$namecompare = similar_text($suiteCrmSchool['name'], $internalListData['Nom_etablissement'], $perc);
 			if ($perc >= 80) {
@@ -513,8 +514,7 @@ class DocumentManagerCustom extends DocumentManager
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
-
-		if (empty($this->etabComet)) {
+		if (empty($param)) {
 			$param['rule']['id'] = '62ff32cd9b6fb';
 			$param['fields'] = [
 				'id',
@@ -549,7 +549,9 @@ class DocumentManagerCustom extends DocumentManager
 			$param['limit'] = 10000;
 			$param['date_ref'] = '1970-01-01 00:00:00';
 			$param['call_type'] = 'read';
-			// $read['jobId'] = $this->jobId;
+		}
+
+		if (empty($this->etabComet)) {
 			$this->etabComet = $this->solutionTarget->read($param);
 		}
 
@@ -602,8 +604,10 @@ class DocumentManagerCustom extends DocumentManager
 						}
 						// we do a custom search for the gouv id in the rows of the suiteCrm
 
-						foreach ($suiteCrmData as $index => $suiteCrmSchool) {
-							if ($sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
+						foreach ($this->etabComet as $index => $suiteCrmSchool) {
+							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+								if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
+								}
 								$findSuiteCrmId = $suiteCrmSchool['externalgouvid_c'];
 							}
 						}
