@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Project
 {
-  /**
+    /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
@@ -44,6 +44,16 @@ class Project
      * @ORM\OneToMany(targetEntity=Job::class, mappedBy="project")
      */
     private $jobs;
+
+    /**
+     * @ORM\Column(name="date_created", type="datetime", nullable=false)
+     */
+    private $dateCreated;
+
+    /**
+     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
+     */
+    private $dateModified;
 
     public function __construct()
     {
@@ -143,6 +153,30 @@ class Project
                 $job->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDateCreated(): ?\DateTimeInterface
+    {
+        return $this->dateCreated;
+    }
+
+    public function setDateCreated(\DateTimeInterface $dateCreated): self
+    {
+        $this->dateCreated = $dateCreated;
+
+        return $this;
+    }
+
+    public function getDateModified(): ?\DateTimeInterface
+    {
+        return $this->dateModified;
+    }
+
+    public function setDateModified(\DateTimeInterface $dateModified): self
+    {
+        $this->dateModified = $dateModified;
 
         return $this;
     }
