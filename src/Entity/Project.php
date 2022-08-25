@@ -55,6 +55,18 @@ class Project
      */
     private $dateModified;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $created_by;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $modified_by;
+
     public function __construct()
     {
         $this->rules = new ArrayCollection();
@@ -177,6 +189,30 @@ class Project
     public function setDateModified(\DateTimeInterface $dateModified): self
     {
         $this->dateModified = $dateModified;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): self
+    {
+        $this->created_by = $created_by;
+
+        return $this;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modified_by;
+    }
+
+    public function setModifiedBy(?User $modified_by): self
+    {
+        $this->modified_by = $modified_by;
 
         return $this;
     }
