@@ -258,7 +258,10 @@ class suitecrmcustom extends suitecrm
 		$query = parent::generateQuery($param, $method);
 		// Add filter on contact type when the contacts are read from SuiteCRM
 
-
+		//if my rule and module = 
+		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '62ff32cd9b6fb') {
+			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
+		}
 		if (
 			$param['module'] == 'Contacts'
 			and !empty($param['ruleParams']['contactType'])

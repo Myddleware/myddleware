@@ -11,7 +11,7 @@ use App\Entity\InternalListValue as InternalListValueEntity;
 class DocumentManagerCustom extends DocumentManager
 {
 
-	protected $etabExternallist;
+	protected $etabComet;
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
 		if (
@@ -382,7 +382,7 @@ class DocumentManagerCustom extends DocumentManager
 
 		//postal code
 		if ($suiteCrmData['billing_address_postalcode'] == "" || $suiteCrmData['billing_address_postalcode'] != $internalListData['Code postal']) {
-			$suiteCrmData['billing_address_postalcode'] = $internalListData['Code postal'];
+			$suiteCrmData['billing_address_postalcode'] = $internalListData['Code_postal'];
 		}
 	} //end define mapTargetFields
 
@@ -410,19 +410,20 @@ class DocumentManagerCustom extends DocumentManager
 
 
 		//we loop through the suiteCrm accounts
-		foreach ($dataSuiteCrm as $suiteCrmSchool) {
+		foreach ($suiteCrmData as $index => $suiteCrmSchool) {
 			//todo find  the right source : the name of the Etablissement ?
 			//todo test if this way of handling serialized data is good or not
 			//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
 			//todo return type of findmatch ?
 			//init name as false at the beginning of the loop
+
 			$validName = false;
-			$validPostalCode = ($internalListData['Code postal'] == $suiteCrmData['billing_address_postalcode']);
-			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmData['billing_address_street']);
-			$validCity = ($internalListData['Nom_commune'] == $suiteCrmData['billing_address_city']);
+			$validPostalCode = ($internalListData['Code_postal'] == $suiteCrmSchool['billing_address_postalcode']);
+			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmSchool['billing_address_street']);
+			// $validCity = ($internalListData['Nom_commune'] == $suiteCrmSchool['billing_address_city']);
 
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
-			$namecompare = similar_text($suiteCrmData['name'], $internalListData['Nom_etablissement'], $perc);
+			$namecompare = similar_text($suiteCrmSchool['name'], $internalListData['Nom_etablissement'], $perc);
 			if ($perc >= 80) {
 				$validName = true;
 			}
@@ -431,7 +432,7 @@ class DocumentManagerCustom extends DocumentManager
 			if ($validRow == true) {
 
 				//we append the array of matches
-				$matchingrows[(int)$perc] = $internalListData['Identifiant_de_l_etablissement'];
+				$matchingrows[(int)$perc] = $suiteCrmSchool['id'];
 			} else {
 				// throw new \Exception("Cet établissement n'a pas assez de champs");
 			}
@@ -513,6 +514,45 @@ class DocumentManagerCustom extends DocumentManager
 	public function getTargetDataDocument()
 	{
 
+		if (empty($this->etabComet)) {
+			$param['rule']['id'] = '62ff32cd9b6fb';
+			$param['fields'] = [
+				'id',
+				'name',
+				'account_type',
+				'billing_address_city',
+				'billing_address_postalcode',
+				'billing_address_street',
+				'billing_address_street_2',
+				'email1',
+				'phone_office',
+				'rep_c',
+				'type_de_partenaire_c',
+			];
+
+
+			$param['id_doc_myddleware'] = $this->id;
+			$param['solutionTarget'] = $this->solutionTarget;
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+
+			// $param['fields'] = $this->ruleFields;
+			$param['offset'] = 0;
+			$param['module'] = 'Accounts';
+			$param['ruleParams']['mode'] = '0';
+			// $param['query']['type_de_partenaire_c'] = 8;
+			$param['query']['type_de_partenaire_c'] = 'ecole_maternelle';
+			// $param['query']['email1'] = $this->sourceData['Mail'];
+			$param['rule']['id'] = $this->ruleId;
+			$param['limit'] = 10000;
+			$param['date_ref'] = '1970-01-01 00:00:00';
+			$param['call_type'] = 'read';
+			// $read['jobId'] = $this->jobId;
+			$this->etabComet = $this->solutionTarget->read($param);
+		}
+
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -528,7 +568,7 @@ class DocumentManagerCustom extends DocumentManager
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
 				('U' == $this->documentType
-					or 'D' == $this->documentType or 'C' == $this->documentType
+					or 'D' == $this->documentType || 'C' == $this->documentType
 				)
 				&& !$this->isChild()
 			) {
@@ -549,86 +589,32 @@ class DocumentManagerCustom extends DocumentManager
 
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
+					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 					if (
-						// $param['module'] == "Accounts" && !empty($param['rule']['id'])
-						// and $param['rule']['id'] == '62ff32cd9b6fb'
-						1 == 1
+						$param['module'] == "Accounts" && !empty($param['rule']['id'])
+						and $param['rule']['id'] == '62ff32cd9b6fb'
+
 					) {
 						if (empty($this->solutionTarget)) {
 							$this->connexionSolution('target');
 						}
-						$param['rule']['id'] = '62ff32cd9b6fb';
-						$param['fields'] = [
-							'name',
-							'account_type',
-							'billing_address_city',
-							'billing_address_postalcode',
-							'billing_address_street',
-							'billing_address_street_2',
-							'email1',
-							'phone_office',
-							'rep_c',
-							'type_de_partenaire_c',
-						];
-
-						//recreate param
-						// $param['solutionTarget'] = $this->solutionTarget;
-						// $param['id_doc_myddleware'] = $this->jobId;
-						// $param['jobId'] = $this->jobId;
-
-						$param['id_doc_myddleware'] = $this->id;
-						$param['solutionTarget'] = $this->solutionTarget;
-						$param['ruleFields'] = $this->ruleFields;
-						$param['ruleRelationships'] = $this->ruleRelationships;
-						$param['jobId'] = $this->jobId;
-						$param['api'] = $this->api;
-
-						// $param['fields'] = $this->ruleFields;
-						$param['offset'] = 0;
-						$param['module'] = 'Accounts';
-						$param['ruleParams']['mode'] = '0';
-						$param['query']['type_de_partenaire_c'] = 8;
-						$param['rule']['id'] = $this->ruleId;
-						$param['limit'] = 10000;
-						$param['date_ref'] = '1970-01-01 00:00:00';
-						$param['call_type'] = 'read';
-						// $read['jobId'] = $this->jobId;
-						$result = $this->solutionTarget->read($param);
-						//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-						//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
-
-						$findSuiteCrmId = 'c28c855d-12f9-b8bd-c593-616ebcf16635';
 						// we do a custom search for the gouv id in the rows of the suiteCrm
 
+						foreach ($suiteCrmData as $index => $suiteCrmSchool) {
+							if ($sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
+								$findSuiteCrmId = $suiteCrmSchool['externalgouvid_c'];
+							}
+						}
 						if (!empty($findSuiteCrmId)) {
 							$this->updateType('U');
 							$this->updateTargetId($findSuiteCrmId);
 						} else {
 							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 							// by name and other fields, or it doesn't exist at all and we need to create it
-
-							if (empty($dataSuiteCrm)) {
-								//we fetch the full Accounts table from the suiteCrm
-								$dataSuiteCrm = ["we get the result of the full data query from the suiteCrm accounts"];
-								$dataSuiteCrm = [
-									"name" => "Maison de quartier Billard",
-									"account_type" => "8",
-									"billing_address_city" => "Vénissieux ",
-									"billing_address_postalcode" => "69200",
-									"billing_address_street" => "3 rue Georges Lyvet",
-									"billing_address_street_2" => "",
-									"email1" => "TEST-benedicte.gastellu@ac-lyon.fr-TEST",
-									"phone_office" => "0478701622 ",
-									"rep_c" => "REP_PLUS",
-									"type_de_partenaire_c" => "8",
-								];
-							}
-
-
 							//! data type : does ! empty work if we get an empty array ?
-							$matchingrows = $this->findMatchCrm($this->sourceData, $dataSuiteCrm);
+							$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
 
 							if (count($matchingrows) == 0) {
 								//if we have more than one match, then we sort by percentage of matching
@@ -646,10 +632,9 @@ class DocumentManagerCustom extends DocumentManager
 								// $this->udpdateStatus('Update')
 								$this->updateType('U');
 								// $this->updateTargetId($matchingrows[0]);
-								$this->updateTargetId('c28c855d-12f9-b8bd-c593-616ebcf16635');
+								$this->updateTargetId(reset($matchingrows));
 							} //end if found
 						}	// end else empty find gouv
-
 
 					}
 
@@ -686,10 +671,6 @@ class DocumentManagerCustom extends DocumentManager
 						$this->typeError = 'E';
 						$this->updateStatus('Not_found');
 					} else {
-
-
-
-
 						$this->updateStatus('Ready_to_send');
 					}
 				}
