@@ -302,16 +302,9 @@ class DocumentManagerCustom extends DocumentManager
 		return $updateStatus;
 	}
 
-	//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//todo create a function that must be in the scope of the target data document and update the fields
-	//todo it has a createId argument true or false because if it is false then we don't create the field ['externalgouvid']
-	//todo instead we just update the fields
-	//todo reverse so the source data is internal list
 	public function mapTargetFields($internalListData, $suiteCrmData, $externalgouvid = null)
 	{
 		if (null !== $externalgouvid) {
-			//todo find the right syntax to targetData field
 			//create a new field for the new school
 			$this->$suiteCrmData['externalgouvid'] = $internalListData['Identifiant_de_l_etablissement'];
 		}
@@ -396,25 +389,16 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 	//function that reads a row from the internallist and trys to find a match in the target
-	//todo find the right kind of source
 	public function findMatchCrm($internalListData, $suiteCrmData)
 	{
 
-		//todo we try to find the school by name etc
-		//todo start the treatment to check if the school is present in the suiteCrm database
 		//to check if all rows of the table were looked at
 		$rowschecked = 0;
-		//to avoid too many choices, this array must have only one element
+		//to avoid too many choices, this array must have only one element at the end
 		$matchingrows = [];
-		//! is it ok to reinitialize the rowschecked ?
-
 
 		//we loop through the suiteCrm accounts
 		foreach ($suiteCrmData as $index => $suiteCrmSchool) {
-			//todo find  the right source : the name of the Etablissement ?
-			//todo test if this way of handling serialized data is good or not
-			//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
-			//todo return type of findmatch ?
 			//init name as false at the beginning of the loop
 
 			$validName = false;
@@ -440,7 +424,6 @@ class DocumentManagerCustom extends DocumentManager
 			$rowschecked++;
 		} // end foreach dataSuiteCrm to find school
 
-		//todo find the good return type ?
 		return $matchingrows;
 	}
 
@@ -506,11 +489,6 @@ class DocumentManagerCustom extends DocumentManager
 		}
 	}
 
-
-
-	//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
@@ -530,7 +508,6 @@ class DocumentManagerCustom extends DocumentManager
 				'type_de_partenaire_c',
 			];
 
-
 			$param['id_doc_myddleware'] = $this->id;
 			$param['solutionTarget'] = $this->solutionTarget;
 			$param['ruleFields'] = $this->ruleFields;
@@ -538,13 +515,10 @@ class DocumentManagerCustom extends DocumentManager
 			$param['jobId'] = $this->jobId;
 			$param['api'] = $this->api;
 
-			// $param['fields'] = $this->ruleFields;
 			$param['offset'] = 0;
 			$param['module'] = 'Accounts';
 			$param['ruleParams']['mode'] = '0';
-			// $param['query']['type_de_partenaire_c'] = 8;
 			$param['query']['type_de_partenaire_c'] = 'ecole_maternelle';
-			// $param['query']['email1'] = $this->sourceData['Mail'];
 			$param['rule']['id'] = $this->ruleId;
 			$param['limit'] = 10000;
 			$param['date_ref'] = '1970-01-01 00:00:00';
@@ -591,9 +565,6 @@ class DocumentManagerCustom extends DocumentManager
 
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
-					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
 					if (
 						$param['module'] == "Accounts" && !empty($param['rule']['id'])
 						and $param['rule']['id'] == '62ff32cd9b6fb'
@@ -617,7 +588,6 @@ class DocumentManagerCustom extends DocumentManager
 						} else {
 							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 							// by name and other fields, or it doesn't exist at all and we need to create it
-							//! data type : does ! empty work if we get an empty array ?
 							$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
 
 							if (count($matchingrows) == 0) {
@@ -627,13 +597,8 @@ class DocumentManagerCustom extends DocumentManager
 							} else {
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
-								} // find if matchingrows
-								//todo create an entry: what are the right fields ?
-								//todo test if this way of handling serialized data is good or not
-								//! WARNING MIGHT END UP WITH INCORRECT DATA TYPE
-								// $this->mapTargetFields($this->unserializeData($source), $target, true);
-								// return parent::getTargetDataDocument();
-								// $this->udpdateStatus('Update')
+								}
+
 								$this->updateType('U');
 								// $this->updateTargetId($matchingrows[0]);
 								$this->updateTargetId(reset($matchingrows));
@@ -642,8 +607,6 @@ class DocumentManagerCustom extends DocumentManager
 
 					}
 
-					//! NEW   CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-					//? CLEAN CODE ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 					$this->updateStatus('Ready_to_send');
 				} else {
 					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : ' . $this->targetId . '. Check this record is not deleted.');
