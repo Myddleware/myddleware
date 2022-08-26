@@ -44,6 +44,7 @@ class RuleManagerCustom extends RuleManager {
 							'61a930273441b', // Aiko Binomes
 							'61a9190e40965', // Aiko Referent
 							'620e5520c62d6', // Sendinblue - coupon
+							'620d3e768e678', // Sendinblue - contact
 							'625fcd2ed442f' // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
@@ -159,12 +160,16 @@ class RuleManagerCustom extends RuleManager {
 				AND !empty($document['source_id'])
 			) {
 				if (
-						$this->ruleId == '620e5520c62d6' // Aiko - Contact 
+						in_array($this->ruleId, array('620e5520c62d6','620d3e768e678')) // Sendinblue - coupon / contact
 					AND	$type != 'D' // No document generated after a deletion
 					AND	strpos($response['error'], 'Invalid phone number') !== false
 				) {		
 					// Use function generatePoleRelationship to generate a document that send the info invalide phone number to COMET
-					$this->generatePoleRelationship('630684804e98c', $document['source_id'], 'id', true);  // Sendinblue - coupon invalid phone
+					if ($this->ruleId == '620e5520c62d6') { // Sendinblue - coupon
+						$this->generatePoleRelationship('630684804e98c', $document['source_id'], 'id', true);  // Sendinblue - coupon invalid phone
+					} else {	// Sendinblue - contact
+						$this->generatePoleRelationship('63075042095e8', $document['source_id'], 'id', true);  // Sendinblue - contact invalid phone
+					}
 					// We cancel this doc because the modification to COMET will generate another document without invalid phone number
 					$this->changeStatus($docId, 'Cancel', 'Telephone invalide. Myddleware va notifier la COMET et effacer ce numéro invalide. ');
 				}
