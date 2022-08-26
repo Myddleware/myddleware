@@ -125,6 +125,14 @@ class RuleManagerCustom extends RuleManager {
 					$this->generatePoleRelationship('626931ebbff78', $document['source_id'], 'record_id', false);  // Mobilisation - Relations pôles Coupons
 				}
 				
+				// If a contact reperant is created to the espace reperant, we send the pole relationship too
+				if (
+						$this->ruleId == '6273905a05cb2' // Esp Rep - Contacts repérants
+					AND	$type == 'C'
+				) {
+					$this->generatePoleRelationship('62743060350ed', $document['source_id'], 'record_id', false);  // Esp Rep - Contact repérant - Pôle
+				}
+				
 				/****************************************/ 
 				/************** AirTable Aiko ****************/ 
 				/****************************************/ 

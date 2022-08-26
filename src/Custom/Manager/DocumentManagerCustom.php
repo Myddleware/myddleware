@@ -63,26 +63,11 @@ class DocumentManagerCustom extends DocumentManager {
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact université. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
 			}
 		}
-		
-		// We cancel the relation pôle - contact partenaire if he has been filtered
-		if (
-				!empty($this->document_data['rule_id'])
-			AND	$this->document_data['rule_id'] == '62743060350ed' // Esp Rep - Contact repérant - Pôle
-		) {			
-			if (
-					strpos($this->message, 'No data for the field record_id.') !== false
-				AND strpos($this->message, 'Esp Rep - Contact rep') !== false
-			) {				
-				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme l\'epace repérant ou n\'est pas un contact de type contact partenaire. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. '); 
-			}
-		}
-		
+			
 		// We cancel the relation Contact repérant - Pôle if he has been filtered
 		if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '62743060350ed' // Esp Rep - Contact repérant - Pôle
-			AND $this->attempt > 3  // To be sure the the relake ko isn't due because this rule run before the contact reperant's rule
 		) {			
 			if (
 					strpos($this->message, 'No data for the field record_id.') !== false
