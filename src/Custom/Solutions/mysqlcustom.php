@@ -112,6 +112,12 @@ class mysqlcustom extends mysql {
 			) {
 				unset($data['date_acces_bilan']);
 			}
+			if (
+					isset($data['date_deb_mentorat'])
+				AND empty($data['date_deb_mentorat'])
+			) {
+				unset($data['date_deb_mentorat']);
+			}
 		}
 		
 		// We can't send decimal empty and don't wnt to set a 0 instead
