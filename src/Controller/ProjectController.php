@@ -30,7 +30,6 @@ class ProjectController extends AbstractController
     public function index(): Response
     {
         $projects = $this->entityManager->getRepository(Project::class)->findAll();
-        dump($projects);
         return $this->render('project/list.html.twig', [
             'projects' => $projects
         ]);
@@ -50,7 +49,13 @@ class ProjectController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $project = $form->getData();
+            $project = $form->getData()->setDateCreated(new \Datetime);
+            $project = $form->getData()->setDateModified(new \Datetime);
+            $project = $form->getData()->setCreatedBy($this->getUser());
+            $project = $form->getData()->setModifiedBy($this->getUser());
+            // $project->setDateCreated() \DateTime();
+            
+            
             $this->entityManager->persist($project);
             $this->entityManager->flush();
             return $this->redirectToRoute('app_project');
