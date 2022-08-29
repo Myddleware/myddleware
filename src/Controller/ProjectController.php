@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Uuid;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
@@ -95,10 +96,12 @@ class ProjectController extends AbstractController
             throw $this->createNotFoundException('Unable to find project entity.');
         }
 
+        $editForm = $this->createEditForm($project);
         $deleteFormProject = $this->createDeleteFormProject($id);
 
         return $this->render('project/edit.html.twig', [
             'project' => $project,
+            'edit_form' => $editForm->createView(),
             'delete_form' => $deleteFormProject->createView(),
         ]);
     }
@@ -140,5 +143,53 @@ class ProjectController extends AbstractController
             ->getForm();
     }
 
-    
+    /**
+     * Creates a form to edit a Project entity.
+     *
+     * @param Project $entity The entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditForm(Project $project)
+    {
+        $form = $this->createForm(ProjectFormType::class, $project, [
+            'action' => $this->generateUrl('project_update', ['id' => $project->getId()]),
+            'method' => 'PUT',
+        ]);
+
+        $form->add('submit', SubmitType::class
+        //, ['label' => 'project.update']
+    );
+
+        return $form;
+    }
+
+        /**
+     * Edits an existing Project entity.
+     *
+     * @Route("/{id}/update", name="project_update", methods={"POST", "PUT"})
+     *
+     * @param mixed $id
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $project = $this->entityManager->getRepository(Project::class)->find($id);
+        if (!$project) {
+            throw $this->createNotFoundException('Unable to find Project entity.');
+        }
+
+        $editForm = $this->createEditForm($project);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isValid()) {
+            $this->entityManager->flush();
+
+            return $this->redirect($this->generateUrl('app_project'));
+        }
+
+        return $this->render('Project/edit.html.twig', [
+            'project' => $project,
+            'edit_form' => $editForm->createView(),
+        ]);
+    }
 }

@@ -28,5 +28,7 @@
 {% endblock titlesm %}
 {% block body %}
 	<div class="container">
+	{{ form_start(edit_form, { 'action': path('project_update',{id : project.id}) }) }}
+	{{ form_end(edit_form) }}
 	</div>
 {% endblock %}
