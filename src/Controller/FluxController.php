@@ -292,8 +292,31 @@ class FluxController extends AbstractController
         }
 
         $conditions = 0;
+
+        //todo ████████████████████████████████████████████████████████████████████████████████████
+        //todo get the rule data
+        if (!empty($data['customWhere']['rule'])) {
+            $datarulesave = $data['customWhere']['rule'];
+        }
+        //todo ████████████████████████████████████████████████████████████████████████████████████
         //---[ FORM ]-------------------------
-        if ($form->get('click_filter')->isClicked()) {
+        // if ($form->get('click_filter')->isClicked()) {
+        // if ($form->get('click_filter')->isClicked() || !($form->get('click_filter')->isClicked())) {
+        $data = $form->getData();
+        if (empty($data)) {
+            if (isset($datarulesave)) {
+                $data['rule'] = $datarulesave;
+            }
+        }
+        $data['user'] = $this->getUser();
+        $data['search'] = $search;
+        $data['page'] = $page;
+
+        if (!empty($datarulesave)) {
+            unset($datarulesave);
+        }
+        //---[ FORM ]-------------------------
+        // if ($form->get('click_filter')->isClicked()) {
             $data = $form->getData();
             $data['user'] = $this->getUser();
             $data['search'] = $search;
@@ -364,7 +387,7 @@ class FluxController extends AbstractController
             } else {
                 $this->sessionService->removeFluxFilterSourceId();
             }
-        } // end clicked
+        // } // end clicked
         //---[ FORM ]-------------------------
 
         $r = $this->documentRepository->getFluxPagination($data);
