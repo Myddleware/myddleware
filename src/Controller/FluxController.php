@@ -296,7 +296,7 @@ class FluxController extends AbstractController
 
         //temporary rule holding if using button display document from rule page
         if (!empty($data['customWhere']['rule'])) {
-            $datarulesave = $data['customWhere']['rule'];
+            $dataRuleSave = $data['customWhere']['rule'];
         }
 
         $data = $form->getData();
@@ -306,24 +306,24 @@ class FluxController extends AbstractController
 
         //assign data rule as data is empty because form-getData is empty
         //because of display document
-        if (empty($data['rule'])) {
+        /* if (empty($data['rule'])) {
             if (isset($datarulesave)) {
                 $data['rule'] = $datarulesave;
             }
-        }
+        } */
         // if data is present then remove it 
         //for memory freeing
-        if (!empty($datarulesave)) {
+        /* if (!empty($datarulesave)) {
             unset($datarulesave);
-        }
+        } */
 
         //if rule filter is present and clicking on page number button (2, 3, etc)
         //instead of using display button then assign rule filter from there
-        if (
+        /* if (
             empty($data['rule']) && !empty($this->sessionService->getFluxFilterRuleName())
         ) {
             $data['rule'] = $this->sessionService->getFluxFilterRuleName();
-        }
+        } */
 
 
             // Get the limit parameter
@@ -390,8 +390,7 @@ class FluxController extends AbstractController
                 $this->sessionService->setFluxFilterSourceId($data['source_id']);
             } else {
                 $this->sessionService->removeFluxFilterSourceId();
-            }
-        // } // end clicked
+        }
         //---[ FORM ]-------------------------
 
         $r = $this->documentRepository->getFluxPagination($data);
