@@ -35,7 +35,14 @@ class suitecrmcustom extends suitecrm {
 												'type_bdd' => 'varchar(255)',
 												'required' => 0,
 												'relate' => false
-											);						
+											);
+			$this->moduleFields['myd_filter_mentor'] = array(
+												'label' => 'Mentor OU Mendor acceuil',
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0,
+												'relate' => false
+											);
 		}
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
@@ -108,6 +115,26 @@ class suitecrmcustom extends suitecrm {
 		} 
 		
 		$read = parent::read($param);
+		// Add a field to filter by mentor OR mentor acceuil
+		if (
+					$param['module']=='Contacts'
+				AND $param['call_type'] == 'read'
+		) {
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read[$key]['myd_filter_mentor'] = 'Non';
+				if (
+						!empty($record['souhaite_faire_de_ai_c'])
+					AND	!empty($record['mentor_acceuil_c'])
+					AND(
+							$record['souhaite_faire_de_ai_c'] == 'Oui'
+						 OR $record['mentor_acceuil_c'] == 'Oui'
+					)
+				) {
+					$read[$key]['myd_filter_mentor'] = 'Oui';
+				}			
+			}
+		}
 		if (
 				$param['rule']['id'] == '5ce362b962b63'
 			AND !empty($read)
