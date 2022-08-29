@@ -293,34 +293,38 @@ class FluxController extends AbstractController
 
         $conditions = 0;
 
-        //todo ████████████████████████████████████████████████████████████████████████████████████
-        //todo get the rule data
+
+        //temporary rule holding if using button display document from rule page
         if (!empty($data['customWhere']['rule'])) {
             $datarulesave = $data['customWhere']['rule'];
         }
-        //todo ████████████████████████████████████████████████████████████████████████████████████
-        //---[ FORM ]-------------------------
-        // if ($form->get('click_filter')->isClicked()) {
-        // if ($form->get('click_filter')->isClicked() || !($form->get('click_filter')->isClicked())) {
+
         $data = $form->getData();
-        if (empty($data)) {
-            if (isset($datarulesave)) {
-                $data['rule'] = $datarulesave;
-            }
-        }
         $data['user'] = $this->getUser();
         $data['search'] = $search;
         $data['page'] = $page;
 
+        //assign data rule as data is empty because form-getData is empty
+        //because of display document
+        if (empty($data['rule'])) {
+            if (isset($datarulesave)) {
+                $data['rule'] = $datarulesave;
+            }
+        }
+        // if data is present then remove it 
+        //for memory freeing
         if (!empty($datarulesave)) {
             unset($datarulesave);
         }
-        //---[ FORM ]-------------------------
-        // if ($form->get('click_filter')->isClicked()) {
-            $data = $form->getData();
-            $data['user'] = $this->getUser();
-            $data['search'] = $search;
-            $data['page'] = $page;
+
+        //if rule filter is present and clicking on page number button (2, 3, etc)
+        //instead of using display button then assign rule filter from there
+        if (
+            empty($data['rule']) && !empty($this->sessionService->getFluxFilterRuleName())
+        ) {
+            $data['rule'] = $this->sessionService->getFluxFilterRuleName();
+        }
+
 
             // Get the limit parameter
             $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
