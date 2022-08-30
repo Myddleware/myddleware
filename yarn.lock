@@ -1609,10 +1609,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hotwired/stimulus@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@hotwired/stimulus@npm:3.0.1"
-  checksum: 5f2dbfeb3dfff8472e1d0ef7db59a18d71540651861c0c5839fa32c56fcd5cae3fc6183a94746303c5adfbd66a9b552a3167e7e193c04dfaa6f51a8e5bea8e5e
+"@hotwired/stimulus@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@hotwired/stimulus@npm:3.1.0"
+  checksum: 82d80b17aa8cd8b69e20da4cc86b768fd8c52d06b40c1606b92526fd405264a65c617d5c051445a5b91af05620ab4475b3c5adc2011ed8d787b4955f9e924845
   languageName: node
   linkType: hard
 
@@ -3922,6 +3922,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hotkeys-js@npm:>=3":
+  version: 3.9.5
+  resolution: "hotkeys-js@npm:3.9.5"
+  checksum: b9c5b98a5c745b77444e23c655c1c011c76fc29f8aff46d8a1be243b25b5cae70bae88b75816dedeffa2f1f24257e7cdef4c1666e49287c443eb44f3c9e14e4b
+  languageName: node
+  linkType: hard
+
 "hpack.js@npm:^2.1.6":
   version: 2.1.6
   resolution: "hpack.js@npm:2.1.6"
@@ -5917,7 +5924,7 @@ __metadata:
     "@babel/plugin-proposal-class-properties": ^7.17.12
     "@babel/plugin-syntax-dynamic-import": ^7.8.3
     "@babel/preset-env": ^7.18.2
-    "@hotwired/stimulus": ^3.0.1
+    "@hotwired/stimulus": ^3.1.0
     "@popperjs/core": ^2.11.5
     "@symfony/stimulus-bridge": ^3.1.0
     "@symfony/webpack-encore": ^2.1.0
@@ -5927,6 +5934,7 @@ __metadata:
     regenerator-runtime: ^0.13.9
     sass: ^1.52.1
     sass-loader: ^12.6.0
+    stimulus-use: ^0.50.0
     webpack-bundle-analyzer: ^4.5.0
     webpack-notifier: ^1.15.0
   languageName: unknown
@@ -6347,6 +6355,17 @@ __metadata:
   version: 1.5.0
   resolution: "statuses@npm:1.5.0"
   checksum: c469b9519de16a4bb19600205cffb39ee471a5f17b82589757ca7bd40a8d92ebb6ed9f98b5a540c5d302ccbc78f15dc03cc0280dd6e00df1335568a5d5758a5c
+  languageName: node
+  linkType: hard
+
+"stimulus-use@npm:^0.50.0":
+  version: 0.50.0
+  resolution: "stimulus-use@npm:0.50.0"
+  dependencies:
+    hotkeys-js: ">=3"
+  peerDependencies:
+    "@hotwired/stimulus": ">= 3"
+  checksum: f244acbac92c78b0a0bc4f8b14732fcfee9da2772e66551bdb606bd1cb3bf64db6b8e485578d3e4ac67cd672b737c26adeb3ea5eeba7979d63e831561b04944d
   languageName: node
   linkType: hard
 
