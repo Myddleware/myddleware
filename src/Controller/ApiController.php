@@ -75,10 +75,10 @@ class ApiController extends AbstractController
 
             // Get input data
             $data = json_decode($request->getContent(), true);
-			$force = true;
-			if ($data['rule'] == 'ALL') {
-				$force = false;
-			}
+            $force = true;
+            if ($data['rule'] == 'ALL') {
+                $force = false;
+            }
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -138,7 +138,9 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            //use request content
+            $rawData = $request->getContent();
+            $data = json_decode($rawData, true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -338,7 +340,7 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:massaction',
-				'force' => 1,
+                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
