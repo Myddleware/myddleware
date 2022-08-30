@@ -28,7 +28,15 @@
 {% endblock titlesm %}
 {% block body %}
 	<div class="container">
-	{{ form_start(edit_form, { 'action': path('project_update',{id : project.id}) }) }}
-	{{ form_end(edit_form) }}
+		{{ form_start(edit_form, { 'action': path('project_update',{id : project.id}) }) }}
+			{{ form_widget(edit_form.name, {'label': 'name'})}}
+			{{ form_widget(edit_form.description, {'label': 'description'})}}
+			{{ form_widget(edit_form.rules, {'label': 'rules'})}}
+			{{ form_widget(edit_form.save, {'label': 'project.confirm_edit' | trans})}}
+		{{ form_end(edit_form) }}
+
+<a href="{{ path('app_project') }}">Cancel</a>
+
+
 	</div>
 {% endblock %}

@@ -880,3 +880,4 @@ project:
     description: Description
     rulenb: number of rules
     delete: Are you sure you want to delete this project ?
+    confirm_edit: Confirm edit
