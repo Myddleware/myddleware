@@ -65,7 +65,7 @@ class moodlecore extends solution
             if (!empty($xml->SINGLE->KEY[0]->VALUE)) {
                 $this->connexion_valide = true;
             } elseif (!empty($xml->ERRORCODE)) {
-                throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
+                throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' - '.$xml->DEBUGINFO : ''));
             } else {
                 throw new \Exception('Error unknown. ');
             }
