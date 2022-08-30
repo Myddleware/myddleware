@@ -3,123 +3,133 @@
 {% block body %}
 <header>
     <div class ="home_container">
-        <img class="logo" src="build/images/logo/logo_2.jpg" alt="logo_myddleware">
-        <div class="home-button">
-        <strong><a href="{{path('login')}}" class="connection">Connection</a></strong>
-        <strong><a href="{{path('app_install_requirements')}}" class="btn-home">{{ 'install.title' | trans }}</a></strong>
-        </div>
-    </div>
+        <img class="logo w-15" src="build/images/logo/logo_2.png" alt="logo_myddleware">
+		<div class="home-button m-4">
+			{% if user %}
+				<button class="connection">
+						<strong><a href="{{path('admin_dashboard')}}">{{ 'dashboard' | trans }}</a></strong>
+				</button>
+			{% else %}
+				<strong><a href="{{path('login')}}" class="connection m-4">{{ 'login.log_in' | trans }}</a></strong>
+			{% endif %}	
+			<strong><a href="{{path('app_install_requirements')}}" class="connection m-4">{{ 'install.title' | trans }}</a></strong>
+			<strong><a href="{{ path('app_register') }}" class="btn-home m-4 p-3">{{ 'login.sign_in' | trans }} </a></strong>
+		</div>
+	</div>
 </header>
-<main class="main_home">
-    <section class="main-content">
-        <h2>Connect <strong><span>your applications</span></strong></br> exploit your data better</h2>
-        <p>Myddleware makes complex data integration operations easier</br>
-        Myddleware is free and open-source !</br>
-        Install it directly on your server and follow our tutorials on the community website to set up your integration rules. 
+
+<main class="main_home pb-3">
+    <section class="main-content m-5 w-40">
+        <h2>{{ 'connect' | trans }} <strong><span>{{ 'your_apps' | trans }}</span></strong></br> 
+		{{ 'exploit_data' | trans }}</h2>
+		<h4>{{ 'complex_integration_easier' | trans }}</h4>
+        <p class="mb-5"></br>
+		{{ 'free_open_source' | trans }} !</br>
+		{{ 'install_instructions' | trans }}
 		<a href ="https://myddleware.github.io/myddleware/#/"><i class="fas fa-arrow-right"></i></a></p>
         <strong><a href="https://myddleware.github.io/myddleware/#/" class="btn-home btn-doc">Documentation</a></strong>
     </section>
-    <section class="main-carousel">
-        <div class="slider">
-	<div class="slide-track">
-		<div class="slide">
-			<img src="build/images/solution/airtable.png" alt="airtable_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/woocommerce.png"  alt="woocommerce_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/suitecrm.png" alt="suitecrm_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/vtigercrm.png" alt="vtigercrm_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/sugarcrm.png" alt="sugarcrm_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/moodle.png" alt="moodle_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/prestashop.png" alt="prestashop_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/zuora.png" alt="zuora_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/sendinblue.png" alt="sendinblue_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/bittle.png" alt="bittle_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/drupal.png" alt="drupal_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/erpnext.png" alt="erpnext_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/dolist.png" alt="dolist_logo" />
-		</div>
-		<div class="slide">
-			<img src="build/images/solution/shopify.png" alt="shopify_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/hubspot.png" alt="hubspot_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/joomla.png" alt="joomla_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/mantis.png" alt="mantis_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/mautic.png" alt="mautic_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/cirrusshield.png" alt="cirrusshield_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/mailchimp.png" alt="mailchimp_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/file.png" alt="file_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/magento.png" alt="magento_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/mysql.png" alt="mysql_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/oracledatabase.png" alt="oracledatabase_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/postgresql.png" alt="postgresql_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/ringcentral.png" alt="ringcentral_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/sagecrm.png" alt="sagecrm_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/salesforce.png" alt="salesforce_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/sapcrm.png" alt="sapcrm_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/sapecc.png" alt="sapecc_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/wooeventmanager.png" alt="wooeventmanager_logo" />
-		</div>
-        <div class="slide">
-			<img src="build/images/solution/facebook.png" alt="facebook_logo" />
+</main>
+<section class="main-carousel w-100 fixed-bottom mb-5">
+	<div class="slider">
+		<div class="slide-track">
+			<div class="slide">
+				<img src="build/images/solution/airtable.png" alt="airtable_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/woocommerce.png" style="height : 64px" alt="woocommerce_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/suitecrm.png" style="height : 64px" alt="suitecrm_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/vtigercrm.png" style="height : 64px" alt="vtigercrm_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/sugarcrm.png"style="height : 64px"  alt="sugarcrm_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/moodle.png" style="height : 64px" alt="moodle_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/prestashop.png" alt="prestashop_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/zuora.png" alt="zuora_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/sendinblue.png" alt="sendinblue_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/bittle.png" alt="bittle_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/drupal.png" alt="drupal_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/erpnext.png" alt="erpnext_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/dolist.png" alt="dolist_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/shopify.png" alt="shopify_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/hubspot.png" style="height : 64px" alt="hubspot_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/joomla.png" alt="joomla_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/mantis.png" style="height : 64px" alt="mantis_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/mautic.png" alt="mautic_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/cirrusshield.png" alt="cirrusshield_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/mailchimp.png" style="height : 64px" alt="mailchimp_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/file.png" alt="file_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/magento.png" alt="magento_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/mysql.png" alt="mysql_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/oracledatabase.png" alt="oracledatabase_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/postgresql.png" alt="postgresql_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/ringcentral.png" alt="ringcentral_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/sagecrm.png" alt="sagecrm_logo" />
+			</div>
+			<div class="slide size">
+				<img src="build/images/solution/salesforce.png" style="height : 64px" alt="salesforce_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/sapcrm.png" alt="sapcrm_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/sapecc.png" alt="sapecc_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/wooeventmanager.png" alt="wooeventmanager_logo" />
+			</div>
+			<div class="slide">
+				<img src="build/images/solution/facebook.png" alt="facebook_logo" />
+			</div>
 		</div>
 	</div>
-</div>
-    </section>
-</main>
+</section>
 {% endblock %}
