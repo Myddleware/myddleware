@@ -157,10 +157,6 @@ class ProjectController extends AbstractController
             'method' => 'PUT',
         ]);
 
-        $form->add('submit', SubmitType::class
-        //, ['label' => 'project.update']
-    );
-
         return $form;
     }
 
