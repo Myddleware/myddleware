@@ -9,8 +9,16 @@ class sendinbluecustom extends sendinblue {
 
     // Update the record 
     protected function update($param, $record, $idDoc = null) {  
-		if (!in_array($param['ruleId'], array('620d3e768e678', '620e5520c62d6'))) {
+		if (!in_array($param['ruleId'], array('620d3e768e678', '620e5520c62d6'))) { // Sendinblue - contact / coupon
 			return parent::update($param, $record, $idDoc);
+		}
+
+		// Remove SMS is empty : Sendinblue doesn't accept an SMS empty, in this case we don't send the SMS field
+		if (
+				isset($record['SMS'])
+			AND empty($record['SMS'])
+		) {
+			unset($record['SMS']);
 		}
 
 		// Custom code for contacts
