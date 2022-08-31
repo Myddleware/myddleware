@@ -1,4 +1,5 @@
 import {Controller} from '@hotwired/stimulus';
+import { useDispatch } from 'stimulus-use';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
@@ -13,10 +14,15 @@ export default class extends Controller {
     }
 
     htmlOutput = null;
+    connectorSourceIdDiv = document.querySelector('[data-rule-connector-source-id-value]');
+    connectorTargetIdDiv = document.querySelector('[data-rule-connector-target-id-value]');
+    moduleSourceIdDiv = document.querySelector('[data-rule-source-module-id-value]');
+    moduleTargetIdDiv = document.querySelector('[data-rule-target-module-id-value]');
 
     connect() {
         this.htmlOutput = document.createElement('div');
         const params = new URLSearchParams(window.location.search)
+        useDispatch(this,{ debug: true });
     }
 
     async onSelectSource(event) {
@@ -61,12 +67,14 @@ export default class extends Controller {
 
     async onSelectModuleSource(event) {
         this.sourceModuleIdValue = event.currentTarget.value;
-         const response = await this.loadSourceFields(this.sourceModuleIdValue);
+        const response = await this.loadSourceFields(this.sourceModuleIdValue);
+        // this.dispatch('sourcemodule', { sourceModuleId: this.sourceModuleIdValue});
     }
 
     async onSelectModuleTarget(event) {
         this.targetModuleIdValue = event.currentTarget.value;
-         const response = await this.loadTargetFields(this.targetModuleIdValue);
+        const response = await this.loadTargetFields(this.targetModuleIdValue);
+        // this.dispatch('targetmodule', { targetModuleId: this.targetModuleIdValue});
     }
 
     async loadSourceFields(sourceModuleId) {
@@ -74,8 +82,8 @@ export default class extends Controller {
             sourceModuleId: this.sourceModuleIdValue,
             connectorSourceId: this.connectorSourceIdValue,
         })
-        const connectorIdDiv = document.querySelector('[data-rule-connector-source-id-value]');
-        this.connectorSourceIdValue = connectorIdDiv.getAttribute("data-rule-connector-source-id-value");
+        // const connectorSourceIdDiv = document.querySelector('[data-rule-connector-source-id-value]');
+        this.connectorSourceIdValue = this.connectorSourceIdDiv.getAttribute('data-rule-connector-source-id-value');
         const response = await fetch(`get-fields/source/${this.connectorSourceIdValue.toString()}/module/${sourceModuleId.toString()}`)
             .then(response => response.text())
             .then((html) => {
@@ -93,8 +101,8 @@ export default class extends Controller {
             targetModuleId: this.targetModuleIdValue,
         })
 
-        const connectorIdDiv = document.querySelector('[data-rule-connector-target-id-value]');
-        this.connectorTargetIdValue = connectorIdDiv.getAttribute("data-rule-connector-target-id-value");
+        // const connectorIdDiv = document.querySelector('[data-rule-connector-target-id-value]');
+        this.connectorTargetIdValue = this.connectorTargetIdDiv.getAttribute('data-rule-connector-target-id-value');
 
         const response = await fetch(`get-fields/target/${this.connectorTargetIdValue.toString()}/module/${targetModuleId.toString()}`)
             .then(response => response.text())
@@ -124,6 +132,7 @@ export default class extends Controller {
         addButton.classList.add('btn');
         addButton.classList.add('btn-warning');
         addButton.classList.add('btn-lg');
+        // addButton.setAttribute('formnovalidate', true);
         addButton.setAttribute('data-action', 'click->rule#addMoreFields');
         addButton.innerText = 'Add more fields to map';
         this.deletePreviousButton();
@@ -147,10 +156,69 @@ export default class extends Controller {
     }
 
     async addMoreFields(event) {
-        console.log(event.currentTarget);
-        event.stopPropagation();
-        // @TODO: this currently sends event.currentTarget as null which then stops execution inside PHP controller
-        const source = await this.onSelectModuleSource(event);
-        const target = await this.onSelectModuleTarget(event);
+        // console.log(event.currentTarget.dataset);
+        // console.log(event.target);
+        // console.log(this.targetModuleIdValue);
+        // console.log(this.sourceModuleIdValue);
+        // event.stopPropagation();
+        event.preventDefault();
+        // At the moment, the source modules are first loaded and displayed, but then they are removed from DOM,
+        // this is surely due to the fact that the 2nd promise erases the first one
+        const sourceModuleId = document.querySelector('[data-rule-source-module-id-value]');
+        const promisesResults = [
+            this.loadSourceFields(Number(sourceModuleId.getAttribute('data-rule-source-module-id-value'))),
+            this.loadTargetFields(this.targetModuleIdValue)
+        ];
+        await Promise.allSettled(promisesResults).then((results) =>
+            console.log('hi')
+        );
+        //
+        // const [sourceFieldsResult, targetFieldsResult] = await Promise.all([
+        //     this.loadSourceFields(Number(sourceModuleId.getAttribu te('data-rule-source-module-id-value'))),
+        //     this.loadTargetFields(this.targetModuleIdValue)
+        // ]);
+
+
+        // await this.loadSourceFields(Number(sourceModuleId.getAttribute('data-rule-source-module-id-value')))
+        //     .then(
+        //     (success) =>  this.loadTargetFields(this.targetModuleIdValue),
+        //     (err) => {
+        //         console.log('zut', err);
+        //     }
+        // );
+        // await this.loadTargetFields(this.targetModuleIdValue);
+
+        // console.log(sourceModuleId);
+        // try {
+        //     this.dispatch('add', {
+        //         targetModuleId: this.targetModuleIdValue,
+        //         sourceModuleId: document.querySelector('[data-rule-source-module-id-value]').getAttribute('data-rule-source-module-id-value')
+        //     });
+        //     // console.log(event.currentTarget.value);
+        //     console.log(this.element);
+        //     // const form = new FormData(this.element);
+        //     // console.log(form);
+        //     // @TODO: this currently sends event.currentTarget as null which then stops execution inside PHP controller
+        //     // const source = await this.onSelectModuleSource(event);
+        //     // const target = await this.onSelectModuleTarget(event);
+        //     // const response = await fetch()
+        //     //     .then(response => response.text())
+        //     //     .then((html) => {
+        //     //         // this.htmlOutput.innerHTML = html;
+        //     //         // this.element.append(this.htmlOutput);
+        //     //         // this.appendButton(this.element);
+        //     //         // this.dispatch('success');
+        //     //     })
+        //     //     .catch(function(err) {
+        //     //         console.log('Failed to fetch response: ', err);
+        //     //     });
+        //     // this.dispatch('success');
+        // } catch (e) {
+        //     console.log(e.responseText);
+        // }
+
+
+
+
     }
 }
