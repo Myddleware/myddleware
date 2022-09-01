@@ -34,6 +34,7 @@ class databasecore extends solution
     protected $driver;
     protected $pdo;
     protected $charset = 'utf8';
+    protected $allowSeveralUpdate = false;
 
     protected $stringSeparatorOpen = '`';
     protected $stringSeparatorClose = '`';
@@ -466,8 +467,11 @@ class databasecore extends solution
             $this->message = 'There is no error but the query hasn\'t modified any record.';
         }
         // Several modifications
-        if ($q->rowCount() > 1) {
-            throw new \Exception('Update query has modified several records. It shoudl never happens. Please check that your id in your database is unique. Query : '.$sql);
+        if (
+				$this->allowSeveralUpdate == false
+			AND	$q->rowCount() > 1
+		) {
+            throw new \Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
         return $record['target_id'];
