@@ -245,7 +245,7 @@ class airtablecore extends solution
                 }
 
                 // Get the offset id
-                $offset = (!empty($content['offset']) ? $content['offset'] : '');
+                $offset = (!empty($content['offset']) ? '&offset='.$content['offset'] : '');
                 if (!empty($content['records'])) {
                     $currentCount = 0;
                     //used for complex fields that contain arrays
