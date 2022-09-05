@@ -302,11 +302,16 @@ class DocumentManagerCustom extends DocumentManager
 		return $updateStatus;
 	}
 
-	public function mapTargetFields($internalListData, $suiteCrmData, $externalgouvid = null)
+	public function mapTargetFields($internalListData, $suiteCrmData)
 	{
-		if (null !== $externalgouvid) {
+		if (!isset($suiteCrmData['externalgouvid_c'])) {
 			//create a new field for the new school
-			$this->$suiteCrmData['externalgouvid'] = $internalListData['Identifiant_de_l_etablissement'];
+			$suiteCrmData['externalgouvid_c'] = $internalListData['Identifiant_de_l_etablissement'];
+		}
+
+		//name update: if there is a difference between the original name and the new name
+		if ($suiteCrmData['name'] !== $internalListData['Nom_etablissement']) {
+			$suiteCrmData['description'] = $internalListData['Nom_etablissement'];
 		}
 
 		//account type
@@ -327,10 +332,16 @@ class DocumentManagerCustom extends DocumentManager
 			}
 		}
 
-		//phone number
+		//phone number map
 		if ($suiteCrmData['phone_office'] == "" || $suiteCrmData['phone_office'] != $internalListData['Telephone']) {
 			$suiteCrmData['phone_office'] = $internalListData['Telephone'];
 		}
+		
+		//if phone number is format 06xxx, then convert it to +33xxx
+		if($suiteCrmData['phone_office'][0] == 0) {
+			$phoneRes = "+33".substr($suiteCrmData['phone_office'],1);
+			$suiteCrmData['phone_office'] = $phoneRes;
+		};
 
 		//email
 		if ($suiteCrmData['email1'] == "" || $suiteCrmData['email1'] != $internalListData['Mail']) {
@@ -338,7 +349,7 @@ class DocumentManagerCustom extends DocumentManager
 		}
 
 		//rep+
-		if ($suiteCrmData['rep_c'] == "" || $suiteCrmData['rep_c'] != $internalListData['Appartenance_Education_Prioritaire']) {
+		// if ($suiteCrmData['rep_c'] == "" || $suiteCrmData['rep_c'] != $internalListData['Appartenance_Education_Prioritaire']) {
 			switch ($internalListData['Appartenance_Education_Prioritaire']) {
 				case "REP+":
 					//some types are integer in suitecrm
@@ -354,7 +365,8 @@ class DocumentManagerCustom extends DocumentManager
 					throw new \Exception("Error reading REP");
 					break;
 			}
-		}
+		// }
+
 
 		//city
 		if ($suiteCrmData['billing_address_city'] == "" || $suiteCrmData['billing_address_city'] != $internalListData['Nom_commune']) {
@@ -374,7 +386,7 @@ class DocumentManagerCustom extends DocumentManager
 		}
 
 		//postal code
-		if ($suiteCrmData['billing_address_postalcode'] == "" || $suiteCrmData['billing_address_postalcode'] != $internalListData['Code postal']) {
+		if ($suiteCrmData['billing_address_postalcode'] == "" || $suiteCrmData['billing_address_postalcode'] != $internalListData['Code_postal']) {
 			$suiteCrmData['billing_address_postalcode'] = $internalListData['Code_postal'];
 		}
 	} //end define mapTargetFields
@@ -426,6 +438,9 @@ class DocumentManagerCustom extends DocumentManager
 
 		return $matchingrows;
 	}
+
+
+	
 
 
 	public function connexionSolution($type)
@@ -593,21 +608,22 @@ class DocumentManagerCustom extends DocumentManager
 							if (count($matchingrows) == 0) {
 								//if we have more than one match, then we sort by percentage of matching
 								//and use the closest match
-								return parent::getTargetDataDocument();
+								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
 							} else {
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								}
-
+								$this->mapTargetFields($this->sourceData, $suiteCrmSchool);
 								$this->updateType('U');
 								// $this->updateTargetId($matchingrows[0]);
 								$this->updateTargetId(reset($matchingrows));
 							} //end if found
 						}	// end else empty find gouv
-
+						
 					}
-
-					$this->updateStatus('Ready_to_send');
+					
+					return parent::getTargetDataDocument();
+					// $this->updateStatus('Ready_to_send');
 				} else {
 					throw new \Exception('Failed to retrieve record in target system before update or deletion. Id target : ' . $this->targetId . '. Check this record is not deleted.');
 				}
