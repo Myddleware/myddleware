@@ -4,7 +4,7 @@ import { useDispatch } from 'stimulus-use';
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
 
-    static targets = ['rule', 'module', 'field', 'connector'];
+    static targets = ['rule', 'module', 'field', 'connector', 'more'];
     static values = {
         infoUrl: String,
         connectorSourceId: Number,
@@ -27,8 +27,9 @@ export default class extends Controller {
         this.sourceHtmlOutput = document.createElement('div');
         this.targetHtmlOutput = document.createElement('div');
         this.moreFieldsSection = document.createElement('section');
+        this.moreFieldsSection.classList.add('additional-fields');
         const params = new URLSearchParams(window.location.search)
-        useDispatch(this,{ debug: true });
+        useDispatch(this);
     }
 
     async onSelectSource(event) {
@@ -150,7 +151,8 @@ export default class extends Controller {
             }
         }
         buttonsToBeRemoved.forEach((div) => {
-           div.remove();
+            console.log(div);
+            div.remove();
         });
 
     }
@@ -165,8 +167,7 @@ export default class extends Controller {
             .then(response => response.text())
             .then((html) => {
                 this.sourceHtmlOutput.innerHTML = html;
-                this.moreFieldsSection.appendChild(this.sourceHtmlOutput);
-                // this.element.appendChild(this.sourceHtmlOutput);
+                // this.moreFieldsSection.prepend(this.sourceHtmlOutput);
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
@@ -184,8 +185,7 @@ export default class extends Controller {
             .then(response => response.text())
             .then((html) => {
                 this.targetHtmlOutput.innerHTML = html;
-                this.moreFieldsSection.appendChild(this.targetHtmlOutput);
-                // this.element.appendChild(this.targetHtmlOutput);
+                // this.moreFieldsSection.append(this.targetHtmlOutput);
             })
             .catch(function(err) {
                 console.log('Failed to fetch response: ', err);
@@ -194,17 +194,69 @@ export default class extends Controller {
 
     async addMoreFields(event) {
         event.preventDefault();
-
         const sourceModuleId = document.querySelector('[data-rule-source-module-id-value]');
         const promisesResults = [
              this.loadMoreSourceFields(Number(sourceModuleId.getAttribute('data-rule-source-module-id-value'))),
              this.loadMoreTargetFields(this.targetModuleIdValue)
         ];
-        await Promise.allSettled(promisesResults).then((results) =>{
-            this.element.append(this.moreFieldsSection);
-            this.appendButton(this.moreFieldsSection);
+        await Promise.allSettled(promisesResults).then((response) =>{
+            console.log(response);
+            const target = this.hasMoreTarget ? this.moreTarget : this.element;
+            console.log(this.sourceHtmlOutput);
+            console.log(this.targetHtmlOutput);
+            // target.insertAdjacentHTML('afterend', this.sourceHtmlOutput);
+            // console.log(target);
+            // console.log(this.moreFieldsSection);
+            // target.innerHTML  = this.moreFieldsSection;
+            // target.appendChild(this.moreFieldsSection);
+
+            // target.parentNode.append(this.sourceHtmlOutput);
+            // const newSourceDiv = target.lastChild.after(this.sourceHtmlOutput);
+            // newSourceDiv.lastChild.after(this.targetHtmlOutput);
+
+            let p = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve(target.lastChild.after(this.sourceHtmlOutput));
+                }, 2 * 100);
+            });
+
+            p.then((result) => {
+                result = target.lastChild
+                console.log(result);
+                // return result * 2;
+            }).then((result) => {
+                result = target.lastChild;
+                result.lastChild.after(this.targetHtmlOutput)
+                console.log(result);
+
+                this.appendButton(result);
+
+                // return result * 3;
+            });
+            // target.appendChild(this.sourceHtmlOutput);
+            // this.element.appendChild(target);  // error : the new child is an ancestor of the parent
+            // this.element.append(this.moreFieldsSection);
+            // target.after(this.targetHtmlOutput);
+            // this.appendButton(this.moreFieldsSection);
+            // this.appendButton(target.parentNode);
+            // this.appendButton(target);
+
+        // }).then((res) => {
+        //     console.log(res);
+            // target.after(this.targetHtmlOutput);
+            // // this.appendButton(this.moreFieldsSection);
+            // this.appendButton(target);
         }).catch(function(err) {
             console.log('Failed to fetch response: ', err);
         });
     }
+
+    // async refreshContent(event) {
+    //     const target = this.hasContentTarget ? this.contentTarget : this.element;
+    //
+    //     target.style.opacity = .5;
+    //     const response = await fetch(this.urlValue);
+    //     target.innerHTML = await response.text();
+    //     target.style.opacity = 1;
+    // }
 }
