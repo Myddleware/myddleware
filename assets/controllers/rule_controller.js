@@ -193,6 +193,7 @@ export default class extends Controller {
     }
 
     async addMoreFields(event) {
+        // this.dispatch('myevent');
         event.preventDefault();
         const sourceModuleId = document.querySelector('[data-rule-source-module-id-value]');
         const promisesResults = [
@@ -219,7 +220,6 @@ export default class extends Controller {
                     resolve(target.lastChild.after(this.sourceHtmlOutput));
                 }, 2 * 100);
             });
-
             p.then((result) => {
                 result = target.lastChild
                 console.log(result);

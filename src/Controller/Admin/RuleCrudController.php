@@ -15,7 +15,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -73,11 +75,15 @@ class RuleCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+
         return [
             IdField::new('id')->hideOnForm(),
+            FormField::addTab('Details')->setIcon('home'),
             BooleanField::new('active'),
             TextField::new('name'),
             TextField::new('nameSlug')->hideOnForm(),
+            FormField::addPanel('Fields mapping')->collapsible()
+                ->setHelp('You must map at least 1 pair of source/target fields. You can only map 1 source & 1 target module, if you need to use other modules, please create a new rule.'),
             AssociationField::new('connectorSource')
                 ->addCssClass('rule')
                 ->setFormTypeOptions([
@@ -109,6 +115,20 @@ class RuleCrudController extends AbstractCrudController
             AssociationField::new('sourceModule')->hideOnForm(),
             AssociationField::new('targetModule')->hideOnForm(),
             AssociationField::new('fields')->hideOnForm(),
+            FormField::addTab('Parameters'),
+            AssociationField::new('params'),
+            FormField::addTab('Filters'),
+            AssociationField::new('filters'),
+            FormField::addTab('Formulae'),
+//            CodeEditorField::new('customFormula')->setLanguage('php'),
+//            AssociationField::new('formula'),
+            FormField::addTab('Relationships'),
+            AssociationField::new('relationships'),
+            FormField::addTab('Order'),
+            AssociationField::new('orders'),
+            FormField::addTab('Audits'),
+            AssociationField::new('audits'),
+
             BooleanField::new('deleted')->renderAsSwitch(false)->hideOnForm(),
             DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('updatedAt')->hideOnForm(),
@@ -131,4 +151,5 @@ class RuleCrudController extends AbstractCrudController
 
         return $this->redirect($url);
     }
+
 }
