@@ -143,6 +143,12 @@ class suitecrmcustom extends suitecrm
 	// Permet de mettre à jour un enregistrement
 	public function updateData($param)
 	{
+		if ($param['rule']['id'] == '62ff32cd9b6fb') {
+			foreach($param['data'] as $idDoc => $data) {
+				unset($param['data'][$idDoc]['name']);
+			}	
+		}
+
 		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
 			$fieldToBeOverriden = array(
 				'dispo_lundi_c',
@@ -178,7 +184,7 @@ class suitecrmcustom extends suitecrm
 	// Custom check before update
 	protected function checkDataBeforeUpdate($param, $data, $idDoc)
 	{
-		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
+ 		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
 			$now = new \DateTime();
 			$currentYear = $now->format('Y');
 			// academic year calculation
@@ -193,6 +199,15 @@ class suitecrmcustom extends suitecrm
 			}
 			// Add the academic year to the annee_scolaire_c field
 			$data['annee_scolaire_c'] = $param['dataHistory'][$idDoc]['annee_scolaire_c'] . ',^' . $currentAcademicYear . '^';
+			return $data;
+		}
+
+		//handle description edit if there is a difference in account name
+		if ($param['rule']['id'] == '62ff32cd9b6fb') {
+			//todo get internallist  instead of commentaire placeholder
+			//todo get description instead of billing address street
+			// $data['description'] = $param['dataHistory'][$idDoc]['billing_address_street'] . " ". "commentaire_placeholder";
+			$data['description'] = "billing address street" . " ". "commentaire_placeholder";
 			return $data;
 		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
@@ -262,6 +277,9 @@ class suitecrmcustom extends suitecrm
 		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '62ff32cd9b6fb') {
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
+
+		
+
 		if (
 			$param['module'] == 'Contacts'
 			and !empty($param['ruleParams']['contactType'])

@@ -521,6 +521,8 @@ class DocumentManagerCustom extends DocumentManager
 				'phone_office',
 				'rep_c',
 				'type_de_partenaire_c',
+				'description',
+				'externalgouvid_c',
 			];
 
 			$param['id_doc_myddleware'] = $this->id;
@@ -594,7 +596,7 @@ class DocumentManagerCustom extends DocumentManager
 							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
 								if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
 								}
-								$findSuiteCrmId = $suiteCrmSchool['externalgouvid_c'];
+								$findSuiteCrmId = $suiteCrmSchool['id'];
 							}
 						}
 						if (!empty($findSuiteCrmId)) {
@@ -605,23 +607,21 @@ class DocumentManagerCustom extends DocumentManager
 							// by name and other fields, or it doesn't exist at all and we need to create it
 							$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
 
-							if (count($matchingrows) == 0) {
-								//if we have more than one match, then we sort by percentage of matching
-								//and use the closest match
-								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
-							} else {
+							if ($matchingrows !== []) {
+
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								}
-								$this->mapTargetFields($this->sourceData, $suiteCrmSchool);
-								$this->updateType('U');
+								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
 								// $this->updateTargetId($matchingrows[0]);
+								$this->updateType('U');
 								$this->updateTargetId(reset($matchingrows));
-							} //end if found
+							} else {
+								$this->updateType('C');
+							}
 						}	// end else empty find gouv
-						
+
 					}
-					
 					return parent::getTargetDataDocument();
 					// $this->updateStatus('Ready_to_send');
 				} else {
