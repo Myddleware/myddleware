@@ -40,23 +40,8 @@ If you wish to remove some special roles from a user privileges (such as ROLE_SU
 php bin/console myddleware:demote-user
 ```
 
-## Email notifications configuration
 
-Myddleware is able to send notifications and alerts using scheduled tasks. For this, you need to configure your SMTP parameters in the 'SMTP config' tab of your user menu :
 
-*This section is still under construction*
-
-## Setting up a cron task
-
-*This section is still under construction*
-
-## Handling transfers in error
-
-*This section is still under construction*
-
-## Setting up a cron task
-
-*This section is still under construction*
 
 ## Upgrading Myddleware
 

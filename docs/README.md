@@ -229,8 +229,11 @@ php bin/console doctrine:fixtures:load --append
 
 <!-- tabs:end -->
 
+%[{ smtp.md }]%
+
 %[{ admin_tasks.md }]%
 
+%[{ cron_jobs.md }]%
 
 ## Contributing
 
