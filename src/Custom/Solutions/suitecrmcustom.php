@@ -207,7 +207,7 @@ class suitecrmcustom extends suitecrm
 			//todo get internallist  instead of commentaire placeholder
 			//todo get description instead of billing address street
 			// $data['description'] = $param['dataHistory'][$idDoc]['billing_address_street'] . " ". "commentaire_placeholder";
-			$data['description'] = "billing address street" . " ". "commentaire_placeholder";
+			$data['description'] = $data['description']." ".$param['rule']['id'];
 			return $data;
 		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);

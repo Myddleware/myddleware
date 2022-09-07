@@ -507,6 +507,7 @@ class DocumentManagerCustom extends DocumentManager
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
+		if ($this->document_data['rule_id'] == "62ff32cd9b6fb") {
 		if (empty($param)) {
 			$param['rule']['id'] = '62ff32cd9b6fb';
 			$param['fields'] = [
@@ -545,7 +546,7 @@ class DocumentManagerCustom extends DocumentManager
 		if (empty($this->etabComet)) {
 			$this->etabComet = $this->solutionTarget->read($param);
 		}
-
+	} //end if filter my rule id
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -560,7 +561,9 @@ class DocumentManagerCustom extends DocumentManager
 			// If the document type is a modification or a deletion we get target data for the record using its ID
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
 			if (
+				//todo, remove automatically C
 				('U' == $this->documentType
+					// or 'D' == $this->documentType
 					or 'D' == $this->documentType || 'C' == $this->documentType
 				)
 				&& !$this->isChild()
@@ -582,6 +585,8 @@ class DocumentManagerCustom extends DocumentManager
 
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
+
+					if (!empty($param)) {
 					if (
 						$param['module'] == "Accounts" && !empty($param['rule']['id'])
 						and $param['rule']['id'] == '62ff32cd9b6fb'
@@ -623,6 +628,7 @@ class DocumentManagerCustom extends DocumentManager
 						}	// end else empty find gouv
 
 					}
+				}
 					return parent::getTargetDataDocument();
 					// $this->updateStatus('Ready_to_send');
 				} else {
