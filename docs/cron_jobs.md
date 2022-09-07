@@ -31,8 +31,9 @@ If you wish to carry out any of these actions, you will need to set up a backgro
 Before creating this task, you need to make sure your configuration is right. Open a command shell and run the following command in the root directory of your Myddleware instance:
 
 ```bash
-php bin/console symfony check:requirements
+symfony check:requirements
 ```
+![Symfony check requirements command](images/symfony_check_requirements_command.png)
 
 From there, unless everything is OK, follow the instructions returned from the command line. There could potentially be a missing PHP extension or
 file permissions to be updated. 
@@ -117,7 +118,7 @@ The ```synchro``` program will allow you to synchronize your data by either exec
 
 Only active rules will be available in the list:
 
-![Active rules](images/active_rules.png)
+![Active rules list](images/active_rules_new.png)
 
 ### Reloading errors
 
