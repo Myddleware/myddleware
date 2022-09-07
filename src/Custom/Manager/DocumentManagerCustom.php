@@ -591,12 +591,12 @@ class DocumentManagerCustom extends DocumentManager
 							$this->connexionSolution('target');
 						}
 						// we do a custom search for the gouv id in the rows of the suiteCrm
-
+						$findSuiteCrmId = "";
 						foreach ($this->etabComet as $index => $suiteCrmSchool) {
 							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
 								if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
+									$findSuiteCrmId = $suiteCrmSchool['id'];
 								}
-								$findSuiteCrmId = $suiteCrmSchool['id'];
 							}
 						}
 						if (!empty($findSuiteCrmId)) {
@@ -612,6 +612,7 @@ class DocumentManagerCustom extends DocumentManager
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								}
+								
 								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
 								// $this->updateTargetId($matchingrows[0]);
 								$this->updateType('U');
