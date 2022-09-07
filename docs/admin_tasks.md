@@ -16,6 +16,8 @@ To add a user with the role Super Admin by default, simply type :
 php bin/console myddleware:add-user --superadmin
 ```
 
+![Add Myddleware User command prompt](images/add_user_command.png)
+
 ## Promote an existing user
 
 Some advanced Myddleware features such as cancelling or deleting all documents from a rule are restricted to Super Admin users. To enable these privileges for a Myddleware user, once in the myddleware directory, type the following command :
@@ -32,6 +34,8 @@ php bin/console myddleware:promote-user
 
 Type the user’s email address, press Enter then type ROLE_SUPER_ADMIN and press Enter again.
 
+![Promote Myddleware User command prompt](images/promote_user_command.png)
+
 ## Demote a user
 
 If you wish to remove some special roles from a user privileges (such as ROLE_SUPER_ADMIN), use the following command :
@@ -40,8 +44,7 @@ If you wish to remove some special roles from a user privileges (such as ROLE_SU
 php bin/console myddleware:demote-user
 ```
 
-
-
+![Demote Myddleware User command prompt](images/demote_user_command.png)
 
 ## Upgrading Myddleware
 
