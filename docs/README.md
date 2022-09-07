@@ -229,12 +229,6 @@ php bin/console doctrine:fixtures:load --append
 
 <!-- tabs:end -->
 
-%[{ smtp.md }]%
-
-%[{ admin_tasks.md }]%
-
-%[{ cron_jobs.md }]%
-
 ## Contributing
 
 > Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
