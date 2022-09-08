@@ -123,7 +123,7 @@ class SynchroCommand extends Command
                     } else {
                         // Envoi du job sur toutes les règles demandées. Si ALL est sélectionné alors on récupère toutes les règle dans leur ordre de lancement sinon on lance seulement la règle demandée.
                         if ('ALL' == $rule) {
-                            $rules = $this->jobManager->getRules();
+                            $rules = $this->jobManager->getRules($force);
                         } else {
                             $rules[] = $rule;
                         }

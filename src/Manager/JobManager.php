@@ -567,7 +567,7 @@ class jobcore
         // Connectors
     }
 
-    public function getRules()
+    public function getRules($force = false)
     {
         try {
             $sqlParams = '	SELECT name_slug 
@@ -575,8 +575,8 @@ class jobcore
 								INNER JOIN rule
 									ON rule.id = ruleorder.rule_id
 							WHERE 
-									rule.active = 1
-								AND	rule.deleted = 0
+									rule.deleted = 0
+								'.(!$force ? .' AND rule.active = 1 ' : '').'
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
