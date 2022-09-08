@@ -1421,9 +1421,10 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
-                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
+						// Allows to get the history fields, necessary for updating the SAP for instance
+                        foreach ($send['data'] as $docId => $value) {
+                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
+                        }
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
