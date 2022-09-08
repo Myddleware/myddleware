@@ -204,10 +204,14 @@ class suitecrmcustom extends suitecrm
 
 		//handle description edit if there is a difference in account name
 		if ($param['rule']['id'] == '62ff32cd9b6fb') {
-			//todo get internallist  instead of commentaire placeholder
-			//todo get description instead of billing address street
-			// $data['description'] = $param['dataHistory'][$idDoc]['billing_address_street'] . " ". "commentaire_placeholder";
-			$data['description'] = $data['description']." ".$param['rule']['id'];
+			$nina = "\n 3 checkDataBeforeUpdate() in suitecrmcustom \n";
+			echo $nina;
+			
+			// This requires a custom formula from Nom_etablissement in internallitst 
+			// To name in suiteCrm
+			if(!empty($param['data'][$idDoc]['description'])) {
+					$data['description'] = $param['dataHistory'][$idDoc]['description'] . " - Nom officiel: ".$param['data'][$idDoc]['description'];
+				}
 			return $data;
 		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);

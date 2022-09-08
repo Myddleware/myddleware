@@ -507,7 +507,9 @@ class DocumentManagerCustom extends DocumentManager
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
+		// rule should be internallist
 		if ($this->document_data['rule_id'] == "62ff32cd9b6fb") {
+			//param should be empty to assign the custom params
 		if (empty($param)) {
 			$param['rule']['id'] = '62ff32cd9b6fb';
 			$param['fields'] = [
@@ -543,6 +545,7 @@ class DocumentManagerCustom extends DocumentManager
 			$param['call_type'] = 'read';
 		}
 
+		//call the full repository of partners
 		if (empty($this->etabComet)) {
 			$this->etabComet = $this->solutionTarget->read($param);
 		}
@@ -560,6 +563,9 @@ class DocumentManagerCustom extends DocumentManager
 
 			// If the document type is a modification or a deletion we get target data for the record using its ID
 			// And if the rule is not a child (no target id is required, it will be send with the parent rule)
+
+			//the following code is applied regardless of whether the document is update or create
+			//however the type will be changed accordingly inside
 			if (
 				//todo, remove automatically C
 				('U' == $this->documentType
@@ -601,6 +607,7 @@ class DocumentManagerCustom extends DocumentManager
 							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
 								if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
 									$findSuiteCrmId = $suiteCrmSchool['id'];
+									break;
 								}
 							}
 						}
@@ -629,6 +636,7 @@ class DocumentManagerCustom extends DocumentManager
 
 					}
 				}
+					
 					return parent::getTargetDataDocument();
 					// $this->updateStatus('Ready_to_send');
 				} else {

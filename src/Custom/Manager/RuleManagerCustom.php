@@ -35,6 +35,8 @@ class RuleManagerCustom extends RuleManager
 	protected function sendTarget($type, $documentId = null)
 	{
 		// Call standard function
+		$toto = "\n 2 sendTarget() in RuleManagerCustom \n";
+		echo $toto;
 		$responses = parent::sendTarget($type, $documentId);
 
 		// List of rules with custom action
