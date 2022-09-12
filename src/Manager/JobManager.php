@@ -576,7 +576,7 @@ class jobcore
 									ON rule.id = ruleorder.rule_id
 							WHERE 
 									rule.deleted = 0
-								'.(!$force ? .' AND rule.active = 1 ' : '').'
+								'.(!$force ? ' AND rule.active = 1 ' : '').'
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
