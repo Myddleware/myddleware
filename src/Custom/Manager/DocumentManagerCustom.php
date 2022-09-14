@@ -577,6 +577,11 @@ class DocumentManagerCustom extends DocumentManager
 			$param['date_ref'] = '1970-01-01 00:00:00';
 			$param['call_type'] = 'read';
 		}
+
+		//call the full repository of partners
+		if (empty($this->quartierComet)) {
+			$this->quartierComet = $this->solutionTarget->read($param);
+		}
 	}
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
@@ -658,6 +663,47 @@ class DocumentManagerCustom extends DocumentManager
 								$this->updateType('C');
 							}
 						}	// end else empty find gouv
+
+					} elseif (
+						$param['module'] == "Accounts" && !empty($param['rule']['id'])
+						and $param['rule']['id'] == '6321c09e5a1b2'
+
+					) {
+						if (empty($this->solutionTarget)) {
+							$this->connexionSolution('target');
+						}
+						// we do a custom search for the gouv id in the rows of the suiteCrm
+						$findSuiteCrmId = "";
+						foreach ($this->quartierComet as $index => $suiteCrmSchool) {
+							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+								//codeQuartier intstead of etab
+								if ($this->sourceData['Code_quartier'] == $suiteCrmSchool['externalgouvid_c']) {
+									$findSuiteCrmId = $suiteCrmSchool['id'];
+									break;
+								}
+							}
+						}
+						if (!empty($findSuiteCrmId)) {
+							$this->updateType('U');
+							$this->updateTargetId($findSuiteCrmId);
+						} else {
+							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
+							// by name and other fields, or it doesn't exist at all and we need to create it
+							$matchingrows = $this->findMatchCrm($this->sourceData, $this->quartierComet);
+
+							if ($matchingrows !== []) {
+
+								if (count($matchingrows) > 1) {
+									krsort($matchingrows);
+								}
+								$this->updateType('U');
+								$this->updateTargetId(reset($matchingrows));
+							} else {
+								$this->updateType('C');
+							}
+						}	// end else empty find gouv
+
+					
 
 					}
 				}
