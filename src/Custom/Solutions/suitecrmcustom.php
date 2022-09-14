@@ -143,7 +143,7 @@ class suitecrmcustom extends suitecrm
 	// Permet de mettre à jour un enregistrement
 	public function updateData($param)
 	{
-		if ($param['rule']['id'] == '62ff32cd9b6fb') {
+		if ($param['rule']['id'] == '62ff32cd9b6fb' || $param['rule']['id'] == '6321c09e5a1b2') {
 			foreach($param['data'] as $idDoc => $data) {
 				unset($param['data'][$idDoc]['name']);
 			}	
@@ -204,8 +204,6 @@ class suitecrmcustom extends suitecrm
 
 		//handle description edit if there is a difference in account name
 		if ($param['rule']['id'] == '62ff32cd9b6fb') {
-			$nina = "\n 3 checkDataBeforeUpdate() in suitecrmcustom \n";
-			echo $nina;
 			
 			// This requires a custom formula from Nom_etablissement in internallitst 
 			// To name in suiteCrm
