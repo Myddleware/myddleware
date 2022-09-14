@@ -549,7 +549,35 @@ class DocumentManagerCustom extends DocumentManager
 		if (empty($this->etabComet)) {
 			$this->etabComet = $this->solutionTarget->read($param);
 		}
-	} //end if filter my rule id
+		//end if filter my rule id
+	} elseif ($this->document_data['rule_id'] == "6321c09e5a1b2") {
+		if (empty($param)) {
+			$param['rule']['id'] = '6321c09e5a1b2';
+			$param['fields'] = [
+				'id',
+				'name',
+				'ville_c',
+				'departement_c',
+				'description',
+				'externalgouvid_c',
+			];
+
+			$param['id_doc_myddleware'] = $this->id;
+			$param['solutionTarget'] = $this->solutionTarget;
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+
+			$param['offset'] = 0;
+			$param['module'] = 'mod_2_quartiers';
+			$param['ruleParams']['mode'] = '0';
+			$param['rule']['id'] = $this->ruleId;
+			$param['limit'] = 10000;
+			$param['date_ref'] = '1970-01-01 00:00:00';
+			$param['call_type'] = 'read';
+		}
+	}
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -624,9 +652,6 @@ class DocumentManagerCustom extends DocumentManager
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								}
-								
-								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
-								// $this->updateTargetId($matchingrows[0]);
 								$this->updateType('U');
 								$this->updateTargetId(reset($matchingrows));
 							} else {
