@@ -2074,7 +2074,8 @@ class documentcore
             $this->message .= 'Target id : '.$target_id;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
-
+			// Change the target id for the current process
+            $this->targetId = $target_id;
             return true;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
