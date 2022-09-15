@@ -454,7 +454,7 @@ public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 
 		$validName = false;
 		$validCity = ($internalListData['Noms_des_communes_concernees'] == $suiteCrmQuartier['ville_c']);
-		
+
 		if (isset($suiteCrmQuartier['departement_c'])) {
 			$validDepartement = ($internalListData['DEPARTEMENT'] == $suiteCrmQuartier['departement_c']);
 		}
@@ -596,9 +596,9 @@ public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 				'id',
 				'name',
 				'ville_c',
-				// 'departement_c',
+				'departement_c',
 				'description',
-				// 'externalgouvid_c',
+				'externalgouvid_c',
 			];
 
 			$param['id_doc_myddleware'] = $this->id;

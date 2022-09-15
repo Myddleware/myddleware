@@ -212,14 +212,12 @@ class suitecrmcustom extends suitecrm
 				}
 			return $data;
 		}
+
+		// Automatically check document as priority quartier
 		if ($param['rule']['id'] == '6321c09e5a1b2') {
-			
-			// This requires a custom formula from Nom_etablissement in internallitst 
-			// To name in suiteCrm
-			if(!empty($param['data'][$idDoc]['description'])) {
-					$data['description'] = $param['dataHistory'][$idDoc]['description'] . " - Numéro département : ".$param['data'][$idDoc]['description'];
-				}
-			return $data;
+			if (isset($param['data'][$idDoc]['quartier_prioritaire_c'])){
+				$param['data'][$idDoc]['quartier_prioritaire_c'] = 1;
+			}
 		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
 	}
