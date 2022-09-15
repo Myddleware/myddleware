@@ -213,12 +213,6 @@ class suitecrmcustom extends suitecrm
 			return $data;
 		}
 
-		// Automatically check document as priority quartier
-		if ($param['rule']['id'] == '6321c09e5a1b2') {
-			if (isset($param['data'][$idDoc]['quartier_prioritaire_c'])){
-				$param['data'][$idDoc]['quartier_prioritaire_c'] = 1;
-			}
-		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
 	}
 
@@ -287,9 +281,11 @@ class suitecrmcustom extends suitecrm
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
 
-		if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2') {
-			// Ternary so that if query not empty, we add the 
-			$query = (!empty($query) ? "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) " : $query." AND mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ");
+		if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2' && $param["call_type"] == 'read' && !strpos($query, "mod_2_quartiers_cstm.quartier_prioritaire_c" == 0)){
+			// Ternary so that if query not empty, we add the whole query
+			// Otherwise we append the query
+			$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
+			// $query = (empty($query) ? "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) " : $query." AND mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ");
 		}
 
 		
