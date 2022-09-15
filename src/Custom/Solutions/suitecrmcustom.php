@@ -212,6 +212,15 @@ class suitecrmcustom extends suitecrm
 				}
 			return $data;
 		}
+		if ($param['rule']['id'] == '6321c09e5a1b2') {
+			
+			// This requires a custom formula from Nom_etablissement in internallitst 
+			// To name in suiteCrm
+			if(!empty($param['data'][$idDoc]['description'])) {
+					$data['description'] = $param['dataHistory'][$idDoc]['description'] . " - Numéro département : ".$param['data'][$idDoc]['description'];
+				}
+			return $data;
+		}
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
 	}
 
@@ -280,9 +289,9 @@ class suitecrmcustom extends suitecrm
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
 
-		// if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2') {
-		// 	$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
-		// }
+		if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2') {
+			$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
+		}
 
 		
 
