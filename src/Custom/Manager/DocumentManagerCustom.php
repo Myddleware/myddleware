@@ -544,6 +544,39 @@ public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 		}
 	}
 
+
+	public function setQuartierDocumentParams()
+	{
+		$param['rule']['id'] = '6321c09e5a1b2';
+			$param['fields'] = [
+				'id',
+				'name',
+				'ville_c',
+				'departement_c',
+				'description',
+				'externalgouvid_c',
+				'quartier_prioritaire_c'
+			];
+
+			$param['id_doc_myddleware'] = $this->id;
+			$param['solutionTarget'] = $this->solutionTarget;
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+
+			$param['offset'] = 0;
+			$param['module'] = 'mod_2_quartiers';
+			$param['ruleParams']['mode'] = '0';
+			$param['query']['quartier_prioritaire_c'] = 1;
+			$param['rule']['id'] = $this->ruleId;
+			$param['limit'] = 10000;
+			$param['date_ref'] = '1970-01-01 00:00:00';
+			$param['call_type'] = 'read';
+
+			return $param;
+	}
+
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
@@ -591,40 +624,18 @@ public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 		}
 		//end if filter my rule id
 	} elseif ($this->document_data['rule_id'] == "6321c09e5a1b2") {
+
+		// Assign params for current document
 		if (empty($param)) {
-			$param['rule']['id'] = '6321c09e5a1b2';
-			$param['fields'] = [
-				'id',
-				'name',
-				'ville_c',
-				'departement_c',
-				'description',
-				'externalgouvid_c',
-				'quartier_prioritaire_c'
-			];
-
-			$param['id_doc_myddleware'] = $this->id;
-			$param['solutionTarget'] = $this->solutionTarget;
-			$param['ruleFields'] = $this->ruleFields;
-			$param['ruleRelationships'] = $this->ruleRelationships;
-			$param['jobId'] = $this->jobId;
-			$param['api'] = $this->api;
-
-			$param['offset'] = 0;
-			$param['module'] = 'mod_2_quartiers';
-			$param['ruleParams']['mode'] = '0';
-			$param['query']['quartier_prioritaire_c'] = 1;
-			$param['rule']['id'] = $this->ruleId;
-			$param['limit'] = 10000;
-			$param['date_ref'] = '1970-01-01 00:00:00';
-			$param['call_type'] = 'read';
+			$param = $this->setQuartierDocumentParams();
 		}
 
+		//Recall connexion if invalid
 		if ($this->solutionTarget->connexion_valide == false) {
 			$this->connexionSolution('target');
 		}
 
-		//call the full repository of partners
+		//call the full repository of discricts if not already loaded in current instance
 		if (empty($this->quartierComet)) {
 			$this->quartierComet = $this->solutionTarget->read($param);
 		}

@@ -288,7 +288,8 @@ class suitecrmcustom extends suitecrm
 		}
 
 		if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2') {
-			$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
+			// Ternary so that if query not empty, we add the 
+			$query = (!empty($query) ? "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) " : $query." AND mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ");
 		}
 
 		
