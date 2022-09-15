@@ -12,6 +12,7 @@ class DocumentManagerCustom extends DocumentManager
 {
 
 	protected $etabComet;
+	protected $quartierComet;
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
 		if (
