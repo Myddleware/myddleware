@@ -599,6 +599,7 @@ public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 				'departement_c',
 				'description',
 				'externalgouvid_c',
+				'quartier_prioritaire_c'
 			];
 
 			$param['id_doc_myddleware'] = $this->id;
