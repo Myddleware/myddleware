@@ -557,9 +557,9 @@ class DocumentManagerCustom extends DocumentManager
 				'id',
 				'name',
 				'ville_c',
-				'departement_c',
+				// 'departement_c',
 				'description',
-				'externalgouvid_c',
+				// 'externalgouvid_c',
 			];
 
 			$param['id_doc_myddleware'] = $this->id;
@@ -572,10 +572,15 @@ class DocumentManagerCustom extends DocumentManager
 			$param['offset'] = 0;
 			$param['module'] = 'mod_2_quartiers';
 			$param['ruleParams']['mode'] = '0';
+			$param['query']['quartier_prioritaire_c'] = 1;
 			$param['rule']['id'] = $this->ruleId;
 			$param['limit'] = 10000;
 			$param['date_ref'] = '1970-01-01 00:00:00';
 			$param['call_type'] = 'read';
+		}
+
+		if ($this->solutionTarget->connexion_valide == false) {
+			$this->connexionSolution('target');
 		}
 
 		//call the full repository of partners
@@ -665,7 +670,7 @@ class DocumentManagerCustom extends DocumentManager
 						}	// end else empty find gouv
 
 					} elseif (
-						$param['module'] == "Accounts" && !empty($param['rule']['id'])
+						$param['module'] == "mod_2_quartiers" && !empty($param['rule']['id'])
 						and $param['rule']['id'] == '6321c09e5a1b2'
 
 					) {

@@ -280,6 +280,10 @@ class suitecrmcustom extends suitecrm
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
 
+		// if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2') {
+		// 	$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
+		// }
+
 		
 
 		if (
