@@ -190,9 +190,9 @@ class airtablecore extends solution
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
             // There is a bug on the parameter returnFieldsByFieldId soit can't be used
             // In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
+			include 'lib/airtable/metadata.php';
             foreach ($param['fields'] as $field) {
                 if ('fld' == substr($field, 0, 3)) {
-                    include 'lib/airtable/metadata.php';
                     if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
                         $fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
                         continue;
@@ -221,18 +221,43 @@ class airtablecore extends solution
                         // Add a dimension to fit with the rest of the method
                         $content['records'][] = $content2;
                     } else {
+						// There is a bug on the parameter returnFieldsByFieldId soit can't be used
+						// In case we use fieldsId, we need to set the label instead of the id of the field
+						foreach ($param['query'] as $key => $value) {
+							if ('fld' == substr($key, 0, 3)) {
+								if (!empty($moduleFields[$baseID][$param['module']][$key]['label'])) {
+									unset($param['query'][$key]);
+									$param['query'][$moduleFields[$baseID][$param['module']][$key]['label']] = $value;
+									continue;
+								}
+							}
+						}
+						$filterByFormula = 'filterByFormula=';
                         // Filter by specific field (for example to avoid duplicate records)
                         foreach ($param['query'] as $key => $queryParam) {
+							// If there are several filter we manage the AND operator
+							if(count($param['query']) > 1) {
+								if ($filterByFormula == 'filterByFormula=') {
+									$filterByFormula .= 'AND(';
+								} else {
+									$filterByFormula .= ',';
+								}
+							}
                             // Transform "___" into space (Myddleware can't have space in the field name)
                             $key = str_replace('___', ' ', $key);
-                            // TODO: improve this, for now we can only filter with ONE key,
-                            // we should be able to add a variety (but this would need probably a series of 'AND() / OR() query params)
-                            $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?filterByFormula={'.$key.'}="'.$queryParam.'"', $options);
-                            $statusCode = $response->getStatusCode();
-                            $contentType = $response->getHeaders()['content-type'][0];
-                            $content = $response->getContent();
-                            $content = $response->toArray();
+							$filterByFormula .= '{'.$key.'}="'.$queryParam.'"';
                         }
+						// If there are several filter we manage the AND operator
+						if(count($param['query']) > 1) {
+							$filterByFormula = rtrim($filterByFormula, ',');
+							$filterByFormula .= ')';
+						}
+						// Get all records corresponding to the filters
+						$response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?'.$filterByFormula, $options);
+						$statusCode = $response->getStatusCode();
+						$contentType = $response->getHeaders()['content-type'][0];
+						$content = $response->getContent();
+						$content = $response->toArray();
                     }
                 } else {
                     // all records
