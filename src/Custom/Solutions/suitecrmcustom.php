@@ -143,7 +143,7 @@ class suitecrmcustom extends suitecrm
 	// Permet de mettre à jour un enregistrement
 	public function updateData($param)
 	{
-		if ($param['rule']['id'] == '62ff32cd9b6fb' || $param['rule']['id'] == '6321c09e5a1b2') {
+		if ($param['rule']['id'] == '62ff32cd9b6fb') {
 			foreach($param['data'] as $idDoc => $data) {
 				unset($param['data'][$idDoc]['name']);
 			}	
