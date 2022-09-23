@@ -133,4 +133,30 @@ class airtablecustom extends airtable {
 		}
 		return $result;
 	}
+	
+	// Check data before create
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    {
+		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
+		// If the etab sup is missing then we remove the field from the call
+		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
+			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+				unset($data['fldBQBCfr1ZgVJmE3']);
+			}
+		}
+        return $data;
+    }
+
+    // Check data before update
+    protected function checkDataBeforeUpdate($param, $data, $idDoc)
+    {
+		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
+		// If the etab sup is missing then we remove the field from the call
+		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
+			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+				unset($data['fldBQBCfr1ZgVJmE3']);
+			}
+		}
+        return $data;
+    }
 }
