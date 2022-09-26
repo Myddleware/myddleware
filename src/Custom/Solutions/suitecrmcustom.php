@@ -11,7 +11,7 @@ class suitecrmcustom extends suitecrm {
 	
 	protected $limitCall = 100;
 	public $anneeScolaire = '2022_2023';
-	public $anneeScolaire2 = '2022'; // used to select 2 years
+	//public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
 	protected $moduleWithAnnee = array('Contacts', 'FP_events');
 	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';
@@ -308,18 +308,7 @@ class suitecrmcustom extends suitecrm {
 				in_array($param['module'], $this->moduleWithAnnee)
 			AND $param['call_type'] != 'history'
 		) {
-			// Allows to filter on 2 years for Aïko (to be removed once the data are fixed) 
-			if (
-					!empty($param['rule']['id'])
-				AND (
-						$param['rule']['id'] == '61a920fae25c5' // Aiko contact
-					 OR $param['module'] == 'CRMC_binome' 		// Binôme des 2 dernière années
-				)
-			){
-				$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire2."%' ";
-			} else {
-				$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire."%' ";
-			}
+			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire."%' ";
 		}
 		// Add a filter for contact universite 
 		if (
