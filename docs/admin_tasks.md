@@ -64,15 +64,17 @@ git fetch
 git checkout origin/main -ft
 ```
 
-### Upgrading
+### Upgrade
 
-You can upgrade Myddleware with this command, which will run a series of jobs in the background :
+!> For security & compatibility reasons, please make sure your PHP version is 7.4+. Myddleware 3 is compatible with PHP 7.4 & 8.0.
+
+You can upgrade Myddleware to its latest version with this command, which will run a series of jobs in the background :
 
 ```
 php bin/console myddleware:upgrade --env=background
 ```
 
-### Upgrading (alternative)
+### Upgrade (alternative)
 
 If you encountered an issue during the upgrade you can do it step by step by following this tutorial instead.
 
@@ -89,13 +91,21 @@ Please refer to ``Ensuring your custom code is upgrade-safe in Myddleware``  in 
 You can also delete these files, run ```git pull``` again and you will get the latest version of these files. However, if you do, you will probably lose your custom code & files.
 
 
+#### Check your server meets new requirements
+
+````
+symfony check:requirements
+````
+
+Read the prompt and if needed, follow the instructions to install missing extensions or configurations.
+
 #### Upgrade PHP dependencies
 
 ```
 composer install
 ```
 
-#### Synchronise Myddleware Database
+#### Synchronise Myddleware database
 
 
 ````
