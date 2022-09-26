@@ -21,7 +21,61 @@ Currently, all Myddleware API endpoints are POST request endpoints.
 
 ### /api/synchro
 
+You can execute a rule or all your active rules. Simply send the rule ID.
+
+Example body:
+
+````json
+{
+    "rule": "631848032ab82"
+}
+````
+
+Example response:
+
+```json
+{
+    "error": "",
+    "jobId": "6331b6f35a1ff4.39548442",
+    "jobData": {
+        "Close": 0,
+        "Cancel": 0,
+        "Open": 0,
+        "Error": 0,
+        "paramJob": "Synchro : 631848032ab82",
+        "solutions": "",
+        "duration": 0.64,
+        "myddlewareId": "6331b6f35a1ff4.39548442",
+        "Manual": 1,
+        "Api": 1,
+        "jobError": "",
+        "documents": []
+    }
+}
+```
+
+#### Execute all active rules
+
+If  you want to synchronise all your active rules at once, you need to send 'ALL' instead of a rule ID.
+
+````json
+{
+    "rule": "ALL"
+}
+````
+
+
 ### /api/read_record
+
+POST http://localhost:8000/api/read_record
+
+````json
+{
+  "rule": "6331a6247f2140.75163260",
+  "filterQuery": "",
+  "filterValues" : ""
+}
+````
 
 ### /api/delete_record
 
