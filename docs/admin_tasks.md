@@ -50,3 +50,87 @@ php bin/console myddleware:demote-user
 
 *This section is still under construction*
 
+### Init & fetch from GitHub
+
+We suggest you use git to update Myddleware. If you don’t have git on your server, [here are the instructions on how to install it](https://git-scm.com/download/linux).
+Before doing anything else, create a backup of your Myddleware instance before updating.
+After the backup, go to the root directory of Myddleware and run the command as stated below to update all the Myddleware files.
+If you've never used git with Myddleware, please run these commands from your Myddleware root directory:
+
+```git
+git init
+git remote add -t main origin https://github.com/Myddleware/myddleware.git
+git fetch
+git checkout origin/main -ft
+```
+
+### Upgrading
+
+You can upgrade Myddleware with this command, which will run a series of jobs in the background :
+
+```
+php bin/console myddleware:upgrade --env=background
+```
+
+### Upgrading (alternative)
+
+If you encountered an issue during the upgrade you can do it step by step by following this tutorial instead.
+
+#### Fetch from GitHub
+
+```git
+git pull
+```
+
+**TODO: this section is still under construction**
+
+If you get an error message below after trying to pull, you might have changed at least one file in the Myddleware standard code. 
+Please refer to ``Ensuring your custom code is upgrade-safe in Myddleware``  in the **Developer's guide** section of this doc. It will help you manage conflicts & transferring your custom code safely. 
+You can also delete these files, run ```git pull``` again and you will get the latest version of these files. However, if you do, you will probably lose your custom code & files.
+
+
+#### Upgrade PHP dependencies
+
+```
+composer install
+```
+
+#### Synchronise Myddleware Database
+
+
+````
+php bin/console doctrine:schema:update --force --env=background
+````
+
+#### Synchronise Myddleware config inside the database
+
+````
+php bin/console doctrine:fixtures:load --append --env=background
+````
+
+#### Clear cache files
+
+````
+php bin/console cache:clear
+````
+
+> Alternatively, if you encountered issues with this command, you can try to run ````rm -rf var/cache/*```` instead
+
+#### Upgrade JavaScript libraries
+
+!> If you do not have [yarn](https://yarnpkg.com/getting-started/install#nodejs-1610-1) package manager installed on your server, please do so as it is now required in Myddleware 3+.
+
+Run the following command to update your JavaScript libraries.
+
+````
+yarn install
+````
+
+#### Build for prod
+
+Once that's done, you now need to build your Myddleware instance for production using the following command : 
+
+```
+yarn build 
+```
+
