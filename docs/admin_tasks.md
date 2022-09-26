@@ -59,7 +59,7 @@ Before launching this upgrade procedure, create a backup of all your Myddleware 
 
 ##### Upgrade PHP
 
-!> For security & compatibility reasons, please make sure your PHP version is 7.4+. Myddleware 3 is compatible with PHP 7.4 & 8.0.
+!> For security & compatibility reasons, please make sure your PHP version is 7.4+. Myddleware 3 is compatible with PHP 7.4 & 8.0, but not 8.1. However, Myddleware 4 will be compatible with PHP 8.0 & 8.1.
 
 The following PHP extensions must be installed & enabled (they usually are by default):
 
