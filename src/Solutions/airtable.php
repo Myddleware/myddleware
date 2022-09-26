@@ -153,16 +153,14 @@ class airtablecore extends solution
     public function get_module_fields($module, $type = 'source', $param = null)
     {
         require 'lib/airtable/metadata.php';
-        parent::get_module_fields($module, $type);
+        $this->moduleFields = parent::get_module_fields($module, $type);
         try {
             if (!empty($moduleFields[$this->projectID][$module])) {
-                $this->moduleFields = $moduleFields[$this->projectID][$module];
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$this->projectID][$module]);
             }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
             return false;
         }
     }

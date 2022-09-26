@@ -53,7 +53,7 @@ class airtablecustom extends airtable {
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
-				$param['rule']['conn_id_target'] == 8
+				in_array($param['rule']['conn_id_target'], array(4,8))
 			AND $param['document']['type'] == 'U'
 			AND $param['call_type'] == 'history'
 			AND strpos($result['error'], '404 Not Found')
