@@ -315,14 +315,14 @@ class suitecrmcustom extends suitecrm {
 				!empty($param['rule']['id'])
 			AND $param['rule']['id'] == '5d01a630c217c' // Contact - Université
 		){
-			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'contact_universite' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_universite%' ";
 		}
 		// Add a filter for contact reperant 
 		if (
 				!empty($param['rule']['id'])
 			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
 		){
-			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c = 'contact_reperant' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_reperant%' ";
 		}	
 		return $query;
 	}
