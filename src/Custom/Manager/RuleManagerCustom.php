@@ -45,6 +45,7 @@ class RuleManagerCustom extends RuleManager {
 							'61a9190e40965', // Aiko Referent
 							'620e5520c62d6', // Sendinblue - coupon
 							'620d3e768e678', // Sendinblue - contact
+							'6273905a05cb2', // Esp Rep - Contacts repérants
 							'625fcd2ed442f' // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
