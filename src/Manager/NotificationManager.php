@@ -141,7 +141,7 @@ class NotificationManager
                 $textMail = $this->translator->trans('email_alert.body', [
                     '%min%' => $this->configParams['alert_time_limit'],
                     '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
-                    '%id%' => $job->getId,
+                    '%id%' => $job->getId(),
                     'base_uri' => $this->configParams['base_uri'] ?? '',
                 ]);
 

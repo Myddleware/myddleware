@@ -72,66 +72,65 @@ class RuleManagerCustom extends RuleManager {
 					!empty($response['id']) 
 				AND	$response['id'] != '-1'
 				AND !empty($document['source_id'])
+				AND	$type == 'C' 
 			) {
-				// Si un engagé est envoyé dans REEC, on recherche également son pôle
-				// En effet quand un engagé est reconduit, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
-				if ($this->ruleId == '5ce3621156127' ) {//Engagés
-					$this->generatePoleRelationship('5d081bd3e1234', $document['source_id'], 'record_id', false); // Engagé - pole
-				}
-			
-				// Si un engagé est envoyé dans REEC, on recherche également sa composante
-				// En effet quand un engagé est envoyé dans REEC, il a peut être filtré avant et la relation avec la composante est donc filtrée aussi
-				// On force donc la relance de la relation composante - Engagé à chaque fois qu'un engagé est modifié	
-				if ($this->ruleId == '5ce3621156127') { //Engagés
-					$this->generatePoleRelationship('5f8486295b5a7', $document['source_id'], 'contact_id', false); // Composante - Engagé
+				if (
+					$this->ruleId == '5ce3621156127' //Engagés
+				) {
+					// Si un engagé est envoyé dans REEC, on recherche également son pôle
+					// En effet quand un engagé est reconduit, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
+					$this->generatePoleRelationship('5d081bd3e1234', $document['source_id'], 'record_id', true); // Engagé - pole
+					// Si un engagé est envoyé dans REEC, on recherche également sa composante
+					// En effet quand un engagé est envoyé dans REEC, il a peut être filtré avant et la relation avec la composante est donc filtrée aussi
+					// On force donc la relance de la relation composante - Engagé à chaque fois qu'un engagé est modifié	
+					$this->generatePoleRelationship('5f8486295b5a7', $document['source_id'], 'contact_id', true); // Composante - Engagé
 				}
 			
 				// Si un contact composante est envoyé dans REEC, on recherche également son pôle
 				// En effet un contact composante dont on  ajoute un mail ne sera plus filtré donc sera envoyé dans REEC,
 				// Cependant, dans ce cas, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
-				if ($this->ruleId == '5d01a630c217c') { //Contact composante
-					$this->generatePoleRelationship('5d163d3c1d837', $document['source_id'], 'record_id', false);  // contact composante - pole
+				if (
+					$this->ruleId == '5d01a630c217c'	//Contact composante
+				) { 
+					$this->generatePoleRelationship('5d163d3c1d837', $document['source_id'], 'record_id', true);  // contact composante - pole
 				}
 				
 				// Si une composante est envoyée dans REEC, on recherche également son pôle 
 				// Utilisé quand un établissement (filtre de le règle) est ajouté à une composante
-				if ($this->ruleId == '5ce362b962b63') { // composante
-					$this->generatePoleRelationship('5cfaca925116f', $document['source_id'], 'record_id', false);  // composante - pole
+				if (
+						$this->ruleId == '5ce362b962b63'	// composante
+				) { 
+					$this->generatePoleRelationship('5cfaca925116f', $document['source_id'], 'record_id', true);  // composante - pole
 				}
 				
 				// Si un établissement est envoyée dans REEC, on recherche également son pôle
 				if (
-						$this->ruleId == '5f847b2242138' // Etablissement sup 
-					AND $type != 'U' // Seulement en modif car en création les 2 documents se bloquent
-					AND	$type != 'D' // Seulement en modif car en création les 2 documents se bloquent
+					$this->ruleId == '5f847b2242138' // Etablissement sup 
 				) {
-					$this->generatePoleRelationship('5f847d9927a10', $document['source_id'], 'record_id', false);  // Etablissement sup - pole
+					$this->generatePoleRelationship('5f847d9927a10', $document['source_id'], 'record_id', true);  // Etablissement sup - pole
 				}
 				
 				// Si une session de formation est envoyée dans REEC, on recherche également son pôle
 				// Utilisé quand une formation change de type (filtre de le règle)
 				if (
-						$this->ruleId == '5ce454613bb17' // Formation
-					AND	$type != 'D'
+					$this->ruleId == '5ce454613bb17' // Formation
 				) {
-					$this->generatePoleRelationship('5d08e425e49ea', $document['source_id'], 'record_id', false);  // Formation - pôle
+					$this->generatePoleRelationship('5d08e425e49ea', $document['source_id'], 'record_id', true);  // Formation - pôle
 				}
 				
 				// If a coupon is created to Airtable, we send the pole relationship too
 				// It fix a bug when the coupon has been removed from Airtable and créated again by Myddleware, the pole wasn't sent again
 				if (
-						$this->ruleId == '625fcd2ed442f' // Mobilisation - Coupons
-					AND	$type == 'C'
+					$this->ruleId == '625fcd2ed442f' // Mobilisation - Coupons
 				) {
-					$this->generatePoleRelationship('626931ebbff78', $document['source_id'], 'record_id', false);  // Mobilisation - Relations pôles Coupons
+					$this->generatePoleRelationship('626931ebbff78', $document['source_id'], 'record_id', true);  // Mobilisation - Relations pôles Coupons
 				}
 				
 				// If a contact reperant is created to the espace reperant, we send the pole relationship too
 				if (
-						$this->ruleId == '6273905a05cb2' // Esp Rep - Contacts repérants
-					AND	$type == 'C'
+					$this->ruleId == '6273905a05cb2' // Esp Rep - Contacts repérants
 				) {
-					$this->generatePoleRelationship('62743060350ed', $document['source_id'], 'record_id', false);  // Esp Rep - Contact repérant - Pôle
+					$this->generatePoleRelationship('62743060350ed', $document['source_id'], 'record_id', true);  // Esp Rep - Contact repérant - Pôle
 				}
 				
 				/****************************************/ 
@@ -139,28 +138,24 @@ class RuleManagerCustom extends RuleManager {
 				/****************************************/ 
 				// Si un contact est envoyé dans REEC, on recherche également son pôle (seulement pour la migration)
 				if (
-						$this->ruleId == '61a920fae25c5' // Aiko - Contact 
-					AND	$type != 'D' // No document generated after a deletion
+					$this->ruleId == '61a920fae25c5' // Aiko - Contact 
 				) {		
-					$this->generatePoleRelationship('61a9329e6d6f2', $document['source_id'], 'record_id', false);  // Aiko Contact - pole
+					$this->generatePoleRelationship('61a9329e6d6f2', $document['source_id'], 'record_id', true);  // Aiko Contact - pole
 				}
 				
 				// Si un binome est envoyé dans REEC, on recherche également son pôle (seulement pour la migration)
 				if (
-						$this->ruleId == '61a930273441b' // Aiko Binomes
-					AND	$type != 'D' // No document generated after a deletion
+					$this->ruleId == '61a930273441b' // Aiko Binomes 
 				) {		
-					$this->generatePoleRelationship('61a93469599ae', $document['source_id'], 'record_id', false);  // Aiko Binome - pole
+					$this->generatePoleRelationship('61a93469599ae', $document['source_id'], 'record_id', true);  // Aiko Binome - pole
 				}
 				
 				// Si un référent est envoyé dans REEC, on recherche également son pôle (seulement pour la migration)	
 				if (
-						$this->ruleId == '61a9190e40965' // Aiko Referent
-					AND	$type != 'D' // No document generated after a deletion
+					$this->ruleId == '61a9190e40965' // Aiko Referent
 				) {			
-					$this->generatePoleRelationship('61b7662e60774', $document['source_id'], 'user_id', false);  // Aiko Referent(user) - pole
+					$this->generatePoleRelationship('61b7662e60774', $document['source_id'], 'user_id', true);  // Aiko Referent(user) - pole
 				}
-		 
 			}
 			// In case of error
 			elseif (

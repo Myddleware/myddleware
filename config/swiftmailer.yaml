@@ -1,8 +1,8 @@
 swiftmailer:
-    transport: gmail
-    host: smtp.gmail.com
-    port: 465
+    transport: smtp
+    host: smtp-relay.sendinblue.com
+    port: 587
     auth_mode: login
-    encryption: ssl
-    user: null
-    password: null
+    encryption: tls
+    username: stephanefaure@myddleware.com
+    password: HSxk32BwrC7nbLzO

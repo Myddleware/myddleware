@@ -747,6 +747,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fldhjrWZMvk0V8Dox'=> array( 'label' => 'utm_campaign', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldd62c003RfQjfcY'=> array( 'label' => 'utm_content', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldBUu85vhDwA3u1d'=> array( 'label' => 'utm_term', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldE9lhfEfcp44LOu'=> array( 'label' => 'DEPUIS REINVITATION', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 	'RECONDUCTION' => array(
 		'fldN5fuEjkkSuu4cU'=> array( 'label' => 'id_contact', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
