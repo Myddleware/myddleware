@@ -322,7 +322,7 @@ class suitecrmcustom extends suitecrm {
 				!empty($param['rule']['id'])
 			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
 		){
-			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_reperant%' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.espace_reperant_c = 'oui' ";
 		}	
 		return $query;
 	}

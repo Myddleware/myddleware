@@ -46,6 +46,7 @@ class RuleManagerCustom extends RuleManager {
 							'620e5520c62d6', // Sendinblue - coupon
 							'620d3e768e678', // Sendinblue - contact
 							'6273905a05cb2', // Esp Rep - Contacts repérants
+							'633d94b3ce61e', // Mobilisation - Participation RI -> comet relance
 							'625fcd2ed442f' // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
@@ -54,6 +55,14 @@ class RuleManagerCustom extends RuleManager {
 			OR !in_array($this->ruleId,$ruleList)
 		) {
 			return $responses;
+		}
+		
+		// Get the type if absent (in case of reading a specific record
+		if (empty($type)) {
+			$documentData = $this->getDocumentHeader($documentId);
+			if (!empty($documentData['type'])) {
+				$type = $documentData['type'];
+			}
 		}
 		
 		// Custom actions
@@ -156,6 +165,14 @@ class RuleManagerCustom extends RuleManager {
 				) {			
 					$this->generatePoleRelationship('61b7662e60774', $document['source_id'], 'user_id', true);  // Aiko Referent(user) - pole
 				}
+				
+				// Si un référent est envoyé dans REEC, on recherche également son pôle (seulement pour la migration)	
+				if (
+					$this->ruleId == '633d94b3ce61e' // Mobilisation - Participation RI -> comet relance
+				) {			
+					$targetData = $this->getDocumentData($docId, 'T');
+					$this->generatePoleRelationship('633ef1ecf11db', $document['source_id'], 'id', true, array('values' => array('id' => $targetData['fp_events_leads_1leads_idb'], 'date_modified' => gmdate('Y-m-d H:i:s'))));  // Mobilisation - relance rdv pris -> comet
+				}
 			}
 			// In case of error
 			elseif (
@@ -182,7 +199,7 @@ class RuleManagerCustom extends RuleManager {
 		return $responses;
 	}
 	
-	protected function generatePoleRelationship($rulePole, $searchValue, $searchField = 'record_id', $rerun = true) {
+	protected function generatePoleRelationship($rulePole, $searchValue, $searchField = 'record_id', $rerun = true, $values = false) {
 		try {		
 			// Instantiate the rule
 			$ruleRel = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface, $this->formulaManager, $this->solutionManager, $this->documentManager);	
@@ -190,7 +207,7 @@ class RuleManagerCustom extends RuleManager {
 			$ruleRel->setJobId($this->jobId);
 
 			// Cherche tous les pôles de l'enregistrement correspondant à la règle
-			$documents = $ruleRel->generateDocuments($searchValue, true, '', $searchField); 				
+			$documents = $ruleRel->generateDocuments($searchValue, (empty($values) ? true : false), $values, $searchField); 				
 			if (!empty($documents->error)) {					
 				throw new \Exception($documents->error);
 			}			
