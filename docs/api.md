@@ -1,4 +1,3 @@
-
 # Myddleware REST API
 
 The Myddleware API was built using [API Platform](https://api-platform.com/). 
