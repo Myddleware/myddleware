@@ -194,6 +194,31 @@ class RuleManagerCustom extends RuleManager {
 					// We cancel this doc because the modification to COMET will generate another document without invalid phone number
 					$this->changeStatus($docId, 'Cancel', 'Telephone invalide. Myddleware va notifier la COMET et effacer ce numéro invalide. ');
 				}
+				
+				// If there is an "nprocessable Entity" errro when we try to create a binome for the first time
+				// Then we try to send again both contacts and referent
+				if (
+						$this->ruleId == '61a930273441b' 	// 	Aiko binome
+					AND	$type == 'C' 						// Creation only
+					AND	$documentData['attempt'] == 1 		// Only the first try
+					AND	strpos($response['error'], 'Unprocessable Entity returned') !== false
+				) {	
+					$sourceData = $this->getDocumentData($docId, 'S');
+					if (!empty($sourceData['MydCustRelSugarcrmc_binome_contacts_1contacts_ida'])) { // Mentoré
+						$this->generatePoleRelationship('61a920fae25c5', $sourceData['MydCustRelSugarcrmc_binome_contacts_1contacts_ida'], 'id', true);  // Aiko contact
+					}
+					if (!empty($sourceData['MydCustRelSugarcrmc_binome_contactscontacts_ida'])) { // Mentor
+						$this->generatePoleRelationship('61a920fae25c5', $sourceData['MydCustRelSugarcrmc_binome_contactscontacts_ida'], 'id', true);  // Aiko contact
+					}
+					if (!empty($sourceData['assigned_user_id'])) { // Referent
+						$this->generatePoleRelationship('61a9190e40965', $sourceData['assigned_user_id'], 'id', true);  // Aiko Référent
+					}
+					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
+					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
+					if ($deleteTargetData) {
+						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l\'une d\'entre elle doit être supprimee dans Airtable. ');
+					}
+				}
 			}
 		}
 		return $responses;

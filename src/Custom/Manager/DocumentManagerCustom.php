@@ -20,6 +20,18 @@ class DocumentManagerCustom extends DocumentManager {
 		return parent::getDocumentHistory($searchFields);
 	} */
 	
+	protected function searchRelateDocumentByStatus($ruleRelationship, $record_id, $status) {
+		// Don't check if a relate document is filtered for rule Aiko binome
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '61a930273441b' // Aiko binome
+			AND $status = 'Filter'
+		) {
+			return null;
+		}
+		return parent::searchRelateDocumentByStatus($ruleRelationship, $record_id, $status);
+	}
+	
 	protected function beforeStatusChange($new_status) {	
 		
 		// On annule la relation pôle - contact (user) si le contact (user) a été filtré

@@ -43,6 +43,7 @@ class airtablecustom extends airtable {
         'BINOMES' => array('ID___COMET'),
         'POLE' => array('nom___du___pole'),
         'REFERENTS' => array('ID___COMET'),
+        'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
 		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy')
         );
 

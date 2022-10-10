@@ -36,6 +36,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'Reponse'=> array( 'label' => 'Reponse', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'REFERENT'=> array( 'label' => 'REFERENT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'POLES'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
+        'assigned_user_id'=> array( 'label' => 'assigned_user_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false), 
         'URL___CHATBOT'=> array( 'label' => 'URL CHATBOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false), 
     ),
     'POLE' => array(
