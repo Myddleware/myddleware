@@ -11,14 +11,14 @@ The application you want to connect needs to have a webservice API with methods 
 First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures, and more specifically the LoadSolutionData class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
 
 ```php
-        protected $solutionData = [
-                ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
-                // Your connector
-                ['name' => 'myconnector',  'active' => 1, 'source' => 1, 'target' => 1],
-        ];
+    protected $solutionData = [
+            ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
+            // Your connector
+            ['name' => 'myconnector',  'active' => 1, 'source' => 1, 'target' => 1],
+    ];
 ```
 
 In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the SolutionManager class.
@@ -26,24 +26,22 @@ In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/b
 First, add the use statement at the top of the SolutionManager class :
 
 ```php
-...
-use App\Solutions\WooEventManager;
-use App\Solutions\WordPress;
-use App\Solutions\Zuora;
-// Your new connector
-use App\Solutions\MyConnector;
+    use App\Solutions\WooEventManager;
+    use App\Solutions\WordPress;
+    use App\Solutions\Zuora;
+    // Your new connector
+    use App\Solutions\MyConnector;
 ```
 
 Then still in SolutionManager, add the new connector to the constructor.
 
 ```php
-        public function __construct(
+    public function __construct(
         WordPress $wordPress,
         WooCommerce $wooCommerce,
         WooEventManager $wooEventManager,
          // Your connector
          MyConnector $myConnector
-    
     ) {
         $this->classes = [
             'wordpress' => $wordPress,
@@ -164,7 +162,7 @@ You have to add this function login to check the connexion with you application.
 Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
 
 ```php
-         public function login($paramConnexion)
+    public function login($paramConnexion)
     {
         parent::login($paramConnexion);
         try {
