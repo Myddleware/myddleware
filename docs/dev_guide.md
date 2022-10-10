@@ -2,6 +2,7 @@
 
 All Myddleware improvements are welcome, and we particularly encourage community members to contribute to our connectors list by making a pull request so that the whole community can benefit from your work.
 To help you write your own connector, please read the following guidelines for successful connector creation.
+We also strongly recommend checking out the source code of all existing connectors inside the [/src/Solutions folder](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/) to help you implementing all the required methods.
 
 !>You may also have some very specific needs that simply require customising Myddleware to fit your own context. If that's the case, please refer to the "Ensuring your custom code is upgrade-safe in Myddleware" section of this documentation.
 
@@ -14,7 +15,7 @@ and hopefully has a documentation website available to help you connect Myddlewa
 
 > Most Myddleware applications are connected using REST API, however this is not the only option.
 
-#### Declare your new connector's name & store it in database
+#### Declare your new connector's name
 
 First you will need to add your new connector to the ``solution`` table in your database, using Doctrine Fixtures,
 and more specifically the ``LoadSolutionData`` class, located in
@@ -64,7 +65,7 @@ Then still in ``SolutionManager``, add the new connector to the constructor.
     }
 ```
 
-#### Download source API SDKs
+#### Download source API SDKs (optional)
 
 !> This step is optional and will vary according to the type of API you would like to connect to Myddleware. For this part, you must refer to the source API documentation.
 
@@ -81,6 +82,8 @@ Here is a sample of the code using the third-party client:
 
 ````php
 <?php
+
+namespace App\Solutions;
 
 use Automattic\WooCommerce\Client;
 
@@ -146,17 +149,28 @@ class woocommercecore extends solution
     ...
 ````
 
-#### Add the new connector to your current database
+### Add the new connector to your current database
 
-In your terminal, load Myddleware fixtures:
+In your terminal, load Myddleware fixtures. This will store your new connector's name inside the database.
 
 ```bash
         php bin/console doctrine:fixtures:load --append
 ```
+Your new connector should appear inside the ``solution`` table of your database
 
-> Check in Myddleware if the new connector is already available.
+![Database solutions table](images/dev_guide/solutions_table.png)
 
-Now, let's create a new connector class, in [/src/Solutions](https://github.com/Myddleware/myddleware/tree/main/src/Solutions), the file name must be the same as the name of your class (this is due to autoloading). You can use the code of another class for inspiration. For example, check out "SuiteCRM.php":
+> Go to your Myddleware interface to check whether the new connector is already available.
+
+### Creating the Connector file
+
+Now, let's create a new solution(connector) class, in [/src/Solutions](https://github.com/Myddleware/myddleware/tree/main/src/Solutions). 
+The file name must be the same as the name of your class (this is due to autoloading). 
+
+!> All Connectors (Solutions) extend the Myddleware parent class ```Solution```. This class contains a variety of methods which you may override to fit your connector's needs. 
+We strongly recommend you [check it out](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/solution.php) when in doubt as this class acts as the backbone of all Myddleware connectors.
+
+You can use the code of another class for inspiration. For example, check out [SuiteCRM.php](https://github.com/Myddleware/myddleware/tree/main/src/Solutions/suitecrm.php):
 
 ```php
         namespace App\Solutions;
@@ -181,8 +195,14 @@ Now, let's create a new connector class, in [/src/Solutions](https://github.com/
 #### Add the solution's logo
 
 Finally, if you want to display the application's logo, add the image corresponding to your application with the png format and size 64*64 pixels in [assets/images/solution](https://github.com/Myddleware/myddleware/tree/main/assets/images/solution)
+Once you've added the new image to the assets directory, you need to build Myddleware again in order for the image to be loaded to the Myddleware UI.
+To do so, you can run either ``yarn watch`` (in dev environment) or ```yarn build``` (in production environment).
 
-> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. You should also log errors using Symfony logger. In case of errors, the error message will be sent to the ```background.log```, ```prod.log``` & ```dev.log`` files, depending on your environment.
+
+### Error handling
+
+!> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. 
+You should also log errors using [Symfony logger](https://symfony.com/doc/current/logging.html). In case of errors, the error message will be sent to the ```background.log```, ```prod.log``` & ```dev.log``` files, depending on your environment.
 
 Here is an example method from our [WordPress.php](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/wordpress.php) file :
 
@@ -199,36 +219,63 @@ Here is an example method from our [WordPress.php](https://github.com/Myddleware
         }
 ```
 
+### Compulsory methods to implement
+
+Here's a non-exhaustive list of all the methods you will need to implement inside your Connector class. Each method's implementation will vary according to your source application's specificities.
+Please make sure you refer to its documentation for specifics such as modules lists, fields, formats, way to log in, etc.
+
+!> Warning: these method names (and signatures), as well as some class names, properties & namespaces, will undergo some slight changes in Myddleware 4 for code quality & consistency reasons. For instance, get_module_fields() will become getModuleFields() to respect the camelCase standard. Some typos & spelling mistakes might get fixed too. 
+
+| Method                       | Description                                                                                                                        | Arguments                      | Return type               |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------------------------|
+| **getFieldsLogin()**         | This method retrieves the list of fields required to login to your source app. For instance, an email, a password & a URL.         |                                | array                     |
+| **login()**                  | Connects to the source app.                                                                                                        | array $paramConnexion          | void                      |
+| **get_modules()**            | Retrieves the list of modules your connector can read from inside your source application solution.                                | string $type = 'source'        | array                     |
+| **get_modules_fields()**     | Retrieves the list of fields for each module your connector can read from inside your source application solution.                 | string $module, string $type = 'source', array $param = null | array $this->moduleFields |
+| **read()**                   | The heart of Myddleware: this method reads data (documents) inside your source application and transforms it to Myddleware format. | array $param                   | array                     |
+| **createData()**  *OPTIONAL* | Writes data inside your target application solution. (Not all APIs allow you to do so).                                            | array $param                   | array                     |
+| **updateData()**  *OPTIONAL* | Similarly to createData(), this method allows you to update documents inside your target application solution.                     | array $param                   | array                     |
+
 ### getFieldsLogin() method
 
-In the new connector class, you need to implement the getFieldsLogin() method. Here, you have to put the parameters required to connect to your solution.
+In the new connector class, you need to implement the ``getFieldsLogin()`` method. 
+Here, you have to put the parameters required to connect to your solution.
 
-For example, to login to the WooCommerce API, we need a URL, Consumer Key & Consumer Secret  :
+For example, to log in to the WooCommerce API, we need a URL, a Consumer Key &  a Consumer Secret  :
 
 ```php
-  public function getFieldsLogin()
+
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+...
+
+class woocommercecore extends solution
+{
+    public function getFieldsLogin()
     {
         return [
-                    [
-                        'name' => 'url',
-                        'type' => TextType::class,
-                        'label' => 'solution.fields.url',
-                    ],
-                    [
-                        'name' => 'consumerkey',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumerkey',
-                    ],
-                    [
-                        'name' => 'consumersecret',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumersecret',
-                    ],
-                ];
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+            [
+                'name' => 'consumerkey',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumerkey',
+            ],
+            [
+                'name' => 'consumersecret',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumersecret',
+            ],
+        ];
     }
+}
 ```
 
-> Check that everything is working in Myddleware
+> Check that everything is working in Myddleware UI by  clicking on Connector->Creation, then select your application, the parameters you have added in your function should be visible.
 
 ![view fields_login](images/dev_guide/suitecrm_create.PNG)
 
@@ -236,13 +283,12 @@ For example, to login to the WooCommerce API, we need a URL, Consumer Key & Cons
 
 ### login() method
 
-Now to connect your connector, we need to create a new function in your class, we will call it "login".
+Now to connect your connector, we need to implement the login() method in order for Myddleware to be able to connect to your source application when creating a connector & running a rule.
+This method takes a ``$paramConnexion`` parameter which is an array containing the necessary data required to be able to log in.
 
-Example code, available in the file ```myddleware/src/Solution/suitecrm.php```
+Make sure every error is caught and ``this->connexion_valide`` is set to ``true`` if the connection was successful.
 
-You have to add this function login to check the connexion with you application.
-
-Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
+Example implementation : 
 
 ```php
     public function login($paramConnexion)
@@ -283,23 +329,30 @@ Make sure every error is catched and "this->connexion_valide = true" if the conn
     }
 ```
 
-To debug this function, you can click on the button "Test" and check the result in firebug for example. The function will be called each time you click on "Test", no need to refresh the page.
+If you want to test out this method inside the Myddleware UI, you can already do it by filling in the "Create connector" form, filling in the fields & click on the "Test" button to check whether the Request & Response flow works properly.
+In case of a successful connection to your source application, the light bulb icon should colour itself. Otherwise, an error message should appear below.
 
-*Let's now create the first rule*
+![Create connector form](/images/dev_guide/connector_method_login_test.png)
 
-### Method get_modules
+### get_modules() method
 
-Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "get_modules" function.
+We now need to create a method which will display the list of modules available in our connector. As mentioned before, the way to retrieve modules will depend on your source application.
+For instance, some applications will give you access to a method which will retrieve an up-to-date list of all available modules. You would then need to call this service and return its value as an
+array here. However, some apps do not provide such method and you will therefore need to manually input the list of modules you would like to retrieve.
 
-Here, you have to add the module you want to connect in the method.
-
-In input you have access to the type of connexion, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
-
-You then return an array with a list of module:
+The ``type`` argument allows you to return a different set of modules depending on whether you are reading(``source``) or writing(``target``) inside your app. 
+Indeed,some modules may be available as a source or as target only.
 
 ```php
-        //Get module list
-        public function get_mudules($type = 'source')
+<?php
+
+namespace App\Solutions;
+...
+
+class myconnector extends solution
+{
+...
+        public function get_modules($type = 'source')
         {
                 return [
                         'contacts' => 'Contacts',
@@ -309,61 +362,99 @@ You then return an array with a list of module:
         }
 ```
 
-**Other code examples are available in the:**
 
-```myddleware/src/Solutions/sugarcrm.php```
+Now you can test out whether this method worked inside the Myddleware UI by going to the rule creation view, select your solution & then check whether the module list  returned in "Choose your module" is accurate.
 
-Now you can debug (with firebug for example) your function when the module list is called in the rule creation view(in "Choose your module") :
+![view modules select list](images/dev_guide/view_modules.PNG)
 
-![view modules](images/dev_guide/view_modules.PNG)
 
-Next step is the fields mapping, we now need to create a function for it.
+### get_module_fields() method
 
-### Method get_module_fields
+You have to indicate to Myddleware what fields are available for each module. 
+If your application has a method which describes all fields for every module, you should use it. 
+For example, you can check out the Salesforce & Prestashop connectors which resort to this strategy.
+Otherwise, you will have to provide an array of all fields with a simple descrition for each one. 
+We often store these lists in metadata files inside the [/src/Solutions/lib](https://github.com/Myddleware/myddleware/tree/main/src/Solutions/lib) folder.
 
-You have to indicate to Myddleware what fields are available for each module. If your application has a function which describe all fields for every module, you should use it. For example, we did it for Salesforce or Prestashop. Otherwise you have to describe every field.
+#### Arguments
 
-- Add the function get_module_fields in you class.
+| Arguments                   | Description / values                                                                                                                                                | 
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| string **$module**          | The module to which a fields belongs to.                                                                                                                            |  
+| string **$type = 'source'** | ``source`` or ``target`` <br/> If a module is only available as a target, set it to ``target``, else, the default is source (which works for both source & target)  |
+| array **$param = null()**   | Additional optional parameters.                                                                                                                                     |
 
-<!-- tabs:start -->
-
-#### **Input**
-
-- Module indicate from which module we need the fields
-
-- Type indicate if the module is in source or in target in the rule
-
-#### **Output**
+#### Signature
 
 - An array with all the fields for the module
-You should then add the fields related (field available to create relationship) and the class attribute this->fieldsRelate
 
-- Your fields will then be displayed after clicking on the button “Go to fields mapping”. You can refresh this page, your function will be called each time this page is loaded :
+You should then add the related fields (field available to create relationship) and the property $this->fieldsRelate.
 
-<!-- tabs:end -->
+Example implementation :
+
+````php
+<?php
+
+namespace App\Solutions;
+
+...
+
+class wordpresscore extends solution  {
+    
+    ...
+
+    public function get_module_fields($module, $type = 'source', $param = null)
+    {
+        parent::get_module_fields($module, $type);
+        try {
+            require_once 'lib/wordpress/metadata.php';
+            if (!empty($moduleFields[$module])) {
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+            }
+
+            if (!empty($fieldsRelate[$module])) {
+                $this->fieldsRelate = $fieldsRelate[$module];
+            }
+
+            if (!empty($this->fieldsRelate)) {
+                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+            }
+
+            return $this->moduleFields;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            return false;
+        }
+    }
+}   
+````
+
+Your fields will then be displayed after clicking on the button ``Go to fields mapping``.
+You can refresh this page, your method will be called each time this page is loaded.
 
 ![view modules fields](images/dev_guide/modules_fields.PNG)
 
-*Create a mapping and save the rule. We will now create the function read*
 
-### Method read
+### read() method
 
-> The read function is one of the most important function in the connector.
+> The read() method is the most important method of a connector. This is the true heart of Myddleware, where all the magic happens. Indeed, this method is the one that allows you to retrieve documents from your source application.
 
-The read function has to be able to :
+The read() method needs to be able to :
 
-- Read records from a reference (usually the modified datetime)
-- Read a specific record using the record id
-- Search a record with a criteria (used in duplicate search) => only if you use your application as a target, not only a source
-- You can open your rule, tab parameter, and click “Simulate transfer”, this button will call the read function :
+- Read records using a **reference** (usually a ``date_modified`` or ``updatedAt`` property)
+- Read a specific record using the **record's id**
+- Search for a record based on criteria (used in duplicate search) => only if you use your application as a target
+
+If you want to check whether this method is correctly implemented inside the Myddleware UI, you can open your rule, click on the ``Parameters``, and click on ``Simulate documents``.
+When you do, please remember to set a reference date in the past and to click on the ``Save`` button before launching the simulation. If all went well, you should get a number of documents to be read in the ``Estimated documents`` input.
 
 ![Simulate transfer](images/dev_guide/simulate_transfer.PNG)
 
-You can also run your rule in a command prompt :
+You can also run your rule using a command prompt with : 
 
-        php bin/console myddleware:synchro <your rule id> –env=background
+        php bin/console myddleware:synchro <your rule id> –-env=background
 
-Here is an example of input value :
+Here is an example of output value :
 
 ![Command synchro](images/dev_guide/command_synchro.PNG)
 
