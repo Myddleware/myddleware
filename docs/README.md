@@ -233,4 +233,10 @@ php bin/console doctrine:fixtures:load --append
 
 > Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
 
-If you would like to contribute to Myddleware source code, please refer to the [developer's guide](dev_guide.md) section of this documentation.
+Myddleware is an Open Source community project. All contributions are welcome, no matter how big or small. There are many ways to contribute to the project.
+You can of course help us improve and debug our source code, but you can also start by simply reporting issues & bugs or suggesting new features on our [GitHub Issues forum](https://github.com/Myddleware/myddleware/issues), or review and leave comments on [Pull Requests](https://github.com/Myddleware/myddleware/pulls).
+
+If you would like to contribute to Myddleware source code, please refer to the [developer's guide](dev_guide.md) section of this documentation. We also kindly ask 
+that you follow the [Symfony Coding Standards](https://symfony.com/doc/current/contributing/code/standards.html) to ensure uniformity and clarity of our source code across Myddleware.
+We recommend using the [PHP CS Fixer](https://github.com/FriendsOfPhp/PHP-CS-Fixer) tool to ensure these standards are respected across your contributed code.
+
