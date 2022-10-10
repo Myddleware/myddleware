@@ -1,15 +1,25 @@
 # Developer's guide
 
+All Myddleware improvements are welcome, and we particularly encourage community members to contribute to our connectors list by making a pull request so that the whole community can benefit from your work.
+To help you write your own connector, please read the following guidelines for successful connector creation.
+
+!>You may also have some very specific needs that simply require customising Myddleware to fit your own context. If that's the case, please refer to the "Ensuring your custom code is upgrade-safe in Myddleware" section of this documentation.
+
 ## Create your own connectors
 
 ### Requirements
 
-The application you want to connect needs to have a webservice API with methods to read data (at the very least) and hopefully have a documentation website available to help you connect Myddleware to the target application. 
+Before you can connect a new application to Myddleware, you need to check that the application you want to connect has a webservice API with methods to read data (at the very least) 
+and hopefully has a documentation website available to help you connect Myddleware to the target application. 
 
 > Most Myddleware applications are connected using REST API, however this is not the only option.
 
-First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures,
-and more specifically the ``LoadSolutionData`` class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
+#### Declare your new connector's name & store it in database
+
+First you will need to add your new connector to the ``solution`` table in your database, using Doctrine Fixtures,
+and more specifically the ``LoadSolutionData`` class, located in
+[/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). 
+To do so, add a new entry in ``$solutionData`` in  for your new connector :
 
 ```php
     protected $solutionData = [
@@ -22,7 +32,7 @@ and more specifically the ``LoadSolutionData`` class, located in [/src/DataFixtu
     ];
 ```
 
-In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the SolutionManager class.
+In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the ``SolutionManager`` class.
 
 First, add the use statement at the top of the SolutionManager class :
 
@@ -34,7 +44,7 @@ First, add the use statement at the top of the SolutionManager class :
     use App\Solutions\MyConnector;
 ```
 
-Then still in SolutionManager, add the new connector to the constructor.
+Then still in ``SolutionManager``, add the new connector to the constructor.
 
 ```php
     public function __construct(
@@ -58,11 +68,83 @@ Then still in SolutionManager, add the new connector to the constructor.
 
 !> This step is optional and will vary according to the type of API you would like to connect to Myddleware. For this part, you must refer to the source API documentation.
 
-In your terminal, you might need to download an SDK for the new API. For instance, [the WooCommerce REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) tells us that we need to add the **automattic/woocommerce** dependency to our Myddleware project in order to be able to login to the REST API. To do so, we ran :
+In your terminal, you might need to download an SDK for the new API. 
+For instance, [the WooCommerce REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction)
+tells us that we need to add the **automattic/woocommerce** dependency to our Myddleware project in order to be able to login to the REST API. To do so, we ran :
 
 ```bash
        composer require automattic/woocommerce
 ```
+
+Then, we implemented the Client described in their documentation inside our login(), create(), update() & read() methods. 
+Here is a sample of the code using the third-party client:
+
+````php
+<?php
+
+use Automattic\WooCommerce\Client;
+
+...
+
+class woocommercecore extends solution
+{
+    protected $apiUrlSuffix = '/wp-json/wc/v3/';
+    protected $url;
+    protected $consumerKey;
+    protected $consumerSecret;
+    protected $woocommerce;
+    
+    ...
+    
+    public function login($paramConnexion)
+    {
+        parent::login($paramConnexion);
+        $this->woocommerce = new Client(
+            $this->paramConnexion['url'],
+            $this->paramConnexion['consumerkey'],
+            $this->paramConnexion['consumersecret'],
+            [
+                'wp_api' => true,
+                'version' => 'wc/v3',
+            ]
+            );
+        if ($this->woocommerce->get('data')) {
+            $this->connexion_valide = true;
+        }
+    }
+}
+
+    public function upsert($method, $param)
+    {
+        ...
+        foreach ($param['data'] as $idDoc => $data) {
+                $param['method'] = $method;
+                $module = $param['module'];
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+
+                if ('create' === $method) {
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->post($module, $data);
+                } else {
+                    $targetId = $data['target_id'];
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
+                }          
+            ...
+        }
+    }
+    
+    public function read($param){
+    ...
+        $response = $this->woocommerce->get($module, [
+            'orderby' => 'modified',
+            'per_page' => $this->callLimit,
+            'page' => $page, ]
+        );
+    ...        
+    }
+    ...
+````
 
 #### Add the new connector to your current database
 
