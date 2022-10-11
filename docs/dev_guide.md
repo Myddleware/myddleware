@@ -445,53 +445,236 @@ The read() method needs to be able to :
 - Read a specific record using the **record's id**
 - Search for a record based on criteria (used in duplicate search) => only if you use your application as a target
 
-If you want to check whether this method is correctly implemented inside the Myddleware UI, you can open your rule, click on the ``Parameters``, and click on ``Simulate documents``.
-When you do, please remember to set a reference date in the past and to click on the ``Save`` button before launching the simulation. If all went well, you should get a number of documents to be read in the ``Estimated documents`` input.
+If you want to check whether this method is correctly implemented inside the Myddleware UI, you can open your rule, click on the ``Parameters`` tab, and click on ``Simulate documents``.
+
+!> When you do, please remember to set a reference date in the past and to click on the ``Save`` button before launching the simulation, otherwise no documents will be read. 
+
+If all went well, you should get a number of documents to be read in the ``Estimated documents`` input.
 
 ![Simulate transfer](images/dev_guide/simulate_transfer.PNG)
 
 You can also run your rule using a command prompt with : 
 
+````php
         php bin/console myddleware:synchro <your rule id> –-env=background
+````
 
-Here is an example of output value :
+Here is an example of input value :
 
-![Command synchro](images/dev_guide/command_synchro.PNG)
+![Synchro synchro command input](images/dev_guide/command_synchro.PNG)
 
-Parameters :
+| Parameters           | Description / values                                                                                                               | 
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| string **module**    | The module to read in your application.                                                                                            |  
+| array **rule**       | Contains the parameters of the rule (``id``, ``conn_id_source``, ``conn_id_target``, ``date_modified``, ...).                      |
+| string **date_ref**  | Reference date from which to look for newly-created or modified documents.                                                         |
+| array **ruleParams** | Rule parameters (``limit``, ``delete``, ``datereference``, ``mode``, ``duplicate_fields``).                                        |
+| array **fields**     | List of mapped fields for this rule.The read() method has to return a value for all these fields in each records.                  |
+| array **query**      | If defined, the read method has to return the result of the query. Otherwise, Myddleware will user the reference date to read data. |
+| int **offset**       | Used only if your application has to be read with limited data.                                                                    |
+| int **limit**        | Used only if your application has to be read with limited data.                                                                    |
+| string **jobId**     | ID of the job (task).                                                                                                              |
+| string **manual**    | Indicates whether the rule is ran manually.                                                                                        |
 
-- Module is the module to read in your application
-- Rule contains the parameters of the rule
-- Date_ref is used to search all data modified or created after this reference
-- RuleParams is the parameters of the rule
-- Fields contains every fields mapped in the rule.
-- Offset and limit are used only if your application has to be read with limited data
-- jobId is the if of the job
-- Manual indicate if the rule is run manually
+#### Defining which fields to be read (required fields)
 
-Myddleware has to be able to read records from the source application. The list of fields returns must be the ones in the rule field mapping (input entry : fields). But some other fields are requiered : the id of the record and its reference (usually the modified record datetime). But the id and reference can be named differently depending on the application and the module.
+Myddleware has to be able to read records from the source application. 
+The array of fields returned must be the ones provided during the fields mapping stage of rule creation (input entry : fields). 
 
-> It is the reason why you have to create the attribute required_fields in your class :
+!> Some fields are always required to be mapped for Myddleware to be able to launch a synchro / read() command : the record's ``id`` and its ``reference`` (usually the record's modified datetime).
+Watch out though as the id and reference can be named differently depending on the application and module.
+For that reason, each newly developed connector class must include a ``$required_fields`` class property.
 
-IMAGE
+To do so, you need to make sure you set the ``default`` entry of required fields. You should then only add entries for modules whose required fields are different from the default ones.
+Example of required fields list (Prestashop connector):
 
-The next step is to call the webservice function of your application depending on the input parameter :
+````php
+class prestashopcore extends solution
+{
+    protected $required_fields = [
+        'default' => ['id', 'date_upd', 'date_add'],
+        'product_options' => ['id'],
+        'product_option_values' => ['id'],
+        'combinations' => ['id'],
+        'stock_availables' => ['id'],
+        'order_histories' => ['id', 'date_add'],
+        'order_details' => ['id'],
+        'customer_messages' => ['id', 'date_add'],
+        'order_carriers' => ['id', 'date_add'],
+        'order_payments' => ['id', 'date_add', 'order_reference'],
+    ];
+    ...
+}
+````
 
-If the entry query exists in input then it is prioritary, you have to use the query parameter to search records
-If the entry query is empty then you have to use the reference. Myddleware must search all records created/modified ather the content of the parameter date_ref
-The function should return an array with these entries :
+The ``addRequiredField($fields, $module = 'default', $mode = null)`` method from the Solution parent class will be called in the background to load these required fields you've defined.
 
-count with the number of records read. Has to be 2 if no record are read.
-date_ref with the new date_ref. It has to be the max date found in the list records returns.
-values with an array of records. The key of these entries has to be the id of the record. The entry id and date_modified has to be present for each record. Date modified contains the value of the date_created or date_modified depending the type of the rule .
+#### Handling date formats - dateTimeToMyddleware() & dateTimeFromMyddleware()
 
-> Tips: for the date format, we need to create a function "DateTimeMyddleware", which converts the date Myddleware format, we can take inspiration from the function created in the ```myddleware/src/Solutions/woocommerce.php```. We will also need to convert the Myddleware format to your connector fromat if necessary.
+Regarding dates format, you may need to override the ``dateTimeToMyddleware()`` method, which converts the source application's date into Myddleware-readable format. 
+we can take inspiration from the function created in the ```myddleware/src/Solutions/woocommerce.php```. 
+Inversely, you may need to override the ``dateTimeFromMyddleware()`` method in order to convert the dates provided by Myddleware to your source application's format.
+Here is an [example](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/woocommerce.php#L160) of connector resorting to these methods.
 
-The output of the function read should look like this:
+````php
 
-IMAGE
+namespace App\Solutions;
 
-### Method create
+use Automattic\WooCommerce\Client;
+
+class woocommercecore extends solution
+{
+
+...
+
+    protected $woocommerce;  // HTTP Client
+
+    public function read($param)
+    {
+        try {
+            $module = $param['module'];
+            $result = [];
+            // format the reference date
+            $dateRefWooFormat = $this->dateTimeFromMyddleware($param['date_ref']);
+            // Set the limit
+            if (empty($param['limit'])) {
+                $param['limit'] = $this->callLimit;
+            }
+
+            // adding query parameters into the request
+            if (!empty($param['query'])) {
+                $query = '';
+                foreach ($param['query'] as $key => $value) {
+                    if ('id' === $key) {
+                        $query = strval('/'.$value);
+                    } else {
+                        // in case of query on sub module, we check if that the search field is the parent id
+                        if (
+                                !empty($this->subModules[$param['module']])
+                            and $this->subModules[$param['module']]['parent_id'] == $key
+                        ) {
+                            $query = strval('/'.$value);
+                        }
+                    }
+                }
+            }
+
+            //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
+            if (!empty($this->subModules[$param['module']])) {
+                $module = $this->subModules[$param['module']]['parent_module'];
+            }
+
+            $stop = false;
+            $count = 0;
+            $page = 1;
+            do {
+                //for specific requests (e.g. readrecord with an id)
+                if (!empty($query)) {
+                    $response = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
+                                                                              'page' => $page, ]);
+                    //when reading a specific record only we need to add a layer to the array
+                    $records = $response;
+                    $response = [];
+                    $response[] = $records;
+                } elseif ('customers' === $module) {
+                    //orderby modified isn't available for customers in the API filters so we sort by creation date
+                    $response = $this->woocommerce->get($module, ['orderby' => 'registered_date',
+                                                                                    'order' => 'asc',
+                                                                                    'per_page' => $this->callLimit,
+                                                                                    'page' => $page, ]);
+                //get all data, sorted by date_modified
+                } else {
+                    $response = $this->woocommerce->get($module, ['orderby' => 'modified',
+                                                                                'per_page' => $this->callLimit,
+                                                                                'page' => $page, ]);
+                }
+                if (!empty($response)) {
+                    //used for submodules (e.g. line_items)
+                    $response = $this->convertResponse($param, $response);
+                    foreach ($response as $record) {
+                        $row = [];
+                        //either we read all from a date_ref or we read based on a query (readrecord)
+                        if ($dateRefWooFormat < $record->date_modified || (!empty($query))) {
+                            foreach ($param['fields'] as $field) {
+                                // If we have a 2 dimensional array we break it down
+                                $fieldStructure = explode('__', $field);
+                                $fieldGroup = '';
+                                $fieldName = '';
+                                if (!empty($fieldStructure[1])) {
+                                    $fieldGroup = $fieldStructure[0];
+                                    $fieldName = $fieldStructure[1];
+                                    $row[$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
+                                } else {
+                                    $row[$field] = (!empty($record->$field) ? $record->$field : '');
+                                }
+                            }
+                            $row['id'] = $record->id;
+                            ++$count;
+                            $result[] = $row;
+                        } else {
+                            $stop = true;
+                        }
+                    }
+                } else {
+                    $stop = true;
+                }
+                if (!empty($query)) {
+                    $stop = true;
+                }
+                ++$page;
+            } while (!$stop && $count < $param['limit']);
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+        }
+
+        return $result;
+    }
+    
+    // Convert date to Myddleware format
+    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    protected function dateTimeToMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+
+        return $dto->format('Y-m-d H:i:s');
+    }
+
+    //convert from Myddleware format to Woocommerce format
+    protected function dateTimeFromMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+        // Return date to UTC timezone
+        return $dto->format('Y-m-d\TH:i:s');
+    }
+
+    public function getRefFieldName($moduleSource, $ruleMode)
+    {
+        return 'date_modified';
+    }
+    
+}
+
+````
+
+#### Signature
+
+Myddleware must search for all records created/modified after the content of the ``date_ref`` parameter.
+If set, the query parameter takes priority to return results.
+The read() method should return an ``array`` containing the following entries :
+
+- ``count`` : the number of records read. Has to be 2 if no records were read.
+- ``date_ref`` which should be set to the new ``date_ref``. It has to be the max date found in the returned records list.
+- ``values`` which should contain an ``array`` of records. The key of these entries has to be the ``id`` of the record.
+    - Each record should have an ``id`` and ``date_modified`` entry. Date modified contains the value of ``date_created`` or ``date_modified``, depending on the type of rule.
+
+The ``read()`` method's output should look like this :
+
+![Example output value for a read() method call](images/dev_guide/tuto_connecteur_method_read_output.png)
+
+### create() method - OPTIONAL
+
+> This method will allow Myddleware to add new records into your application when it is set as a target. However, not all solutions allow
+> for third-party software to write into them. Hence why this method is optional in Myddleware.
 
 Create a rule now with your application in target. Then create the function public function create($param) in your class.
 
@@ -537,21 +720,21 @@ Reread a document:
 
         bin/console myddleware:massaction rerun document <document id> --env=background
 
-### Method update
+### update() method - OPTIONAL
 
 The method update works in the same way as the method create. The output parameter must be built exactly like in the method create.
 
 The only difference is that you have the entry “target_id” for each record in the array data. You will need this entry to update your data in your application.
 
-## Create formula
+## Create formulae
 
 In this article we‘ll look at an important point in your synchronization rules and one of the many setting options offered by Myddleware, formulas.
 
-### The fundamentals
+### Fundamentals
 
 For starters, formulas allow you to format or to set the values that will be sent to a given target field . In other words, you have the option of adding fixed text to all uppercase, change timezones, concatenate several source fields etc.
 
-### The syntaxe
+### Syntax
 
 To help, syntax highlighting (1) is available to you right on your text box. Furthermore you will find below, the list of source fields that you have chosen (2), the available functions and their categories (3) and one or two drop list(s) (4) of the different values for the list type fields (as SalutationID example).
 
@@ -621,6 +804,7 @@ Reads a string starting of the given Index, ([PHP](https://www.php.net/manual/fr
 Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/function.strip-tags.php)) **striptags(String)**:
 
         striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
+
 
 ## Ensuring your custom code is upgrade-safe in Myddleware
 
