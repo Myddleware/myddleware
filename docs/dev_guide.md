@@ -676,28 +676,38 @@ The ``read()`` method's output should look like this :
 > This method will allow Myddleware to add new records into your application when it is set as a target. However, not all solutions allow
 > for third-party software to write into them. Hence why this method is optional in Myddleware.
 
-Create a rule now with your application in target. Then create the function public function create($param) in your class.
-
-Run your rule as you did while developing the method read.
 
 Here is an example of input value :
 
 ![Example input value](images/dev_guide/tuto_connecteur_method_create_input.png)
 
-Parameters :
 
-- data contains all the record Myddleware want to create in tour application. The key of each record is the id of the data trasfer in Myddleware
-- module is the module to write in your application
-- ruleId is teh id of the rule
-- rule contains the parameters of the rule
-- ruleFields contains the fields of the rule
-- ruleParams is the parameters of the rule
-- ruleRelationships contains the relationships with the current rule
-- fieldsType contains the type of all fields in the rule
-- jobId is the if of the job
+| Parameters                  | Description / values                                                                                                                    | 
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| array **data**              | Records which Myddleware will attempt to create in your target application. The key of each record is the document ``id`` in Myddleware |  
+| string **module**           | The module into which to write into in your application.                                                                                |  
+| string **ruleId**           | The rule's ``id``                                                                                                                       |
+| array **rule**              | Contains the rule's parameters (``id``, ``conn_id_source``, ``conn_id_target``, ``date_modified``, ...).                                |
+| array **ruleFields**        | Fields to be mapped inside the rule.                                                                                                    |
+| array **ruleParams**        | Rule parameters (``limit``, ``delete``, ``datereference``, ``mode``, ``duplicate_fields``).                                             |
+| array **ruleRelationships** | Potential relationships with other rules this rule may have.                                                                            |
+| string **fieldsType**       | The type of all fields in the rule.                                                                                                     |
+| string **jobId**            | ID of the job (task).                                                                                                                   |
 
-The output of the function created should look like these :
 
+#### Signature
+
+The method's output should return an array with an array (key = ``id`` of the Myddleware document) for each record created. 
+This array has 2 entries :
+
+| Parameters        | Description / values                                           | 
+|-------------------|----------------------------------------------------------------|
+| string **id**     | ID of the record inside the target application.                |  
+| string **error** | Error message or empty if the record was successfully created. | 
+
+Example output:
+
+````php
         [
                 [583f4dd2c4c843.39717569] => [
                         [id] => 65
@@ -709,8 +719,10 @@ The output of the function created should look like these :
                         [error] =>
                 ]
         ]
+````
 
-> To help writing code and not recreate time-consuming manipulation in Myddleware, we can use in your terminal :
+> Tip: during the testing / debugging phase, to help writing code and not recreate time-consuming manipulation in Myddleware, 
+> you can run the following commands in your terminal 
 
 Read a record:
 
@@ -720,15 +732,161 @@ Reread a document:
 
         bin/console myddleware:massaction rerun document <document id> --env=background
 
+
+
+Here is [an example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/sendinblue.php#L445):
+
+````php
+
+namespace App\Solutions;
+
+use ApiPlatform\Core\OpenApi\Model\Contact;
+use SendinBlue\Client\Model\GetContacts;
+
+class sendinbluecore extends solution
+{
+   protected function create($param, $record, $idDoc = null)
+    {
+        // Import or create new contact for sendinblue
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+        $createContact['email'] = $record['email'];
+        // Add attributes
+        $createContact['attributes'] = $record;
+        $result = $apiInstance->createContact($createContact);
+
+        return $result->getId();
+    }
+}
+
+````
+
+
 ### update() method - OPTIONAL
 
-The method update works in the same way as the method create. The output parameter must be built exactly like in the method create.
+The update() method is similar to the create() method. The output parameters should therefore be exactly the same as create().
 
-The only difference is that you have the entry “target_id” for each record in the array data. You will need this entry to update your data in your application.
+The only difference is that there should be a ``target_id`` entry for each record. This entry is required in order to update data inside the target application.
+
+Here is [an example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/sendinblue.php#L459): 
+
+````php
+
+namespace App\Solutions;
+
+use ApiPlatform\Core\OpenApi\Model\Contact;
+use SendinBlue\Client\Model\GetContacts;
+
+class sendinbluecore extends solution
+{
+    protected function update($param, $record, $idDoc = null)
+    {
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
+            // target_id contains the id of the record to be modified
+            $identifier = $record['target_id'];
+            $updateContact['attributes'] = $record;
+            $result = $apiInstance->updateContact($identifier, $updateContact);
+        } catch (\Exception $e) {
+            throw new \Exception('Exception when calling ContactsApi->updateContact: '.$e->getMessage());
+        }
+
+        return $identifier;
+    }
+}
+
+````
+
+
+### createData() & updateData() alternative methods - OPTIONAL
+
+Instead of overriding the create() & update() methods, you may wish to override the createData() & updateData() methods instead.
+Here is an [example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/woocommerce.php#L286) : 
+
+````php
+namespace App\Solutions;
+
+use Automattic\WooCommerce\Client;
+
+class woocommercecore extends solution
+{
+
+... 
+
+    /**
+     * @param $param
+     *
+     * @return mixed
+     */
+    public function createData($param)
+    {
+        return $this->upsert('create', $param);
+    }
+
+    /**
+     * @param $param
+     *
+     * @return mixed
+     */
+    public function updateData($param)
+    {
+        return $this->upsert('update', $param);
+    }
+
+    public function upsert($method, $param)
+    {
+        foreach ($param['data'] as $idDoc => $data) {
+            try {
+                $result = [];
+                $param['method'] = $method;
+                $module = $param['module'];
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+
+                if ('create' === $method) {
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->post($module, $data);
+                } else {
+                    $targetId = $data['target_id'];
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
+                }
+
+                $response = $recordResult;
+                if ($response) {
+                    $record = $response;
+                    if (!empty($record->id)) {
+                        $result[$idDoc] = [
+                                            'id' => $record->id,
+                                            'error' => false,
+                                    ];
+                    } else {
+                        throw new \Exception('Error during '.print_r($response));
+                    }
+                }
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+                $result[$idDoc] = [
+                                        'id' => '-1',
+                                        'error' => $error,
+                                        ];
+            }
+            // Modification du statut du flux
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+        }
+
+        return $result;
+    }
+  }
+````
 
 ## Create formulae
 
-In this article we‘ll look at an important point in your synchronization rules and one of the many setting options offered by Myddleware, formulas.
+> Myddleware embarks a set of valuable tools to facilitate data transformation, including the possibility to add what we call ``formulae``.
+> Inside the Myddleware UI, you can create your own formulae to manipulate data before it is being transferred from your source application to your target.
+> For instance, let's image your source application contains a ``first_name`` & a ``last_name`` field, but your target application only accepts a ``fullName`` field. 
+> This is no problem, as you can add a formula on the ``fullName`` target field in which you will be able to concatenate the 2 source fields for example.
+> This is a basic example, however you are free to make much more complex formulae if you wish, thanks to a bunch of built-in PHP functions embarked with Myddleware.
 
 ### Fundamentals
 
