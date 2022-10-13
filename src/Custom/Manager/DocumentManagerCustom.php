@@ -699,7 +699,7 @@ class DocumentManagerCustom extends DocumentManager
 
 	public function setQuartierDocumentParams()
 	{
-		$param['rule']['id'] = '6321c09e5a1b2';
+		$param['rule']['id'] = '63481a0fd40a7';
 			$param['fields'] = [
 				'id',
 				'name',
@@ -732,66 +732,70 @@ class DocumentManagerCustom extends DocumentManager
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
+		if (!in_array($this->document_data['rule_id'],(array('63481a0fd40a7','63482d533bd4e'))) {
+			return parent::getTargetDataDocument();
+		}
+		
 		// rule should be internallist
-		if ($this->document_data['rule_id'] == "62ff32cd9b6fb") {
+		if ($this->document_data['rule_id'] == "63482d533bd4e") {
 			//param should be empty to assign the custom params
-		if (empty($param)) {
-			$param['rule']['id'] = '62ff32cd9b6fb';
-			$param['fields'] = [
-				'id',
-				'name',
-				'account_type',
-				'billing_address_city',
-				'billing_address_postalcode',
-				'billing_address_street',
-				'billing_address_street_2',
-				'email1',
-				'phone_office',
-				'rep_c',
-				'type_de_partenaire_c',
-				'description',
-				'externalgouvid_c',
-			];
+			if (empty($param)) {
+				$param['rule']['id'] = '63482d533bd4e';
+				$param['fields'] = [
+					'id',
+					'name',
+					'account_type',
+					'billing_address_city',
+					'billing_address_postalcode',
+					'billing_address_street',
+					'billing_address_street_2',
+					'email1',
+					'phone_office',
+					'rep_c',
+					'type_de_partenaire_c',
+					'description',
+					'externalgouvid_c',
+				];
 
-			$param['id_doc_myddleware'] = $this->id;
-			$param['solutionTarget'] = $this->solutionTarget;
-			$param['ruleFields'] = $this->ruleFields;
-			$param['ruleRelationships'] = $this->ruleRelationships;
-			$param['jobId'] = $this->jobId;
-			$param['api'] = $this->api;
+				$param['id_doc_myddleware'] = $this->id;
+				$param['solutionTarget'] = $this->solutionTarget;
+				$param['ruleFields'] = $this->ruleFields;
+				$param['ruleRelationships'] = $this->ruleRelationships;
+				$param['jobId'] = $this->jobId;
+				$param['api'] = $this->api;
 
-			$param['offset'] = 0;
-			$param['module'] = 'Accounts';
-			$param['ruleParams']['mode'] = '0';
-			$param['query']['type_de_partenaire_c'] = 'ecole_maternelle';
-			$param['rule']['id'] = $this->ruleId;
-			$param['limit'] = 10000;
-			$param['date_ref'] = '1970-01-01 00:00:00';
-			$param['call_type'] = 'read';
+				$param['offset'] = 0;
+				$param['module'] = 'Accounts';
+				$param['ruleParams']['mode'] = '0';
+				$param['query']['type_de_partenaire_c'] = 'ecole_maternelle';
+				$param['rule']['id'] = $this->ruleId;
+				$param['limit'] = 10000;
+				$param['date_ref'] = '1970-01-01 00:00:00';
+				$param['call_type'] = 'read';
+			}
+
+			//call the full repository of partners
+			if (empty($this->etabComet)) {
+				$this->etabComet = $this->solutionTarget->read($param);
+			}
+			//end if filter my rule id
+		} elseif ($this->document_data['rule_id'] == "63481a0fd40a7") {
+
+			// Assign params for current document
+			if (empty($param)) {
+				$param = $this->setQuartierDocumentParams();
+			}
+
+			//Recall connexion if invalid
+			if ($this->solutionTarget->connexion_valide == false) {
+				$this->connexionSolution('target');
+			}
+
+			//call the full repository of discricts if not already loaded in current instance
+			if (empty($this->quartierComet)) {
+				$this->quartierComet = $this->solutionTarget->read($param);
+			}
 		}
-
-		//call the full repository of partners
-		if (empty($this->etabComet)) {
-			$this->etabComet = $this->solutionTarget->read($param);
-		}
-		//end if filter my rule id
-	} elseif ($this->document_data['rule_id'] == "6321c09e5a1b2") {
-
-		// Assign params for current document
-		if (empty($param)) {
-			$param = $this->setQuartierDocumentParams();
-		}
-
-		//Recall connexion if invalid
-		if ($this->solutionTarget->connexion_valide == false) {
-			$this->connexionSolution('target');
-		}
-
-		//call the full repository of discricts if not already loaded in current instance
-		if (empty($this->quartierComet)) {
-			$this->quartierComet = $this->solutionTarget->read($param);
-		}
-	}
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -835,88 +839,87 @@ class DocumentManagerCustom extends DocumentManager
 				if (-1 !== $history) {
 
 					if (!empty($param)) {
-					if (
-						$param['module'] == "Accounts" && !empty($param['rule']['id'])
-						and $param['rule']['id'] == '62ff32cd9b6fb'
+						if (
+							$param['module'] == "Accounts" && !empty($param['rule']['id'])
+							and $param['rule']['id'] == '63482d533bd4e'
 
-					) {
-						if (empty($this->solutionTarget)) {
-							$this->connexionSolution('target');
-						}
-						// we do a custom search for the gouv id in the rows of the suiteCrm
-						$findSuiteCrmId = "";
-						foreach ($this->etabComet as $index => $suiteCrmSchool) {
-							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
-								if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
-									$findSuiteCrmId = $suiteCrmSchool['id'];
-									break;
+						) {
+							if (empty($this->solutionTarget)) {
+								$this->connexionSolution('target');
+							}
+							// we do a custom search for the gouv id in the rows of the suiteCrm
+							$findSuiteCrmId = "";
+							foreach ($this->etabComet as $index => $suiteCrmSchool) {
+								if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+									if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
+										$findSuiteCrmId = $suiteCrmSchool['id'];
+										break;
+									}
 								}
 							}
-						}
-						if (!empty($findSuiteCrmId)) {
-							$this->updateType('U');
-							$this->updateTargetId($findSuiteCrmId);
-						} else {
-							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
-							// by name and other fields, or it doesn't exist at all and we need to create it
-							$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
-
-							if ($matchingrows !== []) {
-
-								if (count($matchingrows) > 1) {
-									krsort($matchingrows);
-								}
+							if (!empty($findSuiteCrmId)) {
 								$this->updateType('U');
-								$this->updateTargetId(reset($matchingrows));
+								$this->updateTargetId($findSuiteCrmId);
 							} else {
-								$this->updateType('C');
+								//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
+								// by name and other fields, or it doesn't exist at all and we need to create it
+								$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
+
+								if ($matchingrows !== []) {
+
+									if (count($matchingrows) > 1) {
+										krsort($matchingrows);
+									}
+									$this->updateType('U');
+									$this->updateTargetId(reset($matchingrows));
+								} else {
+									$this->updateType('C');
+								}
+							}	// end else empty find gouv
+
+						} elseif (
+							$param['module'] == "mod_2_quartiers" && !empty($param['rule']['id'])
+							and $param['rule']['id'] == '63481a0fd40a7'
+
+						) {
+							if (empty($this->solutionTarget)) {
+								$this->connexionSolution('target');
 							}
-						}	// end else empty find gouv
-
-					} elseif (
-						$param['module'] == "mod_2_quartiers" && !empty($param['rule']['id'])
-						and $param['rule']['id'] == '6321c09e5a1b2'
-
-					) {
-						if (empty($this->solutionTarget)) {
-							$this->connexionSolution('target');
-						}
-						// we do a custom search for the gouv id in the rows of the suiteCrm
-						$findSuiteCrmId = "";
-						foreach ($this->quartierComet as $index => $suiteCrmSchool) {
-							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
-								//codeQuartier intstead of etab
-								if ($this->sourceData['Code_quartier'] == $suiteCrmSchool['externalgouvid_c']) {
-									$findSuiteCrmId = $suiteCrmSchool['id'];
-									break;
+							// we do a custom search for the gouv id in the rows of the suiteCrm
+							$findSuiteCrmId = "";
+							foreach ($this->quartierComet as $index => $suiteCrmSchool) {
+								if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+									//codeQuartier intstead of etab
+									if ($this->sourceData['Code_quartier'] == $suiteCrmSchool['externalgouvid_c']) {
+										$findSuiteCrmId = $suiteCrmSchool['id'];
+										break;
+									}
 								}
 							}
-						}
-						if (!empty($findSuiteCrmId)) {
-							$this->updateType('U');
-							$this->updateTargetId($findSuiteCrmId);
-						} else {
-							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
-							// by name and other fields, or it doesn't exist at all and we need to create it
-							$matchingrows = $this->findMatchCrmQuartiers($this->sourceData, $this->quartierComet);
-
-							if ($matchingrows !== []) {
-
-								if (count($matchingrows) > 1) {
-									krsort($matchingrows);
-								}
+							if (!empty($findSuiteCrmId)) {
 								$this->updateType('U');
-								$this->updateTargetId(reset($matchingrows));
+								$this->updateTargetId($findSuiteCrmId);
 							} else {
-								$this->updateType('C');
-							}
-						}	// end else empty find gouv
+								//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
+								// by name and other fields, or it doesn't exist at all and we need to create it
+								$matchingrows = $this->findMatchCrmQuartiers($this->sourceData, $this->quartierComet);
 
-					
+								if ($matchingrows !== []) {
 
+									if (count($matchingrows) > 1) {
+										krsort($matchingrows);
+									}
+									$this->updateType('U');
+									$this->updateTargetId(reset($matchingrows));
+								} else {
+									$this->updateType('C');
+								}
+							}	// end else empty find gouv
+
+						
+
+						}
 					}
-				}
-					
 					return parent::getTargetDataDocument();
 					// $this->updateStatus('Ready_to_send');
 				} else {

@@ -75,7 +75,7 @@ class internallistcore extends solution
     {
         try {
             //get the data to obtain the fields of the row
-            $data = $this->entityManager->getRepository(InternalListValueEntity::class)->find($module)->getData();
+            $data = $this->entityManager->getRepository(InternalListValueEntity::class)->findOneBy(['listId' => $module])->getData();
 
             //from serialized json to fileds
             $unserializedData = unserialize($data);

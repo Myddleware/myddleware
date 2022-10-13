@@ -1374,9 +1374,6 @@ class rulecore
 
     protected function sendTarget($type, $documentId = null)
     {
-
-        $coucou = "\n 1 sendtarget() in RuleManager \n";
-        echo $coucou;
         try {
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
