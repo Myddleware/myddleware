@@ -732,7 +732,7 @@ class DocumentManagerCustom extends DocumentManager
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
-		if (!in_array($this->document_data['rule_id'],(array('63481a0fd40a7','63482d533bd4e'))) {
+		if (!in_array($this->document_data['rule_id'],(array('63481a0fd40a7','63482d533bd4e')))) {
 			return parent::getTargetDataDocument();
 		}
 		
