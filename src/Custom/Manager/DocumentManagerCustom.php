@@ -635,68 +635,6 @@ class DocumentManagerCustom extends DocumentManager
 		return parent::insertDataTable($data, $type);
 	}
 	
-	// Connect to the source or target application
-    public function connexionSolution($type)
-    {
-        try {
-            if ('source' == $type) {
-                $connId = $this->document_data['conn_id_source'];
-            } elseif ('target' == $type) {
-                $connId = $this->document_data['conn_id_target'];
-            } else {
-                return false;
-            }
-
-            // Get the name of the application
-            $sql = 'SELECT solution.name  
-		    		FROM connector
-						INNER JOIN solution 
-							ON solution.id  = connector.sol_id
-		    		WHERE connector.id = :connId';
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bindValue(':connId', $connId);
-            $result = $stmt->executeQuery();
-            $r = $result->fetchAssociative();
-            // Get params connection
-            $sql = 'SELECT id, conn_id, name, value
-		    		FROM connectorparam 
-		    		WHERE conn_id = :connId';
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bindValue(':connId', $connId);
-            $result = $stmt->executeQuery();
-            $tab_params = $result->fetchAllAssociative();
-            $params = [];
-            if (!empty($tab_params)) {
-                foreach ($tab_params as $key => $value) {
-                    $params[$value['name']] = $value['value'];
-                    $params['ids'][$value['name']] = ['id' => $value['id'], 'conn_id' => $value['conn_id']];
-                }
-            }
-
-            // Connect to the application
-            if ('source' == $type) {
-                $this->solutionSource = $this->solutionManager->get($r['name']);
-                $this->solutionSource->setApi($this->api);
-                $loginResult = $this->solutionSource->login($params);
-                $c = (($this->solutionSource->connexion_valide) ? true : false);
-            } else {
-                $this->solutionTarget = $this->solutionManager->get($r['name']);
-                $this->solutionTarget->setApi($this->api);
-                $loginResult = $this->solutionTarget->login($params);
-                $c = (($this->solutionTarget->connexion_valide) ? true : false);
-            }
-            if (!empty($loginResult['error'])) {
-                return $loginResult;
-            }
-
-            return $c;
-        } catch (\Exception $e) {
-            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
-            return false;
-        }
-    }
-
 	public function connexionSolution($type)
 	{
 		try {
