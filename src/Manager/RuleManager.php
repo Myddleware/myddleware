@@ -1425,7 +1425,7 @@ class rulecore
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
 
-                        // Allows to get the history fields, necessary for updating the SAP for instance
+						// Allows to get the history fields, necessary for updating the SAP for instance
                         foreach ($send['data'] as $docId => $value) {
                             $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
                         }
@@ -1866,6 +1866,30 @@ class rulecore
 
         return false;
     }
+	
+	// Delete a document data
+    protected function deleteDocumentData($documentId, $type)
+    {
+        try {
+            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
+                                    ->findOneBy([
+                                        'doc_id' => $documentId,
+                                        'type' => $type,
+                                        ]
+                                );
+            // Generate data array
+            if (!empty($documentDataEntity)) {
+                $this->entityManager->remove($documentDataEntity);
+				$this->entityManager->flush();
+				return true;
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+
+        return false;
+    }
+
 
     // Get the content of the table config
     protected function setConfigParam()

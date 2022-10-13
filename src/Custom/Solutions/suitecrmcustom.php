@@ -12,33 +12,38 @@ class suitecrmcustom extends suitecrm
 
 	protected $limitCall = 100;
 	public $anneeScolaire = '2022_2023';
-	public $anneeScolaire2 = '2022'; // used to select 2 years
+	//public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
-	protected $moduleWithAnnee = array('Contacts', 'FP_events');
+	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi');
 	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';
 	protected $currentRule;
-
-	protected $FieldsDuplicate = [
-		'Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
-		'Accounts' => ['email1', 'name'],
-		'Users' => ['email1', 'last_name'],
-		'Leads' => ['email1', 'last_name'],
-		'Prospects' => ['email1', 'name'],
-		'default' => ['name'],
-	];
-
+	protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
+        'Accounts' => ['email1', 'name'],
+        'Users' => ['email1', 'last_name'],
+        'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
+        'Prospects' => ['email1', 'name'],
+        'default' => ['name'],
+    ];
+	
 	// Add aiko field to be able to filter on it
 	public function get_module_fields($module, $type = 'source', $param = null)
 	{
 		parent::get_module_fields($module, $type);
 		if ($module == 'Contacts') {
 			$this->moduleFields['aiko'] = array(
-				'label' => 'Aïko',
-				'type' => 'varchar(255)',
-				'type_bdd' => 'varchar(255)',
-				'required' => 0,
-				'relate' => false
-			);
+												'label' => 'Aïko',
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0,
+												'relate' => false
+											);
+			$this->moduleFields['myd_filter_mentor'] = array(
+												'label' => 'Mentor OU Mendor acceuil',
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0,
+												'relate' => false
+											);
 		}
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
@@ -114,6 +119,26 @@ class suitecrmcustom extends suitecrm
 		}
 
 		$read = parent::read($param);
+		// Add a field to filter by mentor OR mentor acceuil
+		if (
+					$param['module']=='Contacts'
+				AND $param['call_type'] == 'read'
+		) {
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read[$key]['myd_filter_mentor'] = 'Non';
+				if (
+						!empty($record['souhaite_faire_de_ai_c'])
+					AND	!empty($record['mentor_acceuil_c'])
+					AND(
+							$record['souhaite_faire_de_ai_c'] == 'Oui'
+						 OR $record['mentor_acceuil_c'] == 'Oui'
+					)
+				) {
+					$read[$key]['myd_filter_mentor'] = 'Oui';
+				}			
+			}
+		}
 		if (
 			$param['rule']['id'] == '5ce362b962b63'
 			and !empty($read)
@@ -139,16 +164,18 @@ class suitecrmcustom extends suitecrm
 		}
 		return $read;
 	}
-
-	// Permet de mettre à jour un enregistrement
-	public function updateData($param)
-	{
-		if ($param['rule']['id'] == '62ff32cd9b6fb') {
-			foreach($param['data'] as $idDoc => $data) {
-				unset($param['data'][$idDoc]['name']);
-			}	
+	
+	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null) {
+		if ($param['rule']['id'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
+			// Change id and use event_id and lead_id
+			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
 		}
-
+		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
+	}
+	
+	// Permet de mettre à jour un enregistrement
+    public function updateData($param)
+    {
 		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
 			$fieldToBeOverriden = array(
 				'dispo_lundi_c',
@@ -313,32 +340,22 @@ class suitecrmcustom extends suitecrm
 			in_array($param['module'], $this->moduleWithAnnee)
 			and $param['call_type'] != 'history'
 		) {
-			// Allows to filter on 2 years for Aïko (to be removed once the data are fixed) 
-			if (
-				!empty($param['rule']['id'])
-				and ($param['rule']['id'] == '61a920fae25c5' // Aiko contact
-					or $param['module'] == 'CRMC_binome' 		// Binôme des 2 dernière années
-				)
-			) {
-				$query .= ' AND ' . strtolower($param['module']) . "_cstm.annee_scolaire_c LIKE '%" . $this->anneeScolaire2 . "%' ";
-			} else {
-				$query .= ' AND ' . strtolower($param['module']) . "_cstm.annee_scolaire_c LIKE '%" . $this->anneeScolaire . "%' ";
-			}
+			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire."%' ";
 		}
 		// Add a filter for contact universite 
 		if (
-			!empty($param['rule']['id'])
-			and $param['rule']['id'] == '5d01a630c217c' // Contact - Université
-		) {
-			$query .= ' AND ' . strtolower($param['module']) . "_cstm.reec_c = 'contact_universite' ";
+				!empty($param['rule']['id'])
+			AND $param['rule']['id'] == '5d01a630c217c' // Contact - Université
+		){
+			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_universite%' ";
 		}
 		// Add a filter for contact reperant 
 		if (
-			!empty($param['rule']['id'])
-			and $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
-		) {
-			$query .= ' AND ' . strtolower($param['module']) . "_cstm.reec_c = 'contact_reperant' ";
-		}
+				!empty($param['rule']['id'])
+			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
+		){
+			$query .= ' AND '.strtolower($param['module'])."_cstm.espace_reperant_c = 'oui' ";
+		}	
 		return $query;
 	}
 

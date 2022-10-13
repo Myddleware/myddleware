@@ -112,6 +112,12 @@ class mysqlcustom extends mysql {
 			) {
 				unset($data['date_acces_bilan']);
 			}
+			if (
+					isset($data['date_deb_mentorat'])
+				AND empty($data['date_deb_mentorat'])
+			) {
+				unset($data['date_deb_mentorat']);
+			}
 		}
 		
 		// We can't send decimal empty and don't wnt to set a 0 instead
@@ -663,7 +669,7 @@ class mysqlcustom extends mysql {
 		}
 	
 		// We send nouveau = 1 only in creation otherwise we don't send the field
-		if ($param['rule']['id'] == '5ce3621156127') { 	// règle engagé
+		if (in_array($param['rule']['id'], array('5ce3621156127', '5cdf83721067d'))) { 	// règle engagé + accompagné
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {
 				if (isset($param['data'][$idDoc]['nouveau'])) {					

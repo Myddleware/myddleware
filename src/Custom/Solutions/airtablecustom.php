@@ -42,7 +42,9 @@ class airtablecustom extends airtable {
         'CONTACTS' => array('ID___COMET'),
         'BINOMES' => array('ID___COMET'),
         'POLE' => array('nom___du___pole'),
-        'REFERENTS' => array('ID___COMET')
+        'REFERENTS' => array('ID___COMET'),
+        'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
+		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy')
         );
 
 
@@ -52,7 +54,7 @@ class airtablecustom extends airtable {
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
-				$param['rule']['conn_id_target'] == 8
+				in_array($param['rule']['conn_id_target'], array(4,8))
 			AND $param['document']['type'] == 'U'
 			AND $param['call_type'] == 'history'
 			AND strpos($result['error'], '404 Not Found')
@@ -132,4 +134,30 @@ class airtablecustom extends airtable {
 		}
 		return $result;
 	}
+	
+	// Check data before create
+    protected function checkDataBeforeCreate($param, $data, $idDoc)
+    {
+		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
+		// If the etab sup is missing then we remove the field from the call
+		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
+			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+				unset($data['fldBQBCfr1ZgVJmE3']);
+			}
+		}
+        return $data;
+    }
+
+    // Check data before update
+    protected function checkDataBeforeUpdate($param, $data, $idDoc)
+    {
+		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
+		// If the etab sup is missing then we remove the field from the call
+		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
+			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+				unset($data['fldBQBCfr1ZgVJmE3']);
+			}
+		}
+        return $data;
+    }
 }

@@ -12,7 +12,8 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'REFERENT DE'=> array( 'label' => 'Référent de', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'DATE___DE___NAISSANCE'=> array( 'label' => 'Date de naissance', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'Civilité'=> array( 'label' => 'Civilité', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-        'pole'=> array( 'label' => 'Pôle', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'pole'=> array( 'label' => 'Pôle', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'POLES'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
         'delete'=> array( 'label' => 'Deleted', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
     ),
     'BINOMES' => array(
@@ -35,6 +36,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'Reponse'=> array( 'label' => 'Reponse', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'REFERENT'=> array( 'label' => 'REFERENT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'POLES'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
+        'assigned_user_id'=> array( 'label' => 'assigned_user_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false), 
         'URL___CHATBOT'=> array( 'label' => 'URL CHATBOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => false), 
     ),
     'POLE' => array(
@@ -746,6 +748,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fldhjrWZMvk0V8Dox'=> array( 'label' => 'utm_campaign', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldd62c003RfQjfcY'=> array( 'label' => 'utm_content', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldBUu85vhDwA3u1d'=> array( 'label' => 'utm_term', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldE9lhfEfcp44LOu'=> array( 'label' => 'DEPUIS REINVITATION', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 	'RECONDUCTION' => array(
 		'fldN5fuEjkkSuu4cU'=> array( 'label' => 'id_contact', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),

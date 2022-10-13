@@ -81,6 +81,28 @@ class ToolsManagerCustom extends ToolsManager {
 		if (current(array_keys($data['source'])) == 'CRMC__etablissement_sup') {
 			$data['lst_rule']['5cddddcce2e3e'] = 'REEC - Poles';
 		}
+		
+		// Add bidirectional rule for Mobilisation - Participation RI
+		if ($data['regleId'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
+				$data['rule_params'][] = array(
+									'id' => 'bidirectional',
+									'name' => 'bidirectional',
+									'required' => false,
+									'type' => 'option',
+									'label' => 'create_rule.step3.params.sync',
+									'option' => array('627153382dc34' => 'Mobilisation - Participations RI'));
+		}
+		
+		if ($data['regleId'] == '627153382dc34') {	// Mobilisation - Participations RI
+				$data['rule_params'][] = array(
+									'id' => 'bidirectional',
+									'name' => 'bidirectional',
+									'required' => false,
+									'type' => 'option',
+									'label' => 'create_rule.step3.params.sync',
+									'option' => array('6281633dcddf1' => 'Mobilisation - Participation RI -> comet'));
+		}
+
 		return $data;
 	}
 } 

@@ -61,6 +61,7 @@ class JobRepository extends ServiceEntityRepository
             ->setParameter('status', 'Start')
             ->setParameter('timeLimit', $begin)
             ->getQuery()
+            ->setMaxResults(1)
             ->getOneOrNullResult();
     }
 

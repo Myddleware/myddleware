@@ -196,6 +196,7 @@ class documentcore
 								rule.name_slug,
 								ruleparam.value mode,
 								rule.conn_id_source,
+								rule.conn_id_target,
 								rule.module_source
 							FROM document 
 								INNER JOIN rule
@@ -959,6 +960,11 @@ class documentcore
                 }
                 // Prepare the search array with teh value for each duplicate field
                 foreach ($duplicate_fields as $duplicate_field) {
+					// In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
+					if ($duplicate_field == 'Myddleware_element_id') {
+						$searchFields['id'] = $target[$duplicate_field];
+						continue;
+					}
                     $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
@@ -1463,7 +1469,8 @@ class documentcore
                 $targetId = $this->getTargetId($ruleField, $source[$ruleField['field_name_source']]);
                 if (!empty($targetId['record_id'])) {
                     return $targetId['record_id'];
-                } else {
+                // No need of relate field in case of deletion
+				} elseif ($this->documentType != 'D') {
                     throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
                 }
             }
@@ -2067,9 +2074,9 @@ class documentcore
             $this->message .= 'Target id : '.$target_id;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
-            // Change the target id for the current process
-            $this->targetId = $target_id;
 
+			// Change the target id for the current process
+            $this->targetId = $target_id;
             return true;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
