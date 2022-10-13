@@ -230,7 +230,7 @@ class suitecrmcustom extends suitecrm
 		}
 
 		//handle description edit if there is a difference in account name
-		if ($param['rule']['id'] == '62ff32cd9b6fb') {
+		if ($param['rule']['id'] == '63482d533bd4e') {
 			// This requires a custom formula from Nom_etablissement in internallitst 
 			// To name in suiteCrm
 			if(!empty($param['data'][$idDoc]['description'])) {
@@ -303,7 +303,7 @@ class suitecrmcustom extends suitecrm
 		// Add filter on contact type when the contacts are read from SuiteCRM
 
 		//if my rule and module = 
-		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '62ff32cd9b6fb') {
+		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '63482d533bd4e') {
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
 
