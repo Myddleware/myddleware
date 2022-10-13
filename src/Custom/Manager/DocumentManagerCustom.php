@@ -12,6 +12,7 @@ class DocumentManagerCustom extends DocumentManager
 {
 
 	protected $etabComet;
+	protected $quartierComet;
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
 		if (
@@ -416,7 +417,6 @@ class DocumentManagerCustom extends DocumentManager
 			$validName = false;
 			$validPostalCode = ($internalListData['Code_postal'] == $suiteCrmSchool['billing_address_postalcode']);
 			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmSchool['billing_address_street']);
-			// $validCity = ($internalListData['Nom_commune'] == $suiteCrmSchool['billing_address_city']);
 
 
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
@@ -440,6 +440,46 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 
+//function that reads a row from the internallist and trys to find a match in the target
+public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
+{
+
+	//to check if all rows of the table were looked at
+	$rowschecked = 0;
+	//to avoid too many choices, this array must have only one element at the end
+	$matchingrows = [];
+
+	//we loop through the suiteCrm accounts
+	foreach ($suiteCrmData as $index => $suiteCrmQuartier) {
+		//init name as false at the beginning of the loop
+
+		$validName = false;
+		$validCity = ($internalListData['Noms_des_communes_concernees'] == $suiteCrmQuartier['ville_c']);
+
+		if (isset($suiteCrmQuartier['departement_c'])) {
+			$validDepartement = ($internalListData['DEPARTEMENT'] == $suiteCrmQuartier['departement_c']);
+		}
+
+
+		//use algorithm to compare similarity of 2 names, threshold is 60% similar
+		$namecompare = similar_text($suiteCrmQuartier['name'], $internalListData['Quartier_prioritaire'], $perc);
+		if ($perc >= 80) {
+			$validName = true;
+		}
+		//to have a match, we need a similar name and at least the same address or postal code
+		$validRow = ($validName && ($validCity || $validDepartement));
+		if ($validRow == true) {
+
+			//we append the array of matches
+			$matchingrows[(int)$perc] = $suiteCrmQuartier['id'];
+		} else {
+			// throw new \Exception("Cet établissement n'a pas assez de champs");
+		}
+		$rowschecked++;
+	} // end foreach dataSuiteCrm to find school
+
+	return $matchingrows;
+}
 	
 
 
@@ -504,6 +544,39 @@ class DocumentManagerCustom extends DocumentManager
 		}
 	}
 
+
+	public function setQuartierDocumentParams()
+	{
+		$param['rule']['id'] = '6321c09e5a1b2';
+			$param['fields'] = [
+				'id',
+				'name',
+				'ville_c',
+				'departement_c',
+				'description',
+				'externalgouvid_c',
+				'quartier_prioritaire_c'
+			];
+
+			$param['id_doc_myddleware'] = $this->id;
+			$param['solutionTarget'] = $this->solutionTarget;
+			$param['ruleFields'] = $this->ruleFields;
+			$param['ruleRelationships'] = $this->ruleRelationships;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+
+			$param['offset'] = 0;
+			$param['module'] = 'mod_2_quartiers';
+			$param['ruleParams']['mode'] = '0';
+			$param['query']['quartier_prioritaire_c'] = 1;
+			$param['rule']['id'] = $this->ruleId;
+			$param['limit'] = 10000;
+			$param['date_ref'] = '1970-01-01 00:00:00';
+			$param['call_type'] = 'read';
+
+			return $param;
+	}
+
 	// Permet de transformer les données source en données cibles
 	public function getTargetDataDocument()
 	{
@@ -549,7 +622,24 @@ class DocumentManagerCustom extends DocumentManager
 		if (empty($this->etabComet)) {
 			$this->etabComet = $this->solutionTarget->read($param);
 		}
-	} //end if filter my rule id
+		//end if filter my rule id
+	} elseif ($this->document_data['rule_id'] == "6321c09e5a1b2") {
+
+		// Assign params for current document
+		if (empty($param)) {
+			$param = $this->setQuartierDocumentParams();
+		}
+
+		//Recall connexion if invalid
+		if ($this->solutionTarget->connexion_valide == false) {
+			$this->connexionSolution('target');
+		}
+
+		//call the full repository of discricts if not already loaded in current instance
+		if (empty($this->quartierComet)) {
+			$this->quartierComet = $this->solutionTarget->read($param);
+		}
+	}
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
@@ -624,15 +714,53 @@ class DocumentManagerCustom extends DocumentManager
 								if (count($matchingrows) > 1) {
 									krsort($matchingrows);
 								}
-								
-								// $this->mapTargetFields($this->sourceData, $suiteCrmSchool);
-								// $this->updateTargetId($matchingrows[0]);
 								$this->updateType('U');
 								$this->updateTargetId(reset($matchingrows));
 							} else {
 								$this->updateType('C');
 							}
 						}	// end else empty find gouv
+
+					} elseif (
+						$param['module'] == "mod_2_quartiers" && !empty($param['rule']['id'])
+						and $param['rule']['id'] == '6321c09e5a1b2'
+
+					) {
+						if (empty($this->solutionTarget)) {
+							$this->connexionSolution('target');
+						}
+						// we do a custom search for the gouv id in the rows of the suiteCrm
+						$findSuiteCrmId = "";
+						foreach ($this->quartierComet as $index => $suiteCrmSchool) {
+							if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+								//codeQuartier intstead of etab
+								if ($this->sourceData['Code_quartier'] == $suiteCrmSchool['externalgouvid_c']) {
+									$findSuiteCrmId = $suiteCrmSchool['id'];
+									break;
+								}
+							}
+						}
+						if (!empty($findSuiteCrmId)) {
+							$this->updateType('U');
+							$this->updateTargetId($findSuiteCrmId);
+						} else {
+							//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
+							// by name and other fields, or it doesn't exist at all and we need to create it
+							$matchingrows = $this->findMatchCrmQuartiers($this->sourceData, $this->quartierComet);
+
+							if ($matchingrows !== []) {
+
+								if (count($matchingrows) > 1) {
+									krsort($matchingrows);
+								}
+								$this->updateType('U');
+								$this->updateTargetId(reset($matchingrows));
+							} else {
+								$this->updateType('C');
+							}
+						}	// end else empty find gouv
+
+					
 
 					}
 				}

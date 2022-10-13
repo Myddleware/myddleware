@@ -80,7 +80,8 @@ class loadexternallistcore
                 $newRow = new InternalListValueEntity();
                 $rowDate = gmdate('Y-m-d h:i:s');
                 $newRow->setReference($rowDate);
-                $newRowId = $value['Identifiant_de_l_etablissement'];
+                // $newRowId = $value['Identifiant_de_l_etablissement'];
+                $newRowId = $value['Code_quartier'];
                 $firstRowData = $value;
                 $firstRowSerialized = serialize($firstRowData);
                 $newRow->setData($firstRowSerialized);
