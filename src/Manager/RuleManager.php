@@ -1374,6 +1374,9 @@ class rulecore
 
     protected function sendTarget($type, $documentId = null)
     {
+
+        $coucou = "\n 1 sendtarget() in RuleManager \n";
+        echo $coucou;
         try {
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
@@ -1421,6 +1424,7 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
+
 						// Allows to get the history fields, necessary for updating the SAP for instance
                         foreach ($send['data'] as $docId => $value) {
                             $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
