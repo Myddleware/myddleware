@@ -19,7 +19,7 @@
 
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
-![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
+![Create Myddleware "Customer" Rule View with WooCommerce Customers & Vtiger Opportunities modules](docs/images/rule_create_woo_vtiger.png)
 
 [On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
