@@ -16,6 +16,7 @@
 [![docsify](https://img.shields.io/badge/documented%20with-docsify-cc00ff.svg)](https://docsify.js.org/)
 ![GitHub followers](https://img.shields.io/github/followers/Myddleware?style=social)
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
+<a href="https://www.opensourceagenda.com/projects/myddleware"><img src="https://www.opensourceagenda.com/projects/myddleware/reviews/badge.svg" alt="Open Source Agenda"></a>
 
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
