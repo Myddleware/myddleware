@@ -2,7 +2,19 @@
 
 ## Filters
 
-*This section is still under construction*
+You can apply filters to the data you want to send into your target application. 
+To do so, click on the “Filters” tab while creating or editing your rule.
+
+![Filters tab with multiple dropdown lists for each source field](images/advanced_usage/rule_filters_empty.png)
+
+For each of your fields, you can select from a pre-set list of filters to apply.
+
+![Filters tab with multiple dropdown lists for each source field](images/advanced_usage/rule_filters_dropdown_list.png)
+
+And then input the reference to use as a filter. Myddleware will apply this filter to this field inside your rule, meaning
+that only the documents matching this exact filter will be sent to the read() method. 
+
+![Filters tab with multiple dropdown lists for each source field](images/advanced_usage/rule_filter_email.png)
 
 ## Formulae
 
@@ -112,9 +124,4 @@ to send an ``order`` to SuiteCRM, we have to link it to the related ``account``.
 In order to do so, we need to retrieve the account's id corresponding to the customer linked to the order in Prestashop.
 
 To do that, we will link this new rule to the previous rule where we will be able to find the SuiteCRM account id.
-
-## Mass actions
-
-*This section is still under construction*
-
 

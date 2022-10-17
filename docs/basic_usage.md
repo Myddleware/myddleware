@@ -254,7 +254,7 @@ You can also view the list of all the previously ran tasks.
 
 #### Documents
 
-Documents (data transfers) can then be opened by clicking on **Display documents**.
+Documents (data transfers) can be opened by clicking on **Display documents**.
 
 ![Documents list](images/basic_usage/rule/rule_documents.png)
 
@@ -263,6 +263,23 @@ You can also access the detail for each individual document by clicking on it.
 ![Single document details](images/basic_usage/rule/document_detail.png)
 
 You will then be able to see what Myddleware has read in the source application and what has been sent into the target application.
+
+##### Handling documents in error
+
+When a document (data transfer) is in error, you can modify it, by resending it or cancelling it. 
+To be able to modify the document data, double-click on target data, change the data and click on the validation icon.
+
+![Single documents view: double-click on target data transfer field to tweak it & then click on reload or cancel the transfer](images/basic_usage/document/document_tweak_data_transfer_error.png)
+
+##### Mass actions
+
+You can reload or cancel multiple documents at the same time.
+
+> Only documents in error can be reloaded or cancelled.
+
+Click on the checkboxes to select the transfer(s) you want to reload or cancel and click on ``Cancel transfers`` or ``Reload transfers``.
+
+![Select the documents in error then click on cancel documents or reload documents](images/basic_usage/document/documents_list_cancel_rerun_documents_in_error_buttons.png)
 
 ## Going further
 
