@@ -1,10 +1,26 @@
-# List of available connectors and how to link them to Myddleware
+# Available Myddleware connectors
 
-> Each Myddleware connector will require different set of credentials for Myddleware to be able to link your applications together.
+Each connector will require a different set of credentials for Myddleware to be able to link your applications together.
+This page aims to give you some guidance on how to obtain your credentials depending on the app you intend to connect to Myddleware.
+
+!> Disclaimer: some of these connectors are currently under scrutiny / maintenance due to the fact that when an app provider decides to 
+update their webservice, Myddleware code needs to be updated to reflect these changes too. If you detect any errors or missing information, please do not hesitate
+to let us know by raising an issue on our [GitHub Issues forum](https://github.com/Myddleware/myddleware/issues).
 
 ## CMS apps
 
 ### WordPress
+
+Tne WordPress API is public and does not require any login credentials. Therefore, all you will need to be able to create
+your WordPress connector will be your website's ``URL``.
+
+Myddleware can currently read the following modules :
+
+| Module   | Source | Target |
+|----------|--------|--------|
+| Posts    | Yes    | No     | 
+| Pages    | Yes    | No     | 
+| Comments | Yes    | No     |
 
 ## CRM apps
 
@@ -78,28 +94,52 @@ To create your Salesforce connector, you will need the following credentials:
 - Your consumer secret 
 - Indicate if you are connecting a sandbox or not (0 or 1)
 
+![Salesforce connector credentials Myddleware form](images/credentials/salesforce_connector_credentials.png)
+
 #### Where to find your security token ?
 
 Log in to Salesforce with your username and password.
-From the homepage of your account, click on your username then on “My Settings”.
-Then choose “Personal”.
-Finally, click on “Reset my security token” (it will be sent by email).
+1) From the homepage of your account, click on your name in the top right corner, then on ``Setup``.
+2) Then, on the left-hand side, in the ``Personal Setup`` section of the menu, click on ``My Personal Information`` then ``Reset My Security Token``.
+3) Finally, click on ``Reset my security token`` (it will be sent by email).
+
+![Salesforce Reset Security Token navigation](images/credentials/salesforce_access_token_nav.png)
 
 #### Consumer Key and Consumer Secret
 
-You need to create an app.
+You need to create an app. 
 
-From Setup, enter “Apps” in the Quick Find box, then select “Apps”. Then select “Create”, then “Apps”.
+1) To do so, click on your name, then on ``Setup``.
 
-Create a connected app by clicking on “New”
+2) Then, on the left-hand side, go to the ``App Setup`` section, then click on ``Create``, then ``Apps``.
 
-After typing your App Name, API name and email address, enable OAuth Settings.
+![Salesforce Create an App navigation](images/credentials/salesforce_create_app.png)
 
-Put your Salesforce URL and choose “Full access”. Save.
+Create a connected app by clicking on ``New`` at the bottom, inside the ``Connected Apps`` panel.
 
-You will be redirected to the presentation page of your app. There you’ll find your Consumer Key and Consumer Secret.
+![Salesforce New App button](images/credentials/salesforce_new_connected_app.png)
 
-Fill in the connector creation form in Myddleware :
+1) Input your App's name, API name and email address.
+2) Then, enable OAuth Settings by clicking on the checkbox.
+3) Insert your Salesforce URL in the ``Callback URL`` section.
+4) Then, select ``Full access`` by double-clicking on it.
+5) Click on the small arrow on the right
+6) The selected `` Full access`` scope should now have moved to the ``Selected OAuth Scopes`` box.
+7) Save.
+
+![Salesforce New Connected App form](images/credentials/salesforce_create_connected_app_form.png)
+
+Click on ``Continue``. You will be redirected to the presentation page of your app.
+
+To get your Consumer Key & Consumer Secret, you will then need to click on the ``Manage Consumer Details`` button.
+At this stage, 2-factor authentication will require a code, which will have been sent to you via email. Insert this code.
+
+![Salesforce New Connected App form](images/credentials/salesforce_app_detail.png)
+
+You will then be redirected to the Consumer Key & Secret page.
+Here, you’ll find your ``Consumer Key`` and ``Consumer Secret`` which you can now copy & paste into the Myddleware credentials form.
+
+![Salesforce New Connected App form](images/credentials/salesforce_consumer_key.png)
 
 ### SAP CRM
 
@@ -282,21 +322,203 @@ To connect Mautic to Myddleware, you need :
 
 ### Microsoft SQL
 
+Myddleware can write and read all tables of your Microsoft SQL database.
+
+To connect a Microsoft SQL database to Myddleware, you need these parameters :
+
+- User
+- Password 
+- Host server 
+- Database name 
+- Database port access
+
+You need to enable the PDO php module. This page should help you do so : [Installing/Configuring PDO](https://www.php.net/manual/en/pdo.installation.php)
+
+If you installed Myddleware on a Windows server, you need to install the [sqlsrv PDO driver](https://www.php.net/manual/en/sqlsrv.installation.php).
+
+If you installed Myddleware on a Linux server, you need to install the [dblib PDO driver](https://www.php.net/manual/en/ref.pdo-dblib.php).
+
 ### MySQL
+
+Myddleware can write and read all table of your MySQL database.
+
+To connect a MySQL database to Myddleware, you need these parameters :
+
+- User 
+- Password 
+- Host server 
+- Database name 
+- Database port access
+
+Myddleware uses the mysql PDO driver.
+
+You need to enable the PDO php module. This page should help you : [Installing/Configuring PDO](https://www.php.net/manual/en/pdo.installation.php)
+
+### Oracle
+
+### PostgreSQL
 
 ## Others
 
+### Eventbrite
+
+- 'Organizer' => 'User
+- 'Events' => 'User
+- 'Tickets' => 'User
+- 'Venues' => 'User
+- 'Access_Codes' => 'Event
+- 'Discount_Codes' => 'Event
+- 'Attendees' => 'Event
+- 'Users' => 'User
+
 ### Facebook
+
+Here is the list of available modules in source (reading) and target (writing) :
+
+| Module                  | Source | Target |
+|-------------------------|--------|--------|
+| Read capture lead form  | Yes    | No     |
+
+To connect a Facebook to Myddleware, you need these parameters :
+
+- Client ID 
+- Client secret 
+- User access token
+
+You will find your client ID and client secret in your app. 
+You will find your app here, You will be able to create an app if you don’t have one. https://developers.facebook.com/apps/
+
+To get you access token, open the Graph API Explorer : https://developers.facebook.com/tools/explorer
+
+Select your app, user token and add autorisations : ``manage_page`` and ``leads_retrieval`` :
+
+Then, copy your token. However, this token will expire in a few hours. 
+If you want to extend the life of this token, click on the ``i`` icon  :
+Then click on ``Open in Access Token Tool`` :
+Then click on ``Extend Access Token``. 
+Your token will expire in 2 month. After this time you will have to refresh the token in your Myddleware Facebook connector.
 
 ### File (FTP)
 
+Myddleware can be connected to your server via an FTP connection. 
+It can read csv/txt files stored on your server and transfer the data to another application.
+
+To connect Myddleware to an FTP server, you need these parameters :
+
+- User 
+- Password 
+- Host server 
+- Port 
+- Directory where the files will be stored (eg : ``/home/myddleware/my_directory``)
+
+Myddleware uses the  [ssh2_connect()](https://www.php.net/manual/en/function.ssh2-connect.php) 
+and [ssh2_auth_password()](https://www.php.net/manual/en/function.ssh2-auth-password.php) PHP functions to connect to your FTP server.
+
 ### Moodle
+
+Here is the list of available modules in source (reading) and target (writing) :
+
+| Module                         | Source | Target |
+|--------------------------------|--------|--------|
+| Courses                        | Yes    | Yes    |
+| Users                          | Yes    | Yes    |
+| Group members                  | No     | Yes    |
+| Groups                         | No     | Yes    |
+| Enrollment                     | Yes    | Yes    |
+| Unenrollment                   | No     | Yes    |
+| Notes                          | No     | Yes    |
+| Courses completion             | Yes    | No     |
+| Activities completion          | Yes    | No     |
+| Courses last access            | Yes    | No     |
+| Competencies module completion | Yes    | No     |
+| User competencies              | Yes    | No     |
+| User grades                    | Yes    | No     |
+
+
+Please, first install the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware).
+
+Generate your token by following [this Moodle tutorial](https://docs.moodle.org/400/en/Using_web_services).
+
+You can use this system role and assign it to the user linked to your token. 
+Click on this link to download it, then unzip it before importing it in Moodle : [myddleware_moodle_role](https://moodle.org/plugins/local_myddleware)
+
+To assign a role, go to ``Site administration`` -> ``Users`` -> ``Assign system roles``
+
+Choose Myddleware role
+
+Then add the user you want to use in Myddleware :
+
+Myddleware uses the REST API architecture.
+
+Then open your external service :
+
+Please add these functions to your external services :
+
+In the blue box you can see the standard functions. In the red box are the custom functions used by Myddleware to read data from Moodle. 
+The custom functions all have a name beginning with ``local_myddleware`` (there are more functions than displayed on the screenshot).  
+Make sure you have installed the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware) if you don’t find these functions in the list.
+
+Add the URL of your Moodle instance and your token in Myddleware :
 
 ### RingCentral
 
+Here is the list of available modules in source (reading) and target (writing) :
+
+
+| Module    | Source | Target |
+|-----------|--------|--------|
+| Call log  | Yes    | No     |
+| Messages  | Yes    | No     |
+| Presence  | No     | No     |
+
+To create your RingCentral connector, you will need :
+
+- Username 
+- Password 
+- API key 
+- API secret
+
+Click [here](https://devcommunity.ringcentral.com/ringcentraldev/topics/how-do-i-get-my-production-app-key) to get more 
+information about these parameters.
+
+
 ### Sage50
 
+Myddleware can read and write all Sage50 module available with Sage Sdata API
+
+To create your Sage50 connector, you will need the following :
+
+- Username
+- Password
+- Host server
+
+Don’t forget to activate your Sage50 Sdata API :
+
+### WooCommerce Event Manager Plugin (WordPress)
+
+This WordPress plugin is provided by [MagePeople](https://mage-people.com/product/mage-woo-event-booking-manager-pro/).
+This connector relies on the WordPress connector.
+The list of available modules is based on this [documentation](https://docs.mage-people.com/woocommerce-event-manager/rest-api-details-of-event-manager/).
+Currently, Myddleware is able to read the following modules :
+
+| Module           | Source | Target |
+|------------------|--------|--------|
+| Events           | Yes    | No     |
+| Categories       | Yes    | No     |
+| Organizers       | Yes    | No     |
+| Event More Date  | Yes    | No     |
+
 ### Zuora
+
+Myddleware can read and write in all Zuora modules.
+
+To create a Zuora connector, you will need:
+
+- Your username 
+- Your password 
+- WSDL file that you need to download. You will find more information about WSDL [here](https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/AB_Getting_started_with_the__SOAP_API/B_Zuora_WSDL) 
+- Finally, if you're connecting to a sandbox, please write ``1`` or ``0`` if you're connecting a production environment
+
 
 
 
