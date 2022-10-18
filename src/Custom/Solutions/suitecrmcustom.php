@@ -130,9 +130,11 @@ class suitecrmcustom extends suitecrm
 				if (
 						!empty($record['souhaite_faire_de_ai_c'])
 					AND	!empty($record['mentor_acceuil_c'])
+					AND	!empty($record['volontaire_mentorat_c'])
 					AND(
 							$record['souhaite_faire_de_ai_c'] == 'Oui'
 						 OR $record['mentor_acceuil_c'] == 'Oui'
+						 OR $record['volontaire_mentorat_c'] == 'Oui'
 					)
 				) {
 					$read[$key]['myd_filter_mentor'] = 'Oui';
