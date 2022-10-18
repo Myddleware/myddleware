@@ -26,6 +26,31 @@ Myddleware can currently read the following modules :
 
 ### Airtable
 
+Airtable modules are entirely custom and Myddleware is able to read, write & delete data in any Airtable base.
+For Myddleware to be able to connect to your Airtable application, you need to provide the following:
+
+- your project ID (Airtable base)
+- your API key / token
+
+![Airtable connector credentials Myddleware form](images/credentials/airtable_connector_credentials.png)
+
+To get your project (base) ID, you can obtain it from many ways. For example, by clicking on your
+base's logo and accessing it, it will then be displayed in your URL.
+
+![Airtable](images/credentials/airtable_app_id_url.png)
+
+Or, from your base, you can access the API documentation of that specific base by clicking on the ``Help`` icon, which will
+open a sidebar menu. Scroll down to ``ÀPI documentation``. This will open a new page with the API documentation for this 
+particular base and you will find the ``project's base ID`` at the top.
+
+![Airtable help menu](images/credentials/airtable_help_menu.png)
+
+![Airtable base API documentation](images/credentials/airtable_app_id_api_doc.png)
+
+To get your ``API key``, login to Airtable and go to your [account](https://airtable.com/account).
+
+![Airtable connector credentials Myddleware form](images/credentials/airtable_api_key.png)
+
 ### Cirrusshield
 
 Myddleware is able to read and write all Cirrus Shield modules, even the custom ones.
@@ -48,11 +73,11 @@ Here is the list of available modules in source (reading) and target (writing) :
 | Deals                                             | Yes    | Yes    | 
 | Engagement  (task, email, meeting, note and call) | Yes    | No     | 
 
-Need more features ? Please contact us.
-
-To create your hubspot connector, you will need our api key :
+To create your hubspot connector, you will need your API key.
 
 > Please, follow this tutorial to get your API key : https://knowledge.hubspot.com/articles/kcs_article/integrations/how-do-i-get-my-hubspot-api-key
+
+![Hubspot connector credentials Myddleware form](images/credentials/hubspot_connector_credentials.png)
 
 ### SageCRM
 
@@ -154,27 +179,46 @@ Myddleware is compatible with SugarCRM CE and SugarCRM PRO v6.2 and upper versio
 
 Myddleware can read and write all SugarCRM modules, even the custom ones.
 
-To connect SugarCRM to Myddleware, you need your username, your password and your Url :
+To connect SugarCRM to Myddleware, you need :
 
-However there is a subtlety about your URL. You need to add the following information :  service/v4/rest.php
+- your username
+- your password
+- your URL
 
-Using the example above, the URL should be : “your-crm.fr/sugarcrm/service/v4/rest.php”
+![SugarCRM connector credentials Myddleware form](images/credentials/sugarcrm_connector_credentials.png)
 
-Tip: Use the username and password of a user having the right to make the rules, write access, read, edit …
+> Tip: Use the username and password of a user with sufficient access control privileges to make the rules, write access, read, edit.
 
-### SuiteCRM
+### SuiteCRM 7
 
-Myddleware can read and write all SuiteCRM modules, even the custom ones.
+Myddleware can read and write in all SuiteCRM modules, even the custom ones.
 
-To connect SuiteCRM to Myddleware, you need your user name, your password and your URL:
+
+To connect SuiteCRM to Myddleware, you need:
+
+- your username
+- your password
+- your URL
+
+![SuiteCRM login form](images/credentials/suitecrm_login_form.png)
+
+![SuiteCRM connector credentials Myddleware form](images/credentials/suitecrm_connector_credentials.png)
 
 ### VTiger
 
-Myddleware can read and write all Vtiger modules, even the custom ones.
+Myddleware can read and write into all Vtiger modules, even the custom ones.
 
-To connect Vtiger to Myddleware, you need your username, your access key and your URL:
+To connect Vtiger to Myddleware, you need
+- your username
+- your access key 
+- your URL
 
-To get your access key, open your Vtiger profil preferences :
+![Vtiger connector credentials Myddleware form](images/credentials/vtiger_connector_credentials.png)
+
+To get your access key, click on the user menu in the top right corner, then click on ``My preferences``, scroll down,
+your ``Access Key`` should be at the bottom.
+
+![Vtiger Access Key location](images/credentials/vtiger_access_key.png)
 
 ## ERP apps
 
@@ -187,6 +231,8 @@ To connect ERPNext to Myddleware, you need :
 - your username
 - your password
 - your URL
+
+![ERPNext connector credentials Myddleware form](images/credentials/erpnext_connector_credentials.png)
 
 ## E-commerce apps
 
@@ -202,11 +248,16 @@ Here is the list of available modules in source (reading) and target (writing) :
 | Customer Addresses                                 | Yes    | No     |
 | Orders                                             | Yes    | No     |
 
-Need more functionalities ? Please Contact us
 
-To connect Magento to Myddleware, you need your username, your password and your URL:
+To connect Magento to Myddleware, you need :
 
-Use the username and password of a user that has the rights you need to use Myddleware. Add the URL of your shop as well.
+- your username
+- your password
+- your shop's URL
+
+!> Use the username and password of a user that has sufficient access rights you need to use Myddleware.
+
+![Magento connector credentials Myddleware form](images/credentials/magento_connector_credentials.png)
 
 ### Prestashop
 
@@ -214,15 +265,48 @@ Every module can be read by Myddleware as a source & target.
 
 It will allow you to create the PrestaShop connector.
 
-To do so, you will need the URL of your shop and an API key that you will have to generate yourself.
-How do you generate this key?
-To generate this key, you should go in the back office of your shop. Go to “Advanced Settings” and then “Webservice“.
+To do so, you will need : 
+
+- your shop's URL
+- an API key which you will have to generate yourself
+
+![Prestashop connector credentials Myddleware form](images/credentials/prestashop_connector_credentials.png)
+
+#### How do you generate your API key?
+
+To generate this key, you should go in the back office of your shop. Go to ``Advanced Settings`` and then ``Webservice``.
 Click on “enable webservice” (save if the webservice was not activated) then click on “Add new webservice key” (black arrow)
 Finally, click on “generate” to generate the key and set the “Status” button to “Yes”. 
-Select the check boxes “View”, “Edit”, “Add” and “Fast view” (just like in the example below).
+
+Select the checkboxes “View”, “Edit”, “Add” and “Fast view” (just like in the example below).
+
 Finally, save and get your API key to create your connector.
 
 ### WooCommerce (WordPress)
+
+In order to link your WooCommerce shop to Myddleware, you need to provide the following information :
+
+- your shop's URL
+- your Consumer Key
+- your Consumer Secret
+
+![WooCommerce connector credentials Myddleware form](images/credentials/woocommerce_connector_credentials.png)
+
+#### Where to generate your Consumer Secret & Consumer Key?
+
+Login to your WordPress admin interface. Then, go to the WooCommerce section.
+Select ``Settings``, then ``Advanced``, then click on ``REST API``.
+
+![WooCommerce Settings - REST API section](images/credentials/woocommerce_rest_api_list.png)
+
+Then, fill in the form by selecting the appropriate user, and select Read/Write permissions to allow Myddleware to both read & write into your application.
+
+![WooCommerce - Generate REST API key form](images/credentials/woocommerce_generate_api_key.png)
+
+When submitting the form, your credentials will be displayed. Make sure to copy them down as they will only be displayed once, you won't be able to access them anymore later.
+
+![WooCommerce - Consumer Key & Consumer Secret](images/credentials/woocommerce_consumer_key_consumer_secret.png)
+
 
 ### Shop Application
 
@@ -238,20 +322,19 @@ To connect Shop application to Myddleware, you need these parameters :
 
 ### Dolist
 
-
 Here is the list of available modules in source (reading) and target (writing) :
 
-| Module                    | Source | Target |
-|---------------------------|--------|--------|
-| Campaign                  | Yes    | No     |
-| Contacts                  | Yes    | Yes    |
-| Body segment statistics   | No     | Yes    |
-| Header segment statistics | No     | Yes    |
-| Finished statistics       | Yes     | No    |
-| Clicks statistics         | Yes     | No    |
-| Unsubscribed statistics   | Yes     | No    |
-| Unfinished statistics     | Yes     | No    |
-| Open statistics           | Yes     | No    |
+| Module                     | Source | Target |
+|----------------------------|--------|-------|
+| Campaign                   | Yes    | No    |
+| Contacts                   | Yes    | Yes   |
+| Body segment statistics    | No     | Yes   |
+| Header segment statistics  | No     | Yes   |
+| Finished statistics        | Yes    | No    |
+| Clicks statistics          | Yes    | No    |
+| Unsubscribed statistics    | Yes    | No    |
+| Unfinished statistics      | Yes    | No    |
+| Open statistics            | Yes    | No    |
 
 – Connecting to your Dolist environment
 – Creating a Dolist authentication
@@ -318,9 +401,31 @@ To connect Mautic to Myddleware, you need :
 
 ### Sendinblue
 
+Myddleware is able to read the following modules :
+
+| Module                        | Source | Target |
+|-------------------------------|--------|--------|
+| Contacts                      | Yes    | Yes    |
+| Transactional emails          | Yes    | Yes    |
+| Transactional email activity  | Yes    | Yes    |
+
+
+To create a Sendinblue connector, you need to provide the following information:
+
+- login (your email address)
+- API key 
+
+![Sendinblue connector credentials Myddleware form](images/credentials/sendinblue_connector_credentials.png)
+
+#### Where to find your API key?
+
+You can get your Sendinblue API key by going to the user menu, then go to ``SMTP & API`` or directly to https://account.sendinblue.com/advanced/api.
+
+![Sendinblue API keys](images/credentials/sendinblue_api_key.png)
+
 ## Database apps
 
-### Microsoft SQL
+### Microsoft SQL Server
 
 Myddleware can write and read all tables of your Microsoft SQL database.
 
@@ -331,6 +436,9 @@ To connect a Microsoft SQL database to Myddleware, you need these parameters :
 - Host server 
 - Database name 
 - Database port access
+
+![Microsoft SQL connector credentials Myddleware form](images/credentials/microsoftsql_connector_credentials.png)
+
 
 You need to enable the PDO php module. This page should help you do so : [Installing/Configuring PDO](https://www.php.net/manual/en/pdo.installation.php)
 
@@ -350,13 +458,20 @@ To connect a MySQL database to Myddleware, you need these parameters :
 - Database name 
 - Database port access
 
-Myddleware uses the mysql PDO driver.
+![MySQL connector credentials Myddleware form](images/credentials/mysql_connector_credentials.png)
 
-You need to enable the PDO php module. This page should help you : [Installing/Configuring PDO](https://www.php.net/manual/en/pdo.installation.php)
+Myddleware uses the MySQL PDO driver.
+
+You need to enable the PDO PHP module. 
+This manual should help you : [Installing/Configuring PDO](https://www.php.net/manual/en/pdo.installation.php)
 
 ### Oracle
 
+![Oracle connector credentials Myddleware form](images/credentials/oracle_connector_credentials.png)
+
 ### PostgreSQL
+
+![PostgreSQL connector credentials Myddleware form](images/credentials/postgresql_connector_credentials.png)
 
 ## Others
 
@@ -460,6 +575,8 @@ Make sure you have installed the [Myddleware Moodle plugin](https://moodle.org/p
 
 Add the URL of your Moodle instance and your token in Myddleware :
 
+![Moodle connector credentials Myddleware form](images/credentials/moodle_connector_credentials.png)
+
 ### RingCentral
 
 Here is the list of available modules in source (reading) and target (writing) :
@@ -519,6 +636,6 @@ To create a Zuora connector, you will need:
 - WSDL file that you need to download. You will find more information about WSDL [here](https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/AB_Getting_started_with_the__SOAP_API/B_Zuora_WSDL) 
 - Finally, if you're connecting to a sandbox, please write ``1`` or ``0`` if you're connecting a production environment
 
-
+![Zuora connector credentials Myddleware form](images/credentials/zuora_connector_credentials.png)
 
 
