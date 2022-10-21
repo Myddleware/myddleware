@@ -63,3 +63,8 @@ services:
       decorates: App\Solutions\sendinblue
       decoration_on_invalid: ignore
       decoration_priority: 1
+
+  App\Custom\Manager\NotificationManagerCustom:
+      decorates: App\Manager\NotificationManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1

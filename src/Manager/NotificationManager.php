@@ -283,7 +283,7 @@ class NotificationManager
     }
 
     // Add every admin email in the notification list
-    private function setEmailAddresses()
+    protected function setEmailAddresses()
     {
         $users = $this->userRepository->findEmailsToNotification();
         foreach ($users as $user) {

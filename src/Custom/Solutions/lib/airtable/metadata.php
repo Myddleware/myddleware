@@ -513,6 +513,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fld2tHcATRYAqbuO0'=> array( 'label' => 'utm_term', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'flduGYPQNiE1VnkAW'=> array( 'label' => 'apiengagement_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldU6F3S9WNLTyV8m'=> array( 'label' => 'Relation_POLE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldGgKN2x8Ptr0HRN'=> array( 'label' => 'Pole: Airtable ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
     ),
 	'Relation_POLE' => array(
         
