@@ -628,9 +628,6 @@
     "twig/twig": {
         "version": "v3.3.8"
     },
-    "twitter/bootstrap": {
-        "version": "v4.6.1"
-    },
     "webmozart/assert": {
         "version": "1.10.0"
     },
