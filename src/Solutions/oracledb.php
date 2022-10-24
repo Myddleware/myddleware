@@ -33,8 +33,8 @@ class oracledbcore extends database
     protected $fieldLabel = 'Name';
     protected $fieldType = 'Type';
 
-    protected $stringSeparatorOpen = '';
-    protected $stringSeparatorClose = '';
+    protected string $stringSeparatorOpen = '';
+    protected string $stringSeparatorClose = '';
 
     protected function generatePdo()
     {

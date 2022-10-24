@@ -32,8 +32,8 @@ class microsoftsqlcore extends database
     protected $fieldLabel = 'COLUMN_NAME';
     protected $fieldType = 'DATA_TYPE';
 
-    protected $stringSeparatorOpen = '[';
-    protected $stringSeparatorClose = ']';
+    protected string $stringSeparatorOpen = '[';
+    protected string $stringSeparatorClose = ']';
 	
 	// Enable to delete data
     protected $sendDeletion = true;
@@ -92,7 +92,7 @@ class microsoftsqlcore extends database
         return str_replace("'", "''", $value);
     }
 
-    protected function get_query_select_header($param, $method)
+    protected function get_query_select_header($param, $method): string
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {
