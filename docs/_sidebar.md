@@ -8,5 +8,6 @@
 * [Job scheduler & cron tasks](cron_jobs.md)
 * [Myddleware API](api.md)
 * [Developer's Guide](dev_guide.md)
+* [Connectors](connectors_credentials.md)
 * [Website](https://www.myddleware.com)
 * [Contact Us](https://www.myddleware.com/contact-us)

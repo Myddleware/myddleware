@@ -1,49 +1,59 @@
 # Developer's guide
 
+All Myddleware improvements are welcome, and we particularly encourage community members to contribute to our connectors list by making a pull request so that the whole community can benefit from your work.
+To help you write your own connector, please read the following guidelines for successful connector creation.
+We also strongly recommend checking out the source code of all existing connectors inside the [/src/Solutions folder](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/) to help you implementing all the required methods.
+
+!>You may also have some very specific needs that simply require customising Myddleware to fit your own context. If that's the case, please refer to the "Ensuring your custom code is upgrade-safe in Myddleware" section of this documentation.
+
 ## Create your own connectors
 
 ### Requirements
 
-The application you want to connect needs to have a webservice API with methods to read data (at the very least) and hopefully have a documentation website available to help you connect Myddleware to the target application. 
+Before you can connect a new application to Myddleware, you need to check that the application you want to connect has a webservice API with methods to read data (at the very least) 
+and hopefully has a documentation website available to help you connect Myddleware to the target application. 
 
 > Most Myddleware applications are connected using REST API, however this is not the only option.
 
-First you will need to add your new connector to the solution table in your database, using Doctrine Fixtures, and more specifically the LoadSolutionData class, located in [/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). To do so, add a new entry in $solutionData in  for your new connector :
+#### Declare your new connector's name
+
+First you will need to add your new connector to the ``solution`` table in your database, using Doctrine Fixtures,
+and more specifically the ``LoadSolutionData`` class, located in
+[/src/DataFixtures/LoadSolutionData.php](https://github.com/Myddleware/myddleware/blob/main/src/DataFixtures/LoadSolutionData.php). 
+To do so, add a new entry in ``$solutionData`` in  for your new connector :
 
 ```php
-        protected $solutionData = [
-                ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
-                ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
-                // Your connector
-                ['name' => 'myconnector',  'active' => 1, 'source' => 1, 'target' => 1],
-        ];
+    protected $solutionData = [
+            ['name' => 'sugarcrm',   'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'vtigercrm',   'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'salesforce',  'active' => 1, 'source' => 1, 'target' => 1],
+            ['name' => 'prestashop',  'active' => 1, 'source' => 1, 'target' => 1],
+            // Your connector
+            ['name' => 'myconnector',  'active' => 1, 'source' => 1, 'target' => 1],
+    ];
 ```
 
-In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the SolutionManager class.
+In [/src/Manager/SolutionManager.php](https://github.com/Myddleware/myddleware/blob/main/src/Manager/SolutionManager.php), add your new connector to the ``SolutionManager`` class.
 
 First, add the use statement at the top of the SolutionManager class :
 
 ```php
-...
-use App\Solutions\WooEventManager;
-use App\Solutions\WordPress;
-use App\Solutions\Zuora;
-// Your new connector
-use App\Solutions\MyConnector;
+    use App\Solutions\WooEventManager;
+    use App\Solutions\WordPress;
+    use App\Solutions\Zuora;
+    // Your new connector
+    use App\Solutions\MyConnector;
 ```
 
-Then still in SolutionManager, add the new connector to the constructor.
+Then still in ``SolutionManager``, add the new connector to the constructor.
 
 ```php
-        public function __construct(
+    public function __construct(
         WordPress $wordPress,
         WooCommerce $wooCommerce,
         WooEventManager $wooEventManager,
          // Your connector
          MyConnector $myConnector
-    
     ) {
         $this->classes = [
             'wordpress' => $wordPress,
@@ -55,27 +65,112 @@ Then still in SolutionManager, add the new connector to the constructor.
     }
 ```
 
-#### Download source API SDKs
+#### Download source API SDKs (optional)
 
 !> This step is optional and will vary according to the type of API you would like to connect to Myddleware. For this part, you must refer to the source API documentation.
 
-In your terminal, you might need to download an SDK for the new API. For instance, [the WooCommerce REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) tells us that we need to add the **automattic/woocommerce** dependency to our Myddleware project in order to be able to login to the REST API. To do so, we ran :
+In your terminal, you might need to download an SDK for the new API. 
+For instance, [the WooCommerce REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction)
+tells us that we need to add the **automattic/woocommerce** dependency to our Myddleware project in order to be able to login to the REST API. To do so, we ran :
 
 ```bash
        composer require automattic/woocommerce
 ```
 
-#### Add the new connector to your current database
+Then, we implemented the Client described in their documentation inside our login(), create(), update() & read() methods. 
+Here is a sample of the code using the third-party client:
 
-In your terminal, load Myddleware fixtures:
+````php
+<?php
+
+namespace App\Solutions;
+
+use Automattic\WooCommerce\Client;
+
+...
+
+class woocommercecore extends solution
+{
+    protected $apiUrlSuffix = '/wp-json/wc/v3/';
+    protected $url;
+    protected $consumerKey;
+    protected $consumerSecret;
+    protected $woocommerce;
+    
+    ...
+    
+    public function login($paramConnexion)
+    {
+        parent::login($paramConnexion);
+        $this->woocommerce = new Client(
+            $this->paramConnexion['url'],
+            $this->paramConnexion['consumerkey'],
+            $this->paramConnexion['consumersecret'],
+            [
+                'wp_api' => true,
+                'version' => 'wc/v3',
+            ]
+            );
+        if ($this->woocommerce->get('data')) {
+            $this->connexion_valide = true;
+        }
+    }
+}
+
+    public function upsert($method, $param)
+    {
+        ...
+        foreach ($param['data'] as $idDoc => $data) {
+                $param['method'] = $method;
+                $module = $param['module'];
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+
+                if ('create' === $method) {
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->post($module, $data);
+                } else {
+                    $targetId = $data['target_id'];
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
+                }          
+            ...
+        }
+    }
+    
+    public function read($param){
+    ...
+        $response = $this->woocommerce->get($module, [
+            'orderby' => 'modified',
+            'per_page' => $this->callLimit,
+            'page' => $page, ]
+        );
+    ...        
+    }
+    ...
+````
+
+### Add the new connector to your current database
+
+In your terminal, load Myddleware fixtures. This will store your new connector's name inside the database.
 
 ```bash
         php bin/console doctrine:fixtures:load --append
 ```
+Your new connector should appear inside the ``solution`` table of your database
 
-> Check in Myddleware if the new connector is already available.
+![Database solutions table](images/dev_guide/solutions_table.png)
 
-Now, let's create a new connector class, in [/src/Solutions](https://github.com/Myddleware/myddleware/tree/main/src/Solutions), the file name must be the same as the name of your class (this is due to autoloading). You can use the code of another class for inspiration. For example, check out "SuiteCRM.php":
+> Go to your Myddleware interface to check whether the new connector is already available.
+
+### Creating the Connector file
+
+Now, let's create a new solution(connector) class, in [/src/Solutions](https://github.com/Myddleware/myddleware/tree/main/src/Solutions). 
+The file name must be the same as the name of your class (this is due to autoloading). 
+
+!> All Connectors (Solutions) extend the Myddleware parent class ```Solution```. This class contains a variety of methods which you may override to fit your connector's needs. 
+We strongly recommend you [check it out](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/solution.php) when in doubt as this class acts as the backbone of all Myddleware connectors.
+
+You can use the code of another class for inspiration. For example, check out [SuiteCRM.php](https://github.com/Myddleware/myddleware/tree/main/src/Solutions/suitecrm.php):
 
 ```php
         namespace App\Solutions;
@@ -100,8 +195,14 @@ Now, let's create a new connector class, in [/src/Solutions](https://github.com/
 #### Add the solution's logo
 
 Finally, if you want to display the application's logo, add the image corresponding to your application with the png format and size 64*64 pixels in [assets/images/solution](https://github.com/Myddleware/myddleware/tree/main/assets/images/solution)
+Once you've added the new image to the assets directory, you need to build Myddleware again in order for the image to be loaded to the Myddleware UI.
+To do so, you can run either ``yarn watch`` (in dev environment) or ```yarn build``` (in production environment).
 
-> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. You should also log errors using Symfony logger. In case of errors, the error message will be sent to the ```background.log```, ```prod.log``` & ```dev.log`` files, depending on your environment.
+
+### Error handling
+
+!> Tip: regarding error handling, there are several options. You should throw exceptions using a try/catch method. 
+You should also log errors using [Symfony logger](https://symfony.com/doc/current/logging.html). In case of errors, the error message will be sent to the ```background.log```, ```prod.log``` & ```dev.log``` files, depending on your environment.
 
 Here is an example method from our [WordPress.php](https://github.com/Myddleware/myddleware/blob/main/src/Solutions/wordpress.php) file :
 
@@ -118,36 +219,63 @@ Here is an example method from our [WordPress.php](https://github.com/Myddleware
         }
 ```
 
+### Compulsory methods to implement
+
+Here's a non-exhaustive list of all the methods you will need to implement inside your Connector class. Each method's implementation will vary according to your source application's specificities.
+Please make sure you refer to its documentation for specifics such as modules lists, fields, formats, way to log in, etc.
+
+!> Warning: these method names (and signatures), as well as some class names, properties & namespaces, will undergo some slight changes in Myddleware 4 for code quality & consistency reasons. For instance, get_module_fields() will become getModuleFields() to respect the camelCase standard. Some typos & spelling mistakes might get fixed too. 
+
+| Method                       | Description                                                                                                                        | Arguments                      | Return type               |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------------------------|
+| **getFieldsLogin()**         | This method retrieves the list of fields required to login to your source app. For instance, an email, a password & a URL.         |                                | array                     |
+| **login()**                  | Connects to the source app.                                                                                                        | array $paramConnexion          | void                      |
+| **get_modules()**            | Retrieves the list of modules your connector can read from inside your source application solution.                                | string $type = 'source'        | array                     |
+| **get_modules_fields()**     | Retrieves the list of fields for each module your connector can read from inside your source application solution.                 | string $module, string $type = 'source', array $param = null | array $this->moduleFields |
+| **read()**                   | The heart of Myddleware: this method reads data (documents) inside your source application and transforms it to Myddleware format. | array $param                   | array                     |
+| **createData()**  *OPTIONAL* | Writes data inside your target application solution. (Not all APIs allow you to do so).                                            | array $param                   | array                     |
+| **updateData()**  *OPTIONAL* | Similarly to createData(), this method allows you to update documents inside your target application solution.                     | array $param                   | array                     |
+
 ### getFieldsLogin() method
 
-In the new connector class, you need to implement the getFieldsLogin() method. Here, you have to put the parameters required to connect to your solution.
+In the new connector class, you need to implement the ``getFieldsLogin()`` method. 
+Here, you have to put the parameters required to connect to your solution.
 
-For example, to login to the WooCommerce API, we need a URL, Consumer Key & Consumer Secret  :
+For example, to log in to the WooCommerce API, we need a URL, a Consumer Key &  a Consumer Secret  :
 
 ```php
-  public function getFieldsLogin()
+
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+...
+
+class woocommercecore extends solution
+{
+    public function getFieldsLogin()
     {
         return [
-                    [
-                        'name' => 'url',
-                        'type' => TextType::class,
-                        'label' => 'solution.fields.url',
-                    ],
-                    [
-                        'name' => 'consumerkey',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumerkey',
-                    ],
-                    [
-                        'name' => 'consumersecret',
-                        'type' => PasswordType::class,
-                        'label' => 'solution.fields.consumersecret',
-                    ],
-                ];
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+            [
+                'name' => 'consumerkey',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumerkey',
+            ],
+            [
+                'name' => 'consumersecret',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.consumersecret',
+            ],
+        ];
     }
+}
 ```
 
-> Check that everything is working in Myddleware
+> Check that everything is working in Myddleware UI by  clicking on Connector->Creation, then select your application, the parameters you have added in your function should be visible.
 
 ![view fields_login](images/dev_guide/suitecrm_create.PNG)
 
@@ -155,16 +283,15 @@ For example, to login to the WooCommerce API, we need a URL, Consumer Key & Cons
 
 ### login() method
 
-Now to connect your connector, we need to create a new function in your class, we will call it "login".
+Now to connect your connector, we need to implement the login() method in order for Myddleware to be able to connect to your source application when creating a connector & running a rule.
+This method takes a ``$paramConnexion`` parameter which is an array containing the necessary data required to be able to log in.
 
-Example code, available in the file ```myddleware/src/Solution/suitecrm.php```
+Make sure every error is caught and ``this->connexion_valide`` is set to ``true`` if the connection was successful.
 
-You have to add this function login to check the connexion with you application.
-
-Make sure every error is catched and "this->connexion_valide = true" if the connexion works.
+Example implementation : 
 
 ```php
-         public function login($paramConnexion)
+    public function login($paramConnexion)
     {
         parent::login($paramConnexion);
         try {
@@ -202,23 +329,30 @@ Make sure every error is catched and "this->connexion_valide = true" if the conn
     }
 ```
 
-To debug this function, you can click on the button "Test" and check the result in firebug for example. The function will be called each time you click on "Test", no need to refresh the page.
+If you want to test out this method inside the Myddleware UI, you can already do it by filling in the "Create connector" form, filling in the fields & click on the "Test" button to check whether the Request & Response flow works properly.
+In case of a successful connection to your source application, the light bulb icon should colour itself. Otherwise, an error message should appear below.
 
-*Let's now create the first rule*
+![Create connector form](/images/dev_guide/connector_method_login_test.png)
 
-### Method get_modules
+### get_modules() method
 
-Still in your connector class, we need to create a function that will display the list of modules in our connector. Create a "get_modules" function.
+We now need to create a method which will display the list of modules available in our connector. As mentioned before, the way to retrieve modules will depend on your source application.
+For instance, some applications will give you access to a method which will retrieve an up-to-date list of all available modules. You would then need to call this service and return its value as an
+array here. However, some apps do not provide such method and you will therefore need to manually input the list of modules you would like to retrieve.
 
-Here, you have to add the module you want to connect in the method.
-
-In input you have access to the type of connexion, if your solution is in the target or in source of the rule. Some module could be available only source or only in target.
-
-You then return an array with a list of module:
+The ``type`` argument allows you to return a different set of modules depending on whether you are reading(``source``) or writing(``target``) inside your app. 
+Indeed,some modules may be available as a source or as target only.
 
 ```php
-        //Get module list
-        public function get_mudules($type = 'source')
+<?php
+
+namespace App\Solutions;
+...
+
+class myconnector extends solution
+{
+...
+        public function get_modules($type = 'source')
         {
                 return [
                         'contacts' => 'Contacts',
@@ -228,121 +362,352 @@ You then return an array with a list of module:
         }
 ```
 
-**Other code examples are available in the:**
 
-```myddleware/src/Solutions/sugarcrm.php```
+Now you can test out whether this method worked inside the Myddleware UI by going to the rule creation view, select your solution & then check whether the module list  returned in "Choose your module" is accurate.
 
-Now you can debug (with firebug for example) your function when the module list is called in the rule creation view(in "Choose your module") :
+![view modules select list](images/dev_guide/view_modules.PNG)
 
-![view modules](images/dev_guide/view_modules.PNG)
 
-Next step is the fields mapping, we now need to create a function for it.
+### get_module_fields() method
 
-### Method get_module_fields
+You have to indicate to Myddleware what fields are available for each module. 
+If your application has a method which describes all fields for every module, you should use it. 
+For example, you can check out the Salesforce & Prestashop connectors which resort to this strategy.
+Otherwise, you will have to provide an array of all fields with a simple descrition for each one. 
+We often store these lists in metadata files inside the [/src/Solutions/lib](https://github.com/Myddleware/myddleware/tree/main/src/Solutions/lib) folder.
 
-You have to indicate to Myddleware what fields are available for each module. If your application has a function which describe all fields for every module, you should use it. For example, we did it for Salesforce or Prestashop. Otherwise you have to describe every field.
+#### Arguments
 
-- Add the function get_module_fields in you class.
+| Arguments                   | Description / values                                                                                                                                                | 
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| string **$module**          | The module to which a fields belongs to.                                                                                                                            |  
+| string **$type = 'source'** | ``source`` or ``target`` <br/> If a module is only available as a target, set it to ``target``, else, the default is source (which works for both source & target)  |
+| array **$param = null()**   | Additional optional parameters.                                                                                                                                     |
 
-<!-- tabs:start -->
-
-#### **Input**
-
-- Module indicate from which module we need the fields
-
-- Type indicate if the module is in source or in target in the rule
-
-#### **Output**
+#### Signature
 
 - An array with all the fields for the module
-You should then add the fields related (field available to create relationship) and the class attribute this->fieldsRelate
 
-- Your fields will then be displayed after clicking on the button “Go to fields mapping”. You can refresh this page, your function will be called each time this page is loaded :
+You should then add the related fields (field available to create relationship) and the property $this->fieldsRelate.
 
-<!-- tabs:end -->
+Example implementation :
+
+````php
+<?php
+
+namespace App\Solutions;
+
+...
+
+class wordpresscore extends solution  {
+    
+    ...
+
+    public function get_module_fields($module, $type = 'source', $param = null)
+    {
+        parent::get_module_fields($module, $type);
+        try {
+            require_once 'lib/wordpress/metadata.php';
+            if (!empty($moduleFields[$module])) {
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+            }
+
+            if (!empty($fieldsRelate[$module])) {
+                $this->fieldsRelate = $fieldsRelate[$module];
+            }
+
+            if (!empty($this->fieldsRelate)) {
+                $this->moduleFields = array_merge($this->moduleFields, $this->fieldsRelate);
+            }
+
+            return $this->moduleFields;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            return false;
+        }
+    }
+}   
+````
+
+Your fields will then be displayed after clicking on the button ``Go to fields mapping``.
+You can refresh this page, your method will be called each time this page is loaded.
 
 ![view modules fields](images/dev_guide/modules_fields.PNG)
 
-*Create a mapping and save the rule. We will now create the function read*
 
-### Method read
+### read() method
 
-> The read function is one of the most important function in the connector.
+> The read() method is the most important method of a connector. This is the true heart of Myddleware, where all the magic happens. Indeed, this method is the one that allows you to retrieve documents from your source application.
 
-The read function has to be able to :
+The read() method needs to be able to :
 
-- Read records from a reference (usually the modified datetime)
-- Read a specific record using the record id
-- Search a record with a criteria (used in duplicate search) => only if you use your application as a target, not only a source
-- You can open your rule, tab parameter, and click “Simulate transfer”, this button will call the read function :
+- Read records using a **reference** (usually a ``date_modified`` or ``updatedAt`` property)
+- Read a specific record using the **record's id**
+- Search for a record based on criteria (used in duplicate search) => only if you use your application as a target
+
+If you want to check whether this method is correctly implemented inside the Myddleware UI, you can open your rule, click on the ``Parameters`` tab, and click on ``Simulate documents``.
+
+!> When you do, please remember to set a reference date in the past and to click on the ``Save`` button before launching the simulation, otherwise no documents will be read. 
+
+If all went well, you should get a number of documents to be read in the ``Estimated documents`` input.
 
 ![Simulate transfer](images/dev_guide/simulate_transfer.PNG)
 
-You can also run your rule in a command prompt :
+You can also run your rule using a command prompt with : 
 
-        php bin/console myddleware:synchro <your rule id> –env=background
+````php
+        php bin/console myddleware:synchro <your rule id> –-env=background
+````
 
 Here is an example of input value :
 
-![Command synchro](images/dev_guide/command_synchro.PNG)
+![Synchro synchro command input](images/dev_guide/command_synchro.PNG)
 
-Parameters :
+| Parameters           | Description / values                                                                                                               | 
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| string **module**    | The module to read in your application.                                                                                            |  
+| array **rule**       | Contains the parameters of the rule (``id``, ``conn_id_source``, ``conn_id_target``, ``date_modified``, ...).                      |
+| string **date_ref**  | Reference date from which to look for newly-created or modified documents.                                                         |
+| array **ruleParams** | Rule parameters (``limit``, ``delete``, ``datereference``, ``mode``, ``duplicate_fields``).                                        |
+| array **fields**     | List of mapped fields for this rule.The read() method has to return a value for all these fields in each records.                  |
+| array **query**      | If defined, the read method has to return the result of the query. Otherwise, Myddleware will user the reference date to read data. |
+| int **offset**       | Used only if your application has to be read with limited data.                                                                    |
+| int **limit**        | Used only if your application has to be read with limited data.                                                                    |
+| string **jobId**     | ID of the job (task).                                                                                                              |
+| string **manual**    | Indicates whether the rule is ran manually.                                                                                        |
 
-- Module is the module to read in your application
-- Rule contains the parameters of the rule
-- Date_ref is used to search all data modified or created after this reference
-- RuleParams is the parameters of the rule
-- Fields contains every fields mapped in the rule.
-- Offset and limit are used only if your application has to be read with limited data
-- jobId is the if of the job
-- Manual indicate if the rule is run manually
+#### Defining which fields to be read (required fields)
 
-Myddleware has to be able to read records from the source application. The list of fields returns must be the ones in the rule field mapping (input entry : fields). But some other fields are requiered : the id of the record and its reference (usually the modified record datetime). But the id and reference can be named differently depending on the application and the module.
+Myddleware has to be able to read records from the source application. 
+The array of fields returned must be the ones provided during the fields mapping stage of rule creation (input entry : fields). 
 
-> It is the reason why you have to create the attribute required_fields in your class :
+!> Some fields are always required to be mapped for Myddleware to be able to launch a synchro / read() command : the record's ``id`` and its ``reference`` (usually the record's modified datetime).
+Watch out though as the id and reference can be named differently depending on the application and module.
+For that reason, each newly developed connector class must include a ``$required_fields`` class property.
 
-IMAGE
+To do so, you need to make sure you set the ``default`` entry of required fields. You should then only add entries for modules whose required fields are different from the default ones.
+Example of required fields list (Prestashop connector):
 
-The next step is to call the webservice function of your application depending on the input parameter :
+````php
+class prestashopcore extends solution
+{
+    protected $required_fields = [
+        'default' => ['id', 'date_upd', 'date_add'],
+        'product_options' => ['id'],
+        'product_option_values' => ['id'],
+        'combinations' => ['id'],
+        'stock_availables' => ['id'],
+        'order_histories' => ['id', 'date_add'],
+        'order_details' => ['id'],
+        'customer_messages' => ['id', 'date_add'],
+        'order_carriers' => ['id', 'date_add'],
+        'order_payments' => ['id', 'date_add', 'order_reference'],
+    ];
+    ...
+}
+````
 
-If the entry query exists in input then it is prioritary, you have to use the query parameter to search records
-If the entry query is empty then you have to use the reference. Myddleware must search all records created/modified ather the content of the parameter date_ref
-The function should return an array with these entries :
+The ``addRequiredField($fields, $module = 'default', $mode = null)`` method from the Solution parent class will be called in the background to load these required fields you've defined.
 
-count with the number of records read. Has to be 2 if no record are read.
-date_ref with the new date_ref. It has to be the max date found in the list records returns.
-values with an array of records. The key of these entries has to be the id of the record. The entry id and date_modified has to be present for each record. Date modified contains the value of the date_created or date_modified depending the type of the rule .
+#### Handling date formats - dateTimeToMyddleware() & dateTimeFromMyddleware()
 
-> Tips: for the date format, we need to create a function "DateTimeMyddleware", which converts the date Myddleware format, we can take inspiration from the function created in the ```myddleware/src/Solutions/woocommerce.php```. We will also need to convert the Myddleware format to your connector fromat if necessary.
+Regarding dates format, you may need to override the ``dateTimeToMyddleware()`` method, which converts the source application's date into Myddleware-readable format. 
+we can take inspiration from the function created in the ```myddleware/src/Solutions/woocommerce.php```. 
+Inversely, you may need to override the ``dateTimeFromMyddleware()`` method in order to convert the dates provided by Myddleware to your source application's format.
+Here is an [example](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/woocommerce.php#L160) of connector resorting to these methods.
 
-The output of the function read should look like this:
+````php
 
-IMAGE
+namespace App\Solutions;
 
-### Method create
+use Automattic\WooCommerce\Client;
 
-Create a rule now with your application in target. Then create the function public function create($param) in your class.
+class woocommercecore extends solution
+{
 
-Run your rule as you did while developing the method read.
+...
+
+    protected $woocommerce;  // HTTP Client
+
+    public function read($param)
+    {
+        try {
+            $module = $param['module'];
+            $result = [];
+            // format the reference date
+            $dateRefWooFormat = $this->dateTimeFromMyddleware($param['date_ref']);
+            // Set the limit
+            if (empty($param['limit'])) {
+                $param['limit'] = $this->callLimit;
+            }
+
+            // adding query parameters into the request
+            if (!empty($param['query'])) {
+                $query = '';
+                foreach ($param['query'] as $key => $value) {
+                    if ('id' === $key) {
+                        $query = strval('/'.$value);
+                    } else {
+                        // in case of query on sub module, we check if that the search field is the parent id
+                        if (
+                                !empty($this->subModules[$param['module']])
+                            and $this->subModules[$param['module']]['parent_id'] == $key
+                        ) {
+                            $query = strval('/'.$value);
+                        }
+                    }
+                }
+            }
+
+            //for submodules, we first send the parent module in the request before working on the submodule with convertResponse()
+            if (!empty($this->subModules[$param['module']])) {
+                $module = $this->subModules[$param['module']]['parent_module'];
+            }
+
+            $stop = false;
+            $count = 0;
+            $page = 1;
+            do {
+                //for specific requests (e.g. readrecord with an id)
+                if (!empty($query)) {
+                    $response = $this->woocommerce->get($module.$query, ['per_page' => $this->callLimit,
+                                                                              'page' => $page, ]);
+                    //when reading a specific record only we need to add a layer to the array
+                    $records = $response;
+                    $response = [];
+                    $response[] = $records;
+                } elseif ('customers' === $module) {
+                    //orderby modified isn't available for customers in the API filters so we sort by creation date
+                    $response = $this->woocommerce->get($module, ['orderby' => 'registered_date',
+                                                                                    'order' => 'asc',
+                                                                                    'per_page' => $this->callLimit,
+                                                                                    'page' => $page, ]);
+                //get all data, sorted by date_modified
+                } else {
+                    $response = $this->woocommerce->get($module, ['orderby' => 'modified',
+                                                                                'per_page' => $this->callLimit,
+                                                                                'page' => $page, ]);
+                }
+                if (!empty($response)) {
+                    //used for submodules (e.g. line_items)
+                    $response = $this->convertResponse($param, $response);
+                    foreach ($response as $record) {
+                        $row = [];
+                        //either we read all from a date_ref or we read based on a query (readrecord)
+                        if ($dateRefWooFormat < $record->date_modified || (!empty($query))) {
+                            foreach ($param['fields'] as $field) {
+                                // If we have a 2 dimensional array we break it down
+                                $fieldStructure = explode('__', $field);
+                                $fieldGroup = '';
+                                $fieldName = '';
+                                if (!empty($fieldStructure[1])) {
+                                    $fieldGroup = $fieldStructure[0];
+                                    $fieldName = $fieldStructure[1];
+                                    $row[$field] = (!empty($record->$fieldGroup->$fieldName) ? $record->$fieldGroup->$fieldName : '');
+                                } else {
+                                    $row[$field] = (!empty($record->$field) ? $record->$field : '');
+                                }
+                            }
+                            $row['id'] = $record->id;
+                            ++$count;
+                            $result[] = $row;
+                        } else {
+                            $stop = true;
+                        }
+                    }
+                } else {
+                    $stop = true;
+                }
+                if (!empty($query)) {
+                    $stop = true;
+                }
+                ++$page;
+            } while (!$stop && $count < $param['limit']);
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+        }
+
+        return $result;
+    }
+    
+    // Convert date to Myddleware format
+    // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    protected function dateTimeToMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+
+        return $dto->format('Y-m-d H:i:s');
+    }
+
+    //convert from Myddleware format to Woocommerce format
+    protected function dateTimeFromMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+        // Return date to UTC timezone
+        return $dto->format('Y-m-d\TH:i:s');
+    }
+
+    public function getRefFieldName($moduleSource, $ruleMode)
+    {
+        return 'date_modified';
+    }
+    
+}
+
+````
+
+#### Signature
+
+Myddleware must search for all records created/modified after the content of the ``date_ref`` parameter.
+If set, the query parameter takes priority to return results.
+The read() method should return an ``array`` containing the following entries :
+
+- ``count`` : the number of records read. Has to be 2 if no records were read.
+- ``date_ref`` which should be set to the new ``date_ref``. It has to be the max date found in the returned records list.
+- ``values`` which should contain an ``array`` of records. The key of these entries has to be the ``id`` of the record.
+    - Each record should have an ``id`` and ``date_modified`` entry. Date modified contains the value of ``date_created`` or ``date_modified``, depending on the type of rule.
+
+The ``read()`` method's output should look like this :
+
+![Example output value for a read() method call](images/dev_guide/tuto_connecteur_method_read_output.png)
+
+### create() method - OPTIONAL
+
+> This method will allow Myddleware to add new records into your application when it is set as a target. However, not all solutions allow
+> for third-party software to write into them. Hence why this method is optional in Myddleware.
+
 
 Here is an example of input value :
 
 ![Example input value](images/dev_guide/tuto_connecteur_method_create_input.png)
 
-Parameters :
 
-- data contains all the record Myddleware want to create in tour application. The key of each record is the id of the data trasfer in Myddleware
-- module is the module to write in your application
-- ruleId is teh id of the rule
-- rule contains the parameters of the rule
-- ruleFields contains the fields of the rule
-- ruleParams is the parameters of the rule
-- ruleRelationships contains the relationships with the current rule
-- fieldsType contains the type of all fields in the rule
-- jobId is the if of the job
+| Parameters                  | Description / values                                                                                                                    | 
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| array **data**              | Records which Myddleware will attempt to create in your target application. The key of each record is the document ``id`` in Myddleware |  
+| string **module**           | The module into which to write into in your application.                                                                                |  
+| string **ruleId**           | The rule's ``id``                                                                                                                       |
+| array **rule**              | Contains the rule's parameters (``id``, ``conn_id_source``, ``conn_id_target``, ``date_modified``, ...).                                |
+| array **ruleFields**        | Fields to be mapped inside the rule.                                                                                                    |
+| array **ruleParams**        | Rule parameters (``limit``, ``delete``, ``datereference``, ``mode``, ``duplicate_fields``).                                             |
+| array **ruleRelationships** | Potential relationships with other rules this rule may have.                                                                            |
+| string **fieldsType**       | The type of all fields in the rule.                                                                                                     |
+| string **jobId**            | ID of the job (task).                                                                                                                   |
 
-The output of the function created should look like these :
 
+#### Signature
+
+The method's output should return an array with an array (key = ``id`` of the Myddleware document) for each record created. 
+This array has 2 entries :
+
+| Parameters        | Description / values                                           | 
+|-------------------|----------------------------------------------------------------|
+| string **id**     | ID of the record inside the target application.                |  
+| string **error** | Error message or empty if the record was successfully created. | 
+
+Example output:
+
+````php
         [
                 [583f4dd2c4c843.39717569] => [
                         [id] => 65
@@ -354,8 +719,10 @@ The output of the function created should look like these :
                         [error] =>
                 ]
         ]
+````
 
-> To help writing code and not recreate time-consuming manipulation in Myddleware, we can use in your terminal :
+> Tip: during the testing / debugging phase, to help writing code and not recreate time-consuming manipulation in Myddleware, 
+> you can run the following commands in your terminal 
 
 Read a record:
 
@@ -365,745 +732,153 @@ Reread a document:
 
         bin/console myddleware:massaction rerun document <document id> --env=background
 
-### Method update
-
-The method update works in the same way as the method create. The output parameter must be built exactly like in the method create.
-
-The only difference is that you have the entry “target_id” for each record in the array data. You will need this entry to update your data in your application.
-
-## Create formula
-
-In this article we‘ll look at an important point in your synchronization rules and one of the many setting options offered by Myddleware, formulas.
-
-### The fundamentals
-
-For starters, formulas allow you to format or to set the values that will be sent to a given target field . In other words, you have the option of adding fixed text to all uppercase, change timezones, concatenate several source fields etc.
-
-### The syntaxe
-
-To help, syntax highlighting (1) is available to you right on your text box. Furthermore you will find below, the list of source fields that you have chosen (2), the available functions and their categories (3) and one or two drop list(s) (4) of the different values for the list type fields (as SalutationID example).
-
-![Formula](images/dev_guide/formula.PNG)
-
-**Examples**
-
-- Concatenate multiple fields, Myddleware uses the “.” as in PHP {field1}.{field2}.{fields3}
-
-- Concatenate a fixed text with one or multiple fields “Client Name: “.{Firstname}.” “.{Lastname}
-
-- Three-valued condition , “If the Greeting field is ‘Mr.’ then send 1, otherwise send 2” is written as followed : (({Greeting} == “Mr.”) ? “1” : “2”), those three-valued conditions can be nested in order, for example, to make the data correspond. Thus, ({resolution} == “10” ? “Open” : ({resolution} == “20” ? “Fixed” : ({resolution} == “30” ? “Reopened” : “Suspended”))) is correct and functional, this formula means “If resolution is 10 then ‘Open’ is sent, otherwise if resolution is 20 then ‘Fixed‘ is sent, otherwise if resolution is 30 then ‘Reopened’ is sent, otherwise ‘Suspended ‘ is sent.
-
-- Add two fileds {field1} + {field2}
-
-In this article we‘ll look at an important point in your synchronization rules and one of the many setting options offered by Myddleware, formulas.
-
-**Functions**
-
-In the formula of Myddleware, you can use the functions listed at the bottom right (see of the previous image).
 
 
-This function round floating point (up), ([PHP](https://www.php.net/manual/fr/function.round.php)) **round(numbre [, clarification])**:
+Here is [an example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/sendinblue.php#L445):
 
-        round(525.6352, 2) // Gives 525.64
+````php
 
-Rounds up, ([PHP](https://www.php.net/manual/fr/function.ceil.php)) **ceil(float)**:
+namespace App\Solutions;
 
-        ceil(525.6352) // Gives 526
+use ApiPlatform\Core\OpenApi\Model\Contact;
+use SendinBlue\Client\Model\GetContacts;
 
-Returns the absolute value, ([PHP](https://www.php.net/manual/fr/function.abs.php)) **abs(number)**:
+class sendinbluecore extends solution
+{
+   protected function create($param, $record, $idDoc = null)
+    {
+        // Import or create new contact for sendinblue
+        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+        $createContact['email'] = $record['email'];
+        // Add attributes
+        $createContact['attributes'] = $record;
+        $result = $apiInstance->createContact($createContact);
 
-        abs(-5) // Gives 5
+        return $result->getId();
+    }
+}
 
-Deletes spaces (or other charachters) at the begenning and the end of a string, ([PHP](https://www.php.net/manual/fr/function.trim.php)) **trim(string [, Masque])**:
+````
 
-        trim(” bonjour “) // Returns “bonjour”
 
-Lowercases all charachters, ([PHP](https://www.php.net/manual/fr/function.mb-strtolower.php)) **lower(STRING)**:
+### update() method - OPTIONAL
 
-        lower(“BONJOUR”) // Returns “bonjour”
+The update() method is similar to the create() method. The output parameters should therefore be exactly the same as create().
 
-Uppercases all charachters, ([PHP](https://www.php.net/manual/fr/function.mb-strtoupper.php)) **upper(String)**:
+The only difference is that there should be a ``target_id`` entry for each record. This entry is required in order to update data inside the target application.
 
-        upper(“bonjour”) // Returns “BONJOUR”
+Here is [an example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/sendinblue.php#L459): 
 
-Formats a local date/hour, ([PHP](https://www.php.net/manual/fr/function.date.php)) **date(Format [, Timestamp])**:
+````php
 
-        date(“Y:m:d”) // Returns “2014:09:16”
+namespace App\Solutions;
 
-Returns current Unix timestamp with microseconds, ([PHP](https://www.php.net/manual/fr/function.microtime.php)) **microtime([true if you want a float result])**:
+use ApiPlatform\Core\OpenApi\Model\Contact;
+use SendinBlue\Client\Model\GetContacts;
 
-        microtime(true) // Returns 1410338028.5745
-
-Changes the timezone of the given date, ([PHP](https://www.php.net/manual/fr/timezones.php)) **changeTimeZone(Date you want to change, old timezone, new timezone)**:
-
-        changeTimeZone(“2014-09-16 12:00:00”, “America/Denver”, “America/New_York”) // Returns “2014-09-16 14:00:00”
-
-Changes the format of the given date, **changeFormatDate(Date you want to change, New format)**:
-
-        changeTimeZone(“2014-09-16 12:00:00”, “Y/m/d H:i:s”) // Returns “2014/09/16 12:00:00”
-
-Reads a string starting of the given Index, ([PHP](https://www.php.net/manual/fr/function.mb-substr.php)) **substr(String, Indexample)**:
-
-        substr(“abcdef”, -1) // Returns “f”
-
-Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/function.strip-tags.php)) **striptags(String)**:
-
-        striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
-
-## API Overwiew
-
-The API is built to allow you to call Myddleware from your application using REST protocol. For example, you will be able to call a specific Myddlewere ‘s rule when a specific event happends in your application. You will also be able to synchronize a specific record using a call to Myddleware.
-
-Please find the [postman collection here](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#e564597d-ef6e-40e1-87f1-c69b7b2d7479).
-
-Please find our [php sample code](https://github.com/Myddleware/myddleware_api).
-
-### Authentification
-
-The function login_check is used to get a bearer tocken from Myddleware. This token well be required for all calls to Myddleware.
-
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#e564597d-ef6e-40e1-87f1-c69b7b2d7479) :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/login_check' \
-        --header 'Content-Type: application/json' \
-        --data-raw '{
-         "username":"username",
-         "password":"password"
-        }'
-```
-
-**Output :**
-
-<!-- tabs:start -->
-#### **if success :**
-
-```php
-        {
-        « token »: <token>
+class sendinbluecore extends solution
+{
+    protected function update($param, $record, $idDoc = null)
+    {
+        try {
+            $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+            $updateContact = new \SendinBlue\Client\Model\UpdateContact(); // Values to create a contact
+            // target_id contains the id of the record to be modified
+            $identifier = $record['target_id'];
+            $updateContact['attributes'] = $record;
+            $result = $apiInstance->updateContact($identifier, $updateContact);
+        } catch (\Exception $e) {
+            throw new \Exception('Exception when calling ContactsApi->updateContact: '.$e->getMessage());
         }
-```
 
-#### **If error :**
-```php
-        {
-        « code »: <error code>,
-        « message »: <error message>
-        }
-```
-<!-- tabs:end -->
+        return $identifier;
+    }
+}
 
-### Function synchro
+````
 
-Use the synchro function to run a specific rule or every active rules.
 
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#96de2d5c-7a77-4d50-aa15-2657663459b2) :
+### createData() & updateData() alternative methods - OPTIONAL
 
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/synchro' \
-        --header 'Content-Type: application/json' \
-        --form 'rule=<rule id>'
-```
+Instead of overriding the create() & update() methods, you may wish to override the createData() & updateData() methods instead.
+Here is an [example of implementation](https://github.com/Myddleware/myddleware/blob/1d840df4fec23eddd47026cafb064ce109155c45/src/Solutions/woocommerce.php#L286) : 
 
-Set the rule id you want to run in Myddleware. Set ALL if you want to reun avery active rules.
+````php
+namespace App\Solutions;
 
-**Output :**
+use Automattic\WooCommerce\Client;
 
-```php
-        {
-        « error »: «  »,
-        « jobId »: « 5e78c2cc32c926.66619369 »,
-        « jobData »: {
-                « Close »: « 2 »,
-                « Cancel »: 0,
-                « Open »: 0,
-                « Error »: 0,
-                « paramJob »: « Synchro : 5e5e5535564c0 »,
-                « solutions »: « ^6^,^27^ »,
-                « duration »: 13.43,
-                « myddlewareId »: « 5e78c2cc32c926.66619369 »,
-                « Manual »: 1,
-                « Api »: 1,
-                « jobError »: «  »,
-                « documents »: [
-                {
-                        « id »: « 5e78c2cd317ac3.60227368 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-23 14:08:13 »,
-                        « date_modified »: « 2020-03-23 14:08:24 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Send »,
-                        « source_id »: « 4×72 »,
-                        « target_id »: « 878987c2-4000-7c15-c353-5e63a95c2397 »,
-                        « source_date_modified »: « 2017-10-09 14:46:34 »,
-                        « mode »: « 0 »,
-                        « type »: « U »,
-                        « attempt »: « 1 »,
-                        « global_status »: « Close »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
-                },
-                {
-                        « id »: « 5e78c2ceab9782.10596576 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-23 14:08:14 »,
-                        « date_modified »: « 2020-03-23 14:08:25 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Send »,
-                        « source_id »: « 4×73 »,
-                        « target_id »: « d28dc52c-68db-f679-5c80-5e63a9287457 »,
-                        « source_date_modified »: « 2020-03-09 15:33:14 »,
-                        « mode »: « 0 »,
-                        « type »: « U »,
-                        « attempt »: « 1 »,
-                        « global_status »: « Close »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
+class woocommercecore extends solution
+{
+
+... 
+
+    /**
+     * @param $param
+     *
+     * @return mixed
+     */
+    public function createData($param)
+    {
+        return $this->upsert('create', $param);
+    }
+
+    /**
+     * @param $param
+     *
+     * @return mixed
+     */
+    public function updateData($param)
+    {
+        return $this->upsert('update', $param);
+    }
+
+    public function upsert($method, $param)
+    {
+        foreach ($param['data'] as $idDoc => $data) {
+            try {
+                $result = [];
+                $param['method'] = $method;
+                $module = $param['module'];
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+
+                if ('create' === $method) {
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->post($module, $data);
+                } else {
+                    $targetId = $data['target_id'];
+                    unset($data['target_id']);
+                    $recordResult = $this->woocommerce->put($module.'/'.$targetId, $data);
                 }
-                ]
-        }
-        }
-```
 
-### Function read record
-
-Use the read record function to force Myddleware to read a specific record into your application. For example. you can call this function when a record is saved into your application. Myddleware will read it from your source application and send it to your target application. It is used when you need a real time synchronisation.
-
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#68ee49d2-2fea-47ca-92ad-5d2345b6ba0c) :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/read_record' \
-        --form 'rule=<your rule id>' \
-        --form 'filterQuery=<field>' \
-        --form 'filterValues=<value>'
-```
-
-**Set these parameters :**
-
-- rule : The rule you want to run
-- filterQuery : The field used to build the query executed into your application by Myddleware. It is usually the « id » field ‘s name of your record.
-- filterValue : The field value used in the parameter filterQuery. It is usually the id of your record.
-
-**Output :**
-
-```php
-        {
-        « error »: «  »,
-        « jobId »: « 5e78c4c4ec8631.31640728 »,
-        « jobData »: {
-                « Close »: 0,
-                « Cancel »: « 1 »,
-                « Open »: 0,
-                « Error »: 0,
-                « paramJob »: « read records wilth filter id IN (4×60) »,
-                « solutions »: « ^6^,^27^ »,
-                « duration »: 2.42,
-                « myddlewareId »: « 5e78c4c4ec8631.31640728 »,
-                « Manual »: 1,
-                « Api »: 1,
-                « jobError »: «  »,
-                « documents »: [
-                {
-                        « id »: « 5e78c4c5f27231.38354025 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-23 14:16:37 »,
-                        « date_modified »: « 2020-03-23 14:16:39 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « No_send »,
-                        « source_id »: « 4×60 »,
-                        « target_id »: « e559cfe4-4e41-e2da-235e-5e63a985d98e »,
-                        « source_date_modified »: « 2017-10-09 14:46:24 »,
-                        « mode »: « 0 »,
-                        « type »: « U »,
-                        « attempt »: « 0 »,
-                        « global_status »: « Cancel »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
+                $response = $recordResult;
+                if ($response) {
+                    $record = $response;
+                    if (!empty($record->id)) {
+                        $result[$idDoc] = [
+                                            'id' => $record->id,
+                                            'error' => false,
+                                    ];
+                    } else {
+                        throw new \Exception('Error during '.print_r($response));
+                    }
                 }
-                ]
+            } catch (\Exception $e) {
+                $error = $e->getMessage();
+                $result[$idDoc] = [
+                                        'id' => '-1',
+                                        'error' => $error,
+                                        ];
+            }
+            // Modification du statut du flux
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
-        }
-```
 
-### Function mass action
-
-Use the mass action function to change (rerun, cancel, remove, restore or change the status)  a group of data transfer.
-
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#eef6a218-fc20-4d3b-8d49-59b9d3d221cb) :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/mass_action' \
-        --header 'action: ' \
-        --form 'action=restore' \
-        --form 'dataType=rule' \
-        --form 'ids=5e5e5535564c0' \
-        --form 'forceAll=Y'
-```
-
-**Set these parameters :**
-
-- action : rerun, cancel, remove, restore or changeStatus.
-- dataType : rule or document. If you want to select data transfer using a rule (all data transfer of the rule) as the filter set « rule ». Otherwise set « document » if you want to filter your search by data transfer id.
-- ids : set the id(s) of the data transfer (document) or the rule depending of what you have set in the parameter dataType. If you put several ids, then put commas to separate them.
-- forceAll (optional) : Set Y to process action on all data transfer (not only open and error ones). In this case, be carefull, you could remove, cancel or change status of data successfully sent to your target application. Myddleware could generate duplicate data in your target application if you run again your rule without setting duplicate fields.
-- fromStatus : Only used with action changeStatus action. Add filter to select data transfer depending of their status.
-- toStatus : Only used with action changeStatus action. New status to be set on all data transfer selected.
-
-**Output :**
-
-```php
-        {
-        « error »: «  »,
-        « jobId »: « 5e78dcacb8f1d0.97025863 »,
-        « jobData »: {
-                « Close »: « 30 »,
-                « Cancel »: « 70 »,
-                « Open »: 0,
-                « Error »: 0,
-                « paramJob »: « Mass remove on data type rule »,
-                « solutions »: « ^6^,^27^ »,
-                « duration »: 10.28,
-                « myddlewareId »: « 5e78dcacb8f1d0.97025863 »,
-                « Manual »: 1,
-                « Api »: 1,
-                « jobError »: «  »,
-                « documents »: [
-                {
-                        « id »: « 5e6685af04d858.22701783 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-09 18:06:39 »,
-                        « date_modified »: « 2020-03-23 15:58:36 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Cancel »,
-                        « source_id »: « 4×72 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2020-03-09 19:06:39 »,
-                        « mode »: « 0 »,
-                        « type »: « D »,
-                        « attempt »: « 0 »,
-                        « global_status »: « Cancel »,
-                        « parent_id »: «  »,
-                        « deleted »: « 1 »
-                },
-                {
-                        « id »: « 5e6685fd2cfbb8.35868016 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-09 18:07:57 »,
-                        « date_modified »: « 2020-03-23 15:58:36 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Cancel »,
-                        « source_id »: « 4×72 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2020-03-09 19:07:57 »,
-                        « mode »: « 0 »,
-                        « type »: « D »,
-                        « attempt »: « 0 »,
-                        « global_status »: « Cancel »,
-                        « parent_id »: «  »,
-                        « deleted »: « 1 »
-                },
-                {
-                        « id »: « 5e668618964e93.34804135 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-09 18:08:24 »,
-                        « date_modified »: « 2020-03-23 15:58:36 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Cancel »,
-                        « source_id »: « 4×72 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2020-03-09 19:08:24 »,
-                        « mode »: « 0 »,
-                        « type »: « D »,
-                        « attempt »: « 0 »,
-                        « global_status »: « Cancel »,
-                        « parent_id »: «  »,
-                        « deleted »: « 1 »
-                },
-                {
-                        « id »: « 5e669dcd915191.00190986 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-09 19:49:33 »,
-                        « date_modified »: « 2020-03-23 15:58:37 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Cancel »,
-                        « source_id »: « 4×72 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2020-03-09 20:49:33 »,
-
-```
-
-```
-                […………………………………………………………………………]
-                        « mode »: « 0 »,
-                        « type »: « U »,
-                        « attempt »: « 1 »,
-                        « global_status »: « Close »,
-                        « parent_id »: «  »,
-                        « deleted »: « 1 »
-                }
-                ]
-        }
-        }
-```
-
-### Function rerun error
-
-Use the rerun error function to run again data transfer in error.
-
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#34418cf2-e545-4423-8411-c2784785b2bd) :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/rerun_error' \
-        --form 'limit=10' \
-        --form 'attempt=5'
-```
-
-**Set these parameters :**
-
-- limit : set the limit parameter to limit the number of data transfer selected by the job.
-- attempt : Myddleware will read only data transfer with a number of attemps <= at this parameter
-
-**Output :**
-
-```php
-        {
-        « error »: «  »,
-        « jobId »: « 5e78e6cdd789e7.70152075 »,
-        « jobData »: {
-                « Close »: 0,
-                « Cancel »: 0,
-                « Open »: 0,
-                « Error »: « 3 »,
-                « paramJob »: « Rerun error : limit 3, attempt 5 »,
-                « solutions »: « ^14^,^6^,^3^ »,
-                « duration »: 1.09,
-                « myddlewareId »: « 5e78e6cdd789e7.70152075 »,
-                « Manual »: 1,
-                « Api »: 1,
-                « jobError »: «  »,
-                « documents »: [
-                {
-                        « id »: « 5e612055c98da7.22680820 »,
-                        « rule_id »: « 5e611b50c0a6f »,
-                        « date_created »: « 2020-03-05 15:52:53 »,
-                        « date_modified »: « 2020-03-23 16:41:50 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Error_sending »,
-                        « source_id »: « efa139c1-5e46-b247-739d-5ba8412aa24a »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2018-09-24 01:43:35 »,
-                        « mode »: « 0 »,
-                        « type »: « C »,
-                        « attempt »: « 6 »,
-                        « global_status »: « Error »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
-                },
-                {
-                        « id »: « 5e72552e4fe687.45181957 »,
-                        « rule_id »: « 5e5cc8984ba84 »,
-                        « date_created »: « 2020-03-18 17:06:54 »,
-                        « date_modified »: « 2020-03-23 16:41:50 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Error_sending »,
-                        « source_id »: « 8 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2019-02-06 22:07:59 »,
-                        « mode »: « 0 »,
-                        « type »: « C »,
-                        « attempt »: « 6 »,
-                        « global_status »: « Error »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
-                },
-                {
-                        « id »: « 5e72552e51d612.98166090 »,
-                        « rule_id »: « 5e5cc8984ba84 »,
-                        « date_created »: « 2020-03-18 17:06:54 »,
-                        « date_modified »: « 2020-03-23 16:41:50 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Error_sending »,
-                        « source_id »: « 12 »,
-                        « target_id »: « 15 »,
-                        « source_date_modified »: « 2020-03-03 10:43:31 »,
-                        « mode »: « 0 »,
-                        « type »: « U »,
-                        « attempt »: « 6 »,
-                        « global_status »: « Error »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
-                }
-                ]
-        }
-        }
-```
-
-### Function delete record
-
-Use the delete record function to delete a specific record into the target application using the id of the source application.
-
-Here are [CURL info](https://documenter.getpostman.com/view/1328767/SzS7QmCj?version=latest#5f6f441e-ac1e-468e-bd5f-ab8fd67c6c88) :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/delete_record' \
-        --form 'rule=5e5e5535564c0' \
-        --form 'recordId=4x65' \
-        --form 'reference=2020-03-09 12:14:36' \
-        --form 'lastname=lastname01' \
-        --form 'email=test@test.test' \
-        --form 'firstname=firstname01'
-```
-
-**Set these parameters :**
-
-- rule : The id of the rule
-- recordId : The id of the record in the source application. Then Myddleware will use the rule to get the id of this record in the target application and delete it.
-- reference : the reference date or id used in Myddleware. Use the reference field already used in this rule.
-- Each field of the rule have to be added as input parameters
-
-**Output :**
-
-```php
-        {
-        « error »: «  »,
-        « jobId »: « 5e78e7a7621400.01014726 »,
-        « jobData »: {
-                « Close »: 1,
-                « Cancel »: 0,
-                « Open »: 0,
-                « Error »: 0,
-                « paramJob »: « Delete record 4×63 in rule 5e5e5535564c0 »,
-                « solutions »: « ^6^,^27^ »,
-                « duration »: 0.32,
-                « myddlewareId »: « 5e78e7a7621400.01014726 »,
-                « Manual »: 1,
-                « Api »: 1,
-                « jobError »: «  »,
-                « documents »: [
-                {
-                        « id »: « 5e78e7a766e656.99183539 »,
-                        « rule_id »: « 5e5e5535564c0 »,
-                        « date_created »: « 2020-03-23 16:45:27 »,
-                        « date_modified »: « 2020-03-23 16:45:27 »,
-                        « created_by »: « 1 »,
-                        « modified_by »: « 1 »,
-                        « status »: « Send »,
-                        « source_id »: « 4×63 »,
-                        « target_id »: null,
-                        « source_date_modified »: « 2020-03-09 12:14:36 »,
-                        « mode »: « 0 »,
-                        « type »: « D »,
-                        « attempt »: « 0 »,
-                        « global_status »: « Close »,
-                        « parent_id »: «  »,
-                        « deleted »: « 0 »
-                }
-                ]
-        }
-        }
-```
-
-### Function statistics
-
-Use the statistics function to get the statistics from Myddleware.
-
-Here are [CURL info]() :
-
-```
-        curl --location --request POST 'http://localhost/myddleware/web/api/v1_0/statistics'
-        No input parameter.
-```
-
-**Output :**
-
-```php
-        {
-        « errorByRule »: [
-                {
-                « name »: « Product category »,
-                « id »: « 5e5d3f8f570cb »,
-                « cpt »: « 37 »
-                },
-                {
-                « name »: « Enrolment »,
-                « id »: « 5a7dfcfaea8ee »,
-                « cpt »: « 9 »
-                },
-                {
-                « name »: « Activity completion source »,
-                « id »: « 5c7892bd02e90 »,
-                « cpt »: « 6 »
-                },
-                {
-                « name »: « Product Moodle to PS »,
-                « id »: « 5e5cc8984ba84 »,
-                « cpt »: « 3 »
-                },
-                {
-                « name »: « Order datail »,
-                « id »: « 5d63b4532292b »,
-                « cpt »: « 2 »
-                },
-                {
-                « name »: « employee »,
-                « id »: « 5e611b50c0a6f »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Emails »,
-                « id »: « 5ba1ba8c7c82f »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Customers »,
-                « id »: « 5d63d65dba522 »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Orders »,
-                « id »: « 5d6010d1164fe »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Shipping address »,
-                « id »: « 5d63d4279a52a »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Billing address »,
-                « id »: « 5d63d54bc8310 »,
-                « cpt »: « 1 »
-                },
-                {
-                « name »: « Product Moodle get Stock id »,
-                « id »: « 5e71ec0cd4a41 »,
-                « cpt »: « 1 »
-                }
-        ],
-        « countTypeDoc »: [
-                {
-                « nb »: « 1074 »,
-                « global_status »: « Cancel »
-                },
-                {
-                « nb »: « 1056 »,
-                « global_status »: « Close »
-                },
-                {
-                « nb »: « 44 »,
-                « global_status »: « Open »
-                },
-                {
-                « nb »: « 22 »,
-                « global_status »: « Error »
-                }
-        ],
-        « listJobDetail »: [
-                {
-                « id »: « 5e78e7a7621400.01014726 »,
-                « begin »: « 2020-03-23 16:45:27 »,
-                « end »: « 2020-03-23 16:45:27 »,
-                « status »: « End »,
-                « message »: «  »,
-                « duration »: « 0 »
-                },
-                {
-                « id »: « 5e78e7981dcdf7.88565484 »,
-                « begin »: « 2020-03-23 16:45:12 »,
-                « end »: « 2020-03-23 16:45:12 »,
-                « status »: « End »,
-                « message »: «  »,
-                « duration »: « 0 »
-                },
-                {
-                « id »: « 5e78e791ed9662.98391952 »,
-                « begin »: « 2020-03-23 16:45:05 »,
-                « end »: « 2020-03-23 16:45:06 »,
-                « status »: « End »,
-                « message »: «  »,
-                « duration »: « 1 »
-                },
-                {
-                « id »: « 5e78e78d169314.78840502 »,
-                « begin »: « 2020-03-23 16:45:01 »,
-                « end »: « 2020-03-23 16:45:01 »,
-                « status »: « End »,
-                « message »: «  »,
-                « duration »: « 0 »
-                },
-                {
-                « id »: « 5e78e786166de0.64116198 »,
-                « begin »: « 2020-03-23 16:44:54 »,
-                « end »: « 2020-03-23 16:44:54 »,
-                « status »: « End »,
-                « message »: «  »,
-                « duration »: « 0 »
-                }
-        ],
-        « countTransferHisto »: {
-                « 2020-03-17 »: {
-                « date »: « Mar-17 »,
-                « open »: 0,
-                « error »: 0,
-                « cancel »: 0,
-                « close »: 0
-                },
-                « 2020-03-18 »: {
-                « date »: « Mar-18 »,
-                « open »: 0,
-                « error »: « 1 »,
-                « cancel »: « 16 »,
-                « close »: « 28 »
-                },
-                « 2020-03-19 »: {
-                « date »: « Mar-19 »,
-                « open »: 0,
-                « error »: 0,
-                « cancel »: « 1 »,
-                « close »: « 1 »
-                },
-                « 2020-03-20 »: {
-                « date »: « Mar-20 »,
-                « open »: 0,
-                « error »: 0,
-                « cancel »: « 1 »,
-                « close »: « 1 »
-                },
-                « 2020-03-21 »: {
-                « date »: « Mar-21 »,
-                « open »: 0,
-                « error »: 0,
-                « cancel »: 0,
-                « close »: 0
-                },
-                « 2020-03-22 »: {
-                « date »: « Mar-22 »,
-                « open »: 0,
-                « error »: 0,
-                « cancel »: 0,
-                « close »: 0
-                },
-                « 2020-03-23 »: {
-                « date »: « Mar-23 »,
-                « open »: 0,
-                « error »: « 10 »,
-                « cancel »: « 6 »,
-                « close »: 0
-                }
-        }
-        }
- ```
-
+        return $result;
+    }
+  }
+````
 
 ## Ensuring your custom code is upgrade-safe in Myddleware
 
