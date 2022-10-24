@@ -1,4 +1,6 @@
 {
+  "name": "myddleware/myddleware",
+  "description": "Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications via connectors.",
   "type": "project",
   "license": "proprietary",
   "autoload": {
