@@ -144,10 +144,10 @@ class SynchroCommand extends Command
                                     $this->jobManager->filterDocuments();
 
                                     // Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-                                    $this->jobManager->ckeckPredecessorDocuments();
+                                    $this->jobManager->checkPredecessorDocuments();
 
                                     // Permet de valider qu'au moins un document parent(relation père) est existant
-                                    $this->jobManager->ckeckParentDocuments();
+                                    $this->jobManager->checkParentDocument();
 
                                     // Permet de transformer les docuement avant d'être envoyés à la cible
                                     $this->jobManager->transformDocuments();

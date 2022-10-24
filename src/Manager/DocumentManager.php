@@ -47,11 +47,11 @@ class documentcore
 {
     public $id;
 
-    protected $entityManager;
-    protected $typeError = 'S';
-    protected $message = '';
+    protected EntityManagerInterface $entityManager;
+    protected string $typeError = 'S';
+    protected string $message = '';
     protected $dateCreated;
-    protected $connection;
+    protected Connection $connection;
     protected $ruleName;
     protected $ruleMode;
     protected $ruleId;
@@ -64,7 +64,7 @@ class documentcore
     protected $sourceData;
     protected $data;
     protected $documentType;
-    protected $jobActive = true;
+    protected bool $jobActive = true;
     protected $attempt;
     protected $userId;
     protected $status;
@@ -74,11 +74,11 @@ class documentcore
     protected $jobId;
     protected $key;
     protected $docIdRefError;
-    protected $transformError = false;
-    protected $tools;
+    protected bool $transformError = false;
+    protected ?ToolsManager $tools;
     protected $api;    // Specify if the class is called by the API
     protected $ruleDocuments;
-    protected $globalStatus = [
+    protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
         'Relate_OK' => 'Open',
@@ -100,27 +100,17 @@ class documentcore
     ];
 
     protected $container;
-    protected $logger;
-    /**
-     * @var formulaManager
-     */
-    protected $formulaManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var RuleRelationShipRepository
-     */
-    private $ruleRelationshipsRepository;
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBagInterface;
-    /**
-     * @var SolutionManager
-     */
-    protected $solutionManager;
+    protected LoggerInterface $logger;
+
+    protected FormulaManager $formulaManager;
+
+    private DocumentRepository $documentRepository;
+
+    private RuleRelationShipRepository $ruleRelationshipsRepository;
+
+    protected ?ParameterBagInterface $parameterBagInterface;
+
+    protected ?SolutionManager $solutionManager;
 
     // Instanciation de la classe de génération de log Symfony
     public function __construct(
@@ -146,7 +136,7 @@ class documentcore
         $this->solutionManager = $solutionManager;
     }
 
-    public static function lstGblStatus()
+    public static function lstGblStatus(): array
     {
         return [
             'Open' => 'flux.gbl_status.open',
@@ -156,7 +146,7 @@ class documentcore
         ];
     }
 
-    public static function lstStatus()
+    public static function lstStatus(): array
     {
         return [
             'New' => 'flux.status.new',
@@ -178,7 +168,7 @@ class documentcore
         ];
     }
 
-    public static function lstType()
+    public static function lstType(): array
     {
         return [
             'C' => 'flux.type.create',
@@ -342,7 +332,7 @@ class documentcore
         $this->ruleDocuments = [];
     }
 
-    public function createDocument()
+    public function createDocument(): bool
     {
         // On ne fait pas de beginTransaction ici car on veut pouvoir tracer ce qui a été fait ou non. Si le créate n'est pas du tout fait alors les données sont perdues
         // L'enregistrement même partiel d'un document nous permet de tracer l'erreur.
@@ -411,6 +401,9 @@ class documentcore
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function getJobStatus()
     {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
@@ -430,12 +423,12 @@ class documentcore
         return $this->ruleId;
     }
 
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    public function getJobActive()
+    public function getJobActive(): bool
     {
         return $this->jobActive;
     }
@@ -461,7 +454,7 @@ class documentcore
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas
-    protected function checkFilter($fieldValue, $operator, $filterValue)
+    protected function checkFilter($fieldValue, $operator, $filterValue): bool
     {
         switch ($operator) {
             case 'content':
@@ -471,7 +464,6 @@ class documentcore
                 } else {
                     return true;
                 }
-                break;
             case 'notcontent':
                 $pos = stripos($fieldValue, $filterValue);
                 if (false === $pos) {
@@ -479,7 +471,6 @@ class documentcore
                 } else {
                     return false;
                 }
-                break;
             case 'begin':
                 $begin = substr($fieldValue, 0, strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -487,7 +478,6 @@ class documentcore
                 } else {
                     return false;
                 }
-                break;
             case 'end':
                 $begin = substr($fieldValue, 0 - strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -495,72 +485,62 @@ class documentcore
                 } else {
                     return false;
                 }
-                break;
             case 'in':
                 if (in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'notin':
                 if (!in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'gt':
                 if ($fieldValue > $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'lt':
                 if ($fieldValue < $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'lteq':
                 if ($fieldValue <= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'gteq':
                 if ($fieldValue >= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'equal':
                 if (strtoupper($fieldValue) == strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             case 'different':
                 if (strtoupper($fieldValue) != strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
-                break;
             default:
                 $this->message .= 'Failed to filter. Operator '.$operator.' unknown. ';
-
                 return false;
         }
     }
 
     // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-    public function ckeckPredecessorDocument()
+    public function checkPredecessorDocument(): bool
     {
         // Return false if job has been manually stopped
         if (!$this->jobActive) {
@@ -734,7 +714,7 @@ class documentcore
     }
 
     // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-    public function ckeckParentDocument()
+    public function checkParentDocument(): bool
     {
         // Return false if job has been manually stopped
         if (!$this->jobActive) {
@@ -846,7 +826,7 @@ class documentcore
     }
 
     // Permet de transformer les données source en données cibles
-    public function transformDocument()
+    public function transformDocument(): bool
     {
         // Return false if job has been manually stopped
         if (!$this->jobActive) {
@@ -906,7 +886,7 @@ class documentcore
     }
 
     // Permet de transformer les données source en données cibles
-    public function getTargetDataDocument()
+    public function getTargetDataDocument(): bool
     {
         // Return false if job has been manually stopped
         if (!$this->jobActive) {
@@ -1041,9 +1021,12 @@ class documentcore
         return true;
     }
 
-    // Get the child rule of the current rule
-    // If child rule exist, we run it
-    protected function runChildRule()
+    /**
+     * Get the child rule of the current rule
+     * If child rule exist, we run it
+     * @throws Exception
+     */
+    protected function runChildRule(): bool
     {
         $parentRule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface, $this->formulaManager, $this->solutionManager, clone $this);
         $parentRule->setRule($this->ruleId);
@@ -1086,7 +1069,7 @@ class documentcore
     }
 
     // Vérifie si les données sont différente entre ce qu'il y a dans la cible et ce qui devrait être envoyé
-    protected function checkNoChange($history)
+    protected function checkNoChange($history): bool
     {
         try {
             // Get target data
@@ -1226,7 +1209,7 @@ class documentcore
     }
 
     // Insert source data in table documentData
-    protected function insertDataTable($data, $type)
+    protected function insertDataTable($data, $type): bool
     {
         try {
             // We retrieve all the target fields (not just the rule flieds) before deleting data to the target solution to create a backup
@@ -1306,7 +1289,7 @@ class documentcore
     }
 
     // Mise à jour de la table des données source
-    protected function updateHistoryTable($dataTarget)
+    protected function updateHistoryTable($dataTarget): bool
     {
         if (!empty($dataTarget)) {
             try {
@@ -1326,7 +1309,7 @@ class documentcore
     }
 
     // Mise à jour de la table des données cibles
-    protected function updateTargetTable()
+    protected function updateTargetTable(): bool
     {
         try {
             // Loop on every target field and calculate the value
@@ -1472,6 +1455,8 @@ class documentcore
                 // No need of relate field in case of deletion
                 } elseif ('D' != $this->documentType) {
                     throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
+                } else {
+                    return null;
                 }
             }
             // Si le champ est envoyé sans transformation
@@ -1533,10 +1518,14 @@ class documentcore
             $this->message .= 'Error getRule  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
+        return null;
     }
 
-    // Check if the document is a child
-    public function isChild()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * Check if the document is a child
+     */
+    public function isChild(): bool
     {
         $sqlIsChild = '	SELECT rule.id 
 									FROM rulerelationship 
@@ -1562,8 +1551,8 @@ class documentcore
     protected function getChildDocuments()
     {
         try {
-            $sqlGetChilds = 'SELECT * FROM document WHERE parent_id = :docId AND deleted = 0 ';
-            $stmt = $this->connection->prepare($sqlGetChilds);
+            $sqlGetChildren = 'SELECT * FROM document WHERE parent_id = :docId AND deleted = 0 ';
+            $stmt = $this->connection->prepare($sqlGetChildren);
             $stmt->bindValue(':docId', $this->id);
             $result = $stmt->executeQuery();
 
@@ -1575,8 +1564,11 @@ class documentcore
         }
     }
 
-    // Check if the document is a parent
-    protected function isParent()
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * Check if the document is a parent
+     */
+    protected function isParent(): bool
     {
         $sqlIsChild = '	SELECT rulerelationship.rule_id 
 							FROM rulerelationship 				
@@ -1678,14 +1670,14 @@ class documentcore
     // Permet de déterminer le type de document (Create ou Update)
     // En entrée : l'id de l'enregistrement source
     // En sortie : le type de docuement (C ou U)
-    protected function checkRecordExist($id)
+    protected function checkRecordExist($id): ?string
     {
         try {
             // Query used in the method several times
             // Sort : targetOrder to get the target id non empty first; on global_status to get Cancel last
             // We dont take cancel document excpet if it is a no_send document (data really exists in this case)
             // Then we take the last document created to know if the last action sent was a deletion
-            $sqlParamsSoure = "	SELECT 
+            $sqlParamsSource = "	SELECT 
 								document.id, 
 								document.target_id, 
 								document.type, 
@@ -1756,7 +1748,7 @@ class documentcore
                             if ('-1' == $direction) {
                                 $stmt = $this->connection->prepare($sqlParamsTarget);
                             } else {
-                                $stmt = $this->connection->prepare($sqlParamsSoure);
+                                $stmt = $this->connection->prepare($sqlParamsSource);
                             }
                             $stmt->bindValue(':ruleId', $ruleRelationship['field_id']);
                             $stmt->bindValue(':id', $this->sourceId);
@@ -1825,7 +1817,7 @@ class documentcore
             } else {
                 // If no relationship or no child rule
                 // Recherche d'un enregitsrement avec un target id sur la même source
-                $stmt = $this->connection->prepare($sqlParamsSoure);
+                $stmt = $this->connection->prepare($sqlParamsSource);
                 $stmt->bindValue(':ruleId', $this->ruleId);
                 $stmt->bindValue(':id', $id);
                 $stmt->bindValue(':id_doc', $this->id);
@@ -1881,6 +1873,9 @@ class documentcore
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function documentCancel()
     {
         // Search if the document has child documents
@@ -1901,11 +1896,17 @@ class documentcore
         $this->updateStatus('Cancel');
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function changeDeleteFlag($deleteFlag)
     {
         $this->updateDeleteFlag($deleteFlag);
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function updateStatus($new_status)
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -1954,6 +1955,9 @@ class documentcore
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function updateDeleteFlag($deleted)
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -2018,7 +2022,10 @@ class documentcore
     {
     }
 
-    // Permet de modifier le type du document
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function updateType($new_type)
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -2051,8 +2058,10 @@ class documentcore
         }
     }
 
-    // Permet de modifier le type du document
-    public function updateTargetId($target_id)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateTargetId($target_id): bool
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
@@ -2269,18 +2278,20 @@ class documentcore
         return null;
     }
 
-    // Permet de renvoyer le statut du document
     public function getStatus()
     {
         return $this->status;
     }
 
-    // Fonction permettant de créer un log pour un docuement
-    // Les id de la soluton, de la règle et du document
-    // $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
-    // $code contient le code de l'erreur
-    // $message contient le message de l'erreur avec potentiellement des variable &1, &2...
-    // $data contient les varables du message de type array('id_contact', 'nom_contact')
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * Les id de la soluton, de la règle et du document
+     * $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
+     * $code contient le code de l'erreur
+     * $message contient le message de l'erreur avec potentiellement des variable &1, &2...
+     * $data contient les varables du message de type array('id_contact', 'nom_contact')
+     */
     protected function createDocLog()
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
@@ -2304,6 +2315,9 @@ class documentcore
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function generateDocLog($errorType, $message)
     {
         $this->typeError = $errorType;

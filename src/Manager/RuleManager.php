@@ -663,7 +663,7 @@ class rulecore
 
     // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
     // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckPredecessorDocuments($documents = null)
+    public function checkPredecessorDocuments($documents = null): array
     {
         // include_once 'document.php';
         $response = [];
@@ -689,7 +689,7 @@ class rulecore
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
+                    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -704,7 +704,7 @@ class rulecore
 
     // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
     // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckParentDocuments($documents = null)
+    public function checkParentDocument($documents = null)
     {
         // include_once 'document.php';
         // Permet de charger dans la classe toutes les relations de la règle
@@ -747,7 +747,7 @@ class rulecore
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckParentDocument();
+                    $response[$document['id']] = $this->documentManager->checkParentDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -1240,7 +1240,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments([['id' => $id_document]]);
+            $response = $this->checkPredecessorDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
             } else {
@@ -1250,7 +1250,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments([['id' => $id_document]]);
+            $response = $this->checkParentDocument([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
