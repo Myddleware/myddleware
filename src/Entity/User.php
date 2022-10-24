@@ -51,77 +51,64 @@ class User implements UserInterface, Serializable
     protected int $id;
 
     /**
-     * @var string
      * @ORM\Column(name="username", type="string", length=180)
      */
     protected string $username;
 
     /**
-     * @var string
      * @ORM\Column(name="username_canonical", type="string", length=180, unique=true)
      */
     protected string $usernameCanonical;
 
     /**
-     * @var string
      * @ORM\Column(name="email", type="string", length=180)
      */
     protected string $email;
 
     /**
-     * @var string
      * @ORM\Column(name="email_canonical", type="string", length=180, unique=true)
      */
-    protected string $emailCanonical;
+    protected ?string $emailCanonical;
 
     /**
-     * @var bool
      * @ORM\Column(name="enabled", type="boolean")
      */
     protected bool $enabled;
 
     /**
-     * @var string
      * @ORM\Column(name="salt", type="string", nullable=true)
      */
-    protected string $salt;
+    protected ?string $salt;
 
     /**
-     * @var string
      * @ORM\Column(name="password", type="string")
      */
     protected string $password;
 
     /**
      * Plain password. Used for model validation. Must not be persisted.
-     *
-     * @var string
      */
-    protected string $plainPassword;
+    protected ?string $plainPassword;
 
     /**
-     * @var DateTime
      * @ORM\Column(name="last_login", type="datetime", nullable=true)
      */
-    protected DateTime $lastLogin;
+    protected ?DateTime $lastLogin;
 
     /**
-     * @var string
      * @ORM\Column(name="confirmation_token", type="string", length=180, unique=true, nullable=true)
      */
-    protected string $confirmationToken;
+    protected ?string $confirmationToken;
 
     /**
-     * @var DateTime
      * @ORM\Column(name="password_requested_at", type="datetime", nullable=true)
      */
-    protected DateTime $passwordRequestedAt;
+    protected ?DateTime $passwordRequestedAt;
 
     /**
-     * @var array
      * @ORM\Column(name="roles", type="array")
      */
-    protected array $roles;
+    protected $roles;
 
     /**
      * @Assert\Timezone
@@ -145,7 +132,7 @@ class User implements UserInterface, Serializable
         return $this->id;
     }
 
-    public function addRole($role): User
+    public function addRole($role): self
     {
         $role = strtoupper($role);
         if ($role === static::ROLE_DEFAULT) {
@@ -356,7 +343,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function removeRole($role): User
+    public function removeRole($role): self
     {
         if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
             unset($this->roles[$key]);
@@ -369,7 +356,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setUsername($username): User
+    public function setUsername($username): self
     {
         $this->username = $username;
 
@@ -379,7 +366,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setUsernameCanonical($usernameCanonical): User
+    public function setUsernameCanonical($usernameCanonical): self
     {
         $this->usernameCanonical = $usernameCanonical;
 
@@ -389,7 +376,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setSalt($salt): User
+    public function setSalt($salt): self
     {
         $this->salt = $salt;
 
@@ -399,7 +386,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setEmail($email): User
+    public function setEmail($email): self
     {
         $this->email = $email;
 
@@ -409,7 +396,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setEmailCanonical($emailCanonical): User
+    public function setEmailCanonical($emailCanonical): self
     {
         $this->emailCanonical = $emailCanonical;
 
@@ -419,7 +406,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setEnabled($boolean): User
+    public function setEnabled($boolean): self
     {
         $this->enabled = (bool) $boolean;
 
@@ -429,7 +416,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setPassword($password): User
+    public function setPassword($password): self
     {
         $this->password = $password;
 
@@ -439,7 +426,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setSuperAdmin($boolean): User
+    public function setSuperAdmin($boolean): self
     {
         if (true === $boolean) {
             $this->addRole(static::ROLE_SUPER_ADMIN);
@@ -453,7 +440,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setPlainPassword($password): User
+    public function setPlainPassword($password): self
     {
         $this->plainPassword = $password;
 
@@ -463,7 +450,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setLastLogin(DateTime $time = null): User
+    public function setLastLogin(DateTime $time = null): self
     {
         $this->lastLogin = $time;
 
@@ -473,7 +460,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setConfirmationToken($confirmationToken): User
+    public function setConfirmationToken($confirmationToken): self
     {
         $this->confirmationToken = $confirmationToken;
 
@@ -483,7 +470,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setPasswordRequestedAt(DateTime $date = null): User
+    public function setPasswordRequestedAt(DateTime $date = null): self
     {
         $this->passwordRequestedAt = $date;
 
@@ -512,7 +499,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setRoles(array $roles): User
+    public function setRoles(array $roles): self
     {
         $this->roles = [];
 
@@ -526,7 +513,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setTimezone(string $timezone = 'UTC'): User
+    public function setTimezone(string $timezone = 'UTC'): self
     {
         $this->timezone = $timezone;
 
