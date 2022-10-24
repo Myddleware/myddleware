@@ -2,152 +2,268 @@
 
 ## Connectors
 
-*This section is still under construction*
+In order to be able to synchronise data from your applications, Myddleware relies on *connectors*.
+A connector is the object which allows Myddleware to connect to your solution (SuiteCRM, WooCommerce or Prestahop for example). 
+Thanks to connectors, Myddleware can read and/or write data into the connected solution. Therefore, each solution you would like Myddleware
+to interact with, whether it be as a source or target application, will need to have its own Myddleware connector.
+
+> For the same solution, you can have multiple connectors. For example, let's imagine you own 3 WooCommerce websites, you can have a connector for each of these. 
+> You can even have multiple connectors for the same application, for instance by connecting to the app using various credentials.
+
+### Create a connector
+
+To create a connector, navigate to the **Connectors** tab and select *Creation*
+
+![Create connector button](images/basic_usage/connector/create_connector_button.png)
+
+Now, first select the solution you would like to connect. In the example below, we've selected SuiteCRM. Each solution uses their own custom credentials.
+A form will therefore be displayed which you will need to fill in using the credentials provided by your solution.
+To ensure your credentials are accurate, you can click on the **Test** button and Myddleware will let you know right away whether the connection was successful or not.
+
+![Connector connection failed](images/basic_usage/connector/create_connector_failure.png)
+
+![Connector connection succeeded](images/basic_usage/connector/create_connector_success.png)
+
+If the credentials are right, you may now save your connector. You will then be redirected towards the list of all your connectors.
+
+
+### View my connectors
+
+To access the list of all your connectors, simply go to the **Connectors** tab and select *List*.
+
+![Create connector button](images/basic_usage/connector/connectors_list.png)
+
+From here, you will be able to either update or delete a connector if needed by clicking on the icons in the **options** section.
+
+### Edit or delete a connector
+
+If your solution credentials have changed, you can update a connector, test whether the credentials are still valid and then save your updated connector. 
+
+![Connector connection failed](images/basic_usage/connector/edit_connector.png)
 
 ## Rules
 
-### Creating your first rule
+### Create a rule
 
-Rules are at the core of how Myddleware works. You can create as many as you want and as many as you need.
+> Rules are at the core of how Myddleware works. You can create as many as you want and as many as you need, but each rule will require a **source** connector & a **target** connector.
 
 A rule is basically a job which sends your data from a module to another module. It’s just like transfering something from a box to another, with all the changes it implicates if the first box is square and the second is a circle. The transfer is a copy, so no data can be erased.
 
 To create a rule, log in to your Myddleware instance then click on **Rules** then **Creation** in the navbar.
 
-![Create rule](images/basic_usage/rule/rule1.PNG)
+![Create rule](images/basic_usage/rule/rule1.png)
 
-### Selecting data
+#### Select connectors 
 
 First, you need to choose your environment's source and target connectors (see 1), then you will select the two modules you need to sync (see 2 & 3).
 
-![Create rule](images/basic_usage/rule/rule2.PNG)
+![Create rule](images/basic_usage/rule/rule2.png)
 
-Do not forget to give a name to your rule or you won’t be able to select your modules.
+Do not forget to give a name to your rule, otherwise you won’t be able to select your modules. In the example above, we've chosen to create a rule which will have Prestashop as a **source** from which to read data, which will then be sent to SuiteCRM as a **target**.
 
-In our example we chose **the e-shop s customers**, wich have the information we need to fill the ```Accounts``` module in our target.  
+#### Select modules
+
+In our example, we selected  ```the e-shop s customers``` as a source module, meaning that Myddleware will read data from there, transform it and then send it to SuiteCRM's ```Accounts```  target module.  
 
 !> It is important to know exactly from which module the data you need comes from, and in which module you want it to be copied. Indeed, you won't be able to change this part later.
 
-### Mapping fields
+#### Map some fields
 
 Once you've named & decided on the modules you want to synchronise, you will be redirected to the fields mapping step. This is where you will define the general pattern for each data transfer made by your rule, field by field.
 
-To map your fields, you just have to drag and drop the source field to the target field. For instance, here we've selected the the source field **email** from the ```Customers``` module of our PrestaShop application and we've place it in the **email1** target field from the ```Accounts``` module of our SuiteCRM application. You can map as many fields as you need and can even send multiple sources into one target.
+To map your fields, you just have to drag and drop the source field to the target field. For instance, here we've selected the ```email``` source field from the ```Customers``` module of our PrestaShop application and we've place it in the ```email1``` target field from the ```Accounts``` module of our SuiteCRM application. You can map as many fields as you need and can even send multiple sources into one target.
 
-> NB: please note you don't have to map **all** source/target fields, you can simply select a few if that's what you need. However, some of them will be required, depending on the target app
+> NB: please note you don't need to map *all* source/target fields, you can simply select a few if that's what you need. However, some of them will be required, depending on the target application. Required fields will be marked with a star symbol next to their name in Myddleware.
 
-![Create rule](images/basic_usage/rule/rule3.PNG)
+![Create rule](images/basic_usage/rule/rule3.png)
 
-### Apply formulas to transform data before it is sent to the target app
+#### Apply formulae to transform data before it is sent to the target app
 
-Sometimes, the source data mapping doesn't quite match the target app's own mapping. But don't worry! Myddleware allows you to operate transformations on the data you want to send in order to fit with the target requirements. This is possible thanks to Myddleware's *formulas* system.
-Indeed, for each target field, you can create a formula to modify the source data to fit the type, length,... and other requirements from the target field.
+Sometimes, the source data mapping doesn't quite match the target app's own mapping. But don't worry! 
+Myddleware allows you to operate transformations on the data you want to send in order to fit with the target requirements.
+This is possible thanks to Myddleware's *formulas* system.
+Indeed, for each target field, you can create a formula to modify the source data to fit the type, length, format... and other requirements from the target field.
 
-**Example:**
-In our example, we want to map PrestaShop Customers' data to be sent to SuiteCRM's Accounts module. However, PrestaShop only maps Customers' **first_name** and **last_name** whereas SuiteCRM provides us with a **name** field. Ideally, we would want to add up our source's  **first_name** and **last_name** in order to fit SuiteCRM's name field's logic. To do so, we need to drag and drop this **first_name** and **last_name**, and create a formula to concatenate them.
+###### Simple string concatenation formula example
 
-![Create rule](images/basic_usage/rule/rule4.PNG)
+In our example, we want to map PrestaShop customers' data to be sent to SuiteCRM's ```Accounts``` module. 
+However, PrestaShop only maps customers' ```first_name``` and ```last_name``` whereas SuiteCRM provides us with a ```name``` field. 
+Ideally, we would want to add up our source's  ```first_name``` and ```last_name``` in order to fit SuiteCRM's name field's logic. 
+To do so, we need to drag and drop ```first_name``` and ```last_name```, and create a formula to concatenate them.
+Then, click on the **Create a formula** button.
 
-![Create rule](images/basic_usage/rule/rule5.PNG)
+![Create a formula by dragging 2 source fields inside a target field](images/basic_usage/rule/rule_required_field.png)
 
-You can double-click on the data in “Fields” to make it appear in the formula area. To concat use ```‘.’```, the quotes are here to make a space. The result will be to have the first name, a space, the the last name in our fields name.
+You can double-click on the data in the “Fields” section to make it appear in the formula area at the top. 
+The code you will use for this formula is PHP. Therefore, in order to concatenate 2 fields, we will need to use ```." ".``` between our 2 variables. 
+For example, if you input the following formula: 
 
->To test your formula and your mapping, you can go to ```“simulation”```
+````php
+    {firstname}." ".{lastname}
+````
 
-![Create rule](images/basic_usage/rule/rule6.PNG)
+You would get the following result inside the target application :
 
-Then you can run “Simple simulation” to visualize an example of the transfer, you can also check if your formula transform the data the way you want.
+````text
+    John Doe
+````
 
-!>We will talk about the tabs "Relationships" and "filters" in another chapter
+![Formula modal - simple concatenation example](images/basic_usage/rule/rule5.PNG)
 
-### Confirm the rule
+###### Pre-formatting data using the target application
 
-To finish the creation of this rule, click on “Confirmation” :
+Formulas also allow you to add pre-formatted data inside your target application which does not necessarily come from your source app. 
+For instance, when sending customers from Prestashop to SuiteCRM's ```Account``` module,
+you might want to tell Myddleware that all the accounts will have a ```Customer``` type by default in the ```account_type``` field in the target application (SuiteCRM).
+To do so, you will need to click on the target field's **Create a formula** button (here, we will use ```account_type```).
+The formula modal will open. From there, click on the **Target**  dropdown list at the bottom and select the default value you want to use.
+In our case, we will select ***Customer**.
 
-!>IMAGE Confirm rule
+![Formula target dropdown list](images/basic_usage/rule/rule_formula_target_type.png)
 
-You will then see 2 parameters :
+Then, you need to click on the small arrow next to the dropdown list in order to 'push' this value into the top right field. Don't forget to click on 
+the **confirm** button.
 
-<!-- tabs:start -->
+![Formula - click on arrow to push value at the top](images/basic_usage/rule/formula_arrow_confirm.png)
 
-#### **Synchronization type :**
+Now, you should be able to see the value you've selected in your formula directly inside the target field's box.
 
- Depending on the solution, you could have the choice to read newly created data or all data, created or modified in the source module. In our example, if you only want to send new customers created in Prestashop to SuiteCRM, then select ```“Create data only”```. Otherwise, if you only want to send customers’ modifications in Prestashop to SuiteCRM, then select “Create and update data”. In our example we selected ```“Create and update data”```. This process is based on the reference date that you can set up.
+![Fields mapping - "Customer" formula has been saved](images/basic_usage/rule/mapped_fields_formula.png)
 
-#### **Avoid duplicates fields :**
 
- You can select one of these fields if you want Myddleware to check if a record with the same value already exists in the target solution. If so, Myddleware will only update this data and won’t create a duplicate. But to be able to duplicate a field, the field must be present in the fields mapping. In our example, we selected ```“Email”```.
+#### Simulate a data transfer 
 
-<!-- tabs:end -->
+>To test your formula and your fields' mapping, you can go to the  ```simulation``` tab
 
-Finally, you can click on “Confirm” to create the rule. After which, the page with the detail of your rule should appear.
+![Rule data transfer simulation tab](images/basic_usage/rule/rule6.png)
 
-### Rule detail
+Then you can run a **Simple simulation** to visualize a sample data transfer. 
+You can also check whether your formulae actually transform the data the way you intend them to.
 
-When you open a rule, all its details appear :
+![Rule - simple simulation](images/basic_usage/rule/rule_simulation.png)
 
-!>IMAGE rule detail
+If you would like to verify your data using a specific record from your source application, you can run a **Manual simulation** to visualize
+the transformations on that specific record. To do so, you will therefore need to get that document's ID from inside your source application.
+For example, if I want to check my data using the PrestaShop customer whose ID is 2, 
+I will input ```2``` into the field at the top, and then run the **Manual simulation**
+button, which will get me the following result:
 
-## Set up your jobscheduler (Jobscheduler/crontab)
+![Rule - manual simulation](images/basic_usage/rule/rule_manual_simulation.png)
 
-### Using jobscheduler in the Myddleware interface
+If you are satisfied with the current simulation, you can either directly save your rule by clicking the ````confirm```` button on the ```Confirmation``` tab,
+or you can make even further transformations to your data by adding ```Filters``` & ```Relationships``` to your rule. To find out more about these options,
+please go to the  [Advanced usage section](#advanced-usage-section) of this documentation. 
 
-On your Myddleware interface you have the possibility to create your periodic tasks, click on your username on the top right and click on ```"jobscheduler"``` :  
 
-![Jobscheduler 1](images/basic_usage/jobscheduler_1.png)
+#### Confirm & create the rule
 
-Here you will find the list of your tasks, with the possibility to modify or delete a task through the action column.
+##### Avoid duplicate fields
 
-![Jobscheduler 1](images/basic_usage/jobscheduler_2.png)
+Once all the fields are mapped, you may be prompted to select which field (from the target application) to use to prevent sending duplicate data. 
+For instance, in the example we've used so far, we want to avoid duplicating customers' accounts. 
+We therefore need to tell Myddleware which field needs to be unique. 
+In our case, we will use the ```email1``` field. 
+This way, Myddleware will only update the affected records instead of creating a duplicate. 
 
-To create a new task click the New command button. You will then be redirected to the command creation page:  
+![Rule - confirm creation](images/basic_usage/rule/rule_confirm_duplicate_email.png)
 
-Here you will first have to select the type of command you want to create, depending on your choice you will have different parameters to enter.
+!> In order for this feature to work, the field used to avoid duplicate records must be mapped. If needed, go back to the fields mapping section and add it.
 
-![Jobscheduler 1](images/basic_usage/jobscheduler_create.png)
+##### Synchronisation type
 
-**For the following fields**
+Depending on the solution, you could have the choice to read newly created data or all data, created or modified in the source module.
+In our example, if you only want to send new customers created in Prestashop to SuiteCRM, then select ```Create data only```.
+Otherwise, if you only want to send customers’ modifications in Prestashop to SuiteCRM, then select ```Create and update data```.
+In our example we selected ```Create and update data```. This process is based on the reference date that you can set up.
 
-<!-- tabs:start -->
-#### **Period**
+![Rule - synchronisation type options](images/basic_usage/rule/rule_sync_type.png)
 
-this is the time interval corresponding to the frequency of execution of your task
+You may now click on ```Confirm``` to create and save the rule.
 
-#### **Job order**
+### Rule details
 
-This is the order in which the tasks will be executed
+You can view a summary of each of your rules by selecting it from the list.
 
-#### **Active**
+> NB: if your user has super admin privileges, you will be able to see a variety of actions above your rule, such as the ability to delete the previous documents associated with this rule. 
+> Otherwise, fewer actions will be available to you.
+> If you need to access these actions, you can ask your administrator to upgrade your Myddleware privileges.
 
- Active ? Allows you to deactivate/activate a scheduled task
 
-<!-- tabs:end -->
+| Action            | Description                                                                                                                                                               | Permissions |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| Run the rule      | Run the rule manually, even if the **Enabling the automatic synchronisation** switch is off                                                                               | user        |
+| Edit the rule     | Edit this rule. You can change the fields that being mapped, filters, relationships and other parameters.<br/> However, you may not change the connectors & modules used. | user        |
+| Display documents | View all data transfers (also called documents) generated by the rule so far                                                                                              | user        |
+| Duplicate rule    | Generate a perfect copy of this rule.                                                                                                                                     | user        |
+| Delete the rule   | Delete this rule                                                                                                                                                          | user        |
+| Delete documents  | Delete all previous Myddleware documents (data transfers) related to this rule.                                                                                           | admin       |
+| Cancel documents  | Cancel all Myddleware documents (data transfers) related to this rule which have not been sent yet. These are documents in error or still pending.                        | admin       |
 
-### Using crontab in the Myddleware interface
 
-Just like with Jobscheduler you can use to create new periodic tasks directly via Myddleware, to do this click again on your username, then click on ```"Crontab"```.
+![Rule - details view as a super admin](images/basic_usage/rule/rule_detail_super_admin.png)
 
-![Crontab list](images/basic_usage/crontan_list.PNG)
+You can see an **On/Off** switch which allows you to enable automatic synchronisation. 
+If this option is on, the job which synchronises data as a background task will run this rule. 
+If it is off, the background job will not run this rule. 
+Checkout the [Job scheduler & cron tasks section](cron_jobs.md) for more details about background jobs and how to turn them on. 
 
-**For the following fields**
+### Fields mapping summary
 
-<!-- tabs:start -->
-#### **Arguments**
+If you go to the **Fields mapping** tab, you can see a summary of the fields that are mapped for this rule.
 
-#### **Number**
+![Rule - fields mapping summary](images/basic_usage/rule/rule_mapping_summary.png)
 
-#### **Description**
+### Rule Parameters
 
-#### **Running instance**
+From the rule's detail view, you can access the **parameters** tab. 
 
-#### **Period**
+![Rule parameters view](images/basic_usage/rule/rule_params_default.png)
 
- As for jobscheduler, period is a time interval corresponding to the frequency of execution of your task. Here on the other hand the syntax to use is precise example (*/5* ** * : in the order of writing, minute, hours, day of the month, day of the week).
+| Parameter      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Reference date | The date Myddleware uses to start reading data from the source application. <br/>For example, if you set today’s date, only today’s created or modified data will be sent to your target application. <br/>(This also depends on the mode of your rule : the “Create and update data” rule mode concerns modified data while the “Create data only” rule mode concerns created data). If you want to migrate your data, all you need to do is put this date in the past. <br/>Then all created/modified data after this date will be read by Myddleware. | 
+| Data deletion  | You can ask the system to delete the transferred data of your rule after x days. To be able to do so, you must first set the ```clear data``` background job via the [job scheduler](cron_jobs.md).<br/> This job will delete all previously-transferred documents for this rule, except for their IDs, which Myddleware needs.                                                                                                                                                                                                                         |
+| Limit          | The maximum number of records read in one go by Myddleware (pagination system).                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
- Syntax example :
+![Rule parameters view -  params panel - reference date - Datetime picker ](images/basic_usage/rule/rule_params_datetime_picker.png)
 
-<!-- tabs:end -->
+The estimated documents panel allows you to simulate the number of records which will be read if you ran this rule.
+You can change the reference date if you need to then click on **Save**. 
 
-Here you will find a table with all your periodic tasks, to create a new command click on the ```"create crontab"``` button
+!> For a rule to be able to run, you absolutely MUST click on this save button. Otherwise, Myddleware will execute the rule using the current timestamp, so no documents will be read.
 
-![Crontab list](images/basic_usage/create_crontab.PNG)
+
+![Rule parameters view - estimated documents simulation panel ](images/basic_usage/rule/rule_params_simulation_number.png)
+
+### Run a rule
+
+To manually run a rule, go to its details view and click  **Run the rule**.
+
+![Rule details view - run the rule button ](images/basic_usage/rule/rule_execute.png)
+
+Once the rule has been launched, you may access the running task via the link displayed above. 
+You will be redirected to a summary of the task that Myddleware is running.
+
+#### Task details
+
+![Currently running task summary](images/basic_usage/rule/task_running.png)
+
+You can also view the list of all the previously ran tasks.
+
+![Tasks list](images/basic_usage/rule/tasks_list.png)
+
+#### Documents
+
+Documents (data transfers) can then be opened by clicking on **Display documents**.
+
+![Documents list](images/basic_usage/rule/rule_documents.png)
+
+You can also access the detail for each individual document by clicking on it.
+
+![Single document details](images/basic_usage/rule/document_detail.png)
+
+You will then be able to see what Myddleware has read in the source application and what has been sent into the target application.
+
+## Going further
+
+If you would like to find out about more complex use cases, such as adding relationships between rules, filters and other amazing features, please checkout the [Advanced Usage section](advanced_usage.md)

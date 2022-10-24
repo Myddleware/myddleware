@@ -131,9 +131,10 @@
     },
     "config": {
         "allow-plugins": {
-          "composer/package-versions-deprecated": true,
-          "symfony/flex": true
-        },
+      "composer/package-versions-deprecated": true,
+      "symfony/flex": true,
+      "phpstan/extension-installer": true
+    },
         "preferred-install": {
           "*": "dist"
       },

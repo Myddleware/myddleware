@@ -1103,3 +1103,8 @@ Here are [CURL info]() :
         }
         }
  ```
+
+
+## Ensuring your custom code is upgrade-safe in Myddleware
+
+**This section is still under construction**
