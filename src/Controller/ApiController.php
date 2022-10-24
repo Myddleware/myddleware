@@ -74,10 +74,7 @@ class ApiController extends AbstractController
 
             // Get input data
             $data = json_decode($request->getContent(), true);
-            $force = true;
-            if ('ALL' == $data['rule']) {
-                $force = false;
-            }
+            $force = !(('ALL' === $data['rule']));
 
             // Check parameter
             if (empty($data['rule'])) {
