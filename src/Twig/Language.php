@@ -8,14 +8,14 @@ use Twig\TwigFilter;
 
 class Language extends AbstractExtension
 {
-    private $request;
+    private RequestContextAwareInterface $request;
 
     public function __construct(RequestContextAwareInterface $request)
     {
         $this->request = $request;
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('languages', [$this, 'getAllLanguages']),

@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Entity\Config;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,6 +21,10 @@ class ConfigRepository extends ServiceEntityRepository
         parent::__construct($registry, Config::class);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function deleteAll(): int
     {
         $qb = $this->createQueryBuilder('c');
@@ -28,6 +34,9 @@ class ConfigRepository extends ServiceEntityRepository
         return $qb->getQuery()->getSingleScalarResult() ?? 0;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function findOneByAllowInstall($value): ?Config
     {
         return $this->createQueryBuilder('c')

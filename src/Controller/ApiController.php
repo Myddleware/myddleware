@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,21 +26,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApiController extends AbstractController
 {
     private RuleRepository $ruleRepository;
-
     private JobRepository $jobRepository;
-
     private DocumentRepository $documentRepository;
-
     private string $env;
-
     private KernelInterface $kernel;
-
     private LoggerInterface $logger;
-
     private JobManager $jobManager;
-
     private ParameterBagInterface $parameterBag;
-
     private EntityManagerInterface $entityManager;
 
     public function __construct(
@@ -66,7 +59,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/synchro", name="synchro", methods={"POST"})
      */
-    public function synchroAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function synchroAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -127,7 +120,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/read_record", name="read_record", methods={"POST"})
      */
-    public function readRecordAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function readRecordAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -198,7 +191,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/delete_record", name="delete_record", methods={"POST"})
      */
-    public function deleteRecordAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function deleteRecordAction(Request $request): JsonResponse
     {
         try {
             $connection = $this->container->get('database_connection');
@@ -311,7 +304,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})
      */
-    public function massActionAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function massActionAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -384,7 +377,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/rerun_error", name="rerun_error", methods={"POST"})
      */
-    public function rerunErrorAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function rerunErrorAction(Request $request): JsonResponse
     {
         try {
             $return = [];
@@ -447,7 +440,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/statistics", name="statistics", methods={"POST"})
      */
-    public function statisticsAction(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    public function statisticsAction(Request $request): JsonResponse
     {
         try {
             $return = [];

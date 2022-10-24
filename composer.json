@@ -19,6 +19,7 @@
     "ext-ctype": "*",
     "ext-iconv": "*",
     "ext-json": "*",
+    "ext-pdo": "*",
     "api-platform/core": "2.7.*",
     "automattic/woocommerce": "3.1.*",
     "babdev/pagerfanta-bundle": "3.7.*",

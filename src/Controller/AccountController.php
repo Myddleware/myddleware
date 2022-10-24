@@ -42,8 +42,6 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * Class AccountController.
- *
  * @Route("/rule")
  */
 class AccountController extends AbstractController
@@ -104,7 +102,7 @@ class AccountController extends AbstractController
     /**
      * @Route("/account/locale/{locale}", name="account_locale", options={"expose"=true})
      */
-    public function changeLocaleAction(string $locale, Request $request)
+    public function changeLocale(string $locale, Request $request): RedirectResponse
     {
         $request->getSession()->set('_locale', $locale);
 
@@ -112,13 +110,9 @@ class AccountController extends AbstractController
     }
 
     /**
-     * Function for forms of my account.
-     *
-     * @return RedirectResponse|Response|null
-     *
      * @Route("/account", name="my_account")
      */
-    public function myAccountAction(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
+    public function myAccount(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
     {
         $user = $this->getUser();
         $em = $this->entityManager;

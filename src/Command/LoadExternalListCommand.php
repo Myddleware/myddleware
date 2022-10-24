@@ -37,24 +37,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class LoadExternalListCommand extends Command
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var SymfonyStyle
-     */
-    private $io;
+    private EntityManagerInterface $entityManager;
+    private LoggerInterface $logger;
+    private SymfonyStyle $io;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:loadexternallist';
-    protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
+    protected static string $defaultDescription = 'transfers all lines of csv into InternalListValue';
 
     public function __construct(
         LoggerInterface $logger,
@@ -104,7 +93,7 @@ class LoadExternalListCommand extends Command
                 '',
             ]);
             $io->getErrorStyle()->warning('Debugging information or errors: '.$e);
-            $io->error(sprintf('The user command did not work'));
+            $io->error('The user command did not work');
 
             return 1;
         }

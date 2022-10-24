@@ -29,12 +29,6 @@ use App\Entity\Document;
 use App\Entity\DocumentData;
 use App\Entity\DocumentData as DocumentDataEntity;
 use App\Entity\DocumentRelationship as DocumentRelationship;
-// Gestion des logs
-// Accède aux services
-// Connexion BDD
-use App\Entity\Job;
-use App\Entity\Log;
-use App\Entity\Rule;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleRelationShipRepository;
 use Doctrine\DBAL\Connection;
@@ -78,6 +72,13 @@ class documentcore
     protected ?ToolsManager $tools;
     protected $api;    // Specify if the class is called by the API
     protected $ruleDocuments;
+    protected $container;
+    protected LoggerInterface $logger;
+    protected FormulaManager $formulaManager;
+    private DocumentRepository $documentRepository;
+    private RuleRelationShipRepository $ruleRelationshipsRepository;
+    protected ?ParameterBagInterface $parameterBagInterface;
+    protected ?SolutionManager $solutionManager;
     protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
@@ -98,19 +99,6 @@ class documentcore
         'Error_sending' => 'Error',
         'Not_found' => 'Error',
     ];
-
-    protected $container;
-    protected LoggerInterface $logger;
-
-    protected FormulaManager $formulaManager;
-
-    private DocumentRepository $documentRepository;
-
-    private RuleRelationShipRepository $ruleRelationshipsRepository;
-
-    protected ?ParameterBagInterface $parameterBagInterface;
-
-    protected ?SolutionManager $solutionManager;
 
     // Instanciation de la classe de génération de log Symfony
     public function __construct(

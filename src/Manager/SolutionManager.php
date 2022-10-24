@@ -58,12 +58,9 @@ use App\Solutions\wordpress;
 use App\Solutions\zuora;
 use Exception;
 
-/**
- * Class SolutionManager.
- */
 class SolutionManager
 {
-    private $classes = [];
+    private array $classes = [];
 
     public function __construct(
         wordpress $wordpress,
@@ -131,6 +128,9 @@ class SolutionManager
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {

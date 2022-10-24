@@ -38,30 +38,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SynchroCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var DocumentManager
-     */
-    private $documentManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private EntityManagerInterface $entityManager;
+    private DocumentManager $documentManager;
+    private RuleManager $ruleManager;
+    private DocumentRepository $documentRepository;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:synchro';
@@ -94,7 +76,7 @@ class SynchroCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $step = 1;
         try {

@@ -747,9 +747,8 @@ class jobcore
         $this->message = $upgrade->processUpgrade($output);
     }
 
-    // Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
-
     /**
+     * Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */

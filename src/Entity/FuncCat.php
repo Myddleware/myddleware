@@ -29,99 +29,63 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * FuncCat.
- *
  * @ORM\Table(name="funccat")
  * @ORM\Entity(repositoryClass="App\Repository\FuncCatRepository")
  */
 class FuncCat
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=100)
      */
-    private $name;
+    private string $name;
 
     /**
      * @var ArrayCollection
      */
     private $functions;
 
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
         $this->functions = new ArrayCollection();
     }
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $nameYml
-     *
-     * @return FuncCat
-     */
-    public function setName($nameYml)
+    public function setName($nameYml): self
     {
         $this->name = $nameYml;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Add functions.
-     *
-     * @return FuncCat
-     */
-    public function addFunction(Functions $functions)
+    public function addFunction(Functions $functions): self
     {
         $this->functions[] = $functions;
 
         return $this;
     }
 
-    /**
-     * Remove functions.
-     */
     public function removeFunction(Functions $functions)
     {
         $this->functions->removeElement($functions);
     }
 
     /**
-     * Get functions.
-     *
      * @return \Doctrine\Common\Collections\Collection
      */
     public function getFunctions()

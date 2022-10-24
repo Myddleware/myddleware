@@ -29,23 +29,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class JobSchedulerManager.
- */
 class JobSchedulerManager
 {
     protected $env;
-    protected $entityManager;
-    protected $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
+    protected EntityManagerInterface $entityManager;
+    protected array $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
+    private LoggerInterface $logger;
+    private RuleRepository $ruleRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -57,7 +47,10 @@ class JobSchedulerManager
         $this->logger = $logger;
     }
 
-    public function getJobsParams()
+    /**
+     * @throws Exception
+     */
+    public function getJobsParams(): array
     {
         try {
             $list = [];
@@ -103,8 +96,7 @@ class JobSchedulerManager
         }
     }
 
-    // Get all active rules
-    private function getAllActiveRules()
+    private function getAllActiveRules(): array
     {
         $rules['ALL'] = 'All active rules';
         $activeRules = $this->ruleRepository->findActiveRules();

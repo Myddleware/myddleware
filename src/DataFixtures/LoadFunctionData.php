@@ -64,7 +64,7 @@ class LoadFunctionData implements FixtureInterface
         $this->manager->flush();
     }
 
-    public function getOrder()
+    public function getOrder(): int
     {
         return 1;
     }
@@ -104,7 +104,7 @@ class LoadFunctionData implements FixtureInterface
             ) {
                 $func = new Functions();
                 $func->setName($function);
-                $func->setCategorieId($funcCat);
+                $func->setCategoryId($funcCat);
                 $this->manager->persist($func);
             }
         }

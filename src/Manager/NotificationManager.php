@@ -41,56 +41,26 @@ use Swift_Message;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-/**
- * Class NotificationManager.
- */
 class NotificationManager
 {
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
     protected $emailAddresses;
     protected $configParams;
-    protected $tools;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var ParameterBagInterface
-     */
-    private $params;
-    /**
-     * @var Connection
-     */
-    private $connection;
-    /**
-     * @var Swift_Mailer
-     */
-    private $mailer;
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var mixed|string
-     */
+    protected ToolsManager $tools;
+    private LoggerInterface $logger;
+    private ParameterBagInterface $params;
+    private Connection $connection;
+    private Swift_Mailer $mailer;
+    private UserRepository $userRepository;
+    private TranslatorInterface $translator;
+    private JobRepository $jobRepository;
+    private RuleRepository $ruleRepository;
     private $fromEmail;
-    /**
-     * @var Environment
-     */
-    private $twig;
+    private Environment $twig;
 
     public function __construct(
         LoggerInterface $logger,
@@ -118,8 +88,11 @@ class NotificationManager
         $this->twig = $twig;
     }
 
-    // Send alert if a job is running too long
-    public function sendAlert()
+    /**
+     * Send alert if a job is running too long
+     * @throws Exception
+     */
+    public function sendAlert(): bool
     {
         try {
             // Get the email adresses of all ADMIN
@@ -168,8 +141,11 @@ class NotificationManager
         }
     }
 
-    // Send notification to receive statistique about myddleware data transfer
-    public function sendNotification()
+    /**
+     * Send notification to receive statistics about Myddleware data transfers
+     * @throws Exception
+     */
+    public function sendNotification(): bool
     {
         try {
             // Set all config parameters
@@ -291,6 +267,12 @@ class NotificationManager
         }
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws Exception
+     */
     public function resetPassword(User $user)
     {
         $message = (new Swift_Message('Initialisation du mot de passe'))

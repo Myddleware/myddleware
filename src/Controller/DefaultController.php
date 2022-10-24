@@ -72,76 +72,32 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
     /**
-     * Class DefaultControllerCore.
      *
      * @Route("/rule")
      */
     class DefaultController extends AbstractController
     {
-        private $formuleManager;
-        private $sessionService;
+        private FormulaManager $formuleManager;
+        private SessionService $sessionService;
+        private ParameterBagInterface $params;
+        private EntityManagerInterface $entityManager;
+        private HomeManager $home;
+        private ToolsManager $tools;
+        private TranslatorInterface $translator;
+        private AuthorizationCheckerInterface $authorizationChecker;
+        private JobManager $jobManager;
+        private LoggerInterface $logger;
+        private TemplateManager $template;
+        private RuleRepository $ruleRepository;
+        private JobRepository $jobRepository;
+        private DocumentRepository $documentRepository;
+        private SolutionManager $solutionManager;
+        private RuleManager $ruleManager;
+        private DocumentManager $documentManager;
+        protected Connection $connection;
+        // To allow sending a specific record ID to rule simulation
+        protected $simulationQueryField;
 
-        /**
-         * @var ParameterBagInterface
-         */
-        private $params;
-        /**
-         * @var EntityManagerInterface
-         */
-        private $entityManager;
-        /**
-         * @var HomeManager
-         */
-        private $home;
-
-        /**
-         * @var ToolsManager
-         */
-        private $tools;
-        /**
-         * @var TranslatorInterface
-         */
-        private $translator;
-        /**
-         * @var AuthorizationCheckerInterface
-         */
-        private $authorizationChecker;
-        /**
-         * @var JobManager
-         */
-        private $jobManager;
-        /**
-         * @var LoggerInterface
-         */
-        private $logger;
-        /**
-         * @var TemplateManager
-         */
-        private $template;
-        /**
-         * @var RuleRepository
-         */
-        private $ruleRepository;
-        /**
-         * @var JobRepository
-         */
-        private $jobRepository;
-        /**
-         * @var DocumentRepository
-         */
-        private $documentRepository;
-        /**
-         * @var SolutionManager
-         */
-        private $solutionManager;
-        /**
-         * @var RuleManager
-         */
-        private $ruleManager;
-        /**
-         * @var DocumentManager
-         */
-        private $documentManager;
 
         public function __construct(
             LoggerInterface $logger,
@@ -189,13 +145,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 }
             }
         }
-
-        // Connexion direct bdd (utilisé pour créer les tables Z sans doctrine
-        protected $connection;
-
-        // To allow sending a specific record ID to rule simulation
-        protected $simulationQueryField;
-
         protected function getInstanceBdd()
         {
         }
@@ -256,11 +205,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * SUPPRESSION D'UNE REGLE.
-         *
-         * @param $id
-         *
-         * @return RedirectResponse
-         *
          * @Route("/delete/{id}", name="regle_delete")
          */
         public function ruleDeleteAction(Request $request, $id)
@@ -369,16 +313,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             }
         }
 
-        // AFFICHE LES FLUX D'UNE REGLE
-
         /**
-         * @param $id
-         *
-         * @return RedirectResponse
-         *
          * @Route("/displayflux/{id}", name="regle_displayflux")
          */
-        public function displayFluxAction($id)
+        public function displayFlux($id): RedirectResponse
         {
             $rule = $this->getDoctrine()
                 ->getManager()
@@ -394,16 +332,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
 
-        // Duplicate a rule
-
         /**
-         * @param $id
-         *
-         * @return RedirectResponse
-         *
          * @Route("/duplic_rule/{id}", name="duplic_rule")
          */
-        public function duplicRule($id, Request $request, TranslatorInterface $translator)
+        public function duplicateRule($id, Request $request, TranslatorInterface $translator)
         {
             try {
                 $rule = $this->getDoctrine()
@@ -513,14 +445,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * ACTIVE UNE REGLE.
-         *
-         * @param $id
-         *
-         * @return JsonResponse|Response
-         *
          * @Route("/update/{id}", name="regle_update")
          */
-        public function ruleUpdActiveAction($id)
+        public function ruleUpdActive($id)
         {
             try {
                 // On récupére l'EntityManager
@@ -551,13 +478,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * Executer une règle manuellement.
          *
-         * @param $id
-         *
-         * @return RedirectResponse
-         *
          * @Route("/exec/{id}", name="regle_exec")
          */
-        public function ruleExecAction($id)
+        public function executeRule($id): RedirectResponse
         {
             try {
                 $this->ruleManager->setRule($id);
@@ -583,12 +506,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CANCEL ALL TRANSFERS FOR ONE RULE.
-         *
-         * @param $id
-         *
          * @Route("/view/cancel/documents/{id}", name="rule_cancel_all_transfers")
          */
-        public function cancelRuleTransfersAction($id)
+        public function cancelRuleTransfers($id)
         {
             try {
                 $this->ruleManager->setRule($id);
@@ -603,11 +523,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * DELETE ALL TRANSFERS FOR ONE RULE.
          *
-         * @param $id
-         *
          * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers")
          */
-        public function deleteRuleTransfersAction($id)
+        public function deleteRuleTransfers($id)
         {
             try {
                 $this->ruleManager->setRule($id);
@@ -628,7 +546,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/update/params/{id}", name="path_fiche_params_update")
          */
-        public function ruleUpdParamsAction($id)
+        public function ruleUpdParams($id)
         {
             try {
                 // On récupére l'EntityManager
@@ -689,7 +607,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/simule/{id}", name="path_fiche_params_simulate")
          */
-        public function ruleSimulateTransfersAction(Rule $rule)
+        public function ruleSimulateTransfers(Rule $rule): Response
         {
             try {
                 // On récupére l'EntityManager
@@ -765,11 +683,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * MODE EDITION D'UNE REGLE.
          *
+         * @param Request $request
+         * @param Rule $rule
          * @return RedirectResponse
          *
          * @Route("/edit/{id}", name="regle_edit")
          */
-        public function ruleEditAction(Request $request, Rule $rule)
+        public function ruleEditAction(Request $request, Rule $rule): RedirectResponse
         {
             $session = $request->getSession();
 
@@ -957,8 +877,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          * @return Response
          *
          * @Route("/view/{id}", name="regle_open")
+         * @throws Exception
          */
-        public function ruleOpenAction($id)
+        public function ruleOpenAction($id): Response
         {
             if ($this->getUser()->isAdmin()) {
                 $list_fields_sql = ['id' => $id];
@@ -1227,7 +1148,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/inputs/name_unique/", name="regle_inputs_name_unique", methods={"POST"}, options={"expose"=true})
          */
-        public function ruleNameUniqAction(Request $request)
+        public function ruleNameUniq(Request $request): JsonResponse
         {
             $key = $this->sessionService->getParamRuleLastKey();
 
@@ -1263,7 +1184,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step2/", name="regle_steptwo", methods={"POST"})
          */
-        public function ruleStepTwoAction(Request $request)
+        public function ruleStepTwo(Request $request)
         {
             $session = $request->getSession();
             $myddlewareSession = $session->getBag('flashes')->get('myddlewareSession');
@@ -1366,7 +1287,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step3/simulation/", name="regle_simulation", methods={"POST"})
          */
-        public function ruleSimulationAction(Request $request)
+        public function ruleSimulationAction(Request $request): Response
         {
             $ruleKey = $this->sessionService->getParamRuleLastKey();
 
@@ -1538,7 +1459,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step3/{id}", name="regle_stepthree", defaults={"id"=0})
          */
-        public function ruleStepThreeAction(Request $request)
+        public function ruleStepThree(Request $request)
         {
             $this->getInstanceBdd();
             $ruleKey = $request->get('id');
@@ -2061,7 +1982,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          * @Route("/info/{type}/{field}/", name="path_info_field", methods={"GET"})
          * @Route("/info", name="path_info_field_not_param")
          */
-        public function infoFieldAction(Request $request, $field, $type)
+        public function infoField(Request $request, $field, $type): Response
         {
             $session = $request->getSession();
             $myddlewareSession = $session->get('myddlewareSession');
@@ -2115,7 +2036,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step3/formula/", name="regle_formula", methods={"POST"})
          */
-        public function ruleVerifFormulaAction(Request $request)
+        public function ruleVerifFormula(Request $request): JsonResponse
         {
             if ('POST' == $request->getMethod()) {
                 // Mise en place des variables
@@ -2134,7 +2055,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step3/validation/", name="regle_validation", methods={"POST"})
          */
-        public function ruleValidationAction(Request $request)
+        public function ruleValidation(Request $request): JsonResponse
         {
             // On récupére l'EntityManager
             $this->getInstanceBdd();
@@ -2532,12 +2453,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * TABLEAU DE BORD.
-         *
-         * @return Response
-         *
          * @Route("/panel", name="regle_panel")
          */
-        public function panelAction(Request $request)
+        public function panel(Request $request): Response
         {
             $language = $request->getLocale();
 
@@ -2574,7 +2492,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/graph/type/error/doc", name="graph_type_error_doc", options={"expose"=true})
          */
-        public function graphTypeErrorAction()
+        public function graphTypeError(): Response
         {
             $countTypeDoc = [];
             $documents = $this->documentRepository->countTypeDoc($this->getUser());
@@ -2593,7 +2511,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/graph/type/transfer/rule", name="graph_type_transfer_rule", options={"expose"=true})
          */
-        public function graphTransferRuleAction()
+        public function graphTransferRule(): Response
         {
             $countTransferRule = [];
             $values = $this->documentRepository->countTransferRule($this->getUser());
@@ -2612,7 +2530,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/graph/type/transfer/histo", name="graph_type_transfer_histo", options={"expose"=true})
          */
-        public function graphTransferHistoAction()
+        public function graphTransferHisto(): Response
         {
             $countTransferRule = [];
             $values = $this->home->countTransferHisto($this->getUser());
@@ -2643,7 +2561,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/graph/type/job/histo", name="graph_type_job_histo", options={"expose"=true})
          */
-        public function graphJobHistoAction()
+        public function graphJobHisto(): Response
         {
             $countTransferRule = [];
             $jobs = $this->jobRepository->findBy([], ['begin' => 'ASC'], 5);
@@ -2677,19 +2595,16 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/submodules", name="regle_submodules", methods={"POST"})
          */
-        public function listSubModulesAction()
+        public function listSubModulesAction(): Response
         {
             return new Response(0);
         }
 
         /**
          * VALIDATION DE L'ANIMATION.
-         *
-         * @return Response
-         *
          * @Route("/validation", name="regle_validation_animation")
          */
-        public function validationAnimationAction(Request $request)
+        public function validationAnimationAction(Request $request): Response
         {
             $key = $this->sessionService->getParamRuleLastKey();
 
@@ -2747,7 +2662,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/list/template", name="regle_template")
          */
-        public function listTemplateAction()
+        public function listTemplateAction(): Response
         {
             $key = $this->sessionService->getParamRuleLastKey();
             $solutionSourceName = $this->sessionService->getParamRuleSourceSolution($key);
@@ -2789,12 +2704,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CREATION - STEP ONE - ANIMATION.
-         *
-         * @return Response
-         *
          * @Route("/create", name="regle_stepone_animation")
          */
-        public function ruleStepOneAnimationAction()
+        public function ruleStepOneAnimationAction(): Response
         {
             if ($this->sessionService->isConnectorExist()) {
                 $this->sessionService->removeMyddlewareConnector();
@@ -2847,12 +2759,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * LISTE DES MODULES POUR ANIMATION.
-         *
-         * @return Response
-         *
          * @Route("/list/module", name="regle_list_module")
          */
-        public function ruleListModuleAction(Request $request)
+        public function ruleListModuleAction(Request $request): Response
         {
             try {
                 $id_connector = $request->get('id');
@@ -2900,7 +2809,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          ****************************************************** */
 
         // CREATION REGLE - STEP ONE : Liste des connecteurs pour un user
-        private function liste_connectorAction($type)
+        private function liste_connectorAction($type): string
         {
             $this->getInstanceBdd();
             $solutionRepo = $this->entityManager->getRepository(Connector::class);
@@ -2912,13 +2821,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 }
             }
 
-            $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
-
-            return $lst_solution;
+            return ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
         }
 
         // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
-        private function createListeParamsRule($fields, $formula, $params)
+        private function createListeParamsRule($fields, $formula, $params): array
         {
             $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
             $tab = [];

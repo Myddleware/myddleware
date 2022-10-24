@@ -38,14 +38,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RerunErrorCommand extends Command
 {
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private JobManager $jobManager;
+    private LoggerInterface $logger;
 
     public function __construct(
         LoggerInterface $logger,
@@ -69,7 +63,10 @@ class RerunErrorCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');

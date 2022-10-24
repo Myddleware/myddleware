@@ -25,7 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use App\Repository\RuleRepository;
 use Exception;
@@ -35,23 +34,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class ReadRecordCommand.
- */
 class ReadRecordCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private RuleRepository $ruleRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -78,7 +65,11 @@ class ReadRecordCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');

@@ -32,7 +32,7 @@ use Doctrine\Persistence\ObjectManager;
 class LoadConfigData implements FixtureInterface
 {
     private $manager;
-    protected $configData = [
+    protected array $configData = [
         ['name' => 'allow_install', 'value' => true, 'update' => false],
         ['name' => 'extension_allowed', 'value' => '["xml","wsdl"]', 'update' => false],
         ['name' => 'pager', 'value' => 20, 'update' => false],

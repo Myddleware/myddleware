@@ -7,14 +7,8 @@ use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
 class SecurityService
 {
-    /**
-     * @var RoleHierarchyInterface
-     */
-    private $roleHierarchy;
+    private RoleHierarchyInterface $roleHierarchy;
 
-    /**
-     * SecurityService constructor.
-     */
     public function __construct(RoleHierarchyInterface $roleHierarchy)
     {
         $this->roleHierarchy = $roleHierarchy;
@@ -54,7 +48,7 @@ class SecurityService
      * @copyright ©2MConseil 2019.
      * @author Flavian Cecilien
      */
-    public function getDefinedRoles()
+    public function getDefinedRoles(): array
     {
         $roles = [];
 

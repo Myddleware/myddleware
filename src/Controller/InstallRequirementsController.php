@@ -20,7 +20,6 @@ class InstallRequirementsController extends AbstractController
     private $symfonyRequirements;
     private $phpVersion;
     private $systemStatus;
-
     private $configRepository;
 
     public function __construct(ConfigRepository $configRepository)
@@ -52,18 +51,18 @@ class InstallRequirementsController extends AbstractController
 
                 $checkPassed = true;
 
-                $requirementsErrorMesssages = [];
+                $requirementsErrorMessages = [];
                 foreach ($this->symfonyRequirements->getRequirements() as $req) {
                     if (!$req->isFulfilled()) {
-                        $requirementsErrorMesssages[] = $req->getHelpText();
+                        $requirementsErrorMessages[] = $req->getHelpText();
                         $checkPassed = false;
                     }
                 }
 
-                $recommendationMesssages = [];
+                $recommendationMessages = [];
                 foreach ($this->symfonyRequirements->getRecommendations() as $req) {
                     if (!$req->isFulfilled()) {
-                        $recommendationMesssages[] = $req->getHelpText();
+                        $recommendationMessages[] = $req->getHelpText();
                     }
                 }
 
@@ -76,8 +75,8 @@ class InstallRequirementsController extends AbstractController
 
                 return $this->render('install_requirements/index.html.twig', [
                     'php_version' => $this->phpVersion,
-                    'error_messages' => $requirementsErrorMesssages,
-                    'recommendation_messages' => $recommendationMesssages,
+                    'error_messages' => $requirementsErrorMessages,
+                    'recommendation_messages' => $recommendationMessages,
                     'system_status' => $this->systemStatus,
                 ]);
             } else {
@@ -91,18 +90,18 @@ class InstallRequirementsController extends AbstractController
 
         $checkPassed = true;
 
-        $requirementsErrorMesssages = [];
+        $requirementsErrorMessages = [];
         foreach ($this->symfonyRequirements->getRequirements() as $req) {
             if (!$req->isFulfilled()) {
-                $requirementsErrorMesssages[] = $req->getHelpText();
+                $requirementsErrorMessages[] = $req->getHelpText();
                 $checkPassed = false;
             }
         }
 
-        $recommendationMesssages = [];
+        $recommendationMessages = [];
         foreach ($this->symfonyRequirements->getRecommendations() as $req) {
             if (!$req->isFulfilled()) {
-                $recommendationMesssages[] = $req->getHelpText();
+                $recommendationMessages[] = $req->getHelpText();
             }
         }
 
@@ -116,8 +115,8 @@ class InstallRequirementsController extends AbstractController
         //allow access if no errors
         return $this->render('install_requirements/index.html.twig', [
             'php_version' => $this->phpVersion,
-            'error_messages' => $requirementsErrorMesssages,
-            'recommendation_messages' => $recommendationMesssages,
+            'error_messages' => $requirementsErrorMessages,
+            'recommendation_messages' => $recommendationMessages,
             'system_status' => $this->systemStatus,
         ]);
     }

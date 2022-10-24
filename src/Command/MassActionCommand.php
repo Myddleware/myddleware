@@ -80,11 +80,7 @@ class MassActionCommand extends Command
         $fromStatus = $input->getArgument('fromStatus');
         $toStatus = $input->getArgument('toStatus');
         $api = $input->getArgument('api');
-        $force = $input->getArgument('force');
-        if (empty($force)) {
-            $force = false;
-        }
-
+        $force = $input->getArgument('force') ? $input->getArgument('force') : false;
         // to avoid unwanted apostrophes in SQL queries
         $action = str_replace('\'', '', $action);
         $dataType = str_replace('\'', '', $dataType);
