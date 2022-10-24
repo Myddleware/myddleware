@@ -34,8 +34,8 @@ class microsoftsqlcore extends database
 
     protected string $stringSeparatorOpen = '[';
     protected string $stringSeparatorClose = ']';
-	
-	// Enable to delete data
+
+    // Enable to delete data
     protected $sendDeletion = true;
     protected $readDeletion = true;
 

@@ -414,8 +414,8 @@ class airtablecore extends solution
                     if ('update' == $method) {
                         $body['records'][$i]['id'] = $data['target_id'];
                         if (isset($body['records'][$i]['fields']['target_id'])) {
-							unset($body['records'][$i]['fields']['target_id']);
-						}
+                            unset($body['records'][$i]['fields']['target_id']);
+                        }
                     }
                     ++$i;
                 }

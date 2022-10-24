@@ -103,7 +103,7 @@ class LoadExternalListCommand extends Command
                 '##############',
                 '',
             ]);
-            $io->getErrorStyle()->warning('Debugging information or errors: ' . $e);
+            $io->getErrorStyle()->warning('Debugging information or errors: '.$e);
             $io->error(sprintf('The user command did not work'));
 
             return 1;

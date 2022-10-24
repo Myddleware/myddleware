@@ -199,6 +199,7 @@ class databasecore extends solution
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+
             return false;
         }
     }
@@ -404,7 +405,7 @@ class databasecore extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= ($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
+            $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
@@ -446,7 +447,7 @@ class databasecore extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."=".($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
+            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
@@ -468,9 +469,9 @@ class databasecore extends solution
         }
         // Several modifications
         if (
-				!$this->allowSeveralUpdate
-			AND	$q->rowCount() > 1
-		) {
+                !$this->allowSeveralUpdate
+            and $q->rowCount() > 1
+        ) {
             throw new Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
@@ -605,7 +606,8 @@ class databasecore extends solution
     }
 
     /**
-     * Get the fieldId from the other rules to add them into the source relationship list field
+     * Get the fieldId from the other rules to add them into the source relationship list field.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     protected function get_module_fields_relate($module, $param)

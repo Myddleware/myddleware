@@ -296,17 +296,17 @@ class jobcore
         $this->start = microtime(true);
         // Check if a job is already running except if force = true (api call or manuel call)
         if (!$force) {
-			$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-			$stmt = $this->connection->prepare($sqlJobOpen);
-			$result = $stmt->executeQuery();
-			$job = $result->fetchAssociative(); // 1 row
-			// Error if one job is still running
-			if (!empty($job)) {
-				$this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+            $stmt = $this->connection->prepare($sqlJobOpen);
+            $result = $stmt->executeQuery();
+            $job = $result->fetchAssociative(); // 1 row
+            // Error if one job is still running
+            if (!empty($job)) {
+                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-				return ['success' => false, 'message' => $this->message];
-			}
-		}
+                return ['success' => false, 'message' => $this->message];
+            }
+        }
         // Create Job
         $insertJob = $this->insertJob();
         if ($insertJob) {

@@ -960,11 +960,11 @@ class documentcore
                 }
                 // Prepare the search array with teh value for each duplicate field
                 foreach ($duplicate_fields as $duplicate_field) {
-					// In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
-					if ($duplicate_field == 'Myddleware_element_id') {
-						$searchFields['id'] = $target[$duplicate_field];
-						continue;
-					}
+                    // In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
+                    if ('Myddleware_element_id' == $duplicate_field) {
+                        $searchFields['id'] = $target[$duplicate_field];
+                        continue;
+                    }
                     $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
@@ -1018,10 +1018,10 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
-			// Error if rule mode is update only and the document is a creation
-			if (
-                    $this->documentType == 'C'
-                and $this->ruleMode == 'U'
+            // Error if rule mode is update only and the document is a creation
+            if (
+                    'C' == $this->documentType
+                and 'U' == $this->ruleMode
             ) {
                 throw new \Exception('The document is a creation but the rule mode is UPDATE ONLY. ');
             }
@@ -1166,7 +1166,7 @@ class documentcore
         $read['call_type'] = 'history';
         $read['date_ref'] = '1970-01-01 00:00:00'; // Required field but no needed for history search
         $read['document']['type'] = $this->documentType;
-		$read['document']['id'] = $this->id;
+        $read['document']['id'] = $this->id;
         $read['jobId'] = $this->jobId;
         $dataTarget = $this->solutionTarget->readData($read);
         // If read method returns no result with no error
@@ -1470,8 +1470,8 @@ class documentcore
                 if (!empty($targetId['record_id'])) {
                     return $targetId['record_id'];
                 // No need of relate field in case of deletion
-				} elseif ($this->documentType != 'D') {
-                     throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
+                } elseif ('D' != $this->documentType) {
+                    throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
                 }
             }
             // Si le champ est envoyé sans transformation
@@ -2040,8 +2040,8 @@ class documentcore
             $this->message .= 'Type  : '.$new_type;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
-			// Change the document type for the current process
-			$this->documentType = $new_type;
+            // Change the document type for the current process
+            $this->documentType = $new_type;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -2074,8 +2074,9 @@ class documentcore
             $this->message .= 'Target id : '.$target_id;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
-			// Change the target id for the current process
+            // Change the target id for the current process
             $this->targetId = $target_id;
+
             return true;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION

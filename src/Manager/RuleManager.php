@@ -1152,9 +1152,9 @@ class rulecore
             //if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' 1 Y --env='.$this->env.' > '.$fileTmp.' &', $output);
-            } elseif ($ruleId == 'ALL') {
+            } elseif ('ALL' == $ruleId) {
                 // We don't set the parameter force to 1 when we synchronize all rules
-				exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
             } else {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
@@ -1421,7 +1421,7 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-						// Allows to get the history fields, necessary for updating the SAP for instance
+                        // Allows to get the history fields, necessary for updating the SAP for instance
                         foreach ($send['data'] as $docId => $value) {
                             $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
                         }
@@ -1862,8 +1862,8 @@ class rulecore
 
         return false;
     }
-	
-	// Delete a document data
+
+    // Delete a document data
     protected function deleteDocumentData($documentId, $type)
     {
         try {
@@ -1876,8 +1876,9 @@ class rulecore
             // Generate data array
             if (!empty($documentDataEntity)) {
                 $this->entityManager->remove($documentDataEntity);
-				$this->entityManager->flush();
-				return true;
+                $this->entityManager->flush();
+
+                return true;
             }
         } catch (\Exception $e) {
             $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

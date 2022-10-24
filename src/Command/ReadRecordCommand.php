@@ -73,7 +73,7 @@ class ReadRecordCommand extends Command
             ->addArgument('ruleId', InputArgument::REQUIRED, 'Rule used to read the records')
             ->addArgument('filterQuery', InputArgument::REQUIRED, 'Filter used to read data in the source application, eg : id')
             ->addArgument('filterValues', InputArgument::REQUIRED, 'Values corresponding to the fileter separated by comma, eg : 1256,4587')
-			->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -83,10 +83,10 @@ class ReadRecordCommand extends Command
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');
         $filterValues = $input->getArgument('filterValues');
-		$force = $input->getArgument('force');
-		if (empty($force)) {
-			$force = false;
-		}
+        $force = $input->getArgument('force');
+        if (empty($force)) {
+            $force = false;
+        }
 
         $rule = $this->ruleRepository->findOneBy(['id' => $ruleId, 'deleted' => false]);
         if (null === $rule) {

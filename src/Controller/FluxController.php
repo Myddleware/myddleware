@@ -302,78 +302,78 @@ class FluxController extends AbstractController
 
         $conditions = 0;
         //---[ FORM ]-------------------------
-		if ($form->get('click_filter')->isClicked()) {
-			$data = $form->getData();
-			$data['user'] = $this->getUser();
-			$data['search'] = $search;
-			$data['page'] = $page;
+        if ($form->get('click_filter')->isClicked()) {
+            $data = $form->getData();
+            $data['user'] = $this->getUser();
+            $data['search'] = $search;
+            $data['page'] = $page;
 
-			// Get the limit parameter
-			$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-			$searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-			if (!empty($searchLimit)) {
-				$data['limit'] = $searchLimit->getValue();
-			}
+            // Get the limit parameter
+            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+            if (!empty($searchLimit)) {
+                $data['limit'] = $searchLimit->getValue();
+            }
 
-			$r = $this->documentRepository->getFluxPagination($data);
-			if (empty($data['source_content'])) {
-				$this->sessionService->removeFluxFilterSourceContent();
-			}
+            $r = $this->documentRepository->getFluxPagination($data);
+            if (empty($data['source_content'])) {
+                $this->sessionService->removeFluxFilterSourceContent();
+            }
 
-			if (!empty($data['target_content']) && is_string($data['target_content'])) {
-				$this->sessionService->setFluxFilterTargetContent($data['target_content']);
-			} else {
-				$this->sessionService->removeFluxFilterTargetContent();
-			}
+            if (!empty($data['target_content']) && is_string($data['target_content'])) {
+                $this->sessionService->setFluxFilterTargetContent($data['target_content']);
+            } else {
+                $this->sessionService->removeFluxFilterTargetContent();
+            }
 
-			if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-				$this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
-			} else {
-				$this->sessionService->removeFluxFilterDateModifStart();
-			}
+            if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+                $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+            } else {
+                $this->sessionService->removeFluxFilterDateModifStart();
+            }
 
-			if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-				$this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
-			} else {
-				$this->sessionService->removeFluxFilterDateModifEnd();
-			}
+            if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+                $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
+            } else {
+                $this->sessionService->removeFluxFilterDateModifEnd();
+            }
 
-			if (!empty($data['rule']) && is_string($data['rule'])) {
-				$this->sessionService->setFluxFilterRuleName($data['rule']);
-			} else {
-				$this->sessionService->removeFluxFilterRuleName();
-			}
+            if (!empty($data['rule']) && is_string($data['rule'])) {
+                $this->sessionService->setFluxFilterRuleName($data['rule']);
+            } else {
+                $this->sessionService->removeFluxFilterRuleName();
+            }
 
-			if (!empty($data['status'])) {
-				$this->sessionService->setFluxFilterStatus($data['status']);
-			} else {
-				$this->sessionService->removeFluxFilterStatus();
-			}
+            if (!empty($data['status'])) {
+                $this->sessionService->setFluxFilterStatus($data['status']);
+            } else {
+                $this->sessionService->removeFluxFilterStatus();
+            }
 
-			if (!empty($data['gblstatus'])) {
-				$this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
-			} else {
-				$this->sessionService->removeFluxFilterGblStatus();
-			}
+            if (!empty($data['gblstatus'])) {
+                $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+            } else {
+                $this->sessionService->removeFluxFilterGblStatus();
+            }
 
-			if (!empty($data['type'])) {
-				$this->sessionService->setFluxFilterType($data['type']);
-			} else {
-				$this->sessionService->removeFluxFilterGblStatus();
-			}
+            if (!empty($data['type'])) {
+                $this->sessionService->setFluxFilterType($data['type']);
+            } else {
+                $this->sessionService->removeFluxFilterGblStatus();
+            }
 
-			if (!empty($data['target_id'])) {
-				$this->sessionService->setFluxFilterTargetId($data['target_id']);
-			} else {
-				$this->sessionService->removeFluxFilterTargetId();
-			}
+            if (!empty($data['target_id'])) {
+                $this->sessionService->setFluxFilterTargetId($data['target_id']);
+            } else {
+                $this->sessionService->removeFluxFilterTargetId();
+            }
 
-			if (!empty($data['source_id'])) {
-				$this->sessionService->setFluxFilterSourceId($data['source_id']);
-			} else {
-				$this->sessionService->removeFluxFilterSourceId();
-			}
-		} // end clicked
+            if (!empty($data['source_id'])) {
+                $this->sessionService->setFluxFilterSourceId($data['source_id']);
+            } else {
+                $this->sessionService->removeFluxFilterSourceId();
+            }
+        } // end clicked
         //---[ FORM ]-------------------------
 
         $r = $this->documentRepository->getFluxPagination($data);
@@ -666,7 +666,7 @@ class FluxController extends AbstractController
                 }
             }
         }
-        throw $this->createNotFoundException('Failed to modify the field ' . $fields);
+        throw $this->createNotFoundException('Failed to modify the field '.$fields);
     }
 
     /**
@@ -812,7 +812,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
                 $compact['entities'] = $compact['pager']->getCurrentPageResults();
             } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
             return $compact;
