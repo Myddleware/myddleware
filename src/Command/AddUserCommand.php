@@ -234,7 +234,7 @@ class AddUserCommand extends Command
      */
     private function getCommandHelp(): string
     {
-        return '<<< HELP 
+        return <<<'HELP'
                 The <info>%command.name%</info> command creates new users and saves them in the database:
                 <info>php %command.full_name%</info> <comment>username password email</comment>
                 By default the command creates admin users. If you want to create Super Admin users, 
@@ -248,6 +248,6 @@ class AddUserCommand extends Command
                 <info>php %command.full_name%</info> <comment>username</comment>
                 # command will ask you for all arguments
                 <info>php %command.full_name%</info>
-                HELP';
+                HELP;
     }
 }
