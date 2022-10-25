@@ -200,7 +200,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/delete/{id}", name="regle_delete")
          */
-        public function ruleDeleteAction(Request $request, $id)
+        public function deleteRule(Request $request, $id): RedirectResponse
         {
             $session = $request->getSession();
 
@@ -304,6 +304,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 return $this->redirect($this->generateUrl('regle_list'));
             }
+            return $this->redirect($this->generateUrl('regle_list'));
         }
 
         /**
@@ -534,11 +535,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * MODIFIE LES PARAMETRES D'UNE REGLE.
-         *
-         * @param $id
-         *
          * @return JsonResponse|Response
-         *
          * @Route("/update/params/{id}", name="path_fiche_params_update")
          */
         public function ruleUpdParams($id)
@@ -595,9 +592,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * SIMULE LA LECTURE POUR RETOURNER LE NOMBRE DE TRANSFERS POTENTIELS.
-         *
-         * @param $id
-         *
          * @Route("/simule/{id}", name="path_fiche_params_simulate")
          */
         public function ruleSimulateTransfers(Rule $rule): Response
@@ -860,11 +854,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * FICHE D'UNE REGLE.
-         *
-         * @param $id
-         *
          * @Route("/view/{id}", name="regle_open")
-         *
          * @throws Exception
          */
         public function ruleOpenAction($id): Response
@@ -990,13 +980,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * CREATION - STEP ONE - CONNEXION : jQuery ajax.
-         *
          * @return JsonResponse|Response
-         *
+         * CREATION - STEP ONE - CONNEXION : jQuery ajax.
          * @Route("/inputs", name="regle_inputs", methods={"POST"}, options={"expose"=true})
          */
-        public function ruleInputsAction(Request $request)
+        public function ruleInputs(Request $request)
         {
             try {
                 $ruleKey = $this->sessionService->getParamRuleLastKey();
@@ -1122,8 +1110,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                         return new JsonResponse(['success' => false, 'message' => $this->translator->trans('Connection error')]);
                     }
                 } else {
+                    $this->logger->error("Error: Not Found Exception");
                     throw $this->createNotFoundException('Error');
                 }
+                return new JsonResponse(['success' => false]);
             } catch (Exception $e) {
                 return new JsonResponse(['success' => false, 'message' => $e->getMessage().' '.$e->getLine().' '.$e->getFile()]);
             }
@@ -1271,7 +1261,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create/step3/simulation/", name="regle_simulation", methods={"POST"})
          */
-        public function ruleSimulationAction(Request $request): Response
+        public function ruleSimulation(Request $request): Response
         {
             $ruleKey = $this->sessionService->getParamRuleLastKey();
 
@@ -1296,8 +1286,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                             foreach ($f as $name_fields_target => $k) {
                                 if (isset($k['champs'])) {
                                     $sourcesfields = array_merge($k['champs'], $sourcesfields);
-                                } else {
-                                    $sourcesfields = $sourcesfields;
                                 }
                             }
                         }
@@ -1957,10 +1945,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * Indique des informations concernant le champ envoyé en paramètre.
-         *
-         * @param $field
-         * @param $type
-         *
          * @Route("/info/{type}/{field}/", name="path_info_field", methods={"GET"})
          * @Route("/info", name="path_info_field_not_param")
          */
@@ -2364,7 +2348,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                         'ruleName' => $nameRule,
                         'limit' => $limit,
                         'datereference' => $date_reference,
-                        'limit' => $limit,
                         'content' => $tab_new_rule,
                         'filters' => $request->request->get('filter'),
                         'relationships' => $relationshipsBeforeSave,
@@ -2675,7 +2658,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/create", name="regle_stepone_animation")
          */
-        public function ruleStepOneAnimationAction(): Response
+        public function ruleStepOneAnimation(): Response
         {
             if ($this->sessionService->isConnectorExist()) {
                 $this->sessionService->removeMyddlewareConnector();
@@ -2728,10 +2711,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * LISTE DES MODULES POUR ANIMATION.
-         *
+         * @throws Exception
          * @Route("/list/module", name="regle_list_module")
          */
-        public function ruleListModuleAction(Request $request): Response
+        public function ruleListModule(Request $request): Response
         {
             try {
                 $id_connector = $request->get('id');
@@ -2770,6 +2753,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 return new Response($liste_modules);
             } catch (Exception $e) {
+                $error = $e->getMessage().' '.$e->getLine().' '.$e->getFile();
+                $this->logger->error($error);
                 return new Response('<option value="">Aucun module pour ce connecteur</option>');
             }
         }
@@ -2779,7 +2764,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          ****************************************************** */
 
         // CREATION REGLE - STEP ONE : Liste des connecteurs pour un user
-        private function liste_connectorAction($type): string
+        private function connectorsList($type): string
         {
             $this->getInstanceBdd();
             $solutionRepo = $this->entityManager->getRepository(Connector::class);
