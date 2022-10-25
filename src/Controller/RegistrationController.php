@@ -17,11 +17,8 @@ use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 
 class RegistrationController extends AbstractController
 {
-    private $configRepository;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private ConfigRepository $configRepository;
+    private LoggerInterface $logger;
 
     public function __construct(ConfigRepository $configRepository, LoggerInterface $logger)
     {

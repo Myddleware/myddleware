@@ -28,90 +28,55 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Functions.
- *
  * @ORM\Table(name="functions")
  * @ORM\Entity(repositoryClass="App\Repository\FunctionsRepository")
  */
 class Functions
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var FuncCat
-     *
      * @ORM\ManyToOne(targetEntity="FuncCat")
      * @ORM\JoinColumn(name="fcat_id", referencedColumnName="id")
      */
-    private $categorieId;
+    private FuncCat $categoryId;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=20)
      */
-    private $name;
+    private string $name;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return Functions
-     */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set categorieId.
-     *
-     * @return Functions
-     */
-    public function setCategorieId(FuncCat $categorieId)
+    public function setCategoryId(FuncCat $categoryId): self
     {
-        $this->categorieId = $categorieId;
+        $this->categoryId = $categoryId;
 
         return $this;
     }
 
-    /**
-     * Get categorieId.
-     *
-     * @return FuncCat
-     */
-    public function getCategorieId()
+    public function getCategoryId(): FuncCat
     {
-        return $this->categorieId;
+        return $this->categoryId;
     }
 }

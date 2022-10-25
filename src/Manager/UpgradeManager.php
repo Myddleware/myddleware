@@ -27,6 +27,7 @@ namespace App\Manager;
 
 use App\Entity\Config;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -37,33 +38,18 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
-/**
- * Class UpgradeManager.
- */
 class UpgradeManager
 {
-    protected $env;
+    protected string $env;
     protected $em;
     protected $phpExecutable = 'php';
-    protected $message = '';
-    protected $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
+    protected string $message = '';
+    protected array $defaultEnvironment = ['prod' => 'prod', 'background' => 'background'];
     protected $configParams;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var string
-     */
-    private $projectDir;
-    /**
-     * @var KernelInterface
-     */
-    private $kernel;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    private LoggerInterface $logger;
+    private string $projectDir;
+    private KernelInterface $kernel;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -82,7 +68,7 @@ class UpgradeManager
         $this->phpExecutable = $phpBinaryPath;
     }
 
-    public function processUpgrade($output)
+    public function processUpgrade($output): string
     {
         try {
             // Customize update process
@@ -110,7 +96,7 @@ class UpgradeManager
 
             // Clear cache
             $output->writeln('<comment>Clear Symfony cache...</comment>');
-            $this->clearSymfonycache();
+            $this->clearSymfonyCache();
             $output->writeln('<comment>Clear Symfony cache OK</comment>');
             $this->message .= 'Clear Symfony cache OK'.chr(10);
 
@@ -132,7 +118,7 @@ class UpgradeManager
 
             $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').'</info>');
             $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').chr(10);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             $this->message .= $error.chr(10);
@@ -142,6 +128,9 @@ class UpgradeManager
         return $this->message;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function updateFiles()
     {
         // Update Main if git_branch is empty otherwise we update the specific branch
@@ -157,7 +146,7 @@ class UpgradeManager
             echo $process->getOutput();
             $this->logger->error($process->getOutput());
             $this->message .= $process->getOutput().chr(10);
-            throw new \Exception('Failed to update Myddleware. Failed to update Myddleware files by using git');
+            throw new Exception('Failed to update Myddleware. Failed to update Myddleware files by using git');
         }
 
         // Run the command a second time, we expect to get the message "Already up-to-date"
@@ -174,7 +163,7 @@ class UpgradeManager
             false === strpos($output2, 'Already up to date')
             and false === strpos($output2, 'Already up-to-date')
         ) {
-            throw new \Exception('Failed to update Myddleware. Files are not up-to-date.');
+            throw new Exception('Failed to update Myddleware. Files are not up-to-date.');
         }
     }
 
@@ -219,7 +208,9 @@ class UpgradeManager
         }
     }
 
-    // Update database
+    /**
+     * @throws Exception
+     */
     protected function updateDatabase()
     {
         // Update schema
@@ -262,14 +253,16 @@ class UpgradeManager
         }
     }
 
-    // Clear Symfony cache
-    protected function clearSymfonycache()
+    /**
+     * @throws Exception
+     */
+    protected function clearSymfonyCache()
     {
-        // Add current environement  to the default list
+        // Add current environment  to the default list
         $this->defaultEnvironment[$this->env] = $this->env;
 
         foreach ($this->defaultEnvironment as $env) {
-            // Command clear cach remove only current environment cache
+            // Command clear cache remove only current environment cache
             if ($this->env == $env) {
                 // Clear cache
                 $application = new Application($this->kernel);

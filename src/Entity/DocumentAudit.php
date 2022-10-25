@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentAudit.
- *
  * @ORM\Table(name="documentaudit")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="App\Repository\DocumentAuditRepository")
@@ -38,12 +36,10 @@ use Doctrine\ORM\Mapping as ORM;
 class DocumentAudit
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
-    private $id;
+    private string $id;
 
     /**
      * @ORM\PrePersist()
@@ -54,211 +50,115 @@ class DocumentAudit
     }
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="doc_id", type="string", nullable=false)
      */
-    private $doc;
+    private string $doc;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="modified", type="datetime", nullable=false)
      */
-    private $dateModified;
+    private DateTime $dateModified;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="before_value", type="string", nullable=true)
      */
-    private $before;
+    private string $before;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="after_value", type="string", nullable=true)
      */
-    private $after;
+    private string $after;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="user", type="string", nullable=false)
      */
-    private $byUser;
+    private string $byUser;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", nullable=false)
      */
-    private $name;
+    private string $name;
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return DocumentAudit
-     */
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * Set doc.
-     *
-     * @param string $doc
-     *
-     * @return DocumentAudit
-     */
-    public function setDoc($doc)
+    public function setDoc($doc): self
     {
         $this->doc = $doc;
 
         return $this;
     }
 
-    /**
-     * Get doc.
-     *
-     * @return string
-     */
-    public function getDoc()
+    public function getDoc(): string
     {
         return $this->doc;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return DocumentAudit
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified($dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set before.
-     *
-     * @param string $before
-     *
-     * @return DocumentAudit
-     */
-    public function setBefore($before)
+    public function setBefore($before): self
     {
         $this->before = $before;
 
         return $this;
     }
 
-    /**
-     * Get before.
-     *
-     * @return string
-     */
-    public function getBefore()
+    public function getBefore(): string
     {
         return $this->before;
     }
 
-    /**
-     * Set after.
-     *
-     * @param string $after
-     *
-     * @return DocumentAudit
-     */
-    public function setAfter($after)
+    public function setAfter($after): self
     {
         $this->after = $after;
 
         return $this;
     }
 
-    /**
-     * Get after.
-     *
-     * @return string
-     */
-    public function getAfter()
+    public function getAfter(): string
     {
         return $this->after;
     }
 
-    /**
-     * Set byUser.
-     *
-     * @param string $byUser
-     *
-     * @return DocumentAudit
-     */
-    public function setByUser($byUser)
+    public function setByUser($byUser): self
     {
         $this->byUser = $byUser;
 
         return $this;
     }
 
-    /**
-     * Get byUser.
-     *
-     * @return string
-     */
-    public function getByUser()
+    public function getByUser(): string
     {
         return $this->byUser;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return DocumentAudit
-     */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

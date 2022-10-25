@@ -208,9 +208,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-    public function ckeckPredecessorDocuments()
+    public function checkPredecessorDocuments()
     {
-        $this->ruleManager->ckeckPredecessorDocuments();
+        $this->ruleManager->checkPredecessorDocuments();
     }
 
     // Permet de filtrer les documents en fonction des filtres de la règle
@@ -220,9 +220,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function ckeckParentDocuments()
+    public function checkParentDocument()
     {
-        $this->ruleManager->ckeckParentDocuments();
+        $this->ruleManager->checkParentDocument();
     }
 
     // Permet de trasformer les documents
@@ -296,17 +296,17 @@ class jobcore
         $this->start = microtime(true);
         // Check if a job is already running except if force = true (api call or manuel call)
         if (!$force) {
-			$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-			$stmt = $this->connection->prepare($sqlJobOpen);
-			$result = $stmt->executeQuery();
-			$job = $result->fetchAssociative(); // 1 row
-			// Error if one job is still running
-			if (!empty($job)) {
-				$this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+            $stmt = $this->connection->prepare($sqlJobOpen);
+            $result = $stmt->executeQuery();
+            $job = $result->fetchAssociative(); // 1 row
+            // Error if one job is still running
+            if (!empty($job)) {
+                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-				return ['success' => false, 'message' => $this->message];
-			}
-		}
+                return ['success' => false, 'message' => $this->message];
+            }
+        }
         // Create Job
         $insertJob = $this->insertJob();
         if ($insertJob) {
@@ -747,9 +747,9 @@ class jobcore
         $this->message = $upgrade->processUpgrade($output);
     }
 
-    // Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
-
     /**
+     * Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle.
+     *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */

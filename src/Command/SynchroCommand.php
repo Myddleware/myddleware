@@ -38,30 +38,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SynchroCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var DocumentManager
-     */
-    private $documentManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private EntityManagerInterface $entityManager;
+    private DocumentManager $documentManager;
+    private RuleManager $ruleManager;
+    private DocumentRepository $documentRepository;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:synchro';
@@ -94,7 +76,7 @@ class SynchroCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $step = 1;
         try {
@@ -103,9 +85,9 @@ class SynchroCommand extends Command
             $rule = $input->getArgument('rule');
             $api = $input->getArgument('api');
             $force = $input->getArgument('force');
-			if (empty($force)) {
-				$force = false;
-			}
+            if (empty($force)) {
+                $force = false;
+            }
             // Récupération du Job
             // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
@@ -144,10 +126,10 @@ class SynchroCommand extends Command
                                     $this->jobManager->filterDocuments();
 
                                     // Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-                                    $this->jobManager->ckeckPredecessorDocuments();
+                                    $this->jobManager->checkPredecessorDocuments();
 
                                     // Permet de valider qu'au moins un document parent(relation père) est existant
-                                    $this->jobManager->ckeckParentDocuments();
+                                    $this->jobManager->checkParentDocument();
 
                                     // Permet de transformer les docuement avant d'être envoyés à la cible
                                     $this->jobManager->transformDocuments();

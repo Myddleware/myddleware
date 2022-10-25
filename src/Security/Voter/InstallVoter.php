@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class InstallVoter extends Voter
 {
-    protected function supports($attribute, $subject)
+    protected function supports($attribute, $subject): bool
     {
         // only vote on `Config` objects
         if (!$subject instanceof Config) {
@@ -22,13 +22,11 @@ class InstallVoter extends Voter
             return false;
         }
 
-        // return true;
-
         return in_array($attribute, ['DATABASE_EDIT', 'DATABASE_VIEW'])
             && $subject instanceof Config;
     }
 
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
+    protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
 
@@ -39,20 +37,16 @@ class InstallVoter extends Voter
 
         $config = $subject;
 
-        // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
+            case 'DATABASE_VIEW':
             case 'DATABASE_EDIT':
                 return $this->canInstall($config);
-                break;
-            case 'DATABASE_VIEW':
-                return $this->canInstall($config);
-                break;
         }
 
         return false;
     }
 
-    public function canInstall($config)
+    public function canInstall($config): bool
     {
         if ('allow_install' === $config->getName()) {
             if ('true' === $config->getValue()) {

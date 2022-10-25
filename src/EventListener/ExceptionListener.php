@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ExceptionListener
 {
-    private $router;
+    private UrlGeneratorInterface $router;
 
     public function __construct(UrlGeneratorInterface $router)
     {

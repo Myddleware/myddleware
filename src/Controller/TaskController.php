@@ -43,50 +43,28 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class TaskController.
- *
  * @Route("/rule")
  */
 class TaskController extends AbstractController
 {
     protected $params;
+    private JobManager $jobManager;
+    private JobRepository $jobRepository;
+    private EntityManagerInterface $entityManager;
+    private DocumentRepository $documentRepository;
+    private LoggerInterface $logger;
 
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var LoggerInterface
-     */
-    private $LoggerInterface;
-
-    /**
-     * TaskController constructor.
-     */
     public function __construct(
         JobManager $jobManager,
         JobRepository $jobRepository,
         DocumentRepository $documentRepository,
-        LoggerInterface $LoggerInterface,
+        LoggerInterface $logger,
         EntityManagerInterface $entityManager
     ) {
         $this->jobRepository = $jobRepository;
         $this->jobManager = $jobManager;
         $this->documentRepository = $documentRepository;
-        $this->LoggerInterface = $LoggerInterface;
+        $this->logger = $logger;
         $this->entityManager = $entityManager;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
@@ -99,22 +77,16 @@ class TaskController extends AbstractController
     }
 
     /**
-     * Liste des tâches.
-     *
-     * @param $page
-     *
-     * @return Response
-     *
      * @Route("/task/list", name="task_list", defaults={"page"=1})
      * @Route("/task/list/page-{page}", name="task_list_page", requirements={"page"="\d+"})
      */
-    public function taskListAction($page)
+    public function tasksList($page): Response
     {
         // List of task limited to 1000 and rder by status (start first) and date begin
         $jobs = $this->jobRepository->findBy([], ['status' => 'DESC', 'begin' => 'DESC'], 1000);
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $jobs,
-            'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
+            'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
         ], false);
 
@@ -133,17 +105,11 @@ class TaskController extends AbstractController
         );
     }
 
-    // Fiche d'une tâche
-
     /**
-     * @param $page
-     *
-     * @return RedirectResponse|Response
-     *
      * @Route("/task/view/{id}/log", name="task_view", defaults={"page"=1})
      * @Route("/task/view/{id}/log/page-{page}", name="task_view_page", requirements={"page"="\d+"})
      */
-    public function viewTaskAction(Job $task, $page)
+    public function viewTask(Job $task, $page)
     {
         try {
             $em = $this->getDoctrine()->getManager();
@@ -151,7 +117,7 @@ class TaskController extends AbstractController
             $taskId = $task->getId();
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $em->getRepository(Log::class)->findBy(['job' => $taskId], ['id' => 'DESC']),
-                'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 25,
+                'maxPerPage' => $this->params['pager'] ?? 25,
                 'page' => $page,
             ], false);
             //Check the user timezone
@@ -177,13 +143,9 @@ class TaskController extends AbstractController
     }
 
     /**
-     * Stop task.
-     *
-     * @return RedirectResponse
-     *
      * @Route("/task/stop/{id}", name="task_stop")
      */
-    public function stopTaskAction(Job $taskStop)
+    public function stopTask(Job $taskStop): RedirectResponse
     {
         try {
             $em = $this->getDoctrine()->getManager();

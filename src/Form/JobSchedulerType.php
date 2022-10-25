@@ -37,26 +37,12 @@ class JobSchedulerType extends AbstractType
             ->add('jobOrder', IntegerType::class, ['required' => true, 'data' => $this->getJobOrder($options)]);
     }
 
-    /**
-     * get period value.
-     *
-     * @param $options
-     *
-     * @return int
-     */
-    public function getPeriod($options)
+    public function getPeriod($options): int
     {
         return '' == $options['data']->getPeriod() ? $period = 5 : $period = $options['data']->getPeriod();
     }
 
-    /**
-     * get jobOrder value.
-     *
-     * @param $options
-     *
-     * @return int
-     */
-    public function getJobOrder($options)
+    public function getJobOrder($options): int
     {
         return '' == $options['data']->getjobOrder() ? $jobOrder = 1 : $jobOrder = $options['data']->getjobOrder();
     }
@@ -68,10 +54,7 @@ class JobSchedulerType extends AbstractType
         ]);
     }
 
-    /**
-     * @return string
-     */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'myddleware_reglebundle_jobscheduler';
     }

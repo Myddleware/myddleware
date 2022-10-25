@@ -33,8 +33,8 @@ class postgresqlcore extends database
     protected $sendDeletion = true;
     protected $readDeletion = true;
 
-    protected $stringSeparatorOpen = '';
-    protected $stringSeparatorClose = '';
+    protected string $stringSeparatorOpen = '';
+    protected string $stringSeparatorClose = '';
 
     protected function generatePdo()
     {

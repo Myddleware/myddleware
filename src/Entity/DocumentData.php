@@ -25,13 +25,9 @@
 
 namespace App\Entity;
 
-// unique
-
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DocumentData.
- *
  * @ORM\Entity(repositoryClass="App\Repository\DocumentDataRepository")
  * @ORM\Table(name="documentdata", indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
@@ -41,89 +37,52 @@ use Doctrine\ORM\Mapping as ORM;
 class DocumentData
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var string
-     *
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
      * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
      */
-    private $doc_id;
+    private Document $doc_id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="type", type="string", length=1, nullable=false)
      */
-    private $type;
+    private string $type;
 
     /**
-     * @var array
-     *
      * @ORM\Column(name="data", type="array", nullable=false)
      */
     private $data;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set type.
-     *
-     * @param string $type
-     *
-     * @return DocumentData
-     */
-    public function setType($type)
+    public function setType($type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * Get type.
-     *
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * Set data.
-     *
-     * @param string $data
-     *
-     * @return DocumentData
-     */
-    public function setData($data)
+    public function setData($data): self
     {
         $this->data = $data;
 
         return $this;
     }
 
-    /**
-     * Get data.
-     *
-     * @return string
-     */
     public function getData()
     {
         return $this->data;

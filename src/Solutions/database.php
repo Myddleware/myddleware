@@ -26,18 +26,20 @@
 namespace App\Solutions;
 
 use App\Entity\Rule;
+use Exception;
+use PDO;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class databasecore extends solution
 {
     protected $driver;
-    protected $pdo;
-    protected $charset = 'utf8';
-    protected $allowSeveralUpdate = false;
+    protected PDO $pdo;
+    protected string $charset = 'utf8';
+    protected bool $allowSeveralUpdate = false;
 
-    protected $stringSeparatorOpen = '`';
-    protected $stringSeparatorClose = '`';
+    protected string $stringSeparatorOpen = '`';
+    protected string $stringSeparatorClose = '`';
 
     public function login($paramConnexion)
     {
@@ -53,7 +55,7 @@ class databasecore extends solution
 
                 return ['error' => $error];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
@@ -61,9 +63,7 @@ class databasecore extends solution
         }
     }
 
-    // login($paramConnexion)
-
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -106,7 +106,7 @@ class databasecore extends solution
             // Error management
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Show Tables: '.$errorInfo[2]);
+                throw new Exception('Show Tables: '.$errorInfo[2]);
             }
             // Get every table and add them to the module list
             $fetchAll = $q->fetchAll();
@@ -117,10 +117,8 @@ class databasecore extends solution
             }
 
             return $modules;
-        } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
-            return $error;
+        } catch (Exception $e) {
+            return 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
     }
 
@@ -135,7 +133,7 @@ class databasecore extends solution
             $exec = $q->execute();
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('CheckTable: (Describe) '.$errorInfo[2]);
+                throw new Exception('CheckTable: (Describe) '.$errorInfo[2]);
             }
             // Format the fields
             $fields = $q->fetchAll();
@@ -198,14 +196,13 @@ class databasecore extends solution
             $this->get_module_fields_relate($module, $param);
 
             return $this->moduleFields;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
             return false;
         }
     }
-
-    // get_module_fields($module)
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
     public function readData($param)
@@ -236,17 +233,17 @@ class databasecore extends solution
             // fieldId and fieldDateRef are required for a read action from a rule execution
             if ('read' == $param['call_type']) {
                 if (!isset($param['ruleParams']['fieldId'])) {
-                    throw new \Exception('FieldId has to be specified for the read.');
+                    throw new Exception('FieldId has to be specified for the read.');
                 }
                 if (!isset($param['ruleParams']['fieldDateRef'])) {
-                    throw new \Exception('"fieldDateRef" has to be specified for the read.');
+                    throw new Exception('"fieldDateRef" has to be specified for the read.');
                 }
                 $this->required_fields = ['default' => [$param['ruleParams']['fieldId'], $param['ruleParams']['fieldDateRef']]];
             }
             // fieldId and fieldDateRef are required for a read action from a rule execution
             if ('history' == $param['call_type']) {
                 if (!isset($param['ruleParams']['targetFieldId'])) {
-                    throw new \Exception('targetFieldId has to be specified for read the data in the target table.');
+                    throw new Exception('targetFieldId has to be specified for read the data in the target table.');
                 }
                 $this->required_fields = ['default' => [$param['ruleParams']['targetFieldId']]];
             }
@@ -285,7 +282,7 @@ class databasecore extends solution
                                 !empty($param['ruleParams']['fieldId'])
                             and 'myddleware_generated' == $param['ruleParams']['fieldId']
                         ) {
-                            throw new \Exception('Not possible to read a specific record when myddleware_generated is selected as the Primary key in your source table');
+                            throw new Exception('Not possible to read a specific record when myddleware_generated is selected as the Primary key in your source table');
                         }
                         // The query key is different if the functyion is call from a read data (database is source) or a read history (database is target)
                         if ('history' == $param['call_type']) {
@@ -321,7 +318,7 @@ class databasecore extends solution
 
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
+                throw new Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
             $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -378,19 +375,21 @@ class databasecore extends solution
             }
             // Search for delete data
             $result = $this->searchDeletionByComparison($param, $result);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
     }
 
-    // Create the record
+    /**
+     * @throws Exception
+     */
     protected function create($param, $record, $idDoc = null)
     {
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
-            throw new \Exception('targetFieldId has to be specified for the data creation.');
+            throw new Exception('targetFieldId has to be specified for the data creation.');
         }
 
         // Query init
@@ -406,7 +405,7 @@ class databasecore extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= ($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
+            $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
@@ -421,7 +420,7 @@ class databasecore extends solution
         $exec = $q->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
         }
 
         // If the target reference field isn't in data sent
@@ -433,7 +432,9 @@ class databasecore extends solution
         return $idTarget;
     }
 
-    // Update the record
+    /**
+     * @throws Exception
+     */
     protected function update($param, $record, $idDoc = null)
     {
         // Query init
@@ -446,7 +447,7 @@ class databasecore extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose."=".($value == 'null' ? 'null,' : "'".$this->escape($value)."',");
+            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
         }
 
         // Remove the last coma
@@ -460,7 +461,7 @@ class databasecore extends solution
         // Query error
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
         }
         // No modification
         if (0 == $q->rowCount()) {
@@ -468,22 +469,24 @@ class databasecore extends solution
         }
         // Several modifications
         if (
-				$this->allowSeveralUpdate == false
-			AND	$q->rowCount() > 1
-		) {
-            throw new \Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
+                !$this->allowSeveralUpdate
+            and $q->rowCount() > 1
+        ) {
+            throw new Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
         return $record['target_id'];
     }
 
-    // Function to delete a record
+    /**
+     * @throws Exception
+     */
     public function delete($param, $record)
     {
         // Check control before delete
         $record = $this->checkDataBeforeDelete($param, $record);
         if (empty($record['target_id'])) {
-            throw new \Exception('No target id found. Failed to delete the record.');
+            throw new Exception('No target id found. Failed to delete the record.');
         }
         // Query init
         $sql = 'DELETE FROM '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' ';
@@ -496,12 +499,16 @@ class databasecore extends solution
         $exec = $q->execute();
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
-            throw new \Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
+            throw new Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
         }
 
         return $record['target_id'];
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     protected function searchDeletionByComparison($param, $result)
     {
         // If check deletion by comparaison is selected on the rule param
@@ -516,7 +523,7 @@ class databasecore extends solution
             $exec = $q->execute();
             if (!$exec) {
                 $errorInfo = $this->pdo->errorInfo();
-                throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
+                throw new Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
             $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
             // If result is empty, we stop the process because it would remove all data
@@ -574,7 +581,7 @@ class databasecore extends solution
     }
 
     // Get the strings which can identify what field is an id in the table
-    protected function getIdFields($module, $type, $fields)
+    protected function getIdFields($module, $type, $fields): array
     {
         // default is id
         return ['id'];
@@ -587,18 +594,22 @@ class databasecore extends solution
     }
 
     // Get the header of the select query in the read last function
-    protected function get_query_select_header($param, $method)
+    protected function get_query_select_header($param, $method): string
     {
         return 'SELECT ';
     }
 
-    // Function to buid the SELECT query
-    protected function buildQuery($param, $query)
+    // Function to build the SELECT query
+    protected function buildQuery($param, $query): string
     {
         return $query['select'].$query['from'].$query['where'].(!empty($query['order']) ? $query['order'] : '').$query['limit'];
     }
 
-    // Get the fieldId from the other rules to add them into the source relationship list field
+    /**
+     * Get the fieldId from the other rules to add them into the source relationship list field.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function get_module_fields_relate($module, $param)
     {
         if (!empty($param)) {
@@ -654,7 +665,7 @@ class databasecore extends solution
         }
     }
 
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $fieldsSource = $this->get_module_fields($module, $type, false);
@@ -710,7 +721,7 @@ class databasecore extends solution
                         'label' => 'Primary key in your target table',
                         'required' => true,
                     ];
-                    // Add all fieds to the list
+                    // Add all fields to the list
                     foreach ($fieldsSource as $key => $value) {
                         $idParam['option'][$key] = $value['label'];
                     }
@@ -721,13 +732,13 @@ class databasecore extends solution
             }
 
             return [];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [];
         }
     }
 
     // Generate ID for the document
-    protected function generateId($param, $record)
+    protected function generateId($param, $record): string
     {
         return uniqid('', true);
     }

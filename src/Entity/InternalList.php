@@ -15,44 +15,44 @@ class InternalList
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=50)
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\Column(type="string", length=50)
      */
-    private $type;
+    private ?string $type;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateCreated;
+    private ?\DateTimeInterface $dateCreated;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateModified;
+    private ?\DateTimeInterface $dateModified;
 
     /**
      * @ORM\Column(type="boolean", options={"default":0})
      */
-    private $deleted;
+    private ?bool $deleted;
 
     public function getId(): ?int
     {

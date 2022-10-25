@@ -48,7 +48,7 @@ class LoadJobSchedulerData implements FixtureInterface
         $this->manager->flush();
     }
 
-    public function getOrder()
+    public function getOrder(): int
     {
         return 1;
     }

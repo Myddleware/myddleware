@@ -31,25 +31,16 @@ use App\Repository\JobRepository;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class HomeManager.
- */
 class HomeManager
 {
-    protected $connection;
-    protected $logger;
+    protected Connection $connection;
+    protected LoggerInterface $logger;
 
     const historicDays = 7;
     const nbHistoricJobs = 5;
-    protected $historicDateFormat = 'M-d';
-    /**
-     * @var JobRepository
-     */
-    private $jobRepository;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    protected string $historicDateFormat = 'M-d';
+    private JobRepository $jobRepository;
+    private DocumentRepository $documentRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -63,7 +54,7 @@ class HomeManager
         $this->documentRepository = $documentRepository;
     }
 
-    public function countTransferHisto(User $user = null)
+    public function countTransferHisto(User $user = null): array
     {
         try {
             $historic = [];
@@ -73,9 +64,9 @@ class HomeManager
             $endDate = date('Y-m-d');
             // Init array
             while (strtotime($startDate) < strtotime($endDate)) {
-                $startDateFromat = date($this->historicDateFormat, strtotime('+1 day', strtotime($startDate)));
+                $startDateFormat = date($this->historicDateFormat, strtotime('+1 day', strtotime($startDate)));
                 $startDate = date('Y-m-d', strtotime('+1 day', strtotime($startDate)));
-                $historic[$startDate] = ['date' => $startDateFromat, 'open' => 0, 'error' => 0, 'cancel' => 0, 'close' => 0];
+                $historic[$startDate] = ['date' => $startDateFormat, 'open' => 0, 'error' => 0, 'cancel' => 0, 'close' => 0];
             }
 
             // Select the number of transfers per day

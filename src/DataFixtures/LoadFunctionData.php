@@ -57,14 +57,14 @@ class LoadFunctionData implements FixtureInterface
         $functions = $this->manager->getRepository(Functions::class)->findAll();
         if (!empty($functions)) {
             foreach ($functions as $function) {
-                $this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
+                $this->functions[$function->getCategoryId()->getName()][$function->getId()] = $function->getName();
             }
         }
         $this->generateEntities();
         $this->manager->flush();
     }
 
-    public function getOrder()
+    public function getOrder(): int
     {
         return 1;
     }
@@ -104,7 +104,7 @@ class LoadFunctionData implements FixtureInterface
             ) {
                 $func = new Functions();
                 $func->setName($function);
-                $func->setCategorieId($funcCat);
+                $func->setCategoryId($funcCat);
                 $this->manager->persist($func);
             }
         }
