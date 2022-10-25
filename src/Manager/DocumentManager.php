@@ -452,7 +452,6 @@ class documentcore
                 } else {
                     return true;
                 }
-                // no break
             case 'notcontent':
                 $pos = stripos($fieldValue, $filterValue);
                 if (false === $pos) {
@@ -460,7 +459,6 @@ class documentcore
                 } else {
                     return false;
                 }
-                // no break
             case 'begin':
                 $begin = substr($fieldValue, 0, strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -468,7 +466,6 @@ class documentcore
                 } else {
                     return false;
                 }
-                // no break
             case 'end':
                 $begin = substr($fieldValue, 0 - strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -476,63 +473,54 @@ class documentcore
                 } else {
                     return false;
                 }
-                // no break
             case 'in':
                 if (in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'notin':
                 if (!in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'gt':
                 if ($fieldValue > $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'lt':
                 if ($fieldValue < $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'lteq':
                 if ($fieldValue <= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'gteq':
                 if ($fieldValue >= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'equal':
                 if (strtoupper($fieldValue) == strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             case 'different':
                 if (strtoupper($fieldValue) != strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
-                // no break
             default:
                 $this->message .= 'Failed to filter. Operator '.$operator.' unknown. ';
 
