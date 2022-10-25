@@ -4,5 +4,5 @@ swiftmailer:
     port: 465
     auth_mode: login
     encryption: ssl
-    user: estelle.gaits@gmail.com
-    password: test
+    user: null
+    password: null
