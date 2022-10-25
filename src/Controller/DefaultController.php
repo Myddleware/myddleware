@@ -49,6 +49,7 @@ use App\Manager\RuleManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
 use App\Manager\ToolsManager;
+use App\Repository\ConfigRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
@@ -97,7 +98,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         protected Connection $connection;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
-
+        private ConfigRepository $configRepository;
 
         public function __construct(
             LoggerInterface $logger,
@@ -136,15 +137,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
-            // Init parameters
-            $configRepository = $this->entityManager->getRepository(Config::class);
-            $configs = $configRepository->findAll();
-            if (!empty($configs)) {
-                foreach ($configs as $config) {
-                    $this->params[$config->getName()] = $config->getvalue();
-                }
-            }
         }
+
+
         protected function getInstanceBdd()
         {
         }
