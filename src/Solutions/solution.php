@@ -26,7 +26,9 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
+use App\Manager\FormulaManager;
 use App\Repository\DocumentRepository;
+use App\Repository\RuleRelationShipRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -75,19 +77,25 @@ class solutioncore
     protected ParameterBagInterface $parameterBagInterface;
     protected EntityManagerInterface $entityManager;
     private DocumentRepository $documentRepository;
+    private RuleRelationShipRepository $ruleRelationshipsRepository;
+    private FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
         Connection $connection,
         ParameterBagInterface $parameterBagInterface,
         EntityManagerInterface $entityManager,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+        RuleRelationShipRepository $ruleRelationshipsRepository,
+        FormulaManager $formulaManager
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
         $this->entityManager = $entityManager;
         $this->parameterBagInterface = $parameterBagInterface;
         $this->documentRepository = $documentRepository;
+        $this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
+        $this->formulaManager = $formulaManager;
     }
 
     // Fonction permettant de se loguer à la solution
@@ -143,7 +151,7 @@ class solutioncore
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository);
+            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
             $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {

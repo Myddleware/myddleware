@@ -106,9 +106,9 @@ class documentcore
         Connection $dbalConnection,
         EntityManagerInterface $entityManager,
         DocumentRepository $documentRepository,
+        RuleRelationShipRepository $ruleRelationshipsRepository,
+        FormulaManager $formulaManager,
         SolutionManager $solutionManager = null,
-        FormulaManager $formulaManager = null,
-        RuleRelationShipRepository $ruleRelationshipsRepository = null,
         ParameterBagInterface $parameterBagInterface = null,
         ToolsManager $tools = null
     ) {
