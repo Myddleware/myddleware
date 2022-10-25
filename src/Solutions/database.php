@@ -123,7 +123,7 @@ class databasecore extends solution
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -199,8 +199,7 @@ class databasecore extends solution
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-
-            return false;
+            return [];
         }
     }
 

@@ -43,17 +43,17 @@ class ringcentralcore extends solution
     protected $apiKey;
     protected $token;
     protected $server;
-    protected $callLimit = 100;
-    protected $readLimit = 1000;
+    protected int $callLimit = 100;
+    protected int $readLimit = 1000;
 
-    protected $required_fields = [
+    protected array $required_fields = [
         'default' => ['id'],
         'call-log' => ['id', 'startTime'],
         'message-store' => ['id', 'lastModifiedTime'],
         'presence' => ['id', 'date_modified'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -116,28 +116,25 @@ class ringcentralcore extends solution
         }
     }
 
-    // login($paramConnexion)
-
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
-            $modules = [
+            return [
                 'call-log' => 'Call log',
                 'message-store' => 'Messages',
                 'presence' => 'Presence',
             ];
-
-            return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -148,11 +145,12 @@ class ringcentralcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
-
-    // get_module_fields($module)
 
     public function readData($param)
     {
@@ -297,7 +295,7 @@ class ringcentralcore extends solution
     }
 
     // Add the filed extensionId on the rule
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params[] = [
@@ -341,9 +339,9 @@ class ringcentralcore extends solution
         }
     }
 
-    // dateTimeFromMyddleware($dateTime)
-
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -351,9 +349,9 @@ class ringcentralcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
-
-    // HTTP Request function
+    /**
+     * @throws \Exception
+     */
     public function makeRequest($server, $token, $path, $args = null, $method = 'GET', $data = null)
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {

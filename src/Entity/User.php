@@ -78,7 +78,7 @@ class User implements UserInterface, Serializable
     /**
      * @ORM\Column(name="salt", type="string", nullable=true)
      */
-    protected ?string $salt;
+    protected $salt;
 
     /**
      * @ORM\Column(name="password", type="string")
@@ -221,7 +221,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function getSalt(): ?string
+    public function getSalt()
     {
         return $this->salt;
     }

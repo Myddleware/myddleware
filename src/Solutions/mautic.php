@@ -38,27 +38,27 @@ class mauticcore extends solution
     protected $auth;
 
     // Modules name depending on the context (call to create date, result of a search, result of a creation/update)
-    protected $moduleParameters = [
+    protected array $moduleParameters = [
         'contact' => ['plurial' => 'contacts', 'resultKeyUpsert' => 'contact', 'resultSearch' => 'contacts'],
         'company' => ['plurial' => 'companies', 'resultKeyUpsert' => 'company', 'resultSearch' => 'companies'],
         'segment' => ['plurial' => 'segments', 'resultKeyUpsert' => 'list',    'resultSearch' => 'list'],
     ];
-    protected $required_fields = [
+    protected array $required_fields = [
         'default' => ['id', 'dateModified', 'dateAdded'],
         'company' => ['id'],
     ];
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         'contact' => ['email'],
     ];
 
     // Enable to read deletion and to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
     //If you have Mautic 2 or lower, you must change this parameter to your version number
-    protected $mauticVersion = 3;
+    protected int $mauticVersion = 3;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -108,7 +108,7 @@ class mauticcore extends solution
                 throw new \Exception('Failed to login to Mautic. No error message returned by the API.');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -116,7 +116,7 @@ class mauticcore extends solution
     }
 
     // Get the modules available
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         // Modules available in source and target
         $modules = [
@@ -134,7 +134,7 @@ class mauticcore extends solution
     }
 
     // Get the fields available
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -190,13 +190,18 @@ class mauticcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
-    public function createData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Mautic\Exception\ContextNotFoundException
+     */
+    public function createData($param): array
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -209,9 +214,11 @@ class mauticcore extends solution
         }
     }
 
-    // end function create
-
-    public function updateData($param)
+    /**
+     * @throws \Mautic\Exception\ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -224,9 +231,11 @@ class mauticcore extends solution
         }
     }
 
-    // end function create
-
-    public function deleteData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Mautic\Exception\ContextNotFoundException
+     */
+    public function deleteData($param): array
     {
         // Specific management depending on the module
         switch ($param['module']) {
@@ -239,10 +248,13 @@ class mauticcore extends solution
         }
     }
 
-    // end function create
-
     // Create reconto to Mautic
-    public function createUpdate($action, $param)
+
+    /**
+     * @throws \Mautic\Exception\ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createUpdate($action, $param): array
     {
         // Create API object depending on the module
         $api = new MauticApi();
@@ -297,7 +309,12 @@ class mauticcore extends solution
     }
 
     // Create reconto to Mautic
-    public function manageRelationship($action, $param, $module1, $module2)
+
+    /**
+     * @throws \Mautic\Exception\ContextNotFoundException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function manageRelationship($action, $param, $module1, $module2): array
     {
         // Create API object depending on the module
         $api = new MauticApi();
@@ -350,7 +367,7 @@ class mauticcore extends solution
     }
 
     // Function to delete a record
-    public function deleteRecord($param)
+    public function deleteRecord($param): array
     {
         try {
             // Create API object depending on the module
@@ -437,14 +454,16 @@ class mauticcore extends solution
     }
 
     // Function to convert datetime format from the current application to Myddleware date format
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
 
         return $date->format('Y-m-d H:i:s');
     }
-
-    // dateTimeToMyddleware($dateTime)
 }
 
 class mautic extends mauticcore

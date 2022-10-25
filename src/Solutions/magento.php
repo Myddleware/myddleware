@@ -33,7 +33,7 @@ class magentocore extends solution
     protected $token;
 
     // Tableau de correspondance Module / ID pour les modules qui n'ont pas d'id de type "nommodule"."id"
-    protected $idByModule = [
+    protected array $idByModule = [
         'customers' => 'id',
         'customer_address' => 'id',
         'orders' => 'entity_id',
@@ -41,16 +41,16 @@ class magentocore extends solution
         'orders_items' => 'item_id',
     ];
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         'customers' => ['email'],
     ];
 
-    protected $required_fields = ['default' => ['updated_at']];
+    protected array $required_fields = ['default' => ['updated_at']];
 
-    protected $callLimit = 100;
+    protected int $callLimit = 100;
 
     // Liste des param�tres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -94,7 +94,7 @@ class magentocore extends solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' == $type) {
             return [
@@ -112,7 +112,7 @@ class magentocore extends solution
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -457,14 +457,15 @@ class magentocore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return ['error' => $error];
         }
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         $result = [];
         $result['count'] = 0;
@@ -610,14 +611,20 @@ class magentocore extends solution
                 }
             }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            $result['error'] = $error;
         }
 
         return $result;
     }
 
     // Permet de créer un enregistrement
-    public function createData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createData($param): array
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -676,7 +683,11 @@ class magentocore extends solution
     }
 
     // Permet de mettre à jour un enregistrement
-    public function updateData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         // Initialisation de paramètre en fonction du module
         switch ($param['module']) {
@@ -740,7 +751,7 @@ class magentocore extends solution
     }
 
     // remove one dimension by replacing the dimension by __
-    protected function removeDimension($subRecords)
+    protected function removeDimension($subRecords): array
     {
         foreach ($subRecords as $key => $value) {
             if (is_array($value)) {
@@ -769,7 +780,10 @@ class magentocore extends solution
     // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    /**
+     * @throws \Exception
+     */
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         if (in_array($RuleMode, ['0', 'S'])) {
             return 'updated_at';
@@ -782,12 +796,13 @@ class magentocore extends solution
     /**
      * Performs the underlying HTTP request. Not very exciting.
      *
-     * @param string $method  The API method to be called
-     * @param array  $args    Assoc array of parameters to be passed
-     * @param mixed  $url
-     * @param mixed  $timeout
+     * @param string $method The API method to be called
+     * @param array $args Assoc array of parameters to be passed
+     * @param mixed $url
+     * @param mixed $timeout
      *
      * @return array Assoc array of decoded result
+     * @throws \Exception
      */
     protected function call($url, $method = 'GET', $args = [], $timeout = 10)
     {

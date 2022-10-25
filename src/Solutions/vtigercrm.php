@@ -32,11 +32,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class vtigercrmcore extends solution
 {
     // Enable to delete data
-    protected $sendDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $limitPerCall = 100;
+    protected int $limitPerCall = 100;
 
-    protected $required_fields = [
+    protected array $required_fields = [
         'default' => [
             'id',
             'modifiedtime',
@@ -44,7 +44,7 @@ class vtigercrmcore extends solution
         ],
     ];
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         'Contacts' => ['email', 'lastname'],
         'CompanyDetails' => ['organizationname'],
         'Accounts' => ['accountname'],
@@ -52,13 +52,13 @@ class vtigercrmcore extends solution
         'default' => [''],
     ];
 
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => ['Users', 'Documents'],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [
+    protected array $exclude_field_list = [
         'default' => [
             'default' => [
                 'id',
@@ -75,7 +75,7 @@ class vtigercrmcore extends solution
         ],
     ];
 
-    protected $inventoryModules = [
+    protected array $inventoryModules = [
         'Invoice',
         'SalesOrder',
         'Quotes',
@@ -85,13 +85,13 @@ class vtigercrmcore extends solution
     ];
 
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Quotes', 'SalesOrder'];
+    protected array $allowParentRelationship = ['Quotes', 'SalesOrder'];
 
     /** @var array */
-    protected $moduleList;
+    protected array $moduleList;
 
     /** @var VtigerClient */
-    protected $vtigerClient;
+    protected VtigerClient $vtigerClient;
 
     /**
      * Make the login.
@@ -123,12 +123,7 @@ class vtigercrmcore extends solution
         }
     }
 
-    /**
-     * Make the logout.
-     *
-     * @return bool
-     */
-    public function logout()
+    public function logout(): bool
     {
         // TODO: Creare ed usare il loguot di vtiger (Non Funziona)
         /*
@@ -146,7 +141,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -204,9 +199,10 @@ class vtigercrmcore extends solution
 
             return $options ?: false;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
@@ -245,7 +241,7 @@ class vtigercrmcore extends solution
      *
      * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -311,7 +307,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             if (empty($this->vtigerClient)) {
@@ -457,7 +453,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function createData($param)
+    public function createData($param): array
     {
         try {
             $subDocIdArray = [];
@@ -561,7 +557,7 @@ class vtigercrmcore extends solution
      *
      * @return array
      */
-    public function updateData($param)
+    public function updateData($param): array
     {
         try {
             $subDocIdArray = [];
@@ -660,7 +656,7 @@ class vtigercrmcore extends solution
     }
 
     // Function to delete a record
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         try {
             // For every document

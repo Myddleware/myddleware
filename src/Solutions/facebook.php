@@ -30,14 +30,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class facebookcore extends solution
 {
-    protected $baseUrl = 'https://graph.facebook.com';
-    protected $apiVersion = 'v11.0';
+    protected string $baseUrl = 'https://graph.facebook.com';
+    protected string $apiVersion = 'v11.0';
     protected $facebook;
-    protected $readLast = false;
+    protected bool $readLast = false;
 
-    protected $required_fields = ['default' => ['id', 'created_time']];
+    protected array $required_fields = ['default' => ['id', 'created_time']];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -124,7 +124,7 @@ class facebookcore extends solution
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -161,14 +161,14 @@ class facebookcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
     // Permet de lire les données
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             $result = [];
@@ -303,7 +303,7 @@ class facebookcore extends solution
         }
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         // Only leads module for now
         return 'created_time';

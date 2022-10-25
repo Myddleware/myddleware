@@ -30,22 +30,22 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sagecrmcore extends solution
 {
-    private $wsdl = '';
-    private $username = '';
-    private $password = '';
+    private string $wsdl = '';
+    private string $username = '';
+    private string $password = '';
 
-    protected $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
+    protected array $fieldsNotRelate = ['Opportunity' => ['assigneduserid' => true], 'PhoneLink' => ['entityid' => true], 'EmailLink' => ['entityid' => true]];
 
-    protected $required_fields = ['default' => ['updateddate', 'createddate']];
+    protected array $required_fields = ['default' => ['updateddate', 'createddate']];
 
-    protected $FieldsDuplicate = [];
+    protected array $FieldsDuplicate = [];
 
     protected $required_relationships = [
         'default' => [],
     ];
 
     // Tableau de correspondance Module / ID pour les modules qui n'ont pas d'id de type "nommodule"."id"
-    protected $IdByModule = [
+    protected array $IdByModule = [
         'Orders' => 'orderquoteid',
         'Address_Link' => 'addresslinkid',
         'Comm_Link' => 'commlinkid',
@@ -65,9 +65,9 @@ class sagecrmcore extends solution
     private $instance_url;
 
     // Listes des modules et des champs à exclure
-    protected $exclude_module_list = [];
+    protected array $exclude_module_list = [];
 
-    protected $exclude_field_list = [];
+    protected array $exclude_field_list = [];
 
     // Connexion à SageCRM
     public function login($paramConnexion)
@@ -114,19 +114,15 @@ class sagecrmcore extends solution
         }
     }
 
-    // login($paramConnexion)*/
-
     // Fonction qui renvoie les données de connexion
-    public function getToken()
+    public function getToken(): array
     {
         return ['sf_access_token' => $this->access_token,
             'sf_instance_url' => $this->instance_url, ];
     }
 
-    // getToken()
-
     // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -146,8 +142,6 @@ class sagecrmcore extends solution
             ],
         ];
     }
-
-    // getFieldsLogin()
 
     // Renvoie les modules disponibles du compte Salesforce connecté
     public function get_modules($type = 'source')
@@ -199,16 +193,15 @@ class sagecrmcore extends solution
                 throw new \Exception('SOAP FAULT. Logon failed.');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
 
@@ -319,14 +312,15 @@ class sagecrmcore extends solution
                 throw new \Exception('SOAP FAULT. Logon failed.');
             }
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         $result = [];
         if (empty($param['limit'])) {
@@ -458,7 +452,14 @@ class sagecrmcore extends solution
     }
 
     // Permet de créer des données
-    public function createData($param)
+
+    /**
+     * @throws \SoapFault
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     * @throws \Exception
+     */
+    public function createData($param): array
     {
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
@@ -554,10 +555,15 @@ class sagecrmcore extends solution
         return $result;
     }
 
-    // create($param)
-
     // Permet de modifier des données
-    public function updateData($param)
+
+    /**
+     * @throws \SoapFault
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     * @throws \Exception
+     */
+    public function updateData($param): array
     {
         // $module vaut "Prefix_Module", on fait donc un explode pour séparer les 2
         $tmp = explode('_', $param['module'], 2);
@@ -662,10 +668,11 @@ class sagecrmcore extends solution
         return $result;
     }
 
-    // update($param)
-
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    /**
+     * @throws \Exception
+     */
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         if (in_array($RuleMode, ['0', 'S'])) {
             return 'updateddate';
@@ -676,7 +683,11 @@ class sagecrmcore extends solution
     }
 
     // Function de conversion de date format solution à une date format Myddleware
-    protected function DateConverter($dateTime, $sens = 0)
+
+    /**
+     * @throws \Exception
+     */
+    protected function DateConverter($dateTime, $sens = 0): string
     {
         if ($sens) { // Vers SageCRM
             $formatReturn = "Y-m-d\TH:i:s";
@@ -699,7 +710,8 @@ class sagecrmcore extends solution
 
         return $date->format($formatReturn);
     }
-}// class sagecrmcore
+}
+
 class sagecrm extends sagecrmcore
 {
 }

@@ -29,33 +29,32 @@ class mysqlcore extends database
 {
     protected $driver = 'mysql';
 
-    protected $fieldName = 'Field';
-    protected $fieldLabel = 'Field';
-    protected $fieldType = 'Type';
-
+    protected string $fieldName = 'Field';
+    protected string $fieldLabel = 'Field';
+    protected string $fieldType = 'Type';
     // Enable to delete data
-    protected $sendDeletion = true;
-    protected $readDeletion = true;
+    protected bool $sendDeletion = true;
+    protected bool $readDeletion = true;
 
-    protected function generatePdo()
+    protected function generatePdo(): \PDO
     {
         return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
     }
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function get_query_show_tables(): string
     {
         return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->paramConnexion['database_name'].$this->stringSeparatorClose;
     }
 
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         return 'DESCRIBE '.$this->stringSeparatorOpen.$table.$this->stringSeparatorClose;
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
+    protected function get_query_select_limit_offset($param, $method): string
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;
@@ -63,7 +62,7 @@ class mysqlcore extends database
 
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
-}// class mysqlcore
+}
 
 class mysql extends mysqlcore
 {

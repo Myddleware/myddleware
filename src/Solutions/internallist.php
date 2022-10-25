@@ -32,7 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class internallistcore extends solution
 {
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         try {
             return [
@@ -51,7 +51,7 @@ class internallistcore extends solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modules = [];
@@ -71,7 +71,7 @@ class internallistcore extends solution
         }
     }
 
-    public function get_module_fields($module, $type = 'source', $extension = false)
+    public function get_module_fields($module, $type = 'source', $extension = false): array
     {
         try {
             //get the data to obtain the fields of the row
@@ -93,7 +93,7 @@ class internallistcore extends solution
         }
     }
 
-    public function read($params)
+    public function read($params): array
     {
         try {
             //return value

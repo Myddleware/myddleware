@@ -42,6 +42,7 @@ use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,17 +60,20 @@ class ConnectorController extends AbstractController
     private TranslatorInterface $translator;
     private EntityManagerInterface $entityManager;
     private SolutionManager $solutionManager;
+    private LoggerInterface $logger;
 
     public function __construct(
         SolutionManager $solutionManager,
         SessionService $sessionService,
         TranslatorInterface $translator,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
     ) {
         $this->solutionManager = $solutionManager;
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
+        $this->logger = $logger;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -418,9 +422,11 @@ class ConnectorController extends AbstractController
                 return $this->redirect($this->generateUrl('regle_connector_list'));
                 //-----------
             } catch (Exception $e) {
+                $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
                 throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             }
         } else {
+            $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             throw $this->createNotFoundException('Error');
         }
     }

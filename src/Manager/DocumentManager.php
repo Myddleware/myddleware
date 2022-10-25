@@ -105,9 +105,9 @@ class documentcore
         LoggerInterface $logger,
         Connection $dbalConnection,
         EntityManagerInterface $entityManager,
+        DocumentRepository $documentRepository,
         SolutionManager $solutionManager = null,
         FormulaManager $formulaManager = null,
-        DocumentRepository $documentRepository = null,
         RuleRelationShipRepository $ruleRelationshipsRepository = null,
         ParameterBagInterface $parameterBagInterface = null,
         ToolsManager $tools = null

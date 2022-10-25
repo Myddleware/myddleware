@@ -35,19 +35,15 @@ class erpnextcore extends solution
     protected $token;
     protected $update;
     protected $organizationTimezoneOffset;
-    protected $limitCall = 100;
-
-    protected $required_fields = ['default' => ['name', 'creation', 'modified']];
-
-    protected $FieldsDuplicate = ['Contact' => ['last_name'],
+    protected int $limitCall = 100;
+    protected array $required_fields = ['default' => ['name', 'creation', 'modified']];
+    protected array $FieldsDuplicate = ['Contact' => ['last_name'],
         'Company' => ['company_name'],
         'Item' => ['item_code'],
     ];
-
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
-
-    protected $childModuleKey = [
+    protected array $allowParentRelationship = ['Sales Invoice', 'Sales Order', 'Payment Entry', 'Item Attribute', 'Item', 'Payment', 'Assessment Result'];
+    protected array $childModuleKey = [
         'Sales Invoice Item' => 'items',
         'Sales Order Item' => 'items',
         'Payment Entry Reference' => 'references',
@@ -57,11 +53,10 @@ class erpnextcore extends solution
         'Assessment Result Detail' => 'details',
         'Sales Taxes and Charges' => 'taxes',
     ];
-
     // Get isTable parameter for each module
-    protected $isTableModule = [];
+    protected array $isTableModule = [];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -126,14 +121,14 @@ class erpnextcore extends solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
+            $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
+            $this->logger->error($error);
             return $error;
         }
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -241,16 +236,11 @@ class erpnextcore extends solution
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return [];
         }
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function read($param)
+    public function read($param): array
     {
         try {
             $result = [];
@@ -306,17 +296,12 @@ class erpnextcore extends solution
         return $result;
     }
 
-    public function createData($param)
+    public function createData($param): array
     {
         return $this->createUpdate('create', $param);
     }
 
-    /**
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData($param)
+    public function updateData($param): array
     {
         return $this->createUpdate('update', $param);
     }
@@ -327,7 +312,7 @@ class erpnextcore extends solution
      *
      * @return array
      */
-    public function createUpdate($method, $param)
+    public function createUpdate($method, $param): array
     {
         try {
             $result = [];
@@ -419,8 +404,11 @@ class erpnextcore extends solution
         return $result;
     }
 
-    // return the reference date field name
-    public function getRefFieldName($moduleSource, $ruleMode)
+    /**
+     * return the reference date field name
+     * @throws \Exception
+     */
+    public function getRefFieldName($moduleSource, $ruleMode): string
     {
         // Creation and modification mode
         if (in_array($ruleMode, ['0', 'S'])) {
@@ -432,7 +420,12 @@ class erpnextcore extends solution
         throw new \Exception("$ruleMode is not a correct Rule mode.");
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+
+
+    /**
+     * Function de conversion de datetime format solution à un datetime format Myddleware
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -440,7 +433,10 @@ class erpnextcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // Function de conversion de datetime format Myddleware à un datetime format solution
+    /**
+     * Function de conversion de datetime format Myddleware à un datetime format solution
+     * @throws \Exception
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -449,7 +445,7 @@ class erpnextcore extends solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {

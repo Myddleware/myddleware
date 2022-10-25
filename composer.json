@@ -17,9 +17,11 @@
     "require": {
     "php": ">=7.4",
     "ext-ctype": "*",
+    "ext-curl": "*",
     "ext-iconv": "*",
     "ext-json": "*",
     "ext-pdo": "*",
+    "ext-simplexml": "*",
     "api-platform/core": "2.7.*",
     "automattic/woocommerce": "3.1.*",
     "babdev/pagerfanta-bundle": "3.7.*",
