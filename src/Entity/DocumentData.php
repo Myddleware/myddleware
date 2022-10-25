@@ -57,7 +57,7 @@ class DocumentData
     /**
      * @ORM\Column(name="data", type="array", nullable=false)
      */
-    private array $data;
+    private $data;
 
     public function getId(): int
     {
@@ -83,7 +83,7 @@ class DocumentData
         return $this;
     }
 
-    public function getData(): array
+    public function getData()
     {
         return $this->data;
     }

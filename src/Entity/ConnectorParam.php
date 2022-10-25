@@ -44,17 +44,17 @@ class ConnectorParam
      * @ORM\ManyToOne(targetEntity="Connector", inversedBy="connectorParams")
      * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
      */
-    private $connector;
+    private Connector $connector;
 
     /**
      * @ORM\Column(name="name", type="string", length=684)
      */
-    private string $name;
+    private ?string $name;
 
     /**
      * @ORM\Column(name="value", type="string", length=684)
      */
-    private string $value;
+    private $value;
 
     public function getId()
     {
@@ -68,7 +68,7 @@ class ConnectorParam
         return $this;
     }
 
-    public function getConnector()
+    public function getConnector(): Connector
     {
         return $this->connector;
     }
@@ -80,7 +80,7 @@ class ConnectorParam
         return $this;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -92,7 +92,7 @@ class ConnectorParam
         return $this;
     }
 
-    public function getValue(): string
+    public function getValue()
     {
         return $this->value;
     }

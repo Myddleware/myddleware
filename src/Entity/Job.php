@@ -62,47 +62,47 @@ class Job
     /**
      * @ORM\Column(name="end", type="datetime",  nullable=true, options={"default":NULL})
      */
-    private DateTime $end;
+    private ?DateTime $end;
 
     /**
      * @ORM\Column(name="message", type="text",  nullable=true, options={"default":NULL})
      */
-    private string $message;
+    private ?string $message;
 
     /**
      * @ORM\Column(name="open", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private int $open;
+    private ?int $open;
 
     /**
      * @ORM\Column(name="close", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private int $close;
+    private ?int $close;
 
     /**
      * @ORM\Column(name="cancel", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private int $cancel;
+    private ?int $cancel;
 
     /**
      * @ORM\Column(name="manual", type="boolean",  nullable=true, options={"default":0})
      */
-    private bool $manual;
+    private ?bool $manual;
 
     /**
      * @ORM\Column(name="api", type="boolean",  nullable=true, options={"default":0})
      */
-    private bool $api;
+    private ?bool $api;
 
     /**
      * @ORM\Column(name="error", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private int $error;
+    private ?int $error;
 
     /**
      * @ORM\OneToMany(targetEntity="Log", mappedBy="job")
      */
-    private ArrayCollection $logs;
+    private $logs;
 
     public function __construct()
     {
@@ -165,7 +165,7 @@ class Job
         return $this;
     }
 
-    public function getEnd(): DateTime
+    public function getEnd(): ?DateTime
     {
         return $this->end;
     }
@@ -193,19 +193,19 @@ class Job
         return $this;
     }
 
-    public function getOpen(): int
+    public function getOpen(): ?int
     {
         return $this->open;
     }
 
-    public function setClose($close): Job
+    public function setClose($close): self
     {
         $this->close = $close;
 
         return $this;
     }
 
-    public function getClose(): int
+    public function getClose(): ?int
     {
         return $this->close;
     }
@@ -217,7 +217,7 @@ class Job
         return $this;
     }
 
-    public function getCancel(): int
+    public function getCancel(): ?int
     {
         return $this->cancel;
     }
@@ -229,7 +229,7 @@ class Job
         return $this;
     }
 
-    public function getManual(): bool
+    public function getManual(): ?bool
     {
         return $this->manual;
     }
@@ -241,7 +241,7 @@ class Job
         return $this;
     }
 
-    public function getApi(): bool
+    public function getApi(): ?bool
     {
         return $this->api;
     }
@@ -253,7 +253,7 @@ class Job
         return $this;
     }
 
-    public function getError(): int
+    public function getError(): ?int
     {
         return $this->error;
     }

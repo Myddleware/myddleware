@@ -55,7 +55,7 @@ class RuleAudit
     /**
      * @ORM\Column(name="data", type="array", nullable=false)
      */
-    private array $data;
+    private $data;
 
     public function getId(): int
     {

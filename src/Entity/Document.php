@@ -54,7 +54,7 @@ class Document
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="documents")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private string $rule;
+    private Rule $rule;
 
     /**
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
@@ -81,32 +81,32 @@ class Document
     /**
      * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
      */
-    private string $status;
+    private ?string $status;
 
     /**
      * @ORM\Column(name="source_id", type="string", nullable=true, options={"default":NULL})
      */
-    private string $source;
+    private ?string $source;
 
     /**
      * @ORM\Column(name="target_id", type="string",  nullable=true, options={"default":NULL})
      */
-    private string $target;
+    private ?string $target;
 
     /**
      * @ORM\Column(name="source_date_modified", type="datetime",  nullable=true, options={"default":NULL})
      */
-    private DateTime $sourceDateModified;
+    private ?DateTime $sourceDateModified;
 
     /**
      * @ORM\Column(name="mode", type="string", length=1,  nullable=true, options={"default":NULL})
      */
-    private string $mode;
+    private ?string $mode;
 
     /**
      * @ORM\Column(name="type", type="string", length=1,  nullable=true, options={"default":NULL})
      */
-    private string $type;
+    private ?string $type;
 
     /**
      * @ORM\Column(name="attempt", type="integer", length=5,  nullable=false, options={"default":0})
@@ -121,7 +121,7 @@ class Document
     /**
      * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
      */
-    private string $parentId;
+    private ?string $parentId;
 
     /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
@@ -163,7 +163,7 @@ class Document
         return $this;
     }
 
-    public function getRule(): string
+    public function getRule(): Rule
     {
         return $this->rule;
     }
@@ -199,7 +199,7 @@ class Document
         return $this;
     }
 
-    public function getStatus(): string
+    public function getStatus(): ?string
     {
         return $this->status;
     }
@@ -211,7 +211,7 @@ class Document
         return $this;
     }
 
-    public function getSource(): string
+    public function getSource(): ?string
     {
         return $this->source;
     }
@@ -223,7 +223,7 @@ class Document
         return $this;
     }
 
-    public function getTarget(): string
+    public function getTarget(): ?string
     {
         return $this->target;
     }
@@ -302,7 +302,7 @@ class Document
         return $this;
     }
 
-    public function getParentId(): string
+    public function getParentId(): ?string
     {
         return $this->parentId;
     }

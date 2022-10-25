@@ -64,18 +64,18 @@ class Log
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="orders")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=true)
      */
-    private Rule $rule;
+    private ?Rule $rule;
 
     /**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="logs")
      * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true)
      */
-    private Document $document;
+    private ?Document $document;
 
     /**
      * @ORM\Column(name="ref_doc_id", type="string", length=255, nullable=true)
      */
-    private string $ref;
+    private ?string $ref;
 
     /**
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="logs")
@@ -131,7 +131,7 @@ class Log
         return $this;
     }
 
-    public function getDocument(): Document
+    public function getDocument(): ?Document
     {
         return $this->document;
     }
@@ -143,7 +143,7 @@ class Log
         return $this;
     }
 
-    public function getRef(): string
+    public function getRef(): ?string
     {
         return $this->ref;
     }
