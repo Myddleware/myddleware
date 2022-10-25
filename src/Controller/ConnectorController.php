@@ -35,8 +35,6 @@ use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -84,6 +82,7 @@ class ConnectorController extends AbstractController
 
     /**
      * CALLBACK POUR LES APIS.
+     *
      * @Route("/connector/callback/", name="connector_callback", options={"expose"=true})
      */
     public function callBack()
@@ -211,6 +210,7 @@ class ConnectorController extends AbstractController
 
     /**
      * Contrôle si le fichier upload est valide puis le déplace.
+     *
      * @Route("/connector/upload/{solution}", name="upload", options={"expose"=true})
      */
     public function upload($solution): Response
@@ -302,8 +302,6 @@ class ConnectorController extends AbstractController
     /**
      * CREATION D UN CONNECTEUR LISTE.
      *
-     * @return Response
-     *
      * @Route("/connector/create", name="regle_connector_create")
      */
     public function create(): Response
@@ -331,6 +329,7 @@ class ConnectorController extends AbstractController
      * @return RedirectResponse|Response
      *
      * @Route("/connector/insert", name="regle_connector_insert")
+     *
      * @throws Exception
      */
     public function connectorInsert(Request $request)
@@ -428,6 +427,7 @@ class ConnectorController extends AbstractController
 
     /**
      * LISTE DES CONNECTEURS.
+     *
      * @Route("/connector/list", name="regle_connector_list", defaults={"page"=1})
      * @Route("/connector/list/page-{page}", name="regle_connector_page", requirements={"page"="\d+"})
      */
@@ -469,6 +469,7 @@ class ConnectorController extends AbstractController
 
     /**
      * SUPPRESSION DU CONNECTEUR.
+     *
      * @Route("/connector/delete/{id}", name="connector_delete")
      */
     public function connectorDelete(Request $request, $id): RedirectResponse
@@ -527,7 +528,9 @@ class ConnectorController extends AbstractController
 
     /**
      * FICHE D'UN CONNECTEUR.
+     *
      * @Route("/connector/view/{id}", name="connector_open")
+     *
      * @throws Exception
      * @throws NonUniqueResultException
      * @throws NonUniqueResultException
@@ -614,6 +617,7 @@ class ConnectorController extends AbstractController
 
     /**
      * LISTE DES CONNECTEURS POUR ANIMATION.
+     *
      * @Route("/connector/list/solution", name="regle_connector_by_solution")
      */
     public function connectorListSolution(Request $request): Response
@@ -647,6 +651,7 @@ class ConnectorController extends AbstractController
 
     /**
      * CREATION D'UN CONNECTEUR LISTE animation.
+     *
      * @Route("/connector/createout/{type}", name="regle_connector_create_out")
      */
     public function createOut($type): Response
@@ -673,8 +678,6 @@ class ConnectorController extends AbstractController
 
     /**
      * RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY.
-     *
-     * @return Response
      *
      * @Route("/connector/insert/solution", name="regle_connector_insert_solution")
      */

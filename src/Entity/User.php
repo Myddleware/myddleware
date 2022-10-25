@@ -258,9 +258,6 @@ class User implements UserInterface, Serializable
         return $this->plainPassword;
     }
 
-    /**
-     * @return DateTime
-     */
     public function getLastLogin(): DateTime
     {
         return $this->lastLogin;
@@ -479,8 +476,6 @@ class User implements UserInterface, Serializable
 
     /**
      * Gets the timestamp that the user requested a password reset.
-     *
-     * @return DateTime|null
      */
     public function getPasswordRequestedAt(): ?DateTime
     {

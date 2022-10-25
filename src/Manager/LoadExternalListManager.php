@@ -20,12 +20,12 @@ class loadexternallistcore
     ) {
         $this->entityManager = $entityManager;
     }
+
     /**
      * @throws \Doctrine\DBAL\Exception
      */
     public function loadExternalList($file, InputInterface $input, OutputInterface $output)
     {
-
         // @TODO: please clean up this section (comments & commented code but also indendation which is strange here).
 
         //section for future csv handling

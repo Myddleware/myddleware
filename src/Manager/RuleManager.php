@@ -162,7 +162,8 @@ class rulecore
 
     /**
      * Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
-     * If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application
+     * If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id')
@@ -301,7 +302,8 @@ class rulecore
 
     /**
      * Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
-     * Cette fonction retourne le nombre d'enregistrements lus
+     * Cette fonction retourne le nombre d'enregistrements lus.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function createDocuments()
@@ -409,7 +411,8 @@ class rulecore
     }
 
     /**
-     * Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible
+     * Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible.
+     *
      * @throws Exception
      */
     protected function updateReferenceDate()
@@ -640,7 +643,8 @@ class rulecore
 
     /**
      * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-     * Si un document n'est pas clos alors le statut du docuement est mis à "pending"
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function checkPredecessorDocuments($documents = null): array
@@ -684,7 +688,8 @@ class rulecore
 
     /**
      * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-     * Si un document n'est pas clos alors le statut du docuement est mis à "pending"
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function checkParentDocument($documents = null): array
@@ -745,7 +750,8 @@ class rulecore
 
     /**
      * Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-     * Si un document n'est pas clos alors le statut du docuement est mis à "pending"
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function transformDocuments($documents = null): array
@@ -806,7 +812,8 @@ class rulecore
      * Permet de récupérer les données de la cible avant modification des données
      * 2 cas de figure :
      *  - Le document est un document de modification
-     *  - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
+     *  - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function getTargetDataDocuments($documents = null): array
@@ -1193,7 +1200,8 @@ class rulecore
     }
 
     /**
-     * Permet de relancer un document quelque soit son statut
+     * Permet de relancer un document quelque soit son statut.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     protected function rerun($id_document): array
@@ -1450,7 +1458,8 @@ class rulecore
     }
 
     /**
-     * Check before we send a record deletion
+     * Check before we send a record deletion.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     protected function checkBeforeDelete($send)
@@ -1825,6 +1834,7 @@ class rulecore
 
     // Get the child rules of the current rule
     // Return the relationships between the parent and the clild rules
+
     /**
      * @throws Exception
      */
@@ -1907,7 +1917,8 @@ class rulecore
     }
 
     /**
-     * Checks whether a job is still active then commits the transaction
+     * Checks whether a job is still active then commits the transaction.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     protected function commit($newTransaction)
@@ -1924,16 +1935,17 @@ class rulecore
     }
 
     /**
-     *  Parameter de la règle choix utilisateur
+     *  Parameter de la règle choix utilisateur.
+     *
      * @return array
-     * [
-     *   'id' 		=> 'datereference',
-     *   'name' 		=> 'datereference',
-     *   'required'	=> true,
-     *   'type'		=> 'text',
-     *   'label' => 'solution.params.dateref',
-     *   'readonly' => true
-     * ]
+     *               [
+     *               'id' 		=> 'datereference',
+     *               'name' 		=> 'datereference',
+     *               'required'	=> true,
+     *               'type'		=> 'text',
+     *               'label' => 'solution.params.dateref',
+     *               'readonly' => true
+     *               ]
      */
     public static function getFieldsParamUpd(): array
     {

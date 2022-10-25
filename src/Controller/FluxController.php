@@ -55,7 +55,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- *
  * @Route("/rule")
  */
 class FluxController extends AbstractController
@@ -689,6 +688,7 @@ class FluxController extends AbstractController
 
     /**
      * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
+     *
      * @throws Exception
      */
     public function fluxBtnDyn($method, $id, $solution): RedirectResponse

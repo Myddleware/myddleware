@@ -452,6 +452,7 @@ class documentcore
                 } else {
                     return true;
                 }
+                // no break
             case 'notcontent':
                 $pos = stripos($fieldValue, $filterValue);
                 if (false === $pos) {
@@ -459,6 +460,7 @@ class documentcore
                 } else {
                     return false;
                 }
+                // no break
             case 'begin':
                 $begin = substr($fieldValue, 0, strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -466,6 +468,7 @@ class documentcore
                 } else {
                     return false;
                 }
+                // no break
             case 'end':
                 $begin = substr($fieldValue, 0 - strlen($filterValue));
                 if (strtoupper($begin) == strtoupper($filterValue)) {
@@ -473,56 +476,66 @@ class documentcore
                 } else {
                     return false;
                 }
+                // no break
             case 'in':
                 if (in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'notin':
                 if (!in_array(strtoupper($fieldValue), explode(';', strtoupper($filterValue)))) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'gt':
                 if ($fieldValue > $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'lt':
                 if ($fieldValue < $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'lteq':
                 if ($fieldValue <= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'gteq':
                 if ($fieldValue >= $filterValue) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'equal':
                 if (strtoupper($fieldValue) == strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             case 'different':
                 if (strtoupper($fieldValue) != strtoupper($filterValue)) {
                     return true;
                 } else {
                     return false;
                 }
+                // no break
             default:
                 $this->message .= 'Failed to filter. Operator '.$operator.' unknown. ';
+
                 return false;
         }
     }
@@ -1011,7 +1024,8 @@ class documentcore
 
     /**
      * Get the child rule of the current rule
-     * If child rule exist, we run it
+     * If child rule exist, we run it.
+     *
      * @throws Exception
      */
     protected function runChildRule(): bool
@@ -1506,12 +1520,13 @@ class documentcore
             $this->message .= 'Error getRule  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
+
         return null;
     }
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Check if the document is a child
+     *                                  Check if the document is a child
      */
     public function isChild(): bool
     {
@@ -1554,7 +1569,7 @@ class documentcore
 
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Check if the document is a parent
+     *                                  Check if the document is a parent
      */
     protected function isParent(): bool
     {
@@ -2010,7 +2025,6 @@ class documentcore
     {
     }
 
-
     /**
      * @throws \Doctrine\DBAL\Exception
      */
@@ -2271,14 +2285,13 @@ class documentcore
         return $this->status;
     }
 
-
     /**
      * @throws \Doctrine\DBAL\Exception
-     * Les id de la soluton, de la règle et du document
-     * $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
-     * $code contient le code de l'erreur
-     * $message contient le message de l'erreur avec potentiellement des variable &1, &2...
-     * $data contient les varables du message de type array('id_contact', 'nom_contact')
+     *                                  Les id de la soluton, de la règle et du document
+     *                                  $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
+     *                                  $code contient le code de l'erreur
+     *                                  $message contient le message de l'erreur avec potentiellement des variable &1, &2...
+     *                                  $data contient les varables du message de type array('id_contact', 'nom_contact')
      */
     protected function createDocLog()
     {

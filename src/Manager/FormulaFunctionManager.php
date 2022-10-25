@@ -104,6 +104,7 @@ class formulafunctioncore
                     $return .= $arrayKeyToValue[$varValue].$delimiter;
                 }
             }
+
             return rtrim($return, $delimiter);
         }
     }

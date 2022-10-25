@@ -69,8 +69,6 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param array $filters
-     * @return Document|null
      * @throws NonUniqueResultException
      */
     public function findDocumentByFilters(array $filters = []): ?Document
@@ -103,8 +101,6 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param array $filters
-     * @return Document|null
      * @throws NonUniqueResultException
      */
     public function findDocumentByReadyToSend(array $filters = []): ?Document
@@ -260,10 +256,6 @@ class DocumentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $type
-     *
-     * @return Document|null
-     *
      * @throws NonUniqueResultException
      */
     public function findDocumentBySourceOrTarget(Rule $rule, Document $document, int $id, string $type = 'source'): ?Document

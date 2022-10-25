@@ -325,6 +325,7 @@ class JobSchedulerController extends AbstractController
 
     /**
      * Deletes a Crontab entity.
+     *
      * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"GET", "DELETE"})
      */
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse

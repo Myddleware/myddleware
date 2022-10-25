@@ -92,7 +92,8 @@ class TemplateManager
     }
 
     /**
-     * Sort rule (rule parent first)
+     * Sort rule (rule parent first).
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function setRules($rules): array
@@ -121,7 +122,8 @@ class TemplateManager
     }
 
     /**
-     * Extract all the data of the rule
+     * Extract all the data of the rule.
+     *
      * @throws Exception
      */
     public function extractRule($ruleId): array
@@ -226,7 +228,8 @@ class TemplateManager
     }
 
     /**
-     * Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template
+     * Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template.
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function convertTemplate(
@@ -235,8 +238,7 @@ class TemplateManager
         int $connectorSourceId,
         int $connectorTargetId,
         User $user
-    ): array
-    {
+    ): array {
         /** @var ConnectorRepository $connectorRepository */
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
         $connectorSource = $connectorRepository->find($connectorSourceId);

@@ -41,8 +41,6 @@ class SecurityService
     }
 
     /**
-     * @return array
-     *
      * @version 2.0
      *
      * @copyright ©2MConseil 2019.

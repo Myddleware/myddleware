@@ -102,9 +102,11 @@ class JobSchedulerCommand extends Command
             } catch (\Exception $e) {
                 echo $e->getMessage().chr(10);
                 $io->error($e->getMessage());
+
                 return 1;
             }
         }
+
         return 0;
     }
 }

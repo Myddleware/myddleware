@@ -24,7 +24,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Config;
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
 use App\Entity\Document;
@@ -73,7 +72,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
     /**
-     *
      * @Route("/rule")
      */
     class DefaultController extends AbstractController
@@ -139,7 +137,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             $this->template = $template;
         }
 
-
         protected function getInstanceBdd()
         {
         }
@@ -200,6 +197,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * SUPPRESSION D'UNE REGLE.
+         *
          * @Route("/delete/{id}", name="regle_delete")
          */
         public function ruleDeleteAction(Request $request, $id)
@@ -440,6 +438,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * ACTIVE UNE REGLE.
+         *
          * @Route("/update/{id}", name="regle_update")
          */
         public function ruleUpdActive($id)
@@ -501,6 +500,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CANCEL ALL TRANSFERS FOR ONE RULE.
+         *
          * @Route("/view/cancel/documents/{id}", name="rule_cancel_all_transfers")
          */
         public function cancelRuleTransfers($id)
@@ -598,8 +598,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @param $id
          *
-         * @return Response
-         *
          * @Route("/simule/{id}", name="path_fiche_params_simulate")
          */
         public function ruleSimulateTransfers(Rule $rule): Response
@@ -677,10 +675,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * MODE EDITION D'UNE REGLE.
-         *
-         * @param Request $request
-         * @param Rule $rule
-         * @return RedirectResponse
          *
          * @Route("/edit/{id}", name="regle_edit")
          */
@@ -869,9 +863,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @param $id
          *
-         * @return Response
-         *
          * @Route("/view/{id}", name="regle_open")
+         *
          * @throws Exception
          */
         public function ruleOpenAction($id): Response
@@ -1139,8 +1132,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * CREATION - STEP ONE - VERIF ALIAS RULE.
          *
-         * @return JsonResponse
-         *
          * @Route("/inputs/name_unique/", name="regle_inputs_name_unique", methods={"POST"}, options={"expose"=true})
          */
         public function ruleNameUniq(Request $request): JsonResponse
@@ -1277,8 +1268,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CREATION - STEP THREE - SIMULATION DES DONNEES.
-         *
-         * @return Response
          *
          * @Route("/create/step3/simulation/", name="regle_simulation", methods={"POST"})
          */
@@ -1972,8 +1961,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          * @param $field
          * @param $type
          *
-         * @return Response
-         *
          * @Route("/info/{type}/{field}/", name="path_info_field", methods={"GET"})
          * @Route("/info", name="path_info_field_not_param")
          */
@@ -2027,8 +2014,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * CREATION - STEP THREE - VERIF DES FORMULES.
          *
-         * @return JsonResponse
-         *
          * @Route("/create/step3/formula/", name="regle_formula", methods={"POST"})
          */
         public function ruleVerifFormula(Request $request): JsonResponse
@@ -2045,8 +2030,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CREATION - STEP THREE - Validation du formulaire.
-         *
-         * @return JsonResponse
          *
          * @Route("/create/step3/validation/", name="regle_validation", methods={"POST"})
          */
@@ -2448,6 +2431,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * TABLEAU DE BORD.
+         *
          * @Route("/panel", name="regle_panel")
          */
         public function panel(Request $request): Response
@@ -2483,8 +2467,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * @return Response
-         *
          * @Route("/graph/type/error/doc", name="graph_type_error_doc", options={"expose"=true})
          */
         public function graphTypeError(): Response
@@ -2502,8 +2484,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * @return Response
-         *
          * @Route("/graph/type/transfer/rule", name="graph_type_transfer_rule", options={"expose"=true})
          */
         public function graphTransferRule(): Response
@@ -2521,8 +2501,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * @return Response
-         *
          * @Route("/graph/type/transfer/histo", name="graph_type_transfer_histo", options={"expose"=true})
          */
         public function graphTransferHisto(): Response
@@ -2552,8 +2530,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * @return Response
-         *
          * @Route("/graph/type/job/histo", name="graph_type_job_histo", options={"expose"=true})
          */
         public function graphJobHisto(): Response
@@ -2586,8 +2562,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          * ANIMATION
          * No more submodule in Myddleware. We return a response 0 for the js (animation.js.
          *
-         * @return Response
-         *
          * @Route("/submodules", name="regle_submodules", methods={"POST"})
          */
         public function listSubModulesAction(): Response
@@ -2597,6 +2571,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * VALIDATION DE L'ANIMATION.
+         *
          * @Route("/validation", name="regle_validation_animation")
          */
         public function validationAnimationAction(Request $request): Response
@@ -2653,8 +2628,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * LISTE DES TEMPLATES.
          *
-         * @return Response
-         *
          * @Route("/list/template", name="regle_template")
          */
         public function listTemplateAction(): Response
@@ -2699,6 +2672,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * CREATION - STEP ONE - ANIMATION.
+         *
          * @Route("/create", name="regle_stepone_animation")
          */
         public function ruleStepOneAnimationAction(): Response
@@ -2754,6 +2728,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         /**
          * LISTE DES MODULES POUR ANIMATION.
+         *
          * @Route("/list/module", name="regle_list_module")
          */
         public function ruleListModuleAction(Request $request): Response

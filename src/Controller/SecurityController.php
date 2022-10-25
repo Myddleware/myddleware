@@ -167,6 +167,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
+     *
      * @throws Exception
      */
     public function reset(Request $request, $token)

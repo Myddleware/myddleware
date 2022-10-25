@@ -106,7 +106,6 @@ class JobScheduler
      */
     private int $jobOrder;
 
-
     public function getId(): int
     {
         return $this->id;
@@ -208,7 +207,6 @@ class JobScheduler
         return $this->paramName2;
     }
 
-
     public function setParamValue2($paramValue2): self
     {
         $this->paramValue2 = $paramValue2;
@@ -221,14 +219,12 @@ class JobScheduler
         return $this->paramValue2;
     }
 
-
     public function setPeriod($period): self
     {
         $this->period = $period;
 
         return $this;
     }
-
 
     public function getPeriod(): int
     {

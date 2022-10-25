@@ -11,7 +11,6 @@ use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -113,7 +112,7 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * set data form from files parameter_stml.yml. - this is for Myddleware 2
+     * set data form from files parameter_stml.yml. - this is for Myddleware 2.
      */
     private function setData($form)
     {
@@ -156,7 +155,8 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * Send mail for test configuration in the parameters_smtp.yml. - Myddleware 2
+     * Send mail for test configuration in the parameters_smtp.yml. - Myddleware 2.
+     *
      * @throws Exception
      */
     public function testMailConfiguration($form): void

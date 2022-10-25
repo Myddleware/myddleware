@@ -89,7 +89,8 @@ class NotificationManager
     }
 
     /**
-     * Send alert if a job is running too long
+     * Send alert if a job is running too long.
+     *
      * @throws Exception
      */
     public function sendAlert(): bool
@@ -142,7 +143,8 @@ class NotificationManager
     }
 
     /**
-     * Send notification to receive statistics about Myddleware data transfers
+     * Send notification to receive statistics about Myddleware data transfers.
+     *
      * @throws Exception
      */
     public function sendNotification(): bool
