@@ -49,7 +49,7 @@ class JobScheduler
     /**
      * @ORM\Column(name="date_modified", type="datetime")
      */
-    private DateTime $dateModified;
+    private ?DateTime $dateModified;
 
     /**
      * @ORM\Column(name="created_by", type="integer", nullable=false, options={"default":1})
@@ -69,22 +69,22 @@ class JobScheduler
     /**
      * @ORM\Column(name="paramName1", type="string", length=50, nullable=true)
      */
-    private string $paramName1;
+    private ?string $paramName1;
 
     /**
      * @ORM\Column(name="paramValue1", type="text", nullable=true)
      */
-    private string $paramValue1;
+    private ?string $paramValue1;
 
     /**
      * @ORM\Column(name="paramName2", type="string", length=50, nullable=true)
      */
-    private string $paramName2;
+    private ?string $paramName2;
 
     /**
      * @ORM\Column(name="paramValue2", type="text", nullable=true)
      */
-    private string $paramValue2;
+    private ?string $paramValue2;
 
     /**
      * @ORM\Column(name="period", type="integer", length=6,  nullable=false, options={"default":5})
@@ -94,7 +94,7 @@ class JobScheduler
     /**
      * @ORM\Column(name="lastRun", type="datetime", nullable=true)
      */
-    private DateTime $lastRun;
+    private ?DateTime $lastRun;
 
     /**
      * @ORM\Column(name="active", type="boolean", options={"default":1})
@@ -104,7 +104,7 @@ class JobScheduler
     /**
      * @ORM\Column(name="jobOrder", type="integer", length=3, nullable=true)
      */
-    private int $jobOrder;
+    private ?int $jobOrder;
 
     public function getId(): int
     {
@@ -130,7 +130,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getDateModified(): DateTime
+    public function getDateModified(): ?DateTime
     {
         return $this->dateModified;
     }
@@ -178,7 +178,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getParamName1(): string
+    public function getParamName1(): ?string
     {
         return $this->paramName1;
     }
@@ -190,7 +190,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getParamValue1(): string
+    public function getParamValue1(): ?string
     {
         return $this->paramValue1;
     }
@@ -202,7 +202,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getParamName2(): string
+    public function getParamName2(): ?string
     {
         return $this->paramName2;
     }
@@ -214,7 +214,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getParamValue2(): string
+    public function getParamValue2(): ?string
     {
         return $this->paramValue2;
     }
@@ -238,7 +238,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getLastRun(): DateTime
+    public function getLastRun(): ?DateTime
     {
         return $this->lastRun;
     }
@@ -262,7 +262,7 @@ class JobScheduler
         return $this;
     }
 
-    public function getJobOrder(): int
+    public function getJobOrder(): ?int
     {
         return $this->jobOrder;
     }
