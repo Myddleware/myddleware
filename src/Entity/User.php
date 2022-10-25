@@ -142,7 +142,7 @@ class User implements UserInterface, Serializable
 
     public function isAdmin(): bool
     {
-        return $this->hasRole('ROLE_ADMIN');
+        return $this->hasRole('ROLE_ADMIN') || $this->hasRole('ROLE_SUPER_ADMIN');
     }
 
     /**
