@@ -58,7 +58,7 @@ class User implements UserInterface, Serializable
     /**
      * @ORM\Column(name="username_canonical", type="string", length=180, unique=true)
      */
-    protected string $usernameCanonical;
+    protected ?string $usernameCanonical;
 
     /**
      * @ORM\Column(name="email", type="string", length=180)
@@ -213,7 +213,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function getUsernameCanonical(): string
+    public function getUsernameCanonical(): ?string
     {
         return $this->usernameCanonical;
     }
@@ -258,7 +258,7 @@ class User implements UserInterface, Serializable
         return $this->plainPassword;
     }
 
-    public function getLastLogin(): DateTime
+    public function getLastLogin(): ?DateTime
     {
         return $this->lastLogin;
     }
@@ -266,7 +266,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function getConfirmationToken(): string
+    public function getConfirmationToken(): ?string
     {
         return $this->confirmationToken;
     }
@@ -447,7 +447,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setLastLogin(DateTime $time = null): self
+    public function setLastLogin(?DateTime $time = null): self
     {
         $this->lastLogin = $time;
 
@@ -467,7 +467,7 @@ class User implements UserInterface, Serializable
     /**
      * {@inheritdoc}
      */
-    public function setPasswordRequestedAt(DateTime $date = null): self
+    public function setPasswordRequestedAt(?DateTime $date = null): self
     {
         $this->passwordRequestedAt = $date;
 
