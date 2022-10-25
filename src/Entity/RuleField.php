@@ -60,7 +60,7 @@ class RuleField
     /**
      * @ORM\Column(name="formula", type="text", nullable=true)
      */
-    private string $formula;
+    private ?string $formula;
 
     public function getId(): int
     {
@@ -98,7 +98,7 @@ class RuleField
         return $this;
     }
 
-    public function getFormula(): string
+    public function getFormula(): ?string
     {
         return $this->formula;
     }

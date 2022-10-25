@@ -182,8 +182,8 @@
 			<ul class="listarea" id="functions" name="functions">
 
 				{% for t, v in lst_functions %}
-					<li class="func" data-type="{{ v.getCategorieId.getId }}">
-						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategorieId.getName ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
+					<li class="func" data-type="{{ v.getCategoryId.getId }}">
+						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
 					</li> 				
 				{% endfor %}
 

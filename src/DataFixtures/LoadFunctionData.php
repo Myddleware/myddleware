@@ -57,7 +57,7 @@ class LoadFunctionData implements FixtureInterface
         $functions = $this->manager->getRepository(Functions::class)->findAll();
         if (!empty($functions)) {
             foreach ($functions as $function) {
-                $this->functions[$function->getCategorieId()->getName()][$function->getId()] = $function->getName();
+                $this->functions[$function->getCategoryId()->getName()][$function->getId()] = $function->getName();
             }
         }
         $this->generateEntities();
