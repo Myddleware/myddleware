@@ -2163,7 +2163,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 // fields relate
                 if (!empty($request->request->get('duplicate'))) {
                     // fix : Put the duplicate fields values in the old $tab_new_rule array
-                    $duplicateArray = implode($request->request->get('duplicate'), ';');
+                    $duplicateArray = implode(';', $request->request->get('duplicate'));
                     $tab_new_rule['params']['rule']['duplicate_fields'] = $duplicateArray;
                     $this->sessionService->setParamParentRule($ruleKey, 'duplicate_fields', $duplicateArray);
                 }
