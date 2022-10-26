@@ -110,11 +110,7 @@ Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/fun
 
         striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
 
-
-
 ## Relationships
-
-*This section is still under construction*
 
 We can create relationships in Myddleware that not only allow us to transfer unrelated data items but whole data models entirely.
 
@@ -125,3 +121,117 @@ In order to do so, we need to retrieve the account's id corresponding to the cus
 
 To do that, we will link this new rule to the previous rule where we will be able to find the SuiteCRM account id.
 
+### Use case 1: One-to-Many relationships
+
+> A One-to-Many relationship is when data from 1 module of your source app is sent to multiple modules in your target app.
+For instance, the data from the Customer module of your source application (e.g. Prestahop in our example) will be sent 
+to both Account & Contact modules in our target SuiteCRM.
+
+#### Concrete example 
+
+First, create a rule which sends Prestashop ``the e-shop s customers`` to SuiteCRM ``Accounts``. 
+
+![Example Prestashop to SuiteCRM rule creation - Customers to Accounts](images/advanced_usage/create_rule_presta_suite_customer_account.png)
+
+Then, create a second rule which will send data from the same Prestashop ``the e-shop s customers`` module to SuiteCRM’s ``Contacts`` module.
+Map some fields, such as firstname, lastname, birthday and email for instance.
+
+Then, in the ``Relationships`` tab of the rule creation view, we want to link the contacts to their accounts, which are 
+already set up to being sent to SuiteCRM's ``Account`` module in the first rule you created.
+In this scenario, Myddleware would have to retrieve the SuiteCRM account IDs from the previous rule 
+and send them into the contacts in order to link these contacts and the accounts that have already been created.
+Therefore, you need to select the following fields : 
+
+| Source       | Rules                                        | Target      |
+|--------------|----------------------------------------------|-------------|
+| ID customers | name_of_your_first_Customer_to_Accounts_rule | Account ID  |
+
+![Example Prestashop to SuiteCRM rule creation - Customers to Contacts - relationship selection view](images/advanced_usage/relationships_select_fields.png)
+![Succesful rule creation view with an alert](images/advanced_usage/successful_rule_creation.png)
+![List of available rules (the 2 rules we've just created)](images/advanced_usage/rule_list.png)
+
+Now save the rule and run it. Don’t forget to select a reference date in the past if you want to retrieve data which already exists in Prestashop.
+
+Now open a document. You will find that Myddleware has linked the right account to the matching contact.
+
+The source document id is used twice in the source data : the first time for the contact and the second time for the account. 
+At this point, you have just created your first one-to-many relationship, ie one customer to 2 records (contact and account).
+
+### Use case 2: Many-to-One relationships
+
+> A Many-to-One relationship is when data from multiple modules of your source app is sent to a single module in your target app.
+For instance, the data from the ``Customer`` & ``Address`` modules of your source application (e.g. Prestahop in our example) will be sent 
+to the Account module in our target SuiteCRM.
+
+#### Concrete example
+
+To illustrate Many-to-One relationships, we will first create an ``Addresses`` to ``Accounts`` rule (Prestashop to SuiteCRM).
+First, select ```The Customer, Brand and Customer addresses``` source module and ``Accounts`` as a target module.
+
+![Create a rule with The Customer, Brand and Customer addresses as a Prestashop source module & Accounts as a SuiteCRM target module](images/advanced_usage/rule_creation_addresses.png)
+
+Map some fields such as ``address1``, ``address2``, ``city``, ``postcode``, etc.
+
+![Simulate fields mapping for Address to Accounts rule](images/advanced_usage/address_fields_simulation.png)
+
+Then open the “Relationship” tab. We want to send the addresses to the accounts that have already been sent to SuiteCRM 
+in a previous rule. Just like the one to many relationship scenario, Myddleware will have to spot the SuiteCRM account 
+IDs in the previous rule then update this account :
+
+![Simulate fields mapping for Address to Accounts rule](images/advanced_usage/relationship_customers_addresses.png)
+
+
+Here, we use the Account ID ie the ID of the target module in the current rule. This means that this rule will only update data.
+
+Now save the rule and run it. Don’t forget to put the reference date in the past if you want to retrieve already exiting data in Prestashop.
+
+Now open a transfer and you will see that Myddleware has found the right account to update :
+
+## Bidirectional rules 
+
+In our example, we have only shown you how to send data from Prestashop to SuiteCRM.
+But in reality, Myddleware allows you to send data in both directions, from Prestashop to SuiteCRM and from SuiteCRM to Prestashop.
+
+One of the rules we have created is sending Prestashop Customers to SuiteCRM contacts. 
+In this case, only modifications in Prestashop will be sent to SuiteCRM. But if the contact is modified in SuiteCRM, 
+the modification won’t be sent to Prestashop.
+
+So let’s create a new rule to send the modification of the SuiteCRM contacts to Prestashop. 
+Select the same modules and connectors you used in your previous rule but in the opposite direction :
+
+Go to fields mapping and map at least the fields firstname, lastname and email. Make sure you don’t use a field that will
+be updated everytime like the modification of the date of the record, you could create an infinite loop.
+
+Go to validation. A new field will be displayed ie “Bidirectional synchronization” in addition to the opposite rule. 
+Select the opposite rule and click on “Confirm” :
+
+The opposite rule is displayed on the rule’s detailed view :
+
+Activate both rules. Now, to test your bidirectional rule, modify a customer in Prestashop, go to the the rules list view 
+and click on “Execute all active rules” :
+
+
+Now open the task and you will see the contact that has been sent to SuiteCRM.
+Notice that in SuiteCRM, the contact’s name was “Doe test” and but the name that was sent is “Doe”.  
+The name is now modified in SuiteCRM. Return to the rules list view and click again on “Execute all active rules”. 
+Another transfer is sent as a result of Myddleware reading in SuiteCRM and detecting the modification we’ve just made. 
+The transfer will automatically be cancelled to avoid an infinite loop :
+
+The reason for this being that the data is already updated in Prestashop (which is normal since Prestashop is the source 
+solution from which the data is being sent). So Myddleware detects that there are no modifications to send to Prestashop
+and thus cancels the transfer and stops what could result in an infinite loop.
+
+Now you have to do this test in the opposite direction. To do so, modify the contact in SuiteCRM and return to the rule 
+list view. Click once again on “Execute all active rules”. You only need to run the rules once, not twice as we did in 
+the previous case. In fact, it depends on which rule has been activated first when you click on “Execute all active rules”. 
+In one direction, you have to click on “run all rules” twice, in the other direction, once is enough.
+
+At this point, your modification in SuiteCRM should be visible in Prestashop :
+
+Once Myddleware detects the modification in Prestashop, it will try to send it to SuiteCRM. 
+But once again, the transfer will be cancelled to avoid an infinite loop :
+
+If the transfer isn’t cancelled, your server will continue to update the same contacts every time. To avoid this, you will 
+have to detect why the transfer isn’t cancelled. It could be because you used the modification date, or because the data
+format is not the same in both applications. 
+To solve this problem, remove some fields in your rule or create a formula to have the same data format in both applications.
