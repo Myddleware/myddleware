@@ -28,6 +28,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ManagementSMTPController extends AbstractController
 {
     const PATH = './../config/swiftmailer.yaml';
+    const PATHNOTIFICATION = './../config/packages/swiftmailer.yaml';
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
 
     protected $tools;
@@ -149,6 +150,21 @@ class ManagementSMTPController extends AbstractController
         ]];
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
+
+        // Exports config data to notification config file
+        $arrayNotification = ['swiftmailer' => [
+            'transport' => $form->get('transport')->getData(),
+            'host' => $form->get('host')->getData(),
+            'port' => $form->get('port')->getData(),
+            'auth_mode' => $form->get('auth_mode')->getData(),
+            'encryption' => $form->get('encryption')->getData(),
+            'username' => $form->get('user')->getData(),
+            'password' => $form->get('password')->getData(),
+        ]];
+        $yamlNotification = Yaml::dump($arrayNotification);
+        file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
+
+
         $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
     }
 
