@@ -109,7 +109,6 @@ class suitecrmcustom extends suitecrm
 	// Redifine read function
 	public function read($param)
 	{
-
 		// No history read action for every the rules => no need of history for the migration
 		if (
 			$param['call_type'] == 'history'
@@ -117,7 +116,6 @@ class suitecrmcustom extends suitecrm
 		) {
 			return array();
 		}
-
 		$read = parent::read($param);
 		// Add a field to filter by mentor OR mentor acceuil
 		if (
@@ -308,8 +306,14 @@ class suitecrmcustom extends suitecrm
 		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '63482d533bd4e') {
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
 		}
-
-		if ($param['module'] == 'mod_2_quartiers' && $param['rule']['id'] == '6321c09e5a1b2' && $param["call_type"] == 'read' && !strpos($query, "mod_2_quartiers_cstm.quartier_prioritaire_c" == 0)){
+	
+		// Set the custom table when we search quartier_prioritaire into quartier module
+		if (
+				$param['module'] == 'mod_2_quartiers' 
+			AND $param['rule']['id'] == '63481a0fd40a7' // Référentiel - Quartier
+			AND $param["call_type"] == 'read' 
+			AND !strpos($query, "mod_2_quartiers_cstm.quartier_prioritaire_c" == 0)
+		){
 			// Ternary so that if query not empty, we add the whole query
 			// Otherwise we append the query
 			$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";

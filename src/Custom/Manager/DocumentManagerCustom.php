@@ -511,7 +511,6 @@ class DocumentManagerCustom extends DocumentManager
 	//function that reads a row from the internallist and trys to find a match in the target
 	public function findMatchCrmQuartiers($internalListData, $suiteCrmData)
 	{
-
 		//to check if all rows of the table were looked at
 		$rowschecked = 0;
 		//to avoid too many choices, this array must have only one element at the end
@@ -520,14 +519,12 @@ class DocumentManagerCustom extends DocumentManager
 		//we loop through the suiteCrm accounts
 		foreach ($suiteCrmData as $index => $suiteCrmQuartier) {
 			//init name as false at the beginning of the loop
-
 			$validName = false;
 			$validCity = ($internalListData['Noms_des_communes_concernees'] == $suiteCrmQuartier['ville_c']);
 
 			if (isset($suiteCrmQuartier['departement_c'])) {
 				$validDepartement = ($internalListData['DEPARTEMENT'] == $suiteCrmQuartier['departement_c']);
 			}
-
 
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
 			$namecompare = similar_text($suiteCrmQuartier['name'], $internalListData['Quartier_prioritaire'], $perc);
@@ -537,7 +534,6 @@ class DocumentManagerCustom extends DocumentManager
 			//to have a match, we need a similar name and at least the same address or postal code
 			$validRow = ($validName && ($validCity || $validDepartement));
 			if ($validRow == true) {
-
 				//we append the array of matches
 				$matchingrows[(int)$perc] = $suiteCrmQuartier['id'];
 			} else {
@@ -720,36 +716,33 @@ class DocumentManagerCustom extends DocumentManager
 		}
 	}
 
+	// Set the quartier parameters
 	public function setQuartierDocumentParams()
 	{
 		$param['rule']['id'] = '63481a0fd40a7';
-			$param['fields'] = [
-				'id',
-				'name',
-				'ville_c',
-				'departement_c',
-				'description',
-				'externalgouvid_c',
-				'quartier_prioritaire_c'
-			];
+		$param['fields'] = [
+			'id',
+			'name',
+			'ville_c',
+			'departement_c',
+			'description',
+			'externalgouvid_c',
+			'quartier_prioritaire_c'
+		];
 
-			$param['id_doc_myddleware'] = $this->id;
-			$param['solutionTarget'] = $this->solutionTarget;
-			$param['ruleFields'] = $this->ruleFields;
-			$param['ruleRelationships'] = $this->ruleRelationships;
-			$param['jobId'] = $this->jobId;
-			$param['api'] = $this->api;
+		$param['jobId'] = $this->jobId;
+		$param['api'] = $this->api;
 
-			$param['offset'] = 0;
-			$param['module'] = 'mod_2_quartiers';
-			$param['ruleParams']['mode'] = '0';
-			$param['query']['quartier_prioritaire_c'] = 1;
-			$param['rule']['id'] = $this->ruleId;
-			$param['limit'] = 10000;
-			$param['date_ref'] = '1970-01-01 00:00:00';
-			$param['call_type'] = 'read';
+		$param['offset'] = 0;
+		$param['module'] = 'mod_2_quartiers';
+		$param['ruleParams']['mode'] = '0';
+		$param['query']['quartier_prioritaire_c'] = 1;
+		$param['rule']['id'] = $this->ruleId;
+		$param['limit'] = 10000;
+		$param['date_ref'] = '1970-01-01 00:00:00';
+		$param['call_type'] = 'read';
 
-			return $param;
+		return $param;
 	}
 
 	// Permet de transformer les données source en données cibles
@@ -758,7 +751,7 @@ class DocumentManagerCustom extends DocumentManager
 		if (!in_array($this->document_data['rule_id'],(array('63481a0fd40a7','63482d533bd4e')))) {
 			return parent::getTargetDataDocument();
 		}
-		
+	
 		// rule should be internallist
 		if ($this->document_data['rule_id'] == "63482d533bd4e") {
 			//param should be empty to assign the custom params
@@ -781,7 +774,7 @@ class DocumentManagerCustom extends DocumentManager
 				];
 
 				$param['id_doc_myddleware'] = $this->id;
-				$param['solutionTarget'] = $this->solutionTarget;
+				// $param['solutionTarget'] = $this->solutionTarget;
 				$param['ruleFields'] = $this->ruleFields;
 				$param['ruleRelationships'] = $this->ruleRelationships;
 				$param['jobId'] = $this->jobId;
@@ -802,8 +795,7 @@ class DocumentManagerCustom extends DocumentManager
 				$this->etabComet = $this->solutionTarget->read($param);
 			}
 			//end if filter my rule id
-		} elseif ($this->document_data['rule_id'] == "63481a0fd40a7") {
-
+		} elseif ($this->document_data['rule_id'] == "63481a0fd40a7") { // Référentiel - Quartier
 			// Assign params for current document
 			if (empty($param)) {
 				$param = $this->setQuartierDocumentParams();
@@ -822,7 +814,6 @@ class DocumentManagerCustom extends DocumentManager
 		// Return false if job has been manually stopped
 		if (!$this->jobActive) {
 			$this->message .= 'Job is not active. ';
-
 			return false;
 		}
 		$history = false;
@@ -854,13 +845,11 @@ class DocumentManagerCustom extends DocumentManager
 				) {
 					$this->message .= 'This document type is D (delete) and no record have been found in the target application. It means that the record has already been deleted in the target application. This document is cancelled.';
 					$this->updateStatus('Cancel');
-
 					return false;
 				}
 
 				// From here, the history table has to be filled
 				if (-1 !== $history) {
-
 					if (!empty($param)) {
 						if (
 							$param['module'] == "Accounts" && !empty($param['rule']['id'])
@@ -901,20 +890,23 @@ class DocumentManagerCustom extends DocumentManager
 							}	// end else empty find gouv
 
 						} elseif (
-							$param['module'] == "mod_2_quartiers" && !empty($param['rule']['id'])
-							and $param['rule']['id'] == '63481a0fd40a7'
-
+								$param['module'] == "mod_2_quartiers" 
+							AND !empty($param['rule']['id'])
+							AND $param['rule']['id'] == '63481a0fd40a7' // Référentiel - Quartier
 						) {
 							if (empty($this->solutionTarget)) {
 								$this->connexionSolution('target');
 							}
 							// we do a custom search for the gouv id in the rows of the suiteCrm
 							$findSuiteCrmId = "";
-							foreach ($this->quartierComet as $index => $suiteCrmSchool) {
-								if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+							foreach ($this->quartierComet as $index => $suiteCrmQuartier) {
+								if (
+										isset($suiteCrmQuartier['externalgouvid_c']) 
+									AND !empty($suiteCrmQuartier['externalgouvid_c'])
+								) {
 									//codeQuartier intstead of etab
-									if ($this->sourceData['Code_quartier'] == $suiteCrmSchool['externalgouvid_c']) {
-										$findSuiteCrmId = $suiteCrmSchool['id'];
+									if ($this->sourceData['Code_quartier'] == $suiteCrmQuartier['externalgouvid_c']) {
+										$findSuiteCrmId = $suiteCrmQuartier['id'];
 										break;
 									}
 								}
@@ -926,9 +918,9 @@ class DocumentManagerCustom extends DocumentManager
 								//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 								// by name and other fields, or it doesn't exist at all and we need to create it
 								$matchingrows = $this->findMatchCrmQuartiers($this->sourceData, $this->quartierComet);
-
+print_r($matchingrows);
+// throw new \Exception("test sfaure 01");
 								if ($matchingrows !== []) {
-
 									if (count($matchingrows) > 1) {
 										krsort($matchingrows);
 									}
@@ -938,9 +930,6 @@ class DocumentManagerCustom extends DocumentManager
 									$this->updateType('C');
 								}
 							}	// end else empty find gouv
-
-						
-
 						}
 					}
 					return parent::getTargetDataDocument();
@@ -991,8 +980,6 @@ class DocumentManagerCustom extends DocumentManager
 					if ('S' == $this->documentType) {
 						$this->updateStatus('Found');
 					} else {
-
-
 						$this->updateStatus('Ready_to_send');
 						$this->updateType('U');
 					}
