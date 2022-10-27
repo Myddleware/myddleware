@@ -21,31 +21,12 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    /**
-     * @var AuthorizationCheckerInterface
-     */
-    protected $authorizationChecker;
-
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-    /**
-     * @var EncoderFactoryInterface
-     */
-    private $encoder;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var NotificationManager
-     */
-    private $notificationManager;
-    /**
-     * @var SecurityService
-     */
-    private $securityService;
+    protected AuthorizationCheckerInterface $authorizationChecker;
+    private UserRepository $userRepository;
+    private EncoderFactoryInterface $encoder;
+    private EntityManagerInterface $entityManager;
+    private NotificationManager $notificationManager;
+    private SecurityService $securityService;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
@@ -152,7 +133,7 @@ class SecurityController extends AbstractController
         }
     }
 
-    public function verifAccountAction(Request $request)
+    public function verifAccount(Request $request): Response
     {
         try {
             if ($request->isMethod('POST')) {
@@ -185,12 +166,11 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * Reset user password.
-     *
-     * @param mixed $token
      * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
+     *
+     * @throws Exception
      */
-    public function resetAction(Request $request, $token)
+    public function reset(Request $request, $token)
     {
         if (!$token) {
             $form = $this->createForm(UserForgotPasswordType::class);

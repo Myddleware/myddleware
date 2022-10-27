@@ -27,13 +27,11 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//use Psr\LoggerInterface;
-
 class sapcrmcore extends saproot
 {
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
-    protected $keySubStructure = ['CRMD_ORDER' => [
+    protected array $keySubStructure = ['CRMD_ORDER' => [
         'ET_PARTNER' => 'PARTNER_FCT',
         'ET_STATUS' => 'USER_STAT_PROC',
         'ET_APPOINTMENT' => 'APPT_TYPE',
@@ -47,13 +45,13 @@ class sapcrmcore extends saproot
     ];
 
     // Permet d'ajouter des filtres sur les tables, on ne prend que les partenaires principaux sur la table des partenaire par exemple
-    protected $subStructureFilter = ['CRMD_ORDER' => [
+    protected array $subStructureFilter = ['CRMD_ORDER' => [
         'ET_PARTNER' => ['MAINPARTNER' => 'X'],
     ],
     ];
 
     // Permet d'avoir les GUID pour chaque sous-structure et ainsi de savoirà quel partner/order... appartiennent les autre sstructures
-    protected $guidName = ['CRMD_ORDER' => [
+    protected array $guidName = ['CRMD_ORDER' => [
         'ET_ORDERADM_H' => 'GUID',
         'ET_ACTIVITY_H' => 'GUID',
         'ET_STATUS' => 'GUID',
@@ -65,17 +63,17 @@ class sapcrmcore extends saproot
     ];
 
     // Permet d'indiquer quel est l'id pour chaque module
-    protected $idName = [
+    protected array $idName = [
         'CRMD_ORDER' => ['ET_ORDERADM_H' => 'OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000' => 'PARTNER'],
     ];
 
-    protected $required_fields = [
+    protected array $required_fields = [
         'CRMD_ORDER' => ['ET_ORDERADM_H__CHANGED_AT', 'ET_ORDERADM_H__OBJECT_ID'],
         'BU_PARTNER' => ['ET_BUT000__CHDAT', 'ET_BUT000__CHTIM', 'ET_BUT000__PARTNER'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'CRMD_ORDER' => [
             // 'ET_ORDERADM_H' => array('OBJECT_ID'=> array('label' =>  'Object ID','required_relationship' => false)),
             'ET_PARTNER' => ['PARTNER_NO' => ['label' => 'Partner number', 'required_relationship' => false]],
@@ -91,10 +89,8 @@ class sapcrmcore extends saproot
         parent::login($paramConnexion);
     }
 
-    // login($paramConnexion)*/
-
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ($type = 'source') {
             return [
@@ -109,9 +105,7 @@ class sapcrmcore extends saproot
         ];
     }
 
-    // get_modules()
-
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         if ('target' == $type) {
             switch ($module) {
@@ -203,7 +197,7 @@ class sapcrmcore extends saproot
 
     // Permet de modifier les nom des champs pour le read_last
     // Dans SAP les champs en lecture et en écriture ne sont pas toujours identiques pour le même module, les structures peuvent être différentes
-    protected function convertFieldReadLast($param, $values, $mode)
+    protected function convertFieldReadLast($param, $values, $mode): array
     {
         try {
             $this->get_module_fields($param['module'], 'target');
@@ -285,7 +279,7 @@ class sapcrmcore extends saproot
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
@@ -362,7 +356,7 @@ class sapcrmcore extends saproot
     }
 
     // Permet de créer des données
-    public function updateData($param)
+    public function updateData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice SAP CRM
         foreach ($param['data'] as $idDoc => $data) {
@@ -446,7 +440,7 @@ class sapcrmcore extends saproot
     }
 
     // Ajout des filiale et du groupe en paramètre
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];
@@ -536,7 +530,7 @@ class sapcrmcore extends saproot
 
         return $response;
     }
-}// class sapcrm
+}
 
 class sapcrm extends sapcrmcore
 {

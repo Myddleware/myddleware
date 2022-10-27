@@ -53,7 +53,7 @@ class ManagementSMTPType extends AbstractType
     {
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'regle_bundlemanagement_smtp';
     }

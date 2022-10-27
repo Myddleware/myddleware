@@ -28,98 +28,59 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleParam.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleParamRepository")
  * @ORM\Table(name="ruleparam", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
  */
 class RuleParam
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="params")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private Rule $rule;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=100, nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="value", type="text", nullable=false)
      */
-    private $value;
+    private string $value;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return RuleParam
-     */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set value.
-     *
-     * @param string $value
-     *
-     * @return RuleParam
-     */
-    public function setValue($value)
+    public function setValue($value): self
     {
         $this->value = $value;
 
         return $this;
     }
 
-    /**
-     * Get value.
-     *
-     * @return string
-     */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }

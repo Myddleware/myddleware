@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Manager;
 
@@ -32,6 +33,7 @@ use App\Solutions\eventbrite;
 use App\Solutions\facebook;
 use App\Solutions\file;
 use App\Solutions\hubspot;
+use App\Solutions\internallist;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
@@ -56,12 +58,9 @@ use App\Solutions\wordpress;
 use App\Solutions\zuora;
 use Exception;
 
-/**
- * Class SolutionManager.
- */
 class SolutionManager
 {
-    private $classes = [];
+    private array $classes = [];
 
     public function __construct(
         wordpress $wordpress,
@@ -92,7 +91,8 @@ class SolutionManager
         sugarcrm $sugarcrm,
         salesforce $salesforce,
         airtable $airtable,
-        sendinblue $sendinblue
+        sendinblue $sendinblue,
+        internallist $internallist
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -124,9 +124,13 @@ class SolutionManager
             'salesforce' => $salesforce,
             'airtable' => $airtable,
             'sendinblue' => $sendinblue,
+            'internallist' => $internallist,
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {

@@ -33,24 +33,17 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Yaml\Yaml;
 
-/**
- * Class ToolsManager.
- */
 class toolscore
 {
-    protected $connection;
+    protected Connection $connection;
     protected $container;
-    protected $logger;
-
+    protected LoggerInterface $logger;
     protected $language;
     protected $translations;
-    /**
-     * @var string
-     */
-    private $projectDir;
+    private string $projectDir;
 
-    // Standard rule param list to avoird to delete specific rule param (eg : filename for file connector)
-    protected $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
+    // Standard rule param list to avoid to delete specific rule param (eg : filename for file connector)
+    protected array $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -67,7 +60,7 @@ class toolscore
     }
 
     // Compose une liste html avec les options
-    public static function composeListHtml($array, $phrase = false, $default = null)
+    public static function composeListHtml($array, $phrase = false, $default = null): string
     {
         $r = '';
         if ($array) {
@@ -90,7 +83,7 @@ class toolscore
     }
 
     // Compose checkbox
-    public static function composeListHtmlCheckbox($array, $phrase = false)
+    public static function composeListHtmlCheckbox($array, $phrase = false): string
     {
         $r = '';
         if ($array) {
@@ -120,7 +113,7 @@ class toolscore
         return $data;
     }
 
-    public function getRuleParam()
+    public function getRuleParam(): array
     {
         return $this->ruleParam;
     }
@@ -181,6 +174,9 @@ class toolscore
         file_put_contents($this->projectDir.'/config/packages/public/parameters_public.yml', $new_yaml);
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function getPhpVersion()
     {
         // Get the custom php version first

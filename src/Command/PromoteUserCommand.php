@@ -14,22 +14,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class PromoteUserCommand extends Command
 {
     protected static $defaultName = 'myddleware:promote-user';
-    protected static $defaultDescription = 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN';
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
-
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-
-    /**
-     * @var SymfonyStyle
-     */
-    private $io;
+    protected static string $defaultDescription = 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN';
+    private EntityManagerInterface $em;
+    private UserRepository $userRepository;
+    private SymfonyStyle $io;
 
     public function __construct(EntityManagerInterface $em, UserRepository $userRepository)
     {

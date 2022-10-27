@@ -27,15 +27,15 @@ namespace App\Solutions;
 
 class wooeventmanagercore extends wordpress
 {
-    protected $subModules = [
+    protected array $subModules = [
                                     'mep_event_more_date' => ['parent_module' => 'mep_events',
                                                                     'parent_id' => 'event_id', ],
                                     ];
 
     // Module without reference date
-    protected $moduleWithoutReferenceDate = ['mep_cat', 'mep_org'];
+    protected array $moduleWithoutReferenceDate = ['mep_cat', 'mep_org'];
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         if ('source' === $type) {
             return [

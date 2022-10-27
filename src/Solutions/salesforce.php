@@ -30,11 +30,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class salesforcecore extends solution {
 
-	protected $limitCall = 100;
+	protected int $limitCall = 100;
 
-	protected $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
+	protected array $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
-	protected $FieldsDuplicate = array(
+	protected array $FieldsDuplicate = array(
 										'Contact' => array('Email','LastName'),
 										'Lead' => array('Email','LastName'),
 										'Account' => array('Email', 'Name'),
@@ -50,7 +50,7 @@ class salesforcecore extends solution {
 	protected $instance_url;
 	
 	// Listes des modules et des champs à exclure de Salesforce
-	protected $exclude_module_list = array(
+	protected array $exclude_module_list = array(
 										'default' => 
 											array("AccountFeed", "AccountShare", "ActivityHistory", "AggregateResult", "ApexClass", "ApexComponent", "ApexLog", "ApexPage","AccountHistory","CaseHistory", "ContactHistory","ContractHistory","LeadHistory", "OpportunityHistory",
 											"ApexTestQueueItem", "ApexTestResult", "ApexTrigger", "AssetFeed", "AsyncApexJob", "BrandTemplate", "CampaignFeed", "CampaignShare", "CaseFeed", "CaseHistory","SolutionHistory",
@@ -66,13 +66,13 @@ class salesforcecore extends solution {
 										'target' => array()
 										);
 										
-	protected $exclude_field_list = array(
+	protected array $exclude_field_list = array(
 										'default' => array('CreatedDate','LastModifiedDate','SystemModstamp'),
 										"Contact" => array("Name"), 
 										"Case" => array("CaseNumber")
 									);
 									
-	protected $versionApi = 'v38.0';
+	protected string $versionApi = 'v38.0';
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
@@ -108,20 +108,23 @@ class salesforcecore extends solution {
 		    }
 		}
 		catch (\Exception $e) {
-			$error = $e->getMessage();
-			$this->logger->error($error);
-			return array('error' => $error);
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
 		}
-	} // login($paramConnexion)
+	}
 	
 	// Fonction qui renvoie les données de connexion
-	public function getToken() {
+	public function getToken(): array
+    {
 		return array('sf_access_token' => $this->access_token,
 					 'sf_instance_url' => $this->instance_url);
-	} // getToken()
+	}
 
 	// Liste des paramètres de connexion
-	public function getFieldsLogin() {	
+	public function getFieldsLogin(): array
+    {
         return array(
                     array(
                             'name' => 'login',
@@ -154,7 +157,7 @@ class salesforcecore extends solution {
                             'label' => 'solution.fields.sandbox'
                         )
         );
-	} // getFieldsLogin()
+	}
 
 	// Renvoie les modules disponibles du compte Salesforce connecté
 	public function get_modules($type = 'source') {
@@ -184,10 +187,11 @@ class salesforcecore extends solution {
 			$error = $e->getMessage();
 			return $error;
 		}
-	} // get_modules()
+	}
 
 	// Renvoie les champs du module passé en paramètre
-	public function get_module_fields($module, $type = 'source', $param = null) {
+	public function get_module_fields($module, $type = 'source', $param = null): array
+    {
 		parent::get_module_fields($module, $type);
 		$token = $this->getToken();
 		$instance_url = $token['sf_instance_url'];
@@ -281,12 +285,16 @@ class salesforcecore extends solution {
 			return $this->moduleFields;
 		}
 		catch (\Exception $e) {
-			return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
 		}
-	} // get_module_fields($module)
+	}
 
 	// Permet d'ajouter des paramètres 
-	public function getFieldsParamUpd($type,$module) {	
+	public function getFieldsParamUpd($type,$module): array
+    {
 		try {
 			// Si le module est PricebookEntry (produit dans le catalogue) alors il faut indiquer le catalogue de produit utilisé
 			if (
@@ -322,13 +330,17 @@ class salesforcecore extends solution {
 			return array();
 		}
 		catch (\Exception $e){
-			return array();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
 		}
 	}
 	
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-	public function readData($param) {	
+	public function readData($param): array
+    {
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -444,13 +456,19 @@ class salesforcecore extends solution {
 			return $result;
 		}
 		catch (\Exception $e) {
-		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			return $result;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            $result['error'] = $error;
+            return $result;
 		}
-	} 
-	
-	// Permet de créer des données
-	public function createData($param) {
+	}
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
+    public function createData($param): array
+    {
 		$query_url = $this->instance_url."/services/data/".$this->versionApi."/composite/tree/" . $param['module'] . '/';
 
 		if(!(isset($param['data']))) {
@@ -565,10 +583,14 @@ class salesforcecore extends solution {
 			}
 		}					
 		return $result;
-	} // create($param)
-	
-	// Permet de modifier des données
-	public function updateData($param) {		
+	}
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
+    public function updateData($param): array
+    {
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
 		}
@@ -651,15 +673,16 @@ class salesforcecore extends solution {
 			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
 		}			
 		return $result;
-	} // update($param)	
-	
+	}
+
 	// Permet de formater la réponse si besoin
 	protected function formatResponse($param,$query_request_data) {
 		return $query_request_data;
 	}
 	
 	// Génération du SELECT
-	protected function getSelect($param) {
+	protected function getSelect($param): string
+    {
 		$querySelect = "SELECT+";
 		// Gestion du SELECT
 		foreach ($param['fields'] as $field){
@@ -672,12 +695,16 @@ class salesforcecore extends solution {
 	}
 	
 	// Génération du FROM
-	protected function getFrom($param) {
+	protected function getFrom($param): string
+    {
 		return "+FROM+".$param['module'];
 	}
-	
-	// Permet de faire des développements spécifiques sur le WHERE dans certains cas
-	protected function getWhere($param) {
+
+    /**
+     * @throws \Exception
+     */
+    protected function getWhere($param): string
+    {
 		if (!empty($param['query'])) {
 			foreach ($param['query'] as $key => $value) {
 				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
@@ -710,9 +737,12 @@ class salesforcecore extends solution {
 		}
 		return $queryWhere;
 	}
-	
-	// Génération du ORDER
-	protected function getOrder($param){	
+
+    /**
+     * @throws \Exception
+     */
+    protected function getOrder($param): string
+    {
 		$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
@@ -725,7 +755,8 @@ class salesforcecore extends solution {
 	// Permet de renvoyer le mode de la règle en fonction du module target
 	// Valeur par défaut "0"
 	// Si la règle n'est qu'en création, pas en modicication alors le mode est C
-	public function getRuleMode($module,$type) {
+	public function getRuleMode($module,$type): array
+    {
 		if(
 			$type == 'target'
 			&& in_array($module, array('GroupMember','CollaborationGroupMember','CaseTeamMember','CaseTeamTemplateMember'))
@@ -738,7 +769,12 @@ class salesforcecore extends solution {
 	}
 	
 	// Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-	public function getRefFieldName($moduleSource, $RuleMode) {
+
+    /**
+     * @throws \Exception
+     */
+    public function getRefFieldName($moduleSource, $RuleMode): string
+    {
 		if(in_array($RuleMode,array("0","S"))) {
 			return "LastModifiedDate";
 		} else if ($RuleMode == "C"){
@@ -746,11 +782,15 @@ class salesforcecore extends solution {
 		} else {
 			throw new \Exception ("$RuleMode is not a correct Rule mode.");
 		}
-		return null;
+		return "";
 	}
 	
 	// Fonction permettant de faire l'appel REST
-	protected function call($url, $parameters, $update = false){	
+
+    /**
+     * @throws \Exception
+     */
+    protected function call($url, $parameters, $update = false){
 		ob_start();
 		$ch = curl_init();
 		if($parameters === false){ // Si l'appel ne possède pas de paramètres, on exécute un GET en curl
@@ -811,7 +851,7 @@ class salesforcecore extends solution {
 		curl_close($ch);
 		ob_end_flush();
 		return $query_request_data;	
-    } // call($method, $parameters)
+    }
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
 	protected function dateTimeToMyddleware($dateTime) {
@@ -820,17 +860,18 @@ class salesforcecore extends solution {
 		$tab = explode('.', $dateTime);
 		$dateTime = $tab[0];
 		return $dateTime;
-	}// dateTimeToMyddleware($dateTime)	
+	}
 	
 	// Function de conversion de datetime format Myddleware à un datetime format solution
-	protected function dateTimeFromMyddleware($dateTime) {
+	protected function dateTimeFromMyddleware($dateTime): string
+    {
 		$tab = explode(' ', $dateTime);
 		$date = $tab[0] . 'T' . $tab[1];
 		$date .= '+00:00';
 		return $date;
-	}// dateTimeToMyddleware($dateTime)    
+	}
     
-}// class salesforcecore
+}
 
 class salesforce extends salesforcecore {	
 }

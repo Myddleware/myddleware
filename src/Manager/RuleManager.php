@@ -26,9 +26,7 @@
 namespace App\Manager;
 
 use App\Entity\Config;
-use App\Entity\Document;
 use App\Entity\DocumentData;
-use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit as RuleParamAudit;
@@ -53,8 +51,8 @@ use Symfony\Component\Routing\RouterInterface;
 
 class rulecore
 {
-    protected $connection;
-    protected $logger;
+    protected Connection $connection;
+    protected LoggerInterface $logger;
     protected $ruleId;
     protected $rule;
     protected $ruleFields;
@@ -68,61 +66,24 @@ class rulecore
     protected $jobId;
     protected $manual;
     protected $key;
-    protected $limit = 100;
-    protected $offset = 0;
-    protected $limitReadCommit = 1000;
-    protected $tools;
+    protected int $limit = 100;
+    protected int $offset = 0;
+    protected int $limitReadCommit = 1000;
+    protected ?ToolsManager $tools;
     protected $configParams;
     protected $api;    // Specify if the class is called by the API
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBagInterface;
-    /**
-     * @var documentManager
-     */
-    protected $documentManager;
-    /**
-     * @var string
-     */
+    protected EntityManagerInterface $entityManager;
+    protected ParameterBagInterface $parameterBagInterface;
+    protected ?DocumentManager $documentManager;
     private $env;
-    /**
-     * @var RouterInterface
-     */
-    private $router;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
-    /**
-     * @var RuleRelationShipRepository
-     */
-    private $ruleRelationShipRepository;
-    /**
-     * @var SolutionManager
-     */
-    protected $solutionManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
-    /**
-     * @var RuleOrderRepository
-     */
-    private $ruleOrderRepository;
-    /**
-     * @var SessionInterface
-     */
-    private $session;
-
-    /**
-     * @var FormulaManager
-     */
-    protected $formulaManager;
+    private ?RouterInterface $router;
+    private ?RuleRepository $ruleRepository;
+    private ?RuleRelationShipRepository $ruleRelationShipRepository;
+    protected ?SolutionManager $solutionManager;
+    private ?DocumentRepository $documentRepository;
+    private ?RuleOrderRepository $ruleOrderRepository;
+    private ?SessionInterface $session;
+    protected FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -158,6 +119,9 @@ class rulecore
         $this->formulaManager = $formulaManager;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function setRule($idRule)
     {
         $this->ruleId = $idRule;
@@ -196,8 +160,12 @@ class rulecore
         $this->api = $api;
     }
 
-    // Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
-    // If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application
+    /**
+     * Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
+     * If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id')
     {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
@@ -271,7 +239,7 @@ class rulecore
     }
 
     // Connect to the source or target application
-    public function connexionSolution($type)
+    public function connexionSolution($type): bool
     {
         try {
             if ('source' == $type) {
@@ -332,8 +300,12 @@ class rulecore
         }
     }
 
-    // Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
-    // Cette fonction retourne le nombre d'enregistrements lus
+    /**
+     * Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
+     * Cette fonction retourne le nombre d'enregistrements lus.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createDocuments()
     {
         $readSource = null;
@@ -421,7 +393,9 @@ class rulecore
         return $readSource;
     }
 
-    // Get the status of the current job
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function getJobStatus()
     {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
@@ -436,7 +410,11 @@ class rulecore
         return false;
     }
 
-    // Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible
+    /**
+     * Permet de mettre à jour la date de référence pour ne pas récupérer une nouvelle fois les données qui viennent d'être écrites dans la cible.
+     *
+     * @throws Exception
+     */
     protected function updateReferenceDate()
     {
         $param = $this->entityManager->getRepository(RuleParam::class)
@@ -620,8 +598,10 @@ class rulecore
         }
     }
 
-    // Permet de filtrer les nouveau documents d'une règle
-    public function filterDocuments($documents = null)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function filterDocuments($documents = null): array
     {
         // include_once 'document.php';
         $response = [];
@@ -661,9 +641,13 @@ class rulecore
         return $response;
     }
 
-    // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-    // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckPredecessorDocuments($documents = null)
+    /**
+     * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function checkPredecessorDocuments($documents = null): array
     {
         // include_once 'document.php';
         $response = [];
@@ -689,7 +673,7 @@ class rulecore
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckPredecessorDocument();
+                    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -702,9 +686,13 @@ class rulecore
         return $response;
     }
 
-    // Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-    // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function ckeckParentDocuments($documents = null)
+    /**
+     * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function checkParentDocument($documents = null): array
     {
         // include_once 'document.php';
         // Permet de charger dans la classe toutes les relations de la règle
@@ -747,7 +735,7 @@ class rulecore
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->ckeckParentDocument();
+                    $response[$document['id']] = $this->documentManager->checkParentDocument();
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -760,12 +748,14 @@ class rulecore
         return $response;
     }
 
-    // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-    // Si un document n'est pas clos alors le statut du docuement est mis à "pending"
-    public function transformDocuments($documents = null)
+    /**
+     * Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
+     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function transformDocuments($documents = null): array
     {
-        // include_once 'document.php';
-
         // Permet de charger dans la classe toutes les relations de la règle
         $response = [];
 
@@ -818,18 +808,22 @@ class rulecore
         return $response;
     }
 
-    // Permet de récupérer les données de la cible avant modification des données
-    // 2 cas de figure :
-    //     - Le document est un document de modification
-    //     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
-    public function getTargetDataDocuments($documents = null)
+    /**
+     * Permet de récupérer les données de la cible avant modification des données
+     * 2 cas de figure :
+     *  - Le document est un document de modification
+     *  - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getTargetDataDocuments($documents = null): array
     {
         // include_once 'document.php';
 
         // Permet de charger dans la classe toutes les relations de la règle
         $response = [];
 
-        // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
+        // Sélection de tous les documents de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Transformed');
         }
@@ -869,7 +863,7 @@ class rulecore
         return $response;
     }
 
-    public function sendDocuments()
+    public function sendDocuments(): array
     {
         // creation into the target application
         $sendTarget = $this->sendTarget('C');
@@ -892,24 +886,22 @@ class rulecore
         return $sendTarget;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function actionDocument($id_document, $event, $param1 = null)
     {
         switch ($event) {
             case 'rerun':
                 return $this->rerun($id_document);
-                break;
             case 'cancel':
                 return $this->cancel($id_document);
-                break;
             case 'remove':
                 return $this->changeDeleteFlag($id_document, true);
-                break;
             case 'restore':
                 return $this->changeDeleteFlag($id_document, false);
-                break;
             case 'changeStatus':
                 return $this->changeStatus($id_document, $param1);
-                break;
             default:
                 return 'Action '.$event.' unknown. Failed to run this action. ';
         }
@@ -920,13 +912,10 @@ class rulecore
         switch ($event) {
             case 'ALL':
                 return $this->runMyddlewareJob('ALL');
-                break;
             case 'ERROR':
                 return $this->runMyddlewareJob('ERROR');
-                break;
             case 'runMyddlewareJob':
                 return $this->runMyddlewareJob($this->ruleId, $jobName);
-                break;
             default:
                 return 'Action '.$event.' unknown. Failed to run this action. ';
         }
@@ -991,7 +980,9 @@ class rulecore
         }
     }
 
-    // Get all document of the rule
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false)
     {
         $sql = 'SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId AND deleted = 0';
@@ -1017,7 +1008,7 @@ class rulecore
     // Permet de récupérer les règles potentiellement biderectionnelle.
     // Cette fonction renvoie les règles qui utilisent les même connecteurs et modules que la règle en cours mais en sens inverse (source et target inversées)
     // On est sur une méthode statique c'est pour cela que l'on récupère la connexion e paramètre et non dans les attributs de la règle
-    public static function getBidirectionalRules($connection, $params)
+    public static function getBidirectionalRules($connection, $params): ?array
     {
         try {
             // Récupération des règles opposées à la règle en cours de création
@@ -1066,7 +1057,9 @@ class rulecore
         return null;
     }
 
-    // Permet d'annuler un docuement
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function cancel($id_document)
     {
         $param['id_doc_myddleware'] = $id_document;
@@ -1089,7 +1082,9 @@ class rulecore
         }
     }
 
-    // Remove a document
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function changeDeleteFlag($id_document, $deleteFlag)
     {
         $param['id_doc_myddleware'] = $id_document;
@@ -1112,7 +1107,9 @@ class rulecore
         }
     }
 
-    // Remove a document
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null)
     {
         $param['id_doc_myddleware'] = $id_document;
@@ -1148,12 +1145,15 @@ class rulecore
             }
             //if user clicked on cancel all transfers of a rule
             if ('cancelDocumentJob' === $event) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             //if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' Y --env='.$this->env.' > '.$fileTmp.' &', $output);
-            } else {
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' 1 Y --env='.$this->env.' > '.$fileTmp.' &', $output);
+            } elseif ('ALL' == $ruleId) {
+                // We don't set the parameter force to 1 when we synchronize all rules
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+            } else {
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:synchro '.$ruleId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
@@ -1199,8 +1199,12 @@ class rulecore
         }
     }
 
-    // Permet de relancer un document quelque soit son statut
-    protected function rerun($id_document)
+    /**
+     * Permet de relancer un document quelque soit son statut.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function rerun($id_document): array
     {
         $session = new Session();
         $msg_error = [];
@@ -1237,7 +1241,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments([['id' => $id_document]]);
+            $response = $this->checkPredecessorDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
             } else {
@@ -1247,7 +1251,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments([['id' => $id_document]]);
+            $response = $this->checkParentDocument([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
@@ -1343,7 +1347,7 @@ class rulecore
     }
 
     // Check if the rule is a child rule
-    public function isChild()
+    public function isChild(): bool
     {
         try {
             $queryChild = '	SELECT rule.id 
@@ -1369,7 +1373,7 @@ class rulecore
         return false;
     }
 
-    protected function sendTarget($type, $documentId = null)
+    protected function sendTarget($type, $documentId = null): array
     {
         try {
             // Permet de charger dans la classe toutes les relations de la règle
@@ -1418,9 +1422,10 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
-                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
+                        // Allows to get the history fields, necessary for updating the SAP for instance
+                        foreach ($send['data'] as $docId => $value) {
+                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
+                        }
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
@@ -1452,7 +1457,11 @@ class rulecore
         return $response;
     }
 
-    // Check before we send a record deletion
+    /**
+     * Check before we send a record deletion.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function checkBeforeDelete($send)
     {
         // Check in case of several source records data point to the same target record
@@ -1527,6 +1536,9 @@ class rulecore
         return $send;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function checkDuplicate($transformedData)
     {
         // Traitement si présence de champ duplicate
@@ -1636,7 +1648,10 @@ class rulecore
         }
     }
 
-    public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = '')
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
     {
         // Init $limit parameter
         $limit = ' LIMIT '.$this->limit;
@@ -1819,7 +1834,11 @@ class rulecore
 
     // Get the child rules of the current rule
     // Return the relationships between the parent and the clild rules
-    public function getChildRules()
+
+    /**
+     * @throws Exception
+     */
+    public function getChildRules(): array
     {
         try {
             // get the rule linked to the current rule and check if they have the param child
@@ -1859,6 +1878,30 @@ class rulecore
         return false;
     }
 
+    // Delete a document data
+    protected function deleteDocumentData($documentId, $type): bool
+    {
+        try {
+            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
+                                    ->findOneBy([
+                                        'doc_id' => $documentId,
+                                        'type' => $type,
+                                        ]
+                                );
+            // Generate data array
+            if (!empty($documentDataEntity)) {
+                $this->entityManager->remove($documentDataEntity);
+                $this->entityManager->flush();
+
+                return true;
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+
+        return false;
+    }
+
     // Get the content of the table config
     protected function setConfigParam()
     {
@@ -1873,7 +1916,11 @@ class rulecore
         }
     }
 
-    // Commit function with check if job is still active
+    /**
+     * Checks whether a job is still active then commits the transaction.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function commit($newTransaction)
     {
         // Rollback if the job has been manually stopped
@@ -1887,23 +1934,26 @@ class rulecore
         }
     }
 
-    // Parametre de la règle choix utilisateur
-    /*
-    array(
-        'id' 		=> 'datereference',
-        'name' 		=> 'datereference',
-        'required'	=> true,
-        'type'		=> 'text',
-        'label' => 'solution.params.dateref',
-        'readonly' => true
-    ),	*/
-    public static function getFieldsParamUpd()
+    /**
+     *  Parameter de la règle choix utilisateur.
+     *
+     * @return array
+     *               [
+     *               'id' 		=> 'datereference',
+     *               'name' 		=> 'datereference',
+     *               'required'	=> true,
+     *               'type'		=> 'text',
+     *               'label' => 'solution.params.dateref',
+     *               'readonly' => true
+     *               ]
+     */
+    public static function getFieldsParamUpd(): array
     {
         return [];
     }
 
     // Parametre de la règle obligation du système par défaut
-    public static function getFieldsParamDefault($idSolutionSource = '', $idSolutionTarget = '')
+    public static function getFieldsParamDefault($idSolutionSource = '', $idSolutionTarget = ''): array
     {
         return [
             'active' => false,
@@ -1916,7 +1966,7 @@ class rulecore
     }
 
     // Parametre de la règle en modification dans la fiche
-    public static function getFieldsParamView($idRule = '')
+    public static function getFieldsParamView($idRule = ''): array
     {
         return [
             [

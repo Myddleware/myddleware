@@ -31,15 +31,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class GenerateTemplateCommand.
- */
 class GenerateTemplateCommand extends Command
 {
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    private JobManager $jobManager;
 
     public function __construct(JobManager $jobManager, string $name = null)
     {
@@ -58,7 +52,7 @@ class GenerateTemplateCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $nomTemplate = $input->getArgument('nomTemplate');
         $rulesIds = $input->getArgument('rulesId');
@@ -70,8 +64,12 @@ class GenerateTemplateCommand extends Command
         $response = $this->jobManager->generateTemplate($nomTemplate, $descriptionTemplate, $rulesIds);
         if (true === $response['success']) {
             $output->writeln('Template '.$nomTemplate.' generated.');
+
+            return 0;
         } else {
             $output->writeln('<error>Failed to generate template '.$nomTemplate.' : '.$response['message'].'</error>');
+
+            return 1;
         }
     }
 }

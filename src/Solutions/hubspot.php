@@ -29,17 +29,17 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class hubspotcore extends solution
 {
-    protected $url = 'https://api.hubapi.com/';
-    protected $version = 'v1';
-    protected $readLast = false;
-    protected $migrationMode = false;
+    protected string $url = 'https://api.hubapi.com/';
+    protected string $version = 'v1';
+    protected bool $readLast = false;
+    protected bool $migrationMode = false;
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         // 'contacts' => array('email'), // No duplicate search for now
     ];
 
     // Requiered fields for each modules
-    protected $required_fields = [
+    protected array $required_fields = [
         'companies' => ['hs_lastmodifieddate'],
         'deal' => ['hs_lastmodifieddate'],
         'contact' => ['lastmodifieddate'],
@@ -51,7 +51,7 @@ class hubspotcore extends solution
     ];
 
     // Name of reference fields for each module
-    protected $modifiedField = [
+    protected array $modifiedField = [
         'companies' => 'hs_lastmodifieddate',
         'deal' => 'hs_lastmodifieddate',
         'contact' => 'lastmodifieddate',
@@ -62,19 +62,19 @@ class hubspotcore extends solution
         'line_items' => 'date_modified',
     ];
 
-    protected $limitCall = [
+    protected array $limitCall = [
         'companies' => 100,  // 100 max
         'deal' => 100,  // 100 max
         'contact' => 100, // 100 max
         'engagements' => 100, // 100 max
     ];
 
-    protected $objectModule = [
+    protected array $objectModule = [
         'products' => ['properties' => ['name', 'price']],
         'line_items' => ['properties' => ['name', 'price', 'quantity', 'hs_product_id']],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -98,16 +98,14 @@ class hubspotcore extends solution
             }
             $this->connexion_valide = true;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-
             return ['error' => $error];
         }
     }
 
-    // login($paramConnexion)*/
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         $modules = [
             'companies' => 'Companies',
@@ -139,10 +137,8 @@ class hubspotcore extends solution
         return $modules;
     }
 
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -330,21 +326,12 @@ class hubspotcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
-    /**
-     * Function read data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
     public function readData($param)
     {
         try {
@@ -513,16 +500,7 @@ class hubspotcore extends solution
         return $result;
     }
 
-    // end function read
-
-    /**
-     * Function create data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function createData($param)
+    public function createData($param): array
     {
         try {
             // Associate deal is always an update to Hubspot
@@ -606,7 +584,8 @@ class hubspotcore extends solution
                 $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
             $result[$idDoc] = [
                 'id' => '-1',
                 'error' => $error,
@@ -616,16 +595,7 @@ class hubspotcore extends solution
         return $result;
     }
 
-    // end function create
-
-    /**
-     * Function update data.
-     *
-     * @param $param
-     *
-     * @return mixed
-     */
-    public function updateData($param)
+    public function updateData($param): array
     {
         try {
             $module = $this->formatModuleName($param['module']);
@@ -725,10 +695,9 @@ class hubspotcore extends solution
         return $result;
     }
 
-    // end function update
 
     // Change the result
-    protected function beforeGenerateResult($identifyProfiles, $param)
+    protected function beforeGenerateResult($identifyProfiles, $param): array
     {
         if (!empty($identifyProfiles)) {
             // In case of line Item, we add the dealId if requested
@@ -749,8 +718,11 @@ class hubspotcore extends solution
         return $identifyProfiles;
     }
 
-    // Build the url depending on the module
-    protected function getUrl($param)
+    /**
+     * Build the url depending on the module
+     * @throws \Exception
+     */
+    protected function getUrl($param): array
     {
         // Format the module name
         $module = $this->formatModuleName($param['module']);
@@ -903,7 +875,7 @@ class hubspotcore extends solution
      *
      * @return array
      */
-    public function selectType($results, $module, $first = true)
+    public function selectType($results, $module, $first = true): array
     {
         $moduleResult = explode('_', $module);
         $resultFinal = [];
@@ -918,7 +890,7 @@ class hubspotcore extends solution
     }
 
     // Get version label
-    protected function getVersion($param, $module)
+    protected function getVersion($param, $module): string
     {
         if (
                 'companies' === $module
@@ -931,7 +903,7 @@ class hubspotcore extends solution
     }
 
     //Get the id label depending of the module
-    protected function getIdField($param, $module)
+    protected function getIdField($param, $module): string
     {
         // In case of object module, we return objectId
         if (!empty($this->objectModule[$module])) {
@@ -975,7 +947,7 @@ class hubspotcore extends solution
      *
      * @return array
      */
-    protected function getresultQuery($request, $url, $param)
+    protected function getresultQuery($request, $url, $param): array
     {
         // Module contact or Deal
         if (
@@ -1137,7 +1109,7 @@ class hubspotcore extends solution
      *
      * @return array
      */
-    protected function getresultQueryBydate($request, $param, $offset)
+    protected function getresultQueryBydate($request, $param, $offset): array
     {
         'deals' === $param['module'] || 'companies' === $param['module'] ? $modified = 'hs_lastmodifieddate' : $modified = 'lastmodifieddate';
         if ('owners' === $param['module']) {
@@ -1291,7 +1263,7 @@ class hubspotcore extends solution
      *
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode): ?string
     {
         // Creation and modification mode
         if (in_array($RuleMode, ['0', 'S'])) {
@@ -1310,7 +1282,7 @@ class hubspotcore extends solution
      *
      * @return string
      */
-    public function formatModuleName($name)
+    public function formatModuleName($name): string
     {
         if ('contacts' === $name) {
             return 'contact';
@@ -1348,7 +1320,7 @@ class hubspotcore extends solution
      *
      * @return array Assoc array of decoded result
      */
-    protected function call($url, $method = 'GET', $args = [], $timeout = 120)
+    protected function call($url, $method = 'GET', $args = [], $timeout = 120): array
     {
         if (!function_exists('curl_init') or !function_exists('curl_setopt')) {
             throw new \Exception('curl extension is missing!');

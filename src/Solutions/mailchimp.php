@@ -29,13 +29,13 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class mailchimpcore extends solution
 {
-    protected $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+    protected string $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
     protected $apiKey;
-    protected $verify_ssl = true;
-    protected $update = false;
+    protected bool $verify_ssl = true;
+    protected bool $update = false;
     const TIMEOUT = 60;
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -74,8 +74,6 @@ class mailchimpcore extends solution
         }
     }
 
-    // login($paramConnexion)
-
     // Renvoie les modules passés en paramètre
     public function get_modules($type = 'source')
     {
@@ -87,19 +85,20 @@ class mailchimpcore extends solution
                     'members' => 'Members',
                 ];
             } else {
-                return;
+                return [];
             }
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -111,13 +110,16 @@ class mailchimpcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
-    // Permet de créer des données
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function createUpdate($method, $param)
     {
         // Get module fields to check if the fiels is a boolean
@@ -189,20 +191,24 @@ class mailchimpcore extends solution
         return $result;
     }
 
-    // Create data to Mailchimp
-    public function createData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createData($param): array
     {
         return $this->createUpdate('POST', $param);
     }
 
-    // Update data to Mailchimp
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         return $this->createUpdate('PATCH', $param);
     }
 
     // Transform data, for example for the type boolean : from 1 to true and from 0 to false
-    protected function transformValueType($key, $value)
+    protected function transformValueType($key, $value): bool
     {
         if (
                 !empty($this->moduleFields[$key]['type'])
@@ -219,7 +225,11 @@ class mailchimpcore extends solution
     }
 
     // Create the url parameters depending the module
-    protected function createUrlParam($param, $data, $method)
+
+    /**
+     * @throws \Exception
+     */
+    protected function createUrlParam($param, $data, $method): string
     {
         $urlParam = '';
         // Manage parameters for list
@@ -246,12 +256,13 @@ class mailchimpcore extends solution
     /**
      * Performs the underlying HTTP request. Not very exciting.
      *
-     * @param string $method  The API method to be called
-     * @param array  $args    Assoc array of parameters to be passed
-     * @param mixed  $url
-     * @param mixed  $timeout
+     * @param string $method The API method to be called
+     * @param array $args Assoc array of parameters to be passed
+     * @param mixed $url
+     * @param mixed $timeout
      *
      * @return array Assoc array of decoded result
+     * @throws \Exception
      */
     protected function call($url, $method = 'GET', $args = [], $timeout = self::TIMEOUT)
     {

@@ -38,30 +38,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SynchroCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var DocumentManager
-     */
-    private $documentManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private EntityManagerInterface $entityManager;
+    private DocumentManager $documentManager;
+    private RuleManager $ruleManager;
+    private DocumentRepository $documentRepository;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:synchro';
@@ -89,11 +71,12 @@ class SynchroCommand extends Command
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
             ->addArgument('rule', InputArgument::REQUIRED, 'Rule alias')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $step = 1;
         try {
@@ -101,12 +84,16 @@ class SynchroCommand extends Command
             // alias de la règle en params
             $rule = $input->getArgument('rule');
             $api = $input->getArgument('api');
+            $force = $input->getArgument('force');
+            if (empty($force)) {
+                $force = false;
+            }
             // Récupération du Job
             // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
             $this->jobManager->message = '';
             $this->jobManager->setApi($api);
-            $data = $this->jobManager->initJob('Synchro : '.$rule);
+            $data = $this->jobManager->initJob('Synchro : '.$rule, $force);
             if (true === $data['success']) {
                 $output->writeln('1;'.$this->jobManager->getId());  // Not removed, user for manual job and webservices
 
@@ -118,7 +105,7 @@ class SynchroCommand extends Command
                     } else {
                         // Envoi du job sur toutes les règles demandées. Si ALL est sélectionné alors on récupère toutes les règle dans leur ordre de lancement sinon on lance seulement la règle demandée.
                         if ('ALL' == $rule) {
-                            $rules = $this->jobManager->getRules();
+                            $rules = $this->jobManager->getRules($force);
                         } else {
                             $rules[] = $rule;
                         }
@@ -139,10 +126,10 @@ class SynchroCommand extends Command
                                     $this->jobManager->filterDocuments();
 
                                     // Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-                                    $this->jobManager->ckeckPredecessorDocuments();
+                                    $this->jobManager->checkPredecessorDocuments();
 
                                     // Permet de valider qu'au moins un document parent(relation père) est existant
-                                    $this->jobManager->ckeckParentDocuments();
+                                    $this->jobManager->checkParentDocument();
 
                                     // Permet de transformer les docuement avant d'être envoyés à la cible
                                     $this->jobManager->transformDocuments();

@@ -246,7 +246,7 @@ animate:
         description: Description 
         empty: No template for these solutions, if you want a template, please contact us via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
     tutoriel:
-        link: http://community.myddleware.com/index.php/tutorial/#rules
+        link: https://myddleware.github.io/myddleware/#/basic_usage
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
@@ -294,7 +294,7 @@ view_connector:
         help: Assistance
         link_help: Click here to have more information on this connector
     help:
-        link: http://community.myddleware.com/index.php/connector-guide/#
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials
 
 list_flux:
     start: Start
@@ -647,20 +647,20 @@ help:
                 To change more parameters in your rule, go to the tab "parameter" on this page.
         mapping: >
                 On this page you will find all the fields of your source and target applications used in your rule. You will also find the formulas for data transformation. 
-                If you need help to create your formulas, go to our blog  at the following adress : <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">See the page on formulas</a>.        
+                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
         relate: >
-                Here you will find all the relations to link data in your applications More information on relations at the following adress: <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">see the page on relations</a>
+                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         param: >
                 The reference date shows which data will be read in your source system. Only data that were created or modified after that date will be read and sent to the target system.
                 Therefore if you want to migrate your old data, you need to take a date in the past. If you only want to transfer the new data, then leave the day's date.
-                The number of days for deleting data indicates the number of days your data has been stored in Myddleware. Eventhough your data is encrypted in Myddleware, we do not allow a backup of more than 60 days. You can reduce this number of days, but keep in mind that we can not provide assistance on deleted data.
+                The number of days for deleting data indicates the number of days your data has been stored in Myddleware. Even though your data is encrypted in Myddleware, we do not allow a backup of more than 60 days. You can reduce this number of days, but keep in mind that we can not provide assistance on deleted data.
     rule:
         fields: >
                 Here you can select the correspondance between the fields of your 2 modules simply by a drag and drop. 
                 For example, you can choose to put the name of a Sugar contact in the name of a Salesforce account, 
                 for that, just drag the field "name" of your source module and drop it in the field "name" of your target solution. 
                 To delete a field that was already placed, just double click on it. 
-                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following adress: <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">See the page on formulas</a>.  
+                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
                 For more information or personalised assistance, feel free to contact us.
         simulate: >
                 Here you can simulate the result of the rules you have implemented in the previous stage. 
@@ -668,11 +668,11 @@ help:
         relate: >
                 This tab allows you to define the relations you want to implement in your interface. That way you can link several rules together. 
                 For example, it is possible to transfer the relation between a contact and an account so that they will also be linked in the target solution.
-                More information on relations at the following adress: <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">see the page on relations</a>
+                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         filter: >
                 This tab allows you to filter the fields of your source application at play
                 For example, you can choose to take all the contacts whose country is "France".
-                More information on filters at the following adresse: <a href="http://community.myddleware.com/index.php/tutorial/#filter-your-data" target="_blank">see the page on filters</a>
+                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
         validate: >
                 The last stage, if the target application of your rule allows it, you can choose a de-duplication key. To be used in de-duplication, a field must be selected in the tab "field"of the rule. 
                 For example, for a CRM application, you can de-duplicate all the contacts by their mail. Myddleware will check if the recording already exist in your target solution, before creating it. If it does not existe, Myddleware will create it.Otherwise it will just update it.
@@ -698,7 +698,7 @@ messages:
         failed_get_task_id: Failed to get the task id.
         open_running_task: Click here if you want to open the running task.
         another_task_running: Failed to create the task because another task is already running. Please wait for the end of this task or you can stop it manually.
-        failed_create_directory: An error occured while creating your directory.
+        failed_create_directory: An error occurred while creating your directory.
     template:
         nb_rule: "Number of generated rules: "
         help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
@@ -756,10 +756,10 @@ jobscheduler:
     view:
         show : View details
     description:
-        top : Schedule your Myddleware tasks by creating or modifiyng this table. <a href="http://community.myddleware.com/index.php/administration-guide/#taches-planifiees" target=_blank>More information here.</a> 
+        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>More information here.</a>
         bottom : > 
                 Add this task in your Linux or Windows task scheduler : php bin/console myddleware:jobScheduler --env=background <BR>
-                For example with Linux, add this command in your contab if you want to run Myddleware scheduler every 5 minutes : <BR>
+                For example with Linux, add this command in your crontab if you want to run Myddleware scheduler every 5 minutes : <BR>
                    */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
 management_smtp:
     submit :  Save SMTP config
@@ -807,7 +807,7 @@ en: 'English'
 flash: 
     password:
         reset:
-            success: 'Your password has been succesfully reset'
+            success: 'Your password has been successfully reset'
 
 password_reset:
     title: Change my password

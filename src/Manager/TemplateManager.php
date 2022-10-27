@@ -45,48 +45,27 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * Class TemplateManager.
- */
 class TemplateManager
 {
-    protected $lang;
+    protected string $lang;
     protected $solutionSourceName;
     protected $solutionTarget;
     protected $connectorSource;
     protected $connectorTarget;
     protected $idUser;
-    protected $templateDir;
+    protected string $templateDir;
     protected $rules;
     protected $ruleNameSlugArray;
-    protected $entityManager;
+    protected EntityManagerInterface $entityManager;
     protected $sourceSolution;
     protected $targetSolution;
-    protected $connection;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var string
-     */
-    private $projectDir;
-    /**
-     * @var SolutionManager
-     */
-    private $solutionManager;
-    /**
-     * @var RuleManager
-     */
-    private $ruleManager;
-    /**
-     * @var SessionInterface
-     */
-    private $session;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
+    protected DriverConnection $connection;
+    private LoggerInterface $logger;
+    private string $projectDir;
+    private SolutionManager $solutionManager;
+    private RuleManager $ruleManager;
+    private SessionInterface $session;
+    private TranslatorInterface $translator;
 
     public function __construct(
         LoggerInterface $logger,
@@ -112,8 +91,12 @@ class TemplateManager
         $this->lang = $request ? $request->getLocale() : 'EN';
     }
 
-    // Sort rule (rule parent first)
-    public function setRules($rules)
+    /**
+     * Sort rule (rule parent first).
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function setRules($rules): array
     {
         $this->rules = $rules;
         $rulesString = trim(implode(',', $rules));
@@ -126,7 +109,7 @@ class TemplateManager
     }
 
     // Permet de lister les templates pour les connecteurs selectionnés
-    public function getTemplates(string $solutionSourceName, string $solutionTarget)
+    public function getTemplates(string $solutionSourceName, string $solutionTarget): array
     {
         $templates = [];
         // Read in the directory template, we read files  corresponding to the selected solutions
@@ -138,8 +121,12 @@ class TemplateManager
         return $templates;
     }
 
-    // Extract all the data of the rule
-    public function extractRule($ruleId)
+    /**
+     * Extract all the data of the rule.
+     *
+     * @throws Exception
+     */
+    public function extractRule($ruleId): array
     {
         $rule = $this->entityManager
                             ->getRepository(Rule::class)
@@ -240,25 +227,28 @@ class TemplateManager
         $targetSolution->login($params);
     }
 
-    // Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template
+    /**
+     * Permet de convertir un template en règle lorsque l'utilisateur valide la sélection du template.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function convertTemplate(
         string $ruleName,
         string $templateName,
         int $connectorSourceId,
         int $connectorTargetId,
         User $user
-    ) {
-
+    ): array {
         /** @var ConnectorRepository $connectorRepository */
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
         $connectorSource = $connectorRepository->find($connectorSourceId);
         $connectorTarget = $connectorRepository->find($connectorTargetId);
 
-        // When the the connector is set, we set the solution too
+        // When the connector is set, we set the solution too
         $solutionSourceName = $connectorSource->getSolution()->getName();
         $solutionTargetName = $connectorTarget->getSolution()->getName();
 
-        $this->entityManager->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION      
+        $this->entityManager->getConnection()->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $sourceSolution = $this->solutionManager->get($solutionSourceName);
             $targetSolution = $this->solutionManager->get($solutionTargetName);

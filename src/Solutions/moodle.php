@@ -30,12 +30,10 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 //use Psr\LoggerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//require_once('lib/lib_moodle.php');
-
 class moodlecore extends solution
 {
     protected $moodleClient;
-    protected $required_fields = [
+    protected array $required_fields = [
         'default' => ['id'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
@@ -43,12 +41,12 @@ class moodlecore extends solution
         'get_user_grades' => ['id', 'timemodified'],
     ];
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         'users' => ['email', 'username'],
         'courses' => ['shortname', 'idnumber'],
     ];
 
-    protected $delaySearch = '-1 year';
+    protected string $delaySearch = '-1 year';
 
     public function login($paramConnexion)
     {
@@ -65,7 +63,7 @@ class moodlecore extends solution
             if (!empty($xml->SINGLE->KEY[0]->VALUE)) {
                 $this->connexion_valide = true;
             } elseif (!empty($xml->ERRORCODE)) {
-                throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
+                throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' - '.$xml->DEBUGINFO : ''));
             } else {
                 throw new \Exception('Error unknown. ');
             }
@@ -77,7 +75,7 @@ class moodlecore extends solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -94,7 +92,7 @@ class moodlecore extends solution
     }
 
     // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             if ('source' == $type) {
@@ -121,12 +119,15 @@ class moodlecore extends solution
                 'notes' => 'Notes',
             ];
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -155,13 +156,16 @@ class moodlecore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
     // Read data in Moodle
     // public function readData($param)
-    public function read($param)
+    public function read($param): array
     {
         try {
             $result = [];
@@ -193,13 +197,18 @@ class moodlecore extends solution
             }
         } catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($result['error']);
         }
 
         return $result;
     }
 
     // Permet de créer des données
-    public function createData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -308,7 +317,11 @@ class moodlecore extends solution
     }
 
     // Permet de mettre à jour un enregistrement
-    public function updateData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
@@ -408,7 +421,7 @@ class moodlecore extends solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         if (
                 'target' == $type
@@ -432,6 +445,10 @@ class moodlecore extends solution
     }
 
     // Function de conversion de datetime format Myddleware à un datetime format solution
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -454,7 +471,7 @@ class moodlecore extends solution
     }
 
     // Get the function name
-    protected function getFunctionName($param)
+    protected function getFunctionName($param): string
     {
         // In case of duplicate search (search with a criteria)
         if (
@@ -480,7 +497,11 @@ class moodlecore extends solution
     }
 
     // Prepare parameters for read function
-    protected function setParameters($param)
+
+    /**
+     * @throws \Exception
+     */
+    protected function setParameters($param): array
     {
         $functionName = $this->getFunctionName($param);
         $parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);
@@ -506,7 +527,7 @@ class moodlecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         switch ($moduleSource) {
             case 'get_course_completion_by_date':

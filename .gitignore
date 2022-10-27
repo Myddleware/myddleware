@@ -10,6 +10,8 @@
 !var/logs/.gitkeep
 !var/sessions/.gitkeep
 
+/src/localfiles
+
 # Parameters
 /config/packages/parameters.yml
 /config/packages/public/parameters_public.yml
@@ -20,9 +22,8 @@
 /config/jwt/
 /config/jwt/*.pem
 
-# Parameters for Custom code
+# Parameters for Custom code - Myddleware 2 (Symfony 3)
 /config/services_custom.yaml
-
 
 # Custom directory
 /src/Custom/*
@@ -51,9 +52,6 @@
 
 # Build data
 /build/
-
-# Composer PHAR
-#/composer.phar
 
 # Backup entities generated with doctrine:generate:entities command
 */Entity/*~
@@ -117,9 +115,8 @@ composer.phar
 /docker/etc/openvpn/*
 ##< Docker ##
 
-###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
-###< phpunit/phpunit ###
-
 /migrations
+
+## PHPCSFixer
+.php-cs-fixer.php
+.php-cs-fixer.cache

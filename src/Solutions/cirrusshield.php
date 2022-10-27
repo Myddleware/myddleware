@@ -30,19 +30,17 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class cirrusshieldcore extends solution
 {
-    protected $url = 'https://www.cirrus-shield.net/RestApi/';
+    protected string $url = 'https://www.cirrus-shield.net/RestApi/';
     protected $token;
     protected $update;
     protected $organizationTimezoneOffset;
-    protected $limitCall = 1;
-
-    protected $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
-
-    protected $FieldsDuplicate = ['Contact' => ['Email', 'Name'],
+    protected int $limitCall = 1;
+    protected array $required_fields = ['default' => ['Id', 'CreationDate', 'ModificationDate']];
+    protected array $FieldsDuplicate = ['Contact' => ['Email', 'Name'],
         'default' => ['Name'],
     ];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -78,14 +76,11 @@ class cirrusshieldcore extends solution
             // Connection validation
             $this->connexion_valide = true;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' '.$e->getLine();
             $this->logger->error($error);
-
-            return ['error' => $error];
         }
     }
 
-    // login($paramConnexion)
 
     // Get the modules available
     public function get_modules($type = 'source')
@@ -100,14 +95,12 @@ class cirrusshieldcore extends solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            return $e->getMessage();
         }
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -152,13 +145,13 @@ class cirrusshieldcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            return [];
         }
     }
 
-    // get_module_fields($module)
 
-    public function readData($param)
+    public function readData($param): array
     {
         try {
             $result['date_ref'] = $param['date_ref'];
@@ -284,7 +277,7 @@ class cirrusshieldcore extends solution
     }
 
     // Create data in the target solution
-    public function createData($param)
+    public function createData($param): array
     {
         try {
             $i = 0;
@@ -392,7 +385,7 @@ class cirrusshieldcore extends solution
     }
 
     // Cirrus Shield use the same function for record's creation and modification
-    public function updateData($param)
+    public function updateData($param): array
     {
         $this->update = true;
         $result = $this->createData($param);
@@ -401,8 +394,11 @@ class cirrusshieldcore extends solution
         return $result;
     }
 
-    // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $RuleMode)
+    /**
+     * retrun the reference date field name
+     * @throws \Exception
+     */
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         // Creation and modification mode
         if (in_array($RuleMode, ['0', 'S'])) {
@@ -414,6 +410,9 @@ class cirrusshieldcore extends solution
         throw new \Exception("$RuleMode is not a correct Rule mode.");
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function getOrganizationTimezone()
     {
         // Get the organization in Cirrus
@@ -449,6 +448,9 @@ class cirrusshieldcore extends solution
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function call($url, $method = 'GET', $xmlData = '', $timeout = 300)
     {
         if (function_exists('curl_init') && function_exists('curl_setopt')) {

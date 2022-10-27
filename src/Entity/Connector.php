@@ -32,8 +32,6 @@ use Doctrine\ORM\Mapping as ORM; // slug
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Connector.
- *
  * @ORM\Table(name="connector")
  * @ORM\Entity(repositoryClass="App\Repository\ConnectorRepository")
  */

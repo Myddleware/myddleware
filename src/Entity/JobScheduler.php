@@ -26,435 +26,243 @@
 namespace App\Entity;
 
 use DateTime;
-// slug
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * JobScheduler.
- *
  * @ORM\Table(name="jobscheduler")
  * @ORM\Entity(repositoryClass="App\Repository\JobSchedulerRepository")
  */
 class JobScheduler
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
-    private $dateCreated;
+    private DateTime $dateCreated;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_modified", type="datetime")
      */
-    private $dateModified;
+    private ?DateTime $dateModified;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="created_by", type="integer", nullable=false, options={"default":1})
      */
-    private $createdBy;
+    private int $createdBy;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="modified_by", type="integer", nullable=false, options={"default":1})
      */
-    private $modifiedBy;
+    private int $modifiedBy;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="command", type="string", length=50, nullable=false)
      */
-    private $command;
+    private string $command;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="paramName1", type="string", length=50, nullable=true)
      */
-    private $paramName1;
+    private ?string $paramName1;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="paramValue1", type="text", nullable=true)
      */
-    private $paramValue1;
+    private ?string $paramValue1;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="paramName2", type="string", length=50, nullable=true)
      */
-    private $paramName2;
+    private ?string $paramName2;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="paramValue2", type="text", nullable=true)
      */
-    private $paramValue2;
+    private ?string $paramValue2;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="period", type="integer", length=6,  nullable=false, options={"default":5})
      */
-    private $period;
+    private int $period;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="lastRun", type="datetime", nullable=true)
      */
-    private $lastRun;
+    private ?DateTime $lastRun;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="active", type="boolean", options={"default":1})
      */
-    private $active;
+    private bool $active;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="jobOrder", type="integer", length=3, nullable=true)
      */
-    private $jobOrder;
+    private ?int $jobOrder;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return JobScheduler
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return JobScheduler
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified($dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): ?DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set createdBy.
-     *
-     * @param int $createdBy
-     *
-     * @return JobScheduler
-     */
-    public function setCreatedBy($createdBy)
+    public function setCreatedBy($createdBy): self
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    /**
-     * Get createdBy.
-     *
-     * @return int
-     */
-    public function getCreatedBy()
+    public function getCreatedBy(): int
     {
         return $this->createdBy;
     }
 
-    /**
-     * Set modifiedBy.
-     *
-     * @param int $modifiedBy
-     *
-     * @return JobScheduler
-     */
-    public function setModifiedBy($modifiedBy)
+    public function setModifiedBy($modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 
         return $this;
     }
 
-    /**
-     * Get modifiedBy.
-     *
-     * @return int
-     */
-    public function getModifiedBy()
+    public function getModifiedBy(): int
     {
         return $this->modifiedBy;
     }
 
-    /**
-     * Set command.
-     *
-     * @param string $command
-     *
-     * @return JobScheduler
-     */
-    public function setCommand($command)
+    public function setCommand($command): self
     {
         $this->command = $command;
 
         return $this;
     }
 
-    /**
-     * Get command.
-     *
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return $this->command;
     }
 
-    /**
-     * Set paramName1.
-     *
-     * @param string $paramName1
-     *
-     * @return JobScheduler
-     */
-    public function setParamName1($paramName1)
+    public function setParamName1($paramName1): self
     {
         $this->paramName1 = $paramName1;
 
         return $this;
     }
 
-    /**
-     * Get paramName1.
-     *
-     * @return string
-     */
-    public function getParamName1()
+    public function getParamName1(): ?string
     {
         return $this->paramName1;
     }
 
-    /**
-     * Set paramValue1.
-     *
-     * @param string $paramValue1
-     *
-     * @return JobScheduler
-     */
-    public function setParamValue1($paramValue1)
+    public function setParamValue1($paramValue1): self
     {
         $this->paramValue1 = $paramValue1;
 
         return $this;
     }
 
-    /**
-     * Get paramValue1.
-     *
-     * @return string
-     */
-    public function getParamValue1()
+    public function getParamValue1(): ?string
     {
         return $this->paramValue1;
     }
 
-    /**
-     * Set paramName2.
-     *
-     * @param string $paramName2
-     *
-     * @return JobScheduler
-     */
-    public function setParamName2($paramName2)
+    public function setParamName2($paramName2): self
     {
         $this->paramName2 = $paramName2;
 
         return $this;
     }
 
-    /**
-     * Get paramName2.
-     *
-     * @return string
-     */
-    public function getParamName2()
+    public function getParamName2(): ?string
     {
         return $this->paramName2;
     }
 
-    /**
-     * Set paramValue2.
-     *
-     * @param string $paramValue2
-     *
-     * @return JobScheduler
-     */
-    public function setParamValue2($paramValue2)
+    public function setParamValue2($paramValue2): self
     {
         $this->paramValue2 = $paramValue2;
 
         return $this;
     }
 
-    /**
-     * Get paramValue2.
-     *
-     * @return string
-     */
-    public function getParamValue2()
+    public function getParamValue2(): ?string
     {
         return $this->paramValue2;
     }
 
-    /**
-     * Set period.
-     *
-     * @param string $period
-     *
-     * @return JobScheduler
-     */
-    public function setPeriod($period)
+    public function setPeriod($period): self
     {
         $this->period = $period;
 
         return $this;
     }
 
-    /**
-     * Get period.
-     *
-     * @return string
-     */
-    public function getPeriod()
+    public function getPeriod(): int
     {
         return $this->period;
     }
 
-    /**
-     * Set lastRun.
-     *
-     * @param string $lastRun
-     *
-     * @return JobScheduler
-     */
-    public function setLastRun($lastRun)
+    public function setLastRun($lastRun): self
     {
         $this->lastRun = $lastRun;
 
         return $this;
     }
 
-    /**
-     * Get lastRun.
-     *
-     * @return string
-     */
-    public function getLastRun()
+    public function getLastRun(): ?DateTime
     {
         return $this->lastRun;
     }
 
-    /**
-     * Set active.
-     *
-     * @param string $active
-     *
-     * @return JobScheduler
-     */
-    public function setActive($active)
+    public function setActive($active): self
     {
         $this->active = $active;
 
         return $this;
     }
 
-    /**
-     * Get active.
-     *
-     * @return string
-     */
-    public function getActive()
+    public function getActive(): bool
     {
         return $this->active;
     }
 
-    /**
-     * Set jobOrder.
-     *
-     * @param string $jobOrder
-     *
-     * @return JobScheduler
-     */
-    public function setJobOrder($jobOrder)
+    public function setJobOrder($jobOrder): self
     {
         $this->jobOrder = $jobOrder;
 
         return $this;
     }
 
-    /**
-     * Get jobOrder.
-     *
-     * @return string
-     */
-    public function getJobOrder()
+    public function getJobOrder(): ?int
     {
         return $this->jobOrder;
     }

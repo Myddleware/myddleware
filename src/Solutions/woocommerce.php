@@ -30,20 +30,20 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class woocommercecore extends solution
 {
-    protected $apiUrlSuffix = '/wp-json/wc/v3/';
+    protected string $apiUrlSuffix = '/wp-json/wc/v3/';
     protected $url;
     protected $consumerKey;
     protected $consumerSecret;
     protected $woocommerce;
-    protected $callLimit = 100;       // WooCommerce API only allows 100 records per page read
-    protected $delaySearch = '-1 month';
-    protected $subModules = [
+    protected int $callLimit = 100;       // WooCommerce API only allows 100 records per page read
+    protected string $delaySearch = '-1 month';
+    protected array $subModules = [
                                 'line_items' => ['parent_module' => 'orders',
                                                       'parent_id' => 'order_id', ],
                             ];
 
     //Log in form parameters
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
                     [
@@ -89,7 +89,7 @@ class woocommercecore extends solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'customers' => 'Customers',
@@ -106,7 +106,7 @@ class woocommercecore extends solution
         ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         require 'lib/woocommerce/metadata.php';
         parent::get_module_fields($module, $type);
@@ -142,16 +142,17 @@ class woocommercecore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return ['error' => $error];
         }
     }
 
     // Read all fields, ordered by date_modified
     // $param => [[module],[rule], [date_ref],[ruleParams],[fields],[offset],[limit],[jobId],[manual]]
     // public function readData($param) {
-    public function read($param)
+    public function read($param): array
     {
         try {
             $module = $param['module'];
@@ -253,7 +254,7 @@ class woocommercecore extends solution
     }
 
     //for specific modules (e.g. : line_items)
-    public function convertResponse($param, $response)
+    public function convertResponse($param, $response): array
     {
         if (array_key_exists($param['module'], $this->subModules)) {
             $subModule = $param['module'];   //line_items
@@ -282,8 +283,9 @@ class woocommercecore extends solution
      * @param $param
      *
      * @return mixed
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function createData($param)
+    public function createData($param): array
     {
         return $this->upsert('create', $param);
     }
@@ -294,13 +296,17 @@ class woocommercecore extends solution
      * @param $param
      *
      * @return mixed
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function updateData($param)
+    public function updateData($param): array
     {
         return $this->upsert('update', $param);
     }
 
-    public function upsert($method, $param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function upsert($method, $param): array
     {
         foreach ($param['data'] as $idDoc => $data) {
             try {
@@ -369,6 +375,9 @@ class woocommercecore extends solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);
@@ -377,6 +386,10 @@ class woocommercecore extends solution
     }
 
     //convert from Myddleware format to Woocommerce format
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);
@@ -385,7 +398,7 @@ class woocommercecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($moduleSource, $RuleMode): string
     {
         return 'date_modified';
     }

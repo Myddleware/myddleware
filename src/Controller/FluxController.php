@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -21,7 +22,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
+ *********************************************************************************/
 
 namespace App\Controller;
 
@@ -32,7 +33,6 @@ use App\Entity\DocumentData;
 use App\Entity\DocumentRelationship;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\document as doc;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
 use App\Manager\SolutionManager;
@@ -51,40 +51,21 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Class FluxController.
- *
  * @Route("/rule")
  */
 class FluxController extends AbstractController
 {
     protected $params;
-
-    private $sessionService;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var SolutionManager
-     */
-    private $solutionManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    private SessionService $sessionService;
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $entityManager;
+    private JobManager $jobManager;
+    private SolutionManager $solutionManager;
+    private DocumentRepository $documentRepository;
 
     public function __construct(
         SessionService $sessionService,
@@ -115,13 +96,9 @@ class FluxController extends AbstractController
         ****************************************************** */
 
     /**
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/error/{id}", name="flux_error_rule")
      */
-    public function fluxErrorByRuleAction($id)
+    public function fluxErrorByRule($id): RedirectResponse
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -191,7 +168,8 @@ class FluxController extends AbstractController
                 ->findBy(['deleted' => 0]);
         } else {
             $list_fields_sql =
-                ['createdBy' => $this->getUser()->getId(),
+                [
+                    'createdBy' => $this->getUser()->getId(),
                 ];
 
             $rule = $em->getRepository(Rule::class)->findBy($list_fields_sql);
@@ -222,25 +200,30 @@ class FluxController extends AbstractController
 
             ->add('source_content', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCSourceContentExist() ? $this->sessionService->getFluxFilterSourceContent() : false),
-                'required' => false, ])
+                'required' => false,
+            ])
 
             ->add('target_content', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCTargetContentExist() ? $this->sessionService->getFluxFilterTargetContent() : false),
-                'required' => false, ])
+                'required' => false,
+            ])
 
             ->add('date_modif_start', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCDateModifStartExist() ? $this->sessionService->getFluxFilterDateModifStart() : false),
                 'required' => false,
-                'attr' => ['class' => 'calendar'], ])
+                'attr' => ['class' => 'calendar'],
+            ])
 
             ->add('date_modif_end', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCDateModifEndExist() ? $this->sessionService->getFluxFilterDateModifEnd() : false),
                 'required' => false,
-                'attr' => ['class' => 'calendar'], ])
+                'attr' => ['class' => 'calendar'],
+            ])
 
             ->add('rule', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('rule', ChoiceType::class, [
                 'choices' => $lstRuleName,
@@ -268,11 +251,13 @@ class FluxController extends AbstractController
 
             ->add('source_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCSourceIdExist() ? $this->sessionService->getFluxFilterSourceId() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('target_id', TextType::class, [
                 'data' => ($this->sessionService->isFluxFilterCTargetIdExist() ? $this->sessionService->getFluxFilterTargetId() : false),
-                'required' => false,	])
+                'required' => false,
+            ])
 
             ->add('click_filter', SubmitType::class, [
                 'attr' => [
@@ -394,14 +379,16 @@ class FluxController extends AbstractController
                 $timezone = $this->getUser()->getTimezone();
             }
 
-            return $this->render('Flux/list.html.twig', [
-                'nb' => $compact['nb'],
-                'entities' => $compact['entities'],
-                'pager' => $compact['pager'],
-                'form' => $form->createView(),
-                'condition' => $conditions,
-                'timezone' => $timezone,
-            ]
+            return $this->render(
+                'Flux/list.html.twig',
+                [
+                    'nb' => $compact['nb'],
+                    'entities' => $compact['entities'],
+                    'pager' => $compact['pager'],
+                    'form' => $form->createView(),
+                    'condition' => $conditions,
+                    'timezone' => $timezone,
+                ]
             );
         }
 
@@ -409,13 +396,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Supprime le filtre des flux.
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")
      */
-    public function fluxListDeleteFilterAction()
+    public function fluxListDeleteFilter(): RedirectResponse
     {
         if ($this->sessionService->isFluxFilterExist()) {
             $this->sessionService->removeFluxFilter();
@@ -425,17 +408,10 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Info d'un flux.
-     *
-     * @param $id
-     * @param $page
-     *
-     * @return RedirectResponse|Response
-     *
      * @Route("/flux/{id}/log/", name="flux_info", defaults={"page"=1})
      * @Route("/flux/{id}/log/page-{page}", name="flux_info_page", requirements={"page"="\d+"})
      */
-    public function fluxInfoAction(Request $request, $id, $page)
+    public function fluxInfo(Request $request, $id, $page)
     {
         try {
             $session = $request->getSession();
@@ -482,8 +458,8 @@ class FluxController extends AbstractController
             // Get the post documents (Document coming from a child rule)
             $postDocuments = $em->getRepository(Document::class)->findBy(
                 ['parentId' => $id],
-                ['dateCreated' => 'DESC'],	// order
-                10								// limit
+                ['dateCreated' => 'DESC'],    // order
+                10                                // limit
             );
             // Get the rule name of every child doc
             $postDocumentsRule = [];
@@ -495,8 +471,8 @@ class FluxController extends AbstractController
             // Document link to other document, the parent ones
             $parentRelationships = $em->getRepository(DocumentRelationship::class)->findBy(
                 ['doc_id' => $doc[0]->getId()],
-                ['dateCreated' => 'DESC'],		// order
-                10									// limit
+                ['dateCreated' => 'DESC'],        // order
+                10                                    // limit
             );
             // Get the detail of documents related
             $i = 0;
@@ -516,8 +492,8 @@ class FluxController extends AbstractController
             // Document link to other document, the child ones
             $childRelationships = $em->getRepository(DocumentRelationship::class)->findBy(
                 ['doc_rel_id' => $doc[0]->getId()],
-                ['dateCreated' => 'DESC'],			// order
-                10										// limit
+                ['dateCreated' => 'DESC'],            // order
+                10                                        // limit
             );
             // Get the detail of documents related
             $i = 0;
@@ -575,44 +551,43 @@ class FluxController extends AbstractController
                 $timezone = $this->getUser()->getTimezone();
             }
             // Call the view
-            return $this->render('Flux/view/view.html.twig', [
-                'current_document' => $id,
-                'source' => $sourceData,
-                'target' => $targetData,
-                'history' => $historyData,
-                'doc' => $doc[0],
-                'nb' => $compact['nb'],
-                'entities' => $compact['entities'],
-                'pager' => $compact['pager'],
-                'rule' => $rule,
-                'post_documents' => $postDocuments,
-                'post_Documents_Rule' => $postDocumentsRule,
-                'nb_post_documents' => count($postDocuments),
-                'child_documents' => $childDocuments,
-                'child_Documents_Rule' => $childDocumentsRule,
-                'nb_child_documents' => count($childDocuments),
-                'parent_documents' => $parentDocuments,
-                'parent_Documents_Rule' => $parentDocumentsRule,
-                'nb_parent_documents' => count($parentDocuments),
-                'history_documents' => $historyDocuments,
-                'nb_history_documents' => count($historyDocuments),
-                'ctm_btn' => $list_btn,
-                'read_record_btn' => $solution_source->getReadRecord(),
-                'timezone' => $timezone,
-            ]
+            return $this->render(
+                'Flux/view/view.html.twig',
+                [
+                    'current_document' => $id,
+                    'source' => $sourceData,
+                    'target' => $targetData,
+                    'history' => $historyData,
+                    'doc' => $doc[0],
+                    'nb' => $compact['nb'],
+                    'entities' => $compact['entities'],
+                    'pager' => $compact['pager'],
+                    'rule' => $rule,
+                    'post_documents' => $postDocuments,
+                    'post_Documents_Rule' => $postDocumentsRule,
+                    'nb_post_documents' => count($postDocuments),
+                    'child_documents' => $childDocuments,
+                    'child_Documents_Rule' => $childDocumentsRule,
+                    'nb_child_documents' => count($childDocuments),
+                    'parent_documents' => $parentDocuments,
+                    'parent_Documents_Rule' => $parentDocumentsRule,
+                    'nb_parent_documents' => count($parentDocuments),
+                    'history_documents' => $historyDocuments,
+                    'nb_history_documents' => count($historyDocuments),
+                    'ctm_btn' => $list_btn,
+                    'read_record_btn' => $solution_source->getReadRecord(),
+                    'timezone' => $timezone,
+                ]
             );
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
-            exit;
         }
     }
 
     /**
-     * Sauvegarde flux.
-     *
      * @Route("/flux/save", name="flux_save")
      */
-    public function fluxSaveAction(Request $request)
+    public function fluxSave(Request $request)
     {
         if ('POST' == $request->getMethod()) {
             // Get the field and value from the request
@@ -624,10 +599,11 @@ class FluxController extends AbstractController
                 $em = $this->getDoctrine()->getManager();
                 // Get target data for the document
                 $documentDataEntity = $em->getRepository(DocumentData::class)
-                    ->findOneBy([
-                        'doc_id' => $request->request->get('flux'),
-                        'type' => 'T',
-                    ]
+                    ->findOneBy(
+                        [
+                            'doc_id' => $request->request->get('flux'),
+                            'type' => 'T',
+                        ]
                     );
                 if (!empty($documentDataEntity)) {
                     $target = json_decode($documentDataEntity->getData(), true);
@@ -656,15 +632,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Relancer un flux.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/rerun/{id}", name="flux_rerun")
      */
-    public function fluxRerunAction($id)
+    public function fluxRerun($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -678,15 +648,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Annuler un flux.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/cancel/{id}", name="flux_cancel")
      */
-    public function fluxCancelAction($id)
+    public function fluxCancel($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -700,15 +664,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Read record.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")
      */
-    public function fluxReadRecordAction($id)
+    public function fluxReadRecord($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -729,15 +687,11 @@ class FluxController extends AbstractController
     }
 
     /**
-     * @param $method
-     * @param $id
-     * @param $solution
-     *
      * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
      *
      * @throws Exception
      */
-    public function fluxBtnDynAction($method, $id, $solution): RedirectResponse
+    public function fluxBtnDyn($method, $id, $solution): RedirectResponse
     {
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
@@ -813,10 +767,11 @@ class FluxController extends AbstractController
         try {
             // Get document data
             $documentDataEntity = $this->getDoctrine()->getManager()->getRepository(DocumentData::class)
-                ->findOneBy([
-                    'doc_id' => $id,
-                    'type' => $type,
-                ]
+                ->findOneBy(
+                    [
+                        'doc_id' => $id,
+                        'type' => $type,
+                    ]
                 );
             if (!empty($documentDataEntity)) {
                 $data = json_decode($documentDataEntity->getData(), true);
