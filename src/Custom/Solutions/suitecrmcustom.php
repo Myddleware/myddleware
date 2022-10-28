@@ -305,22 +305,7 @@ class suitecrmcustom extends suitecrm
 		//if my rule and module = 
 		if (strpos($query, 'type_de_partenaire_c') !== false && $param['module'] == 'Accounts' && $param['rule']['id'] == '63482d533bd4e') {
 			$query = "accounts_cstm.type_de_partenaire_c IN ('ecole_maternelle', '8', '10') ";
-		}
-	
-		// Set the custom table when we search quartier_prioritaire into quartier module
-		if (
-				$param['module'] == 'mod_2_quartiers' 
-			AND $param['rule']['id'] == '63481a0fd40a7' // Référentiel - Quartier
-			AND $param["call_type"] == 'read' 
-			AND !strpos($query, "mod_2_quartiers_cstm.quartier_prioritaire_c" == 0)
-		){
-			// Ternary so that if query not empty, we add the whole query
-			// Otherwise we append the query
-			$query = "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ";
-			// $query = (empty($query) ? "mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) " : $query." AND mod_2_quartiers_cstm.quartier_prioritaire_c IN (1) ");
-		}
-
-		
+		}	
 
 		if (
 			$param['module'] == 'Contacts'

@@ -515,19 +515,25 @@ class DocumentManagerCustom extends DocumentManager
 		$rowschecked = 0;
 		//to avoid too many choices, this array must have only one element at the end
 		$matchingrows = [];
+		$matchingrows = [];
 
-		//we loop through the suiteCrm accounts
+		//we loop through the suiteCrm quartier
 		foreach ($suiteCrmData as $index => $suiteCrmQuartier) {
 			//init name as false at the beginning of the loop
 			$validName = false;
-			$validCity = ($internalListData['Noms_des_communes_concernees'] == $suiteCrmQuartier['ville_c']);
-
+			// Check the city
+			$cityCompare = similar_text($suiteCrmQuartier['ville_c'], $internalListData['Noms_des_communes_concernees'], $percCity);
+			if ($percCity >= 90) {
+				$validCity = true;
+			}
+			
 			if (isset($suiteCrmQuartier['departement_c'])) {
 				$validDepartement = ($internalListData['DEPARTEMENT'] == $suiteCrmQuartier['departement_c']);
 			}
 
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
-			$namecompare = similar_text($suiteCrmQuartier['name'], $internalListData['Quartier_prioritaire'], $perc);
+			$nameCompare = similar_text($suiteCrmQuartier['name'], $internalListData['Quartier_prioritaire'], $perc);
+
 			if ($perc >= 80) {
 				$validName = true;
 			}
@@ -541,7 +547,6 @@ class DocumentManagerCustom extends DocumentManager
 			}
 			$rowschecked++;
 		} // end foreach dataSuiteCrm to find school
-
 		return $matchingrows;
 	}
 	
@@ -624,8 +629,7 @@ class DocumentManagerCustom extends DocumentManager
 			$this->emailCoupon[$this->sourceData['messageId']] = true;
 		}
 			
-		$transform = parent::transformDocument();
-		return $transform;
+		return parent::transformDocument();
 	}
 	
 	protected function insertDataTable($data, $type) {
@@ -736,7 +740,6 @@ class DocumentManagerCustom extends DocumentManager
 		$param['offset'] = 0;
 		$param['module'] = 'mod_2_quartiers';
 		$param['ruleParams']['mode'] = '0';
-		$param['query']['quartier_prioritaire_c'] = 1;
 		$param['rule']['id'] = $this->ruleId;
 		$param['limit'] = 10000;
 		$param['date_ref'] = '1970-01-01 00:00:00';
@@ -918,16 +921,13 @@ class DocumentManagerCustom extends DocumentManager
 								//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 								// by name and other fields, or it doesn't exist at all and we need to create it
 								$matchingrows = $this->findMatchCrmQuartiers($this->sourceData, $this->quartierComet);
-print_r($matchingrows);
-// throw new \Exception("test sfaure 01");
+
 								if ($matchingrows !== []) {
 									if (count($matchingrows) > 1) {
 										krsort($matchingrows);
 									}
 									$this->updateType('U');
 									$this->updateTargetId(reset($matchingrows));
-								} else {
-									$this->updateType('C');
 								}
 							}	// end else empty find gouv
 						}

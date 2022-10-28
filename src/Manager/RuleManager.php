@@ -1647,9 +1647,12 @@ class rulecore
         $limit = ' LIMIT '.$this->limit;
         // Si un document est en paramètre alors on filtre la requête sur le document
         if (!empty($documentId)) {
-            $documentFilter = " document.id = '$documentId'";
+            $documentFilter = " 	document.id = '$documentId'
+								AND document.deleted = 0 ";
         } elseif (!empty($parentDocId)) {
-            $documentFilter = " document.parent_id = '$parentDocId' AND document.rule_id = '$parentRuleId' ";
+            $documentFilter = " 	document.parent_id = '$parentDocId' 
+								AND document.rule_id = '$parentRuleId'
+								AND document.deleted = 0 ";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
         }
@@ -1660,6 +1663,7 @@ class rulecore
 								AND document.deleted = 0 
 								AND document.type = '$type' ";
         }
+
         // Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
         $sql = "SELECT document.id id_doc_myddleware, document.target_id, document.source_date_modified
 				FROM document
@@ -1669,7 +1673,6 @@ class rulecore
         $stmt = $this->connection->prepare($sql);
         $result = $stmt->executeQuery();
         $documents = $result->fetchAllAssociative();
-
         foreach ($documents as $document) {
             // If the rule is a parent, we have to get the data of all rules child
             $childRules = $this->getChildRules();
@@ -1698,7 +1701,7 @@ class rulecore
             if (!empty($data)) {
                 $return[$document['id_doc_myddleware']] = array_merge($document, $data);
             } else {
-                $return['error'] = 'No data found in teh document';
+                $return['error'] = 'No data found in the document';
             }
         }
 

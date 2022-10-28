@@ -37,7 +37,7 @@ class loadexternallistcore
      */
     private $io;
 
-    public function loadExternalList($file, InputInterface $input, OutputInterface $output)
+    public function loadExternalList($file, $listId, InputInterface $input, OutputInterface $output)
     {
         //section for future csv handling
         // $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
@@ -61,7 +61,7 @@ class loadexternallistcore
         }
 
         //reference variables
-        $internalList = ($this->entityManager->getRepository(InternalListEntity::class)->findBy(['id' => 1])[0]);
+        $internalList = ($this->entityManager->getRepository(InternalListEntity::class)->findBy(['id' => $listId])[0]);
         $user = ($this->entityManager->getRepository(User::class)->findBy(['id' => 1])[0]);
 
         //progress bar settings

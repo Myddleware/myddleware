@@ -69,7 +69,8 @@ class LoadExternalListCommand extends Command
     {
         $this
             ->setName('myddleware:loadexternallist')
-            ->addArgument('file', InputArgument::REQUIRED, 'selected file');
+            ->addArgument('file', InputArgument::REQUIRED, 'selected file')
+            ->addArgument('listId', InputArgument::REQUIRED, 'Id of the list');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -84,8 +85,9 @@ class LoadExternalListCommand extends Command
         ]);
         try {
             $file = $input->getArgument('file');
+            $listId = $input->getArgument('listId');
             $manager = new LoadExternalListManager($this->entityManager);
-            $manager->loadExternalList($file, $input, $output);
+            $manager->loadExternalList($file, $listId, $input, $output);
             $io->success([
                 '',
                 '##############',

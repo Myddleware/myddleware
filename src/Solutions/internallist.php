@@ -100,12 +100,10 @@ class internallistcore extends solution
 
             //counter for the number of records read
             $recordRead = 0;
-
             //query choice
-            if (!empty($param['query'])) {
+            if (!empty($params['query'])) {
                 // for special query with specified record id
-                $idValue = $param['query']['id'];
-                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $idValue], [$row->getReference() => 'ASC'], [(int) $params['limit']]);
+                $table = $this->entityManager->getRepository(InternalListValueEntity::class)->findBy(['record_id' => $params['query']['id'], 'listId' => $params['module']]);
             } else {
                 //standard query using reference
                 $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
@@ -139,7 +137,6 @@ class internallistcore extends solution
                 return ['error getting the data from the records' => $error];
             }
         }
-
         return $result;
     }
 
