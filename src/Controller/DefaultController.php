@@ -55,6 +55,7 @@ use App\Repository\RuleRepository;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Id;
 use Exception;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -3041,11 +3042,25 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * @Route("/rule/executebyid", name="run_by_id")
          */
-    public function execRuleById()
+    public function execRuleById(Request $request)
     {
+        // $id = string;
         $form = $this->createFormBuilder()
             ->add('id', TextareaType::class)
             ->getForm();
+        dump($request);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $documentId = $form->get('id')->getData();
+            // $ruleId = $_SESSION["_sf2_attributes"]["myddlewareSession"]["param"]["rule"]["key"];
+            $ruleId = '635a94f739fa7';
+
+            $this->ruleExecAction($ruleId);
+            
+
+            }
         return $this->render('Rule/byIdForm.html.twig', [
             'formIdBatch' => $form->createView()
         ]);
