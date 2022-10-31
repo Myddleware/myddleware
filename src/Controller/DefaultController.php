@@ -63,6 +63,8 @@ use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -2901,8 +2903,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         /**
          * @Route("/rule/executebyid", name="run_by_id")
          */
-        public function execRuleById()
-        {
-            return $this->render('Rule/byIdForm.html.twig');
-        }
+    public function execRuleById()
+    {
+        $form = $this->createFormBuilder()
+            ->add('id', TextareaType::class)
+            ->getForm();
+        return $this->render('Rule/byIdForm.html.twig', [
+            'formIdBatch' => $form->createView()
+        ]);
+    }
     }
