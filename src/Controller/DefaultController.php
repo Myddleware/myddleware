@@ -3035,4 +3035,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
             return $encrypter->decrypt($tab_params);
         }
+
+        /**
+         * @Route("/rule/executebyid", name="run_by_id")
+         */
+        public function execRuleById()
+        {
+            return $this->render('Rule/byIdForm.html.twig');
+        }
     }
