@@ -907,7 +907,7 @@ class rulecore
         }
     }
 
-    public function actionRule($event, $jobName = null)
+    public function actionRule($event, $jobName = null, $documentId = null)
     {
         switch ($event) {
             case 'ALL':
@@ -916,6 +916,9 @@ class rulecore
                 return $this->runMyddlewareJob('ERROR');
             case 'runMyddlewareJob':
                 return $this->runMyddlewareJob($this->ruleId, $jobName);
+                break;
+            case 'runRuleByDocId':
+                return $this->runMyddlewareJob($this->ruleId, $jobName, $documentId);
             default:
                 return 'Action '.$event.' unknown. Failed to run this action. ';
         }
@@ -1126,7 +1129,7 @@ class rulecore
         $this->documentManager->updateStatus($toStatus);
     }
 
-    protected function runMyddlewareJob($ruleId, $event = null)
+    protected function runMyddlewareJob($ruleId, $event = null, $documentId = null)
     {
         try {
             $session = new Session();
@@ -1143,9 +1146,12 @@ class rulecore
             } catch (IOException $e) {
                 throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
             }
+            if ($documentId !== null) {
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+            }
             //if user clicked on cancel all transfers of a rule
-            if ('cancelDocumentJob' === $event) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
+            elseif ('cancelDocumentJob' === $event) {
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction cancel rule '.$ruleId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
             //if user clicked on delete all transfers from a rule
             } elseif ('deleteDocumentJob' === $event) {
                 exec($php.' '.__DIR__.'/../../bin/console myddleware:massaction remove rule '.$ruleId.' 1 Y --env='.$this->env.' > '.$fileTmp.' &', $output);
