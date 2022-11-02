@@ -560,12 +560,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/exec/{id}", name="regle_exec")
          */
-        public function ruleExecAction($id)
+        public function ruleExecAction($id, $documentId = null)
         {
             try {
                 $this->ruleManager->setRule($id);
 
-                if ('ALL' == $id) {
+                if ($documentId !== null) {
+                    $this->ruleManager->actionRule('runRuleByDocId', 'execrunRuleByDocId', $documentId);
+
+                } elseif ('ALL' == $id) {
                     $this->ruleManager->actionRule('ALL');
 
                     return $this->redirect($this->generateUrl('regle_list'));
@@ -574,7 +577,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
-                $this->ruleManager->actionRule('runMyddlewareJob');
+                if ($documentId === null){
+
+                    $this->ruleManager->actionRule('runMyddlewareJob');
+                }
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
@@ -3040,29 +3046,28 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         }
 
         /**
-         * @Route("/rule/executebyid", name="run_by_id")
+         * @param $id
+         * 
+         * @Route("/executebyid/{id}", name="run_by_id")
          */
-    public function execRuleById(Request $request)
+    public function execRuleById($id, Request $request)
     {
-        // $id = string;
         $form = $this->createFormBuilder()
             ->add('id', TextareaType::class)
             ->getForm();
-        dump($request);
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()) {
-            $documentId = $form->get('id')->getData();
-            // $ruleId = $_SESSION["_sf2_attributes"]["myddlewareSession"]["param"]["rule"]["key"];
-            $ruleId = '635a94f739fa7';
+        if ($form->isSubmitted() && $form->isValid()) {
+            $documentIdString = $form->get('id')->getData();
+            $documentIdArray = explode(',', $documentIdString);
 
-            $this->ruleExecAction($ruleId);
-            
-
+            foreach ($documentIdArray as $documentIdArrayElement) {
+                $this->ruleExecAction($id, $documentIdArrayElement);
             }
+        }
         return $this->render('Rule/byIdForm.html.twig', [
             'formIdBatch' => $form->createView()
         ]);
     }
-    }
+}
