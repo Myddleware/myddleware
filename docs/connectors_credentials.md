@@ -22,6 +22,8 @@ Myddleware can currently read the following modules :
 | Pages    | Yes    | No     | 
 | Comments | Yes    | No     |
 
+![WordPress connector credentials Myddleware form](images/credentials/wordpress_connector_credentials.png)
+
 ## CRM apps
 
 ### Airtable
@@ -60,6 +62,7 @@ To create your Cirrus Shield connector, you will need :
 - Your username 
 - Your password
 
+![Cirrusshield connector credentials Myddleware form](images/credentials/cirrusshield_connector_credentials.png)
 
 ### Hubspot
 
@@ -102,9 +105,7 @@ After typing in your email address and password, click on “wsdl file”. Choos
 
 The file has been transferred successfully.
 
-Test your connection. If the light bulb is green, you're good to go!
-
-Choose a name for your connector and save it.
+![SageCRM connector credentials Myddleware form](images/credentials/sagecrm_connector_credentials.png)
 
 ### Salesforce
 
@@ -172,6 +173,7 @@ The SAP CRM connector can only be installed by our team.
 
 To know more about this connector, please fill in [this contact form](http://www.myddleware.com/contact-us).
 
+![SAPCRM connector credentials Myddleware form](images/credentials/sapcrm_connector_credentials.png)
 
 ### SugarCRM
 
@@ -378,11 +380,19 @@ Here is the list of available modules in source (reading) and target (writing) :
 | Lists                            | No     | Yes     |
 | List members                     | No     | Yes     |
 
-Connect to Mailchimp an open your profile
+Log in to Mailchimp and open your profile page.
 
-Then click on  « Extra -> API Keys » and copy you API key :
+![Mailchimp profile](images/credentials/mailchimp_homepage.png)
 
-Add this key in your Myddleware connector :
+Then, click on ``Extras`` > ``API Keys`` and get your API key from there :
+
+![Mailchimp Extras Tab](images/credentials/mailchimp_api_keys.png)
+
+![Mailchimp API Keys page](images/credentials/mailchimp_api_key.png)
+
+Finally, add this key in your Myddleware connector :
+
+![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_connector_credentials.png)
 
 ### Mautic 
 
@@ -398,6 +408,8 @@ To connect Mautic to Myddleware, you need :
 - your username
 - your password
 - your URL
+
+![Mautic connector credentials Myddleware form](images/credentials/mautic_connector_credentials.png)
 
 ### Sendinblue
 
@@ -513,6 +525,8 @@ Then click on ``Open in Access Token Tool`` :
 Then click on ``Extend Access Token``. 
 Your token will expire in 2 month. After this time you will have to refresh the token in your Myddleware Facebook connector.
 
+![Facebook connector credentials Myddleware form](images/credentials/facebook_connector_credentials.png)
+
 ### File (FTP)
 
 Myddleware can be connected to your server via an FTP connection. 
@@ -525,6 +539,8 @@ To connect Myddleware to an FTP server, you need these parameters :
 - Host server 
 - Port 
 - Directory where the files will be stored (eg : ``/home/myddleware/my_directory``)
+
+![File connector credentials Myddleware form](images/credentials/file_connector_credentials.png)
 
 Myddleware uses the  [ssh2_connect()](https://www.php.net/manual/en/function.ssh2-connect.php) 
 and [ssh2_auth_password()](https://www.php.net/manual/en/function.ssh2-auth-password.php) PHP functions to connect to your FTP server.
@@ -557,23 +573,53 @@ Generate your token by following [this Moodle tutorial](https://docs.moodle.org/
 You can use this system role and assign it to the user linked to your token. 
 Click on this link to download it, then unzip it before importing it in Moodle : [myddleware_moodle_role](https://moodle.org/plugins/local_myddleware)
 
-To assign a role, go to ``Site administration`` -> ``Users`` -> ``Assign system roles``
+To assign a role, go to ``Site administration`` > ``Users`` > ``Assign system roles``
 
-Choose Myddleware role
+![Access "Assign System role" page on Moodle Site Admin interface](images/credentials/moodle_assign_roles.png)
+
+Choose Myddleware role.
+
+![Select Myddleware role](images/credentials/moodle_assign_myddleware_role.png)
 
 Then add the user you want to use in Myddleware :
 
-Myddleware uses the REST API architecture.
+![Select & add user with Myddleware role](images/credentials/moodle_assign_role_user_add.png)
 
-Then open your external service :
+Then, go to ``Site administration`` > ``Plugins`` > ``Web services `` > ``External services``.
 
-Please add these functions to your external services :
+![Select & add user with Myddleware role](images/credentials/moodle_plugins_link.png)
+
+![Select & add user with Myddleware role](images/credentials/moodle_plugins_external_services_link.png)
+
+Then, click on the ``functions`` link Myddleware corresponding to the Myddleware plugin.
+
+![Select & add user with Myddleware role](images/credentials/moodle_external_webservices.png)
+
+Then, add all of these standard functions to your external service :
+
+- core_course_create_courses
+- core_course_get_categories
+- core_course_get_courses_by_field
+- core_course_update_courses
+- core_group_add_group_members
+- core_group_create_groups
+- core_user_create_users
+- core_user_get_users
+- core_user_update_users
+- core_webservice_get_site_info
+- enrol_manual_enrol_users
+- enrol_manual_unenrol_users
+
+As well as all custom Myddleware functions starting with the ``local_myddleware_``  prefix: 
+
+![Select & add user with Myddleware role](images/credentials/moodle_functions_list.png)
+
 
 In the blue box you can see the standard functions. In the red box are the custom functions used by Myddleware to read data from Moodle. 
 The custom functions all have a name beginning with ``local_myddleware`` (there are more functions than displayed on the screenshot).  
 Make sure you have installed the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware) if you don’t find these functions in the list.
 
-Add the URL of your Moodle instance and your token in Myddleware :
+Finally, you can create your Moodle Myddleware connector by filling in your Moodle URL & token :
 
 ![Moodle connector credentials Myddleware form](images/credentials/moodle_connector_credentials.png)
 
@@ -598,6 +644,7 @@ To create your RingCentral connector, you will need :
 Click [here](https://devcommunity.ringcentral.com/ringcentraldev/topics/how-do-i-get-my-production-app-key) to get more 
 information about these parameters.
 
+![Ringcentral connector credentials Myddleware form](images/credentials/ringcentral_connector_credentials.png)
 
 ### Sage50
 
@@ -624,6 +671,8 @@ Currently, Myddleware is able to read the following modules :
 | Categories       | Yes    | No     |
 | Organizers       | Yes    | No     |
 | Event More Date  | Yes    | No     |
+
+![Woocommerce Event Manager plugin connector credentials Myddleware form](images/credentials/wooeventmanager_connector_credentials.png)
 
 ### Zuora
 
