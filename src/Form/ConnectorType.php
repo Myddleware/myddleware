@@ -15,8 +15,8 @@ class ConnectorType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $fieldsLogin = isset($options['attr']['fieldsLogin']) ? $options['attr']['fieldsLogin'] : null;
-        $secret = isset($options['attr']['secret']) ? $options['attr']['secret'] : null;
+        $fieldsLogin = $options['attr']['fieldsLogin'] ?? null;
+        $secret = $options['attr']['secret'] ?? null;
         $options['attr']['fieldsLogin'] = null;
         if (null != $options['data']->getSolution()) {
             //Init ConnectorParams

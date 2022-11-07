@@ -28,20 +28,18 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//require_once('lib/zuora/API.php');
-
 class zuoracore extends solution
 {
     protected $instance;
-    protected $debug = 0;
-    protected $version = '85.0'; // Maw limit : 50
-    protected $update = false;
-    protected $limitCall = 10; // Maw limit : 50
+    protected int $debug = 0;
+    protected string $version = '85.0'; // Maw limit : 50
+    protected bool $update = false;
+    protected int $limitCall = 10; // Maw limit : 50
 
-    protected $required_fields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
+    protected array $required_fields = ['default' => ['Id', 'UpdatedDate', 'CreatedDate']];
 
     // Connection parameters
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -66,8 +64,6 @@ class zuoracore extends solution
             ],
         ];
     }
-
-    // getFieldsLogin()
 
     // Login to Zuora
     public function login($paramConnexion)
@@ -99,8 +95,6 @@ class zuoracore extends solution
         }
     }
 
-    // login($paramConnexion)*/
-
     // Get the modules available
     public function get_modules($type = 'source')
     {
@@ -117,14 +111,15 @@ class zuoracore extends solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
     // Get the fields available for the module in input
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -157,13 +152,14 @@ class zuoracore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
-    public function createData($param)
+    public function createData($param): array
     {
         // Get the action because we use the create function to update data as well
         if ($this->update) {
@@ -266,7 +262,7 @@ class zuoracore extends solution
     }
 
     // We use the create function to update data
-    public function updateData($param)
+    public function updateData($param): array
     {
         $this->update = true;
 
@@ -274,7 +270,7 @@ class zuoracore extends solution
     }
 
     // Specific function for amend action
-    protected function amend($param)
+    protected function amend($param): array
     {
         try {
             foreach ($param['data'] as $idDoc => $data) {
@@ -320,7 +316,7 @@ class zuoracore extends solution
     }
 
     // Specific function for subscribe action
-    protected function subscribe($param)
+    protected function subscribe($param): array
     {
         try {
             foreach ($param['data'] as $idDoc => $data) {
@@ -506,7 +502,7 @@ class zuoracore extends solution
 
     // The function return true if we can display the column parent in the rule view, relationship tab
     // We display the parent column when module is subscription
-    public function allowParentRelationship($module)
+    public function allowParentRelationship($module): bool
     {
         if (in_array($module, ['Subscription', 'RatePlan'])) {
             return true;
@@ -515,7 +511,7 @@ class zuoracore extends solution
         return false;
     }
 
-    protected function queryAll($query)
+    protected function queryAll($query): array
     {
         $moreCount = 0;
         $recordsArray = [];

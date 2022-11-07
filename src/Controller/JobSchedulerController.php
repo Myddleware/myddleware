@@ -14,26 +14,20 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * JobScheduler controller.
- *
  * @Route("/rule/jobscheduler")
  */
 class JobSchedulerController extends AbstractController
 {
-    /**
-     * @var jobSchedulerManager
-     */
-    private $jobSchedulerManager;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    private JobSchedulerManager $jobSchedulerManager;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager)
     {
@@ -42,11 +36,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Lists all JobScheduler entities.
-     *
      * @Route("/", name="jobscheduler")
      */
-    public function indexAction()
+    public function index(): Response
     {
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
 
@@ -56,11 +48,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Creates a new JobScheduler entity.
-     *
      * @Route("/create", name="jobscheduler_create", methods={"POST"})
      */
-    public function createAction(Request $request)
+    public function create(Request $request)
     {
         $entity = new JobScheduler();
         $form = $this->createCreateForm($entity);
@@ -78,7 +68,7 @@ class JobSchedulerController extends AbstractController
             $paramValue2 = $form->get('paramValue2')->getData();
             $paramValue2 = $paramValue2 ? $paramValue2 : '';
 
-            $active = 1 == $form->get('active')->getData() ? true : false;
+            $active = 1 == $form->get('active')->getData();
             /*
              * set value by default
              */
@@ -103,14 +93,7 @@ class JobSchedulerController extends AbstractController
         ]);
     }
 
-    /**
-     * Creates a form to create a JobScheduler entity.
-     *
-     * @param JobScheduler $entity The entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createCreateForm(JobScheduler $entity)
+    private function createCreateForm(JobScheduler $entity): FormInterface
     {
         $form = $this->createForm(JobSchedulerType::class, $entity, [
             'action' => $this->generateUrl('jobscheduler_create'),
@@ -123,11 +106,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Displays a form to create a new JobScheduler entity.
-     *
      * @Route("/new", name="jobscheduler_new")
      */
-    public function newAction()
+    public function new(): Response
     {
         $entity = new JobScheduler();
         $form = $this->createCreateForm($entity);
@@ -139,13 +120,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Finds and displays a JobScheduler entity.
-     *
      * @Route("/{id}/show", name="jobscheduler_show")
-     *
-     * @param mixed $id
      */
-    public function showAction($id)
+    public function show($id): Response
     {
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
@@ -165,13 +142,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Displays a form to edit an existing JobScheduler entity.
-     *
      * @Route("/{id}/edit", name="jobscheduler_edit")
-     *
-     * @param mixed $id
      */
-    public function editAction($id)
+    public function edit($id): Response
     {
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
 
@@ -191,12 +164,8 @@ class JobSchedulerController extends AbstractController
 
     /**
      * Creates a form to edit a JobScheduler entity.
-     *
-     * @param JobScheduler $entity The entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createEditForm(JobScheduler $entity)
+    private function createEditForm(JobScheduler $entity): FormInterface
     {
         $form = $this->createForm(JobSchedulerType::class, $entity, [
             'action' => $this->generateUrl('jobscheduler_update', ['id' => $entity->getId()]),
@@ -212,10 +181,8 @@ class JobSchedulerController extends AbstractController
      * Edits an existing JobScheduler entity.
      *
      * @Route("/{id}/update", name="jobscheduler_update", methods={"POST", "PUT"})
-     *
-     * @param mixed $id
      */
-    public function updateAction(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
@@ -238,13 +205,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Deletes a JobScheduler entity.
-     *
      * @Route("/{id}/delete", name="jobscheduler_delete", methods={"GET", "DELETE"})
-     *
-     * @param mixed $id
      */
-    public function deleteAction(Request $request, $id)
+    public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $id = $request->get('id');
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -260,12 +223,8 @@ class JobSchedulerController extends AbstractController
 
     /**
      * Creates a form to delete a JobScheduler entity by id.
-     *
-     * @param mixed $id The entity id
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm($id)
+    private function createDeleteForm($id): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('jobscheduler_delete', ['id' => $id]))
@@ -275,13 +234,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * get fields select.
-     *
-     * @return JsonResponse
-     *
      * @Route("/getFieldsSelect", name="jobscheduler_input", methods={"GET"}, options={"expose"=true})
      */
-    public function getFieldsSelectAction(Request $request)
+    public function getFieldsSelect(Request $request): JsonResponse
     {
         $select = [];
         if ($request->isXmlHttpRequest() && 'GET' == $request->getMethod()) {
@@ -291,6 +246,9 @@ class JobSchedulerController extends AbstractController
         return $this->json($select);
     }
 
+    /**
+     * @throws Exception
+     */
     private function getData($selectName)
     {
         $paramsCommand = null;
@@ -348,7 +306,7 @@ class JobSchedulerController extends AbstractController
     /**
      * @Route("/crontab_list", name="jobscheduler_cron_list")
      */
-    public function crontabList()
+    public function crontabList(): Response
     {
         //Check the user timezone
         if ($timezone = '') {
@@ -369,10 +327,8 @@ class JobSchedulerController extends AbstractController
      * Deletes a Crontab entity.
      *
      * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"GET", "DELETE"})
-     *
-     * @param mixed $id
      */
-    public function deleteActionCrontab(Request $request, $id)
+    public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $id = $request->get('id');
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -389,12 +345,8 @@ class JobSchedulerController extends AbstractController
 
     /**
      * Creates a form to delete a Crontab entity by id.
-     *
-     * @param mixed $id The entity id
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteFormCrontab($id)
+    private function createDeleteFormCrontab($id): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('crontab_delete', ['id' => $id]))
@@ -404,13 +356,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Displays a form to edit an existing Crontab entity.
-     *
      * @Route("/{id}/edit_crontab", name="crontab_edit")
-     *
-     * @param mixed $id
      */
-    public function editActionCrontab($id)
+    public function editCrontab($id): Response
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
@@ -428,34 +376,23 @@ class JobSchedulerController extends AbstractController
         ]);
     }
 
-    /**
-     * Creates a form to edit a Crontab entity.
-     *
-     * @param CronJob $entity The entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createEditFormCrontab(CronJob $entity)
+    private function createEditFormCrontab(CronJob $entity): FormInterface
     {
         // Field command can't be changed
-        $form = $this->createForm(JobSchedulerCronType::class, $entity, [
+        return $this->createForm(JobSchedulerCronType::class, $entity, [
                 'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
                 'method' => 'PUT',
             ])
             ->add('command', TextType::class, ['disabled' => true]
         );
-
-        return $form;
     }
 
     /**
      * Edits an existing Crontab entity.
      *
      * @Route("/{id}/update_crontab", name="crontab_update", methods={"POST", "PUT"})
-     *
-     * @param mixed $id
      */
-    public function updateActionCronatb(Request $request, $id)
+    public function updateCrontab(Request $request, $id)
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
@@ -477,13 +414,9 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * Finds and displays a crontab entity.
-     *
      * @Route("/{id}/show_crontab", name="crontab_show")
-     *
-     * @param mixed $id
      */
-    public function showActionCrontab($id)
+    public function showCrontab($id): Response
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {

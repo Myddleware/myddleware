@@ -22,12 +22,12 @@ class Config
      * @ORM\Column(type="string", length=255)
      * @Assert\Unique
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $value;
+    private ?string $value;
 
     public function getId(): ?int
     {

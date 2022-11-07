@@ -498,8 +498,9 @@ $(function () {
 					}
 				}, // rev 1.08
 				statusCode: {
-					500: function () {
-						alert('Service is temporarily unavailable');
+					500: function (e) {
+						console.log(e.responseText);
+						alert('An error occured. Please check your server logs for more detailed information.');
 						$("#validation").attr('value', before); // rev 1.08
 					}
 				}

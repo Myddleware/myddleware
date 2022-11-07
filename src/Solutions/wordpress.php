@@ -28,15 +28,20 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class wordpresscore extends solution
 {
-    protected $apiSuffix = '/wp-json/wp/v2/';
-    protected $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
+    protected string $apiSuffix = '/wp-json/wp/v2/';
+    protected int $callLimit = 100;   // Wordpress API only allows 100 records per page to be read
     // Module without reference date
-    protected $moduleWithoutReferenceDate = ['users', 'categories'];
+    protected array $moduleWithoutReferenceDate = ['users', 'categories'];
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
                     [
@@ -47,6 +52,13 @@ class wordpresscore extends solution
                 ];
     }
 
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     */
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -69,7 +81,7 @@ class wordpresscore extends solution
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'posts' => 'Posts',
@@ -91,7 +103,7 @@ class wordpresscore extends solution
             ];
     }
 
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -110,13 +122,21 @@ class wordpresscore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return ['error' => $error];
         }
     }
 
-    public function readData($param)
+    /**
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function readData($param): array
     {
         try {
             $result = [];
@@ -235,7 +255,7 @@ class wordpresscore extends solution
     }
 
     //for specific fields (e.g. : event_informations from Woocommerce Event Manager plugin)
-    protected function convertResponse($param, $response)
+    protected function convertResponse($param, $response): array
     {
         $newResponse = [];
         if (!empty($response)) {
@@ -280,6 +300,9 @@ class wordpresscore extends solution
 
     // Convert date to Myddleware format
     // 2020-07-08T12:33:06 to 2020-07-08 10:33:06
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);
@@ -290,6 +313,10 @@ class wordpresscore extends solution
     }
 
     //convert from Myddleware format to Woocommerce format
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         $dto = new \DateTime($dateTime);
@@ -298,7 +325,7 @@ class wordpresscore extends solution
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
-    public function referenceIsDate($module)
+    public function referenceIsDate($module): bool
     {
         // Le module users n'a pas de date de référence. On utilise donc l'ID comme référence
         if (in_array($module, $this->moduleWithoutReferenceDate)) {

@@ -30,19 +30,18 @@ class postgresqlcore extends database
     protected $driver = 'pgsql';
 
     // Enable to delete data
-    protected $sendDeletion = true;
-    protected $readDeletion = true;
+    protected bool $sendDeletion = true;
+    protected bool $readDeletion = true;
+    protected string $stringSeparatorOpen = '';
+    protected string $stringSeparatorClose = '';
 
-    protected $stringSeparatorOpen = '';
-    protected $stringSeparatorClose = '';
-
-    protected function generatePdo()
+    protected function generatePdo(): \PDO
     {
         return new \PDO($this->driver.':host='.$this->paramConnexion['host'].';port='.$this->paramConnexion['port'].';dbname='.$this->paramConnexion['database_name'], $this->paramConnexion['login'], $this->paramConnexion['password']);
     }
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function get_query_show_tables(): string
     {
         return "SELECT *
 				FROM pg_catalog.pg_tables
@@ -73,14 +72,15 @@ class postgresqlcore extends database
 
             return $modules;
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return $error;
+            return ['error' => $error];
         }
     }
 
     // Get all fields from the table selected
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         try {
             // Get all fields of the table in input
@@ -153,16 +153,15 @@ class postgresqlcore extends database
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         // Get the schema and table namespace
         $tableParam = explode('.', $table);
@@ -192,7 +191,7 @@ class postgresqlcore extends database
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
+    protected function get_query_select_limit_offset($param, $method): string
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;
@@ -200,7 +199,7 @@ class postgresqlcore extends database
 
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
-}// class postgresqlcore
+}
 
 class postgresql extends postgresqlcore
 {

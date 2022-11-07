@@ -27,11 +27,9 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//use Psr\LoggerInterface;
-
 class sapecccore extends sap
 {
-    protected $limit = 5;
+    protected int $limit = 5;
 
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
@@ -48,7 +46,7 @@ class sapecccore extends sap
                                                         ),
                                         );
     */
-    protected $guidName = ['ET_BKPF' => [
+    protected array $guidName = ['ET_BKPF' => [
         'ET_BKPF' => 'BELNR',
         'ET_BSEG' => 'BELNR',
         // 'ET_ABUZ' => 'BELNR',
@@ -61,7 +59,7 @@ class sapecccore extends sap
         ],
     ];
 
-    protected $required_fields = [
+    protected array $required_fields = [
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
@@ -74,7 +72,7 @@ class sapecccore extends sap
     // login($paramConnexion)*/
 
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -86,9 +84,7 @@ class sapecccore extends sap
         ];
     }
 
-    // get_modules()
-
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];
@@ -174,7 +170,7 @@ class sapecccore extends sap
 
     // Permet de lire les document FI
     // C'est une règle particulière car elle peut générer de document fils sur d'autres règles
-    public function readFiDocument($param, $parameters, $readLast)
+    public function readFiDocument($param, $parameters, $readLast): array
     {
         try {
             try {
@@ -266,7 +262,7 @@ class sapecccore extends sap
         }
     }
 
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         // Pour l'instant tout est create only
         if ('target' == $type) {
@@ -277,7 +273,7 @@ class sapecccore extends sap
 
         return parent::getRuleMode($module, $type);
     }
-}// class sapecc
+}
 
 class sapecc extends sapecccore
 {

@@ -30,6 +30,7 @@ use App\Entity\Rule;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -46,7 +47,10 @@ class RuleRepository extends ServiceEntityRepository
         parent::__construct($registry, Rule::class);
     }
 
-    // Retourne le nombre de règle pour un user
+    /**
+     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
     public function findCountAllRuleByUser($id)
     {
         return $this->createQueryBuilder('r')
@@ -58,7 +62,7 @@ class RuleRepository extends ServiceEntityRepository
     }
 
     // Retourne toutes les règles d'un user
-    public function findListRuleByUser(User $user)
+    public function findListRuleByUser(User $user): Query
     {
         $sql = $this->createQueryBuilder('r')
             ->join('r.connectorSource', 'cs')
@@ -118,13 +122,9 @@ class RuleRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param $ruleId
-     *
-     * @return Rule|null
-     *
      * @throws NonUniqueResultException
      */
-    public function findByRuleParam($ruleId)
+    public function findByRuleParam($ruleId): ?Rule
     {
         return $this->createQueryBuilder('r')
             ->select('r')
@@ -139,7 +139,7 @@ class RuleRepository extends ServiceEntityRepository
     /**
      * @return Rule[]
      */
-    public function errorByRule(User $user = null)
+    public function errorByRule(User $user = null): array
     {
         $qb = $this->createQueryBuilder('r')
             ->select('r.name, r.id, COUNT(document.id) as cpt')
@@ -184,7 +184,7 @@ class RuleRepository extends ServiceEntityRepository
     /**
      * @return Rule[]
      */
-    public function findRulesWithDeletedParams()
+    public function findRulesWithDeletedParams(): array
     {
         return $this->createQueryBuilder('r')
             ->select('r')

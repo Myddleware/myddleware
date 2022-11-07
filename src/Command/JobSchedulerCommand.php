@@ -37,23 +37,11 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
- * Class JobSchedulerCommand.
- */
 class JobSchedulerCommand extends Command
 {
-    /**
-     * @var JobSchedulerRepository
-     */
-    private $jobSchedulerRepository;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    private JobSchedulerRepository $jobSchedulerRepository;
+    private LoggerInterface $logger;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -76,7 +64,7 @@ class JobSchedulerCommand extends Command
     }
 
     // Run the job scheduler
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'dev');
@@ -114,7 +102,11 @@ class JobSchedulerCommand extends Command
             } catch (\Exception $e) {
                 echo $e->getMessage().chr(10);
                 $io->error($e->getMessage());
+
+                return 1;
             }
         }
+
+        return 0;
     }
 }

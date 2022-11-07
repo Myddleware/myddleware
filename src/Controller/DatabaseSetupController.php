@@ -27,13 +27,9 @@ class DatabaseSetupController extends AbstractController
 {
     private $connectionSuccessMessage;
     private $connectionFailedMessage;
-    private $configRepository;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    private $entityManager;
+    private ConfigRepository $configRepository;
+    private LoggerInterface $logger;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager, LoggerInterface $logger)
     {

@@ -25,12 +25,12 @@
 
 namespace App\Solutions;
 
-use App\Manager\rule as ruleMyddleware;
-use Symfony\Component\Form\Extension\Core\Type\TextType; // SugarCRM Myddleware
+use App\Manager\RuleManager as RuleMyddleware;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class sapcore extends saproot
 {
-    protected $limit = 5;
+    protected int $limit = 5;
 
     // Permet de connaître la clé de filtrage principale sur les tables, la fonction partenire sur la table des partenaire par exemple
     // ces filtres correspondent aux sélections de l'utilisateur lors de la création de règle
@@ -47,7 +47,7 @@ class sapcore extends saproot
                                                         ),
                                         );
     */
-    protected $guidName = ['ET_BKPF' => [
+    protected array $guidName = ['ET_BKPF' => [
         'ET_BKPF' => 'BELNR',
         'ET_BSEG' => 'BELNR',
         'ET_ABUZ' => 'BELNR',
@@ -60,11 +60,11 @@ class sapcore extends saproot
         ],
     ];
 
-    protected $required_fields = [
+    protected array $required_fields = [
         'ET_BKPF' => ['ET_BKPF__BELNR', 'ET_BKPF__PSODT', 'ET_BKPF__PSOTM'],
     ];
 
-    protected $relateFieldAllowed = [
+    protected array $relateFieldAllowed = [
         'ET_BSEG' => [
             'KUNNR' => ['label' => 'Partner number', 'required_relationship' => false],
         ],
@@ -82,10 +82,8 @@ class sapcore extends saproot
         parent::login($paramConnexion);
     }
 
-    // login($paramConnexion)*/
-
     // Renvoie les modules disponibles du compte Salesforce connecté
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         return [
             'ET_BKPF' => 'FI En-tête pièce pour comptabilité (ET_BKPF)',
@@ -97,10 +95,8 @@ class sapcore extends saproot
         ];
     }
 
-    // get_modules()
-
     // On appelle la fonction get_module_fields de SAP standard et on ajoute les champ de relation spécifique
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         // Le champ relate ET_BKPF est ajouté sur le module ET_BSEG, relation obligatoire. Le module ET_BSEG n'a pas lieu d'être sans le module ET_BKPF car c'est lui qui lui génère les documents
         if ('ET_BSEG' == $module) {
@@ -141,7 +137,7 @@ class sapcore extends saproot
         }
     }
 
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             $params = [];
@@ -217,7 +213,7 @@ class sapcore extends saproot
 
     // Permet de lire les document FI
     // C'est une règle particulière car elle peut générer de document fils sur d'autres règles
-    public function readFiDocument($param, $parameters, $readLast)
+    public function readFiDocument($param, $parameters, $readLast): array
     {
         try {
             try {
@@ -369,7 +365,11 @@ class sapcore extends saproot
     }
 
     // Permet de generer un id en fonction des champs du module
-    protected function generateId($module, $data)
+
+    /**
+     * @throws \Exception
+     */
+    protected function generateId($module, $data): string
     {
         if (!empty($this->buildId[$module])) {
             $id = '';
@@ -394,7 +394,7 @@ class sapcore extends saproot
         throw new \Exception('Failed to generate id for the module '.$module.'. No table for id.');
     }
 
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         // Pour l'instant tout est create only
         if ('target' == $type) {
@@ -405,7 +405,7 @@ class sapcore extends saproot
 
         return parent::getRuleMode($module, $type);
     }
-}// class sap
+}
 
 class sap extends sapcore
 {

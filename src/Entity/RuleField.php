@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleField.
- *
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="App\Repository\RuleFieldRepository")
  * @ORM\Table(name="rulefield", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
@@ -37,121 +35,70 @@ use Doctrine\ORM\Mapping as ORM;
 class RuleField
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="fields")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private Rule $rule;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="target_field_name", type="text", nullable=false)
      */
-    private $target;
+    private string $target;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="source_field_name", type="text", nullable=false)
      */
-    private $source;
+    private string $source;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="formula", type="text", nullable=true)
      */
-    private $formula;
+    private ?string $formula;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set target.
-     *
-     * @param string $target
-     *
-     * @return RuleField
-     */
-    public function setTarget($target)
+    public function setTarget($target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    /**
-     * Get target.
-     *
-     * @return string
-     */
-    public function getTarget()
+    public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * Set source.
-     *
-     * @param string $source
-     *
-     * @return RuleField
-     */
-    public function setSource($source)
+    public function setSource($source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    /**
-     * Get source.
-     *
-     * @return string
-     */
-    public function getSource()
+    public function getSource(): string
     {
         return $this->source;
     }
 
-    /**
-     * Set formula.
-     *
-     * @param string $formula
-     *
-     * @return RuleField
-     */
-    public function setFormula($formula)
+    public function setFormula($formula): self
     {
         $this->formula = $formula;
 
         return $this;
     }
 
-    /**
-     * Get formula.
-     *
-     * @return string
-     */
-    public function getFormula()
+    public function getFormula(): ?string
     {
         return $this->formula;
     }

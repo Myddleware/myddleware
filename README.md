@@ -16,10 +16,11 @@
 [![docsify](https://img.shields.io/badge/documented%20with-docsify-cc00ff.svg)](https://docsify.js.org/)
 ![GitHub followers](https://img.shields.io/github/followers/Myddleware?style=social)
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
+<a href="https://www.opensourceagenda.com/projects/myddleware"><img src="https://www.opensourceagenda.com/projects/myddleware/reviews/badge.svg" alt="Open Source Agenda"></a>
 
 Myddleware is the customisable free open-source platform that facilitates data migration and synchronisation between applications.
 
-![Create Rule View](http://community.myddleware.com/wp-content/uploads/2016/11/create_rule_view-1024x596.png)
+![Create Myddleware "Customer" Rule View with WooCommerce Customers & Vtiger Opportunities modules](docs/images/rule_create_woo_vtiger.png)
 
 [On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
@@ -209,3 +210,10 @@ The MAILER_URL is optional. It is used by Myddleware to send you notification em
 ## Contributing
 
 > Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
+
+Myddleware is an Open Source community project. All contributions are welcome, no matter how big or small. There are many ways to contribute to the project.
+You can of course help us improve and debug our source code, but you can also start by simply reporting issues & bugs or suggesting new features on our [GitHub Issues forum](https://github.com/Myddleware/myddleware/issues), or review and leave comments on [Pull Requests](https://github.com/Myddleware/myddleware/pulls).
+
+If you would like to contribute to Myddleware source code, please refer to the [developer's guide](dev_guide.md) section of this documentation. We also kindly ask
+that you follow the [Symfony Coding Standards](https://symfony.com/doc/current/contributing/code/standards.html) to ensure uniformity and clarity of our source code across Myddleware.
+We recommend using the [PHP CS Fixer](https://github.com/FriendsOfPhp/PHP-CS-Fixer) tool to ensure these standards are respected across your contributed code.

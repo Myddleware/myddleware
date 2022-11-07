@@ -208,9 +208,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-    public function ckeckPredecessorDocuments()
+    public function checkPredecessorDocuments()
     {
-        $this->ruleManager->ckeckPredecessorDocuments();
+        $this->ruleManager->checkPredecessorDocuments();
     }
 
     // Permet de filtrer les documents en fonction des filtres de la règle
@@ -220,9 +220,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function ckeckParentDocuments()
+    public function checkParentDocument()
     {
-        $this->ruleManager->ckeckParentDocuments();
+        $this->ruleManager->checkParentDocument();
     }
 
     // Permet de trasformer les documents
@@ -289,21 +289,23 @@ class jobcore
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function initJob(string $paramJob): array
+    public function initJob(string $paramJob, bool $force = false): array
     {
         $this->paramJob = $paramJob;
         $this->id = uniqid('', true);
         $this->start = microtime(true);
-        // Check if a job is already running
-        $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-        $stmt = $this->connection->prepare($sqlJobOpen);
-        $result = $stmt->executeQuery();
-        $job = $result->fetchAssociative(); // 1 row
-        // Error if one job is still running
-        if (!empty($job)) {
-            $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+        // Check if a job is already running except if force = true (api call or manuel call)
+        if (!$force) {
+            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+            $stmt = $this->connection->prepare($sqlJobOpen);
+            $result = $stmt->executeQuery();
+            $job = $result->fetchAssociative(); // 1 row
+            // Error if one job is still running
+            if (!empty($job)) {
+                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-            return ['success' => false, 'message' => $this->message];
+                return ['success' => false, 'message' => $this->message];
+            }
         }
         // Create Job
         $insertJob = $this->insertJob();
@@ -339,6 +341,7 @@ class jobcore
             $paramJob[] = $event;
             $paramJob[] = $datatype;
             $paramJob[] = implode(',', $param);
+            $paramJob[] = 1; // Force run even if another task is running
 
             return $this->runBackgroundJob('massaction', $paramJob);
         } else {
@@ -366,7 +369,7 @@ class jobcore
             // Formatage des paramètres
             if (!empty($param)) {
                 foreach ($param as $valueParam) {
-                    $params .= "'".$valueParam."' ";
+                    $params .= $valueParam.' ';
                 }
             }
             // Get the php executable
@@ -380,7 +383,7 @@ class jobcore
             } catch (IOException $e) {
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
+            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' 1 --env='.$this->env.'  > '.$fileTmp.' &');
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {
@@ -564,7 +567,7 @@ class jobcore
         // Connectors
     }
 
-    public function getRules()
+    public function getRules($force = false)
     {
         try {
             $sqlParams = '	SELECT name_slug 
@@ -572,8 +575,8 @@ class jobcore
 								INNER JOIN rule
 									ON rule.id = ruleorder.rule_id
 							WHERE 
-									rule.active = 1
-								AND	rule.deleted = 0
+									rule.deleted = 0
+								'.(!$force ? ' AND rule.active = 1 ' : '').'
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
@@ -744,9 +747,9 @@ class jobcore
         $this->message = $upgrade->processUpgrade($output);
     }
 
-    // Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
-
     /**
+     * Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle.
+     *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */

@@ -34,14 +34,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UpgradeCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -62,7 +56,7 @@ class UpgradeCommand extends Command
     }
 
     // Process to the upgrade
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $data = $this->jobManager->initJob('upgrade');
         if (false === $data['success']) {

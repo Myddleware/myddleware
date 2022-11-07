@@ -28,12 +28,9 @@ namespace App\Twig;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * Class RegleExtension.
- */
 class RegleExtension extends AbstractExtension
 {
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('sensor', [$this, 'sensor']),
@@ -50,7 +47,7 @@ class RegleExtension extends AbstractExtension
     }
 
     // Nom de l'extension
-    public function getName()
+    public function getName(): string
     {
         return 'regle_extension';
     }

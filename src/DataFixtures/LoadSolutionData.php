@@ -33,7 +33,7 @@ use Doctrine\Persistence\ObjectManager;
 class LoadSolutionData implements FixtureInterface
 {
     private $manager;
-    protected $solutionData = [
+    protected array $solutionData = [
         ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],

@@ -31,8 +31,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Job.
- *
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
  * @ORM\Table(name="job", indexes={
  *  @ORM\Index(name="index_status", columns={"status"})
@@ -41,89 +39,65 @@ use Doctrine\ORM\Mapping as ORM;
 class Job
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string", length=255, nullable=false)
      * @ORM\Id
      */
-    private $id;
+    private string $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="status", type="string", length=50, nullable=false)
      */
-    private $status;
+    private string $status;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="param", type="text", nullable=false)
      */
-    private $param;
+    private string $param;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="begin", type="datetime", nullable=false)
      */
-    private $begin;
+    private DateTime $begin;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="end", type="datetime",  nullable=true, options={"default":NULL})
      */
-    private $end;
+    private ?DateTime $end;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="message", type="text",  nullable=true, options={"default":NULL})
      */
-    private $message;
+    private ?string $message;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="open", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private $open;
+    private ?int $open;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="close", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private $close;
+    private ?int $close;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="cancel", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private $cancel;
+    private ?int $cancel;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="manual", type="boolean",  nullable=true, options={"default":0})
      */
-    private $manual;
+    private ?bool $manual;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="api", type="boolean",  nullable=true, options={"default":0})
      */
-    private $api;
+    private ?bool $api;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="error", type="integer", length=6,  nullable=true, options={"default":0})
      */
-    private $error;
+    private ?int $error;
 
     /**
      * @ORM\OneToMany(targetEntity="Log", mappedBy="job")
@@ -136,145 +110,73 @@ class Job
         $this->logs = new ArrayCollection();
     }
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return Job
-     */
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * Set status.
-     *
-     * @param string $status
-     *
-     * @return Job
-     */
-    public function setStatus($status)
+    public function setStatus($status): self
     {
         $this->status = $status;
 
         return $this;
     }
 
-    /**
-     * Get status.
-     *
-     * @return string
-     */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    /**
-     * Set param.
-     *
-     * @param string $param
-     *
-     * @return Job
-     */
-    public function setParam($param)
+    public function setParam($param): self
     {
         $this->param = $param;
 
         return $this;
     }
 
-    /**
-     * Get param.
-     *
-     * @return string
-     */
-    public function getParam()
+    public function getParam(): string
     {
         return $this->param;
     }
 
-    /**
-     * Set begin.
-     *
-     * @param DateTime $begin
-     *
-     * @return Job
-     */
-    public function setBegin($begin)
+    public function setBegin($begin): self
     {
         $this->begin = $begin;
 
         return $this;
     }
 
-    /**
-     * Get begin.
-     *
-     * @return DateTime
-     */
-    public function getBegin()
+    public function getBegin(): DateTime
     {
         return $this->begin;
     }
 
-    /**
-     * Set end.
-     *
-     * @param DateTime $end
-     *
-     * @return Job
-     */
-    public function setEnd($end)
+    public function setEnd($end): self
     {
         $this->end = $end;
 
         return $this;
     }
 
-    /**
-     * Get end.
-     *
-     * @return DateTime
-     */
-    public function getEnd()
+    public function getEnd(): ?DateTime
     {
         return $this->end;
     }
 
-    /**
-     * Set message.
-     *
-     * @param string $message
-     *
-     * @return Job
-     */
-    public function setMessage($message)
+    public function setMessage($message): self
     {
         $this->message = $message;
 
         return $this;
     }
 
-    /**
-     * Get message.
-     *
-     * @return string
-     */
     public function getMessage()
     {
         // Don't show ip address
@@ -284,146 +186,74 @@ class Job
         return preg_replace($patterns, $replacements, $this->message);
     }
 
-    /**
-     * Set open.
-     *
-     * @param int $open
-     *
-     * @return Job
-     */
-    public function setOpen($open)
+    public function setOpen($open): self
     {
         $this->open = $open;
 
         return $this;
     }
 
-    /**
-     * Get open.
-     *
-     * @return int
-     */
-    public function getOpen()
+    public function getOpen(): ?int
     {
         return $this->open;
     }
 
-    /**
-     * Set close.
-     *
-     * @param int $close
-     *
-     * @return Job
-     */
-    public function setClose($close)
+    public function setClose($close): self
     {
         $this->close = $close;
 
         return $this;
     }
 
-    /**
-     * Get close.
-     *
-     * @return int
-     */
-    public function getClose()
+    public function getClose(): ?int
     {
         return $this->close;
     }
 
-    /**
-     * Set cancel.
-     *
-     * @param int $cancel
-     *
-     * @return Job
-     */
-    public function setCancel($cancel)
+    public function setCancel($cancel): self
     {
         $this->cancel = $cancel;
 
         return $this;
     }
 
-    /**
-     * Get cancel.
-     *
-     * @return int
-     */
-    public function getCancel()
+    public function getCancel(): ?int
     {
         return $this->cancel;
     }
 
-    /**
-     * Set manual.
-     *
-     * @param int $manual
-     *
-     * @return Job
-     */
-    public function setManual($manual)
+    public function setManual($manual): self
     {
         $this->manual = $manual;
 
         return $this;
     }
 
-    /**
-     * Get manual.
-     *
-     * @return int
-     */
-    public function getManual()
+    public function getManual(): ?bool
     {
         return $this->manual;
     }
 
-    /**
-     * Set api.
-     *
-     * @param int $api
-     *
-     * @return Job
-     */
-    public function setApi($api)
+    public function setApi($api): self
     {
         $this->api = $api;
 
         return $this;
     }
 
-    /**
-     * Get api.
-     *
-     * @return int
-     */
-    public function getApi()
+    public function getApi(): ?bool
     {
         return $this->api;
     }
 
-    /**
-     * Set error.
-     *
-     * @param int $error
-     *
-     * @return Job
-     */
-    public function setError($error)
+    public function setError($error): self
     {
         $this->error = $error;
 
         return $this;
     }
 
-    /**
-     * Get error.
-     *
-     * @return int
-     */
-    public function getError()
+    public function getError(): ?int
     {
         return $this->error;
     }

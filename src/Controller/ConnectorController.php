@@ -35,14 +35,14 @@ use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
 use App\Service\SessionService;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,42 +51,29 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Class ConnectorController.
- *
  * @Route("/rule")
  */
 class ConnectorController extends AbstractController
 {
     protected $params;
-
-    /**
-     * @var SessionService
-     */
-    private $sessionService;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var SolutionManager
-     */
-    private $solutionManager;
+    private SessionService $sessionService;
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $entityManager;
+    private SolutionManager $solutionManager;
+    private LoggerInterface $logger;
 
     public function __construct(
         SolutionManager $solutionManager,
         SessionService $sessionService,
         TranslatorInterface $translator,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
     ) {
         $this->solutionManager = $solutionManager;
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
+        $this->logger = $logger;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -97,19 +84,13 @@ class ConnectorController extends AbstractController
         }
     }
 
-    /* ******************************************************
-     * CONNECTOR
-     ****************************************************** */
-
     /**
      * CALLBACK POUR LES APIS.
      *
-     * @return RedirectResponse|Response
-     *
      * @Route("/connector/callback/", name="connector_callback", options={"expose"=true})
      */
-    public function callBackAction()
-    { // REV 1.1.1
+    public function callBack()
+    {
         try {
             // Nom de la solution
             if (!$this->sessionService->isSolutionNameExist()) {
@@ -234,13 +215,9 @@ class ConnectorController extends AbstractController
     /**
      * Contrôle si le fichier upload est valide puis le déplace.
      *
-     * @param $solution
-     *
-     * @return Response
-     *
      * @Route("/connector/upload/{solution}", name="upload", options={"expose"=true})
      */
-    public function uploadAction($solution) // REV 1.1.0
+    public function upload($solution): Response
     {
         if (isset($solution)) {
             $output_dir = __DIR__.'/../Custom/Solutions/'.trim($solution).'/file/';
@@ -326,16 +303,12 @@ class ConnectorController extends AbstractController
         }
     }
 
-    // Rev 1.1.1 --------------------------
-
     /**
      * CREATION D UN CONNECTEUR LISTE.
      *
-     * @return Response
-     *
      * @Route("/connector/create", name="regle_connector_create")
      */
-    public function createAction()
+    public function create(): Response
     {
         $solution = $this->entityManager->getRepository(Solution::class)->solutionActive();
         $lstArray = [];
@@ -360,8 +333,10 @@ class ConnectorController extends AbstractController
      * @return RedirectResponse|Response
      *
      * @Route("/connector/insert", name="regle_connector_insert")
+     *
+     * @throws Exception
      */
-    public function connectorInsertAction(Request $request)
+    public function connectorInsert(Request $request)
     {
         $type = '';
 
@@ -447,9 +422,11 @@ class ConnectorController extends AbstractController
                 return $this->redirect($this->generateUrl('regle_connector_list'));
                 //-----------
             } catch (Exception $e) {
+                $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
                 throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             }
         } else {
+            $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             throw $this->createNotFoundException('Error');
         }
     }
@@ -457,26 +434,12 @@ class ConnectorController extends AbstractController
     /**
      * LISTE DES CONNECTEURS.
      *
-     * @param $page
-     *
-     * @return Response
-     *
      * @Route("/connector/list", name="regle_connector_list", defaults={"page"=1})
      * @Route("/connector/list/page-{page}", name="regle_connector_page", requirements={"page"="\d+"})
      */
-    public function connectorListAction($page = 1)
+    public function connectorList($page = 1): Response
     {
         try {
-            // $config = new Configuration();
-            // $connection = [
-            //     'driver' => 'pdo',
-            //     'memory' => true
-            // ];
-
-            // $em = EntityManager::create($connection, $config);
-            // $connectorTest = $em->getRepository(Connector::class);
-            // $connectorTest->findListConnectorByUser($this->getUser()->isAdmin(), $this->getUser()->getId());
-
             // ---------------
             $compact['nb'] = 0;
 
@@ -513,13 +476,9 @@ class ConnectorController extends AbstractController
     /**
      * SUPPRESSION DU CONNECTEUR.
      *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/connector/delete/{id}", name="connector_delete")
      */
-    public function connectorDeleteAction(Request $request, $id)
+    public function connectorDelete(Request $request, $id): RedirectResponse
     {
         $session = $request->getSession();
         if (isset($id)) {
@@ -576,13 +535,13 @@ class ConnectorController extends AbstractController
     /**
      * FICHE D'UN CONNECTEUR.
      *
-     * @param $id
-     *
-     * @return RedirectResponse|Response
-     *
      * @Route("/connector/view/{id}", name="connector_open")
+     *
+     * @throws Exception
+     * @throws NonUniqueResultException
+     * @throws NonUniqueResultException
      */
-    public function connectorOpenAction(Request $request, $id)
+    public function connectorOpen(Request $request, $id)
     {
         $qb = $this->entityManager->getRepository(Connector::class)->createQueryBuilder('c');
         $qb->select('c', 'cp')->leftjoin('c.connectorParams', 'cp');
@@ -665,11 +624,9 @@ class ConnectorController extends AbstractController
     /**
      * LISTE DES CONNECTEURS POUR ANIMATION.
      *
-     * @return Response
-     *
      * @Route("/connector/list/solution", name="regle_connector_by_solution")
      */
-    public function connectorListSolutionAction(Request $request)
+    public function connectorListSolution(Request $request): Response
     {
         $id = $request->get('id', null);
 
@@ -701,13 +658,9 @@ class ConnectorController extends AbstractController
     /**
      * CREATION D'UN CONNECTEUR LISTE animation.
      *
-     * @param $type
-     *
-     * @return Response
-     *
      * @Route("/connector/createout/{type}", name="regle_connector_create_out")
      */
-    public function createOutAction($type)
+    public function createOut($type): Response
     {
         $solution = $this->entityManager->getRepository(Solution::class)->solutionConnectorType($type);
         $lstArray = [];
@@ -732,11 +685,9 @@ class ConnectorController extends AbstractController
     /**
      * RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY.
      *
-     * @return Response
-     *
      * @Route("/connector/insert/solution", name="regle_connector_insert_solution")
      */
-    public function connectorInsertSolutionAction()
+    public function connectorInsertSolutionAction(): Response
     {
         if ($this->sessionService->isConnectorValuesExist()) {
             $values = $this->sessionService->getConnectorValues();

@@ -11,7 +11,6 @@ use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -21,8 +20,6 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Class ManagementSMTPController.
- *
  * @Route("/rule")
  */
 class ManagementSMTPController extends AbstractController
@@ -31,14 +28,8 @@ class ManagementSMTPController extends AbstractController
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
 
     protected $tools;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
+    private LoggerInterface $logger;
+    private TranslatorInterface $translator;
 
     public function __construct(LoggerInterface $logger, TranslatorInterface $translator)
     {
@@ -47,11 +38,9 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * @return Response
-     *
      * @Route("/managementsmtp", name="management_smtp_index")
      */
-    public function indexAction()
+    public function index(): Response
     {
         $form = $this->createCreateForm();
         $form = $this->getData($form);
@@ -60,11 +49,9 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * Read config stmp.
-     *
      * @Route("/managementsmtp/readConfig", name="management_smtp_create")
      */
-    public function createConfigAction(Request $request)
+    public function createConfig(Request $request)
     {
         try {
             $form = $this->createCreateForm();
@@ -86,12 +73,7 @@ class ManagementSMTPController extends AbstractController
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
-    /**
-     * Creates a form to create a JobScheduler entity.
-     *
-     * @return Form The form
-     */
-    private function createCreateForm()
+    private function createCreateForm(): \Symfony\Component\Form\FormInterface
     {
         $form = $this->createForm(ManagementSMTPType:: class, null, [
             'action' => $this->generateUrl('management_smtp_create'),
@@ -113,9 +95,7 @@ class ManagementSMTPController extends AbstractController
     }
 
     /***
-     * get data for file parameters_smtp.yml
-     * @param $form
-     * @return mixed
+     * get data for file parameters_smtp.yml - this is for Myddleware 2
      */
     private function getData($form)
     {
@@ -132,9 +112,7 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * set data form from files parameter_stml.yml.
-     *
-     * @param $form
+     * set data form from files parameter_stml.yml. - this is for Myddleware 2.
      */
     private function setData($form)
     {
@@ -154,19 +132,17 @@ class ManagementSMTPController extends AbstractController
 
     /**
      * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
-     *
-     * @return void
      */
     protected function parseYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
-            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
-            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
-            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
-            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
-            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
-            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
-            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
+            $transport = $swiftParams['transport'] ?? null;
+            $host = $swiftParams['host'] ?? null;
+            $port = $swiftParams['port'] ?? null;
+            $auth_mode = $swiftParams['auth_mode'] ?? null;
+            $encryption = $swiftParams['encryption'] ?? null;
+            $user = $swiftParams['user'] ?? null;
+            $password = $swiftParams['password'] ?? null;
             $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
             // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
             // TODO: find a way to check whether the variable is already set & if so overwrite it
@@ -179,15 +155,11 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * Send mail for test configuration in the parameters_smtp.yml.
-     *
-     * @return RedirectResponse
+     * Send mail for test configuration in the parameters_smtp.yml. - Myddleware 2.
      *
      * @throws Exception
-     *
-     * @param mixed $form
      */
-    public function testMailConfiguration($form)
+    public function testMailConfiguration($form): void
     {
         $host = $form->get('host')->getData();
         $port = $form->get('port')->getData();
@@ -254,9 +226,6 @@ class ManagementSMTPController extends AbstractController
             ->setTo('recipient@example.com')
             ->setBody('You should see me from the profiler!')
         ;
-
         $mailer->send($message);
-
-        // ...
     }
 }

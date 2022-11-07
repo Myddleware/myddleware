@@ -7,23 +7,13 @@ use App\Entity\InternalListValue as InternalListValueEntity;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-//progress bar
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 class loadexternallistcore
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var User
-     */
-    private $user;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         EntityManagerInterface $entityManager
@@ -31,14 +21,12 @@ class loadexternallistcore
         $this->entityManager = $entityManager;
     }
 
-    //for progress bar
     /**
-     * @var SymfonyStyle
+     * @throws \Doctrine\DBAL\Exception
      */
-    private $io;
-
     public function loadExternalList($file, InputInterface $input, OutputInterface $output)
     {
+        // @TODO: please clean up this section (comments & commented code but also indendation which is strange here).
         //section for future csv handling
         // $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
         //extract the data from the csv
@@ -46,7 +34,7 @@ class loadexternallistcore
         $csvRows = array_map(function ($csv) {
             //convert the csv to a string, using ; as a separator
             return str_getcsv($csv, ';');
-            //using file path
+        //using file path
         }, file($file));
         //we generate a header which use the array shift method
         //array_shift takes of the 1st element of an array and returns it
@@ -101,7 +89,7 @@ class loadexternallistcore
             $this->entityManager->getConnection()->commit();
         } catch (Exception $e) {
             $this->entityManager->getConnection()->rollBack();
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             throw $e;
         }

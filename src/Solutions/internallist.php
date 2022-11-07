@@ -32,7 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class internallistcore extends solution
 {
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         try {
             return [
@@ -44,14 +44,14 @@ class internallistcore extends solution
                 ],
             ];
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['Login field error: ' => $error];
         }
     }
 
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             $modules = [];
@@ -64,14 +64,14 @@ class internallistcore extends solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['module error: ' => $error];
         }
     }
 
-    public function get_module_fields($module, $type = 'source', $extension = false)
+    public function get_module_fields($module, $type = 'source', $extension = false): array
     {
         try {
             //get the data to obtain the fields of the row
@@ -86,14 +86,14 @@ class internallistcore extends solution
 
             return $this->moduleFields;
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['module fields error: ' => $error];
         }
     }
 
-    public function read($params)
+    public function read($params): array
     {
         try {
             //return value
@@ -112,7 +112,7 @@ class internallistcore extends solution
                 $table = $this->entityManager->getRepository(InternalListValueEntity::class)->searchRecords($params);
             }
         } catch (\Exception $e) {
-            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error getting the records' => $error];
@@ -133,7 +133,7 @@ class internallistcore extends solution
                 //we increment the number of record read
                 ++$recordRead;
             } catch (\Exception $e) {
-                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
 
                 return ['error getting the data from the records' => $error];
@@ -150,13 +150,13 @@ class internallistcore extends solution
             try {
                 $this->connexion_valide = true;
             } catch (\PDOException $e) {
-                $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->logger->error($error);
 
                 return ['error' => $error];
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];

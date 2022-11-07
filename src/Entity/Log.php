@@ -29,8 +29,6 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Log.
- *
  * @ORM\Entity(repositoryClass="App\Repository\LogRepository")
  * @ORM\Table(name="log", indexes={
  *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
@@ -41,216 +39,123 @@ use Doctrine\ORM\Mapping as ORM;
 class Log
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="created", type="datetime", nullable=false)
      */
-    private $dateCreated;
+    private DateTime $dateCreated;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="type", type="string", length=5, nullable=false)
      */
-    private $type;
+    private string $type;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="msg", type="text", nullable=false)
      */
-    private $message;
+    private string $message;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="orders")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=true)
      */
-    private $rule;
+    private ?Rule $rule;
 
     /**
-     * @var Document
-     *
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="logs")
      * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true)
      */
-    private $document;
+    private ?Document $document;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="ref_doc_id", type="string", length=255, nullable=true)
      */
-    private $ref;
+    private ?string $ref;
 
     /**
-     * @var Job
-     *
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="logs")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
-    private $job;
+    private Job $job;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return Log
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set type.
-     *
-     * @param string $type
-     *
-     * @return Log
-     */
-    public function setType($type)
+    public function setType($type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * Get type.
-     *
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * Set message.
-     *
-     * @param string $message
-     *
-     * @return Log
-     */
-    public function setMessage($message)
+    public function setMessage($message): self
     {
         $this->message = $message;
 
         return $this;
     }
 
-    /**
-     * Get message.
-     *
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    /**
-     * Set document.
-     *
-     * @param string $document
-     *
-     * @return Log
-     */
-    public function setDocument($document)
+    public function setDocument($document): self
     {
         $this->document = $document;
 
         return $this;
     }
 
-    /**
-     * Get document.
-     *
-     * @return string
-     */
-    public function getDocument()
+    public function getDocument(): ?Document
     {
         return $this->document;
     }
 
-    /**
-     * Set ref.
-     *
-     * @param string $ref
-     *
-     * @return Log
-     */
-    public function setRef($ref)
+    public function setRef($ref): self
     {
         $this->ref = $ref;
 
         return $this;
     }
 
-    /**
-     * Get ref.
-     *
-     * @return string
-     */
-    public function getRef()
+    public function getRef(): ?string
     {
         return $this->ref;
     }
 
-    /**
-     * Set job.
-     *
-     * @param string $job
-     *
-     * @return Log
-     */
-    public function setJob($job)
+    public function setJob($job): self
     {
         $this->job = $job;
 
         return $this;
     }
 
-    /**
-     * Get job.
-     *
-     * @return string
-     */
-    public function getJob()
+    public function getJob(): Job
     {
         return $this->job;
     }

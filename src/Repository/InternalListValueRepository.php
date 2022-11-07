@@ -49,7 +49,7 @@ class InternalListValueRepository extends ServiceEntityRepository
 
     public function searchRecords($params): array
     {
-        $tablequery = $this->createQueryBuilder('internal_list_value')
+        return $this->createQueryBuilder('internal_list_value')
             ->Where('internal_list_value.reference >= :dateref')
             ->andWhere('internal_list_value.listId = :module')
             ->getQuery()
@@ -57,8 +57,6 @@ class InternalListValueRepository extends ServiceEntityRepository
             ->setParameter('module', $params['module'])
             ->setParameter('dateref', $params['date_ref'])
             ->getResult();
-
-        return $tablequery;
     }
 
     // /**

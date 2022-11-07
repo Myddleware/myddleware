@@ -4,14 +4,9 @@ namespace App\Form\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * Class ResetPassword.
- */
 class ResetPassword
 {
     /**
-     * @var string
-     *
      * @Assert\Length(
      *     min = 8,
      *     max = 50,
@@ -19,14 +14,14 @@ class ResetPassword
      *     maxMessage = "profile.type.password.length_max"
      * )
      */
-    protected $password;
+    protected string $password;
 
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password)
+    public function setPassword(string $password): ResetPassword
     {
         $this->password = $password;
 

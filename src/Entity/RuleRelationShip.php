@@ -28,8 +28,6 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleRelationShip.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleRelationShipRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="rulerelationship", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
@@ -37,193 +35,114 @@ use Doctrine\ORM\Mapping as ORM;
 class RuleRelationShip
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="relationsShip")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private ?Rule $rule;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="field_name_source", type="string", length=100, nullable=false)
      */
-    private $fieldNameSource;
+    private string $fieldNameSource;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="field_name_target", type="string", length=100, nullable=false)
      */
-    private $fieldNameTarget;
+    private string $fieldNameTarget;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="field_id", type="string", length=100, nullable=true)
      */
-    private $fieldId;
+    private string $fieldId;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="parent", type="boolean", nullable=true)
      */
-    private $parent;
+    private bool $parent;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private $deleted;
+    private bool $deleted;
 
     /**
      * @ORM\Column(name="errorEmpty", type="boolean", options={"default":0})
      */
-    private $errorEmpty;
+    private bool $errorEmpty;
 
     /**
      * @ORM\Column(name="errorMissing", type="boolean", options={"default":1})
      */
-    private $errorMissing;
+    private bool $errorMissing;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set fieldNameSource.
-     *
-     * @param string $fieldNameSource
-     *
-     * @return RuleRelationShip
-     */
-    public function setFieldNameSource($fieldNameSource)
+    public function setFieldNameSource($fieldNameSource): self
     {
         $this->fieldNameSource = $fieldNameSource;
 
         return $this;
     }
 
-    /**
-     * Get fieldNameSource.
-     *
-     * @return string
-     */
-    public function getFieldNameSource()
+    public function getFieldNameSource(): string
     {
         return $this->fieldNameSource;
     }
 
-    /**
-     * Set fieldNameTarget.
-     *
-     * @param string $fieldNameTarget
-     *
-     * @return RuleRelationShip
-     */
-    public function setFieldNameTarget($fieldNameTarget)
+    public function setFieldNameTarget($fieldNameTarget): self
     {
         $this->fieldNameTarget = $fieldNameTarget;
 
         return $this;
     }
 
-    /**
-     * Get fieldNameTarget.
-     *
-     * @return string
-     */
-    public function getFieldNameTarget()
+    public function getFieldNameTarget(): string
     {
         return $this->fieldNameTarget;
     }
 
-    /**
-     * Set fieldId.
-     *
-     * @param string $fieldId
-     *
-     * @return RuleRelationShip
-     */
-    public function setFieldId($fieldId)
+    public function setFieldId($fieldId): self
     {
         $this->fieldId = $fieldId;
 
         return $this;
     }
 
-    /**
-     * Get fieldId.
-     *
-     * @return string
-     */
-    public function getFieldId()
+    public function getFieldId(): string
     {
         return $this->fieldId;
     }
 
-    /**
-     * Set parent.
-     *
-     * @param string $parent
-     *
-     * @return RuleRelationShip
-     */
-    public function setParent($parent)
+    public function setParent($parent): self
     {
         $this->parent = $parent;
 
         return $this;
     }
 
-    /**
-     * Get parent.
-     *
-     * @return string
-     */
-    public function getParent()
+    public function getParent(): bool
     {
         return $this->parent;
     }
 
-    /**
-     * Set deleted.
-     *
-     * @param int $deleted
-     *
-     * @return Rule
-     */
-    public function setDeleted($deleted)
+    public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
 
         return $this;
     }
 
-    /**
-     * Get deleted.
-     *
-     * @return int
-     */
-    public function getDeleted()
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
@@ -240,40 +159,24 @@ class RuleRelationShip
         return $this;
     }
 
-    /**
-     * Get the value of errorEmpty.
-     */
-    public function getErrorEmpty()
+    public function getErrorEmpty(): bool
     {
         return $this->errorEmpty;
     }
 
-    /**
-     * Set the value of errorEmpty.
-     *
-     * @return self
-     */
-    public function setErrorEmpty($errorEmpty)
+    public function setErrorEmpty($errorEmpty): self
     {
         $this->errorEmpty = $errorEmpty;
 
         return $this;
     }
 
-    /**
-     * Get the value of errorMissing.
-     */
-    public function getErrorMissing()
+    public function getErrorMissing(): bool
     {
         return $this->errorMissing;
     }
 
-    /**
-     * Set the value of errorMissing.
-     *
-     * @return self
-     */
-    public function setErrorMissing($errorMissing)
+    public function setErrorMissing($errorMissing): self
     {
         $this->errorMissing = $errorMissing;
 

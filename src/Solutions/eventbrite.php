@@ -30,7 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class eventbritecore extends solution
 {
-    protected $typeRead = [
+    protected array $typeRead = [
         'Organizer' => 'User',
         'Events' => 'User',
         'Tickets' => 'User',
@@ -42,9 +42,9 @@ class eventbritecore extends solution
     ];
 
     private $token;
-    private $urlBase = 'https://www.eventbrite.com/json/';
+    private string $urlBase = 'https://www.eventbrite.com/json/';
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -55,8 +55,8 @@ class eventbritecore extends solution
         ];
     }
 
-    protected $required_fields = ['default' => ['id', 'modified']];
-    protected $eventStatuses = ''; //'live,started,ended'
+    protected array $required_fields = ['default' => ['id', 'modified']];
+    protected string $eventStatuses = ''; //'live,started,ended'
 
     public function login($paramConnexion)
     {
@@ -83,9 +83,7 @@ class eventbritecore extends solution
         }
     }
 
-    // login($paramConnexion)
-
-    public function get_modules($type = 'source')
+    public function get_modules($type = 'source'): array
     {
         try {
             // Le module attendee n'est accessible d'en source
@@ -116,16 +114,13 @@ class eventbritecore extends solution
 
             return $modules;
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-
-            return $error;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
-
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -313,7 +308,7 @@ class eventbritecore extends solution
     //		count : Le nombre d'enregistrement trouvé
     //		date_ref : la nouvelle date de référence
     //   	values : les enregsitrements du module demandé (l'id et la date de modification (libellés 'id' et 'date_modified') sont obligatoires), exemple Array(['id] => 454664654654, ['name] => dernier,  [date_modified] => 2013-10-11 18:41:18)
-    public function readData($param)
+    public function readData($param): array
     {
         if (!isset($param['fields'])) {
             $param['fields'] = [];
@@ -336,7 +331,7 @@ class eventbritecore extends solution
     }
 
     // Permet de créer des données
-    public function createData($param)
+    public function createData($param): array
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -380,8 +375,10 @@ class eventbritecore extends solution
         return $result;
     }
 
-    // Permet de créer des données
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         $moduleSingle = substr(strtolower($param['module']), 0, -1);
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
@@ -428,7 +425,7 @@ class eventbritecore extends solution
         return $result;
     }
 
-    protected function readLastEventType($param)
+    protected function readLastEventType($param): array
     {
         try {
             $parameters = [
@@ -468,7 +465,7 @@ class eventbritecore extends solution
         }
     }
 
-    protected function readLastUserType($param)
+    protected function readLastUserType($param): array
     {
         try {
             $parameters = [
@@ -533,7 +530,7 @@ class eventbritecore extends solution
     }
 
     // Lescture directe s'il s'agit d'un module lié au user
-    protected function readUserType($param)
+    protected function readUserType($param): array
     {
         try {
             $i = 0;
@@ -597,7 +594,7 @@ class eventbritecore extends solution
     }
 
     // Lecture indirecte s'il s'agit d'un module lié aux évènements car il faut d'abord récupérer les event du users pour enseuite récupérer les autres éléments (ex : attendee)
-    protected function readEventType($param)
+    protected function readEventType($param): array
     {
         try {
             // Sauvegarde de la date de référence temp qui est maintenant à GMT
@@ -673,7 +670,7 @@ class eventbritecore extends solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         if (
                 'target' == $type
@@ -710,8 +707,6 @@ class eventbritecore extends solution
             return false;
         }
     }
-
-    // call($method, $parameters)
 }
 
 class eventbrite extends eventbritecore

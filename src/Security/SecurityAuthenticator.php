@@ -27,19 +27,13 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
 {
     use TargetPathTrait;
 
-    private $entityManager;
-
-    private $urlGenerator;
-
-    private $csrfTokenManager;
-
-    private $passwordEncoder;
-
-    private $securityService;
-
-    private $env;
-
-    private $translator;
+    private EntityManagerInterface $entityManager;
+    private UrlGeneratorInterface $urlGenerator;
+    private ?CsrfTokenManagerInterface $csrfTokenManager;
+    private UserPasswordEncoderInterface $passwordEncoder;
+    private SecurityService $securityService;
+    private string $env;
+    private TranslatorInterface $translator;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -59,13 +53,13 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         $this->translator = $translator;
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return 'login' === $request->attributes->get('_route')
             && $request->isMethod('POST');
     }
 
-    public function getCredentials(Request $request)
+    public function getCredentials(Request $request): array
     {
         $credentials = [
             'username' => $request->request->get('_username'),
@@ -101,7 +95,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         if (!$user->isEnabled()) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('login.disabled_account'));
@@ -119,7 +113,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): RedirectResponse
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
@@ -128,7 +122,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         return new RedirectResponse($this->urlGenerator->generate('regle_panel'));
     }
 
-    protected function getLoginUrl()
+    protected function getLoginUrl(): string
     {
         return $this->urlGenerator->generate('login');
     }

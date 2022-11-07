@@ -32,7 +32,7 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob;
 class LoadCronJobData implements FixtureInterface
 {
     private $manager;
-    protected $cronJobData = [
+    protected array $cronJobData = [
         ['period' => '*/5 * * * *', 'command' => 'myddleware:synchro ALL', 'description' => 'Run every active rules'],
         ['period' => '0 * * * *', 'command' => 'myddleware:rerunerror 100 5', 'description' => 'Reload error : 1st level'],
         ['period' => '0 0 * * *', 'command' => 'myddleware:rerunerror 100 10', 'description' => 'Reload error : 2nd level'],
