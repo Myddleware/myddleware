@@ -384,9 +384,9 @@ Log in to Mailchimp and open your profile page.
 
 Then, click on ``Extras`` > ``API Keys`` and get your API key from there :
 
-![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_api_keys.png)
+![Mailchimp Extras Tab](images/credentials/mailchimp_api_keys.png)
 
-![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_api_key.png)
+![Mailchimp API Keys page](images/credentials/mailchimp_api_key.png)
 
 Finally, add this key in your Myddleware connector :
 
@@ -406,6 +406,8 @@ To connect Mautic to Myddleware, you need :
 - your username
 - your password
 - your URL
+
+![Mautic connector credentials Myddleware form](images/credentials/mautic_connector_credentials.png)
 
 ### Sendinblue
 
