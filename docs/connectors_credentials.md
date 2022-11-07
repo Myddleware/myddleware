@@ -62,6 +62,7 @@ To create your Cirrus Shield connector, you will need :
 - Your username 
 - Your password
 
+![Cirrusshield connector credentials Myddleware form](images/credentials/cirrusshield_connector_credentials.png)
 
 ### Hubspot
 
@@ -104,9 +105,7 @@ After typing in your email address and password, click on “wsdl file”. Choos
 
 The file has been transferred successfully.
 
-Test your connection. If the light bulb is green, you're good to go!
-
-Choose a name for your connector and save it.
+![SageCRM connector credentials Myddleware form](images/credentials/sagecrm_connector_credentials.png)
 
 ### Salesforce
 
