@@ -378,11 +378,19 @@ Here is the list of available modules in source (reading) and target (writing) :
 | Lists                            | No     | Yes     |
 | List members                     | No     | Yes     |
 
-Connect to Mailchimp an open your profile
+Log in to Mailchimp and open your profile page.
 
-Then click on  « Extra -> API Keys » and copy you API key :
+![Mailchimp profile](images/credentials/mailchimp_homepage.png)
 
-Add this key in your Myddleware connector :
+Then, click on ``Extras`` > ``API Keys`` and get your API key from there :
+
+![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_api_keys.png)
+
+![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_api_key.png)
+
+Finally, add this key in your Myddleware connector :
+
+![Mailchimp connector credentials Myddleware form](images/credentials/mailchimp_connector_credentials.png)
 
 ### Mautic 
 
@@ -512,6 +520,8 @@ If you want to extend the life of this token, click on the ``i`` icon  :
 Then click on ``Open in Access Token Tool`` :
 Then click on ``Extend Access Token``. 
 Your token will expire in 2 month. After this time you will have to refresh the token in your Myddleware Facebook connector.
+
+![Facebook connector credentials Myddleware form](images/credentials/facebook_connector_credentials.png)
 
 ### File (FTP)
 
