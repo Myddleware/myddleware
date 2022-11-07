@@ -173,6 +173,7 @@ The SAP CRM connector can only be installed by our team.
 
 To know more about this connector, please fill in [this contact form](http://www.myddleware.com/contact-us).
 
+![SAPCRM connector credentials Myddleware form](images/credentials/sapcrm_connector_credentials.png)
 
 ### SugarCRM
 
@@ -643,6 +644,7 @@ To create your RingCentral connector, you will need :
 Click [here](https://devcommunity.ringcentral.com/ringcentraldev/topics/how-do-i-get-my-production-app-key) to get more 
 information about these parameters.
 
+![Ringcentral connector credentials Myddleware form](images/credentials/ringcentral_connector_credentials.png)
 
 ### Sage50
 
@@ -669,6 +671,8 @@ Currently, Myddleware is able to read the following modules :
 | Categories       | Yes    | No     |
 | Organizers       | Yes    | No     |
 | Event More Date  | Yes    | No     |
+
+![Woocommerce Event Manager plugin connector credentials Myddleware form](images/credentials/wooeventmanager_connector_credentials.png)
 
 ### Zuora
 
