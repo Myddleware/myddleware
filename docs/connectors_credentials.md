@@ -22,6 +22,8 @@ Myddleware can currently read the following modules :
 | Pages    | Yes    | No     | 
 | Comments | Yes    | No     |
 
+![WordPress connector credentials Myddleware form](images/credentials/wordpress_connector_credentials.png)
+
 ## CRM apps
 
 ### Airtable
