@@ -559,23 +559,53 @@ Generate your token by following [this Moodle tutorial](https://docs.moodle.org/
 You can use this system role and assign it to the user linked to your token. 
 Click on this link to download it, then unzip it before importing it in Moodle : [myddleware_moodle_role](https://moodle.org/plugins/local_myddleware)
 
-To assign a role, go to ``Site administration`` -> ``Users`` -> ``Assign system roles``
+To assign a role, go to ``Site administration`` > ``Users`` > ``Assign system roles``
 
-Choose Myddleware role
+![Access "Assign System role" page on Moodle Site Admin interface](images/credentials/moodle_assign_roles.png)
+
+Choose Myddleware role.
+
+![Select Myddleware role](images/credentials/moodle_assign_myddleware_role.png)
 
 Then add the user you want to use in Myddleware :
 
-Myddleware uses the REST API architecture.
+![Select & add user with Myddleware role](images/credentials/moodle_assign_role_user_add.png)
 
-Then open your external service :
+Then, go to ``Site administration`` > ``Plugins`` > ``Web services `` > ``External services``.
 
-Please add these functions to your external services :
+![Select & add user with Myddleware role](images/credentials/moodle_plugins_link.png)
+
+![Select & add user with Myddleware role](images/credentials/moodle_plugins_external_services_link.png)
+
+Then, click on the ``functions`` link Myddleware corresponding to the Myddleware plugin.
+
+![Select & add user with Myddleware role](images/credentials/moodle_external_webservices.png)
+
+Then, add all of these standard functions to your external service :
+
+- core_course_create_courses
+- core_course_get_categories
+- core_course_get_courses_by_field
+- core_course_update_courses
+- core_group_add_group_members
+- core_group_create_groups
+- core_user_create_users
+- core_user_get_users
+- core_user_update_users
+- core_webservice_get_site_info
+- enrol_manual_enrol_users
+- enrol_manual_unenrol_users
+
+As well as all custom Myddleware functions starting with the ``local_myddleware_``  prefix: 
+
+![Select & add user with Myddleware role](images/credentials/moodle_functions_list.png)
+
 
 In the blue box you can see the standard functions. In the red box are the custom functions used by Myddleware to read data from Moodle. 
 The custom functions all have a name beginning with ``local_myddleware`` (there are more functions than displayed on the screenshot).  
 Make sure you have installed the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware) if you don’t find these functions in the list.
 
-Add the URL of your Moodle instance and your token in Myddleware :
+Finally, you can create your Moodle Myddleware connector by filling in your Moodle URL & token :
 
 ![Moodle connector credentials Myddleware form](images/credentials/moodle_connector_credentials.png)
 
