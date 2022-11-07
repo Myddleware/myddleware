@@ -22,6 +22,7 @@ class InternalList
      */
     private ?string $name;
 
+
     /**
      * @ORM\Column(type="string", length=50)
      */

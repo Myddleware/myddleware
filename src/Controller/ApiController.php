@@ -31,6 +31,7 @@ class ApiController extends AbstractController
     private string $env;
     private KernelInterface $kernel;
     private LoggerInterface $logger;
+
     private JobManager $jobManager;
     private ParameterBagInterface $parameterBag;
     private EntityManagerInterface $entityManager;

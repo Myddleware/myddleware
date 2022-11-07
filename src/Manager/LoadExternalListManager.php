@@ -27,7 +27,6 @@ class loadexternallistcore
     public function loadExternalList($file, InputInterface $input, OutputInterface $output)
     {
         // @TODO: please clean up this section (comments & commented code but also indendation which is strange here).
-
         //section for future csv handling
         // $file = "C:\laragon\www\myddleware\src\localfiles\\" . $file . ".csv";
         //extract the data from the csv
