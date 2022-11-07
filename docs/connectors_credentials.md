@@ -526,6 +526,8 @@ To connect Myddleware to an FTP server, you need these parameters :
 - Port 
 - Directory where the files will be stored (eg : ``/home/myddleware/my_directory``)
 
+![File connector credentials Myddleware form](images/credentials/file_connector_credentials.png)
+
 Myddleware uses the  [ssh2_connect()](https://www.php.net/manual/en/function.ssh2-connect.php) 
 and [ssh2_auth_password()](https://www.php.net/manual/en/function.ssh2-auth-password.php) PHP functions to connect to your FTP server.
 
