@@ -35,7 +35,7 @@
                 <tbody>
                 {% for value in entity %}
                 <tr>                    
-                    <td class="value">{{ value.command }}</td>
+                    <td class="value text-break">{{ value.command }}</td>
                     <td class="value">{{ value.period }}</td>
                     <td class="value">{{ value.description  }}</td>
 					<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
