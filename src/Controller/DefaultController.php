@@ -2922,11 +2922,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         if ($form->isSubmitted() && $form->isValid()) {
             $documentIdString = $form->get('id')->getData();
-            $documentIdArray = explode(',', $documentIdString);
+            // $documentIdArray = explode(',', $documentIdString);
 
-            foreach ($documentIdArray as $documentIdArrayElement) {
-                $this->ruleExecAction($id, $documentIdArrayElement);
-            }
+            // foreach ($documentIdArray as $documentIdArrayElement) {
+            //     $this->ruleExecAction($id, $documentIdArrayElement);
+            // }
+            $this->ruleExecAction($id, $documentIdString);
+
         }
         return $this->render('Rule/byIdForm.html.twig', [
             'formIdBatch' => $form->createView()

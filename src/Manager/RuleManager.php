@@ -893,6 +893,11 @@ class rulecore
     {
         switch ($event) {
             case 'rerun':
+                if ((strpos($id_document, ',') !== false)) {
+                    return $this->massIdRerun($id_document);
+                } else {
+                    return $this->rerun($id_document);
+                }
                 return $this->rerun($id_document);
             case 'cancel':
                 return $this->cancel($id_document);
@@ -1330,6 +1335,161 @@ class rulecore
         return $msg_error;
     }
 
+    // Permet de relancer un document quelque soit son statut
+    protected function massIdRerun(string $documentIds)
+    {
+        $session = new Session();
+        $msg_error = [];
+        $msg_success = [];
+        $msg_info = [];
+        // Récupération du statut du document
+        $param['id_doc_myddleware'] = $documentIds;
+        $param['jobId'] = $this->jobId;
+        $param['api'] = $this->api;
+        // Set the param values and clear all document attributes
+        $this->documentManager->setParam($param, true);
+        $status = $this->documentManager->getStatus();
+        // Si la règle n'est pas chargée alors on l'initialise.
+        if (empty($this->ruleId)) {
+            $this->ruleId = $this->documentManager->getRuleId();
+            $this->setRule($this->ruleId);
+            $this->setRuleRelationships();
+            $this->setRuleParam();
+            $this->setRuleField();
+        }
+
+        // Manually setting the status to New
+        $status = "New";
+        
+        $response[$documentIds] = false;
+
+        $arrayIdDocument = [];
+
+        $arrayDocIdOriginal = explode(",", $documentIds);
+        foreach ($arrayDocIdOriginal as $document) {
+            $arrayIdDocument[] = ['id' => $document];
+        }
+            // On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
+        if (in_array($status, ['New', 'Filter_KO'])) {
+            $response = $this->filterDocuments($arrayIdDocument);
+            if (true === $this->verifyMultiIdResponse($response)) {
+                $msg_success[] = 'Transfer id '.$documentIds.' : Status change => Filter_OK';
+                // Update status if an action has been executed
+                $status = 'Filter_OK';
+            } elseif (-1 == $response[$documentIds]) {
+                $msg_info[] = 'Transfer id '.$documentIds.' : Status change => Filter';
+            } else {
+                // Update status if an action has been executed
+                $status = 'Filter_KO';
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer => Filter_KO';
+            }
+        }
+
+        
+        if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
+            $response = $this->ckeckPredecessorDocuments($arrayIdDocument);
+            if (true === $this->verifyMultiIdResponse($response)) {
+                // Update status if an action has been executed
+                $status = 'Predecessor_OK';
+                $msg_success[] = 'Transfer id '.$documentIds.' : Status change => Predecessor_OK';
+            } else {
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer => Predecessor_KO';
+                // Update status if an action has been executed
+                $status = 'Predecessor_KO';
+            }
+        }
+        if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
+            $response = $this->ckeckParentDocuments($arrayIdDocument);
+            if (true === $this->verifyMultiIdResponse($response)) {
+                // Update status if an action has been executed
+                $status = 'Relate_OK';
+                $msg_success[] = 'Transfer id '.$documentIds.' : Status change => Relate_OK';
+            } else {
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer => Relate_KO';
+                // Update status if an action has been executed
+                $status = 'Relate_KO';
+            }
+        }
+        if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
+            $response = $this->transformDocuments($arrayIdDocument);
+            if (true === $this->verifyMultiIdResponse($response)) {
+                // Update status if an action has been executed
+                $status = 'Transformed';
+                $msg_success[] = 'Transfer id '.$documentIds.' : Status change : Transformed';
+            } else {
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer : Error_transformed';
+                // Update status if an action has been executed
+                $status = 'Error_transformed';
+            }
+        }
+        if (in_array($status, ['Transformed', 'Error_checking', 'Not_found'])) {
+            $response = $this->getTargetDataDocuments($arrayIdDocument);
+            if (true === $this->verifyMultiIdResponse($response)) {
+                if ('S' == $this->rule['mode']) {
+                    $msg_success[] = 'Transfer id '.$documentIds.' : Status change : '.$response['doc_status'];
+                } else {
+                    $msg_success[] = 'Transfer id '.$documentIds.' : Status change : '.$response['doc_status'];
+                }
+            } else {
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer : '.$response['doc_status'];
+            }
+            // Update status if an action has been executed
+            $status = $this->documentManager->getStatus();
+        }
+        // Si la règle est en mode recherche alors on n'envoie pas de données
+        // Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
+        if (
+                'S' != $this->rule['mode']
+            && (
+                    in_array($status, ['Ready_to_send', 'Error_sending'])
+                || (
+                        true === $response[$documentIds]
+                    && !empty($response['doc_status'])
+                    && in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
+                )
+            )
+        ) {
+            $response = $this->sendTarget('', $documentIds);
+            if (
+                    !empty($response[$documentIds]['id'])
+                && empty($response[$documentIds]['error'])
+                && empty($response['error']) // Error can be on the document or can be a general error too
+            ) {
+                $msg_success[] = 'Transfer id '.$documentIds.' : Status change : Send';
+            } else {
+                $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$documentIds]['error']);
+            }
+        }
+        // If the job is manual, we display error in the UI
+        if ($this->manual) {
+            if (!empty($msg_error)) {
+                $session->set('error', $msg_error);
+            }
+            if (!empty($msg_success)) {
+                $session->set('success', $msg_success);
+            }
+            if (!empty($msg_info)) {
+                $session->set('info', $msg_info);
+            }
+        }
+
+        return $msg_error;
+    }
+
+    public function verifyMultiIdResponse(array $response)
+    {
+        $allDocumentsValid = true;
+
+        foreach ($response as $documentState) {
+            if ($documentState !== true && $documentState !== 'Ready_to_send') {
+                $allDocumentsValid = false;
+                break;
+            }
+        }
+
+        return $allDocumentsValid;
+    }
+
     protected function clearSendData($sendData)
     {
         if (!empty($sendData)) {
@@ -1382,18 +1542,28 @@ class rulecore
     protected function sendTarget($type, $documentId = null): array
     {
         try {
+
+            if ((strpos($documentId, ',') !== false)) {
+                $arrayDocumentsIds = explode(',', $documentId);
+            } else {
+                $arrayDocumentsIds[0] = $documentId;
+            }
+            
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
             $response['error'] = '';
 
             // Le type peut-être vide das le cas d'un relancement de flux après une erreur
             if (empty($type)) {
-                $documentData = $this->getDocumentHeader($documentId);
+                foreach($arrayDocumentsIds as $documentId){
+                    $documentData = $this->getDocumentHeader($documentId);
+                }
                 if (!empty($documentData['type'])) {
                     $type = $documentData['type'];
                 }
             }
 
+            foreach($arrayDocumentsIds as $documentId){
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
             $send['data'] = $this->getSendDocuments($type, $documentId);
             $send['module'] = $this->rule['module_target'];
@@ -1452,6 +1622,7 @@ class rulecore
                     $response['error'] = $connect['error'];
                 }
             }
+        }
         } catch (\Exception $e) {
             $response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             if (!$this->api) {
