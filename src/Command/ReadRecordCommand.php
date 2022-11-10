@@ -101,6 +101,9 @@ class ReadRecordCommand extends Command
         }
 
         $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
+
+        // If the query is by id, we use the flag that leads to massIdRerun()
+        // Otherwise we use the regular rerun
         if ($filterQuery === 'id') {
             $this->jobManager->readRecord($rule, $filterQuery, $filterValues, 1);    
         }else $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
