@@ -1562,8 +1562,9 @@ class rulecore
             }
 
             foreach($arrayDocumentsIds as $documentId){
+                $send['data'] = $this->getSendDocuments($type, $documentId);
+            }
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
-            $send['data'] = $this->getSendDocuments($type, $documentId);
             $send['module'] = $this->rule['module_target'];
             $send['ruleId'] = $this->rule['id'];
             $send['rule'] = $this->rule;
@@ -1619,7 +1620,7 @@ class rulecore
                     $response['error'] = $connect['error'];
                 }
             }
-        }
+        
         } catch (\Exception $e) {
             $response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             if (!$this->api) {
