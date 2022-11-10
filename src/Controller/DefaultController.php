@@ -480,6 +480,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          */
         public function ruleExecAction($id, $documentId = null)
         {
+            // We added a doc id to this function to carry the document ids in case of a run rule by doc id.
+            // In every case except our mass run by doc id, $documentId will be null so we keep the usual behaviour of the function untouched. 
             try {
                 $this->ruleManager->setRule($id);
 
@@ -2907,6 +2909,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             return $encrypter->decrypt($tab_params);
         }
 
+
+        // Function to take source document ids optain in a form and reading them and them only.
+
         /**
          * @param $id
          * 
@@ -2922,13 +2927,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
         if ($form->isSubmitted() && $form->isValid()) {
             $documentIdString = $form->get('id')->getData();
-            // $documentIdArray = explode(',', $documentIdString);
 
-            // foreach ($documentIdArray as $documentIdArrayElement) {
-            //     $this->ruleExecAction($id, $documentIdArrayElement);
-            // }
+            // We will get to the runrecord commmand using the ids from the form.
             $this->ruleExecAction($id, $documentIdString);
-
         }
         return $this->render('Rule/byIdForm.html.twig', [
             'formIdBatch' => $form->createView()

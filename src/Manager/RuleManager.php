@@ -893,12 +893,14 @@ class rulecore
     {
         switch ($event) {
             case 'rerun':
+                // We use the method massIdRerun if there is a , in the id string, which implies that it is actually several ids
+                // Otherwise we use the regular rerun
                 if ((strpos($id_document, ',') !== false)) {
                     return $this->massIdRerun($id_document);
                 } else {
                     return $this->rerun($id_document);
                 }
-                return $this->rerun($id_document);
+                break;
             case 'cancel':
                 return $this->cancel($id_document);
             case 'remove':
@@ -1335,7 +1337,8 @@ class rulecore
         return $msg_error;
     }
 
-    // Permet de relancer un document quelque soit son statut
+    // Function to rerun several documents by their ids. The process of creating the document (status: New) is separated from the other statuses (Filter, Predecessor...etc)
+    // if we have 5 documents, we will have 5 statuses New then the rest of the operations will happen after that.
     protected function massIdRerun(string $documentIds)
     {
         $session = new Session();
@@ -1359,12 +1362,14 @@ class rulecore
         }
 
         // Manually setting the status to New
+        // In this method, the statuses are set mannually because the method for getting statuses doesn't understand the string of several ids.
         $status = "New";
         
         $response[$documentIds] = false;
 
         $arrayIdDocument = [];
 
+        //we separate the string into an array in order to be able to match the associative array id => <id of doc> structure
         $arrayDocIdOriginal = explode(",", $documentIds);
         foreach ($arrayDocIdOriginal as $document) {
             $arrayIdDocument[] = ['id' => $document];
@@ -1384,8 +1389,6 @@ class rulecore
                 $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer => Filter_KO';
             }
         }
-
-        
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
             $response = $this->ckeckPredecessorDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
@@ -1476,18 +1479,19 @@ class rulecore
         return $msg_error;
     }
 
+    // Function to verify the state of the response. It will be valid if at least one document valid.
+    // That way if all of the documents fail we can abort the process, but if some succeed, then the failed ones will be logged.
     public function verifyMultiIdResponse(array $response)
     {
-        $allDocumentsValid = true;
+        $atLeastOneDocumentValid = false;
 
         foreach ($response as $documentState) {
-            if ($documentState !== true && $documentState !== 'Ready_to_send') {
-                $allDocumentsValid = false;
+            if ($documentState === true || $documentState === 'Ready_to_send') {
+                $atLeastOneDocumentValid = true;
                 break;
             }
         }
-
-        return $allDocumentsValid;
+        return $atLeastOneDocumentValid;
     }
 
     protected function clearSendData($sendData)
