@@ -470,40 +470,50 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 	//function that reads a row from the internallist and trys to find a match in the target
-	public function findMatchCrm($internalListData, $suiteCrmData)
+	public function findMatchCrmEtab()
 	{
-
-		//to check if all rows of the table were looked at
-		$rowschecked = 0;
 		//to avoid too many choices, this array must have only one element at the end
 		$matchingrows = [];
 
 		//we loop through the suiteCrm accounts
-		foreach ($suiteCrmData as $index => $suiteCrmSchool) {
+		foreach ($this->etabComet as $index => $suiteCrmSchool) {
 			//init name as false at the beginning of the loop
 
 			$validName = false;
-			$validPostalCode = ($internalListData['Code_postal'] == $suiteCrmSchool['billing_address_postalcode']);
-			$validAddress = ($internalListData['Adresse_1'] == $suiteCrmSchool['billing_address_street']);
-
-
+			$validCity = false;
+			
+			// Check validity of code postal
+			if (
+					!empty($this->sourceData['Code_postal'])
+				AND !empty($suiteCrmSchool['billing_address_postalcode'])
+			) {
+				$validPostalCode = ($this->sourceData['Code_postal'] == $suiteCrmSchool['billing_address_postalcode']);
+			}
+			
+			// Check validity of city
+			if (
+					!empty($this->sourceData['Nom_commune'])
+				AND !empty($suiteCrmSchool['billing_address_city'])
+			) {
+				$cityCompare = similar_text($this->sourceData['Nom_commune'], $suiteCrmSchool['billing_address_city'], $cityPerc);
+				if ($cityPerc >= 90) {
+					$validCity = true;
+				}
+			}
+			
 			//use algorithm to compare similarity of 2 names, threshold is 60% similar
-			$namecompare = similar_text($suiteCrmSchool['name'], $internalListData['Nom_etablissement'], $perc);
+			$namecompare = similar_text($suiteCrmSchool['name'], $this->sourceData['Nom_etablissement'], $perc);
 			if ($perc >= 80) {
 				$validName = true;
 			}
 			//to have a match, we need a similar name and at least the same address or postal code
-			$validRow = ($validName && ($validPostalCode || $validAddress));
-			if ($validRow == true) {
-
+			if (($validName && ($validPostalCode || $validCity))) {
 				//we append the array of matches
 				$matchingrows[(int)$perc] = $suiteCrmSchool['id'];
 			} else {
 				// throw new \Exception("Cet établissement n'a pas assez de champs");
 			}
-			$rowschecked++;
 		} // end foreach dataSuiteCrm to find school
-
 		return $matchingrows;
 	}
 
@@ -511,10 +521,7 @@ class DocumentManagerCustom extends DocumentManager
 	//function that reads a row from the internallist and trys to find a match in the target
 	public function findMatchCrmQuartiers()
 	{
-		//to check if all rows of the table were looked at
-		$rowschecked = 0;
 		//to avoid too many choices, this array must have only one element at the end
-		$matchingrows = [];
 		$matchingrows = [];
 
 		//we loop through the suiteCrm quartier
@@ -548,14 +555,12 @@ class DocumentManagerCustom extends DocumentManager
 				$validName = true;
 			}
 			//to have a match, we need a similar name and at least the same address or postal code
-			$validRow = ($validName && ($validCity || $validDepartement));
-			if ($validRow == true) {
+			if ($validName && ($validCity || $validDepartement)) {
 				//we append the array of matches
 				$matchingrows[(int)$perc] = $suiteCrmQuartier['id'];
 			} else {
 				// throw new \Exception("Cet établissement n'a pas assez de champs");
 			}
-			$rowschecked++;
 		} // end foreach dataSuiteCrm to find school
 		return $matchingrows;
 	}
@@ -875,7 +880,7 @@ class DocumentManagerCustom extends DocumentManager
 							// we do a custom search for the gouv id in the rows of the suiteCrm
 							$findSuiteCrmId = "";
 							foreach ($this->etabComet as $index => $suiteCrmSchool) {
-								if (isset($suiteCrmSchool['externalgouvid_c']) && !empty($suiteCrmSchool['externalgouvid_c'])) {
+								if (!empty($suiteCrmSchool['externalgouvid_c'])) {
 									if ($this->sourceData['Identifiant_de_l_etablissement'] == $suiteCrmSchool['externalgouvid_c']) {
 										$findSuiteCrmId = $suiteCrmSchool['id'];
 										break;
@@ -888,10 +893,9 @@ class DocumentManagerCustom extends DocumentManager
 							} else {
 								//if we didn't find the exteralgouvid in the suiteCrm database it means that we have to either find the school
 								// by name and other fields, or it doesn't exist at all and we need to create it
-								$matchingrows = $this->findMatchCrm($this->sourceData, $this->etabComet);
+								$matchingrows = $this->findMatchCrmEtab();
 
-								if ($matchingrows !== []) {
-
+								if (!empty($matchingrows)) {
 									if (count($matchingrows) > 1) {
 										krsort($matchingrows);
 									}
@@ -932,7 +936,7 @@ class DocumentManagerCustom extends DocumentManager
 								// by name and other fields, or it doesn't exist at all and we need to create it
 								$matchingrows = $this->findMatchCrmQuartiers();
 
-								if ($matchingrows !== []) {
+								if (!empty($matchingrows)) {
 									if (count($matchingrows) > 1) {
 										krsort($matchingrows);
 									}

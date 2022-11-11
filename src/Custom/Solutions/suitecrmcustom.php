@@ -232,10 +232,12 @@ class suitecrmcustom extends suitecrm
 		//handle description edit if there is a difference in account name
 		if ($param['rule']['id'] == '63482d533bd4e') {
 			// This requires a custom formula from Nom_etablissement in internallitst 
+			// Name not updated, we keep the historical name
+			unset($data['name']);
 			// To name in suiteCrm
-			if(!empty($param['data'][$idDoc]['description'])) {
-					$data['description'] = $param['dataHistory'][$idDoc]['description'] . " - Nom officiel: ".$param['data'][$idDoc]['description'];
-				}
+			if(!empty($param['dataHistory'][$idDoc]['description'])) {
+				$data['description'] = $param['dataHistory'][$idDoc]['description'] . " - Nom officiel: ".$param['data'][$idDoc]['description'];
+			}
 			return $data;
 		}
 
@@ -364,4 +366,21 @@ class suitecrmcustom extends suitecrm
 		}
 		return false;
 	}
+	
+	
+	 // Build the direct link to the record (used in data transfer view)
+    public function getDirectLink($rule, $document, $type)
+    {
+		// Get url, module and record ID depending on the type
+        if ('source' == $type) {
+            // $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+            $module = $rule->getModuleSource();
+            $recordId = $document->getSource();
+        } else {
+            // $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+            $module = $rule->getModuleTarget();
+            $recordId = $document->gettarget();
+        }
+        return 'https://comet.afev.org/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+    }
 }
