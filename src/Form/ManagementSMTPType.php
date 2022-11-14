@@ -19,12 +19,14 @@ class ManagementSMTPType extends AbstractType
                 'smtp' => 'smtp',
                 'gmail' => 'gmail',
                 'sendmail' => 'sendmail',
+                'sendinblue' => 'sendinblue',
             ],
             'placeholder' => '- Choose transport -',
             'required' => false, ]);
 
         $builder->add('host', TextType::class, ['required' => false]);
         $builder->add('port', IntegerType::class, ['required' => false]);
+        $builder->add('ApiKey', TextType::class, ['required' => false]);
         $builder->add('auth_mode', ChoiceType::class, [
             'empty_data' => null,
             'choices' => [
