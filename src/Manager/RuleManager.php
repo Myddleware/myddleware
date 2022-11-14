@@ -1653,7 +1653,9 @@ class rulecore
             }
 
             foreach($arrayDocumentsIds as $documentId){
-                $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
+                // $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
+                $sendDataDocumentArrayElement = $this->getSendDocuments($type, $documentId);
+                $send['data'] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
             }
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
             $send['module'] = $this->rule['module_target'];
