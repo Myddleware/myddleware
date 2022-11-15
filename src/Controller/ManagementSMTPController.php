@@ -19,6 +19,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Repository\UserRepository;
+use Swift_Message;
 
 /**
  * @Route("/rule")
@@ -33,11 +35,14 @@ class ManagementSMTPController extends AbstractController
     protected $tools;
     private LoggerInterface $logger;
     private TranslatorInterface $translator;
+    private UserRepository $userRepository;
 
-    public function __construct(LoggerInterface $logger, TranslatorInterface $translator)
+
+    public function __construct(LoggerInterface $logger, TranslatorInterface $translator, UserRepository $userRepository)
     {
         $this->logger = $logger;
         $this->translator = $translator;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -213,55 +218,64 @@ class ManagementSMTPController extends AbstractController
      */
     public function testMailConfiguration($form): void
     {
-        $host = $form->get('host')->getData();
-        $port = $form->get('port')->getData();
-        $user = $form->get('user')->getData();
-        $auth_mode = $form->get('auth_mode')->getData();
-        $encryption = $form->get('encryption')->getData();
-        $password = $form->get('password')->getData();
-        $user_email = $this->getUser()->getEmail();
-        if ('sendmail' == $form->get('transport')->getData()) {
-            // Create the Transport for sendmail
-            $transport = new Swift_SendmailTransport();
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
+        } // End filecheck
+        if (isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false) {
+            $this->send($form);
         } else {
-            // Create the Transport for gmail and smtp
-            $transport = new Swift_SmtpTransport($host, $port);
-            if (!empty($user)) {
-                $transport->setUsername($user);
-                $transport->setPassword($password);
+            // Standard email
+            $host = $form->get('host')->getData();
+            $port = $form->get('port')->getData();
+            $user = $form->get('user')->getData();
+            $auth_mode = $form->get('auth_mode')->getData();
+            $encryption = $form->get('encryption')->getData();
+            $password = $form->get('password')->getData();
+            $user_email = $this->getUser()->getEmail();
+            if ('sendmail' == $form->get('transport')->getData()) {
+                // Create the Transport for sendmail
+                $transport = new Swift_SendmailTransport();
+            } else {
+                // Create the Transport for gmail and smtp
+                $transport = new Swift_SmtpTransport($host, $port);
+                if (!empty($user)) {
+                    $transport->setUsername($user);
+                    $transport->setPassword($password);
+                }
+                if (!empty($auth_mode)) {
+                    $transport->setAuthMode($auth_mode);
+                }
+                if (!empty($encryption)) {
+                    $transport->setEncryption($encryption);
+                }
             }
-            if (!empty($auth_mode)) {
-                $transport->setAuthMode($auth_mode);
-            }
-            if (!empty($encryption)) {
-                $transport->setEncryption($encryption);
-            }
-        }
 
-        // Create the Mailer using your created Transport
-        $mailer = new Swift_Mailer($transport);
-        $subject = $this->translator->trans('management_smtp_sendmail.subject');
-        try {
-            // Check that we have at least one email address
-            if (empty($user_email)) {
-                throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
+            // Create the Mailer using your created Transport
+            $mailer = new Swift_Mailer($transport);
+            $subject = $this->translator->trans('management_smtp_sendmail.subject');
+            try {
+                // Check that we have at least one email address
+                if (empty($user_email)) {
+                    throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
+                }
+                $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . chr(10);
+                $textMail .= $this->translator->trans('email_notification.best_regards') . chr(10) . $this->translator->trans('email_notification.signature');
+                $message = (new \Swift_Message($subject));
+                $message
+                    ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
+                    ->setBody($textMail);
+                $message->setTo($user_email);
+                $send = $mailer->send($message);
+                if (!$send) {
+                    $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $user_email);
+                    throw new Exception('Failed to send email : ' . $textMail . ' to ' . $user_email);
+                }
+            } catch (Exception $e) {
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $session = new Session();
+                $session->set('error', [$error]);
             }
-            $textMail = $this->translator->trans('management_smtp_sendmail.textMail').chr(10);
-            $textMail .= $this->translator->trans('email_notification.best_regards').chr(10).$this->translator->trans('email_notification.signature');
-            $message = (new \Swift_Message($subject));
-            $message
-                ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
-                ->setBody($textMail);
-            $message->setTo($user_email);
-            $send = $mailer->send($message);
-            if (!$send) {
-                $this->logger->error('Failed to send email : '.$textMail.' to '.$user_email);
-                throw new Exception('Failed to send email : '.$textMail.' to '.$user_email);
-            }
-        } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $session = new Session();
-            $session->set('error', [$error]);
         }
     }
 
@@ -273,11 +287,64 @@ class ManagementSMTPController extends AbstractController
      */
     public function sendEmail($name, Swift_Mailer $mailer)
     {
+       
         $message = (new \Swift_Message('Hello Email'))
             ->setFrom('send@example.com')
             ->setTo('recipient@example.com')
             ->setBody('You should see me from the profiler!')
         ;
         $mailer->send($message);
+    }
+
+    protected function send($textMail) {
+		// Get the email adresses of all ADMIN
+		$this->setEmailAddresses();
+		// Check that we have at least one email address
+		if (empty($this->emailAddresses)) {
+			throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
+		}
+		
+		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
+            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
+            foreach ($this->emailAddresses as $emailAddress) {
+                $sendSmtpEmailTo[] = array('email' => $emailAddress);
+            }
+            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
+            $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
+            $sendSmtpEmail['htmlContent'] = $textMail;
+            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+
+            try {
+                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+            } catch (Exception $e) {
+                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            }
+        } else {
+            $message =
+                    (new Swift_Message($this->translator->trans('email_alert.subject')))
+                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->setBody($textMail);
+            // Send the message to all admins
+            foreach ($this->emailAddresses as $emailAddress) {
+                $message->setTo($emailAddress);
+                $send = $this->mailer->send($message);
+                if (!$send) {
+                    $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                    throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                }
+            }
+        }
+        return true;
+	}
+
+    // Add every admin email in the notification list
+    protected function setEmailAddresses()
+    {
+        $users = $this->userRepository->findEmailsToNotification();
+        foreach ($users as $user) {
+            $this->emailAddresses[] = $user['email'];
+        }
     }
 }
