@@ -51,6 +51,7 @@ class RuleManagerCustom extends RuleManager
 							'620d3e768e678', // Sendinblue - contact
 							'6273905a05cb2', // Esp Rep - Contacts repérants
 							'633d94b3ce61e', // Mobilisation - Participation RI -> comet relance
+							'627153382dc34', // Mobilisation - Participations RI
 							'625fcd2ed442f' // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
@@ -216,6 +217,28 @@ class RuleManagerCustom extends RuleManager
 					}
 					if (!empty($sourceData['assigned_user_id'])) { // Referent
 						$this->generatePoleRelationship('61a9190e40965', $sourceData['assigned_user_id'], 'id', true);  // Aiko Référent
+					}
+					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
+					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
+					if ($deleteTargetData) {
+						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l\'une d\'entre elle doit être supprimee dans Airtable. ');
+					}
+				}
+				
+				// If there is an "nprocessable Entity" errro when we try to create a particpation RI for the first time
+				// Then we try to send again both contacts and referent
+				if (
+						$this->ruleId == '627153382dc34' 	// Mobilisation - Participations RI
+					AND	$type == 'C' 						// Creation only
+					AND	$documentData['attempt'] == 1 		// Only the first try
+					AND	strpos($response['error'], 'Unprocessable Entity returned') !== false
+				) {	
+					$sourceData = $this->getDocumentData($docId, 'S');
+					if (!empty($sourceData['fp_events_leads_1leads_idb'])) { // Coupon
+						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['fp_events_leads_1leads_idb'], 'id', true);  // Mobilisation - Coupons
+					}
+					if (!empty($sourceData['fp_events_leads_1fp_events_ida'])) { // Mobilisation - Evenement RI
+						$this->generatePoleRelationship('6267e128b2c87', $sourceData['fp_events_leads_1fp_events_ida'], 'id', true);  // Mobilisation - Coupons
 					}
 					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
 					$deleteTargetData = $this->deleteDocumentData($docId, 'T');

@@ -44,6 +44,7 @@ class airtablecustom extends airtable {
         'POLE' => array('nom___du___pole'),
         'REFERENTS' => array('ID___COMET'),
         'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
+		'PARTICIPATION_RI' => array('fldL4qph2Lg65xKjz', 'fldtIpKCdlbykhkm5'),
 		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy')
         );
 
