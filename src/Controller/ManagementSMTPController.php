@@ -51,7 +51,13 @@ class ManagementSMTPController extends AbstractController
     public function index(): Response
     {
         $form = $this->createCreateForm();
-        $form = $this->getParametersFromSwiftmailerYaml($form);
+        if ($this->checkIfApiKeyInEnv() !== false) {
+            $form = $this->getParametersFromApiKey($form);
+        } elseif ($checkIfmailerUrlInEnv !== false) {
+            $form = $this->getParametersFromMailerUrl($form);
+        } else {
+            $form = $this->getParametersFromSwiftmailerYaml($form);
+        }
 
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
@@ -88,23 +94,23 @@ class ManagementSMTPController extends AbstractController
     // Is called once when you go to the smtp page.
     // Is called twice when you click on Save SMTP config.
     // Is called twice when you click on Send test mail.
-    private function createCreateForm(): \Symfony\Component\Form\FormInterface    {
-        $form = $this->createForm(ManagementSMTPType:: class, null, [
+    private function createCreateForm(): \Symfony\Component\Form\FormInterface
+    {
+        $form = $this->createForm(ManagementSMTPType::class, null, [
             'action' => $this->generateUrl('management_smtp_create'),
         ]);
         $form->add('submit', SubmitType::class, [
-                    'label' => 'management_smtp.submit',
-                    'attr' => [
-                        'class' => 'btn btn-outline-primary mb-2',
-                        ],
-                    ]);
+            'label' => 'management_smtp.submit',
+            'attr' => [
+                'class' => 'btn btn-outline-primary mb-2',
+            ],
+        ]);
         $form->add('submit_test', SubmitType::class, [
             'label' => 'management_smtp.sendtestmail',
             'attr' => [
                 'class' => 'btn btn-outline-primary mb-2',
-                ],
-            ]);
-
+            ],
+        ]);
         return $form;
     }
 
@@ -118,7 +124,6 @@ class ManagementSMTPController extends AbstractController
      */
     private function getParametersFromSwiftmailerYaml($form)
     {
-        
         $value = Yaml::parse(file_get_contents(self::PATH));
         $form->get('transport')->setData($value['swiftmailer']['transport']);
         $form->get('host')->setData($value['swiftmailer']['host']);
@@ -134,6 +139,25 @@ class ManagementSMTPController extends AbstractController
     public function getParametersFromMailerUrl($form)
     {
         $mailerUrlEnv = $this->checkIfmailerUrlInEnv();
+        if ($mailerUrl !== false) {
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+            $form->get('transport')->setData('smtp');
+            $form->get('host')->setData($mailerUrlArray[0]);
+            $form->get('port')->setData($mailerUrlArray[1]);
+            $form->get('auth_mode')->setData($mailerUrlArray[3]);
+            $form->get('encryption')->setData($mailerUrlArray[2]);
+            $form->get('user')->setData($mailerUrlArray[4]);
+            $form->get('password')->setData($mailerUrlArray[5]);
+        } else {
+            throw new Exception('Error while reading the .env');
+        }
+        return $form;
+    }
+
+        // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
+    public function getParametersFromApiKey($form)
+    {
+        $apiKey = $this->checkIfApiKeyInEnv();
         if ($mailerUrl !== false) {
             $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
             $form->get('transport')->setData('smtp');
@@ -241,19 +265,13 @@ class ManagementSMTPController extends AbstractController
     protected function parseApiKeyYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
-            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
-            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
-            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
-            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
-            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
-            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
-            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
-            $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
+            $apiKey = isset($swiftParams['ApiKey']) ? $swiftParams['ApiKey'] : null;
+            $apiKeyEnv = "SENDINBLUE_APIKEY=$apiKey";
             // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
             // TODO: find a way to check whether the variable is already set & if so overwrite it
-            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents(self::LOCAL_ENV_FILE, $apiKeyEnv.PHP_EOL, FILE_APPEND | LOCK_EX);
         } catch (Exception $e) {
-            $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
+            $this->logger->error("Unable to write SENDINBLUE_APIKEY in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
             $session = new Session();
             $session->set('error', [$e]);
         }
@@ -335,24 +353,23 @@ class ManagementSMTPController extends AbstractController
      */
     public function sendEmail($name, Swift_Mailer $mailer)
     {
-       
         $message = (new \Swift_Message('Hello Email'))
-            ->setFrom('send@example.com')
-            ->setTo('recipient@example.com')
-            ->setBody('You should see me from the profiler!')
-        ;
+        ->setFrom('send@example.com')
+        ->setTo('recipient@example.com')
+        ->setBody('You should see me from the profiler!');
         $mailer->send($message);
     }
 
-    protected function sendinblueSendMailByApiKey($textMail) {
-		// Get the email adresses of all ADMIN
-		$this->setEmailAddresses();
-		// Check that we have at least one email address
-		if (empty($this->emailAddresses)) {
-			throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
-		}
-		
-		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+    protected function sendinblueSendMailByApiKey($textMail)
+    {
+        // Get the email adresses of all ADMIN
+        $this->setEmailAddresses();
+        // Check that we have at least one email address
+        if (empty($this->emailAddresses)) {
+            throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
+        }
+
+        if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
             $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
             $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
             $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
@@ -368,25 +385,25 @@ class ManagementSMTPController extends AbstractController
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
             } catch (Exception $e) {
-                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             }
         } else {
             $message =
-                    (new Swift_Message($this->translator->trans('email_alert.subject')))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setBody($textMail);
+                (new Swift_Message($this->translator->trans('email_alert.subject')))
+                ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                ->setBody($textMail);
             // Send the message to all admins
             foreach ($this->emailAddresses as $emailAddress) {
                 $message->setTo($emailAddress);
                 $send = $this->mailer->send($message);
                 if (!$send) {
-                    $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
-                    throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                    $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
+                    throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
                 }
             }
         }
         return true;
-	}
+    }
 
     // Add every admin email in the notification list
     protected function setEmailAddresses()
