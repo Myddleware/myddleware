@@ -78,6 +78,8 @@ class ManagementSMTPController extends AbstractController
 
             if ($form->get('submit_test') === $form->getClickedButton()) {
                 $this->testMailConfiguration($form);
+            } else {
+                $this->envMailerUrlVsApiKey($form);
             }
 
             if ($form->isValid() && $form->isSubmitted()) {
@@ -90,6 +92,16 @@ class ManagementSMTPController extends AbstractController
         }
 
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
+    }
+
+    public function envMailerUrlVsApiKey($form)
+    {
+        if ($form->get('transport')->getData() === 'sendinblue') {
+            $this->putApiKeyInDotEnv($form);
+        }else {
+            $this->parseYamlConfigToLocalEnv($form);
+        }
+        
     }
 
     // Function to create the mail mailing form.
@@ -228,9 +240,19 @@ class ManagementSMTPController extends AbstractController
     /**
      * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
      */
-    protected function parseYamlConfigToLocalEnv(array $swiftParams)
+    protected function parseYamlConfigToLocalEnv($form)
     {
         try {
+            $swiftParams = [
+                'transport' => $form->get('transport')->getData(),
+                'host' => $form->get('host')->getData(),
+                'port' => $form->get('port')->getData(),
+                'auth_mode' => $form->get('auth_mode')->getData(),
+                'encryption' => $form->get('encryption')->getData(),
+                'user' => $form->get('user')->getData(),
+                'password' => $form->get('password')->getData(),
+            ];
+
             $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
             $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
             $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
