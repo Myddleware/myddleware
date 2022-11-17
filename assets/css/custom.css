@@ -1,7 +1,5 @@
 body {
-    background: url('./../images/template/fd.jpg') repeat;
-    background-size: cover;
-    background-color: #9DC0E1;
+    background-color: #f2f2f2 !important;
 }
 
 #logo {
