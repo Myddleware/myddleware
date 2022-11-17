@@ -158,15 +158,9 @@ class ManagementSMTPController extends AbstractController
     public function getParametersFromApiKey($form)
     {
         $apiKey = $this->checkIfApiKeyInEnv();
-        if ($mailerUrl !== false) {
-            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
-            $form->get('transport')->setData('smtp');
-            $form->get('host')->setData($mailerUrlArray[0]);
-            $form->get('port')->setData($mailerUrlArray[1]);
-            $form->get('auth_mode')->setData($mailerUrlArray[3]);
-            $form->get('encryption')->setData($mailerUrlArray[2]);
-            $form->get('user')->setData($mailerUrlArray[4]);
-            $form->get('password')->setData($mailerUrlArray[5]);
+        if ($apiKey !== false) {
+            $form->get('transport')->setData('sendinblue');
+            $form->get('ApiKey')->setData($apiKey);
         } else {
             throw new Exception('Error while reading the .env');
         }
