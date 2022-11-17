@@ -51,10 +51,12 @@ class ManagementSMTPController extends AbstractController
     public function index(): Response
     {
         $form = $this->createCreateForm();
-        if ($this->checkIfApiKeyInEnv() !== false) {
-            $form = $this->getParametersFromApiKey($form);
-        } elseif ($checkIfmailerUrlInEnv !== false) {
-            $form = $this->getParametersFromMailerUrl($form);
+        $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
+        $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+        if ($apiKeyFromEnv !== false) {
+            $form = $this->getParametersFromApiKey($form, $apiKeyFromEnv);
+        } elseif ($mailerUrlFromEnv !== false) {
+            $form = $this->getParametersFromMailerUrl($form, $mailerUrlFromEnv);
         } else {
             $form = $this->getParametersFromSwiftmailerYaml($form);
         }
@@ -136,11 +138,9 @@ class ManagementSMTPController extends AbstractController
     }
 
         // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
-    public function getParametersFromMailerUrl($form)
+    public function getParametersFromMailerUrl($form, $mailerUrlFromEnv)
     {
-        $mailerUrlEnv = $this->checkIfmailerUrlInEnv();
-        if ($mailerUrl !== false) {
-            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlFromEnv);
             $form->get('transport')->setData('smtp');
             $form->get('host')->setData($mailerUrlArray[0]);
             $form->get('port')->setData($mailerUrlArray[1]);
@@ -148,22 +148,14 @@ class ManagementSMTPController extends AbstractController
             $form->get('encryption')->setData($mailerUrlArray[2]);
             $form->get('user')->setData($mailerUrlArray[4]);
             $form->get('password')->setData($mailerUrlArray[5]);
-        } else {
-            throw new Exception('Error while reading the .env');
-        }
         return $form;
     }
 
         // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
-    public function getParametersFromApiKey($form)
+    public function getParametersFromApiKey($form, $apiKeyFromEnv)
     {
-        $apiKey = $this->checkIfApiKeyInEnv();
-        if ($apiKey !== false) {
             $form->get('transport')->setData('sendinblue');
-            $form->get('ApiKey')->setData($apiKey);
-        } else {
-            throw new Exception('Error while reading the .env');
-        }
+            $form->get('ApiKey')->setData($apiKeyFromEnv);
         return $form;
     }
 
