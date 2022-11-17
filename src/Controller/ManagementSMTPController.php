@@ -323,6 +323,7 @@ class ManagementSMTPController extends AbstractController
                     ->setBody($textMail);
                 $message->setTo($user_email);
                 $send = $mailer->send($message);
+                $this->resetSwiftmailerYaml();
                 if (!$send) {
                     $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $user_email);
                     throw new Exception('Failed to send email : ' . $textMail . ' to ' . $user_email);
@@ -386,6 +387,9 @@ class ManagementSMTPController extends AbstractController
             foreach ($this->emailAddresses as $emailAddress) {
                 $message->setTo($emailAddress);
                 $send = $this->mailer->send($message);
+
+                // Reset the yaml to avoid transport conflicts
+                $this->resetSwiftmailerYaml();
                 if (!$send) {
                     $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
                     throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
@@ -428,5 +432,36 @@ class ManagementSMTPController extends AbstractController
             }
         }
         return $apiKeyEnv;
+    }
+
+    /**
+     * set data form from files parameter_stml.yml. - this is for Myddleware 2.
+     */
+    private function resetSwiftmailerYaml()
+    {
+        $array = ['swiftmailer' => [
+            'transport' => "gmail",
+            'host' => "smtp.gmail.com",
+            'port' => 465,
+            'auth_mode' => "login",
+            'encryption' => "ssl",
+            'user' => null,
+            'password' => null,
+        ]];
+        $yaml = Yaml::dump($array);
+        file_put_contents(self::PATH, $yaml);
+
+        // Exports config data to notification config file
+        $arrayNotification = ['swiftmailer' => [
+            'transport' => "gmail",
+            'host' => "smtp.gmail.com",
+            'port' => 465,
+            'auth_mode' => "login",
+            'encryption' => "ssl",
+            'username' => null,
+            'password' => null,
+        ]];
+        $yamlNotification = Yaml::dump($arrayNotification);
+        file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
     }
 }
