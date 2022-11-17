@@ -51,10 +51,13 @@ class ManagementSMTPController extends AbstractController
     public function index(): Response
     {
         $form = $this->createCreateForm();
-        $form = $this->getData($form);
+        $form = $this->getParametersFromFrontendForm($form);
 
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
+
+    // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
+    // Is called if you click on the Save SMTP config button OR the Send test mail button.
 
     /**
      * @Route("/managementsmtp/readConfig", name="management_smtp_create")
@@ -70,7 +73,7 @@ class ManagementSMTPController extends AbstractController
             }
 
             if ($form->isValid() && $form->isSubmitted()) {
-                $this->setData($form);
+                $this->putParamsInSwiftMailerYaml($form);
 
                 return $this->redirect($this->generateUrl('management_smtp_index'));
             }
@@ -81,8 +84,11 @@ class ManagementSMTPController extends AbstractController
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
-    private function createCreateForm(): \Symfony\Component\Form\FormInterface
-    {
+    // Function to create the mail mailing form.
+    // Is called once when you go to the smtp page.
+    // Is called twice when you click on Save SMTP config.
+    // Is called twice when you click on Send test mail.
+    private function createCreateForm(): \Symfony\Component\Form\FormInterface    {
         $form = $this->createForm(ManagementSMTPType:: class, null, [
             'action' => $this->generateUrl('management_smtp_create'),
         ]);
@@ -102,10 +108,15 @@ class ManagementSMTPController extends AbstractController
         return $form;
     }
 
+    // Function to obtain parameters from the .env file
+    // Is called once when you go to the smtp page.
+    // Is called once when you click on Save SMTP config.
+    // Is called once when you click on Send test mail.
+
     /***
      * get data for file parameters_smtp.yml - this is for Myddleware 2
      */
-    private function getData($form)
+    private function getParametersFromFrontendForm($form)
     {
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
@@ -113,7 +124,7 @@ class ManagementSMTPController extends AbstractController
         $mailerUrlEnv = getenv('MAILER_URL');
         if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
 
-            $mailerUrlArray = $this->splitEnvString($mailerUrlEnv);
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
             $form->get('transport')->setData('smtp');
             $form->get('host')->setData($mailerUrlArray[0]);
             $form->get('port')->setData($mailerUrlArray[1]);
@@ -135,7 +146,8 @@ class ManagementSMTPController extends AbstractController
         return $form;
     }
 
-    public function splitEnvString(string $envString): array
+    // Takes MAILER_URL and turns it into an array with all parameters
+    public function envMailerUrlToArray(string $envString): array
     {
         $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
         $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
@@ -157,7 +169,7 @@ class ManagementSMTPController extends AbstractController
     /**
      * set data form from files parameter_stml.yml. - this is for Myddleware 2.
      */
-    private function setData($form)
+    private function putParamsInSwiftMailerYaml($form)
     {
         $array = ['swiftmailer' => [
             'transport' => $form->get('transport')->getData(),
@@ -184,7 +196,10 @@ class ManagementSMTPController extends AbstractController
         $yamlNotification = Yaml::dump($arrayNotification);
         file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
 
-        $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
+        // If there is no api key in the .env, takes data from swiftmailer and puts it in the .env as MAILER_URL
+        if((!isset($apiKeyEnv) || $apiKeyEnv === '' || $apiKeyEnv === false)){
+            $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
+        }
     }
 
     /**
@@ -223,7 +238,7 @@ class ManagementSMTPController extends AbstractController
             $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
         } // End filecheck
         if (isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false) {
-            $this->send($form);
+            $this->sendinblueSendMailByApiKey($form);
         } else {
             // Standard email
             $host = $form->get('host')->getData();
@@ -296,7 +311,7 @@ class ManagementSMTPController extends AbstractController
         $mailer->send($message);
     }
 
-    protected function send($textMail) {
+    protected function sendinblueSendMailByApiKey($textMail) {
 		// Get the email adresses of all ADMIN
 		$this->setEmailAddresses();
 		// Check that we have at least one email address
@@ -313,7 +328,8 @@ class ManagementSMTPController extends AbstractController
             }
             $sendSmtpEmail['to'] = $sendSmtpEmailTo;
             $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
-            $sendSmtpEmail['htmlContent'] = $textMail;
+            // $sendSmtpEmail['htmlContent'] = $textMail;
+            $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_alert.subject');
             $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
 
             try {
