@@ -23,17 +23,18 @@
 *********************************************************************************/
 
 #myd_top {
-	height: 35px;
-	min-height: 35px;
-	max-height: 35px;	
+	/* height: 35px; */
+	min-height: 40px;
+	/* max-height: 35px;	 */
 	background: #444446;
-	border-bottom: 4px solid #C6BD20;
-	min-width: 1200px;
+	border-bottom: 4px solid #198BCA;
+	/* min-width: 1200px; */
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	z-index: 99;
+	font-size: larger;
 }
 
 #myd_title {
@@ -47,7 +48,7 @@
 }
 
 #myd_title a, #myd_title a:hover { 
-	color: #C6BD20;
+	color: #198BCA;
 }
 
 .myd_loading > img{
