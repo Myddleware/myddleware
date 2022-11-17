@@ -51,7 +51,7 @@ class ManagementSMTPController extends AbstractController
     public function index(): Response
     {
         $form = $this->createCreateForm();
-        $form = $this->getParametersFromFrontendForm($form);
+        $form = $this->getParametersFromSwiftmailerYaml($form);
 
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
@@ -108,7 +108,7 @@ class ManagementSMTPController extends AbstractController
         return $form;
     }
 
-    // Function to obtain parameters from the .env file
+    // Function to obtain parameters from the yaml file and puts it in the form.
     // Is called once when you go to the smtp page.
     // Is called once when you click on Save SMTP config.
     // Is called once when you click on Send test mail.
@@ -116,14 +116,25 @@ class ManagementSMTPController extends AbstractController
     /***
      * get data for file parameters_smtp.yml - this is for Myddleware 2
      */
-    private function getParametersFromFrontendForm($form)
+    private function getParametersFromSwiftmailerYaml($form)
     {
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-        }
-        $mailerUrlEnv = getenv('MAILER_URL');
-        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+        
+        $value = Yaml::parse(file_get_contents(self::PATH));
+        $form->get('transport')->setData($value['swiftmailer']['transport']);
+        $form->get('host')->setData($value['swiftmailer']['host']);
+        $form->get('port')->setData($value['swiftmailer']['port']);
+        $form->get('auth_mode')->setData($value['swiftmailer']['auth_mode']);
+        $form->get('encryption')->setData($value['swiftmailer']['encryption']);
+        $form->get('user')->setData($value['swiftmailer']['user']);
+        $form->get('password')->setData($value['swiftmailer']['password']);
+        return $form;
+    }
 
+        // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
+    public function getParametersFromMailerUrl($form)
+    {
+        $mailerUrlEnv = $this->checkIfmailerUrlInEnv();
+        if ($mailerUrl !== false) {
             $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
             $form->get('transport')->setData('smtp');
             $form->get('host')->setData($mailerUrlArray[0]);
@@ -133,16 +144,8 @@ class ManagementSMTPController extends AbstractController
             $form->get('user')->setData($mailerUrlArray[4]);
             $form->get('password')->setData($mailerUrlArray[5]);
         } else {
-        $value = Yaml::parse(file_get_contents(self::PATH));
-        $form->get('transport')->setData($value['swiftmailer']['transport']);
-        $form->get('host')->setData($value['swiftmailer']['host']);
-        $form->get('port')->setData($value['swiftmailer']['port']);
-        $form->get('auth_mode')->setData($value['swiftmailer']['auth_mode']);
-        $form->get('encryption')->setData($value['swiftmailer']['encryption']);
-        $form->get('user')->setData($value['swiftmailer']['user']);
-        $form->get('password')->setData($value['swiftmailer']['password']);
+            throw new Exception('Error while reading the .env');
         }
-
         return $form;
     }
 
@@ -161,8 +164,6 @@ class ManagementSMTPController extends AbstractController
 
         $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
         $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
-
-
         return $envArray;
     }
 
@@ -195,17 +196,49 @@ class ManagementSMTPController extends AbstractController
         ]];
         $yamlNotification = Yaml::dump($arrayNotification);
         file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
+    }
 
-        // If there is no api key in the .env, takes data from swiftmailer and puts it in the .env as MAILER_URL
+    // If there is no api key in the .env, takes data from swiftmailer and puts it in the .env as MAILER_URL
+    public function putApiKeyInDotEnv($form)
+    {
+        $array = ['swiftmailer' => [
+            'transport' => $form->get('transport')->getData(),
+            'ApiKey' => $form->get('ApiKey')->getData(),
+        ]];
         if((!isset($apiKeyEnv) || $apiKeyEnv === '' || $apiKeyEnv === false)){
-            $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
+            $this->parseApiKeyYamlConfigToLocalEnv($array['swiftmailer']);
+        }
+    }
+
+
+    /**
+     * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
+     */
+    protected function parseYamlConfigToLocalEnv(array $swiftParams)
+    {
+        try {
+            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
+            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
+            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
+            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
+            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
+            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
+            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
+            $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
+            // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
+            // TODO: find a way to check whether the variable is already set & if so overwrite it
+            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
+        } catch (Exception $e) {
+            $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
+            $session = new Session();
+            $session->set('error', [$e]);
         }
     }
 
     /**
      * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
      */
-    protected function parseYamlConfigToLocalEnv(array $swiftParams)
+    protected function parseApiKeyYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
             $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
@@ -362,5 +395,31 @@ class ManagementSMTPController extends AbstractController
         foreach ($users as $user) {
             $this->emailAddresses[] = $user['email'];
         }
+    }
+
+    public function checkIfmailerUrlInEnv()
+    {
+        $mailerUrlEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $mailerUrlEnv = getenv('MAILER_URL');
+            if (!(isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false)){
+                $mailerUrlEnv = false;
+            }
+        }
+        return $mailerUrlEnv;
+    }
+
+    public function checkIfApiKeyInEnv()
+    {
+        $apiKeyEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
+            if (!(isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false)) {
+                $apiKeyEnv = false;
+            }
+        }
+        return $apiKeyEnv;
     }
 }
