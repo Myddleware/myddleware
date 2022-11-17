@@ -182,8 +182,12 @@ class ManagementSMTPController extends AbstractController
      */
     private function putParamsInSwiftMailerYaml($form)
     {
+        $transport = $form->get('transport')->getData();
+        if ($transport == 'sendinblue') {
+            $transport = 'smtp';
+        }
         $array = ['swiftmailer' => [
-            'transport' => $form->get('transport')->getData(),
+            'transport' => $transport,
             'host' => $form->get('host')->getData(),
             'port' => $form->get('port')->getData(),
             'auth_mode' => $form->get('auth_mode')->getData(),
@@ -196,7 +200,7 @@ class ManagementSMTPController extends AbstractController
 
         // Exports config data to notification config file
         $arrayNotification = ['swiftmailer' => [
-            'transport' => $form->get('transport')->getData(),
+            'transport' => $transport,
             'host' => $form->get('host')->getData(),
             'port' => $form->get('port')->getData(),
             'auth_mode' => $form->get('auth_mode')->getData(),
