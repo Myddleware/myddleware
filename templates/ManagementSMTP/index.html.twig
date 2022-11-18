@@ -8,88 +8,76 @@
 	{{ 'management_smtp.title'| trans }}
 {% endblock titlesm %}
 {% block body %}
-	<div class="container p-5">
-		<div class="row justify-content-md-center ">
-			<div class="col-8">
-				<h3 class="title-smtp">{{ 'management_smtp.title'| trans }}</h3>
-				<p class="text-smtp">{{'management_smtp.description'|trans|raw}}</p>
-				{{ form_start(form) }}
-				<div class=" row mb-2">
-					<label for="transport" class="col-sm-2 col-form-label">
-						{{ form_label( form.transport) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.transport, { 'attr': {'class': 'form-select' , 'id' : 'transport'} }) }}
-						{{ form_errors ( form.transport) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
-					<label for="host" class="col-sm-2 col-form-label">
-						{{ form_label( form.host) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.host, { 'attr': {'class': 'form-control' , 'id' : 'host'} }) }}
-						{{ form_errors ( form.host) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
+    <div class="container p-5">
+        <div class="row justify-content-md-center ">
+            <div class="col-8">
+                <h3 class="title-smtp">{{ 'management_smtp.title'| trans }}</h3>
+                <p class="text-smtp">{{'management_smtp.description'|trans|raw}}</p>
+                {{ form_start(form) }}
+                <div class=" row mb-2">
+                    <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.transport) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.transport, { 'attr': {'class': 'form-select' , 'id' : 'transport'} }) }}
+                        {{ form_errors ( form.transport) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
+                    <label for="host" class="col-sm-2 col-form-label"> {{ form_label( form.host) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.host, { 'attr': {'class': 'form-control' , 'id' : 'host'} }) }}
+                        {{ form_errors ( form.host) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
 					<label for="ApiKey" class="col-sm-2 col-form-label">
 						{{ form_label( form.ApiKey) }}</label>
 					<div class="col-sm-10 ">
 						{{ form_widget( form.ApiKey, { 'attr': {'class': 'form-control' , 'id' : 'ApiKey'} }) }}
 						{{ form_errors ( form.ApiKey) }}
 					</div>
-					{% if 1 == 1 %}
-						<p>Our website is in maintenance mode. Please, come back later.</p>
-					{% endif %}
-                    {# {{ form.transport }} #}
-                    {{ dump(form.transport.vars.value) }} 
 				</div>
-				<div class=" row mb-2">
-					<label for="port" class="col-sm-2 col-form-label">
-						{{ form_label( form.port) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.port, { 'attr': {'class': 'form-control' , 'id' : 'port'} }) }}
-						{{ form_errors ( form.port) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
-					<label for="auth_mode" class="col-sm-2 col-form-label">
-						{{ form_label( form.auth_mode) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.auth_mode, { 'attr': {'class': 'form-select' , 'id' : 'auth_mode'} }) }}
-						{{ form_errors ( form.auth_mode) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
-					<label for="encryption" class="col-sm-2 col-form-label">
-						{{ form_label( form.encryption) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.encryption, { 'attr': {'class': 'form-select' , 'id' : 'encryption'} }) }}
-						{{ form_errors ( form.encryption) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
-					<label for="user" class="col-sm-2 col-form-label">
-						{{ form_label( form.user) }}</label>
-					<div class="col-sm-10 ">
-						{{ form_widget( form.user, { 'attr': {'class': 'form-control' , 'id' : 'user'} }) }}
-						{{ form_errors ( form.user) }}
-					</div>
-				</div>
-				<div class=" row mb-2">
-					<label for="password" class="col-sm-2 col-form-label">
-						{{ form_label( form.password) }}</label>
-					<div class="col-sm-10 mb-5">
-						{{ form_widget( form.password, { 'attr': {'class': 'form-control' , 'id' : 'password'} }) }}
-						{{ form_errors ( form.password) }}
-					</div>
-				</div>
-				<div class="d-grid">
-					{{ form_widget( form.submit) }}
-					{{ form_widget( form.submit_test) }}
-					<a id="link_button" role="button" class="btn btn-outline-danger " href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
-				</div>
-				{{ form_end(form) }}
-			</div>
-		</div>
-	</div>
+                <div class=" row mb-2" id='smtp_port'>
+                    <label for="port" class="col-sm-2 col-form-label"> {{ form_label( form.port) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.port, { 'attr': {'class': 'form-control' , 'id' : 'port'} }) }}
+                        {{ form_errors ( form.port) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
+                    <label for="auth_mode" class="col-sm-2 col-form-label"> {{ form_label( form.auth_mode) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.auth_mode, { 'attr': {'class': 'form-select' , 'id' : 'auth_mode'} }) }}
+                        {{ form_errors ( form.auth_mode) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
+                    <label for="encryption" class="col-sm-2 col-form-label"> {{ form_label( form.encryption) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.encryption, { 'attr': {'class': 'form-select' , 'id' : 'encryption'} }) }}
+                        {{ form_errors ( form.encryption) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
+                    <label for="user" class="col-sm-2 col-form-label"> {{ form_label( form.user) }}</label>
+                    <div class="col-sm-10 ">
+                        {{ form_widget( form.user, { 'attr': {'class': 'form-control' , 'id' : 'user'} }) }}
+                        {{ form_errors ( form.user) }}
+                    </div>
+                </div>
+                <div class=" row mb-2">
+                    <label for="password" class="col-sm-2 col-form-label"> {{ form_label( form.password) }}</label>
+                    <div class="col-sm-10 mb-5">
+                        {{ form_widget( form.password, { 'attr': {'class': 'form-control' , 'id' : 'password'} }) }}
+                        {{ form_errors ( form.password) }}
+                    </div>
+                </div>
+                <div class="d-grid">
+                    {{ form_widget( form.submit) }}
+                    {{ form_widget( form.submit_test) }}
+                    <a id="link_button" role="button" class="btn btn-outline-danger " href="{{ path('regle_panel') }}">{{ 'management_smtp.cancel' | trans }}</a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
 {% endblock body %}
