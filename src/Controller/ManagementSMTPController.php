@@ -10,6 +10,7 @@ use Swift_SendmailTransport;
 use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,8 @@ class ManagementSMTPController extends AbstractController
 {
     const PATH = './../config/swiftmailer.yaml';
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
+    const PATHNOTIFICATION = './../config/packages/swiftmailer.yaml';
+
 
     protected $tools;
     private LoggerInterface $logger;
@@ -99,6 +102,21 @@ class ManagementSMTPController extends AbstractController
      */
     private function getData($form)
     {
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+        }
+        $mailerUrlEnv = getenv('MAILER_URL');
+        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+
+            $mailerUrlArray = $this->splitEnvString($mailerUrlEnv);
+            $form->get('transport')->setData('smtp');
+            $form->get('host')->setData($mailerUrlArray[0]);
+            $form->get('port')->setData($mailerUrlArray[1]);
+            $form->get('auth_mode')->setData($mailerUrlArray[3]);
+            $form->get('encryption')->setData($mailerUrlArray[2]);
+            $form->get('user')->setData($mailerUrlArray[4]);
+            $form->get('password')->setData($mailerUrlArray[5]);
+        } else {
         $value = Yaml::parse(file_get_contents(self::PATH));
         $form->get('transport')->setData($value['swiftmailer']['transport']);
         $form->get('host')->setData($value['swiftmailer']['host']);
@@ -107,8 +125,28 @@ class ManagementSMTPController extends AbstractController
         $form->get('encryption')->setData($value['swiftmailer']['encryption']);
         $form->get('user')->setData($value['swiftmailer']['user']);
         $form->get('password')->setData($value['swiftmailer']['password']);
+        }
 
         return $form;
+    }
+
+    public function splitEnvString(string $envString): array
+    {
+        $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
+        $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
+        $envArrayBeforeSplitHostPort = explode($delimiters[0], $envStringQuestionMarks);
+        $noTsplitHostPort = $envArrayBeforeSplitHostPort[0];
+        $splitHostPort = explode(':', $noTsplitHostPort);
+        $port = $splitHostPort[2];
+        $hostWithSlashes = $splitHostPort[1];
+        $hostWithoutSlashes = substr($hostWithSlashes, 2);
+        $hostAndPort = [$hostWithoutSlashes, $port];
+
+        $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
+        $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
+
+
+        return $envArray;
     }
 
     /**
@@ -127,6 +165,20 @@ class ManagementSMTPController extends AbstractController
         ]];
         $yaml = Yaml::dump($array);
         file_put_contents(self::PATH, $yaml);
+
+        // Exports config data to notification config file
+        $arrayNotification = ['swiftmailer' => [
+            'transport' => $form->get('transport')->getData(),
+            'host' => $form->get('host')->getData(),
+            'port' => $form->get('port')->getData(),
+            'auth_mode' => $form->get('auth_mode')->getData(),
+            'encryption' => $form->get('encryption')->getData(),
+            'username' => $form->get('user')->getData(),
+            'password' => $form->get('password')->getData(),
+        ]];
+        $yamlNotification = Yaml::dump($arrayNotification);
+        file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
+
         $this->parseYamlConfigToLocalEnv($array['swiftmailer']);
     }
 
@@ -136,13 +188,13 @@ class ManagementSMTPController extends AbstractController
     protected function parseYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
-            $transport = $swiftParams['transport'] ?? null;
-            $host = $swiftParams['host'] ?? null;
-            $port = $swiftParams['port'] ?? null;
-            $auth_mode = $swiftParams['auth_mode'] ?? null;
-            $encryption = $swiftParams['encryption'] ?? null;
-            $user = $swiftParams['user'] ?? null;
-            $password = $swiftParams['password'] ?? null;
+            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
+            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
+            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
+            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
+            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
+            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
+            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
             $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
             // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
             // TODO: find a way to check whether the variable is already set & if so overwrite it
