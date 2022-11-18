@@ -186,7 +186,7 @@ class ManagementSMTPController extends AbstractController
             $form->get('ApiKey')->setData($apiKeyFromEnv);
         return $form;
     }
-
+    
     // Takes MAILER_URL and turns it into an array with all parameters
     public function envMailerUrlToArray(string $envString): array
     {
