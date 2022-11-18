@@ -262,8 +262,14 @@ class ManagementSMTPController extends AbstractController
             $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
             $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
             // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
-            // TODO: find a way to check whether the variable is already set & if so overwrite it
-            file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+
+            // If the mailer url is already present and identical, we do not add the line
+            $mailerUrlWithoutTitle = str_replace("MAILER_URL=","",$mailerUrl);
+            $mailerInEnv = $this->checkIfmailerUrlInEnv();
+            if ($mailerInEnv === false || $mailerInEnv !== $mailerUrlWithoutTitle) {
+                file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
+            }
         } catch (Exception $e) {
             $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
             $session = new Session();
@@ -279,9 +285,13 @@ class ManagementSMTPController extends AbstractController
         try {
             $apiKey = isset($swiftParams['ApiKey']) ? $swiftParams['ApiKey'] : null;
             $apiKeyEnv = "SENDINBLUE_APIKEY=$apiKey";
-            // for now we send it at the end of the file but if the operation is repeated multiple times, it will write multiple lines
-            // TODO: find a way to check whether the variable is already set & if so overwrite it
-            file_put_contents(self::LOCAL_ENV_FILE, $apiKeyEnv.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            // If the api key is already present and identical, we do not add the line
+            $apiKeyWithoutTitle = str_replace("SENDINBLUE_APIKEY=","",$apiKeyEnv);
+            $apiKeyInEnv = $this->checkIfApiKeyInEnv();
+            if ($apiKeyInEnv === false || $apiKeyInEnv !== $apiKeyWithoutTitle) {
+                file_put_contents(self::LOCAL_ENV_FILE, $apiKeyEnv.PHP_EOL, FILE_APPEND | LOCK_EX);
+            }
         } catch (Exception $e) {
             $this->logger->error("Unable to write SENDINBLUE_APIKEY in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
             $session = new Session();
