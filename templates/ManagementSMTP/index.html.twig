@@ -22,7 +22,7 @@
                         {{ form_errors ( form.host) }}
                     </div>
                 </div>
-                <div class=" row mb-2">
+                <div class=" row mb-2" id='smtp_port'>
                     <label for="port" class="col-sm-2 col-form-label"> {{ form_label( form.port) }}</label>
                     <div class="col-sm-10 ">
                         {{ form_widget( form.port, { 'attr': {'class': 'form-control' , 'id' : 'port'} }) }}
