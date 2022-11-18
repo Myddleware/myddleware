@@ -22,6 +22,14 @@
                         {{ form_errors ( form.host) }}
                     </div>
                 </div>
+                <div class=" row mb-2">
+					<label for="ApiKey" class="col-sm-2 col-form-label">
+						{{ form_label( form.ApiKey) }}</label>
+					<div class="col-sm-10 ">
+						{{ form_widget( form.ApiKey, { 'attr': {'class': 'form-control' , 'id' : 'ApiKey'} }) }}
+						{{ form_errors ( form.ApiKey) }}
+					</div>
+				</div>
                 <div class=" row mb-2" id='smtp_port'>
                     <label for="port" class="col-sm-2 col-form-label"> {{ form_label( form.port) }}</label>
                     <div class="col-sm-10 ">
