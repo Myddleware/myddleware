@@ -132,6 +132,8 @@ class PrestaShopWebservice
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_USERPWD => $this->key.':',
             CURLOPT_HTTPHEADER => ['Expect:'],
+            // CURLOPT_SSL_VERIFYHOST => 0,
+            // CURLOPT_SSL_VERIFYPEER => 0
         ];
 
         return $defaultParams;

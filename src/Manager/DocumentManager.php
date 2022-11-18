@@ -676,11 +676,8 @@ class documentcore
             // Check compatibility between rule mode et document tupe
             // A rule in create mode can't update data excpt for a child rule
             if (
-                    'C' == $this->ruleMode
-                and (
-                        'U' == $this->documentType
-                     or 'D' == $this->documentType
-                )
+					'C' == $this->ruleMode
+				and	'U' == $this->documentType
                 and !$this->isChild()
             ) {
                 $this->message .= 'Rule mode only allows to create data. Filter because this document updates or deletes data.';

@@ -70,7 +70,7 @@ class SynchroCommand extends Command
         $this
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
-            ->addArgument('rule', InputArgument::REQUIRED, 'Rule alias')
+            ->addArgument('rule', InputArgument::REQUIRED, 'Rule id, you can put several rule id separated by coma')
             ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
@@ -107,7 +107,7 @@ class SynchroCommand extends Command
                         if ('ALL' == $rule) {
                             $rules = $this->jobManager->getRules($force);
                         } else {
-                            $rules[] = $rule;
+                            $rules = explode(',',$rule);
                         }
                         if (!empty($rules)) {
                             foreach ($rules as $key => $value) {

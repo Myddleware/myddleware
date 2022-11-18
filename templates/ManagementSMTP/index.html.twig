@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'management_smtp.title'|trans }}{% endblock %}
-{% block titlesm %}{{ 'management_smtp.title'| trans }}{% endblock titlesm %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'management_smtp.title'|trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'management_smtp.title'| trans }}
+{% endblock titlesm %}
 {% block body %}
     <div class="container p-5">
         <div class="row justify-content-md-center ">

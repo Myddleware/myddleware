@@ -96,13 +96,12 @@ class NotificationManager
     public function sendAlert(): bool
     {
         try {
-            // Get the email adresses of all ADMIN
-            $this->setEmailAddresses();
+            
             // Set all config parameters
             $this->setConfigParam();
             if (empty($this->configParams['alert_time_limit'])) {
-                throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
-            }
+				throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
+			}
             // Calculate the date corresponding to the beginning still authorised
             $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
             $timeLimit->modify('-'.$this->configParams['alert_time_limit'].' minutes');
@@ -116,22 +115,10 @@ class NotificationManager
                     '%min%' => $this->configParams['alert_time_limit'],
                     '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
                     '%id%' => $job->getId(),
-                    'base_uri' => $this->configParams['base_uri'] ?? '',
+                    '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
                 ]);
 
-                $message =
-                    (new Swift_Message($this->translator->trans('email_alert.subject')))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setBody($textMail);
-                // Send the message to all admins
-                foreach ($this->emailAddresses as $emailAddress) {
-                    $message->setTo($emailAddress);
-                    $send = $this->mailer->send($message);
-                    if (!$send) {
-                        $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
-                        throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
-                    }
-                }
+                return $this->send($textMail);
             }
 
             return true;
@@ -141,6 +128,51 @@ class NotificationManager
             throw new Exception($error);
         }
     }
+	
+		
+	protected function send($textMail) {
+		// Get the email adresses of all ADMIN
+		$this->setEmailAddresses();
+		// Check that we have at least one email address
+		if (empty($this->emailAddresses)) {
+			throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
+		}
+		
+		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
+            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
+            foreach ($this->emailAddresses as $emailAddress) {
+                $sendSmtpEmailTo[] = array('email' => $emailAddress);
+            }
+            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
+            $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
+            $sendSmtpEmail['htmlContent'] = $textMail;
+            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+
+            try {
+                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+            } catch (Exception $e) {
+                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            }
+        } else {
+            $message =
+                    (new Swift_Message($this->translator->trans('email_alert.subject')))
+                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->setBody($textMail);
+            // Send the message to all admins
+            foreach ($this->emailAddresses as $emailAddress) {
+                $message->setTo($emailAddress);
+                $send = $this->mailer->send($message);
+                if (!$send) {
+                    $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                    throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
+                }
+            }
+        }
+        return true;
+	}
+
 
     /**
      * Send notification to receive statistics about Myddleware data transfers.

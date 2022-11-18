@@ -138,6 +138,21 @@ class ManagementSMTPController extends AbstractController
      */
     private function getParametersFromSwiftmailerYaml($form)
     {
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+        }
+        $mailerUrlEnv = getenv('MAILER_URL');
+        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+
+            $mailerUrlArray = $this->splitEnvString($mailerUrlEnv);
+            $form->get('transport')->setData('smtp');
+            $form->get('host')->setData($mailerUrlArray[0]);
+            $form->get('port')->setData($mailerUrlArray[1]);
+            $form->get('auth_mode')->setData($mailerUrlArray[3]);
+            $form->get('encryption')->setData($mailerUrlArray[2]);
+            $form->get('user')->setData($mailerUrlArray[4]);
+            $form->get('password')->setData($mailerUrlArray[5]);
+        } else {
         $value = Yaml::parse(file_get_contents(self::PATH));
         $form->get('transport')->setData($value['swiftmailer']['transport']);
         $form->get('host')->setData($value['swiftmailer']['host']);
