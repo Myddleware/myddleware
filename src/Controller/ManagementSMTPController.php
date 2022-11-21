@@ -164,7 +164,7 @@ class ManagementSMTPController extends AbstractController
         }
 		return $form;
     }
-}
+
 
         // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
     public function getParametersFromMailerUrl($form, $mailerUrlFromEnv)
