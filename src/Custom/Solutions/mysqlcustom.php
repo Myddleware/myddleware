@@ -644,8 +644,20 @@ class mysqlcustom extends mysql {
 						unset($param['data'][$idDoc]); // Do not send this document
 					}
 							
-					// Send email only if compte_reec_ok is false
-					if (!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])) {				
+					// No update of the email if
+					//    	The REEC user account is created
+					//		AND the contact is not a user
+					// 		AND the contact is not a volontaire
+					if (
+						!(
+								empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
+							 OR $param['rule']['id'] == '5cf98651a17f3'	// users
+							 OR (
+									$param['rule']['id'] != '5ce3621156127'	// engagé
+								AND !empty($param['data'][$idDoc]['volontaire'])
+							)
+						)
+					) {
 						unset($param['data'][$idDoc]['email']);
 					}		
 					// Never modify compte_reec_ok
