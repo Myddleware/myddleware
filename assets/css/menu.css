@@ -128,10 +128,14 @@ menu li a {
 /* LOGO  */
 .logo-nav{
 	padding-top: 5px;
+	margin-right: 120px;
+	margin-left: 40px;
 }
 
 .flex-nav{
 	flex-wrap: initial !important;
+	width: 55%;
+    margin-right:auto;
 }
 
 header{

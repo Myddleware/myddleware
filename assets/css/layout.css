@@ -195,7 +195,7 @@ footer {
 #notification #zone_notification {
     margin: 0 auto 20px;
     text-align: left;
-    /* width: 80vw; */
+    width: 80vw;
     max-width: 80vw;
     max-height: 120px;
     overflow-y:scroll;
