@@ -144,7 +144,7 @@ class ManagementSMTPController extends AbstractController
         $mailerUrlEnv = getenv('MAILER_URL');
         if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
 
-            $mailerUrlArray = $this->splitEnvString($mailerUrlEnv);
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
             $form->get('transport')->setData('smtp');
             $form->get('host')->setData($mailerUrlArray[0]);
             $form->get('port')->setData($mailerUrlArray[1]);
@@ -164,6 +164,7 @@ class ManagementSMTPController extends AbstractController
         }
 		return $form;
     }
+}
 
         // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
     public function getParametersFromMailerUrl($form, $mailerUrlFromEnv)
@@ -417,8 +418,7 @@ class ManagementSMTPController extends AbstractController
             }
             $sendSmtpEmail['to'] = $sendSmtpEmailTo;
             $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
-            // $sendSmtpEmail['htmlContent'] = $textMail;
-            $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_alert.subject');
+            $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_sendinblue.content');
             $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
 
             try {
