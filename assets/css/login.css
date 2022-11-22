@@ -24,7 +24,7 @@
 
 #myd_connexion { 		
 	margin: 100px auto;
-	width: 700px;
+	width: 621px;
 	height: 400px;
 } 
 
@@ -81,8 +81,7 @@
 }
 
 body {
-	background: url('./../images/login/fd.jpg') repeat-y;
-	background-color: #9DC0E1;
+	background-color: #f7f7f7;
 	overflow-y:hidden;
 }
 

@@ -14,14 +14,6 @@ menu .caret, #myd_top .caret {
     border: none;
 }
 
-#cloud {
-    background: url('./../images/template/cloud.png') no-repeat;
-    height: 129px;
-    width: 397px;
-    display: inline-block;
-    border: none;
-}
-
 /* 
 .negative-margin-menu{
     margin-right: -0.77rem;
@@ -34,10 +26,10 @@ menu .caret, #myd_top .caret {
     display: inline-block;
     border: none;
     margin: 20px 20px 20px -13px;
-    padding-top: 15px;
+    padding-top: 20px;
     color: white;
     text-align: center;
-    line-height: 1em;
+    line-height: 0.55em;
 }
 
 #fd-title-large {
