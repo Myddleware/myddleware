@@ -160,7 +160,7 @@
     width: 50px;
 }
 #user_account .user_account_popup_content {
-    color: #C6BD20;
+    color: #198BCA;
     font-weight: bold;
     text-align: center;
     position: absolute;
@@ -190,6 +190,6 @@
 }
 #user_account .selected{
     color: #292707;
-    background-color: #C6BD20;
-    border-color: #999219;
+    background-color: #198BCA;
+    border-color: #0b72a9;
 }
