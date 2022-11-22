@@ -103,6 +103,10 @@ menu li:hover {
 	cursor:pointer;
 }
 
+menu .logo-nav:hover{
+	background: #ffffff;
+}
+
 #myd_top nav {
 	padding-right: 150px;
 }
