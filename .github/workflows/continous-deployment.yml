@@ -42,7 +42,7 @@ jobs:
       # We use the repository's name as the image's name.
       - name: Build and push Docker image
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true # <== Only difference with same job in continuous integration workflow
           tags: |
@@ -58,10 +58,10 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     steps:
       - name: Production release
-        uses: 'marvinpinto/action-automatic-releases@v1.2.1'
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           prerelease: false
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
 
   commit-version-to-kubernetes-repo:
     runs-on: ubuntu-latest
@@ -70,13 +70,13 @@ jobs:
     steps:
       # Configure SSH agent with private key.
       # The public key is configured as a deploy key for the afev-org/kubernetes repo.
-      - name: 'Configure SSH agent'
+      - name: "Configure SSH agent"
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_DEPLOYMENT }}
 
       # Clone the afev-org/kubernetes repository.
-      - name: 'Checkout the kubernetes repository'
+      - name: "Checkout the kubernetes repository"
         uses: actions/checkout@v2
         with:
           repository: afev-org/kubernetes
@@ -84,17 +84,17 @@ jobs:
           ssh-key: not-a-real-key # This action ignores the SSH agent if this field is not set.
 
       # Define settings depending on target environment.
-      - name: 'Configure for pre-production environment'
+      - name: "Configure for pre-production environment"
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           echo "ENVIRONMENT_NAME=preproduction" >> $GITHUB_ENV
-      - name: 'Configure for production environment'
+      - name: "Configure for production environment"
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
           echo "ENVIRONMENT_NAME=production" >> $GITHUB_ENV
       # Write the release's commit hash to the corresponding
       # Kubernetes configuration file.
-      - name: 'Update version in manifests'
+      - name: "Update version in manifests"
         uses: microsoft/variable-substitution@v1
         with:
           files: ./kubernetes/${{ env.ENVIRONMENT_NAME }}/web-apps/myddleware/helm-values.yml
@@ -102,8 +102,8 @@ jobs:
           version: ${{ github.sha }}
 
       # Push changes to the kubernetes repository.
-      - name: 'Commit and push'
+      - name: "Commit and push"
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'chore(${{ env.ENVIRONMENT_NAME }}/myddleware): update version'
+          commit_message: "chore(${{ env.ENVIRONMENT_NAME }}/myddleware): update version"
           repository: ./kubernetes
