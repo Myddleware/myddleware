@@ -5,8 +5,6 @@
     width: 160px;
     display: inline-block;
 }
-
-
 menu .caret, #myd_top .caret {
     background: url('./../images/template/arrow-menu.png') no-repeat;
     height: 13px;
