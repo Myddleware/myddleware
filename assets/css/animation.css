@@ -385,11 +385,13 @@ h2 { margin-top: 50px;}
 }
 
 #animation #animation-Connecteur-source, #animation #animation-Module-source {
+    margin-left: 60px;
 	color: #0D6AAF;		
 
 }
 
 #animation #animation-Connecteur-cible, #animation-Module-cible {
+    
 	color: #198BCA;
 }
 

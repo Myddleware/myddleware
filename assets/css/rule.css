@@ -128,8 +128,8 @@
 
 #rule th {
 	background: #ECECEC;
-	height: 20px;
-	padding: 2px;
+    height: 45px;
+    padding: 10px;
 	text-align: center;
 }
 
@@ -188,9 +188,9 @@
 }
 
 #cible .ui-widget-header {
-    background: none repeat scroll 0 0 #efefef;
+    background: none repeat scroll 0 0 #198BCA;
     border: 0px;
-    color: #454539;
+    color: #ffffff;
     font-weight: bold;
     text-align: center;
     line-height: 2.5em;
@@ -207,7 +207,7 @@
 #cible .ch {
 	border-bottom: 1px solid #cccccc;
     border-width: 1px 10px 1px 1px;
-    color: #aaa00b;
+    color: #198BCA;
     line-height: 2em;
     margin-right: 5px;	
 }
@@ -497,4 +497,5 @@ color: #000000!important;
 
 .fancybox {
 	text-decoration: none!important;
+	color: white !important;
 }
