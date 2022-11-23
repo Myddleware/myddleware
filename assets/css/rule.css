@@ -82,7 +82,7 @@
 	margin: 0px;
 	text-align: center;
 	border: 0px solid #999999;
-	border-radius: 0px;
+	border-radius: 10px;
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -100,8 +100,8 @@
 	position: absolute;
 	top: 0;
 	left: 31px;
-	border-style: solid;
-	border-color: #198BCA transparent transparent #198BCA;
+	/* border-style: solid; */
+	/* border-color: #198BCA transparent transparent #198BCA; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-inactive .onoffswitch-switch:before {
@@ -109,8 +109,8 @@
 	position: absolute;
 	top: 0;
 	right: 31px;
-	border-style: solid;
-	border-color: transparent #555555 #555555 transparent;
+	/* border-style: solid;
+	border-color: transparent #555555 #555555 transparent; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
