@@ -338,7 +338,7 @@ td a {
 
 /* Connectors list page */
 #connector-list {
-	max-width: 40vw;
+	max-width: 75vw;
 }
 
 #validRuleParams {

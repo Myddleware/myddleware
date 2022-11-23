@@ -128,7 +128,7 @@
 }
 
 #animation .animation-workspace-content{
-    width: 20%;
+    width: 19%;
     height: 100%;
     float: left;
 }
@@ -385,13 +385,13 @@ h2 { margin-top: 50px;}
 }
 
 #animation #animation-Connecteur-source, #animation #animation-Module-source {
-    margin-left: 60px;
+    margin-left: 6px;
 	color: #0D6AAF;		
 
 }
 
 #animation #animation-Connecteur-cible, #animation-Module-cible {
-    
+    margin-left: 66px;
 	color: #198BCA;
 }
 
