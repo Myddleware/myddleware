@@ -46,26 +46,17 @@
 		<div class="row justify-content-center my-4">
 			<div class="col text-center">
 				<a id="exec_all" class="btn btn-primary" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-						<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
-						</svg>
+						
 						{{'view_rule.action.exec_all'|trans}}
 				</a>
 			</div>
 			<div class="col text-center">
 				<a id="exec_error" class="btn btn-warning" href="{{ path('regle_exec',{'id' : 'ERROR' }) }}" title="" role="button">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-						<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-						<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-						</svg>
 						{{'view_rule.action.exec_error'|trans}}
 				</a>
 			</div>
 			<div class="col text-center">
 				<a id="new_rule" class="btn btn-outline-success" href="{{ path('regle_stepone_animation') }}" title="" role="button">
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-					<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-					</svg>
 					{{'view_rule.action.new_rule'|trans}}
 				</a>
 			</div>
@@ -127,10 +118,7 @@
 								</a>		     		
 								<a class="delete text-decoration-none" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
 									<span class="btn-opt">
-										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-										<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-										<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-										</svg>
+										<i class="fa fa-trash" aria-hidden="true"></i>
 									</span>
 								</a>
 								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="text-decoration-none">

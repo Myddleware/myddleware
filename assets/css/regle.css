@@ -229,13 +229,13 @@ input[type="text"] {
 }
 
 .btn-success {
-	background-color: #198BCA!important;
-	border-color: #198BCA!important;
+	background-color: #19ca42!important;
+	border-color: #19ca42!important;
 }
 
 .btn-success:hover {
-	background-color: #0b72a9!important;
-	border-color: #0b72a9!important;
+	background-color: #16aa39!important;
+	border-color: #16aa39!important;
 } 
 
 
@@ -338,7 +338,7 @@ td a {
 
 /* Connectors list page */
 #connector-list {
-	max-width: 40vw;
+	max-width: 75vw;
 }
 
 #validRuleParams {
