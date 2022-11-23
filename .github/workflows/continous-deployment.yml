@@ -93,8 +93,20 @@ jobs:
         run: |
           echo "ENVIRONMENT_NAME=production" >> $GITHUB_ENV
       # Write the release's commit hash to the corresponding
+
       # Kubernetes configuration file.
-      - name: 'Update version in manifests'
+      - name: 'Update version in manifests in preprod'
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ./kubernetes/charts/myddleware/values.${{ env.ENVIRONMENT_NAME }}.yaml
+        env:
+          version: ${{ github.sha }}
+
+      # TODO: change as above once we use umbrella charts in prod
+      # Kubernetes configuration file.
+      - name: 'Update version in manifests in prod'
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: microsoft/variable-substitution@v1
         with:
           files: ./kubernetes/${{ env.ENVIRONMENT_NAME }}/web-apps/myddleware/helm-values.yml
