@@ -123,4 +123,43 @@ class sendinbluecustom extends sendinblue {
 		
 		return $mask;
 	}
+	
+	// Permet de mettre à jour le statut d'un document après création ou modification dans la cible
+    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
+    {
+		// If we have an error sending for rules Sendinblue coupon and contact and if the error is Contact does not exist
+		// Then we cancel the document because the contact has been deleted in Sendinblue
+		if (
+				!empty($param['ruleId'])
+			AND	in_array($param['ruleId'], array('620e5520c62d6', '620d3e768e678')) // Rules Sendinblue coupon and contact
+			AND $value['id'] == '-1'
+			AND strpos($value['error'], 'Contact does not exist') !== false		
+		) {
+			try {
+				$this->connection->beginTransaction();
+				$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$param['id_doc_myddleware'] = $idDoc;
+				$param['api'] = $this->api;
+				$documentManager->setParam($param);
+				$documentManager->setMessage(utf8_decode('Le contact a été supprimé de Sendinblue. Impossible de le mettre à jour. Ce transfert de données est annulé. '));
+				$documentManager->setTypeError('W');
+				$documentManager->updateStatus('Cancel');
+				$this->logger->error('Le contact a été supprimé de Sendinblue. Impossible de le mettre à jour. Ce transfert de données est annulé. ');
+				$response[$idDoc] = false;	
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+				$documentManager->setTypeError('E');
+				$documentManager->updateStatus('Error_sending');
+				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+				$response[$idDoc] = false;
+			}			
+			return $response;
+		}
+
+        return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
+
+    }
 }
