@@ -45,6 +45,7 @@ class prestashopcore extends solution
         'customer_messages' => ['id', 'date_add'],
         'order_carriers' => ['id', 'date_add'],
         'order_payments' => ['id', 'date_add', 'order_reference'],
+        'shop_urls' => ['id'],
     ];
 
     protected array $notWrittableFields = ['products' => ['manufacturer_name', 'quantity']];
@@ -53,7 +54,7 @@ class prestashopcore extends solution
     protected array $moduleWithLanguage = ['products', 'categories'];
 
     // Module without reference date
-    protected array $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables'];
+    protected array $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables','shop_urls'];
 
     protected $required_relationships = [
         'default' => [],
@@ -492,7 +493,13 @@ class prestashopcore extends solution
                 }
                 // Si la référence n'est pas une date alors c'est l'ID de prestashop
                 else {
-                    if ('' == $param['date_ref']) {
+                    if (
+                            in_array($param['module'], $this->moduleWithoutReferenceDate)
+                        AND (
+                                empty($param['date_ref'])
+                             OR !is_numeric($param['date_ref'])
+                        )    
+                    ) {
                         $param['date_ref'] = 1;
                     }
                     $opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
@@ -986,7 +993,7 @@ class prestashopcore extends solution
         if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
             return 'date_add';
         }
-        if (in_array($moduleSource, ['order_details'])) {
+        if (in_array($moduleSource, ['order_details','shop_urls'])) {
             return 'id';
         }
         if (in_array($RuleMode, ['0', 'S'])) {
