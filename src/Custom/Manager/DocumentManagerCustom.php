@@ -316,10 +316,14 @@ class DocumentManagerCustom extends DocumentManager
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '6210fcbe4d654' // Sendinblue - email delivered
 			AND $new_status == 'Relate_KO'
-			AND strpos($this->sourceData['email'], '@afev.org') !== false
 		) {
-			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('L\email n\'appartient pas à un contact dans la COMET mais à un salarié (domaine afev.org). Ce transfert de données est annulé. ');
+			if (strpos($this->sourceData['email'], '@afev.org') !== false) {
+				$this->message .= utf8_decode('L\email n\'appartient pas à un contact dans la COMET mais à un salarié (domaine afev.org). Ce transfert de données est annulé. ');
+				$new_status = 'Error_expected';
+			} elseif (strpos($this->sourceData['subject'], 'Contact SuiteCRM -') !== false) {
+				$this->message .= utf8_decode('L\email est une notification pour un salarié. Ce transfert de données est annulé. ');
+				$new_status = 'Error_expected';
+			}
 		}
 
 		// Cancel if the doc is related KO and the email linked to a user (afev.org)
