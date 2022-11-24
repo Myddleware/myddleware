@@ -23,31 +23,32 @@
 *********************************************************************************/
 
 #myd_top {
-	height: 35px;
-	min-height: 35px;
-	max-height: 35px;	
+	/* height: 35px; */
+	min-height: 40px;
+	/* max-height: 35px;	 */
 	background: #444446;
-	border-bottom: 4px solid #C6BD20;
-	min-width: 1200px;
+	border-bottom: 4px solid #198BCA;
+	/* min-width: 1200px; */
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	z-index: 99;
+	font-size: larger;
 }
 
 #myd_title {
-	height: 46px;
-	background: #0F66A9;
+	height: 50px;
+	background: #198BCA;
 	margin: 0 auto;
-	width: 80vw;
-	color: white;
+	/* width: 80vw; */
+		color: white;
 	padding: 14px;		
 	font-weight: bold;	
 }
 
 #myd_title a, #myd_title a:hover { 
-	color: #C6BD20;
+	color: #ffffff;
 }
 
 .myd_loading > img{
@@ -63,9 +64,10 @@ header {
 
 section  {
 	margin-bottom: 15vh!important;
-	width: 80vw;
+	/* width: 80vw; */
 	min-height: 570px;
-	background: white;
+	background: white !important;
+	/* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; */
 }
 
 footer {
@@ -185,7 +187,7 @@ footer {
 
 #notification {
     margin: 0 auto;
-    width: 80vw;
+    /* width: 80vw; */
     background:white;
     display:none;
 }

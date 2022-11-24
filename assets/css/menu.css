@@ -23,7 +23,7 @@
 *********************************************************************************/
 
 menu {
-	margin-top: -5px;
+    margin-top: 40px;
 }
 
 menu ul, menu li {
@@ -31,13 +31,13 @@ menu ul, menu li {
 }
 
 menu li {
-	background: #444446;	
+	background: #ffffff;	
 	display: inline-block;
-	width: 150px;
-	padding-top: 5px;
-	height: 50px;
-	text-align: center;
-	font-weight: bold;
+    width: 330px;
+    padding-top: 32px;
+    height: 95px;
+    text-align: center;
+    font-weight: bold;
 }
 
 menu .dropdown-menu > li > a, menu .dropdown-menu > li > a:hover {   		
@@ -49,11 +49,11 @@ menu .dropdown-menu > li > a, menu .dropdown-menu > li > a:hover {
 
 
 menu .dropdown-menu > li > a {
-	color: #444446;
+	color: #000000;
 }
 
 menu .dropdown-menu > li > a:hover {
-	color: #0F66A9;
+	color: #198BCA;
 }
 
 menu li li, #myd_top li li {
@@ -88,18 +88,23 @@ menu li li:hover, #myd_top li li:hover {
 }
 
 #myd_top li li a {
-	color: #0F66A9;
+	color: #000000;
 }
 
 menu .nav-pills > li > a, menu .nav-pills > li > a:hover, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
-	color: white;
+	color: rgb(0, 0, 0);
 	background-color:transparent;
 	border-radius: none;
 }
 
 menu li:hover {
-	background: #0F66A9;
+	background: #198BCA;
+	color:white;
 	cursor:pointer;
+}
+
+menu .logo-nav:hover{
+	background: #ffffff;
 }
 
 #myd_top nav {
@@ -107,12 +112,13 @@ menu li:hover {
 }
 
 #myd_top .nav-pills > li > a, #myd_top .nav-pills > li > a:hover, #myd_top .nav .open > a, #myd_top .nav .open > a:hover, #myd_top .nav .open > a:focus {   		
+	color: white;
 	background-color:transparent;
 	border-radius: none;
 }
 
 #myd_top .nav-pills > li > a:hover, #myd_top .nav .open > a, #myd_top .nav .open > a:hover, #myd_top .nav .open > a:focus {
-	color: #C6BD20;
+	color: #198BCA;
 }
 
 #search {
@@ -121,4 +127,21 @@ menu li:hover {
 
 menu li a {
 	text-decoration: none;
+}
+
+/* LOGO  */
+.logo-nav{
+	padding-top: 5px;
+	margin-right: 120px;
+	margin-left: 40px;
+}
+
+.flex-nav{
+	flex-wrap: initial !important;
+	width: 55%;
+    margin-right:auto;
+}
+
+header{
+	background-color: #ffffff !important;
 }

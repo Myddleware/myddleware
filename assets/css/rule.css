@@ -82,13 +82,13 @@
 	margin: 0px;
 	text-align: center;
 	border: 0px solid #999999;
-	border-radius: 0px;
+	border-radius: 10px;
 	position: absolute;
 	top: 0;
 	bottom: 0;
 }
 #rule .onoffswitch-active .onoffswitch-switch {
-	background: #C6BD20;
+	background: #198BCA;
 	left: 0;
 }
 #rule .onoffswitch-inactive .onoffswitch-switch {
@@ -100,8 +100,8 @@
 	position: absolute;
 	top: 0;
 	left: 31px;
-	border-style: solid;
-	border-color: #C6BD20 transparent transparent #C6BD20;
+	/* border-style: solid; */
+	/* border-color: #198BCA transparent transparent #198BCA; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-inactive .onoffswitch-switch:before {
@@ -109,8 +109,8 @@
 	position: absolute;
 	top: 0;
 	right: 31px;
-	border-style: solid;
-	border-color: transparent #555555 #555555 transparent;
+	/* border-style: solid;
+	border-color: transparent #555555 #555555 transparent; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
@@ -164,6 +164,7 @@
 
 .source, #cible {
 	padding-top:10px;
+	
 }
 
 .source h1, #cible h1 { padding: .2em; margin: 0; }
@@ -172,13 +173,14 @@
 
 #cible {
 	min-width: 600px;
-	max-width: 60vw;
+	max-width: 78vw;
 	overflow: auto;
 }
 
 #cible .champs {
 	width: 260px;
-	padding:5px;
+	margin: 3px;
+	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 #cible ul li {
@@ -186,7 +188,7 @@
 }
 
 #cible .ui-widget-header {
-    background: none repeat scroll 0 0 #ccc31c;
+    background: none repeat scroll 0 0 #efefef;
     border: 0px;
     color: #454539;
     font-weight: bold;
@@ -246,9 +248,9 @@
 }
 
 #targetfields {
-	max-height: 80vh;
+	max-height: 110vh;
 	overflow-y:auto;
-	background: #C7C7C7;
+	background: #ffffff;
 }
 
 #targetfields ol, #targetfields ul {
@@ -329,9 +331,9 @@
 	line-height: 2.5em;
 	text-align: center;
 }
-#validation{
+/* #validation{
 	color: red;
-}
+} */
 
 #simulation #simulation_tab li {
     border-bottom: 1px solid #ccc;
@@ -453,7 +455,7 @@
 }
 
 .link-help > a:hover, .link-help-view > a:hover  {
-	color: #cdc400;
+	color: #38a9ff;
 	text-decoration: none;
 	cursor: pointer;
 }
@@ -482,11 +484,11 @@
 
 /* Rule edit / view nav menu */
 .nav-link {
-	color: #0F66A9!important;
+	color: #4f4f4f!important;
 }
 
 .nav-link.active {
-color: #495057!important; 
+color: #000000!important; 
 }
 
 #ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
