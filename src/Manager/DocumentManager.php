@@ -931,6 +931,10 @@ class documentcore
                         $searchFields['id'] = $target[$duplicate_field];
                         continue;
                     }
+					// Do not search duplicates on an empty field
+					if (!empty($target[$duplicate_field])) {
+						$searchFields[$duplicate_field] = $target[$duplicate_field];
+					}
                     $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
