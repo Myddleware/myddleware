@@ -14,7 +14,7 @@ class suitecrmcustom extends suitecrm
 	public $anneeScolaire = '2022_2023';
 	//public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
-	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi');
+	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi', 'Leads');
 	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';
 	protected $currentRule;
 	protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
