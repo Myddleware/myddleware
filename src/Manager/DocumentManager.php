@@ -965,7 +965,10 @@ class documentcore
 						$searchFields['id'] = $target[$duplicate_field];
 						continue;
 					}
-                    $searchFields[$duplicate_field] = $target[$duplicate_field];
+					// Do not search duplicates on an empty field
+					if (!empty($target[$duplicate_field])) {
+						$searchFields[$duplicate_field] = $target[$duplicate_field];
+					}
                 }
                 if (!empty($searchFields)) {
                     $history = $this->getDocumentHistory($searchFields);
