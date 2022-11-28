@@ -20,6 +20,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Repository\UserRepository;
+
 use Swift_Message;
 
 /**
@@ -61,6 +62,8 @@ class ManagementSMTPController extends AbstractController
             $form = $this->getParametersFromSwiftmailerYaml($form);
         }
 
+        
+        
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
@@ -77,13 +80,22 @@ class ManagementSMTPController extends AbstractController
             $form->handleRequest($request);
 
             if ($form->get('submit_test') === $form->getClickedButton()) {
-                $this->testMailConfiguration($form);
+                $isMailSent = $this->testMailConfiguration($form);
             } else {
                 $this->envMailerUrlVsApiKey($form);
             }
 
             if ($form->isValid() && $form->isSubmitted()) {
                 $this->putParamsInSwiftMailerYaml($form);
+
+                if (!empty($isMailSent)) {
+                    if ($isMailSent === true) {
+                    $success = $this->translator->trans('email_validation.success');
+                    $this->addFlash('success', $success);
+                    } else if ($isMailSent === false) {
+                        $failed = $this->translator->trans('email_validation.error');
+                    $this->addFlash('error', $failed);
+                    }}
 
                 return $this->redirect($this->generateUrl('management_smtp_index'));
             }
@@ -97,7 +109,9 @@ class ManagementSMTPController extends AbstractController
     public function envMailerUrlVsApiKey($form)
     {
         if ($form->get('transport')->getData() === 'sendinblue') {
-            $this->putApiKeyInDotEnv($form);
+            if ($this->checkIfApiKeyInEnv() !== $form->get('ApiKey')->getData()){
+                $this->putApiKeyInDotEnv($form);
+            }
         }else {
             $this->parseYamlConfigToLocalEnv($form);
         }
@@ -321,14 +335,14 @@ class ManagementSMTPController extends AbstractController
      *
      * @throws Exception
      */
-    public function testMailConfiguration($form): void
+    public function testMailConfiguration($form): bool
     {
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
             $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
         } // End filecheck
         if (isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false) {
-            $this->sendinblueSendMailByApiKey($form);
+            $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
         } else {
             // Standard email
             $host = $form->get('host')->getData();
@@ -376,13 +390,29 @@ class ManagementSMTPController extends AbstractController
                 if (!$send) {
                     $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $user_email);
                     throw new Exception('Failed to send email : ' . $textMail . ' to ' . $user_email);
+                } else {
+                    $isRegularEmailSent = true;
                 }
+                
             } catch (Exception $e) {
                 $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $session = new Session();
                 $session->set('error', [$error]);
             }
         }
+
+        $isFinalEmailSent = false;
+        if (!empty($isApiEmailSent)) {
+            if ($isApiEmailSent === true) {
+                $isFinalEmailSent = true;
+            }
+        }
+        if (!empty($isRegularEmailSent)) {
+            if ($isRegularEmailSent === true) {
+                $isFinalEmailSent = true;
+            }
+        }
+        return $isFinalEmailSent;
     }
 
     /**
@@ -424,7 +454,10 @@ class ManagementSMTPController extends AbstractController
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
             } catch (Exception $e) {
-                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+                // $failed = $this->translator->trans('email_validation.error');
+                // $this->addFlash('error', $failed);
+                return false;
+                // throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             }
         } else {
             $message =
@@ -441,6 +474,7 @@ class ManagementSMTPController extends AbstractController
                 if (!$send) {
                     $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
                     throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
+                    return false;
                 }
             }
         }
