@@ -1338,7 +1338,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                             'date_ref' => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
                             'limit' => 1,
                             'ruleParams' => $ruleParams,
-                            'query' => ['id' => $this->simulationQueryField],
+                            'query' => [(!empty($ruleParams['fieldId']) ? $ruleParams['fieldId'] : 'id') => $this->simulationQueryField],
                             'call_type' => 'simulation',
                         ]);
 
