@@ -142,6 +142,28 @@ class ManagementSMTPController extends AbstractController
         // Refills the content with everythintg but the api key
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
+    // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
+    public function EmptyMailerUrlEnv() {
+
+        // Finds the api key and removes it
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        $linesEnv = explode("\n", $envFile);
+        $lineCounter = 0;
+        foreach($linesEnv as $line) {
+            if (strpos($line, "MAILER_URL") !== false) {
+                unset($linesEnv[$lineCounter]);
+            }
+            $lineCounter++;
+        }
+        $envFileFinal = implode("\n", $linesEnv);
+
+        // Clears the .env
+        $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
+        fclose($clearContentOfDotEnv);
+
+        // Refills the content with everythintg but the api key
+        file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+    }
 
     // Function to create the mail mailing form.
     // Is called once when you go to the smtp page.
@@ -323,7 +345,11 @@ class ManagementSMTPController extends AbstractController
             // If the mailer url is already present and identical, we do not add the line
             $mailerUrlWithoutTitle = str_replace("MAILER_URL=","",$mailerUrl);
             $mailerInEnv = $this->checkIfmailerUrlInEnv();
-            if ($mailerInEnv === false || $mailerInEnv !== $mailerUrlWithoutTitle) {
+            if ($mailerInEnv === false) {
+                file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
+            }
+            if ($mailerInEnv !== false && $mailerInEnv !== $mailerUrlWithoutTitle) {
+                $this->EmptyMailerUrlEnv();
                 file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
             }
         } catch (Exception $e) {
