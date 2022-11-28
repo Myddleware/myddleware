@@ -1056,6 +1056,16 @@ class prestashopcore extends solution
         return $opt;
     }
 
+     // Manage specific reference date for the module shop_urls
+     protected function getModifiedDate($param, $record, $dateRefField)
+     {
+        // No reference date for module shop_urls so we set one by default
+        if ($param['module'] == 'shop_urls') {
+            return '1970-01-01 00:00:00';
+        }
+        return $this->dateTimeToMyddleware($record[$dateRefField]);
+     }
+
     // Fonction permettant de faire l'appel REST
     protected function call($url, $parameters)
     {
