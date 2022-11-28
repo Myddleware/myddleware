@@ -106,16 +106,41 @@ class ManagementSMTPController extends AbstractController
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
+    // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer url
     public function envMailerUrlVsApiKey($form)
     {
         if ($form->get('transport')->getData() === 'sendinblue') {
             if ($this->checkIfApiKeyInEnv() !== $form->get('ApiKey')->getData()){
+                $this->EmptyApiKeyEnv();
                 $this->putApiKeyInDotEnv($form);
             }
         }else {
             $this->parseYamlConfigToLocalEnv($form);
         }
         
+    }
+
+    // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
+    public function EmptyApiKeyEnv() {
+
+        // Finds the api key and removes it
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        $linesEnv = explode("\n", $envFile);
+        $lineCounter = 0;
+        foreach($linesEnv as $line) {
+            if (strpos($line, "SENDINBLUE_APIKEY") !== false) {
+                unset($linesEnv[$lineCounter]);
+            }
+            $lineCounter++;
+        }
+        $envFileFinal = implode("\n", $linesEnv);
+
+        // Clears the .env
+        $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
+        fclose($clearContentOfDotEnv);
+
+        // Refills the content with everythintg but the api key
+        file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
 
     // Function to create the mail mailing form.
