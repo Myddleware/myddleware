@@ -493,8 +493,6 @@ class ManagementSMTPController extends AbstractController
 
         // dump($textMail);
         $apiKey = $textMail->get('ApiKey')->getData();
-        $toto = "toto";
-        // die('fin du programme');
         $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
             $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
             $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
@@ -509,52 +507,10 @@ class ManagementSMTPController extends AbstractController
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
             } catch (Exception $e) {
-                // $failed = $this->translator->trans('email_validation.error');
-                // $this->addFlash('error', $failed);
                 return false;
-                // throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             }
 
-        // if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
-        if (0 === 1) {
-            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
-            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
-            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
-            foreach ($this->emailAddresses as $emailAddress) {
-                $sendSmtpEmailTo[] = array('email' => $emailAddress);
-            }
-            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
-            $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_sendinblue.content');
-            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
-
-            try {
-                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
-            } catch (Exception $e) {
-                // $failed = $this->translator->trans('email_validation.error');
-                // $this->addFlash('error', $failed);
-                return false;
-                // throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-            }
-        } else if ( 0 === 1){
-            $message =
-                (new Swift_Message($this->translator->trans('email_alert.subject')))
-                ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                ->setBody($textMail);
-            // Send the message to all admins
-            foreach ($this->emailAddresses as $emailAddress) {
-                $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);
-
-                // Reset the yaml to avoid transport conflicts
-                $this->resetSwiftmailerYaml();
-                if (!$send) {
-                    $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
-                    throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
-                    return false;
-                }
-            }
-        }
+        
         return true;
     }
 
