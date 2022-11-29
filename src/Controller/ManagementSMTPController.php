@@ -388,6 +388,13 @@ class ManagementSMTPController extends AbstractController
         if (isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false) {
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
         } else {
+            
+            if ($form->get('transport')->getData() === "sendinblue") {
+                $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
+            }else {
+
+            
+
             // Standard email
             $host = $form->get('host')->getData();
             $port = $form->get('port')->getData();
@@ -443,6 +450,7 @@ class ManagementSMTPController extends AbstractController
                 $session->set('error', [$error]);
             }
         }
+        }
 
         // Adds a return value to the function to allow the index to display the success and error message.
         $isFinalEmailSent = false;
@@ -482,9 +490,8 @@ class ManagementSMTPController extends AbstractController
         if (empty($this->emailAddresses)) {
             throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
         }
-
-        if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
-            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+        $apiKey = $textMail->get('ApiKey')->getData();
+        $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
             $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
             $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
             foreach ($this->emailAddresses as $emailAddress) {
@@ -498,30 +505,10 @@ class ManagementSMTPController extends AbstractController
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
             } catch (Exception $e) {
-                // $failed = $this->translator->trans('email_validation.error');
-                // $this->addFlash('error', $failed);
                 return false;
-                // throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             }
-        } else {
-            $message =
-                (new Swift_Message($this->translator->trans('email_alert.subject')))
-                ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                ->setBody($textMail);
-            // Send the message to all admins
-            foreach ($this->emailAddresses as $emailAddress) {
-                $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);
 
-                // Reset the yaml to avoid transport conflicts
-                $this->resetSwiftmailerYaml();
-                if (!$send) {
-                    $this->logger->error('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
-                    throw new Exception('Failed to send alert email : ' . $textMail . ' to ' . $emailAddress);
-                    return false;
-                }
-            }
-        }
+        
         return true;
     }
 
