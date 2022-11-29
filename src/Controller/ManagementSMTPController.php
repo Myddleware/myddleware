@@ -46,6 +46,10 @@ class ManagementSMTPController extends AbstractController
         $this->userRepository = $userRepository;
     }
 
+    // Function that loads the main smtp page, check for the api key and the mailer url when the user loads the page. 
+    // Adds the authorized form fields to the page but not the sensitive content, ie password and api key.
+    // If none of them are present then the default form is loaded.
+
     /**
      * @Route("/managementsmtp", name="management_smtp_index")
      */
@@ -345,9 +349,13 @@ class ManagementSMTPController extends AbstractController
             // If the mailer url is already present and identical, we do not add the line
             $mailerUrlWithoutTitle = str_replace("MAILER_URL=","",$mailerUrl);
             $mailerInEnv = $this->checkIfmailerUrlInEnv();
+
+            // Put the content if the mailer is not present in the .env
             if ($mailerInEnv === false) {
                 file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
             }
+
+            // Put the content if there is already a mailer url but it is different from the current one
             if ($mailerInEnv !== false && $mailerInEnv !== $mailerUrlWithoutTitle) {
                 $this->EmptyMailerUrlEnv();
                 file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl.PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -452,6 +460,7 @@ class ManagementSMTPController extends AbstractController
             }
         }
 
+        // Adds a return value to the function to allow the index to display the success and error message.
         $isFinalEmailSent = false;
         if (!empty($isApiEmailSent)) {
             if ($isApiEmailSent === true) {
