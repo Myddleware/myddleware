@@ -189,7 +189,6 @@ class NotificationManager
 									document.global_status IN ('Error', 'Open')
 								AND document.deleted = 0
                             GROUP BY document.global_status";
-echo $sqlParams.chr(10);
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
             $cptLogs = $result->fetchAllAssociative();
@@ -212,7 +211,6 @@ echo $sqlParams.chr(10);
                 }
             }
 
-echo '0'.chr(10);
             $textMail = $this->tools->getTranslation(['email_notification', 'hello']) . chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', 'introduction']) . chr(10);
             $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_success']) . ' ' . $job_close . chr(10);
             $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_error']) . ' ' . $job_error . chr(10);
@@ -228,21 +226,6 @@ echo '0'.chr(10);
             } else {
                 $textMail .= chr(10) . $this->tools->getTranslation(['email_notification', 'no_active_rule']) . chr(10);
             }
-echo 'A'.chr(10);
-            // Get errors since the last notification
-           /*  if ($job_error > 0) {
-echo 'B'.chr(10);
-                $logs = $this->jobRepository->getErrorsSinceLastNotification();
-                if (100 == count($logs)) {
-                    $textMail .= chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', '100_first_erros']) . chr(10);
-                } else {
-                    $textMail .= chr(10) . chr(10) . $this->tools->getTranslation(['email_notification', 'error_list']) . chr(10);
-                }
-                foreach ($logs as $log) {
-                    $textMail .= " - id transfert $log[id], le $log[begin] : $log[message]" . chr(10);
-                }
-            } */
-echo 'C'.chr(10);
 
             // Add url if the parameter base_uri is defined in app\config\public
             if (!empty($this->configParams['base_uri'])) {

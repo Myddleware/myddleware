@@ -5,6 +5,7 @@ namespace App\Custom\Solutions;
 use App\Solutions\suitecrm;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Manager\DocumentManager;
 
 //Sinon on met la classe suivante
 class suitecrmcustom extends suitecrm
@@ -170,6 +171,39 @@ class suitecrmcustom extends suitecrm
 			// Change id and use event_id and lead_id
 			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
 		}
+		
+		// We set the document to cancel when we try to update a converted status for a coupon
+		if (
+				!empty($param['ruleId'])
+			AND	in_array($param['ruleId'], array('633ef1ecf11db')) // Mobilisation - relance rdv pris -> comet
+			AND $value['id'] == '-1'
+			AND strpos($value['error'], 'Erreur code W0001') !== false		
+		) {
+			try {
+				$this->connection->beginTransaction();
+				$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$param['id_doc_myddleware'] = $idDoc;
+				$param['api'] = $this->api;
+				$documentManager->setParam($param);
+				$documentManager->setMessage($value['error']);
+				$documentManager->setTypeError('W');
+				$documentManager->updateStatus('Cancel');
+				$this->logger->error($value['error']);
+				$response[$idDoc] = false;	
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+			} catch (\Exception $e) {
+				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+				$documentManager->setTypeError('E');
+				$documentManager->updateStatus('Error_sending');
+				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+				$response[$idDoc] = false;
+			}			
+			return $response;
+		}
+		
+		
 		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
 	}
 	
@@ -240,7 +274,16 @@ class suitecrmcustom extends suitecrm
 			}
 			return $data;
 		}
-
+		
+		// Do not override converted status
+		if (
+				$param['rule']['id'] == '633ef1ecf11db'			// Mobilisation - relance rdv pris -> comet
+			AND !empty($param['dataHistory'][$idDoc]['status'])
+			AND $param['dataHistory'][$idDoc]['status'] == 'Converted'
+		) { 
+			throw new \Exception(utf8_decode('Statut transformé ne peut pas être modifié. Le document est annulé.').' Erreur code W0001.');
+		}
+		
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
 	}
 
@@ -338,7 +381,7 @@ class suitecrmcustom extends suitecrm
 		// Add a filter for contact universite 
 		if (
 				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '5d01a630c217c' // Contact - Université
+			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact - Composante
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_universite%' ";
 		}

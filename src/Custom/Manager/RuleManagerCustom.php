@@ -171,7 +171,7 @@ class RuleManagerCustom extends RuleManager
 					$this->generatePoleRelationship('61b7662e60774', $document['source_id'], 'user_id', true);  // Aiko Referent(user) - pole
 				}
 				
-				// Si un référent est envoyé dans REEC, on recherche également son pôle (seulement pour la migration)	
+				// If the coupon is re invited then we set the statuts RDV pris in COMET	
 				if (
 					$this->ruleId == '633d94b3ce61e' // Mobilisation - Participation RI -> comet relance
 				) {			
