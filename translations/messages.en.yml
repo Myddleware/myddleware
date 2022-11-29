@@ -707,7 +707,9 @@ email_sendinblue:
         This is a test email sent by Myddleware using the Sendinblue Api Key.
         Best regards,
         the Myddleware team
-
+email_validation:
+    success: Message sent !
+    error: Failed to send message !
 email_notification:
     subject: Myddleware notification
     hello: Hi, 
