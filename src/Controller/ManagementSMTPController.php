@@ -490,8 +490,6 @@ class ManagementSMTPController extends AbstractController
         if (empty($this->emailAddresses)) {
             throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
         }
-
-        // dump($textMail);
         $apiKey = $textMail->get('ApiKey')->getData();
         $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
             $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
