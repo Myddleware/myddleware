@@ -312,6 +312,9 @@ class JobSchedulerController extends AbstractController
     {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 1]);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
             foreach ($entities as $entity) {
                 $entity->setEnable(0);
                 $this->entityManager->persist($entity);
@@ -335,6 +338,9 @@ class JobSchedulerController extends AbstractController
     {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 0]);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
             foreach ($entities as $entity) {
                 $entity->setEnable(1);
                 $this->entityManager->persist($entity);
