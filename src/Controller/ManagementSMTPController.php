@@ -57,10 +57,7 @@ class ManagementSMTPController extends AbstractController
     {
         $form = $this->createCreateForm();
         $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
-        $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
-        if ($apiKeyFromEnv !== false) {
-            $form = $this->getParametersFromApiKey($form, $apiKeyFromEnv);
-        } elseif ($mailerUrlFromEnv !== false) {
+        if ($mailerUrlFromEnv !== false) {
             $form = $this->getParametersFromMailerUrl($form, $mailerUrlFromEnv);
         } else {
             $form = $this->getParametersFromSwiftmailerYaml($form);
@@ -381,20 +378,9 @@ class ManagementSMTPController extends AbstractController
      */
     public function testMailConfiguration($form): bool
     {
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
-        } // End filecheck
-        if (isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false) {
+        if ($form->get('transport')->getData() === "sendinblue") {
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
-        } else {
-            
-            if ($form->get('transport')->getData() === "sendinblue") {
-                $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
-            }else {
-
-            
-
+        }else {
             // Standard email
             $host = $form->get('host')->getData();
             $port = $form->get('port')->getData();
@@ -450,7 +436,24 @@ class ManagementSMTPController extends AbstractController
                 $session->set('error', [$error]);
             }
         }
+
+
+    // Error message if the api mail didn't work    
+    if (isset($isApiEmailSent)) {
+        if ($isApiEmailSent === false) {
+            $failed = $this->translator->trans('email_validation.error');
+            $this->addFlash('error', $failed);
         }
+    }
+
+    if (isset($isRegularEmailSent)) {
+        if ($isRegularEmailSent === false) {
+            $failed = $this->translator->trans('email_validation.error');
+            $this->addFlash('error', $failed);
+        }
+    }
+
+
 
         // Adds a return value to the function to allow the index to display the success and error message.
         $isFinalEmailSent = false;
