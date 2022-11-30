@@ -1,8 +1,8 @@
 swiftmailer:
     transport: smtp
-    host: null
-    port: null
-    auth_mode: null
-    encryption: null
-    username: null
+    host: smtp-relay.sendinblue.com
+    port: 587
+    auth_mode: login
+    encryption: tls
+    username: stephanefaure@myddleware.com
     password: null
