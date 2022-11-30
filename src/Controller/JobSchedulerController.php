@@ -302,6 +302,52 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
+    /**
+     * Disables all cron jobs.
+     *
+     * @Route("/massdisable", name="massdisable")
+     */
+    public function disableAllCrons(Request $request, TranslatorInterface $translator)
+    {
+        try {
+            // $command = '';
+            // $period = ' */5 * * * *';
+            // $crontabForm = new CronJob($command, $period);
+            // $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+            // $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
+
+            // // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
+            // $formParam = $request->request->get('job_scheduler_cron');
+            // $form->handleRequest($request);
+
+            // if ($form->isSubmitted() && $form->isValid()) {
+            //     // use the static method create because command can be set
+            //     $crontab = CronJob::create($formParam['command'], $formParam['period']);
+            //     $crontab->setDescription($formParam['description']);
+            //     $this->entityManager->persist($crontab);
+            //     $this->entityManager->flush();
+            //     $success = $translator->trans('crontab.success');
+            //     $this->addFlash('success', $success);
+
+            //     return $this->redirectToRoute('jobscheduler_cron_list');
+            // } else {
+            //     return $this->render('JobScheduler/crontab.html.twig', [
+            //         'entity' => $entity,
+            //         'form' => $form->createView(),
+            //     ]);
+            // }
+
+            echo "disable all cron";
+            $disable = "disable";
+            echo $disable;
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
 
     /**
      * @Route("/crontab_list", name="jobscheduler_cron_list")
