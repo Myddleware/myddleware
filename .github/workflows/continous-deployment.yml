@@ -98,7 +98,7 @@ jobs:
       - name: "Update version in manifests"
         uses: microsoft/variable-substitution@v1
         with:
-          files: /kubernetes/charts/myddleware/values.${{ env.ENVIRONMENT_NAME }}.yaml
+          files: ./kubernetes/charts/myddleware/values.${{ env.ENVIRONMENT_NAME }}.yaml
         env:
           version: ${{ github.sha }}
 
