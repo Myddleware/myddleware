@@ -883,3 +883,4 @@ duplicate_rule:
     current_rule: Current rule
     new_rule: New rule
     success_duplicate: Your rule has been well duplicated
+banner: None of your Crontab is enabled

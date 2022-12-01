@@ -885,3 +885,4 @@ duplicate_rule:
     current_rule: règle actuelle
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
+banner: Aucune de vos Crontab n'est activé

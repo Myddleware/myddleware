@@ -36,6 +36,15 @@
         <header> 
             <div id="myd_top">
                 <nav>
+                    {% set count =  0  %}
+                    {% for v in entityBanner.getEntityBanner %}
+                        {% if v.enable == false %}
+                            {% set count = count + 1 %}
+                        {% endif %}
+                        {% if entityBanner.getEntityBanner | length == count %}
+                            <span class="text-light pl-1">{{'banner'|trans}}</span>
+                        {% endif %}
+                    {% endfor %}
                     <ul class="nav nav-pills right">
                         <li class="dropdown">
                             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
