@@ -25,9 +25,7 @@
 {% extends 'base.html.twig' %}
 {% block title %}{{parent()}} | {{'title.connector.edit'|trans}} {% endblock %}
 {% block titlesm %}<a href="{{ path('regle_connector_list') }}">{{'breadcrumb.connector_list'|trans}}</a>
-	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-	<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-	</svg>
+	<i class="fa fa-chevron-right" aria-hidden="true"></i>
 	{{'title.connector.edit'|trans}} {{ connector_name }} {% endblock titlesm %} 
 {% block body %}
     <div id="connector">

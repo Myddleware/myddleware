@@ -1,13 +1,12 @@
-body {
-    background: url('../images/login/fd.jpg') ;
-    background-size: cover;
-}
-
 #logo {
     background: url('../images/login/logo.png') no-repeat;
     background-size: contain;
+    margin-top: 60px;
 }
-
+.logo-install{
+    margin-left: 577px !important;
+    margin-top: 70px !important;
+}
 code {
     background-color: #444446;
     color: #fff;
@@ -20,6 +19,7 @@ code {
     max-width: 75vw;
     margin: auto;
     border: none;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 .card .card-body {

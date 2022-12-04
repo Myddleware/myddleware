@@ -91,119 +91,92 @@
                         </li> 
                     </ul>                   
                 </nav>
-            </div>
-            <div id="navigation-container" class="mt-5 container-fluid">
-                <div class="d-flex row mt-4">
-                        <div class="col-2">
-                            <a href="{{ path('regle_panel')}}"> 
-                                <span id="logo"></span>
-                            </a>
-                        </div>
-                        <div class="col-10">
-                            <div class="d-flex align-items-end flex-column-reverse negative-margin-menu">
-                                <div>
-                                    <menu>  
-                                        <ul class="nav nav-pills">
-                                            <li>
-                                                <a href="{{ path('regle_panel') }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
-                                                    <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
-                                                    </svg>
-                                                    {{'menu.index'|trans}}
-                                                </a>
-                                            </li>
-                                            <li class="dropdown">
-                                                <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{'menu.rule.title'|trans}}
-                                                <span class="caret"></span>
-                                                </a>
-                                                <ul class="dropdown-menu" >
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('regle_stepone_animation') }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                                            </svg>
-                                                            {{'menu.rule.createv2'|trans}}
-                                                        </a>
-                                                    </li>                                    
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('regle_list') }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-                                                            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                                            </svg>
-                                                            {{'menu.rule.list'|trans}}
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li class="dropdown">
-                                                <a  class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{'menu.connector.title'|trans}}
-                                                <span class="caret"></span>
-                                                </a>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('regle_connector_create') }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                                            </svg>
-                                                            {{'menu.connector.create'|trans}}
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('regle_connector_list') }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-                                                            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                                            </svg>
-                                                            {{'menu.connector.list'|trans}}
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </li>   
-                                            <li class="dropdown">
-                                                <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{'menu.flux.title'|trans}}
-                                                <span class="caret"></span>
-                                                </a>
-                                                <ul class="dropdown-menu" role="menu">
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('flux_list', {'search': 0}) }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-                                                            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                                            </svg>
-                                                            {{'menu.flux.list'|trans}}
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li class="dropdown">
-                                                <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{'menu.job.title'|trans}}
-                                                <span class="caret"></span>
-                                                </a>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a class="dropdown-item" href="{{ path('task_list') }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
-                                                            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                                            </svg>
-                                                            {{'menu.flux.list'|trans}}
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </li>                                                                               
-                                            <li><a href="http://www.myddleware.com/pricing/support"  target="_blank">{{'menu.support'|trans}}</a></li>
-                                        </ul>                   
-                                    </menu>
-                                </div>
-                                <div>
-                                    <span id="cloud"></span> 
-                                </div>
-                            </div>
-                        </div>
+            </div>      
+                <div class="d-flex">
+                    <div class="d-flex">
+                        <menu>  
+                            <ul class="nav nav-pills flex-nav">
+                                <li class="dropdown logo-nav">
+                                    <a href="{{ path('regle_panel')}}"> 
+                                        <span id="logo"></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ path('regle_panel') }}">
+                                        {{'menu.index'|trans}}
+                                    </a>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{'menu.rule.title'|trans}}
+                                    <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu" >
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('regle_stepone_animation') }}">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                                {{'menu.rule.createv2'|trans}}
+                                            </a>
+                                        </li>                                    
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('regle_list') }}">
+                                                <i class="fa fa-th-list" aria-hidden="true"></i>
+                                                {{'menu.rule.list'|trans}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a  class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{'menu.connector.title'|trans}}
+                                    <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('regle_connector_create') }}">
+                                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                                {{'menu.connector.create'|trans}}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('regle_connector_list') }}">
+                                                <i class="fa fa-th-list" aria-hidden="true"></i>
+                                                {{'menu.connector.list'|trans}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>   
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{'menu.flux.title'|trans}}
+                                    <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('flux_list', {'search': 0}) }}">
+                                                <i class="fa fa-th-list" aria-hidden="true"></i>
+                                                {{'menu.flux.list'|trans}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{'menu.job.title'|trans}}
+                                    <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('task_list') }}">
+                                                <i class="fa fa-th-list" aria-hidden="true"></i>
+                                                {{'menu.flux.list'|trans}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>                                                                               
+                                <li><a href="http://www.myddleware.com/pricing/support"  target="_blank">{{'menu.support'|trans}}</a></li>
+                            </ul>                   
+                        </menu>
                     </div> 
                 </div>  
             </div>                 
@@ -212,9 +185,7 @@
         {% include "Layout/notification.html.twig" %}
         </div>
         <div id="myd_title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-            </svg>
+            <i class="fa fa-chevron-right" aria-hidden="true"></i>
             {% block titlesm %}{% endblock titlesm %}
         </div>
         <section class="mx-auto">    

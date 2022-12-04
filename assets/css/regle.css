@@ -208,7 +208,8 @@ input[type="text"] {
 }
 
 .badge {
-	background: #9E9937;
+	--bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-secondary-rgb), var(--bs-bg-opacity));
 	display:inline-block;
 	width: 40px;
 }
@@ -228,13 +229,13 @@ input[type="text"] {
 }
 
 .btn-success {
-	background-color: #9E9937!important;
-	border-color: #9E9937!important;
+	background-color: #19ca42!important;
+	border-color: #19ca42!important;
 }
 
 .btn-success:hover {
-	background-color: #a8a225!important;
-	border-color: #a8a225!important;
+	background-color: #16aa39!important;
+	border-color: #16aa39!important;
 } 
 
 
@@ -270,7 +271,7 @@ td a {
 }
 
 .title_target, .title_target_ctr {
-	color: #C6BD20;
+	color: #198BCA;
 }
 
 /* Page View Rule : Validation Tab */
@@ -317,7 +318,7 @@ td a {
 }
 
 .mapped-fields{
-	color: #9E9937;
+	color: #198BCA;
 }
 
 .mapped-formula {
@@ -332,12 +333,12 @@ td a {
 }
 
 #rule-list {
-	max-width: 75vw;
+	max-width: 88vw;
 }
 
 /* Connectors list page */
 #connector-list {
-	max-width: 40vw;
+	max-width: 75vw;
 }
 
 #validRuleParams {
@@ -346,4 +347,9 @@ td a {
 
 .CRUD-icons a {
 	text-decoration: none!important;
+}
+
+.tab-3, .tab-4, .tab-5, .tab-6, .tab-7{
+	border: 0px solid transparent !important;
+	border-top-right-radius: 194.25rem !important;
 }

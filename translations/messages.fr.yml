@@ -702,7 +702,14 @@ messages:
     template:
         nb_rule: "Nombre de règle générées: "
         help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
-
+email_sendinblue:
+    content: >
+        Ceci est un email de test envoyé par Myddleware en utilisant la clé Api Sendinblue.
+        Cordialement,
+        l'équipe Myddleware
+email_validation:
+    success: Message envoyé !
+    error: Envoi du message échoué !
 email_notification:
     subject: Notification Myddleware
     hello: Bonjour, 
