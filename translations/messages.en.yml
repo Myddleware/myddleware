@@ -703,6 +703,7 @@ messages:
         nb_rule: "Number of generated rules: "
         help: 'Please, read this tutorial to help you to activate your rules : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
 email_sendinblue:
+    subject: Myddleware - Email configuration test Sendinblue
     content: >
         This is a test email sent by Myddleware using the Sendinblue Api Key.
         Best regards,
