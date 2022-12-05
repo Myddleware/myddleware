@@ -270,7 +270,8 @@ create_connector:
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
     delete: "Désirez-vous supprimer ce connecteur ?"
-    total: Nombre de connecteurs
+    total: Nombre de 
+    total2: connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
     th: 
         name: Nom
