@@ -1,5 +1,5 @@
 swiftmailer:
-    transport: null
+    transport: smtp
     host: null
     port: null
     auth_mode: null
