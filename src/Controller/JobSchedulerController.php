@@ -430,4 +430,56 @@ class JobSchedulerController extends AbstractController
             'entity' => $entity,
         ]);
     }
+    
+    /**
+     * Disables all cron jobs.
+     *
+     * @Route("/massdisable", name="massdisable")
+     */
+    public function disableAllCrons(Request $request, TranslatorInterface $translator)
+    {
+        try {
+            $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 1]);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
+            foreach ($entities as $entity) {
+                $entity->setEnable(0);
+                $this->entityManager->persist($entity);
+            }
+            $this->entityManager->flush();
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
+
+    /**
+     * Enables all cron jobs.
+     *
+     * @Route("/massenable", name="massenable")
+     */
+    public function enableAllCrons(Request $request, TranslatorInterface $translator)
+    {
+        try {
+            $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 0]);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
+            foreach ($entities as $entity) {
+                $entity->setEnable(1);
+                $this->entityManager->persist($entity);
+            }
+            $this->entityManager->flush();
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
 }

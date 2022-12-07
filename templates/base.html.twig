@@ -36,6 +36,13 @@
         <header> 
             <div id="myd_top">
                 <nav>
+                    {% for v in entityBanner.getEntityBanner %}
+                        {% if v.name == "cron_enabled"%}
+                            {% if v.value == true %}
+                            <span class="pl-1 banner">{{'banner'|trans}}</span>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
                     <ul class="nav nav-pills right">
                         <li class="dropdown">
                             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">

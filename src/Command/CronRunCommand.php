@@ -19,10 +19,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
+use App\Entity\Config;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class CronRunCommand extends BaseCommand
 {
     private CommandHelper $commandHelper;
+    protected $configParams;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(
         CommandHelper $commandHelper,
@@ -31,6 +35,7 @@ final class CronRunCommand extends BaseCommand
         parent::__construct($registry);
 
         $this->commandHelper = $commandHelper;
+        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -42,6 +47,10 @@ final class CronRunCommand extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->setConfigParam();
+        if (empty($this->configParams['cron_enabled'])) {
+            throw new Exception('No parameter for the Crontab activation.');
+        }
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
 
@@ -160,4 +169,17 @@ final class CronRunCommand extends BaseCommand
 
         return $process;
     }
+        // Get the content of the table config
+        protected function setConfigParam()
+        {
+            if (empty($this->configParams)) {
+                $configRepository = $this->entityManager->getRepository(Config::class);
+                $configs = $configRepository->findAll();
+                if (!empty($configs)) {
+                    foreach ($configs as $config) {
+                        $this->configParams[$config->getName()] = $config->getvalue();
+                    }
+                }
+            }
+        }
 }
