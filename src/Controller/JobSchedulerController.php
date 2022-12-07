@@ -2,24 +2,25 @@
 
 namespace App\Controller;
 
-use App\Entity\JobScheduler;
-use App\Entity\User;
-use App\Form\JobSchedulerCronType;
-use App\Form\JobSchedulerType;
-use App\Manager\JobSchedulerManager;
-use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Entity\User;
+use App\Entity\Config;
+use App\Entity\JobScheduler;
+use App\Form\JobSchedulerType;
+use App\Form\JobSchedulerCronType;
+use App\Repository\UserRepository;
+use App\Manager\JobSchedulerManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -436,7 +437,7 @@ class JobSchedulerController extends AbstractController
      *
      * @Route("/massdisable", name="massdisable")
      */
-    public function disableAllCrons(Request $request, TranslatorInterface $translator)
+    public function disableAllTask(Request $request, TranslatorInterface $translator)
     {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 1]);
@@ -462,7 +463,7 @@ class JobSchedulerController extends AbstractController
      *
      * @Route("/massenable", name="massenable")
      */
-    public function enableAllCrons(Request $request, TranslatorInterface $translator)
+    public function enableAllTask(Request $request, TranslatorInterface $translator)
     {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 0]);
@@ -470,7 +471,7 @@ class JobSchedulerController extends AbstractController
                 throw new Exception("Couldn't fetch Cronjobs");
             }
             foreach ($entities as $entity) {
-                $entity->setEnable(1);
+                $entity->setvalue(0);
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
@@ -482,4 +483,59 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
+       /**
+     * disable all cron jobs.
+     *
+     * @Route("/massdisableCron", name="massdisableCron")
+     */
+    public function disableAllCrons(Request $request, TranslatorInterface $translator)
+    {
+        try {
+            $entities = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
+            foreach ($entities as $entity) {
+                $entity->setvalue(0);
+                $this->entityManager->persist($entity);
+            }
+            $this->entityManager->flush();
+            $success = $translator->trans('crontab.disableAllCrons');
+            $this->addFlash('success', $success);
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
+
+           /**
+     * Enables all cron jobs.
+     *
+     * @Route("/massenableCron", name="massenableCron")
+     */
+    public function enableAllCrons(Request $request, TranslatorInterface $translator)
+    {
+        try {
+            $entities = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
+            if (!($entities)) {
+                throw new Exception("Couldn't fetch Cronjobs");
+            }
+            foreach ($entities as $entity) {
+                $entity->setvalue(1);
+                $this->entityManager->persist($entity);
+            }
+            $this->entityManager->flush();
+            // Message success
+            $success = $translator->trans('crontab.enableAllCrons');
+            $this->addFlash('success', $success);
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        } catch (Exception $e) {
+            $failure = $translator->trans('crontab.incorrect');
+            $this->addFlash('error', $failure);
+            return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
+
 }

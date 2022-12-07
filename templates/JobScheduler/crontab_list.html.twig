@@ -7,8 +7,11 @@
     <div class="clr"></div>
     <div class="text-center">
         <h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
-        <a href="{{path('crontab')}}" class="btn btn-primary m-4">
-            {{ 'crontab.create'|trans }}
+        <a href="{{path('massdisableCron')}}" class="btn btn-outline-danger">
+            {{ 'crontab.disableCron'|trans }}
+        </a>
+        <a href="{{path('massenableCron')}}" class="btn btn-outline-success">
+            {{ 'crontab.enableCron'|trans }}
         </a>
         <p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
     </div>

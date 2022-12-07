@@ -25,7 +25,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final class CronRunCommand extends BaseCommand
 {
     private CommandHelper $commandHelper;
-    protected $configParams;
+    //protected $configParams;
     protected EntityManagerInterface $entityManager;
 
     public function __construct(
@@ -172,14 +172,15 @@ final class CronRunCommand extends BaseCommand
         // Get the content of the table config
         protected function setConfigParam()
         {
-            if (empty($this->configParams)) {
+            // if (empty($this->configParams)) {
                 $configRepository = $this->entityManager->getRepository(Config::class);
-                $configs = $configRepository->findAll();
+                $configs = $configRepository->findBy(['name' => 'cron_enabled']);
                 if (!empty($configs)) {
                     foreach ($configs as $config) {
-                        $this->configParams[$config->getName()] = $config->getvalue();
+
+                        //$this->configParams[$config->getName()] = $config->getvalue();
                     }
-                }
+                //}
             }
         }
 }
