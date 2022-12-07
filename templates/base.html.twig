@@ -38,7 +38,7 @@
                 <nav>
                     {% for v in entityBanner.getEntityBanner %}
                         {% if v.name == "cron_enabled"%}
-                            {% if v.value == true %}
+                            {% if v.value == false %}
                             <span class="pl-1 banner">{{'banner'|trans}}</span>
                             {% endif %}
                         {% endif %}
