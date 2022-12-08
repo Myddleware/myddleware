@@ -643,23 +643,26 @@ class mysqlcustom extends mysql {
 						$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
 						unset($param['data'][$idDoc]); // Do not send this document
 					}
-							
-					// No update of the email if
-					//    	The REEC user account is created
-					//		AND the contact is not a user
-					// 		AND the contact is not a volontaire
+					
+					// Update email if 
+						// 		Email has been changed
+						// AND 	volontaire = 1 OR type = “User COMET” + compte_reec_ok = 1 
 					if (
-						!(
-								empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
-							 OR $param['rule']['id'] == '5cf98651a17f3'	// users
+							!empty($param['data'][$idDoc]['email'])
+						AND $param['data'][$idDoc]['email'] != $param['dataHistory'][$idDoc]['email']
+						AND (
+								!empty($param['data'][$idDoc]['volontaire'])
 							 OR (
-									$param['rule']['id'] != '5ce3621156127'	// engagé
-								AND !empty($param['data'][$idDoc]['volontaire'])
+									!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
+								AND $param['dataHistory'][$idDoc]['type'] == 'User Comet'
 							)
 						)
 					) {
-						unset($param['data'][$idDoc]['email']);
-					}		
+						$param['data'][$idDoc]['email_updated'] = 1;					
+					} else {
+						unset($param['data'][$idDoc]['email']);				
+					}					
+						
 					// Never modify compte_reec_ok
 					unset($param['data'][$idDoc]['compte_reec_ok']);
 				}
