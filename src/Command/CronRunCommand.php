@@ -51,21 +51,16 @@ final class CronRunCommand extends BaseCommand
     {
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
-        // //Check if crontab is enabled
+        //Check if crontab is enabled
         $entity = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'cron_enabled']);
         if (!($entity)) {
             throw new Exception("Couldn't fetch Cronjobs");
         }
-        // foreach ($entities as $entity) {
             $valueCron = $entity->getValue();
-        // }
         if (
                 $valueCron == 1 
                  && !empty($valueCron))
         {
-
-
-    
             $jobsToRun = $jobRepo->findAll();
     
             $jobCount = count($jobsToRun);
@@ -184,27 +179,4 @@ final class CronRunCommand extends BaseCommand
 
         return $process;
     }
-    // Get the content of the table config
-    // protected function setConfigParam()
-    // {
-
-    //     $entities = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
-    //     if (!($entities)) {
-    //         throw new Exception("Couldn't fetch Cronjobs");
-    //     }
-    //     foreach ($entities as $entity) {
-    //         $valueCron = $entity->getValue();
-    //     }
-    //     return $valueCron;
-    //     // // if (empty($this->configParams)) {
-    //     //     $configRepository = $this->entityManager->getRepository(Config::class);
-    //     //     $configs = $configRepository->findBy(['name' => 'cron_enabled']);
-    //     //     if (!empty($configs)) {
-    //     //         foreach ($configs as $config) {
-
-    //     //             //$this->configParams[$config->getName()] = $config->getvalue();
-    //     //         }
-    //     //     //}
-    //     // }
-    // }
 }
