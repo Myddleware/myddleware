@@ -58,7 +58,10 @@ class airtablecustom extends airtable {
 				in_array($param['rule']['conn_id_target'], array(4,8))
 			AND $param['document']['type'] == 'U'
 			AND $param['call_type'] == 'history'
-			AND strpos($result['error'], '404 Not Found')
+			AND (
+					strpos($result['error'], '404 Not Found')
+				 OR strpos($result['error'], '404  returned')	// Airtable has changed the error message
+			)
 		) {
 			// Change the document type 
 			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);

@@ -206,7 +206,10 @@ class RuleManagerCustom extends RuleManager
 						$this->ruleId == '61a930273441b' 	// 	Aiko binome
 					AND	$type == 'C' 						// Creation only
 					AND	$documentData['attempt'] == 1 		// Only the first try
-					AND	strpos($response['error'], 'Unprocessable Entity returned') !== false
+					AND	(
+							strpos($response['error'], 'Unprocessable Entity returned') !== false
+						 OR	strpos($response['error'], '422  returned') !== false
+					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
 					if (!empty($sourceData['MydCustRelSugarcrmc_binome_contacts_1contacts_ida'])) { // Mentoré
