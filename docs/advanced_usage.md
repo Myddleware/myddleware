@@ -181,37 +181,51 @@ IDs in the previous rule then update this account :
 ![Simulate fields mapping for Address to Accounts rule](images/advanced_usage/relationship_customers_addresses.png)
 
 
-Here, we use the Account ID ie the ID of the target module in the current rule. This means that this rule will only update data.
+Here, we use the ``Account ID`` ie the ID of the target module in the current rule. This means that this rule will only update data.
+Now save the rule and run it. Don’t forget to put the reference date in the past if you want to retrieve already-existing data in Prestashop.
+Now open a transfer. You will see that Myddleware has found the right account to update :
 
-Now save the rule and run it. Don’t forget to put the reference date in the past if you want to retrieve already exiting data in Prestashop.
-
-Now open a transfer and you will see that Myddleware has found the right account to update :
+![Rule Many to One step 3 - transfer of type update](images/advanced_usage/relationship_update_transfer.png)
 
 ## Bidirectional rules 
 
 In our example, we have only shown you how to send data from Prestashop to SuiteCRM.
-But in reality, Myddleware allows you to send data in both directions, from Prestashop to SuiteCRM and from SuiteCRM to Prestashop.
+But in reality, Myddleware allows you to send data in both directions, from Prestashop to SuiteCRM and from SuiteCRM to Prestashop (for example).
 
 One of the rules we have created is sending Prestashop Customers to SuiteCRM contacts. 
 In this case, only modifications in Prestashop will be sent to SuiteCRM. But if the contact is modified in SuiteCRM, 
 the modification won’t be sent to Prestashop.
 
-So let’s create a new rule to send the modification of the SuiteCRM contacts to Prestashop. 
+So let’s create a new rule which will send SuiteCRM contacts updates to Prestashop. 
 Select the same modules and connectors you used in your previous rule but in the opposite direction :
 
-Go to fields mapping and map at least the fields firstname, lastname and email. Make sure you don’t use a field that will
-be updated everytime like the modification of the date of the record, you could create an infinite loop.
+- source: SuiteCRM > ``Contacts``
+- target: Prestashop > ``the e-shop s customers``
+
+![Bidirectional rule - create rule Suite Contacts to Prestashop customers](images/advanced_usage/bidirectional_rule_create_suite_presta_contacts.png)
+
+Map some fields such as ``firstname``, ``lastname`` and ``email`` for instance. 
+
+!> Make sure you don’t use a field that will be updated everytime like the modification date of the record, you could create an infinite loop otherwise ! 
 
 Go to validation. A new field will be displayed ie “Bidirectional synchronization” in addition to the opposite rule. 
 Select the opposite rule and click on “Confirm” :
 
+![Bidirectional sync confirmation](images/advanced_usage/bidirectional_sync.png)
+
 The opposite rule is displayed on the rule’s detailed view :
 
-Activate both rules. Now, to test your bidirectional rule, modify a customer in Prestashop, go to the the rules list view 
-and click on “Execute all active rules” :
+Activate both rules. Now, to test your bidirectional rule, modify a customer in Prestashop, go to the rules list view 
+and click on ``Execute all active rules`` :
 
+![Bidirectional rule - rule description](images/advanced_usage/rule_description.png)
 
-Now open the task and you will see the contact that has been sent to SuiteCRM.
+![Bidirectional rule - rule description](images/advanced_usage/list_rules.png)
+
+Now open the task, you will see the contact that has been sent to SuiteCRM.
+
+![img.png](img.png)
+
 Notice that in SuiteCRM, the contact’s name was “Doe test” and but the name that was sent is “Doe”.  
 The name is now modified in SuiteCRM. Return to the rules list view and click again on “Execute all active rules”. 
 Another transfer is sent as a result of Myddleware reading in SuiteCRM and detecting the modification we’ve just made. 
