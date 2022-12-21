@@ -500,3 +500,11 @@ color: #000000!important;
 .fancybox {
 	text-decoration: none!important;
 }
+
+.mapping-container {
+	justify-content: center !important;
+}
+
+.mapping-container > .mapping-card {
+	margin: 30px;
+}
