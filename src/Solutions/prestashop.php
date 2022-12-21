@@ -501,6 +501,9 @@ class prestashopcore extends solution
                         )    
                     ) {
                         $param['date_ref'] = 1;
+                    } else {
+						// We read the next record
+						$param['date_ref']++;
                     }
                     $opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
                     $opt['sort'] = '[id_ASC]';

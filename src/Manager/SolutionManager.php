@@ -55,9 +55,13 @@ use App\Solutions\vtigercrm;
 use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
+use App\Solutions\yousign;
 use App\Solutions\zuora;
 use Exception;
 
+/**
+ * Class SolutionManager.
+ */
 class SolutionManager
 {
     private array $classes = [];
@@ -92,7 +96,8 @@ class SolutionManager
         salesforce $salesforce,
         airtable $airtable,
         sendinblue $sendinblue,
-        internallist $internallist
+        internallist $internallist,
+        yousign $yousign
     ) {
         $this->classes = [
             'wordpress' => $wordpress,
@@ -124,17 +129,15 @@ class SolutionManager
             'salesforce' => $salesforce,
             'airtable' => $airtable,
             'sendinblue' => $sendinblue,
+            'yousign' => $yousign,
             'internallist' => $internallist,
         ];
     }
 
-    /**
-     * @throws Exception
-     */
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware. ');
+            throw new Exception('Solution ' . $name . ' not found. Please make sure that you have added this solution into Myddleware. ');
         }
 
         return $this->classes[$name];
