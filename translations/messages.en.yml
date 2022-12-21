@@ -300,7 +300,8 @@ view_connector:
 list_flux:
     start: Start
     end: End
-    total: Number of documents
+    total1: Number of
+    total2: documents
     empty: No documents found
     btn:
         filter: Filter
