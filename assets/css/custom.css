@@ -59,7 +59,7 @@ menu .caret, #myd_top .caret {
 
 /* buttons */
 
-.btn-myd, .btn-mydinv, .btn-mydinv:hover, .btn-myd:hover {
+.btn-mydinv, .btn-mydinv:hover {
     color: #404042;
     font-weight: bold;
     background: url('./../images/template/btn.png') no-repeat;
@@ -100,11 +100,11 @@ menu .caret, #myd_top .caret {
     display:inline-block;
 }
 
-.btn-myd, .btn-small-myd, .btn-middle-myd, .btn-large-myd  {
+.btn-small-myd, .btn-middle-myd, .btn-large-myd  {
     background-position: left top;
 }
 
-.btn-myd:hover, .btn-small-myd:hover, .btn-middle-myd:hover, .btn-large-myd:hover {
+.btn-small-myd:hover, .btn-middle-myd:hover, .btn-large-myd:hover {
     background-position: left bottom;
     text-decoration:none;
     cursor:pointer;
