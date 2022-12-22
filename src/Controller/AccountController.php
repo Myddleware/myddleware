@@ -174,13 +174,20 @@ class AccountController extends AbstractController
      **/
     public function downloadFileAction()
     {
-        
-        $file = '\laragon\www\myddleware_NORMAL\var\log\dev.log';
+        if ($this->env === "dev") {
+            $logType = 'dev.log';
+        } else {
+            $logType = 'prod.log';
+        }
+        $cwd = getcwd();
+        $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
+        $varPath = "\\var\log\\".$logType;
+        $file = $cwdWithoutPublic . $varPath;
         $absolutePathFile = realpath($file);
        
 
         $response = new BinaryFileResponse($absolutePathFile);
-        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'dev.log');
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $logType);
         return $response;
     }
 
@@ -189,12 +196,19 @@ class AccountController extends AbstractController
      **/
     public function emptyLogAction(Request $request): Response
     {
-
-        // Set the file path
-        $file = 'C:\laragon\www\myddleware_NORMAL\var\log\dev.log';
+        if ($this->env === "dev") {
+            $logType = 'dev.log';
+        } else {
+            $logType = 'prod.log';
+        }
+        $cwd = getcwd();
+        $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
+        $varPath = "\\var\log\\".$logType;
+        $file = $cwdWithoutPublic . $varPath;
+        $absolutePathFile = realpath($file);
 
         // Open the file in write mode
-        $handle = fopen($file, 'w');
+        $handle = fopen($absolutePathFile, 'w');
 
         // Check if the file was successfully opened
         if ($handle) {
