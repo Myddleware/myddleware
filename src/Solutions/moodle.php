@@ -418,6 +418,20 @@ class moodlecore extends solution
         return $result;
     }
 
+	// Check data before update
+    // Add a throw exeption if error
+    protected function checkDataBeforeUpdate($param, $data)
+    {
+		// createpassword field can be oly used in creation
+		if (
+				$param['module'] == 'users'
+			AND isset($data['createpassword'])
+		) {
+			unset($data['createpassword']);
+		}
+        return parent::checkDataBeforeUpdate($param, $data);
+    }
+
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
@@ -535,6 +549,9 @@ class moodlecore extends solution
                 break;
             case 'get_users_last_access':
                 return 'lastaccess';
+                break;
+            case 'users': // Only use to get one user (history purpose)
+                return 'id';
                 break;
             default:
                 return 'timemodified';
