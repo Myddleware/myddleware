@@ -183,4 +183,28 @@ class AccountController extends AbstractController
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'dev.log');
         return $response;
     }
+
+    /**
+     * @Route("/emptylog", name="empty_log")
+     **/
+    public function emptyLogAction(Request $request): Response
+    {
+
+        // Set the file path
+        $file = 'C:\laragon\www\myddleware_NORMAL\var\log\dev.log';
+
+        // Open the file in write mode
+        $handle = fopen($file, 'w');
+
+        // Check if the file was successfully opened
+        if ($handle) {
+            // Truncate the file by writing an empty string to it
+            fwrite($handle, '');
+
+            // Close the file
+            fclose($handle);
+        }
+
+        return $this->redirect($request->headers->get('referer'));
+    }
 }
