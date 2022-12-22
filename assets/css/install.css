@@ -47,3 +47,7 @@ aside {
     display: flex;
     justify-content: center;
 }
+
+#card-install-blue-like-logo{
+    background-color: #198bca !important;
+}
