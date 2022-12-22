@@ -24,22 +24,25 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
+use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
-use App\Manager\ToolsManager;
-use App\Service\AlertBootstrapInterface;
 use App\Service\UserManagerInterface;
+use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 
 /**
  * @Route("/rule")
@@ -164,5 +167,20 @@ class AccountController extends AbstractController
         return $this->render('Account/resetPassword.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/download", name="download_log")
+     **/
+    public function downloadFileAction()
+    {
+        
+        $file = '\laragon\www\myddleware_NORMAL\var\log\dev.log';
+        $absolutePathFile = realpath($file);
+       
+
+        $response = new BinaryFileResponse($absolutePathFile);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'dev.log');
+        return $response;
     }
 }

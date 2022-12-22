@@ -90,7 +90,17 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                     <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>
                 </a>
             </div>
+            <div class="row display-logs">
+                <div class="col">
+                    <h2>Download the latest logs</h2>
+                    <a href="{{path('download_log')}}">
+                        <button type="button" class="btn btn-primary">Download</button>
+                    </a>
+                    
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
