@@ -112,3 +112,7 @@ body {
 	width: 16px;
 	display: inline-block;
 } 
+
+#reset-password-button-request {
+    margin-top: 10px!important;
+}

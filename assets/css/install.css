@@ -42,3 +42,12 @@ aside {
 #database_setup_Save {
     width: 100%;
 }
+
+.logo-myddleware-install-container {
+    display: flex;
+    justify-content: center;
+}
+
+#card-install-blue-like-logo{
+    background-color: #198bca !important;
+}
