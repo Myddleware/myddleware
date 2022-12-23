@@ -716,10 +716,11 @@ email_validation:
 email_notification:
     subject: Myddleware notification
     hello: Hi, 
-    introduction: "Here the statistics about your data transfers with Myddleware: "
+    introduction: "Here are the statistics about your data transfers with Myddleware during the last 24 hours : "
     transfer_success: "- Documents successfully sent: "
     transfer_error: "- Documents in error: "
-    transfer_open: "- Documents still open:"
+    transfer_open: "- Documents open:"
+    transfer_cancel: "- Documents cancel:"
     active_rule: "Active rules: "
     no_active_rule: No active rule in Myddleware.
     100_first_erros: "Here are the 100 first errors: "

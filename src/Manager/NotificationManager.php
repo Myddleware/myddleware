@@ -118,7 +118,7 @@ class NotificationManager
                     '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
                 ]);
 
-                return $this->send($textMail);
+                return $this->send($textMail, $this->translator->trans('email_alert.subject'));
             }
 
             return true;
@@ -130,7 +130,7 @@ class NotificationManager
     }
 	
 		
-	protected function send($textMail) {
+	protected function send($textMail, $subject) {
 		// Get the email adresses of all ADMIN
 		$this->setEmailAddresses();
 		// Check that we have at least one email address
@@ -146,7 +146,7 @@ class NotificationManager
                 $sendSmtpEmailTo[] = array('email' => $emailAddress);
             }
             $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
+            $sendSmtpEmail['subject'] = $subject;
             $sendSmtpEmail['htmlContent'] = $textMail;
             $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
 
@@ -174,12 +174,8 @@ class NotificationManager
 	}
 
 
-    /**
-     * Send notification to receive statistics about Myddleware data transfers.
-     *
-     * @throws Exception
-     */
-    public function sendNotification(): bool
+    // Send notification to receive statistique about myddleware data transfer
+    public function sendNotification()
     {
         try {
             // Set all config parameters
@@ -191,33 +187,25 @@ class NotificationManager
                 throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
             }
             // Récupération du nombre de données transférées depuis la dernière notification. On en compte qu'une fois les erreurs
+			$limitDate = new DateTime('now', new \DateTimeZone('GMT'));
+			$limitDate->modify('-24 hours');
+				
             $sqlParams = "	SELECT
-                                count(distinct log.doc_id) cpt,
-                                document.global_status
-                            FROM job
-                                INNER JOIN log
-                                    ON log.job_id = job.id
-                                INNER JOIN rule
-                                    ON log.rule_id = rule.id
-                                INNER JOIN document
-                                        ON document.id = log.doc_id
-                                    AND document.deleted = 0
-                            WHERE
-                                    job.begin BETWEEN (SELECT MAX(begin) FROM job WHERE param = 'notification' AND end >= begin) AND NOW()
-                                AND (
-                                        document.global_status != 'Error'
-                                    OR (
-                                            document.global_status = 'Error'
-                                        AND document.date_modified BETWEEN (SELECT MAX(begin) FROM job WHERE param = 'notification' AND end >= begin) AND NOW()
-                                    )
-                                )
-                            GROUP BY document.global_status";
+								count(document.id) cpt,
+								document.global_status
+							FROM document
+							WHERE
+									document.deleted = 0
+								AND document.date_modified > :limitDate	   
+							GROUP BY document.global_status";
             $stmt = $this->connection->prepare($sqlParams);
+			$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
             $result = $stmt->executeQuery();
             $cptLogs = $result->fetchAllAssociative();
             $job_open = 0;
             $job_close = 0;
             $job_error = 0;
+            $job_cancel = 0;
             if (!empty($cptLogs)) {
                 foreach ($cptLogs as $cptLog) {
                     switch ($cptLog['global_status']) {
@@ -230,74 +218,53 @@ class NotificationManager
                         case 'Close':
                             $job_close = $cptLog['cpt'];
                             break;
+						 case 'Cancel':
+                            $job_cancel = $cptLog['cpt'];
+                            break;
                     }
                 }
             }
 
-            $textMail = $this->tools->getTranslation(['email_notification', 'hello']).chr(10).chr(10).$this->tools->getTranslation(['email_notification', 'introduction']).chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_success']).' '.$job_close.chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_error']).' '.$job_error.chr(10);
-            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_open']).' '.$job_open.chr(10);
+            $textMail = $this->tools->getTranslation(['email_notification', 'hello']) . '<br/>' . '<br/>' . $this->tools->getTranslation(['email_notification', 'introduction']) . '<br/>';
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_success']) . ' ' . $job_close . '<br/>';
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_error']) . ' ' . $job_error . '<br/>';
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_open']) . ' ' . $job_open . '<br/>';
+            $textMail .= $this->tools->getTranslation(['email_notification', 'transfer_cancel']) . ' ' . $job_cancel . '<br/>';
 
             // Récupération des règles actives
             $activeRules = $this->ruleRepository->findBy(['active' => true, 'deleted' => false]);
             if (!empty($activeRules)) {
-                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'active_rule']).chr(10);
+                $textMail .= '<br/>' . $this->tools->getTranslation(['email_notification', 'active_rule']) . '<br/>';
                 foreach ($activeRules as $activeRule) {
-                    $textMail .= ' - '.$activeRule->getName().chr(10);
+                    $textMail .= ' - ' . $activeRule->getName() . '<br/>';
                 }
             } else {
-                $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'no_active_rule']).chr(10);
-            }
-
-            // Get errors since the last notification
-            if ($job_error > 0) {
-                $logs = $this->jobRepository->getErrorsSinceLastNotification();
-                if (100 == count($logs)) {
-                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', '100_first_erros']).chr(10);
-                } else {
-                    $textMail .= chr(10).chr(10).$this->tools->getTranslation(['email_notification', 'error_list']).chr(10);
-                }
-                foreach ($logs as $log) {
-                    $textMail .= " - Règle $log[name], id transfert $log[id], le $log[begin] : $log[message]".chr(10);
-                }
+                $textMail .= '<br/>' . $this->tools->getTranslation(['email_notification', 'no_active_rule']) . '<br/>';
             }
 
             // Add url if the parameter base_uri is defined in app\config\public
             if (!empty($this->configParams['base_uri'])) {
-                $textMail .= chr(10).$this->configParams['base_uri'].chr(10);
+                $textMail .= '<br/>' . $this->configParams['base_uri'] . '<br/>';
             }
             // Create text
-            $textMail .= chr(10).$this->tools->getTranslation(['email_notification', 'best_regards']).chr(10).$this->tools->getTranslation(['email_notification', 'signature']);
+            $textMail .= '<br/>' . $this->tools->getTranslation(['email_notification', 'best_regards']) . '<br/>' . $this->tools->getTranslation(['email_notification', 'signature']);
 
-            $message = (new \Swift_Message($this->tools->getTranslation(['email_notification', 'subject'])));
-            $message
-                ->setFrom((!empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'))
-                ->setBody($textMail);
-            // Send the message to all admins
-            foreach ($this->emailAddresses as $emailAddress) {
-                $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);
-                if (!$send) {
-                    $this->logger->error('Failed to send email : '.$textMail.' to '.$emailAddress);
-                    throw new Exception('Failed to send email : '.$textMail.' to '.$emailAddress);
-                }
-            }
-
-            return true;
+            return $this->send($textMail, $this->tools->getTranslation(['email_notification', 'subject']));
         } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
             throw new Exception($error);
         }
     }
 
-    // Add every admin email in the notification list
+	// Add every admin email in the notification list
     protected function setEmailAddresses()
     {
         $users = $this->userRepository->findEmailsToNotification();
         foreach ($users as $user) {
-            $this->emailAddresses[] = $user['email'];
+			if (!in_array($user['email'],$this->emailAddresses)) { 
+				$this->emailAddresses[] = $user['email'];
+			}
         }
     }
 

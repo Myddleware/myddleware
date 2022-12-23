@@ -715,10 +715,11 @@ email_validation:
 email_notification:
     subject: Notification Myddleware
     hello: Bonjour, 
-    introduction: "Voici les statistiques concernant vos documents avec la solution Myddleware:"
+    introduction: "Voici les statistiques des 24 dernières heures dans Myddleware:"
     transfer_success: "- Nombre de documents envoyés avec succès: "
     transfer_error: "- Nombre de documents en erreur: "
     transfer_open: "- Nombre de documents ouverts: "
+    transfer_cancel: "- Nombre de documents annulés: "
     active_rule: "Vos règles actives dans Myddleware sont: "
     no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
     100_first_erros: "Voici les 100 premières erreurs: "
