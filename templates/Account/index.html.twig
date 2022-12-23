@@ -99,10 +99,12 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                     
                 </div>
                 <div class="col">
+                    {% if is_granted('ROLE_SUPER_ADMIN') %}
                     <h2>Empty the log file</h2>
                     <a href="{{path('empty_log')}}">
                         <button type="button" class="btn btn-primary">Empty</button>
                     </a>
+                    {% endif %}
                     
                 </div>
             </div>
