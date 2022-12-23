@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block body %}
+
+<h1>execute a rule by id</h1>
+
+
+<div class="container-fluid p-3">
+    {{ form_start(formIdBatch) }}
+    {{ form_row(formIdBatch.id, {'attr' : {'placeholder': "separate the ids with comas, no space"}}) }}
+    <button type='submit' class='btn btn-success' >Run the rule with these ids</button>
+    {{ form_end(formIdBatch) }}
+</div>
+
+{% endblock %}
