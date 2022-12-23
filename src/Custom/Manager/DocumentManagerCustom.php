@@ -69,6 +69,20 @@ class DocumentManagerCustom extends DocumentManager
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
 			}
 		}
+		
+		// On annule la relation pôle - contact (engagé) si le contact (jeune accompagné) a été filtré ou n'est pas un jeune accompagné
+		if (
+			!empty($this->document_data['rule_id'])
+			and	$this->document_data['rule_id'] == '63a325156cd50' // REEC - Composante - Jeune accompag
+		) {
+			if (
+				strpos($this->message, 'No data for the field contact_id.') !== false
+				and strpos($this->message, 'in the rule REEC - Jeune accompagn') !== false
+			) {
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type jeune accompagne. Le lien contact - composante ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+			}
+		}
 
 		// On annule la relation pôle - contact (université) si le contact (université) a été filtré
 		if (
