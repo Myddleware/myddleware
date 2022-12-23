@@ -420,7 +420,7 @@ class moodlecore extends solution
 
 	// Check data before update
     // Add a throw exeption if error
-    protected function checkDataBeforeUpdate($param, $data)
+    protected function checkDataBeforeUpdate($param, $data, $idDoc=null)
     {
 		// createpassword field can be oly used in creation
 		if (
@@ -429,7 +429,7 @@ class moodlecore extends solution
 		) {
 			unset($data['createpassword']);
 		}
-        return parent::checkDataBeforeUpdate($param, $data);
+        return parent::checkDataBeforeUpdate($param, $data, $idDoc);
     }
 
     // Permet de renvoyer le mode de la règle en fonction du module target

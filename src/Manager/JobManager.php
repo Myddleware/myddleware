@@ -505,7 +505,10 @@ class jobcore
     }
 
     // Fonction permettant d'annuler massivement des documents
-    public function readRecord($ruleId, $filterQuery, $filterValues): bool
+
+    // In order to add extra components to the function without disturbing its regular use, we added a flag argument.
+    // This $usesDocumentIds flag is either null or 1
+    public function readRecord($ruleId, $filterQuery, $filterValues, $usesDocumentIds = null): bool
     {
         try {
             // Get the filter values
@@ -529,6 +532,11 @@ class jobcore
             $this->ruleManager->setJobId($this->id);
             $this->ruleManager->setApi($this->api);
 
+            // We create an array that will match the initial structure of the function
+            if ($usesDocumentIds === 1) {
+                $arrayOfDocumentIds = [];
+            }
+
             // Try to read data for each values
             foreach ($filterValuesArray as $value) {
                 // Generate documents
@@ -536,8 +544,13 @@ class jobcore
                 if (!empty($documents->error)) {
                     throw new Exception($documents->error);
                 }
-                // Run documents
-                if (!empty($documents)) {
+
+                // We assign the id to an id section of the array
+                if ($usesDocumentIds === 1) {
+                    $arrayOfDocumentIds[] = $documents[0]->id;
+                    continue;
+                } elseif (!empty($documents)) {
+                    // Run documents
                     foreach ($documents as $doc) {
                         $errors = $this->ruleManager->actionDocument($doc->id, 'rerun');
                         // Check errors
@@ -546,6 +559,12 @@ class jobcore
                         }
                     }
                 }
+            }
+
+            // Since the actionDocument takes a string and not an array of ids, we recompose the ids into a string separated by commas
+            if ($usesDocumentIds === 1) {
+                $stringOfDocumentIds = implode(',', $arrayOfDocumentIds);
+                $errors = $this->ruleManager->actionDocument($stringOfDocumentIds, 'rerun');
             }
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
