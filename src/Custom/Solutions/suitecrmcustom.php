@@ -102,7 +102,9 @@ class suitecrmcustom extends suitecrm
 
 	public function readData($param)
 	{
-		$this->currentRule = $param['rule']['id'];
+		if (!empty($param['rule']['id'])) {
+			$this->currentRule = $param['rule']['id'];
+		}
 		return parent::readData($param);
 	}
 
@@ -141,8 +143,9 @@ class suitecrmcustom extends suitecrm
 			}
 		}
 		if (
-			$param['rule']['id'] == '5ce362b962b63'
-			and !empty($read)
+				!empty($param['rule']['id'])
+			AND	$param['rule']['id'] == '5ce362b962b63'
+			AND !empty($read)
 		) {
 			foreach ($read as $key => $record) {
 				// Record filtered by default

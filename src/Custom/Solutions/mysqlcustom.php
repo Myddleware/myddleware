@@ -649,6 +649,7 @@ class mysqlcustom extends mysql {
 						// AND 	volontaire = 1 OR type = “User COMET” + compte_reec_ok = 1 
 					if (
 							!empty($param['data'][$idDoc]['email'])
+						AND !empty($param['dataHistory'][$idDoc])	
 						AND $param['data'][$idDoc]['email'] != $param['dataHistory'][$idDoc]['email']
 						AND (
 								!empty($param['data'][$idDoc]['volontaire'])

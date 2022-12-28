@@ -162,7 +162,23 @@ class rulecore
     {
         $this->ruleId = $idRule;
         if (!empty($this->ruleId)) {
-            $rule = "SELECT *, (SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode FROM rule WHERE id = :ruleId";
+            $rule = "	SELECT 
+							rule.*, 
+							(SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode,
+							source_solution.name as solution_source_name,
+							target_solution.name as solution_target_name
+						FROM rule 
+							INNER JOIN connector source_connector
+								 ON rule.conn_id_source = source_connector.id
+								AND source_connector.deleted = 0
+								INNER JOIN solution	source_solution
+									ON source_connector.sol_id = source_solution.id
+							INNER JOIN connector target_connector
+								 ON rule.conn_id_target = target_connector.id
+								AND target_connector.deleted = 0
+								INNER JOIN solution	target_solution
+									ON target_connector.sol_id = target_solution.id
+						WHERE rule.id = :ruleId";
             $stmt = $this->connection->prepare($rule);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
@@ -282,16 +298,6 @@ class rulecore
                 return false;
             }
 
-            // Get the name of the application
-            $sql = 'SELECT solution.name  
-		    		FROM connector
-						INNER JOIN solution 
-							ON solution.id  = connector.sol_id
-		    		WHERE connector.id = :connId';
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bindValue(':connId', $connId);
-            $result = $stmt->executeQuery();
-            $r = $result->fetchAssociative();
             // Get params connection
             $sql = 'SELECT id, conn_id, name, value
 		    		FROM connectorparam 
@@ -310,12 +316,12 @@ class rulecore
 
             // Connect to the application
             if ('source' == $type) {
-                $this->solutionSource = $this->solutionManager->get($r['name']);
+                $this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
                 $this->solutionSource->setApi($this->api);
                 $loginResult = $this->solutionSource->login($params);
                 $c = (($this->solutionSource->connexion_valide) ? true : false);
             } else {
-                $this->solutionTarget = $this->solutionManager->get($r['name']);
+                $this->solutionTarget = $this->solutionManager->get($this->rule['solution_target_name']);
                 $this->solutionTarget->setApi($this->api);
                 $loginResult = $this->solutionTarget->login($params);
                 $c = (($this->solutionTarget->connexion_valide) ? true : false);
@@ -335,7 +341,7 @@ class rulecore
     // Permet de mettre toutes les données lues dans le système source dans le tableau $this->dataSource
     // Cette fonction retourne le nombre d'enregistrements lus
     public function createDocuments()
-    {
+    {				
         $readSource = null;
         // Si la lecture pour la règle n'est pas désactivée
         // Et si la règle est active et pas supprimée ou bien le lancement est en manuel
@@ -350,19 +356,20 @@ class rulecore
                         1 == $this->manual
                     )
                 )
-        ) {
+        ) {				
             // lecture des données dans la source
             $readSource = $this->readSource();
+					
             if (empty($readSource['error'])) {
                 $readSource['error'] = '';
             }
-
+					
             // Si erreur
             if (!isset($readSource['count'])) {
                 return $readSource;
             }
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
-            try {
+            try {					
                 if ($readSource['count'] > 0) {
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
@@ -531,8 +538,6 @@ class rulecore
         if (!empty($read['fields'])) {
             $connect = $this->connexionSolution('source');
             if (true === $connect) {
-                // Call source to add data into $send array if a call has to be done
-                $send = $this->checkSourceBeforeSend($send);
                 $this->dataSource = $this->solutionSource->readData($read);
                 // If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
                 if (
@@ -1314,8 +1319,13 @@ class rulecore
                     in_array($status, ['Ready_to_send', 'Error_sending'])
                 || (
                         true === $response[$id_document]
-                    && !empty($response['doc_status'])
-                    && in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
+                    && (
+                            empty($response['doc_status'])
+                        || (
+                                !empty($response['doc_status'])
+                            && 'No_send' != $response['doc_status']
+                        )
+                    )
                 )
             )
         ) {
@@ -1434,6 +1444,8 @@ class rulecore
                 // Connexion à la cible
                 $connect = $this->connexionSolution('target');
                 if (true === $connect) {
+					// Call source to add data into $send array if a call has to be done
+					$send = $this->checkSourceBeforeSend($send);
                     // Création des données dans la cible
                     if ('C' == $type) {
                         // Permet de vérifier que l'on ne va pas créer un doublon dans la cible

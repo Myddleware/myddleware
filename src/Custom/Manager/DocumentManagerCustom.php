@@ -349,11 +349,11 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('L\email n\'a pas été trouvé dans les contacts et les coupons de la COMET. Ce transfert de données est annulé. ');
 		}
-		
-		
+				
 		// In case a data has already been deleted in Airtable, Myddleware won't be able to process the check, so we cancel the deletion
 		if (
-				in_array($this->document_data['conn_id_target'], array(4,8)) // Airtable connectors
+				!empty($this->document_data)
+			AND	in_array($this->document_data['conn_id_target'], array(4,8)) // Airtable connectors
 			AND $new_status == 'Error_checking'
 			AND	$this->documentType == 'D' // Deletion
 		) {
