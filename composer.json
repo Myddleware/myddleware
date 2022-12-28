@@ -15,7 +15,7 @@
   },
   "prefer-stable": true,
     "require": {
-    "php": ">=7.4",
+    "php": ">=7.4, <8.2.0",
     "ext-ctype": "*",
     "ext-curl": "*",
     "ext-iconv": "*",
