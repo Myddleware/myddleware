@@ -50,7 +50,7 @@
     "phan/phan": "4.1.*",
     "phpdocumentor/reflection-docblock": "5.3.*",
     "prestashop/prestashop-webservice-lib": "dev-master",
-    "roave/better-reflection": "4.12.*",
+    "roave/better-reflection": "^6.5",
     "sendinblue/api-v3-sdk": "^7.4.4",
     "sensio/framework-extra-bundle": "5.6.*",
     "shapecode/cron-bundle": "5.0.*",
@@ -83,7 +83,7 @@
     "symfony/yaml": "4.4.*",
     "twig/extra-bundle": "3.4.*",
     "twig/twig": "3.4.*"
-    },
+  },
     "repositories": [
         {
             "type": "package",
