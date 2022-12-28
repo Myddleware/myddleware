@@ -1583,6 +1583,8 @@ class rulecore
                 // Connexion à la cible
                 $connect = $this->connexionSolution('target');
                 if (true === $connect) {
+					// Call source to add data into $send array if a call has to be done
+					$send = $this->checkSourceBeforeSend($send);
                     // Création des données dans la cible
                     if ('C' == $type) {
                         // Permet de vérifier que l'on ne va pas créer un doublon dans la cible
@@ -1627,6 +1629,27 @@ class rulecore
 
         return $response;
     }
+	
+	protected function checkSourceBeforeSend($send) {	
+		if (empty($this->solutionSource)) {		
+			$this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
+		}
+		if($this->solutionSource->sourceCallRequestedBeforeSend($send)) {
+			$connect = $this->connexionSolution('source');
+			if ($connect) {		
+				// Add source data into send array
+				if (!empty($send['data'])) {
+					foreach ($send['data'] as $documentId => $record) {		
+						$send['source'][$documentId] = $this->getDocumentData($documentId, 'S');						
+					}
+				}	
+				$send = $this->solutionSource->sourceActionBeforeSend($send);
+			} else {	
+				throw new \Exception('Failed to connect to the source solution before sending data.');
+			}
+		}
+		return $send;
+	}
 
     protected function massSendTarget($type, $documentId = null)
     {
