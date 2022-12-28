@@ -126,8 +126,24 @@ class rulecore
     {
         $this->ruleId = $idRule;
         if (!empty($this->ruleId)) {
-            $rule = "SELECT *, (SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode FROM rule WHERE id = :ruleId";
-            $stmt = $this->connection->prepare($rule);
+            $rule = "	SELECT 
+							rule.*, 
+							(SELECT value FROM ruleparam WHERE rule_id = :ruleId and name= 'mode') mode,
+							source_solution.name as solution_source_name,
+							target_solution.name as solution_target_name
+						FROM rule 
+							INNER JOIN connector source_connector
+								 ON rule.conn_id_source = source_connector.id
+								AND source_connector.deleted = 0
+								INNER JOIN solution	source_solution
+									ON source_connector.sol_id = source_solution.id
+							INNER JOIN connector target_connector
+								 ON rule.conn_id_target = target_connector.id
+								AND target_connector.deleted = 0
+								INNER JOIN solution	target_solution
+									ON target_connector.sol_id = target_solution.id
+						WHERE rule.id = :ruleId";
+			$stmt = $this->connection->prepare($rule);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
             $this->rule = $result->fetchAssociative();
@@ -250,16 +266,6 @@ class rulecore
                 return false;
             }
 
-            // Get the name of the application
-            $sql = 'SELECT solution.name  
-		    		FROM connector
-						INNER JOIN solution 
-							ON solution.id  = connector.sol_id
-		    		WHERE connector.id = :connId';
-            $stmt = $this->connection->prepare($sql);
-            $stmt->bindValue(':connId', $connId);
-            $result = $stmt->executeQuery();
-            $r = $result->fetchAssociative();
             // Get params connection
             $sql = 'SELECT id, conn_id, name, value
 		    		FROM connectorparam 
@@ -278,12 +284,12 @@ class rulecore
 
             // Connect to the application
             if ('source' == $type) {
-                $this->solutionSource = $this->solutionManager->get($r['name']);
+                $this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
                 $this->solutionSource->setApi($this->api);
                 $loginResult = $this->solutionSource->login($params);
                 $c = (($this->solutionSource->connexion_valide) ? true : false);
             } else {
-                $this->solutionTarget = $this->solutionManager->get($r['name']);
+                $this->solutionTarget = $this->solutionManager->get($this->rule['solution_target_name']);
                 $this->solutionTarget->setApi($this->api);
                 $loginResult = $this->solutionTarget->login($params);
                 $c = (($this->solutionTarget->connexion_valide) ? true : false);
@@ -1305,8 +1311,13 @@ class rulecore
                     in_array($status, ['Ready_to_send', 'Error_sending'])
                 || (
                         true === $response[$id_document]
-                    && !empty($response['doc_status'])
-                    && in_array($response['doc_status'], ['Ready_to_send', 'Error_sending'])
+                    && (
+                            empty($response['doc_status'])
+                        || (
+                                !empty($response['doc_status'])
+                            && 'No_send' != $response['doc_status']
+                        )
+                    )
                 )
             )
         ) {
