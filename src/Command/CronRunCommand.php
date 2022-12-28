@@ -6,6 +6,7 @@ namespace App\Command;
 
 use function count;
 use DateTime;
+use Exception;
 use Doctrine\Persistence\ManagerRegistry;
 use Shapecode\Bundle\CronBundle\Command\BaseCommand;
 use Shapecode\Bundle\CronBundle\Console\Style\CronStyle;
@@ -19,18 +20,24 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
+use App\Entity\Config;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class CronRunCommand extends BaseCommand
 {
     private CommandHelper $commandHelper;
+    //protected $configParams;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(
         CommandHelper $commandHelper,
-        ManagerRegistry $registry
+        ManagerRegistry $registry,
+        EntityManagerInterface $entityManager
     ) {
         parent::__construct($registry);
 
         $this->commandHelper = $commandHelper;
+        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -44,65 +51,77 @@ final class CronRunCommand extends BaseCommand
     {
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
-
-        $jobsToRun = $jobRepo->findAll();
-
-        $jobCount = count($jobsToRun);
-        $style->comment(sprintf('Cronjobs started at %s', (new DateTime())->format('r')));
-
-        $style->title('Execute cronjobs');
-        $style->info(sprintf('Found %d jobs', $jobCount));
-
-        // Update the job with it's next scheduled time
-        $now = new DateTime();
-
-        /** @var CronJobRunning[] $processes */
-        $processes = [];
-        $em = $this->getManager();
-
-        foreach ($jobsToRun as $job) {
-            sleep(1);
-
-            $style->section(sprintf('Running "%s"', $job->getFullCommand()));
-
-            if (!$job->isEnable()) {
-                $style->notice('cronjob is disabled');
-
-                continue;
-            }
-
-            if ($job->getNextRun() > $now) {
-                $style->notice(sprintf('cronjob will not be executed. Next run is: %s', $job->getNextRun()->format('r')));
-
-                continue;
-            }
-
-            $job->increaseRunningInstances();
-            $process = $this->runJob($job);
-
-            $job->calculateNextRun();
-            $job->setLastUse($now);
-
-            $em->persist($job);
-            $em->flush();
-
-            $processes[] = new CronJobRunning($job, $process);
-
-            if ($job->getRunningInstances() > $job->getMaxInstances()) {
-                $style->notice('cronjob will not be executed. The number of maximum instances has been exceeded.');
-            } else {
-                $style->success('cronjob started successfully and is running in background');
-            }
-
-            $style->info($job->getFullCommand().' : Begin '.date('Y-m-d h:i:s'));
-            $this->waitProcesses($processes);
-            $style->info($job->getFullCommand().' : End '.date('Y-m-d h:i:s'));
-            $processes = [];
+        //Check if crontab is enabled
+        $entity = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'cron_enabled']);
+        if (!($entity)) {
+            throw new Exception("Couldn't fetch Cronjobs");
         }
+            $valueCron = $entity->getValue();
+        if (
+                $valueCron == 1 
+                 && !empty($valueCron))
+        {
+            $jobsToRun = $jobRepo->findAll();
+    
+            $jobCount = count($jobsToRun);
+            $style->comment(sprintf('Cronjobs started at %s', (new DateTime())->format('r')));
+    
+            $style->title('Execute cronjobs');
+            $style->info(sprintf('Found %d jobs', $jobCount));
+    
+            // Update the job with it's next scheduled time
+            $now = new DateTime();
+    
+            /** @var CronJobRunning[] $processes */
+            $processes = [];
+            $em = $this->getManager();
+    
+            foreach ($jobsToRun as $job) {
+                sleep(1);
+    
+                $style->section(sprintf('Running "%s"', $job->getFullCommand()));
+    
+                if (!$job->isEnable()) {
+                    $style->notice('cronjob is disabled');
+    
+                    continue;
+                }
+    
+                if ($job->getNextRun() > $now) {
+                    $style->notice(sprintf('cronjob will not be executed. Next run is: %s', $job->getNextRun()->format('r')));
+    
+                    continue;
+                }
+    
+                $job->increaseRunningInstances();
+                $process = $this->runJob($job);
+    
+                $job->calculateNextRun();
+                $job->setLastUse($now);
+    
+                $em->persist($job);
+                $em->flush();
+    
+                $processes[] = new CronJobRunning($job, $process);
+    
+                if ($job->getRunningInstances() > $job->getMaxInstances()) {
+                    $style->notice('cronjob will not be executed. The number of maximum instances has been exceeded.');
+                } else {
+                    $style->success('cronjob started successfully and is running in background');
+                }
+    
+                $style->info($job->getFullCommand().' : Begin '.date('Y-m-d h:i:s'));
+                $this->waitProcesses($processes);
+                $style->info($job->getFullCommand().' : End '.date('Y-m-d h:i:s'));
+                $processes = [];
 
-        $style->success('All jobs are finished.');
-
-        return CronJobResult::EXIT_CODE_SUCCEEDED;
+                $style->success('All jobs are finished.');
+                return CronJobResult::EXIT_CODE_SUCCEEDED;
+            }
+        }else{
+            $style->error('Your crontabs are disabled');
+            return CronJobResult::EXIT_CODE_FAILED;
+        }  
     }
 
     /**
