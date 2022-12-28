@@ -1560,7 +1560,7 @@ class rulecore
 
             
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
-            $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
+            $send['data'] = $this->getSendDocuments($type, $documentId);
             $send['module'] = $this->rule['module_target'];
             $send['ruleId'] = $this->rule['id'];
             $send['rule'] = $this->rule;
@@ -1583,6 +1583,8 @@ class rulecore
                 // Connexion à la cible
                 $connect = $this->connexionSolution('target');
                 if (true === $connect) {
+                    // Call source to add data into $send array if a call has to be done
+					$send = $this->checkSourceBeforeSend($send);
                     // Création des données dans la cible
                     if ('C' == $type) {
                         // Permet de vérifier que l'on ne va pas créer un doublon dans la cible
@@ -1627,6 +1629,27 @@ class rulecore
 
         return $response;
     }
+
+    protected function checkSourceBeforeSend($send) {	
+		if (empty($this->solutionSource)) {		
+			$this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
+		}
+		if($this->solutionSource->sourceCallRequestedBeforeSend($send)) {
+			$connect = $this->connexionSolution('source');
+			if ($connect) {		
+				// Add source data into send array
+				if (!empty($send['data'])) {
+					foreach ($send['data'] as $documentId => $record) {		
+						$send['source'][$documentId] = $this->getDocumentData($documentId, 'S');						
+					}
+				}	
+				$send = $this->solutionSource->sourceActionBeforeSend($send);
+			} else {	
+				throw new \Exception('Failed to connect to the source solution before sending data.');
+			}
+		}
+		return $send;
+	}
 
     protected function massSendTarget($type, $documentId = null)
     {
@@ -1917,7 +1940,7 @@ class rulecore
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getSendDocuments($type, $documentId, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
+    public function getSendDocuments($type, $documentId=null, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
     {
         // Init $limit parameter
         $limit = ' LIMIT '.$this->limit;
@@ -1974,7 +1997,7 @@ class rulecore
             if (!empty($data)) {
                 $return[$document['id_doc_myddleware']] = array_merge($document, $data);
             } else {
-                $return['error'] = 'No data found in teh document';
+                $return['error'] = 'No data found in the document';
             }
         }
 
