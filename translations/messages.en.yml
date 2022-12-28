@@ -506,6 +506,7 @@ solution:
         consumerkey: Consumer key
         consumersecret: Consumer secret 
         apikey: Api key
+        projectid: Project id
         apiuser: Api user
         apikeysecret: Api secret key
         mail_gotomeeting: Mail GotoMeeting 

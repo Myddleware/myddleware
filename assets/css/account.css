@@ -193,3 +193,6 @@
     background-color: #198BCA;
     border-color: #0b72a9;
 }
+.edit-profile{
+    max-width: fit-content !important;
+}
