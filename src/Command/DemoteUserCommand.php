@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class DemoteUserCommand extends Command
 {
     protected static $defaultName = 'myddleware:demote-user';
-    protected static string $defaultDescription = 'Demote an Myddleware existing user by removing a role';
+    protected static $defaultDescription = 'Demote an Myddleware existing user by removing a role';
     private EntityManagerInterface $em;
     private UserRepository $userRepository;
     private SymfonyStyle $io;

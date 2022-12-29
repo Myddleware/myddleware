@@ -478,9 +478,6 @@
     "symfony/contracts": {
         "version": "v1.1.11"
     },
-    "symfony/deprecation-contracts": {
-        "version": "v2.5.0"
-    },
     "symfony/flex": {
         "version": "1.19",
         "recipe": {
