@@ -1662,27 +1662,6 @@ class rulecore
 		return $send;
 	}
 
-    protected function checkSourceBeforeSend($send) {	
-		if (empty($this->solutionSource)) {		
-			$this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
-		}
-		if($this->solutionSource->sourceCallRequestedBeforeSend($send)) {
-			$connect = $this->connexionSolution('source');
-			if ($connect) {		
-				// Add source data into send array
-				if (!empty($send['data'])) {
-					foreach ($send['data'] as $documentId => $record) {		
-						$send['source'][$documentId] = $this->getDocumentData($documentId, 'S');						
-					}
-				}	
-				$send = $this->solutionSource->sourceActionBeforeSend($send);
-			} else {	
-				throw new \Exception('Failed to connect to the source solution before sending data.');
-			}
-		}
-		return $send;
-	}
-
     protected function massSendTarget($type, $documentId = null)
     {
         try {
