@@ -146,3 +146,12 @@
 	width: 64px;
 	height: 64px;
 }
+.banner{
+    font-size: 0.9em;
+    border-radius: 6px;
+    padding-left: 10px;
+    padding-right: 50px;
+    color: #d40015;
+    border: solid 0.5px #DC3545;
+    background-color: rgb(249, 155, 155);
+}
