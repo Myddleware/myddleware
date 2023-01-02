@@ -84,6 +84,7 @@ class rulecore
     private ?RuleOrderRepository $ruleOrderRepository;
     private ?SessionInterface $session;
     protected FormulaManager $formulaManager;
+    private $dataSource;
 
     public function __construct(
         LoggerInterface $logger,
@@ -1390,7 +1391,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments($arrayIdDocument);
+            $response = $this->checkPredecessorDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Predecessor_OK';
@@ -1402,7 +1403,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments($arrayIdDocument);
+            $response = $this->checkPredecessorDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Relate_OK';
@@ -1560,7 +1561,7 @@ class rulecore
 
             
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
-            $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
+            $send['data'] = $this->getSendDocuments($type, $documentId);
             $send['module'] = $this->rule['module_target'];
             $send['ruleId'] = $this->rule['id'];
             $send['rule'] = $this->rule;
