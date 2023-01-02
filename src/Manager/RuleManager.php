@@ -1454,11 +1454,8 @@ class rulecore
             )
         ) {
             $response = $this->massSendTarget('', $documentIds);
-            if (
-                    !empty($response[$documentIds]['id'])
-                && empty($response[$documentIds]['error'])
-                && empty($response['error']) // Error can be on the document or can be a general error too
-            ) {
+            // Error can be on the document or can be a general error too
+            if ($this->noErrorInDocuments($response) === true ) {
                 $msg_success[] = 'Transfer id '.$documentIds.' : Status change : Send';
             } else {
                 $msg_error[] = 'Transfer id '.$documentIds.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$documentIds]['error']);
@@ -1478,6 +1475,32 @@ class rulecore
         }
 
         return $msg_error;
+    }
+
+    public function noErrorInDocuments($response): bool
+    {
+        $noError = false;
+
+        foreach ($response as $document){ 
+
+            $documentIdsNotEmpty = !empty($document['id']);
+            $noErrorInDocumentIds = empty($document['error']) || $document['error'] === false;
+            $noGeneralResponseError = empty($response['error']) || $response['error'] === false;
+            $NoErrorAndValid = 
+            (
+                $documentIdsNotEmpty 
+                && $noErrorInDocumentIds
+                && $noGeneralResponseError
+            );
+            if ($NoErrorAndValid) {
+                $noError = true;
+            } else {
+                $noError = false;
+            }
+        }
+        
+        
+        return $noError;
     }
 
     // Function to verify the state of the response. It will be valid if at least one document valid.
@@ -1505,8 +1528,9 @@ class rulecore
                 if (isset($value['id_doc_myddleware'])) {
                     unset($value['id_doc_myddleware']);
                 }
-                $sendData[$key] = $value;
+                
             }
+            
 
             return $sendData;
         }
