@@ -623,7 +623,7 @@ class solutioncore
 							if(array_search($field, $fieldsArray) !== false) {
 								$param['id_doc_myddleware'] = $docId;
 								$param['api'] = $this->api;				
-								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
 								$documentManager->setParam($param);			
 								$send['data'][$docId][$ruleField['target_field_name']] = $documentManager->getTransformValue($send['source'][$docId], $ruleField);			
 							}
