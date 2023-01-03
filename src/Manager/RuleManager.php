@@ -1523,10 +1523,10 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($value['source_date_modified']);
+                    unset($sendData->{$key}['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($value['id_doc_myddleware']);
+                    unset($sendData->{$key}['id_doc_myddleware']);
                 }
                 
             }
@@ -1680,7 +1680,7 @@ class rulecore
             foreach($arrayDocumentsIds as $documentId){
                 // $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
                 $sendDataDocumentArrayElement = $this->getSendDocuments($type, $documentId);
-                $send['data'] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
+                $send['data'][$documentId] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
             }
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
             $send['module'] = $this->rule['module_target'];
