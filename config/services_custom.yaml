@@ -23,3 +23,13 @@ services:
   #     decorates: App\Solutions\wordpress
   #     decoration_on_invalid: ignore
   #     decoration_priority: 1
+
+  App\Custom\Solutions\prestashopcustom:
+      decorates: App\Solutions\prestashop
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Manager\DocumentManagerCustom:
+      decorates: App\Manager\DocumentManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
