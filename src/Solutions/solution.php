@@ -69,6 +69,8 @@ class solutioncore
     // Disable to read deletion and to delete data
     protected bool $readDeletion = false;
     protected bool $sendDeletion = false;
+	// Array to detectif a source field has been changed before the record 
+    protected $fieldsChangedBeforeSend = [];
     // Specify if the class is called by the API
     protected $api;
     protected $message;
@@ -597,6 +599,11 @@ class solutioncore
     {
     }
 
+	// Function used to check if the source solution has to be called before we send data to the target solution
+	public function sourceCallRequestedBeforeSend($send) {	
+		return false;
+	}
+	
 	// Action to be done into the source solution before sending data
 	public function sourceActionBeforeSend($send) {
 		// If at least one source field has been changed, then we calculate the corresponding target field

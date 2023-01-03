@@ -696,7 +696,7 @@ class suitecrmcore extends solution
                     'name_value_list' => $dataSugar,
                     'delete' => (!empty($data['deleted']) ? 1 : 0),
                 ];
-                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
+                $set_relationship_result = $this->call('    ', $set_relationship_params);
 
                 if (!empty($set_relationship_result->created)) {
                     $result[$key] = [
@@ -885,19 +885,19 @@ class suitecrmcore extends solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type): array
-    {
-        if (
-                'target' == $type
-            && array_key_exists($module, $this->module_relationship_many_to_many)
-        ) {
-            return [
-                'C' => 'create_only',
-            ];
-        }
+    // public function getRuleMode($module, $type): array
+    // {
+        // if (
+                // 'target' == $type
+            // && array_key_exists($module, $this->module_relationship_many_to_many)
+        // ) {
+            // return [
+                // 'C' => 'create_only',
+            // ];
+        // }
 
-        return parent::getRuleMode($module, $type);
-    }
+        // return parent::getRuleMode($module, $type);
+    // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 
