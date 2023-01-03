@@ -208,7 +208,7 @@ class RuleManagerCustom extends RuleManager
 					AND	$documentData['attempt'] == 1 		// Only the first try
 					AND	(
 							strpos($response['error'], 'Unprocessable Entity returned') !== false
-						 OR	strpos($response['error'], '422  returned') !== false
+						 OR	strpos($response['error'], 'HTTP/2 422') !== false
 					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
@@ -234,7 +234,10 @@ class RuleManagerCustom extends RuleManager
 						$this->ruleId == '627153382dc34' 	// Mobilisation - Participations RI
 					AND	$type == 'C' 						// Creation only
 					AND	$documentData['attempt'] == 1 		// Only the first try
-					AND	strpos($response['error'], 'Unprocessable Entity returned') !== false
+					AND	(
+							strpos($response['error'], 'Unprocessable Entity returned') !== false
+						OR	strpos($response['error'], 'HTTP/2 422') !== false
+					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
 					if (!empty($sourceData['fp_events_leads_1leads_idb'])) { // Coupon
