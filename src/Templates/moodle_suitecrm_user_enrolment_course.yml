@@ -1,0 +1,60 @@
+name: moodle_suitecrm_user_enrolment_course
+description: 'Send Moodle courses, users and enrolments to SuiteCRM contacts and events'
+rules:
+    -
+        name: Courses
+        nameSlug: courses
+        sourceSolution: moodle
+        targetSolution: suitecrm
+        sourceModule: courses
+        targetModule: FP_events
+        fields:
+            - { target: name, source: fullname, formula: 'htmlEntityDecode( {fullname})' }
+            - { target: description, source: summary, formula: null }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: name }
+    -
+        name: Contacts
+        nameSlug: contacts
+        sourceSolution: moodle
+        targetSolution: suitecrm
+        sourceModule: users
+        targetModule: Contacts
+        fields:
+            - { target: last_name, source: lastname, formula: null }
+            - { target: description, source: description, formula: null }
+            - { target: email1, source: email, formula: null }
+            - { target: first_name, source: firstname, formula: null }
+            - { target: phone_home, source: phone2, formula: null }
+            - { target: phone_mobile, source: phone1, formula: null }
+            - { target: primary_address_city, source: city, formula: null }
+            - { target: primary_address_country, source: country, formula: null }
+            - { target: primary_address_street, source: address, formula: null }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: email1 }
+    -
+        name: Enrolment
+        nameSlug: enrolment
+        sourceSolution: moodle
+        targetSolution: suitecrm
+        sourceModule: get_enrolments_by_date
+        targetModule: fp_events_contacts
+        relationships:
+            - { fieldNameSource: userid, fieldNameTarget: fp_events_contactscontacts_idb, fieldId: contacts, parent: false }
+            - { fieldNameSource: courseid, fieldNameTarget: fp_events_contactsfp_events_ida, fieldId: courses, parent: false }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: C }
