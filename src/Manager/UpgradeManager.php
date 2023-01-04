@@ -135,7 +135,7 @@ class UpgradeManager
     {
         // Update Main if git_branch is empty otherwise we update the specific branch
         $command = (!empty($this->configParams['git_branch'])) ? 'git pull origin '.$this->configParams['git_branch'] : 'git pull';
-        $process = new Process($command);
+        $process = new Process(array($command));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -150,7 +150,7 @@ class UpgradeManager
         }
 
         // Run the command a second time, we expect to get the message "Already up-to-date"
-        $process = new Process($command);
+        $process = new Process(array($command));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -171,7 +171,7 @@ class UpgradeManager
     protected function updateVendors()
     {
         // Change the command composer if php isn't the default php version
-        $process = new Process('composer install --ignore-platform-reqs');
+        $process = new Process(array('composer install --ignore-platform-reqs'));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -182,14 +182,14 @@ class UpgradeManager
     // Execute yarn action
     protected function yarnAction()
     {
-        $process = new Process('yarn install');
+        $process = new Process(array('yarn install'));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
 
-        $process = new Process('yarn build');
+        $process = new Process(array('yarn build'));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -200,7 +200,7 @@ class UpgradeManager
     // Clear boostrap cache
     protected function clearBoostrapCache()
     {
-        $process = new Process($this->phpExecutable.' vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php');
+        $process = new Process(array($this->phpExecutable.' vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php'));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
@@ -286,7 +286,7 @@ class UpgradeManager
             } else {
                 // CLear other environment cache via command
                 $command = 'rm -rf var/cache/'.$env.'/*';
-                $process = new Process($command);
+                $process = new Process(array($command));
                 $process->run();
                 // executes after the command finishes
                 if (!$process->isSuccessful()) {
