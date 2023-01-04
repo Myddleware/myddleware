@@ -302,7 +302,7 @@ class solutioncore
             // Format data
             if (!empty($readResult)) {
                 // Get the name of the field used for the reference
-                $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+                $dateRefField = $this->getRefFieldName($param);
                 // Get the name of the field used as id
                 $idField = $this->getIdName($param['module']);
 
@@ -739,7 +739,9 @@ class solutioncore
         }
 
         // Add the ref field if it isn't already in the array
-        $dateRefField = $this->getRefFieldName($module, $mode);
+		$param['module'] = $module;
+		$param['ruleParams']['mode'] = $mode;
+        $dateRefField = $this->getRefFieldName($param);
         if (
                 !empty($dateRefField)
             and false === array_search($dateRefField, $fields)
@@ -864,7 +866,7 @@ class solutioncore
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($param)
     {
     }
 

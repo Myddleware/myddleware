@@ -246,7 +246,7 @@ class erpnextcore extends solution
             $result = [];
             $data = [];
             // Get the reference date field name
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
 
             // Add 1 second to the date ref because the call to ERPNExt includes the date ref.. Otherwise we will always read the last record
             $date = new \DateTime($param['date_ref']);
@@ -408,16 +408,16 @@ class erpnextcore extends solution
      * return the reference date field name
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $ruleMode): string
+    public function getRefFieldName($param): string
     {
         // Creation and modification mode
-        if (in_array($ruleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'modified';
         // Creation mode only
-        } elseif ('C' == $ruleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'creation';
         }
-        throw new \Exception("$ruleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
 

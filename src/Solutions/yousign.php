@@ -431,17 +431,16 @@ class yousigncore extends solution
     /**
      * Returns the reference date field name according to the module & rulemode.
      *
-     * @param string $moduleSource
-     * @param string $ruleMode
+     * @param string $param
      *
      * @return string|null
      */
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($param)
     {
-        if (in_array($ruleMode, ['0', 'S', 'C'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'C'])) {
             return 'updatedAt';
         } else {
-            throw new \Exception("$ruleMode is not a correct Rule mode.");
+            throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
         }
 
         return null;

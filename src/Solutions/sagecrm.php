@@ -334,7 +334,7 @@ class sagecrmcore extends solution
         $result = [];
         try {
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $DateRefField = $this->getRefFieldName($param);
 
             // Define SOAP connection options.
             $options = [
@@ -672,14 +672,14 @@ class sagecrmcore extends solution
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'updateddate';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'createddate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Function de conversion de date format solution à une date format Myddleware

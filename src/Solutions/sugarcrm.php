@@ -367,7 +367,7 @@ class sugarcrmcore extends solution
         return $filterArgs;
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
         return 'date_modified';
     }

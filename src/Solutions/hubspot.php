@@ -770,7 +770,7 @@ class hubspotcore extends solution
             }
 
             // ModificationDate or CreationDate
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
 
             $property = '';
             // If date_ref is more than 30 days in the past or if an offset is in the reference
@@ -1256,23 +1256,22 @@ class hubspotcore extends solution
     /**
      * return the reference date field name.
      *
-     * @param $moduleSource
-     * @param $RuleMode
+     * @param $param
      *
      * @return string|null
      *
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): ?string
+    public function getRefFieldName($param): ?string
     {
         // Creation and modification mode
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'ModificationDate';
         // Creation mode only
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'CreationDate';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     /**

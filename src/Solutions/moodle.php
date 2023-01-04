@@ -541,17 +541,22 @@ class moodlecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        switch ($moduleSource) {
+        switch ($param['module']) {
             case 'get_course_completion_by_date':
                 return 'timecompleted';
                 break;
             case 'get_users_last_access':
                 return 'lastaccess';
                 break;
-            case 'users': // Only use to get one user (history purpose)
-                return 'id';
+            case 'users': 
+				$functionName = $this->getFunctionName($param);
+				if ($functionName == 'core_user_get_users') { // Only use to get one user (history purpose)
+					return 'id';
+				} else {
+					return 'timemodified';
+				}
                 break;
             default:
                 return 'timemodified';

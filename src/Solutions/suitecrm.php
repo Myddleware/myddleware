@@ -379,7 +379,7 @@ class suitecrmcore extends solution
         $query = '';
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        $dateRefField = $this->getRefFieldName($param);
 
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -868,7 +868,7 @@ class suitecrmcore extends solution
             }
             // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
                 $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
@@ -904,14 +904,14 @@ class suitecrmcore extends solution
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        if (in_array($RuleMode, ['0', 'S', 'U'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'])) {
             return 'date_modified';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_entered';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship
