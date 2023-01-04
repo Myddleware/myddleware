@@ -2430,8 +2430,8 @@
                 "shasum": ""
             },
             "require": {
-                "laminas/laminas-code": "~3.4.1|^4.0",
-                "php": ">=7.1",
+                "laminas/laminas-code": "4.8.0",
+                "php": ">=8.1",
                 "symfony/filesystem": "^4.4.17|^5.0|^6.0"
             },
             "conflict": {
@@ -3375,7 +3375,7 @@
         },
         {
             "name": "laminas/laminas-code",
-            "version": "4.7.1",
+            "version": "4.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-code.git",
@@ -3388,7 +3388,7 @@
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.4, <8.2"
+                "php": ">=8.1.0, <8.2.1"
             },
             "require-dev": {
                 "doctrine/annotations": "^1.13.2",
@@ -3441,7 +3441,7 @@
         },
         {
             "name": "laminas/laminas-hydrator",
-            "version": "4.5.0",
+            "version": "4.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-hydrator.git",
@@ -3454,8 +3454,8 @@
                 "shasum": ""
             },
             "require": {
-                "laminas/laminas-stdlib": "^3.3",
-                "php": "^7.4 || ~8.0.0 || ~8.1.0",
+                "laminas/laminas-stdlib": "3.16.1",
+                "php": "~8.1.0 || ~8.2.0",
                 "webmozart/assert": "^1.10"
             },
             "conflict": {
@@ -3519,7 +3519,7 @@
         },
         {
             "name": "laminas/laminas-stdlib",
-            "version": "3.13.0",
+            "version": "3.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-stdlib.git",
@@ -3532,7 +3532,7 @@
                 "shasum": ""
             },
             "require": {
-                "php": "^7.4 || ~8.0.0 || ~8.1.0"
+                "php": "~8.1.0 || ~8.2.0"
             },
             "conflict": {
                 "zendframework/zend-stdlib": "*"
@@ -14328,7 +14328,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4, <8.2.0",
+        "php": ">=8.1.7,<8.2.1",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
