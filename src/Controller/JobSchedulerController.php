@@ -475,7 +475,7 @@ class JobSchedulerController extends AbstractController
                 throw new Exception("Couldn't fetch Cronjobs");
             }
             foreach ($entities as $entity) {
-                $entity->setvalue(0);
+                $entity->setEnable(1);
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
