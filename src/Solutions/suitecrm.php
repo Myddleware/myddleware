@@ -136,7 +136,7 @@ class suitecrmcore extends solution
                 throw new \Exception('Please check url');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -655,7 +655,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -675,7 +675,7 @@ class suitecrmcore extends solution
      */
     protected function createRelationship($param)
     {
-        foreach ($param['data'] as $key => $data) {
+        foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
@@ -696,28 +696,28 @@ class suitecrmcore extends solution
                     'name_value_list' => $dataSugar,
                     'delete' => (!empty($data['deleted']) ? 1 : 0),
                 ];
-                $set_relationship_result = $this->call('    ', $set_relationship_params);
+                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
 
                 if (!empty($set_relationship_result->created)) {
-                    $result[$key] = [
-                        'id' => $key, // On met $key car onn a pas l'id de la relation
+                    $result[$idDoc] = [
+                        'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
                         'error' => false,
                     ];
                 } else {
-                    $result[$key] = [
+                    $result[$idDoc] = [
                         'id' => '-1',
                         'error' => '01',
                     ];
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
-                $result[$key] = [
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
-            $this->updateDocumentStatus($key, $result[$key], $param);
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
@@ -786,7 +786,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
