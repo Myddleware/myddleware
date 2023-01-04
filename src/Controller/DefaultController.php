@@ -792,6 +792,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 // Champs et formules d'une règle
                 if ($ruleFields) {
+					$fields = array();
                     foreach ($ruleFields as $ruleFieldsObj) {
                         $array = [
                             'target' => $ruleFieldsObj->getTarget(),
@@ -856,8 +857,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 // reload ---------------
                 return $this->redirect($this->generateUrl('regle_stepthree', ['id' => $rule->getId()]));
             } catch (Exception $e) {
-                $this->sessionService->setCreateRuleError($key, $this->translator->trans('error.rule.update').' '.$e->getMessage());
-                $session->set('error', [$this->translator->trans('error.rule.update').' '.$e->getMessage()]);
+                $this->sessionService->setCreateRuleError($key, $this->translator->trans('error.rule.update').' '.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+                $session->set('error', [$this->translator->trans('error.rule.update').' '.$e->getMessage().' '.$e->getFile().' '.$e->getLine()]);
 
                 return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
             }
