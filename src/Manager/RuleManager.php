@@ -84,6 +84,7 @@ class rulecore
     private ?RuleOrderRepository $ruleOrderRepository;
     private ?SessionInterface $session;
     protected FormulaManager $formulaManager;
+    private $dataSource;
 
     public function __construct(
         LoggerInterface $logger,
@@ -1401,7 +1402,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments($arrayIdDocument);
+            $response = $this->checkPredecessorDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Predecessor_OK';
@@ -1510,13 +1511,14 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($value['source_date_modified']);
+                    unset($sendData->{$key}['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($value['id_doc_myddleware']);
+                    unset($sendData->{$key}['id_doc_myddleware']);
                 }
-                $sendData[$key] = $value;
+                
             }
+            
 
             return $sendData;
         }
@@ -1690,6 +1692,103 @@ class rulecore
                 // $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
                 $sendDataDocumentArrayElement = $this->getSendDocuments($type, $documentId);
                 $send['data'] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
+            }
+            // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
+            $send['module'] = $this->rule['module_target'];
+            $send['ruleId'] = $this->rule['id'];
+            $send['rule'] = $this->rule;
+            $send['ruleFields'] = $this->ruleFields;
+            $send['ruleParams'] = $this->ruleParams;
+            $send['ruleRelationships'] = $this->ruleRelationships;
+            $send['jobId'] = $this->jobId;
+            // Si des données sont prêtes à être créées
+            if (!empty($send['data'])) {
+                // If the rule is a child rule, no document is sent. They will be sent with the parent rule.
+                if ($this->isChild()) {
+                    foreach ($send['data'] as $key => $data) {
+                        // True is send to avoid an error in rerun method. We should put the target_id but the document will be send with the parent rule.
+                        $response[$key] = ['id' => true];
+                    }
+
+                    return $response;
+                }
+
+                // Connexion à la cible
+                $connect = $this->connexionSolution('target');
+                if (true === $connect) {
+                    // Création des données dans la cible
+                    if ('C' == $type) {
+                        // Permet de vérifier que l'on ne va pas créer un doublon dans la cible
+                        $send['data'] = $this->checkDuplicate($send['data']);
+                        $send['data'] = $this->clearSendData($send['data']);
+                        $response = $this->solutionTarget->createData($send);
+                    }
+                    // Modification des données dans la cible
+                    elseif ('U' == $type) {
+                        $send['data'] = $this->clearSendData($send['data']);
+                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
+                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
+                        $response = $this->solutionTarget->updateData($send);
+                    }
+                    // Delete data from target application
+                    elseif ('D' == $type) {
+                        $send = $this->checkBeforeDelete($send);
+                        if (empty($send['error'])) {
+                            $send['data'] = $this->beforeDelete($send['data']);
+                            $response = $this->solutionTarget->deleteData($send);
+                        } else {
+                            $response['error'] = $send['error'];
+                        }
+                    } else {
+                        $response[$documentId] = false;
+                        $response['error'] = 'Type transfer '.$type.' unknown. ';
+                    }
+                } else {
+                    $response[$documentId] = false;
+                    $response['error'] = $connect['error'];
+                }
+            }
+        
+        } catch (\Exception $e) {
+            $response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            if (!$this->api) {
+                echo $response['error'];
+            }
+            $this->logger->error($response['error']);
+        }
+
+        return $response;
+    }
+
+    protected function massSendTarget($type, $documentId = null)
+    {
+        try {
+
+            if ((strpos($documentId, ',') !== false)) {
+                $arrayDocumentsIds = explode(',', $documentId);
+            } else {
+                $arrayDocumentsIds[0] = $documentId;
+            }
+            
+            // Permet de charger dans la classe toutes les relations de la règle
+            $response = [];
+            $response['error'] = '';
+
+            // Le type peut-être vide das le cas d'un relancement de flux après une erreur
+            if (empty($type)) {
+                foreach($arrayDocumentsIds as $documentId){
+                    $documentData = $this->getDocumentHeader($documentId);
+                }
+                if (!empty($documentData['type'])) {
+                    $type = $documentData['type'];
+                }
+            }
+
+            foreach($arrayDocumentsIds as $documentId){
+                // $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
+                $sendDataDocumentArrayElement = $this->getSendDocuments($type, $documentId);
+                $send['data'][$documentId] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
             }
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
             $send['module'] = $this->rule['module_target'];

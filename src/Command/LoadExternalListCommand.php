@@ -43,7 +43,7 @@ class LoadExternalListCommand extends Command
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:loadexternallist';
-    protected static string $defaultDescription = 'transfers all lines of csv into InternalListValue';
+    protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
 
     public function __construct(
         LoggerInterface $logger,
