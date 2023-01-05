@@ -69,6 +69,8 @@ class solutioncore
     // Disable to read deletion and to delete data
     protected bool $readDeletion = false;
     protected bool $sendDeletion = false;
+	// Array to detectif a source field has been changed before the record 
+    protected $fieldsChangedBeforeSend = [];
     // Specify if the class is called by the API
     protected $api;
     protected $message;
@@ -300,7 +302,7 @@ class solutioncore
             // Format data
             if (!empty($readResult)) {
                 // Get the name of the field used for the reference
-                $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+                $dateRefField = $this->getRefFieldName($param);
                 // Get the name of the field used as id
                 $idField = $this->getIdName($param['module']);
 
@@ -597,6 +599,11 @@ class solutioncore
     {
     }
 
+	// Function used to check if the source solution has to be called before we send data to the target solution
+	public function sourceCallRequestedBeforeSend($send) {	
+		return false;
+	}
+	
 	// Action to be done into the source solution before sending data
 	public function sourceActionBeforeSend($send) {
 		// If at least one source field has been changed, then we calculate the corresponding target field
@@ -732,7 +739,9 @@ class solutioncore
         }
 
         // Add the ref field if it isn't already in the array
-        $dateRefField = $this->getRefFieldName($module, $mode);
+		$param['module'] = $module;
+		$param['ruleParams']['mode'] = $mode;
+        $dateRefField = $this->getRefFieldName($param);
         if (
                 !empty($dateRefField)
             and false === array_search($dateRefField, $fields)
@@ -857,7 +866,7 @@ class solutioncore
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($param)
     {
     }
 
