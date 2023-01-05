@@ -88,6 +88,7 @@ class SynchroCommand extends Command
             if (empty($force)) {
                 $force = false;
             }
+
             // Récupération du Job
             // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.

@@ -29,6 +29,7 @@ use Swift_Message;
 class ManagementSMTPController extends AbstractController
 {
     const PATH = './../config/swiftmailer.yaml';
+	const PATHNOTIFICATION = './../config/packages/swiftmailer.yaml';
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
     const PATHNOTIFICATION = './../config/packages/swiftmailer.yaml';
 

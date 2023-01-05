@@ -1,4 +1,8 @@
 DirectoryIndex index.php
+
+# Not upgrade safe
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
 <IfModule mod_negotiation.c>
     Options -MultiViews
 </IfModule>

@@ -931,6 +931,7 @@ class documentcore
                         $searchFields['id'] = $target[$duplicate_field];
                         continue;
                     }
+
 					// Do not search duplicates on an empty field
 					if (!empty($target[$duplicate_field])) {
 						$searchFields[$duplicate_field] = $target[$duplicate_field];
@@ -2077,6 +2078,8 @@ class documentcore
             // Change the target id for the current process
             $this->targetId = $target_id;
 
+			// Change the target id for the current process
+            $this->targetId = $target_id;
             return true;
         } catch (\Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
