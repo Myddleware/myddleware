@@ -506,6 +506,7 @@ solution:
         consumerkey: Consumer key
         consumersecret: Consumer secret 
         apikey: Api key
+        projectid: Project id
         apiuser: Api user
         apikeysecret: Api secret key
         mail_gotomeeting: Mail GotoMeeting 
@@ -872,7 +873,13 @@ crontab:
     number: Number
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
+    disableAllCrons: Your crontabs have been disabled
+    enableAllCrons: Your crontabs have been enable
     create: Create crontab
+    massdisable: Disable all tasks
+    massenable: Enable all tasks
+    enableCron: On
+    disableCron: Off
     period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
     max_instance_help: A maximum instance limit for new tasks
     help:  > 
@@ -886,3 +893,4 @@ duplicate_rule:
     current_rule: Current rule
     new_rule: New rule
     success_duplicate: Your rule has been well duplicated
+banner: Crontab is disabled

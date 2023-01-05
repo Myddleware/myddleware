@@ -505,7 +505,7 @@ class magentocore extends solution
             }
 
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
 
             // Limit = pageSize
             if (!empty($param['limit'])) {
@@ -783,14 +783,14 @@ class magentocore extends solution
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'updated_at';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'created_at';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     /**

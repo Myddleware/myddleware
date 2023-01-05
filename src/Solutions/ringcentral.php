@@ -195,7 +195,7 @@ class ringcentralcore extends solution
                 $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
 
                 // Get the reference date field name
-                $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+                $dateRefField = $this->getRefFieldName($param);
                 $dateRef = $this->dateTimeFromMyddleware($dateRefExt[$extensionId]);
                 $pageNum = 1;
 
@@ -283,13 +283,13 @@ class ringcentralcore extends solution
     }
 
     // retrun the reference date field name
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($param)
     {
-        if ('call-log' == $moduleSource) {
+        if ('call-log' == $param['module']) {
             return 'startTime';
-        } elseif ('message-store' == $moduleSource) {
+        } elseif ('message-store' == $param['module']) {
             return 'lastModifiedTime';
-        } elseif ('presence' == $moduleSource) {
+        } elseif ('presence' == $param['module']) {
             return 'date_modified';
         }
     }

@@ -42,6 +42,7 @@ class LoadConfigData implements FixtureInterface
         ['name' => 'git_branch', 'value' => 'main', 'update' => false],
         ['name' => 'base_uri', 'value' => '', 'update' => false],
         ['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false],
+        ['name' => 'cron_enabled', 'value' => true, 'update' => true],
     ];
 
     public function load(ObjectManager $manager)
