@@ -136,7 +136,7 @@ class suitecrmcore extends solution
                 throw new \Exception('Please check url');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -379,7 +379,7 @@ class suitecrmcore extends solution
         $query = '';
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        $dateRefField = $this->getRefFieldName($param);
 
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -621,6 +621,14 @@ class suitecrmcore extends solution
                     if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
+
+                    // Note are sent using setNoteAttachement function 
+                    if (
+                        $param['module'] == 'Notes'
+                        and $key == 'filecontents'
+                    ) {
+                        continue;
+                    }
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
                 $setEntriesListParameters = [
@@ -631,6 +639,14 @@ class suitecrmcore extends solution
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
 
                 if (!empty($get_entry_list_result->id)) {
+                    // In case of module note with attachement, we generate a second call to add the file
+                    if (
+                        $param['module'] == 'Notes'
+                        and !empty($data['filecontents'])
+                    ) {
+                        $this->setNoteAttachement($data, $get_entry_list_result->id);
+                    } 
+
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
@@ -639,7 +655,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -659,7 +675,7 @@ class suitecrmcore extends solution
      */
     protected function createRelationship($param)
     {
-        foreach ($param['data'] as $key => $data) {
+        foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
@@ -683,25 +699,25 @@ class suitecrmcore extends solution
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
 
                 if (!empty($set_relationship_result->created)) {
-                    $result[$key] = [
-                        'id' => $key, // On met $key car onn a pas l'id de la relation
+                    $result[$idDoc] = [
+                        'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
                         'error' => false,
                     ];
                 } else {
-                    $result[$key] = [
+                    $result[$idDoc] = [
                         'id' => '-1',
                         'error' => '01',
                     ];
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
-                $result[$key] = [
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
-            $this->updateDocumentStatus($key, $result[$key], $param);
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
@@ -736,6 +752,15 @@ class suitecrmcore extends solution
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
                         continue;
                     }
+
+                    // Note are sent using setNoteAttachement function 
+                    if (
+                        $param['module'] == 'Notes'
+                        and $key == 'filecontents'
+                    ) {
+                        continue;
+                    }
+
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
                 $setEntriesListParameters = [
@@ -746,6 +771,13 @@ class suitecrmcore extends solution
 
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
                 if (!empty($get_entry_list_result->id)) {
+                    // In case of module note with attachement, we generate a second call to add the file
+                    if (
+                        $param['module'] == 'Notes'
+                        and !empty($data['filecontents'])
+                    ) {
+                        $this->setNoteAttachement($data, $get_entry_list_result->id);
+                    } 
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
@@ -754,7 +786,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -782,6 +814,30 @@ class suitecrmcore extends solution
 
         return $this->updateData($param);
     }
+
+
+    // Function to send a note
+	protected function setNoteAttachement($data, $noteId) {					
+		$setNoteAttachementParameters = array(
+			'session' => $this->session,
+			'note' => array(
+				'id' => $noteId,
+				'filename' => $data['filename'],
+				'file' => $data['filecontents'],
+			),
+		);
+
+		$set_not_attachement_result = $this->call('set_note_attachment', $setNoteAttachementParameters);
+		if (
+				empty($set_not_attachement_result->id)
+			 OR (
+					!empty($set_not_attachement_result->id)
+				AND $set_not_attachement_result->id == '-1'
+			)
+		) {
+			 throw new \Exception('Failed to create the attachement on the note. ');
+		}				
+	}
 
     // Build the query for read data to SuiteCRM
 
@@ -812,7 +868,7 @@ class suitecrmcore extends solution
             }
             // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
                 $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
@@ -829,33 +885,33 @@ class suitecrmcore extends solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type): array
-    {
-        if (
-                'target' == $type
-            && array_key_exists($module, $this->module_relationship_many_to_many)
-        ) {
-            return [
-                'C' => 'create_only',
-            ];
-        }
+    // public function getRuleMode($module, $type): array
+    // {
+        // if (
+                // 'target' == $type
+            // && array_key_exists($module, $this->module_relationship_many_to_many)
+        // ) {
+            // return [
+                // 'C' => 'create_only',
+            // ];
+        // }
 
-        return parent::getRuleMode($module, $type);
-    }
+        // return parent::getRuleMode($module, $type);
+    // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        if (in_array($RuleMode, ['0', 'S', 'U'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'])) {
             return 'date_modified';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_entered';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship

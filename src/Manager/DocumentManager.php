@@ -2314,7 +2314,45 @@ class documentcore
         $this->message = $message;
         $this->createDocLog();
     }
+	
+	// Generate a document using the rule id and search parameters
+	protected function generateDocument($ruleId, $searchValue = null, $searchField = 'id', $rerun = true)
+	{
+		try {
+			// Instantiate the rule
+			$rule = new RuleManager($this->logger, $this->connection, $this->entityManager, $this->parameterBagInterface, $this->formulaManager, $this->solutionManager, clone $this);
+			$rule->setRule($ruleId);
+			$rule->setJobId($this->jobId);
+
+			if (empty($searchValue)) {
+				$searchValue = $this->sourceId;
+			}
+			// $this->sourceId = engagé ID
+			// Cherche tous les pôles de l'enregistrement correspondant à la règle
+			$documents = $rule->generateDocuments($searchValue, true, '', $searchField);
+			if (!empty($documents->error)) {
+				throw new \Exception($documents->error);
+			}
+			// Run documents
+			if (
+				!empty($documents)
+				and $rerun
+			) {
+				foreach ($documents as $doc) {
+					$errors = $rule->actionDocument($doc->id, 'rerun');
+					// Check errors
+					if (!empty($errors)) {
+						$this->message .=  'Document ' . $doc->id . ' in error (rule ' . $ruleId . '  : ' . $errors[0] . '. ';
+					}
+				}
+			}
+		} catch (\Exception $e) {
+			$this->message .= 'Error : ' . $e->getMessage();
+			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+		}
+	}
 }
+
 class DocumentManager extends documentcore
 {
 }

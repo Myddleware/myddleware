@@ -188,14 +188,17 @@
 }
 
 #cible .ui-widget-header {
-    background: none repeat scroll 0 0 #efefef;
+    background: none repeat scroll 0 0 #198BCA;
     border: 0px;
-    color: #454539;
+	color: #eee;
     font-weight: bold;
     text-align: center;
     line-height: 2.5em;
     word-wrap: break-word;
 }
+.icon-white-formula{
+	color: #eee !important;
+	}
 
 #cible .ch, #cible .placeholder {
 	list-style:none;
@@ -207,7 +210,6 @@
 #cible .ch {
 	border-bottom: 1px solid #cccccc;
     border-width: 1px 10px 1px 1px;
-    color: #aaa00b;
     line-height: 2em;
     margin-right: 5px;	
 }
@@ -497,4 +499,12 @@ color: #000000!important;
 
 .fancybox {
 	text-decoration: none!important;
+}
+
+.mapping-container {
+	justify-content: center !important;
+}
+
+.mapping-container > .mapping-card {
+	margin: 30px;
 }

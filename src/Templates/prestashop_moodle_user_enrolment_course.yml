@@ -12,8 +12,8 @@ rules:
             - { target: email, source: email, formula: null }
             - { target: firstname, source: firstname, formula: null }
             - { target: lastname, source: lastname, formula: null }
-            - { target: username, source: firstname;lastname, formula: 'lower( substr( {firstname},1).{lastname})' }
-            - { target: password, source: lastname, formula: '{lastname}."?1"' }
+            - { target: username, source: firstname;lastname, formula: 'lower({firstname}.{lastname})' }
+            - { target: createpassword, source: my_value, formula: '"1"' }
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: '1970-01-01 00:00:00' }
@@ -47,14 +47,12 @@ rules:
         targetSolution: moodle
         sourceModule: orders
         targetModule: users
-        fields:
-            - { target: description, source: gift_message, formula: null }
         relationships:
             - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: users, parent: false }
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: '1970-01-01 00:00:00' }
-            - { name: mode, value: '0' }
+            - { name: mode, value: U }
             - { name: limit, value: '100' }
             - { name: description, value: 'This rule creates a link between Prestashop customer orders and Moodle users. It is required to manage enrollment.' }
     -
@@ -72,6 +70,6 @@ rules:
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: 0 }
-            - { name: mode, value: '0' }
+            - { name: mode, value: C }
             - { name: limit, value: '100' }
             - { name: description, value: 'Create Moodle enrollment depending on the product ordered by Prestashop customers.' }

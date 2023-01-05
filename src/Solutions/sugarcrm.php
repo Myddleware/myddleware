@@ -352,10 +352,10 @@ class sugarcrmcore extends solution
                     }
                     $result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
                 }
-                // No data returned if record deleted, we set a default date
+                // No data returned if record deleted, we set a default date (date ref to have no impact on the final date ref)
                 if (!empty($result[$record->id]['myddleware_deletion'])) {
-                    $result[$record->id]['date_modified'] = gmdate('Y-m-d H:i:s');
-                }
+                    $result[$record->id]['date_modified'] = $param['date_ref'];
+                }	
             }
         }
 
@@ -367,7 +367,7 @@ class sugarcrmcore extends solution
         return $filterArgs;
     }
 
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
         return 'date_modified';
     }

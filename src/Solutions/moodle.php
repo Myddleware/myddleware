@@ -418,6 +418,20 @@ class moodlecore extends solution
         return $result;
     }
 
+	// Check data before update
+    // Add a throw exeption if error
+    protected function checkDataBeforeUpdate($param, $data, $idDoc=null)
+    {
+		// createpassword field can be oly used in creation
+		if (
+				$param['module'] == 'users'
+			AND isset($data['createpassword'])
+		) {
+			unset($data['createpassword']);
+		}
+        return parent::checkDataBeforeUpdate($param, $data, $idDoc);
+    }
+
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
@@ -527,14 +541,22 @@ class moodlecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-        switch ($moduleSource) {
+        switch ($param['module']) {
             case 'get_course_completion_by_date':
                 return 'timecompleted';
                 break;
             case 'get_users_last_access':
                 return 'lastaccess';
+                break;
+            case 'users': 
+				$functionName = $this->getFunctionName($param);
+				if ($functionName == 'core_user_get_users') { // Only use to get one user (history purpose)
+					return 'id';
+				} else {
+					return 'timemodified';
+				}
                 break;
             default:
                 return 'timemodified';

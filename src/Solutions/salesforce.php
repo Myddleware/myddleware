@@ -367,7 +367,7 @@ class salesforcecore extends solution {
 			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
 			
 			// Récupération du nom du champ date
-			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+			$DateRefField = $this->getRefFieldName($param);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
@@ -711,7 +711,7 @@ class salesforcecore extends solution {
 			}
 		} else {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
-			$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+			$DateRefField = $this->getRefFieldName($param);
 
 			// Mis en forme de la date de référence pour qu'elle corresponde aux exigeances du service Salesforce
 			$tab = explode(' ', $param['date_ref']);
@@ -743,7 +743,7 @@ class salesforcecore extends solution {
      */
     protected function getOrder($param): string
     {
-		$DateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+		$DateRefField = $this->getRefFieldName($param);
 		if($DateRefField == 'LastModifiedDate') {
 			$queryOrder = "+ORDER+BY+LastModifiedDate"; // Ajout du module souhaité
 		} else {
@@ -773,14 +773,14 @@ class salesforcecore extends solution {
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
-		if(in_array($RuleMode,array("0","S"))) {
+		if(in_array($param['ruleParams']['mode'],array("0","S"))) {
 			return "LastModifiedDate";
-		} else if ($RuleMode == "C"){
+		} else if ($param['ruleParams']['mode'] == "C"){
 			return "CreatedDate";
 		} else {
-			throw new \Exception ("$RuleMode is not a correct Rule mode.");
+			throw new \Exception ("$param[ruleParams][mode] is not a correct Rule mode.");
 		}
 		return "";
 	}

@@ -398,7 +398,7 @@ class woocommercecore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
         return 'date_modified';
     }

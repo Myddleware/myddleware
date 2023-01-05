@@ -1,5 +1,4 @@
 <?php
-
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -22,7 +21,7 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
- *********************************************************************************/
+*********************************************************************************/
 
 namespace App\DataFixtures;
 
@@ -33,7 +32,7 @@ use Doctrine\Persistence\ObjectManager;
 class LoadSolutionData implements FixtureInterface
 {
     private $manager;
-    protected array $solutionData = [
+    protected $solutionData = [
         ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
@@ -62,6 +61,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'postgresql',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'yousign',           'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)

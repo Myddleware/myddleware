@@ -270,7 +270,8 @@ create_connector:
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
     delete: "Désirez-vous supprimer ce connecteur ?"
-    total: Nombre de connecteurs
+    total: Nombre de 
+    total2: connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
     th: 
         name: Nom
@@ -503,6 +504,7 @@ solution:
         consumerkey: Clé consommateur
         consumersecret: Secret consommateur 
         apikey: Clé api
+        projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
         mail_gotomeeting: Mail GotoMeeting 
@@ -703,6 +705,7 @@ messages:
         nb_rule: "Nombre de règle générées: "
         help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
 email_sendinblue:
+    subject: Myddleware - Test de configuration email Sendinblue
     content: >
         Ceci est un email de test envoyé par Myddleware en utilisant la clé Api Sendinblue.
         Cordialement,
@@ -713,10 +716,11 @@ email_validation:
 email_notification:
     subject: Notification Myddleware
     hello: Bonjour, 
-    introduction: "Voici les statistiques concernant vos documents avec la solution Myddleware:"
+    introduction: "Voici les statistiques des 24 dernières heures dans Myddleware:"
     transfer_success: "- Nombre de documents envoyés avec succès: "
     transfer_error: "- Nombre de documents en erreur: "
     transfer_open: "- Nombre de documents ouverts: "
+    transfer_cancel: "- Nombre de documents annulés: "
     active_rule: "Vos règles actives dans Myddleware sont: "
     no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
     100_first_erros: "Voici les 100 premières erreurs: "
@@ -869,7 +873,11 @@ crontab:
     number: Nombres
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
+    correct: Vos crontabs ont été désactivés
     create: Créer crontab
+    massdisable: Désactiver toutes les tâches
+    massenable: Activer toutes les tâches
+    enableCron: On/Off
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
     help: > 
@@ -883,3 +891,4 @@ duplicate_rule:
     current_rule: règle actuelle
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
+banner: Crontab est désactivé

@@ -501,7 +501,7 @@ class ManagementSMTPController extends AbstractController
                 $sendSmtpEmailTo[] = array('email' => $emailAddress);
             }
             $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $this->translator->trans('email_alert.subject');
+            $sendSmtpEmail['subject'] = $this->translator->trans('email_sendinblue.subject');
             $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_sendinblue.content');
             $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
 

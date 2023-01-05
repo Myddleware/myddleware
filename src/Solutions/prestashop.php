@@ -441,7 +441,7 @@ class prestashopcore extends solution
         }
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        $dateRefField = $this->getRefFieldName($param);
 
         try { // try-catch PrestashopWebservice
             $result = [];
@@ -501,6 +501,9 @@ class prestashopcore extends solution
                         )    
                     ) {
                         $param['date_ref'] = 1;
+                    } else {
+						// We read the next record
+						$param['date_ref']++;
                     }
                     $opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
                     $opt['sort'] = '[id_ASC]';
@@ -610,7 +613,7 @@ class prestashopcore extends solution
     {
         try { // try-catch Myddleware
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
             try { // try-catch PrestashopWebservice
                 $result = [];
                 // Init parameter to read in Prestashop
@@ -987,21 +990,21 @@ class prestashopcore extends solution
     /**
      * @throws \Exception
      */
-    public function getRefFieldName($moduleSource, $RuleMode): string
+    public function getRefFieldName($param): string
     {
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
-        if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
+        if (in_array($param['module'], ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
             return 'date_add';
         }
-        if (in_array($moduleSource, ['order_details','shop_urls'])) {
+        if (in_array($param['module'], ['order_details','shop_urls'])) {
             return 'id';
         }
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'date_upd';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_add';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)

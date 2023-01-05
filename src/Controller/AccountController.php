@@ -24,22 +24,25 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
+use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
-use App\Manager\ToolsManager;
-use App\Service\AlertBootstrapInterface;
 use App\Service\UserManagerInterface;
+use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 
 /**
  * @Route("/rule")
@@ -164,5 +167,58 @@ class AccountController extends AbstractController
         return $this->render('Account/resetPassword.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/download", name="download_log")
+     **/
+    public function downloadFileAction()
+    {
+        if ($this->env === "dev") {
+            $logType = 'dev.log';
+        } else {
+            $logType = 'prod.log';
+        }
+        $cwd = getcwd();
+        $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
+        $varPath = "\\var\log\\".$logType;
+        $file = $cwdWithoutPublic . $varPath;
+        $absolutePathFile = realpath($file);
+       
+
+        $response = new BinaryFileResponse($absolutePathFile);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $logType);
+        return $response;
+    }
+
+    /**
+     * @Route("/emptylog", name="empty_log")
+     **/
+    public function emptyLogAction(Request $request): Response
+    {
+        if ($this->env === "dev") {
+            $logType = 'dev.log';
+        } else {
+            $logType = 'prod.log';
+        }
+        $cwd = getcwd();
+        $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
+        $varPath = "\\var\log\\".$logType;
+        $file = $cwdWithoutPublic . $varPath;
+        $absolutePathFile = realpath($file);
+
+        // Open the file in write mode
+        $handle = fopen($absolutePathFile, 'w');
+
+        // Check if the file was successfully opened
+        if ($handle) {
+            // Truncate the file by writing an empty string to it
+            fwrite($handle, '');
+
+            // Close the file
+            fclose($handle);
+        }
+
+        return $this->redirect($request->headers->get('referer'));
     }
 }

@@ -55,6 +55,7 @@ use App\Repository\RuleRepository;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Id;
 use Exception;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -63,6 +64,8 @@ use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -475,12 +478,17 @@ use Symfony\Contracts\Translation\TranslatorInterface;
          *
          * @Route("/exec/{id}", name="regle_exec")
          */
-        public function executeRule($id): RedirectResponse
+        public function ruleExecAction($id, $documentId = null)
         {
+            // We added a doc id to this function to carry the document ids in case of a run rule by doc id.
+            // In every case except our mass run by doc id, $documentId will be null so we keep the usual behaviour of the function untouched. 
             try {
                 $this->ruleManager->setRule($id);
 
-                if ('ALL' == $id) {
+                if ($documentId !== null) {
+                    $this->ruleManager->actionRule('runRuleByDocId', 'execrunRuleByDocId', $documentId);
+
+                } elseif ('ALL' == $id) {
                     $this->ruleManager->actionRule('ALL');
 
                     return $this->redirect($this->generateUrl('regle_list'));
@@ -489,7 +497,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                     return $this->redirect($this->generateUrl('regle_list'));
                 }
-                $this->ruleManager->actionRule('runMyddlewareJob');
+                if ($documentId === null){
+
+                    $this->ruleManager->actionRule('runMyddlewareJob');
+                }
 
                 return $this->redirect($this->generateURL('regle_open', ['id' => $id]));
             } catch (Exception $e) {
@@ -781,6 +792,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 // Champs et formules d'une règle
                 if ($ruleFields) {
+					$fields = array();
                     foreach ($ruleFields as $ruleFieldsObj) {
                         $array = [
                             'target' => $ruleFieldsObj->getTarget(),
@@ -845,8 +857,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 // reload ---------------
                 return $this->redirect($this->generateUrl('regle_stepthree', ['id' => $rule->getId()]));
             } catch (Exception $e) {
-                $this->sessionService->setCreateRuleError($key, $this->translator->trans('error.rule.update').' '.$e->getMessage());
-                $session->set('error', [$this->translator->trans('error.rule.update').' '.$e->getMessage()]);
+                $this->sessionService->setCreateRuleError($key, $this->translator->trans('error.rule.update').' '.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+                $session->set('error', [$this->translator->trans('error.rule.update').' '.$e->getMessage().' '.$e->getFile().' '.$e->getLine()]);
 
                 return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
             }
@@ -2897,4 +2909,31 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
             return $encrypter->decrypt($tab_params);
         }
+
+
+        // Function to take source document ids optain in a form and reading them and them only.
+
+        /**
+         * @param $id
+         * 
+         * @Route("/executebyid/{id}", name="run_by_id")
+         */
+    public function execRuleById($id, Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('id', TextareaType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $documentIdString = $form->get('id')->getData();
+
+            // We will get to the runrecord commmand using the ids from the form.
+            $this->ruleExecAction($id, $documentIdString);
+        }
+        return $this->render('Rule/byIdForm.html.twig', [
+            'formIdBatch' => $form->createView()
+        ]);
     }
+}

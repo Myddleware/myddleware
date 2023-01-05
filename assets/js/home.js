@@ -33,7 +33,7 @@ function drawChart() {
 			success: function (dataServ) {
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
-					is3D: true,
+					is3D: false,
 				};
 
 				var chart = new google.visualization.PieChart(document.getElementById('pie_chart_error_doc'));
@@ -50,7 +50,7 @@ function drawChart() {
 				
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
-					is3D: true,
+					is3D: false,
 				};
 				var chart = new google.visualization.PieChart(document.getElementById('pie_chart_transfer_rule'));
 				chart.draw(data, options);
@@ -65,7 +65,7 @@ function drawChart() {
 			success: function (dataServ) {
 				var data = google.visualization.arrayToDataTable(dataServ);
 				var options = {
-					is3D: true,
+					is3D: false,
 					isStacked: true,
 					legend: { position: 'bottom'},
 					height: 400,
@@ -87,7 +87,7 @@ function drawChart() {
 				var data = google.visualization.arrayToDataTable(dataServ);
 				
 				var options = {
-					is3D: true,
+					is3D: false,
 					isStacked: true,
 					legend: { position: 'bottom'},
 					height: 400,
