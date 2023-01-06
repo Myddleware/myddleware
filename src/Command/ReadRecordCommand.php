@@ -25,7 +25,6 @@
 
 namespace App\Command;
 
-use App\Entity\Job;
 use App\Manager\JobManager;
 use App\Repository\RuleRepository;
 use Exception;
@@ -35,23 +34,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class ReadRecordCommand.
- */
 class ReadRecordCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var RuleRepository
-     */
-    private $ruleRepository;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
+    private RuleRepository $ruleRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -73,20 +60,24 @@ class ReadRecordCommand extends Command
             ->addArgument('ruleId', InputArgument::REQUIRED, 'Rule used to read the records')
             ->addArgument('filterQuery', InputArgument::REQUIRED, 'Filter used to read data in the source application, eg : id')
             ->addArgument('filterValues', InputArgument::REQUIRED, 'Values corresponding to the fileter separated by comma, eg : 1256,4587')
-			->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $ruleId = $input->getArgument('ruleId');
         $filterQuery = $input->getArgument('filterQuery');
         $filterValues = $input->getArgument('filterValues');
-		$force = $input->getArgument('force');
-		if (empty($force)) {
-			$force = false;
-		}
+        $force = $input->getArgument('force');
+        if (empty($force)) {
+            $force = false;
+        }
 
         $rule = $this->ruleRepository->findOneBy(['id' => $ruleId, 'deleted' => false]);
         if (null === $rule) {
@@ -106,7 +97,12 @@ class ReadRecordCommand extends Command
         }
 
         $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
-        $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
+
+        // If the query is by id, we use the flag that leads to massIdRerun()
+        // Otherwise we use the regular rerun
+        if ($filterQuery === 'id') {
+            $this->jobManager->readRecord($rule, $filterQuery, $filterValues, 1);    
+        }else $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
 
         // Close job if it has been created
         $responseCloseJob = $this->jobManager->closeJob();

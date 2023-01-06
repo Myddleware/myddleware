@@ -32,12 +32,9 @@ use App\Solutions\lib\PrestaShopWebserviceException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-// Librairie prestashop
-//require_once('lib/lib_prestashop.php');
-
 class prestashopcore extends solution
 {
-    protected $required_fields = [
+    protected array $required_fields = [
         'default' => ['id', 'date_upd', 'date_add'],
         'product_options' => ['id'],
         'product_option_values' => ['id'],
@@ -48,24 +45,25 @@ class prestashopcore extends solution
         'customer_messages' => ['id', 'date_add'],
         'order_carriers' => ['id', 'date_add'],
         'order_payments' => ['id', 'date_add', 'order_reference'],
+        'shop_urls' => ['id'],
     ];
 
-    protected $notWrittableFields = ['products' => ['manufacturer_name', 'quantity']];
+    protected array $notWrittableFields = ['products' => ['manufacturer_name', 'quantity']];
 
     // Module dépendants du langage
-    protected $moduleWithLanguage = ['products', 'categories'];
+    protected array $moduleWithLanguage = ['products', 'categories'];
 
     // Module without reference date
-    protected $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables'];
+    protected array $moduleWithoutReferenceDate = ['order_details', 'product_options', 'product_option_values', 'combinations', 'carriers', 'stock_availables','shop_urls'];
 
     protected $required_relationships = [
         'default' => [],
     ];
 
-    protected $fieldsIdNotRelate = ['id_gender', 'id_supply_order_state'];
+    protected array $fieldsIdNotRelate = ['id_gender', 'id_supply_order_state'];
 
     // List of relationship many to many in Prestashop. We create a module to transform it in 2 relationships one to many.
-    protected $module_relationship_many_to_many = [
+    protected array $module_relationship_many_to_many = [
         'groups_customers' => ['label' => 'Association groups - customers', 'fields' => [], 'relationships' => ['customer_id', 'groups_id'], 'searchModule' => 'customers', 'subModule' => 'groups', 'subData' => 'group'],
         'carts_products' => ['label' => 'Association carts - products', 'fields' => ['quantity' => 'Quantity', 'id_product_attribute' => 'id_product_attribute', 'id_address_delivery' => 'id_address_delivery'], 'relationships' => ['cart_id', 'id_product'], 'searchModule' => 'carts', 'subModule' => 'cart_rows', 'subData' => 'cart_row', 'subDataId' => 'id_product'],
         'products_options_values' => ['label' => 'Association products options - values', 'fields' => [], 'relationships' => ['product_option_id', 'product_option_values_id'], 'searchModule' => 'product_options', 'subModule' => 'product_option_values', 'subData' => 'product_option_value'],
@@ -78,20 +76,20 @@ class prestashopcore extends solution
     private $webService;
 
     // Listes des modules et des champs à exclure de Salesforce
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
-    protected $exclude_field_list = [];
+    protected array $exclude_field_list = [];
 
-    protected $FieldsDuplicate = [
+    protected array $FieldsDuplicate = [
         'customers' => ['email'],
         'products' => ['ean13', 'name', 'reference'],
         'stock_availables' => ['id_product'],
     ];
 
-    protected $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
+    protected array $threadStatus = ['open' => 'open', 'closed' => 'closed', 'pending1' => 'pending1', 'pending2' => 'pending2'];
 
     // Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion)
@@ -120,17 +118,15 @@ class prestashopcore extends solution
                 throw new \Exception($e->getMessage());
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];
         }
     }
 
-    // login($paramConnexion)
-
     // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -203,11 +199,8 @@ class prestashopcore extends solution
             return array_intersect_key($authorized, $modulesSource);
         }
     }
-
-    // get_modules()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $extension = false)
+    public function get_module_fields($module, $type = 'source', $extension = false): array
     {
         parent::get_module_fields($module, $type, $extension);
         try { // try-catch Myddleware
@@ -374,13 +367,12 @@ class prestashopcore extends solution
                 throw new \Exception('Call failed '.$e->getTrace());
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
 
-            return false;
+            return ['error' => $error];
         }
     }
-
-    // get_module_fields($module)
 
     // Fonction permettant de récupérer les listes déroulantes
     protected function getList($field, $fields)
@@ -434,10 +426,12 @@ class prestashopcore extends solution
         return $out;
     }
 
-    // xml2array ( $xmlObject, $out = array () )
-
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function read($param)
+
+    /**
+     * @throws \Exception
+     */
+    public function read($param): ?array
     {
         // traitement spécial pour module de relation Customers / Groupe
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -447,7 +441,7 @@ class prestashopcore extends solution
         }
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        $dateRefField = $this->getRefFieldName($param);
 
         try { // try-catch PrestashopWebservice
             $result = [];
@@ -499,8 +493,17 @@ class prestashopcore extends solution
                 }
                 // Si la référence n'est pas une date alors c'est l'ID de prestashop
                 else {
-                    if ('' == $param['date_ref']) {
+                    if (
+                            in_array($param['module'], $this->moduleWithoutReferenceDate)
+                        AND (
+                                empty($param['date_ref'])
+                             OR !is_numeric($param['date_ref'])
+                        )    
+                    ) {
                         $param['date_ref'] = 1;
+                    } else {
+						// We read the next record
+						$param['date_ref']++;
                     }
                     $opt['filter[id]'] = '['.$param['date_ref'].',999999999]';
                     $opt['sort'] = '[id_ASC]';
@@ -584,6 +587,10 @@ class prestashopcore extends solution
     }
 
     // Method de find the date ref after a read call
+
+    /**
+     * @throws \Exception
+     */
     protected function getReferenceCall($param, $result)
     {
         // IF the reference is a date
@@ -602,11 +609,11 @@ class prestashopcore extends solution
     }
 
     // Read pour les modules fictifs sur les relations many to many
-    protected function readManyToMany($param)
+    protected function readManyToMany($param): array
     {
         try { // try-catch Myddleware
             // On va chercher le nom du champ pour la date de référence: Création ou Modification
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
             try { // try-catch PrestashopWebservice
                 $result = [];
                 // Init parameter to read in Prestashop
@@ -736,10 +743,13 @@ class prestashopcore extends solution
         return $result;
     }
 
-    // readManyToMany($param)
-
     // Permet de créer des données
-    public function createData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
+    public function createData($param): array
     {
         // If a sub record is created, it means that we will update the main module
         if (!empty($this->module_relationship_many_to_many[$param['module']])) {
@@ -831,10 +841,11 @@ class prestashopcore extends solution
         return $result;
     }
 
-    // create($param)
-
     // Permet de modifier des données
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         // We never update order_histories even if the methode update is called
         // For this module we always create a new line (so create methode is called)
@@ -954,12 +965,10 @@ class prestashopcore extends solution
         return $result;
     }
 
-    // update($param)
-
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         if (
                 'target' == $type
@@ -977,25 +986,29 @@ class prestashopcore extends solution
     }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+
+    /**
+     * @throws \Exception
+     */
+    public function getRefFieldName($param): string
     {
         // We force date_add for some module (when there is no date_upd (order_histories) or when the date_upd can be empty (customer_messages))
-        if (in_array($moduleSource, ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
+        if (in_array($param['module'], ['order_histories', 'order_payments', 'order_carriers', 'customer_messages'])) {
             return 'date_add';
         }
-        if (in_array($moduleSource, ['order_details'])) {
+        if (in_array($param['module'], ['order_details','shop_urls'])) {
             return 'id';
         }
-        if (in_array($RuleMode, ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
             return 'date_upd';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_add';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
-    public function referenceIsDate($module)
+    public function referenceIsDate($module): bool
     {
         // Le module order détail n'a pas de date de référence. On utilise donc l'ID comme référence
         if (in_array($module, $this->moduleWithoutReferenceDate)) {
@@ -1006,7 +1019,7 @@ class prestashopcore extends solution
     }
 
     // Permet de renvoyer l'id de la table en récupérant la table liée à la règle ou en la créant si elle n'existe pas
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         try {
             if (
@@ -1034,8 +1047,10 @@ class prestashopcore extends solution
 
             return [];
         } catch (\Exception $e) {
-            return [];
-            //return $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
@@ -1044,13 +1059,21 @@ class prestashopcore extends solution
         return $opt;
     }
 
+     // Manage specific reference date for the module shop_urls
+     protected function getModifiedDate($param, $record, $dateRefField)
+     {
+        // No reference date for module shop_urls so we set one by default
+        if ($param['module'] == 'shop_urls') {
+            return '1970-01-01 00:00:00';
+        }
+        return $this->dateTimeToMyddleware($record[$dateRefField]);
+     }
+
     // Fonction permettant de faire l'appel REST
     protected function call($url, $parameters)
     {
     }
-
-    // call($method, $parameters)
-}// class prestashopcore
+}
 class prestashop extends prestashopcore
 {
 }

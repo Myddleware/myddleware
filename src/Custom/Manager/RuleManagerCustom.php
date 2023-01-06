@@ -32,7 +32,7 @@ class RuleManagerCustom extends RuleManager
 		return $responses;
 	}
 
-	protected function sendTarget($type, $documentId = null)
+	protected function sendTarget($type, $documentId = null): array
 	{
 		// Call standard function
 		$responses = parent::sendTarget($type, $documentId);
@@ -287,7 +287,7 @@ class RuleManagerCustom extends RuleManager
 		}
 	}
 
-	public function getTargetDataDocuments($documents = null)
+	public function getTargetDataDocuments($documents = null): array
 	{
 		// include_once 'document.php';
 

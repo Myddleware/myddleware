@@ -38,14 +38,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RerunErrorCommand extends Command
 {
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private JobManager $jobManager;
+    private LoggerInterface $logger;
 
     public function __construct(
         LoggerInterface $logger,
@@ -64,20 +58,23 @@ class RerunErrorCommand extends Command
             ->setDescription('Synchronisation des données')
             ->addArgument('limit', InputArgument::REQUIRED, 'Nombre maximum de flux en erreur traité')
             ->addArgument('attempt', InputArgument::REQUIRED, 'Nombre maximum de tentative')
-			->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $limit = $input->getArgument('limit');
         $attempt = $input->getArgument('attempt');
         $api = $input->getArgument('api');
-		$force = $input->getArgument('force');
-		if (empty($force)) {
-			$force = false;
-		}
+        $force = $input->getArgument('force');
+        if (empty($force)) {
+            $force = false;
+        }
 
         // Set the API value
         $this->jobManager->setApi((bool) $api);

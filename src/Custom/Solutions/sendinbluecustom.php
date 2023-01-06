@@ -125,7 +125,7 @@ class sendinbluecustom extends sendinblue {
 	}
 	
 	// Permet de mettre à jour le statut d'un document après création ou modification dans la cible
-    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
+    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array
     {
 		// If we have an error sending for rules Sendinblue coupon and contact and if the error is Contact does not exist
 		// Then we cancel the document because the contact has been deleted in Sendinblue

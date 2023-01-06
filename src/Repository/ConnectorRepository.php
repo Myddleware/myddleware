@@ -27,6 +27,7 @@ namespace App\Repository;
 
 use App\Entity\Connector;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -58,7 +59,7 @@ class ConnectorRepository extends ServiceEntityRepository
     }
 
     // Affiche la liste des connecteurs d'un user ou tout en fonction si c'est le support
-    public function findListConnectorByUser($is_support, $id)
+    public function findListConnectorByUser($is_support, $id): Query
     {
         $qb = $this->createQueryBuilder('c');
 

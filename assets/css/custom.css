@@ -1,36 +1,15 @@
-body {
-    background: url('./../images/template/fd.jpg') repeat;
-    background-size: cover;
-    background-color: #9DC0E1;
-}
-
 #logo {
     background: url('./../images/template/logo.png') no-repeat;
     background-size: 158px;
     height: 113px;
     width: 160px;
     display: inline-block;
-    margin-top: 50px;
 }
-
-
 menu .caret, #myd_top .caret {
     background: url('./../images/template/arrow-menu.png') no-repeat;
     height: 13px;
     width: 14px;
     border: none;
-}
-
-#cloud {
-    background: url('./../images/template/cloud.png') no-repeat;
-    height: 129px;
-    width: 397px;
-    display: inline-block;
-    border: none;
-}
-
-.negative-margin-menu{
-    margin-right: -0.77rem;
 }
 
 #fd-title-small {
@@ -40,10 +19,10 @@ menu .caret, #myd_top .caret {
     display: inline-block;
     border: none;
     margin: 20px 20px 20px -13px;
-    padding-top: 15px;
+    padding-top: 20px;
     color: white;
     text-align: center;
-    line-height: 1em;
+    line-height: 0.55em;
 }
 
 #fd-title-large {
@@ -69,7 +48,7 @@ menu .caret, #myd_top .caret {
     width: 293px;
     display: inline-block;
     border: none;
-    margin: 20px 20px 20px -13px;
+    margin: 20px 20px 20px 0px;
     padding-top: 15px;
     color: white;
     font-size: 0.9em;
@@ -231,9 +210,30 @@ menu .caret, #myd_top .caret {
     padding: 2em;
 }
 
-/* Nav menu */
-#navigation-container{
-    max-width: 80vw;
-    margin: auto;
+
+/* CUSTOM BUTTON BOOSTRAP */
+
+.btn-outline-success:hover{
+    background-color: #19ca42 !important;
+    color:white !important;
+}
+
+.btn-outline-success{
+    color: #19ca42 !important;
+    border-color: #19ca42 !important;
+}
+
+.btn-primary {
+	background-color: #198BCA!important;
+	border-color: #198BCA!important;
+}
+
+.btn-primary:hover {
+	background-color: #0F66A9!important;
+	border-color: #0F66A9!important;
+} 
+
+.btn{
+    border-radius: 0% !important;
 }
 

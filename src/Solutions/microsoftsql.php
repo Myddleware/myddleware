@@ -28,15 +28,17 @@ namespace App\Solutions;
 class microsoftsqlcore extends database
 {
     protected $driver;
-    protected $fieldName = 'COLUMN_NAME';
-    protected $fieldLabel = 'COLUMN_NAME';
-    protected $fieldType = 'DATA_TYPE';
-
-    protected $stringSeparatorOpen = '[';
-    protected $stringSeparatorClose = ']';
+    protected string $fieldName = 'COLUMN_NAME';
+    protected string $fieldLabel = 'COLUMN_NAME';
+    protected string $fieldType = 'DATA_TYPE';
+    protected string $stringSeparatorOpen = '[';
+    protected string $stringSeparatorClose = ']';
+    // Enable to delete data
+    protected bool $sendDeletion = true;
+    protected bool $readDeletion = true;
 
     // Generate PDO object
-    protected function generatePdo()
+    protected function generatePdo(): \PDO
     {
         $this->set_driver();
         if ('sqlsrv' == $this->driver) {
@@ -57,13 +59,13 @@ class microsoftsqlcore extends database
     }
 
     // Query to get all the tables of the database
-    protected function get_query_show_tables()
+    protected function get_query_show_tables(): string
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
     }
 
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         return 'SELECT * FROM information_schema.columns WHERE table_name = \''.$table.'\'';
     }
@@ -88,7 +90,7 @@ class microsoftsqlcore extends database
         return str_replace("'", "''", $value);
     }
 
-    protected function get_query_select_header($param, $method)
+    protected function get_query_select_header($param, $method): string
     {
         // The limit is managed with TOP if we don't have the offset parameter
         if ('read_last' == $method) {

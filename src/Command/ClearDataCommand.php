@@ -31,19 +31,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class ClearDataCommand.
- */
 class ClearDataCommand extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    private LoggerInterface $logger;
+    private JobManager $jobManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -63,7 +54,10 @@ class ClearDataCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
         $data = $this->jobManager->initJob('cleardata');
@@ -75,6 +69,7 @@ class ClearDataCommand extends Command
             return 0;
         }
 
+        // @TODO: this method executes SQL queries but it does not actually return anything at the moment, we need to make it return something if we want to catch this $response['message']
         $response = $this->jobManager->clearData();
         // Display message on the console
         if (!empty($response['message'])) {

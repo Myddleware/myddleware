@@ -29,27 +29,27 @@ class oracledbcore extends database
 {
     protected $driver = 'oci';
 
-    protected $fieldName = 'Name';
-    protected $fieldLabel = 'Name';
-    protected $fieldType = 'Type';
+    protected string $fieldName = 'Name';
+    protected string $fieldLabel = 'Name';
+    protected string $fieldType = 'Type';
 
-    protected $stringSeparatorOpen = '';
-    protected $stringSeparatorClose = '';
+    protected string $stringSeparatorOpen = '';
+    protected string $stringSeparatorClose = '';
 
-    protected function generatePdo()
+    protected function generatePdo(): \PDO
     {
         return new \PDO($this->driver.':dbname=//'.$this->paramConnexion['host'].':'.$this->paramConnexion['port'].'/'.$this->paramConnexion['database_name'].';charset='.$this->charset, $this->paramConnexion['login'], $this->paramConnexion['password']);
     }
 
     // Generate query
-    protected function get_query_show_tables()
+    protected function get_query_show_tables(): string
     {
         return "SELECT * FROM (SELECT CONCAT(CONCAT(owner, '.'), table_name) AS \"TableName\", owner FROM all_tables UNION SELECT CONCAT(CONCAT(owner, '.'), view_name) AS \"ViewName\", owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
         // return "SELECT * FROM (SELECT table_name, owner FROM all_tables UNION SELECT view_name, owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
     }
 
     // Query to get all the flieds of the table
-    protected function get_query_describe_table($table)
+    protected function get_query_describe_table($table): string
     {
         $table = substr($table, (strpos($table, '.') ?: -1) + 1);
 
@@ -57,7 +57,7 @@ class oracledbcore extends database
     }
 
     // Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
-    public function readData($param)
+    public function readData($param): array
     {
         $result = [];
         try {
@@ -165,7 +165,7 @@ class oracledbcore extends database
     }
 
     // Get the limit operator of the select query in the read last function
-    protected function get_query_select_limit_offset($param, $method)
+    protected function get_query_select_limit_offset($param, $method): string
     {
         if (empty($param['offset'])) {
             $param['offset'] = 0;
@@ -183,7 +183,8 @@ class oracledbcore extends database
 
         return " ROWNUM BETWEEN $param[offset] AND ".($param['limit'] + $param['offset']);
     }
-}// class oracledbcore
+}
+
 class oracledb extends oracledbcore
 {
 }

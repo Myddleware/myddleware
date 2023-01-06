@@ -1,15 +1,15 @@
 
 {% extends 'baseone.html.twig' %}
-{% block title %} Install Step 1{% endblock %}
 {% block stylesheets %}
     {{ encore_entry_link_tags('install') }}
 {% endblock %}
+{% block title %}{% endblock %}
 {% block body %}
 <div id="myd_top"></div>
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <p> <span id="logo"></span></p>
+            <p><span id="logo" class="logo-install"></span></p>
             <div class="row">
                 <div class="col">
                     <div class="card text-center main-card">

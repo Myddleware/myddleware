@@ -1,2 +1,8 @@
 swiftmailer:
-    url: '%env(MAILER_URL)%'
+    transport: smtp
+    host: null
+    port: null
+    auth_mode: null
+    encryption: null
+    user: null
+    password: null

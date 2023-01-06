@@ -208,9 +208,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
-    public function ckeckPredecessorDocuments()
+    public function checkPredecessorDocuments()
     {
-        $this->ruleManager->ckeckPredecessorDocuments();
+        $this->ruleManager->checkPredecessorDocuments();
     }
 
     // Permet de filtrer les documents en fonction des filtres de la règle
@@ -220,9 +220,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function ckeckParentDocuments()
+    public function checkParentDocument()
     {
-        $this->ruleManager->ckeckParentDocuments();
+        $this->ruleManager->checkParentDocument();
     }
 
     // Permet de trasformer les documents
@@ -296,17 +296,17 @@ class jobcore
         $this->start = microtime(true);
         // Check if a job is already running except if force = true (api call or manuel call)
         if (!$force) {
-			$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-			$stmt = $this->connection->prepare($sqlJobOpen);
-			$result = $stmt->executeQuery();
-			$job = $result->fetchAssociative(); // 1 row
-			// Error if one job is still running
-			if (!empty($job)) {
-				$this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+            $stmt = $this->connection->prepare($sqlJobOpen);
+            $result = $stmt->executeQuery();
+            $job = $result->fetchAssociative(); // 1 row
+            // Error if one job is still running
+            if (!empty($job)) {
+                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-				return ['success' => false, 'message' => $this->message];
-			}
-		}
+                return ['success' => false, 'message' => $this->message];
+            }
+        }
         // Create Job
         $insertJob = $this->insertJob();
         if ($insertJob) {
@@ -505,7 +505,10 @@ class jobcore
     }
 
     // Fonction permettant d'annuler massivement des documents
-    public function readRecord($ruleId, $filterQuery, $filterValues): bool
+
+    // In order to add extra components to the function without disturbing its regular use, we added a flag argument.
+    // This $usesDocumentIds flag is either null or 1
+    public function readRecord($ruleId, $filterQuery, $filterValues, $usesDocumentIds = null): bool
     {
         try {
             // Get the filter values
@@ -529,6 +532,11 @@ class jobcore
             $this->ruleManager->setJobId($this->id);
             $this->ruleManager->setApi($this->api);
 
+            // We create an array that will match the initial structure of the function
+            if ($usesDocumentIds === 1) {
+                $arrayOfDocumentIds = [];
+            }
+
             // Try to read data for each values
             foreach ($filterValuesArray as $value) {
                 // Generate documents
@@ -536,8 +544,13 @@ class jobcore
                 if (!empty($documents->error)) {
                     throw new Exception($documents->error);
                 }
-                // Run documents
-                if (!empty($documents)) {
+
+                // We assign the id to an id section of the array
+                if ($usesDocumentIds === 1) {
+                    $arrayOfDocumentIds[] = $documents[0]->id;
+                    continue;
+                } elseif (!empty($documents)) {
+                    // Run documents
                     foreach ($documents as $doc) {
                         $errors = $this->ruleManager->actionDocument($doc->id, 'rerun');
                         // Check errors
@@ -546,6 +559,12 @@ class jobcore
                         }
                     }
                 }
+            }
+
+            // Since the actionDocument takes a string and not an array of ids, we recompose the ids into a string separated by commas
+            if ($usesDocumentIds === 1) {
+                $stringOfDocumentIds = implode(',', $arrayOfDocumentIds);
+                $errors = $this->ruleManager->actionDocument($stringOfDocumentIds, 'rerun');
             }
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
@@ -567,7 +586,7 @@ class jobcore
         // Connectors
     }
 
-    public function getRules()
+    public function getRules($force = false)
     {
         try {
             $sqlParams = '	SELECT name_slug 
@@ -575,8 +594,8 @@ class jobcore
 								INNER JOIN rule
 									ON rule.id = ruleorder.rule_id
 							WHERE 
-									rule.active = 1
-								AND	rule.deleted = 0
+									rule.deleted = 0
+								'.(!$force ? ' AND rule.active = 1 ' : '').'
 							ORDER BY ruleorder.order ASC';
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
@@ -747,9 +766,9 @@ class jobcore
         $this->message = $upgrade->processUpgrade($output);
     }
 
-    // Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle
-
     /**
+     * Permet de supprimer toutes les données des tabe source, target et history en fonction des paramètre de chaque règle.
+     *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */

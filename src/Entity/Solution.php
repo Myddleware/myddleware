@@ -25,199 +25,116 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Solution.
- *
  * @ORM\Table(name="solution")
  * @ORM\Entity(repositoryClass="App\Repository\SolutionRepository")
  */
 class Solution
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=20,nullable=false)
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="active", type="integer", length=1,nullable=false)
      */
-    private $active;
+    private int $active;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="source", type="integer", length=1,nullable=false)
      */
-    private $source;
+    private int $source;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="target", type="integer", length=1,nullable=false)
      */
-    private $target;
+    private int $target;
 
     /**
-     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="Connector", mappedBy="solution", cascade={"persist", "remove", "merge"})
      */
     private $connector;
 
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
         $this->connector = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Set name.
-     *
-     * @param string $name
-     *
-     * @return Solution
-     */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get name.
-     *
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Set active.
-     *
-     * @param int $active
-     *
-     * @return Solution
-     */
-    public function setActive($active)
+    public function setActive(int $active): self
     {
         $this->active = $active;
 
         return $this;
     }
 
-    /**
-     * Get active.
-     *
-     * @return int
-     */
-    public function getActive()
+    public function getActive(): int
     {
         return $this->active;
     }
 
-    /**
-     * Set source.
-     *
-     * @param int $source
-     *
-     * @return Solution
-     */
-    public function setSource($source)
+    public function setSource($source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    /**
-     * Get source.
-     *
-     * @return int
-     */
-    public function getSource()
+    public function getSource(): int
     {
         return $this->source;
     }
 
-    /**
-     * Set target.
-     *
-     * @param int $target
-     *
-     * @return Solution
-     */
-    public function setTarget($target)
+    public function setTarget($target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    /**
-     * Get target.
-     *
-     * @return int
-     */
-    public function getTarget()
+    public function getTarget(): int
     {
         return $this->target;
     }
 
-    /**
-     * Add connector.
-     *
-     * @return Solution
-     */
-    public function addConnector(Connector $connector)
+    public function addConnector(Connector $connector): self
     {
         $this->connector[] = $connector;
 
         return $this;
     }
 
-    /**
-     * Remove connector.
-     */
     public function removeConnector(Connector $connector)
     {
         $this->connector->removeElement($connector);
     }
 
-    /**
-     * Get connector.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
     public function getConnector()
     {
         return $this->connector;

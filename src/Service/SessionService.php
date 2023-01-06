@@ -2,18 +2,17 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
- * Manage the session of myddleware ( Refactoring since the Controllers ).
+ * Manages Myddleware Session ( Refactoring since the Controllers ).
  *
  * @author Dolyveen Renault <drenault@karudev-informatique.fr>
  */
 class SessionService
 {
     const MYDDLEWARE_SESSION_INDEX = 'myddlewareSession';
-    private $_session;
+    private SessionInterface $_session;
 
     const ERROR_CREATE_RULE_INDEX = 'create_rule';
 
@@ -48,7 +47,7 @@ class SessionService
         return $myddlewareSession['param']['myddleware']['connector']['solution']['callback'];
     }
 
-    public function isSolutionNameExist()
+    public function isSolutionNameExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -108,14 +107,14 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function isUploadNameExist()
+    public function isUploadNameExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['myddleware']['upload']['name']);
     }
 
-    public function isUploadErrorExist()
+    public function isUploadErrorExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -126,7 +125,7 @@ class SessionService
 
     //############ CONNECTOR ###################
 
-    public function isConnectorExist()
+    public function isConnectorExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -208,28 +207,28 @@ class SessionService
         return $myddlewareSession['param']['connector']['source']['solution'];
     }
 
-    public function isParamConnectorSourceExist()
+    public function isParamConnectorSourceExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['connector']['source']);
     }
 
-    public function isParamRuleSourceModuleExist($key)
+    public function isParamRuleSourceModuleExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['rule'][$key]['source']['module']);
     }
 
-    public function isParamRuleCibleModuleExist($key)
+    public function isParamRuleCibleModuleExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['rule'][$key]['cible']['module']);
     }
 
-    public function isParamRuleCibleModeExist($key)
+    public function isParamRuleCibleModeExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -251,7 +250,7 @@ class SessionService
         return json_decode($myddlewareSession['param']['connector']['source']['token']);
     }
 
-    public function isParamConnectorSourceTokenExist()
+    public function isParamConnectorSourceTokenExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -273,7 +272,7 @@ class SessionService
         return json_decode($myddlewareSession['param']['connector']['source']['refreshToken']);
     }
 
-    public function isParamConnectorSourceRefreshTokenExist()
+    public function isParamConnectorSourceRefreshTokenExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -325,7 +324,7 @@ class SessionService
         return $myddlewareSession['param']['connector'][$parent][$type];
     }
 
-    public function isParamConnectorExist()
+    public function isParamConnectorExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -379,7 +378,7 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function isConnectorValuesExist()
+    public function isConnectorValuesExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -470,7 +469,7 @@ class SessionService
         return $myddlewareSession['param']['rule'][$key][$parent][$name];
     }
 
-    public function isParamRuleExist($key)
+    public function isParamRuleExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -485,7 +484,7 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function getParamRuleNameValid($key)
+    public function getParamRuleNameValid($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -507,7 +506,7 @@ class SessionService
         return $myddlewareSession['param']['rule'][$key]['rulename'];
     }
 
-    public function isParamRuleNameExist($key)
+    public function isParamRuleNameExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -583,14 +582,14 @@ class SessionService
         return $myddlewareSession['param']['rule'][$key]['last_version_id'];
     }
 
-    public function isParamRuleLastVersionIdExist($key)
+    public function isParamRuleLastVersionIdExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['rule'][$key]['last_version_id']);
     }
 
-    public function isParamRuleLastVersionIdEmpty($key)
+    public function isParamRuleLastVersionIdEmpty($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -761,7 +760,7 @@ class SessionService
         return $myddlewareSession['param']['rule'][$key]['source']['datereference'];
     }
 
-    public function isParamRuleSourceDateReference($key)
+    public function isParamRuleSourceDateReference($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -798,21 +797,21 @@ class SessionService
         return $myddlewareSession['param']['rule'][$key]['source']['fields']['error'];
     }
 
-    public function isParamRuleSourceFieldsErrorExist($key)
+    public function isParamRuleSourceFieldsErrorExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['rule'][$key]['source']['fields']['error']);
     }
 
-    public function isParamRuleSourceFieldsExist($key)
+    public function isParamRuleSourceFieldsExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['param']['rule'][$key]['source']['fields']);
     }
 
-    public function isParamRuleTargetFieldsExist($key)
+    public function isParamRuleTargetFieldsExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -899,24 +898,16 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function isRuleIdExist($key)
+    public function isRuleIdExist($key): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['rule']['newid'][$key]);
     }
 
-    /**
-     * If the rulename is less than X characters.
-     *
-     * @return bool
-     *
-     * @param mixed $key
-     * @param mixed $number
-     */
-    public function isRuleNameLessThanXCharacters($key, $number)
+    public function isRuleNameLessThanXCharacters($key, $number): bool
     {
-        if (null != $this->getParamRuleSourceSolution($key) || strlen($this->getParamRuleName($key)) < $number || false == $this->getParamRuleNameValid($key)) {
+        if (null != $this->getParamRuleSourceSolution($key) || strlen($this->getParamRuleName($key)) < $number || !$this->getParamRuleNameValid($key)) {
             return false;
         }
 
@@ -1234,105 +1225,105 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function isFluxFilterCSourceIdExist()
+    public function isFluxFilterCSourceIdExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['source_id']);
     }
 
-    public function isFluxFilterCTargetIdExist()
+    public function isFluxFilterCTargetIdExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['target_id']);
     }
 
-    public function isFluxFilterCWhereExist()
+    public function isFluxFilterCWhereExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['where']);
     }
 
-    public function isFluxFilterCGblStatusExist()
+    public function isFluxFilterCGblStatusExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['gblstatus']);
     }
 
-    public function isFluxFilterCStatusExist()
+    public function isFluxFilterCStatusExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['status']);
     }
 
-    public function isFluxFilterTypeExist()
+    public function isFluxFilterTypeExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['type']);
     }
 
-    public function isFluxFilterCRuleExist()
+    public function isFluxFilterCRuleExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['rule']);
     }
 
-    public function isFluxFilterCExist()
+    public function isFluxFilterCExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']);
     }
 
-    public function isFluxFilterCDateCreateStartExist()
+    public function isFluxFilterCDateCreateStartExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['date_create_start']);
     }
 
-    public function isFluxFilterCSourceContentExist()
+    public function isFluxFilterCSourceContentExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['source_content']);
     }
 
-    public function isFluxFilterCTargetContentExist()
+    public function isFluxFilterCTargetContentExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['target_content']);
     }
 
-    public function isFluxFilterCDateModifEndExist()
+    public function isFluxFilterCDateModifEndExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['date_modif_end']);
     }
 
-    public function isFluxFilterCDateModifStartExist()
+    public function isFluxFilterCDateModifStartExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['date_modif_start']);
     }
 
-    public function isFluxFilterCDateCreateEndExist()
+    public function isFluxFilterCDateCreateEndExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['date_create_end']);
     }
 
-    public function isFluxFilterExist()
+    public function isFluxFilterExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
@@ -1358,7 +1349,7 @@ class SessionService
         return $myddlewareSession['error'][self::ERROR_CREATE_RULE_INDEX][$key];
     }
 
-    public function isErrorNotEmpty($key, $type)
+    public function isErrorNotEmpty($key, $type): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
 

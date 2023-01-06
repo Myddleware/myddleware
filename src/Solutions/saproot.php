@@ -28,12 +28,10 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-//use Psr\LoggerInterface;
-
 class saprootcore extends solution
 {
-    protected $limit = 100;
-    protected $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
+    protected int $limit = 100;
+    protected array $options = ['trace' => 1, // All fault tracing this allows for recording messages sent and received
         'soap_version' => 'SOAP_1_2',
         'authentication' => 'SOAP_AUTHENTICATION_BASIC',
         'exceptions' => 1,
@@ -41,12 +39,12 @@ class saprootcore extends solution
         'encoding' => 'ISO-8859-1',
     ];
 
-    protected $keySubStructure = [];
-    protected $subStructureFilter = [];
-    protected $guidName = [];
-    protected $idName = [];
-    protected $required_fields = [];
-    protected $relateFieldAllowed = [];
+    protected array $keySubStructure = [];
+    protected array $subStructureFilter = [];
+    protected array $guidName = [];
+    protected array $idName = [];
+    protected array $required_fields = [];
+    protected array $relateFieldAllowed = [];
 
     // Connexion à sapcrm
     public function login($paramConnexion)
@@ -78,11 +76,9 @@ class saprootcore extends solution
             return ['error' => $error];
         }
     }
-
-    // login($paramConnexion)*/
-
+    
     // Liste des paramètres de connexion
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -103,10 +99,8 @@ class saprootcore extends solution
         ];
     }
 
-    // getFieldsLogin()
-
     // Renvoie les champs du module passé en paramètre
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         try {
             try {
@@ -196,14 +190,15 @@ class saprootcore extends solution
                 throw new \Exception('SOAP FAULT. Logon failed.');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+
+            return ['error' => $error];
         }
     }
 
-    // get_module_fields($module)
-
     // Permet de lire des données et de les sauvegarder dans plusieurs structures
-    public function readMultiStructure($param, $function, $parameters, $readLast)
+    public function readMultiStructure($param, $function, $parameters, $readLast): array
     {
         try {
             try {
@@ -418,7 +413,7 @@ class saprootcore extends solution
     }
 
     // Transformation du nom de la structure (exemple ET_ORDERADM_H devient EtOrderadmH)
-    protected function transformName($name)
+    protected function transformName($name): string
     {
         $result = '';
         $nameArray = explode('_', $name);
@@ -442,6 +437,10 @@ class saprootcore extends solution
     }
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -449,9 +448,11 @@ class saprootcore extends solution
         return $date->format('Y-m-d H:i:s');
     }
 
-    // dateTimeToMyddleware($dateTime)
-
     // Function de conversion de datetime format Myddleware à un datetime format solution
+
+    /**
+     * @throws \Exception
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         $date = new \DateTime($dateTime);
@@ -459,11 +460,9 @@ class saprootcore extends solution
         return $date->format('YmdHis');
     }
 
-    // dateTimeFromMyddleware($dateTime)
-
     // Lorsque SAP renvoie un résultat, le réponse est différente s'il y a une seule ligne dans le retour ou s'il y en a plusieurs
     // On formate de sorte que même s'il n'y a qu'une seule ligne, la réponse soit convertie en tableau comme s'il y avait plusieurs lignes
-    protected function convertResponseTab($response)
+    protected function convertResponseTab($response): array
     {
         if (!is_array($response)) {
             $result[] = $response;
@@ -473,7 +472,7 @@ class saprootcore extends solution
 
         return $result;
     }
-}// class saprootcore
+}
 
 class saproot extends saprootcore
 {

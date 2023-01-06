@@ -26,6 +26,9 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
+use App\Manager\FormulaManager;
+use App\Repository\DocumentRepository;
+use App\Repository\RuleRelationShipRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -34,83 +37,67 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class solutioncore
 {
     // Permet d'indiquer que la connexion webservice est valide
-    public $connexion_valide = false;
-
-    public $js = 0;
-    public $refresh_token = false;
-    public $callback = false;
-
+    public bool $connexion_valide = false;
+    public int $js = 0;
+    public bool $refresh_token = false;
+    public bool $callback = false;
     // Session de la connexion webservice
     protected $session;
-
     // Liste des champs d'un module
-    protected $moduleFields = [];
-
+    protected array $moduleFields = [];
     // Permet d'ajouter des champs nécessaires lorsque l'on va lire les données dans la solution source
     // Tableau de type array('id','date_modified')
-    protected $required_fields = [];
-
+    protected array $required_fields = [];
     // URL de la solution pour atteindre les webservices
     protected $paramConnexion;
-
     // Classe permettant d'enregistrer les log Symfony
-    protected $logger;
-
+    protected LoggerInterface $logger;
     // Tableau comportant les différents types de BDD valides
-    protected $type_valide = ['text'];
-
+    protected array $type_valide = ['text'];
     // Liste des modules à exclure pour chaque solution
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => [],
         'target' => [],
         'source' => [],
     ];
-
     // Liste des champs à exclure pour chaque solution
-    protected $exclude_field_list = [];
-
+    protected array $exclude_field_list = [];
     // Module list that allows to make parent relationships
-    protected $allowParentRelationship = [];
-
+    protected array $allowParentRelationship = [];
     // Enable the read record button on the data transfer detail view for the source solution
-    protected $readRecord = true;
-
+    protected bool $readRecord = true;
     // Disable to read deletion and to delete data
-    protected $readDeletion = false;
-    protected $sendDeletion = false;
-	
+    protected bool $readDeletion = false;
+    protected bool $sendDeletion = false;
 	// Array to detectif a source field has been changed before the record 
     protected $fieldsChangedBeforeSend = [];
-
     // Specify if the class is called by the API
     protected $api;
-
     protected $message;
-
     // Instanciation de la classe de génération de log Symfony
-    /**
-     * @var Connection
-     */
-    protected $connection;
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBagInterface;
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    protected Connection $connection;
+    protected ParameterBagInterface $parameterBagInterface;
+    protected EntityManagerInterface $entityManager;
+    private DocumentRepository $documentRepository;
+    private RuleRelationShipRepository $ruleRelationshipsRepository;
+    private FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
         Connection $connection,
         ParameterBagInterface $parameterBagInterface,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        DocumentRepository $documentRepository,
+        RuleRelationShipRepository $ruleRelationshipsRepository,
+        FormulaManager $formulaManager
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
         $this->entityManager = $entityManager;
         $this->parameterBagInterface = $parameterBagInterface;
+        $this->documentRepository = $documentRepository;
+        $this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
+        $this->formulaManager = $formulaManager;
     }
 
     // Fonction permettant de se loguer à la solution
@@ -139,31 +126,34 @@ class solutioncore
         $this->paramConnexion = $paramConnexion;
     }
 
-    public function logout()
+    public function logout(): bool
     {
         return true;
     }
 
     // Permet de récupérer la classe de génération de log Symfony
-    protected function getLogger()
+    protected function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
 
     // Permet de se connecter à la base de données
-    protected function getConn()
+    protected function getConn(): Connection
     {
         return $this->connection;
     }
 
-    // Permet de mettre à jour le statut d'un document après création ou modification dans la cible
-    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null)
+    /**
+     * Permet de mettre à jour le statut d'un document après création ou modification dans la cible
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array
     {
         $this->connection->beginTransaction();
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
             $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
@@ -232,7 +222,7 @@ class solutioncore
 
     // Même structure que la méthode getFieldsLogin
     // Prend en paramètre d'entre source ou target
-    public function getFieldsParamUpd($type, $module)
+    public function getFieldsParamUpd($type, $module): array
     {
         return [];
     }
@@ -262,7 +252,7 @@ class solutioncore
 
     // Cette méthode doit remplir les attributs :
     // moduleFields avec le tableu ci-dessus
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         $this->moduleFields = [];
         // The field Myddleware_element_id is ID of the current module. It is always added for the field mapping
@@ -312,7 +302,7 @@ class solutioncore
             // Format data
             if (!empty($readResult)) {
                 // Get the name of the field used for the reference
-                $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+                $dateRefField = $this->getRefFieldName($param);
                 // Get the name of the field used as id
                 $idField = $this->getIdName($param['module']);
 
@@ -404,7 +394,7 @@ class solutioncore
     // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
-    public function createData($param)
+    public function createData($param): array
     {
         try {
             // For every document
@@ -487,7 +477,7 @@ class solutioncore
     // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
     // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
     // )
-    public function updateData($param)
+    public function updateData($param): array
     {
         try {
             // For every document
@@ -540,7 +530,7 @@ class solutioncore
     }
 
     // Delete a record
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         try {
             // For every document
@@ -584,7 +574,9 @@ class solutioncore
         return $result;
     }
 
-    // Delete a record
+    /**
+     * @throws \Exception
+     */
     protected function delete($param, $data)
     {
         // Set an error by default
@@ -594,12 +586,12 @@ class solutioncore
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
+    public function getRuleMode($module, $type): array
     {
         return [
             '0' => 'create_modify',
             'C' => 'create_only',
-			'U' => 'update_only',
+            'U' => 'update_only',
         ];
     }
 
@@ -608,11 +600,10 @@ class solutioncore
     }
 
 	// Function used to check if the source solution has to be called before we send data to the target solution
-	public function sourceCallRequestedBeforeSend($send)
-    {	
+	public function sourceCallRequestedBeforeSend($send) {	
 		return false;
 	}
-
+	
 	// Action to be done into the source solution before sending data
 	public function sourceActionBeforeSend($send) {
 		// If at least one source field has been changed, then we calculate the corresponding target field
@@ -639,7 +630,7 @@ class solutioncore
 							if(array_search($field, $fieldsArray) !== false) {
 								$param['id_doc_myddleware'] = $docId;
 								$param['api'] = $this->api;				
-								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
 								$documentManager->setParam($param);			
 								$send['data'][$docId][$ruleField['target_field_name']] = $documentManager->getTransformValue($send['source'][$docId], $ruleField);			
 							}
@@ -658,13 +649,13 @@ class solutioncore
 
     // Permet d'ajouter des boutoon sur la page flux en fonction de la solution source ou targe
     // Type : source ou target
-    public function getDocumentButton($type)
+    public function getDocumentButton($type): array
     {
         return [];
     }
 
     // Permet d'indiquer le type de référence, si c'est une date (true) ou un texte libre (false)
-    public function referenceIsDate($module)
+    public function referenceIsDate($module): bool
     {
         return true;
     }
@@ -676,19 +667,19 @@ class solutioncore
     }
 
     // Return if the read record button has to be display on the data transfert view
-    public function getReadRecord()
+    public function getReadRecord(): bool
     {
         return $this->readRecord;
     }
 
     // Return if the connector can read deletion
-    public function getReadDeletion($module)
+    public function getReadDeletion($module): bool
     {
         return $this->readDeletion;
     }
 
     // Return if the connector can send deletion
-    public function getSendDeletion($module)
+    public function getSendDeletion($module): bool
     {
         return $this->sendDeletion;
     }
@@ -705,7 +696,7 @@ class solutioncore
     // [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
     // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
     // Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle
-    public function beforeRuleSave($data, $type)
+    public function beforeRuleSave($data, $type): array
     {
         return ['done' => true, 'message' => ''];
     }
@@ -713,7 +704,7 @@ class solutioncore
     // Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
     // Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté l'entrée ruleId au tableau
     // Retourne des message de type $messages[] = array ( 'type' => 'success', 'message' => 'OK');
-    public function afterRuleSave($data, $type)
+    public function afterRuleSave($data, $type): array
     {
         return [];
     }
@@ -748,7 +739,9 @@ class solutioncore
         }
 
         // Add the ref field if it isn't already in the array
-        $dateRefField = $this->getRefFieldName($module, $mode);
+		$param['module'] = $module;
+		$param['ruleParams']['mode'] = $mode;
+        $dateRefField = $this->getRefFieldName($param);
         if (
                 !empty($dateRefField)
             and false === array_search($dateRefField, $fields)
@@ -826,16 +819,15 @@ class solutioncore
         return $dateTime;
     }
 
-    // dateTimeToMyddleware($dateTime)
-
     // Function de conversion de datetime format Myddleware à un datetime format solution
     protected function dateTimeFromMyddleware($dateTime)
     {
         return $dateTime;
     }
 
-    // dateTimeToMyddleware($dateTime)
-
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function getInfoDocument($idDocument)
     {
         $connection = $this->getConn();
@@ -848,12 +840,13 @@ class solutioncore
         $stmt = $connection->prepare($sqlParams);
         $stmt->bindValue(':id_doc', $idDocument);
         $result = $stmt->executeQuery();
-        $documentData = $result->fetchAssociative();
-
-        return $documentData;
+        return $result->fetchAssociative();
     }
 
-    // Permet de récupérer la source ID du document en paramètre
+    /**
+     * Permet de récupérer la source ID du document en paramètre
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function getSourceId($idDoc)
     {
         // Récupération du source_id
@@ -867,24 +860,24 @@ class solutioncore
     }
 
     // Ajout de champ personnalisé dans la target ex : bittle
-    public function getFieldMappingAdd($moduleTarget)
+    public function getFieldMappingAdd($moduleTarget): bool
     {
         return false;
     }
 
     // Return the name of the field used for the reference
-    public function getRefFieldName($moduleSource, $RuleMode)
+    public function getRefFieldName($param)
     {
     }
 
     // Return the name of the field used for the id
-    public function getIdName($module)
+    public function getIdName($module): string
     {
         return 'id';
     }
 
     // The function return true if we can display the column parent in the rule view, relationship tab
-    public function allowParentRelationship($module)
+    public function allowParentRelationship($module): bool
     {
         if (
                 !empty($this->allowParentRelationship)
@@ -920,8 +913,9 @@ class solutioncore
         }
     }
 
-    // Check data before create
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
@@ -934,8 +928,9 @@ class solutioncore
         return $data;
     }
 
-    // Check data before update
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeUpdate($param, $data, $idDoc)
     {
         // Exception if the job has been stopped manually
@@ -944,8 +939,9 @@ class solutioncore
         return $data;
     }
 
-    // Check data before update
-    // Add a throw exeption if error
+    /**
+     * @throws \Exception
+     */
     protected function checkDataBeforeDelete($param, $data)
     {
         // Exception if the job has been stopped manually
@@ -954,7 +950,10 @@ class solutioncore
         return $data;
     }
 
-    // Check if the job is still active
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
     protected function isJobActive($param)
     {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
@@ -970,8 +969,11 @@ class solutioncore
         }
     }
 
-    // Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule
-    protected function getParamLogin($connId)
+    /**
+     * Permet de récupérer les paramètre de login afin de faire un login quand on ne vient pas de la classe rule
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function getParamLogin($connId): array
     {
         // RECUPERE LE NOM DE LA SOLUTION
         $sql = 'SELECT solution.name  

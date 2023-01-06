@@ -30,16 +30,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class suitecrmcore extends solution
 {
-    protected $limitCall = 100;
-    protected $urlSuffix = '/service/v4_1/rest.php';
+    protected int $limitCall = 100;
+    protected string $urlSuffix = '/service/v4_1/rest.php';
 
     // Enable to read deletion and to delete data
-    protected $readDeletion = true;
-    protected $sendDeletion = true;
+    protected bool $readDeletion = true;
+    protected bool $sendDeletion = true;
 
-    protected $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+    protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
 
-    protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -54,13 +54,13 @@ class suitecrmcore extends solution
     ];
 
     // liste des modules à exclure pour chaque solution
-    protected $exclude_module_list = [
+    protected array $exclude_module_list = [
         'default' => ['Home', 'Calendar', 'Documents', 'Administration', 'Currencies', 'CustomFields', 'Connectors', 'Dropdown', 'Dynamic', 'DynamicFields', 'DynamicLayout', 'EditCustomFields', 'Help', 'Import', 'MySettings', 'FieldsMetaData', 'UpgradeWizard', 'Sync', 'Versions', 'LabelEditor', 'Roles', 'OptimisticLock', 'TeamMemberships', 'TeamSets', 'TeamSetModule', 'Audit', 'MailMerge', 'MergeRecords', 'Schedulers', 'Schedulers_jobs', 'Groups', 'InboundEmail', 'ACLActions', 'ACLRoles', 'DocumentRevisions', 'ACL', 'Configurator', 'UserPreferences', 'SavedSearch', 'Studio', 'SugarFeed', 'EAPM', 'OAuthKeys', 'OAuthTokens'],
         'target' => [],
         'source' => [],
     ];
 
-    protected $exclude_field_list = [
+    protected array $exclude_field_list = [
         'default' => ['date_entered', 'date_modified', 'created_by_name', 'modified_by_name', 'created_by', 'modified_user_id'],
         'Contacts' => ['c_accept_status_fields', 'm_accept_status_fields', 'accept_status_id', 'accept_status_name', 'opportunity_role_fields', 'opportunity_role_id', 'opportunity_role', 'email'],
         'Leads' => ['email'],
@@ -69,7 +69,7 @@ class suitecrmcore extends solution
     ];
 
     // Tableau représentant les relation many-to-many de Sugar
-    protected $module_relationship_many_to_many = [
+    protected array $module_relationship_many_to_many = [
         'calls_contacts' => ['label' => 'Relationship Call Contact', 'module_name' => 'Calls', 'link_field_name' => 'contacts', 'fields' => [], 'relationships' => ['call_id', 'contact_id']],
         'calls_users' => ['label' => 'Relationship Call User', 'module_name' => 'Calls', 'link_field_name' => 'users', 'fields' => [], 'relationships' => ['call_id', 'user_id']],
         'calls_leads' => ['label' => 'Relationship Call Lead', 'module_name' => 'Calls', 'link_field_name' => 'leads', 'fields' => [], 'relationships' => ['call_id', 'lead_id']],
@@ -104,7 +104,7 @@ class suitecrmcore extends solution
         'fp_events_prospects_1' => ['label' => 'Relationship Event Prospect', 'module_name' => 'FP_events', 'link_field_name' => 'fp_events_prospects_1', 'fields' => ['accept_status', 'invite_status'], 'relationships' => ['fp_events_prospects_1fp_events_ida', 'fp_events_prospects_1prospects_idb']],
     ];
 
-    protected $customRelationship = 'MydCustRelSugar';
+    protected string $customRelationship = 'MydCustRelSugar';
 
     public function login($paramConnexion)
     {
@@ -136,14 +136,14 @@ class suitecrmcore extends solution
                 throw new \Exception('Please check url');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
             return ['error' => $error];
         }
     }
 
-    public function logout()
+    public function logout(): bool
     {
         try {
             $logout_parameters = ['session' => $this->session];
@@ -157,7 +157,7 @@ class suitecrmcore extends solution
         }
     }
 
-    public function getFieldsLogin()
+    public function getFieldsLogin(): array
     {
         return [
             [
@@ -211,7 +211,7 @@ class suitecrmcore extends solution
     }
 
     // Permet de récupérer tous les champs d'un module
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -265,7 +265,7 @@ class suitecrmcore extends solution
                             '_id' == substr($field->name, -3)
                         || '_ida' == substr($field->name, -4)
                         || '_idb' == substr($field->name, -4)
-						|| '_id_c' == substr($field->name, -5)
+                        || '_id_c' == substr($field->name, -5)
                         || (
                                 'id' == $field->type
                             && 'id' != $field->name
@@ -326,7 +326,7 @@ class suitecrmcore extends solution
                                 '_id' == substr($field->name, -3)
                             || '_ida' == substr($field->name, -4)
                             || '_idb' == substr($field->name, -4)
-							|| '_id_c' == substr($field->name, -5)
+                            || '_id_c' == substr($field->name, -5)
                             || (
                                     'id' == $field->type
                                 && 'id' != $field->name
@@ -360,6 +360,10 @@ class suitecrmcore extends solution
     }
 
     // Permet de lire les données
+
+    /**
+     * @throws \Exception
+     */
     public function read($param)
     {
         $result = [];
@@ -375,7 +379,7 @@ class suitecrmcore extends solution
         $query = '';
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+        $dateRefField = $this->getRefFieldName($param);
 
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -518,7 +522,7 @@ class suitecrmcore extends solution
     }
 
     // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): string
     {
         // Get url, module and record ID depending on the type
         if ('source' == $type) {
@@ -535,7 +539,7 @@ class suitecrmcore extends solution
         return rtrim($url, '/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
     }
 
-    protected function readRelationship($param, $dataParent)
+    protected function readRelationship($param, $dataParent): array
     {
         if (empty($param['limit'])) {
             $param['limit'] = 100;
@@ -592,8 +596,11 @@ class suitecrmcore extends solution
         return $result;
     }
 
-    // Permet de créer des données
-    public function createData($param)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function createData($param): array
     {
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -614,6 +621,7 @@ class suitecrmcore extends solution
                     if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
                         $key = substr($key, strlen($this->customRelationship));
                     }
+
                     // Note are sent using setNoteAttachement function 
                     if (
                         $param['module'] == 'Notes'
@@ -637,7 +645,8 @@ class suitecrmcore extends solution
                         and !empty($data['filecontents'])
                     ) {
                         $this->setNoteAttachement($data, $get_entry_list_result->id);
-                    }
+                    } 
+
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
@@ -646,7 +655,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -660,9 +669,13 @@ class suitecrmcore extends solution
     }
 
     // Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function createRelationship($param)
     {
-        foreach ($param['data'] as $key => $data) {
+        foreach ($param['data'] as $idDoc => $data) {
             try {
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
@@ -686,32 +699,34 @@ class suitecrmcore extends solution
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
 
                 if (!empty($set_relationship_result->created)) {
-                    $result[$key] = [
-                        'id' => $key, // On met $key car onn a pas l'id de la relation
+                    $result[$idDoc] = [
+                        'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
                         'error' => false,
                     ];
                 } else {
-                    $result[$key] = [
+                    $result[$idDoc] = [
                         'id' => '-1',
                         'error' => '01',
                     ];
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
-                $result[$key] = [
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
-            $this->updateDocumentStatus($key, $result[$key], $param);
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
-    public function updateData($param)
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateData($param): array
     {
         // In case of many to many relationship, the update is done by using createRelationship function
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
@@ -744,6 +759,15 @@ class suitecrmcore extends solution
                             continue;
                         }
                     }
+
+                    // Note are sent using setNoteAttachement function 
+                    if (
+                        $param['module'] == 'Notes'
+                        and $key == 'filecontents'
+                    ) {
+                        continue;
+                    }
+
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
                 $setEntriesListParameters = [
@@ -769,7 +793,7 @@ class suitecrmcore extends solution
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = $e->getMessage();
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -807,7 +831,7 @@ class suitecrmcore extends solution
 
     
     // Function to delete a record
-    public function deleteData($param)
+    public function deleteData($param): array
     {
         // We set the flag deleted to 1 and we call the update function
         foreach ($param['data'] as $idDoc => $data) {
@@ -822,8 +846,12 @@ class suitecrmcore extends solution
         return $this->updateData($param);
     }
 
+	
     // Build the query for read data to SuiteCRM
-    protected function generateQuery($param, $method)
+    /**
+     * @throws \Exception
+     */
+    protected function generateQuery($param, $method): string
     {
         $query = '';
         // if a specific query is requeted we don't use date_ref
@@ -847,7 +875,7 @@ class suitecrmcore extends solution
             }
             // Filter by date only for read method (no need for read_last method
         } elseif ('read' == $method) {
-            $dateRefField = $this->getRefFieldName($param['module'], $param['ruleParams']['mode']);
+            $dateRefField = $this->getRefFieldName($param);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
                 $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
@@ -864,33 +892,37 @@ class suitecrmcore extends solution
     // Permet de renvoyer le mode de la règle en fonction du module target
     // Valeur par défaut "0"
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    public function getRuleMode($module, $type)
-    {
-        if (
-                'target' == $type
-            && array_key_exists($module, $this->module_relationship_many_to_many)
-        ) {
-            return [
-                'C' => 'create_only',
-            ];
-        }
+    // public function getRuleMode($module, $type): array
+    // {
+        // if (
+                // 'target' == $type
+            // && array_key_exists($module, $this->module_relationship_many_to_many)
+        // ) {
+            // return [
+                // 'C' => 'create_only',
+            // ];
+        // }
 
-        return parent::getRuleMode($module, $type);
-    }
+        // return parent::getRuleMode($module, $type);
+    // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
-    public function getRefFieldName($moduleSource, $RuleMode)
+
+    /**
+     * @throws \Exception
+     */
+    public function getRefFieldName($param): string
     {
-        if (in_array($RuleMode, ['0', 'S', 'U'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'])) {
             return 'date_modified';
-        } elseif ('C' == $RuleMode) {
+        } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_entered';
         }
-        throw new \Exception("$RuleMode is not a correct Rule mode.");
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
     // Get the list of field (name and id) for each custom relationship
-    protected function getCustomRelationshipListFields($module)
+    protected function getCustomRelationshipListFields($module): array
     {
         $get_module_fields_parameters = [
             'session' => $this->session,

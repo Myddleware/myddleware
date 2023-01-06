@@ -33,7 +33,6 @@ use App\Entity\DocumentData;
 use App\Entity\DocumentRelationship;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\document as doc;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
 use App\Manager\SolutionManager;
@@ -52,40 +51,21 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Class FluxController.
- *
  * @Route("/rule")
  */
 class FluxController extends AbstractController
 {
     protected $params;
-
-    private $sessionService;
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
-    /**
-     * @var SolutionManager
-     */
-    private $solutionManager;
-    /**
-     * @var DocumentRepository
-     */
-    private $documentRepository;
+    private SessionService $sessionService;
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $entityManager;
+    private JobManager $jobManager;
+    private SolutionManager $solutionManager;
+    private DocumentRepository $documentRepository;
 
     public function __construct(
         SessionService $sessionService,
@@ -116,13 +96,9 @@ class FluxController extends AbstractController
         ****************************************************** */
 
     /**
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/error/{id}", name="flux_error_rule")
      */
-    public function fluxErrorByRuleAction($id)
+    public function fluxErrorByRule($id): RedirectResponse
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -303,76 +279,76 @@ class FluxController extends AbstractController
         $conditions = 0;
         //---[ FORM ]-------------------------
         if ($form->get('click_filter')->isClicked()) {
-			$data = $form->getData();
-			$data['user'] = $this->getUser();
-			$data['search'] = $search;
-			$data['page'] = $page;
+            $data = $form->getData();
+            $data['user'] = $this->getUser();
+            $data['search'] = $search;
+            $data['page'] = $page;
 
-			// Get the limit parameter
-			$configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-			$searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-			if (!empty($searchLimit)) {
-				$data['limit'] = $searchLimit->getValue();
-			}
+            // Get the limit parameter
+            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+            if (!empty($searchLimit)) {
+                $data['limit'] = $searchLimit->getValue();
+            }
 
-			$r = $this->documentRepository->getFluxPagination($data);
-			if (empty($data['source_content'])) {
-				$this->sessionService->removeFluxFilterSourceContent();
-			}
+            $r = $this->documentRepository->getFluxPagination($data);
+            if (empty($data['source_content'])) {
+                $this->sessionService->removeFluxFilterSourceContent();
+            }
 
-			if (!empty($data['target_content']) && is_string($data['target_content'])) {
-				$this->sessionService->setFluxFilterTargetContent($data['target_content']);
-			} else {
-				$this->sessionService->removeFluxFilterTargetContent();
-			}
+            if (!empty($data['target_content']) && is_string($data['target_content'])) {
+                $this->sessionService->setFluxFilterTargetContent($data['target_content']);
+            } else {
+                $this->sessionService->removeFluxFilterTargetContent();
+            }
 
-			if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-				$this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
-			} else {
-				$this->sessionService->removeFluxFilterDateModifStart();
-			}
+            if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+                $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+            } else {
+                $this->sessionService->removeFluxFilterDateModifStart();
+            }
 
-			if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-				$this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
-			} else {
-				$this->sessionService->removeFluxFilterDateModifEnd();
-			}
+            if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+                $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
+            } else {
+                $this->sessionService->removeFluxFilterDateModifEnd();
+            }
 
-			if (!empty($data['rule']) && is_string($data['rule'])) {
-				$this->sessionService->setFluxFilterRuleName($data['rule']);
-			} else {
-				$this->sessionService->removeFluxFilterRuleName();
-			}
+            if (!empty($data['rule']) && is_string($data['rule'])) {
+                $this->sessionService->setFluxFilterRuleName($data['rule']);
+            } else {
+                $this->sessionService->removeFluxFilterRuleName();
+            }
 
-			if (!empty($data['status'])) {
-				$this->sessionService->setFluxFilterStatus($data['status']);
-			} else {
-				$this->sessionService->removeFluxFilterStatus();
-			}
+            if (!empty($data['status'])) {
+                $this->sessionService->setFluxFilterStatus($data['status']);
+            } else {
+                $this->sessionService->removeFluxFilterStatus();
+            }
 
-			if (!empty($data['gblstatus'])) {
-				$this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
-			} else {
-				$this->sessionService->removeFluxFilterGblStatus();
-			}
+            if (!empty($data['gblstatus'])) {
+                $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+            } else {
+                $this->sessionService->removeFluxFilterGblStatus();
+            }
 
-			if (!empty($data['type'])) {
-				$this->sessionService->setFluxFilterType($data['type']);
-			} else {
-				$this->sessionService->removeFluxFilterGblStatus();
-			}
+            if (!empty($data['type'])) {
+                $this->sessionService->setFluxFilterType($data['type']);
+            } else {
+                $this->sessionService->removeFluxFilterGblStatus();
+            }
 
-			if (!empty($data['target_id'])) {
-				$this->sessionService->setFluxFilterTargetId($data['target_id']);
-			} else {
-				$this->sessionService->removeFluxFilterTargetId();
-			}
+            if (!empty($data['target_id'])) {
+                $this->sessionService->setFluxFilterTargetId($data['target_id']);
+            } else {
+                $this->sessionService->removeFluxFilterTargetId();
+            }
 
-			if (!empty($data['source_id'])) {
-				$this->sessionService->setFluxFilterSourceId($data['source_id']);
-			} else {
-				$this->sessionService->removeFluxFilterSourceId();
-			}
+            if (!empty($data['source_id'])) {
+                $this->sessionService->setFluxFilterSourceId($data['source_id']);
+            } else {
+                $this->sessionService->removeFluxFilterSourceId();
+            }
         } // end clicked
         //---[ FORM ]-------------------------
 
@@ -420,13 +396,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Supprime le filtre des flux.
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")
      */
-    public function fluxListDeleteFilterAction()
+    public function fluxListDeleteFilter(): RedirectResponse
     {
         if ($this->sessionService->isFluxFilterExist()) {
             $this->sessionService->removeFluxFilter();
@@ -436,17 +408,10 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Info d'un flux.
-     *
-     * @param $id
-     * @param $page
-     *
-     * @return RedirectResponse|Response
-     *
      * @Route("/flux/{id}/log/", name="flux_info", defaults={"page"=1})
      * @Route("/flux/{id}/log/page-{page}", name="flux_info_page", requirements={"page"="\d+"})
      */
-    public function fluxInfoAction(Request $request, $id, $page)
+    public function fluxInfo(Request $request, $id, $page)
     {
         try {
             $session = $request->getSession();
@@ -616,16 +581,13 @@ class FluxController extends AbstractController
             );
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
-            exit;
         }
     }
 
     /**
-     * Sauvegarde flux.
-     *
      * @Route("/flux/save", name="flux_save")
      */
-    public function fluxSaveAction(Request $request)
+    public function fluxSave(Request $request)
     {
         if ('POST' == $request->getMethod()) {
             // Get the field and value from the request
@@ -666,19 +628,13 @@ class FluxController extends AbstractController
                 }
             }
         }
-        throw $this->createNotFoundException('Failed to modify the field ' . $fields);
+        throw $this->createNotFoundException('Failed to modify the field '.$fields);
     }
 
     /**
-     * Relancer un flux.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/rerun/{id}", name="flux_rerun")
      */
-    public function fluxRerunAction($id)
+    public function fluxRerun($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -692,15 +648,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Annuler un flux.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/cancel/{id}", name="flux_cancel")
      */
-    public function fluxCancelAction($id)
+    public function fluxCancel($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -714,15 +664,9 @@ class FluxController extends AbstractController
     }
 
     /**
-     * Read record.
-     *
-     * @param $id
-     *
-     * @return RedirectResponse
-     *
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")
      */
-    public function fluxReadRecordAction($id)
+    public function fluxReadRecord($id): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -743,15 +687,11 @@ class FluxController extends AbstractController
     }
 
     /**
-     * @param $method
-     * @param $id
-     * @param $solution
-     *
      * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
      *
      * @throws Exception
      */
-    public function fluxBtnDynAction($method, $id, $solution): RedirectResponse
+    public function fluxBtnDyn($method, $id, $solution): RedirectResponse
     {
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
@@ -812,7 +752,7 @@ class FluxController extends AbstractController
                 $compact['nb'] = $compact['pager']->getNbResults();
                 $compact['entities'] = $compact['pager']->getCurrentPageResults();
             } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
             return $compact;

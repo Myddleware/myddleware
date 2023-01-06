@@ -25,15 +25,11 @@
 
 namespace App\Manager;
 
-/**
- * Class FormulaManager.
- */
 class FormulaManager
 {
-    private $path = "App\Manager\FormulaFunctionManager::";
-
-    public $parse = [];
-    public $formulaFunctionManager;
+    private string $path = "App\Manager\FormulaFunctionManager::";
+    public array $parse = [];
+    public FormulaFunctionManager $formulaFunctionManager;
 
     public function __construct(FormulaFunctionManager $formulaFunctionManager)
     {
@@ -41,7 +37,7 @@ class FormulaManager
         $this->formulaFunctionManager = $formulaFunctionManager;
     }
 
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return __NAMESPACE__;
     }
@@ -52,7 +48,7 @@ class FormulaManager
     }
 
     // Retourne tout le tableau parse
-    public function getParse()
+    public function getParse(): array
     {
         return $this->parse;
     }
@@ -147,7 +143,7 @@ class FormulaManager
     }
 
     // Autorisation des méthodes
-    private function secureFunction()
+    private function secureFunction(): array
     {
         // Récupère le chemin des fonctions de myddlewareFormulaFunctions.php
         $pathFunctions = $this->formulaFunctionManager->getPathFunctions();
@@ -236,7 +232,7 @@ class FormulaManager
     }
 
     // Détecte si une chaine possède des accents
-    private function accent($string)
+    private function accent($string): bool
     {
         if (1 == preg_match('#[áàâäãåçéèêëíìîïñóòôöõúùûüýÿ]#', mb_strtolower($string))) {
             return true;

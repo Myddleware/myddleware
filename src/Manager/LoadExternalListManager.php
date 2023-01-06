@@ -46,7 +46,7 @@ class loadexternallistcore
         $csvRows = array_map(function ($csv) {
             //convert the csv to a string, using ; as a separator
             return str_getcsv($csv, ';');
-            //using file path
+        //using file path
         }, file($file));
         //we generate a header which use the array shift method
         //array_shift takes of the 1st element of an array and returns it

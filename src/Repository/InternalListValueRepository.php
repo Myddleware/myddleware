@@ -57,7 +57,6 @@ class InternalListValueRepository extends ServiceEntityRepository
             ->setParameter('module', $params['module'])
             ->setParameter('dateref', $params['date_ref'])
             ->getResult();
-
         return $tablequery;
     }
 

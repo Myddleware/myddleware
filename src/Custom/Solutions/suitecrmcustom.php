@@ -11,14 +11,14 @@ use App\Manager\DocumentManager;
 class suitecrmcustom extends suitecrm
 {
 
-	protected $limitCall = 100;
+	protected int $limitCall = 100;
 	public $anneeScolaire = '2022_2023';
 	//public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
 	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi', 'Leads');
-	protected $urlSuffix = '/custom/service/v4_1_custom/rest.php';
+	protected string $urlSuffix = '/custom/service/v4_1_custom/rest.php';
 	protected $currentRule;
-	protected $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
+	protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
@@ -27,7 +27,7 @@ class suitecrmcustom extends suitecrm
     ];
 	
 	// Add aiko field to be able to filter on it
-	public function get_module_fields($module, $type = 'source', $param = null)
+	public function get_module_fields($module, $type = 'source', $param = null): array
 	{
 		parent::get_module_fields($module, $type);
 		if ($module == 'Contacts') {
@@ -169,7 +169,7 @@ class suitecrmcustom extends suitecrm
 		return $read;
 	}
 	
-	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null) {
+	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array {
 		if ($param['rule']['id'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
 			// Change id and use event_id and lead_id
 			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
@@ -211,7 +211,7 @@ class suitecrmcustom extends suitecrm
 	}
 	
 	// Permet de mettre à jour un enregistrement
-    public function updateData($param)
+    public function updateData($param): array
     {
 		if ($param['rule']['id'] == '62d9d41a59b28') { // Mobilisation - Reconduction
 			$fieldToBeOverriden = array(
@@ -291,7 +291,7 @@ class suitecrmcustom extends suitecrm
 	}
 
 	// Add filter for contact module
-	public function getFieldsParamUpd($type, $module)
+	public function getFieldsParamUpd($type, $module): array
 	{
 		try {
 			if ($type == 'source') {
@@ -330,7 +330,7 @@ class suitecrmcustom extends suitecrm
 		}
 	}
 
-	public function getRuleMode($module, $type)
+	public function getRuleMode($module, $type): array
 	{
 		// Authorize update for relationship fp_events_leads_1
 		if ($module == 'fp_events_leads_1') {
@@ -344,7 +344,7 @@ class suitecrmcustom extends suitecrm
 
 
 	// Build the query for read data to SuiteCRM
-	protected function generateQuery($param, $method)
+	protected function generateQuery($param, $method): string
 	{
 		// Call the standard function
 		$query = parent::generateQuery($param, $method);
@@ -415,7 +415,7 @@ class suitecrmcustom extends suitecrm
 	
 	
 	 // Build the direct link to the record (used in data transfer view)
-    public function getDirectLink($rule, $document, $type)
+    public function getDirectLink($rule, $document, $type): string
     {
 		// Get url, module and record ID depending on the type
         if ('source' == $type) {

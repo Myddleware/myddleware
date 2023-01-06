@@ -31,8 +31,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Document.
- *
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
  * @ORM\Table(name="document", indexes={
  *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
@@ -47,131 +45,95 @@ use Doctrine\ORM\Mapping as ORM;
 class Document
 {
     /**
-     * @var string
-     *
      * @ORM\Column(name="id", type="string", nullable=false)
      * @ORM\Id
      */
-    private $id;
+    private string $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="documents")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private Rule $rule;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
-    private $dateCreated;
+    private DateTime $dateCreated;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_modified", type="datetime", nullable=false)
      */
-    private $dateModified;
+    private DateTime $dateModified;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
      */
-    private $status;
+    private ?string $status;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="source_id", type="string", nullable=true, options={"default":NULL})
      */
-    private $source;
+    private ?string $source;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="target_id", type="string",  nullable=true, options={"default":NULL})
      */
-    private $target;
+    private ?string $target;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="source_date_modified", type="datetime",  nullable=true, options={"default":NULL})
      */
-    private $sourceDateModified;
+    private ?DateTime $sourceDateModified;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="mode", type="string", length=1,  nullable=true, options={"default":NULL})
      */
-    private $mode;
+    private ?string $mode;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="type", type="string", length=1,  nullable=true, options={"default":NULL})
      */
-    private $type;
+    private ?string $type;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="attempt", type="integer", length=5,  nullable=false, options={"default":0})
      */
-    private $attempt;
+    private int $attempt;
 
     /**
-     * @var int
-     *
      * @ORM\Column(name="global_status", type="string",  nullable=false, options={"default":0})
      */
-    private $globalStatus;
+    private string $globalStatus;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
      */
-    private $parentId;
+    private ?string $parentId;
 
     /**
-     * @var bool
-     *
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private $deleted;
+    private int $deleted;
 
     /**
-     * @var DocumentData[]
-     *
      * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="doc_id")
      */
     private $datas;
 
     /**
-     * @var Log[]
-     *
      * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
      */
     private $logs;
@@ -182,345 +144,177 @@ class Document
         $this->logs = new ArrayCollection();
     }
 
-    /**
-     * Set id.
-     *
-     * @param string $id
-     *
-     * @return Document
-     */
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get id.
-     *
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * Set rule.
-     *
-     * @param string $rule
-     *
-     * @return Document
-     */
-    public function setRule($rule)
+    public function setRule($rule): self
     {
         $this->rule = $rule;
 
         return $this;
     }
 
-    /**
-     * Get rule.
-     *
-     * @return string
-     */
-    public function getRule()
+    public function getRule(): Rule
     {
         return $this->rule;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return Document
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateModified.
-     *
-     * @param DateTime $dateModified
-     *
-     * @return Document
-     */
-    public function setDateModified($dateModified)
+    public function setDateModified($dateModified): self
     {
         $this->dateModified = $dateModified;
 
         return $this;
     }
 
-    /**
-     * Get dateModified.
-     *
-     * @return DateTime
-     */
-    public function getDateModified()
+    public function getDateModified(): DateTime
     {
         return $this->dateModified;
     }
 
-    /**
-     * Set status.
-     *
-     * @param string $status
-     *
-     * @return Document
-     */
-    public function setStatus($status)
+    public function setStatus($status): self
     {
         $this->status = $status;
 
         return $this;
     }
 
-    /**
-     * Get status.
-     *
-     * @return string
-     */
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
 
-    /**
-     * Set source.
-     *
-     * @param string $source
-     *
-     * @return Document
-     */
-    public function setSource($source)
+    public function setSource($source): self
     {
         $this->source = $source;
 
         return $this;
     }
 
-    /**
-     * Get source.
-     *
-     * @return string
-     */
-    public function getSource()
+    public function getSource(): ?string
     {
         return $this->source;
     }
 
-    /**
-     * Set target.
-     *
-     * @param string $target
-     *
-     * @return Document
-     */
-    public function setTarget($target)
+    public function setTarget($target): self
     {
         $this->target = $target;
 
         return $this;
     }
 
-    /**
-     * Get target.
-     *
-     * @return string
-     */
-    public function getTarget()
+    public function getTarget(): ?string
     {
         return $this->target;
     }
 
-    /**
-     * Set sourceDateModified.
-     *
-     * @param DateTime $sourceDateModified
-     *
-     * @return Document
-     */
-    public function setSourceDateModified($sourceDateModified)
+    public function setSourceDateModified($sourceDateModified): self
     {
         $this->sourceDateModified = $sourceDateModified;
 
         return $this;
     }
 
-    /**
-     * Get sourceDateModified.
-     *
-     * @return DateTime
-     */
-    public function getSourceDateModified()
+    public function getSourceDateModified(): DateTime
     {
         return $this->sourceDateModified;
     }
 
-    /**
-     * Set mode.
-     *
-     * @param string $mode
-     *
-     * @return Document
-     */
-    public function setMode($mode)
+    public function setMode($mode): self
     {
         $this->mode = $mode;
 
         return $this;
     }
 
-    /**
-     * Get mode.
-     *
-     * @return string
-     */
-    public function getMode()
+    public function getMode(): string
     {
         return $this->mode;
     }
 
-    /**
-     * Set type.
-     *
-     * @param string $type
-     *
-     * @return Document
-     */
-    public function setType($type)
+    public function setType($type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * Get type.
-     *
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * Set attempt.
-     *
-     * @param int $attempt
-     *
-     * @return Document
-     */
-    public function setAttempt($attempt)
+    public function setAttempt($attempt): self
     {
         $this->attempt = $attempt;
 
         return $this;
     }
 
-    public function addAttempt()
+    public function addAttempt(): self
     {
         ++$this->attempt;
 
         return $this;
     }
 
-    /**
-     * Get attempt.
-     *
-     * @return int
-     */
-    public function getAttempt()
+    public function getAttempt(): int
     {
         return $this->attempt;
     }
 
-    /**
-     * Set globalStatus.
-     *
-     * @param string $globalStatus
-     *
-     * @return Document
-     */
-    public function setGlobalStatus($globalStatus)
+    public function setGlobalStatus($globalStatus): self
     {
         $this->globalStatus = $globalStatus;
 
         return $this;
     }
 
-    /**
-     * Get globalStatus.
-     *
-     * @return string
-     */
-    public function getGlobalStatus()
+    public function getGlobalStatus(): string
     {
         return $this->globalStatus;
     }
 
-    /**
-     * Set parentId.
-     *
-     * @param string $parentId
-     *
-     * @return Document
-     */
-    public function setParentId($parentId)
+    public function setParentId($parentId): self
     {
         $this->parentId = $parentId;
 
         return $this;
     }
 
-    /**
-     * Get parentId.
-     *
-     * @return string
-     */
-    public function getParentId()
+    public function getParentId(): ?string
     {
         return $this->parentId;
     }
 
-    /**
-     * Set deleted.
-     *
-     * @param int $deleted
-     *
-     * @return Document
-     */
-    public function setDeleted($deleted)
+    public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
 
         return $this;
     }
 
-    /**
-     * Get deleted.
-     *
-     * @return int
-     */
-    public function getDeleted()
+    public function getDeleted(): int
     {
         return $this->deleted;
     }

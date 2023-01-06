@@ -24,10 +24,7 @@
 
 <div class="link-help-view row text-end mx-4">
 	<a href="#help-content-mapping">
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-			<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-			</svg>
+			<i class="fa fa-info-circle" aria-hidden="true"></i>
 			{{'rule.help'|trans}}
 		</a>
 </div>
@@ -37,7 +34,7 @@
 	<p>{{'view_rule.mapping.module_source'|trans}} : {{ rule.getModuleSource }}<p>
 </div>
 <div class="clr"></div>
-<div class="mapping-container d-flex justify-content-around flex-wrap p-5">
+<div class="d-flex mapping-container flex-wrap p-5">
 			{% if fields %}
 				{% for c, f in fields %}
 					<div class="card mapping-card text-center">
@@ -62,10 +59,7 @@
 </div>
 <div id="help-content-mapping" class="help-content">
 	<h2>{{'help.title'|trans}} 
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-		<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-		<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-		</svg>
+		<i class="fa fa-info-circle" aria-hidden="true"></i>
 	</h2>
 	<p>{{'help.viewrule.mapping'|trans|raw}}</p>
 </div>

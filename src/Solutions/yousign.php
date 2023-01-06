@@ -47,8 +47,8 @@ class yousigncore extends solution
 {
     protected $callLimit = 10;
     // Enable to read deletion and to delete data
-    protected $readDeletion = true;
-    protected $sendDeletion = true;
+    protected bool $readDeletion = true;
+    protected bool $sendDeletion = true;
     /**
      * All YouSign API calls go through the same URL, it is the API Key only which determines which API we're using
      * and serves as auth credentials.
@@ -59,7 +59,7 @@ class yousigncore extends solution
     protected $prodBaseUrl = 'https://api.yousign.com';
     protected $stagingBaseUrl = 'https://staging-api.yousign.com';
 
-    protected $required_fields = ['default' => ['id', 'updatedAt', 'createdAt']];
+    protected array $required_fields = ['default' => ['id', 'updatedAt', 'createdAt']];
 	
 	protected $parentModules = array(
 									'file_objects' => array(
@@ -154,7 +154,7 @@ class yousigncore extends solution
      *
      * @return array|bool
      */
-    public function get_module_fields($module, $type = 'source', $param = null)
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         parent::get_module_fields($module, $type);
         try {
@@ -431,17 +431,16 @@ class yousigncore extends solution
     /**
      * Returns the reference date field name according to the module & rulemode.
      *
-     * @param string $moduleSource
-     * @param string $ruleMode
+     * @param string $param
      *
      * @return string|null
      */
-    public function getRefFieldName($moduleSource, $ruleMode)
+    public function getRefFieldName($param)
     {
-        if (in_array($ruleMode, ['0', 'S', 'C'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'C'])) {
             return 'updatedAt';
         } else {
-            throw new \Exception("$ruleMode is not a correct Rule mode.");
+            throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
         }
 
         return null;

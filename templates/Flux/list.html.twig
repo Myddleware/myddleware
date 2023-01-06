@@ -38,8 +38,9 @@
 	<div id="flux" class="row justify-content-center">
 		{{ form_start(form)}}
 		{% if nb > 0 %}
-			<div id="fd-title-small" class="left">
-				<p>{{ 'list_flux.total'|trans }}:</p>
+			<div id="fd-title-small" class="left nb-connector">
+				<p>{{ 'list_flux.total1'|trans }}:</p>
+				<p>{{ 'list_flux.total2'|trans }}:</p>
 				<p>
 					<span class="nb">{{ nb }}</span>
 				</p>
@@ -122,7 +123,7 @@
 		</div>
 		<div class="row">
 			{% if nb > 0 %}
-				<table class="listepagerflux table">
+				<table class="listepagerflux table container">
 					{% if entities is not empty %}
 						<thead>
 							<tr>
@@ -226,8 +227,10 @@
 		var mass_run = "{{ path('flux_mass_run') }}";
 		// DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
 		start = new dtsel.DTS('#form_date_modif_end',  {
+			showTime: true
 			});
 		end = new dtsel.DTS('#form_date_modif_start',  {
+			showTime: true
 			});
 	</script>
 {% endblock %}

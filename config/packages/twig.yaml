@@ -4,5 +4,6 @@ twig:
     globals:
         myd_version: "%myd_version%"
         locales: '%fallbacks%'
+        entityBanner: '@App\Twig\BannerExtention'
     form_theme: ['bootstrap_4_layout.html.twig']
     exception_controller: null

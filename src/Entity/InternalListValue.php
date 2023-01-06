@@ -16,55 +16,55 @@ class InternalListValue
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=InternalList::class)
      * @ORM\JoinColumn(name="list_id", nullable=false)
      */
-    private $listId;
+    private ?InternalList $listId;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
-    private $createdBy;
+    private ?User $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
      */
-    private $modifiedBy;
+    private ?User $modifiedBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateCreated;
+    private ?\DateTimeInterface $dateCreated;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dateModified;
+    private ?\DateTimeInterface $dateModified;
 
     /**
      * @ORM\Column(type="boolean", options={"default":0})
      */
-    private $deleted;
+    private ?bool $deleted;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $reference;
+    private ?string $reference;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $data;
+    private ?string $data;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $record_id;
+    private ?string $record_id;
 
     public function __construct()
     {

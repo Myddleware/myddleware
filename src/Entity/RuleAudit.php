@@ -29,96 +29,57 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * RuleAudit.
- *
  * @ORM\Entity(repositoryClass="App\Repository\RuleAuditRepository")
  * @ORM\Table(name="ruleaudit", indexes={@ORM\Index(name="index_ruleid", columns={"rule_id"})})
  */
 class RuleAudit
 {
     /**
-     * @var int
-     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var Rule
-     *
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="audits")
      * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
      */
-    private $rule;
+    private Rule $rule;
 
     /**
-     * @var DateTime
-     *
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
-    private $dateCreated;
+    private DateTime $dateCreated;
 
     /**
-     * @var array
-     *
      * @ORM\Column(name="data", type="array", nullable=false)
      */
     private $data;
 
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Get dateCreated.
-     *
-     * @return DateTime
-     */
-    public function getDateCreated()
+    public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
     }
 
-    /**
-     * Set dateCreated.
-     *
-     * @param DateTime $dateCreated
-     *
-     * @return RuleAudit
-     */
-    public function setDateCreated($dateCreated)
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
         return $this;
     }
 
-    /**
-     * Get data.
-     *
-     * @return string
-     */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
-    /**
-     * Set data.
-     *
-     * @param string $data
-     *
-     * @return RuleAudit
-     */
-    public function setData($data)
+    public function setData($data): self
     {
         $this->data = $data;
 

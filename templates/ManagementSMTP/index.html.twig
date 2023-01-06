@@ -1,10 +1,27 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'management_smtp.title'|trans }}{% endblock %}
-{% block titlesm %}{{ 'management_smtp.title'| trans }}{% endblock titlesm %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'management_smtp.title'|trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'management_smtp.title'| trans }}
+{% endblock titlesm %}
 {% block body %}
     <div class="container p-5">
         <div class="row justify-content-md-center ">
             <div class="col-8">
+{% for message in app.flashes('success') %}
+	<div class="alert alert-success">
+		{{ message }}
+	</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+	<div class="alert alert-danger">
+		{{ message }}
+	</div>
+{% endfor %}
+
                 <h3 class="title-smtp">{{ 'management_smtp.title'| trans }}</h3>
                 <p class="text-smtp">{{'management_smtp.description'|trans|raw}}</p>
                 {{ form_start(form) }}
@@ -23,6 +40,14 @@
                     </div>
                 </div>
                 <div class=" row mb-2">
+					<label for="ApiKey" class="col-sm-2 col-form-label">
+						{{ form_label( form.ApiKey) }}</label>
+					<div class="col-sm-10 ">
+						{{ form_widget( form.ApiKey, { 'attr': {'class': 'form-control' , 'id' : 'ApiKey'} }) }}
+						{{ form_errors ( form.ApiKey) }}
+					</div>
+				</div>
+                <div class=" row mb-2" id='smtp_port'>
                     <label for="port" class="col-sm-2 col-form-label"> {{ form_label( form.port) }}</label>
                     <div class="col-sm-10 ">
                         {{ form_widget( form.port, { 'attr': {'class': 'form-control' , 'id' : 'port'} }) }}

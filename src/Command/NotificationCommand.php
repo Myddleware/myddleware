@@ -28,6 +28,7 @@ namespace App\Command;
 use App\Entity\Job;
 use App\Manager\JobManager;
 use App\Manager\NotificationManager;
+use Doctrine\DBAL\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,14 +39,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class NotificationCommand extends Command
 {
-    /**
-     * @var NotificationManager
-     */
-    private $notificationManager;
-    /**
-     * @var JobManager
-     */
-    private $jobManager;
+    private NotificationManager $notificationManager;
+    private JobManager $jobManager;
 
     public function __construct(
         NotificationManager $notificationManager,
@@ -66,7 +61,10 @@ class NotificationCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @throws Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // We don't create job for alert
         if ('alert' == $input->getArgument('type')) {

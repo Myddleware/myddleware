@@ -64,7 +64,7 @@ use Exception;
  */
 class SolutionManager
 {
-    private $classes = [];
+    private array $classes = [];
 
     public function __construct(
         wordpress $wordpress,
@@ -96,8 +96,8 @@ class SolutionManager
         salesforce $salesforce,
         airtable $airtable,
         sendinblue $sendinblue,
-        yousign $yousign,
-        internallist $internallist
+        internallist $internallist,
+        yousign $yousign
     ) {
         $this->classes = [
             'wordpress' => $wordpress,

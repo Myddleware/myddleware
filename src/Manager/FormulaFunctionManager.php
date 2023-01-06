@@ -25,21 +25,17 @@
 
 namespace App\Manager;
 
-/**
- * Class formulafunctioncore.
- */
 class formulafunctioncore
 {
-    protected $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
+    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
+    protected string $path = "App\Manager\FormulaFunctionManager::";
 
-    protected $path = "App\Manager\FormulaFunctionManager::";
-
-    public function getNamesFunctions()
+    public function getNamesFunctions(): array
     {
         return $this->names;
     }
 
-    public function getPathFunctions()
+    public function getPathFunctions(): array
     {
         // Concaténation avant envoi du chemin avec le nom
         $return = [];
@@ -87,9 +83,7 @@ class formulafunctioncore
         // Transform string into an array
         $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
         if (in_array($var, array_keys($arrayKeyToValue))) {
-            $var = $arrayKeyToValue[$var];
-
-            return $var;
+            return $arrayKeyToValue[$var];
         }
         if (!empty($acceptNull)) {
             return '';
@@ -110,9 +104,8 @@ class formulafunctioncore
                     $return .= $arrayKeyToValue[$varValue].$delimiter;
                 }
             }
-            $return = rtrim($return, $delimiter);
 
-            return $return;
+            return rtrim($return, $delimiter);
         }
     }
 

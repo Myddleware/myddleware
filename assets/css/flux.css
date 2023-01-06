@@ -141,4 +141,7 @@
 	word-wrap:break-word;
 }
 
-
+#flux #message {
+	margin-left: 20px;
+	margin-right: 20px;
+}

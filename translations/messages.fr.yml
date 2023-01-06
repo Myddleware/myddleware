@@ -246,7 +246,7 @@ animate:
         description: Description 
         empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
     tutoriel:
-        link: "http://community.myddleware.com/index.php/tutorial/#rules"
+        link: "https://myddleware.github.io/myddleware/#/basic_usage"
         textlink: "Besoin d'aide ? Lisez notre tutoriel."
 
 create_connector:    
@@ -270,7 +270,8 @@ create_connector:
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
     delete: "Désirez-vous supprimer ce connecteur ?"
-    total: Nombre de connecteurs
+    total: Nombre de 
+    total2: connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
     th: 
         name: Nom
@@ -294,7 +295,7 @@ view_connector:
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
-        link: http://community.myddleware.com/index.php/connector-guide/#
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials
         
 list_flux:
     start: Début
@@ -503,6 +504,7 @@ solution:
         consumerkey: Clé consommateur
         consumersecret: Secret consommateur 
         apikey: Clé api
+        projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
         mail_gotomeeting: Mail GotoMeeting 
@@ -647,9 +649,9 @@ help:
                 Si vous souhaitez modifier plus de paramètres de votre règle, rendez-vous dans l'onglet paramètre de cette page.
         mapping: >
                 Dans cette page vous trouvez l'ensemble des champs de vos applications source et cible utilisés dans votre règle. Vous y trouvez également les formules de transformation de données. 
-                Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">Voir la page sur les formules</a>.        
+                Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
         relate: >
-                Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">Voir la page sur les relations</a>
+                Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
         param: >
                 La date de référence indique quelles données vous allez lire dans votre système source. Seules les données ayant été créées ou modifiées après cette date seront lues et envoyées dans le système cible.
                 Donc si vous souhaitez migrer vos anciennes données, vous devez prendre une date dans le passé. Si vous souhaitez seulement transférer les nouvelles données alors laissez la date du jour.
@@ -660,7 +662,7 @@ help:
                 Par exemple, vous pouvez choisir de mettre le nom d'un contact Sugar dans le nom d'un compte Salesforce, 
                 pour cela il vous suffit de prendre le champ "name" de votre module source et de le mettre dans le champ "name" de votre solution cible. 
                 Pour supprimer un champ déjà placé, il vous suffit de double-cliquer dessus. 
-                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formulle, rendez-vous sur notre blog à l'adresse suivante : <a href="http://community.myddleware.com/index.php/developer-guide/#create-formula" target="_blank">Voir la page sur les formules</a>.  
+                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formule, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.  
                 Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.
         simulate: >
                 Ici vous pouvez simuler le résultat des règles que vous avez mises en oeuvre dans l'étape précédente. 
@@ -668,11 +670,11 @@ help:
         relate: >
                 Cet onglet vous permet de définir les relations que vous souhaitez mettre en oeuvre dans votre interface. Vous pouvez ainsi lier plusieurs règles ensemble. 
                 Par exemple, il vous est possible de transférer la relation entre un contact et un compte pour qu'ils soient aussi liés dans la solution cible.
-                Plus d'informations sur les relations à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#relationships" target="_blank">Voir la page sur les relations</a>
+                Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les relations</a>
         filter: >
                 Cet onglet vous permet de filtrer les champs de votre application source à la lecture.
                 Par exemple, vous pouvez choisir de prendre tous les contacts dont le pays est égal à "France".
-                Plus d'informations sur les filtres à l'adresse suivante : <a href="http://community.myddleware.com/index.php/tutorial/#filter-your-data" target="_blank">Voir la page sur les filtres</a>
+                Plus d'informations sur les filtres à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">Voir la page sur les filtres</a>
         validate: >
                 Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle. 
                 Par exemple, pour une application CRM, vous pouvez dé-doublonner tous les contacts par leur mail. Ainsi Myddleware ira vérifier si l'enregistrement existe déjà dans votre solution cible avant de le créer. S'il n'existe pas, Myddleware le créera sinon il ne fera que le mettre à jour.
@@ -682,7 +684,7 @@ help:
 session:
     task:
         msglink: Vous venez de lancer une nouvelle tâche. Vous pouvez vous rendre sur la page de cette tâche en cliquant sur ce lien
-        msginfo: Si vous souhaitez suivre l'évolution de cette tâche vous pouvez rafraichir votre page jusqu'à son passsage au statut 'end'.
+        msginfo: Si vous souhaitez suivre l'évolution de cette tâche vous pouvez rafraichir votre page jusqu'à son passage au statut 'end'.
 
 twitter:
     tweets:
@@ -702,14 +704,23 @@ messages:
     template:
         nb_rule: "Nombre de règle générées: "
         help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
-
+email_sendinblue:
+    subject: Myddleware - Test de configuration email Sendinblue
+    content: >
+        Ceci est un email de test envoyé par Myddleware en utilisant la clé Api Sendinblue.
+        Cordialement,
+        l'équipe Myddleware
+email_validation:
+    success: Message envoyé !
+    error: Envoi du message échoué !
 email_notification:
     subject: Notification Myddleware
     hello: Bonjour, 
-    introduction: "Voici les statistiques concernant vos documents avec la solution Myddleware:"
+    introduction: "Voici les statistiques des 24 dernières heures dans Myddleware:"
     transfer_success: "- Nombre de documents envoyés avec succès: "
     transfer_error: "- Nombre de documents en erreur: "
     transfer_open: "- Nombre de documents ouverts: "
+    transfer_cancel: "- Nombre de documents annulés: "
     active_rule: "Vos règles actives dans Myddleware sont: "
     no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
     100_first_erros: "Voici les 100 premières erreurs: "
@@ -755,9 +766,9 @@ jobscheduler:
     action:
         new_jobscheduler : Nouvelle commande
     view:
-        show : Vue detaillé 
+        show : Vue détaillée
     description:
-        top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="http://community.myddleware.com/index.php/administration-guide/?lang=fr#taches-planifiees" target=_blank>Plus d'information ici.</a> 
+        top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>Plus d'information ici.</a>
         bottom : > 
                  Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:jobScheduler --env=background <BR>
                  Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
@@ -862,7 +873,11 @@ crontab:
     number: Nombres
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
+    correct: Vos crontabs ont été désactivés
     create: Créer crontab
+    massdisable: Désactiver toutes les tâches
+    massenable: Activer toutes les tâches
+    enableCron: On/Off
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
     help: > 
@@ -876,3 +891,4 @@ duplicate_rule:
     current_rule: règle actuelle
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
+banner: Crontab est désactivé

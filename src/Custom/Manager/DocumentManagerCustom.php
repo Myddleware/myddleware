@@ -642,7 +642,7 @@ class DocumentManagerCustom extends DocumentManager
 		return $chekParent;
 	}
 	
-	public function transformDocument() {				
+	public function transformDocument(): bool {		
 		// If the sendinblue contact is not found in the contact rule, we search in the coupon rule
 		if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
 			$transform = parent::transformDocument();			
@@ -665,7 +665,7 @@ class DocumentManagerCustom extends DocumentManager
 		return parent::transformDocument();
 	}
 	
-	protected function insertDataTable($data, $type) {
+	protected function insertDataTable($data, $type): bool {
 		if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
 			// Change parent type if email linked to a coupon
 			if (!empty($this->emailCoupon[$data['sendinblue_msg_id_c']])) {
@@ -782,7 +782,7 @@ class DocumentManagerCustom extends DocumentManager
 	}
 
 	// Permet de transformer les données source en données cibles
-	public function getTargetDataDocument()
+	public function getTargetDataDocument(): bool
 	{
 		if (!in_array($this->document_data['rule_id'],(array('63481a0fd40a7','63482d533bd4e')))) {
 			return parent::getTargetDataDocument();
