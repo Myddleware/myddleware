@@ -8,7 +8,7 @@ use App\Manager\DocumentManager;
 
 class airtablecustom extends airtable {
 
-	protected $tableName = array(
+	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
 								'app5ustIjI5taRXJS' => 'CONTACTS',
@@ -50,7 +50,7 @@ class airtablecustom extends airtable {
 
 
 	// Rededine read fucntion
-	public function readData($param) {
+	public function readData($param): array {
 		$result = parent::readData($param);
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation

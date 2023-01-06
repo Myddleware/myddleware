@@ -58,7 +58,7 @@ class airtablecore extends solution
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
      * However, this can of course be changed to any table value already present in your Airtable base.
      */
-    protected string $tableName;
+    protected array $tableName;
 
     /**
      * Can't be greater than 100.

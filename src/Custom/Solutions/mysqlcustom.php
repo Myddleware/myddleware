@@ -201,7 +201,7 @@ class mysqlcustom extends mysql {
 	}
 	
 	// Add filter for contact module
-	public function getFieldsParamUpd($type, $module) {	
+	public function getFieldsParamUpd($type, $module): array {	
 		try {
 			$params = parent::getFieldsParamUpd($type, $module);
 			 if ($type == 'source'){
@@ -282,7 +282,7 @@ class mysqlcustom extends mysql {
 	
 	
 	// Get all fields from the table selected
-	public function get_module_fields($module, $type = 'source', $param = null) {
+	public function get_module_fields($module, $type = 'source', $param = null): array {
 		try{
 			// Call standard function in case of standard MySQL connector
 			if (!$this->suiteCRMConnexion) {		
@@ -547,7 +547,7 @@ class mysqlcustom extends mysql {
 	} // read($param)
 	
 		// Function to buid the SELECT query
-	protected function buildQuery($param, $query) {
+	protected function buildQuery($param, $query): string {
 		// If deletetion not requested we add the filter on deleted field (only for COMET connector)		
 		if (
 				empty($param['ruleParams']['deletion'])
@@ -592,7 +592,7 @@ class mysqlcustom extends mysql {
 	}
 	
 	
-	public function createData($param) {	
+	public function createData($param): array {	
 		// Myddleware can change the email only if compte_reec_ok = 0
 		// règle REEC - users, REEC - Composante, Esp Rep - Coupons vers Esp Rep
 		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63', '62739b419755f'))) {	
@@ -623,7 +623,7 @@ class mysqlcustom extends mysql {
 		return parent::createData($param);
 	}
 	
-	public function updateData($param) {		
+	public function updateData($param): array {		
 		// Myddleware can change the email only if compte_reec_ok = 0
 		// règle users , engagé , REEC - Composante, Esp Rep - Coupons vers Esp Rep
 		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63','62739b419755f'))) {
@@ -749,7 +749,7 @@ class mysqlcustom extends mysql {
 	}
 	
 	// Allow the search only mode on coupon module
-	public function getRuleMode($module, $type)
+	public function getRuleMode($module, $type): array
     {
         $ruleMode = parent::getRuleMode($module, $type);
         if (
@@ -762,7 +762,7 @@ class mysqlcustom extends mysql {
     }
 	
 	// Generate ID for the document
-    protected function generateId($param, $record)
+    protected function generateId($param, $record): string
     {
 		if ($param['rule']['id'] == '627153382dc34') { // Mobilisation - Participations RI
 			return $record->fp_events_leads_1fp_events_ida.$record->fp_events_leads_1leads_idb;
