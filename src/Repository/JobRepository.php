@@ -51,6 +51,7 @@ class JobRepository extends ServiceEntityRepository
             ->setParameter('status', 'Start')
             ->setParameter('timeLimit', $begin)
             ->getQuery()
+            ->setMaxResults(1)
             ->getOneOrNullResult();
     }
 
@@ -59,21 +60,12 @@ class JobRepository extends ServiceEntityRepository
      */
     public function getErrorsSinceLastNotification(): array
     {
-        $sub = $this->_em->createQueryBuilder();
-        $sub->select('MAX(begin)');
-        $sub->from('App:Job', 'job');
-        $sub->andWhere('job.param = :param')
-            ->setParameter('param', 'notification')
-            ->andWhere('job.end >= job.begin');
-
         $qb = $this->createQueryBuilder('j');
         $qb
-            ->select('log.begin, log.message, document.id, rule.name')
+            ->select('log.begin, log.message, document.id')
             ->join('j.log', 'log')
             ->join('log.document', 'document')
             ->andWhere('document.deleted = 0')
-            ->andWhere('j.begin BETWEEN ('.$sub->getDQL().') AND :now')
-            ->andWhere('document.dateModified BETWEEN ('.$sub->getDQL().' AND :now)')
             ->andWhere('document.globalStatus = :error')
             ->andWhere('document.type = :type')
             ->setParameter('error', 'Error')

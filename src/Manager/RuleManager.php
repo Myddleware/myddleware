@@ -1608,9 +1608,11 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
-                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
+
+						// Allows to get the history fields, necessary for updating the SAP for instance
+                        foreach ($send['data'] as $docId => $value) {
+                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
+                        }
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
@@ -2056,9 +2058,12 @@ class rulecore
         $limit = ' LIMIT '.$this->limit;
         // Si un document est en paramètre alors on filtre la requête sur le document
         if (!empty($documentId)) {
-            $documentFilter = " document.id = '$documentId'";
+            $documentFilter = " 	document.id = '$documentId'
+								AND document.deleted = 0 ";
         } elseif (!empty($parentDocId)) {
-            $documentFilter = " document.parent_id = '$parentDocId' AND document.rule_id = '$parentRuleId' ";
+            $documentFilter = " 	document.parent_id = '$parentDocId' 
+								AND document.rule_id = '$parentRuleId'
+								AND document.deleted = 0 ";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
         }
