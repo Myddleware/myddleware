@@ -37,13 +37,24 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class LoadExternalListCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    private LoggerInterface $logger;
-    private SymfonyStyle $io;
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var SymfonyStyle
+     */
+    private $io;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:loadexternallist';
-    protected static string $defaultDescription = 'transfers all lines of csv into InternalListValue';
+    protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
 
     public function __construct(
         LoggerInterface $logger,
@@ -58,7 +69,8 @@ class LoadExternalListCommand extends Command
     {
         $this
             ->setName('myddleware:loadexternallist')
-            ->addArgument('file', InputArgument::REQUIRED, 'selected file');
+            ->addArgument('file', InputArgument::REQUIRED, 'selected file')
+            ->addArgument('listId', InputArgument::REQUIRED, 'Id of the list');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -73,8 +85,9 @@ class LoadExternalListCommand extends Command
         ]);
         try {
             $file = $input->getArgument('file');
+            $listId = $input->getArgument('listId');
             $manager = new LoadExternalListManager($this->entityManager);
-            $manager->loadExternalList($file, $input, $output);
+            $manager->loadExternalList($file, $listId, $input, $output);
             $io->success([
                 '',
                 '##############',
@@ -92,8 +105,8 @@ class LoadExternalListCommand extends Command
                 '##############',
                 '',
             ]);
-            $io->getErrorStyle()->warning('Debugging information or errors: '.$e);
-            $io->error('The user command did not work');
+            $io->getErrorStyle()->warning('Debugging information or errors: ' . $e);
+            $io->error(sprintf('The user command did not work'));
 
             return 1;
         }
