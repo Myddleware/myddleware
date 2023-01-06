@@ -10,7 +10,8 @@ class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 	protected $pathCustom = "App\Custom\Manager\FormulaFunctionManagerCustom::";
 	
 	// Add custom function in Myddleware
-	public function getNamesFunctions(){		
+	public function getNamesFunctions(): array	
+	{	
 		$this->names = parent::getNamesFunctions();
 		if (!empty($this->namesCustom)) {
 			foreach($this->namesCustom as $name) {
@@ -20,7 +21,7 @@ class FormulaFunctionManagerCustom extends FormulaFunctionManager {
 		return $this->names;
 	}
 	
-	public function getPathFunctions()
+	public function getPathFunctions(): array
     {
         // Concaténation avant envoi du chemin avec le nom
         $return = [];

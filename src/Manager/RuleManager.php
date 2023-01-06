@@ -313,7 +313,7 @@ class rulecore
      * @throws \Doctrine\DBAL\Exception
      */
     public function createDocuments()
-    {				
+    {
         $readSource = null;
         // Si la lecture pour la règle n'est pas désactivée
         // Et si la règle est active et pas supprimée ou bien le lancement est en manuel
@@ -328,20 +328,19 @@ class rulecore
                         1 == $this->manual
                     )
                 )
-        ) {				
+        ) {
             // lecture des données dans la source
             $readSource = $this->readSource();
-					
             if (empty($readSource['error'])) {
                 $readSource['error'] = '';
             }
-					
+
             // Si erreur
             if (!isset($readSource['count'])) {
                 return $readSource;
             }
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
-            try {					
+            try {
                 if ($readSource['count'] > 0) {
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
@@ -550,27 +549,6 @@ class rulecore
 
         return ['error' => 'No field to read in source system. '];
     }
-
-    protected function checkSourceBeforeSend($send) {	
-		if (empty($this->solutionSource)) {		
-			$this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
-		}
-		if($this->solutionSource->sourceCallRequestedBeforeSend($send)) {
-			$connect = $this->connexionSolution('source');
-			if ($connect) {		
-				// Add source data into send array
-				if (!empty($send['data'])) {
-					foreach ($send['data'] as $documentId => $record) {		
-						$send['source'][$documentId] = $this->getDocumentData($documentId, 'S');						
-					}
-				}	
-				$send = $this->solutionSource->sourceActionBeforeSend($send);
-			} else {	
-				throw new \Exception('Failed to connect to the source solution before sending data.');
-			}
-		}
-		return $send;
-	}
 
     // Check every record haven't the same reference date
     // Make sure the next record hasn't the same date modified, so we delete at least the last one
@@ -1997,7 +1975,6 @@ class rulecore
 								AND document.deleted = 0 
 								AND document.type = '$type' ";
         }
-
         // Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
         $sql = "SELECT document.id id_doc_myddleware, document.target_id, document.source_date_modified
 				FROM document
@@ -2007,6 +1984,7 @@ class rulecore
         $stmt = $this->connection->prepare($sql);
         $result = $stmt->executeQuery();
         $documents = $result->fetchAllAssociative();
+
         foreach ($documents as $document) {
             // If the rule is a parent, we have to get the data of all rules child
             $childRules = $this->getChildRules();
@@ -2204,30 +2182,6 @@ class rulecore
 
         return false;
     }
-	
-	// Delete a document data
-    protected function deleteDocumentData($documentId, $type)
-    {
-        try {
-            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
-                                    ->findOneBy([
-                                        'doc_id' => $documentId,
-                                        'type' => $type,
-                                        ]
-                                );
-            // Generate data array
-            if (!empty($documentDataEntity)) {
-                $this->entityManager->remove($documentDataEntity);
-				$this->entityManager->flush();
-				return true;
-            }
-        } catch (\Exception $e) {
-            $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-        }
-
-        return false;
-    }
-
 
     // Delete a document data
     protected function deleteDocumentData($documentId, $type): bool

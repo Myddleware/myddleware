@@ -846,32 +846,8 @@ class suitecrmcore extends solution
         return $this->updateData($param);
     }
 
-
-    // Function to send a note
-	protected function setNoteAttachement($data, $noteId) {					
-		$setNoteAttachementParameters = array(
-			'session' => $this->session,
-			'note' => array(
-				'id' => $noteId,
-				'filename' => $data['filename'],
-				'file' => $data['filecontents'],
-			),
-		);
-
-		$set_not_attachement_result = $this->call('set_note_attachment', $setNoteAttachementParameters);
-		if (
-				empty($set_not_attachement_result->id)
-			 OR (
-					!empty($set_not_attachement_result->id)
-				AND $set_not_attachement_result->id == '-1'
-			)
-		) {
-			 throw new \Exception('Failed to create the attachement on the note. ');
-		}				
-	}
-
+	
     // Build the query for read data to SuiteCRM
-
     /**
      * @throws \Exception
      */

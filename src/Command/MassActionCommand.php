@@ -81,7 +81,6 @@ class MassActionCommand extends Command
         $toStatus = $input->getArgument('toStatus');
         $api = $input->getArgument('api');
         $force = $input->getArgument('force') ? $input->getArgument('force') : false;
-
         // to avoid unwanted apostrophes in SQL queries
         $action = str_replace('\'', '', $action);
         $dataType = str_replace('\'', '', $dataType);
