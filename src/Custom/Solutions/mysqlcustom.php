@@ -733,7 +733,14 @@ class mysqlcustom extends mysql {
 			}
 			
 			// Connect to the application
-			$this->suitecrm = new suitecrmcustom($this->logger, $this->connection, $this->parameterBagInterface, $this->entityManager);								
+			$this->suitecrm = new suitecrmcustom(
+				$this->logger, $this->connection, 
+				$this->parameterBagInterface, 
+				$this->entityManager,
+				$this->documentRepository,
+				$this->ruleRelationshipsRepository,
+				$this->formulaManager
+			);								
 			$this->suitecrm->setApi(0);				
 			$loginResult = $this->suitecrm->login($params);			
 			$this->connexion_valide = (($this->suitecrm->connexion_valide) ? true : false );				
