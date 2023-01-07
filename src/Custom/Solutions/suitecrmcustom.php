@@ -184,7 +184,14 @@ class suitecrmcustom extends suitecrm
 		) {
 			try {
 				$this->connection->beginTransaction();
-				$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$documentManager = new DocumentManager(
+										$this->logger, 
+										$this->connection, 
+										$this->entityManager,
+										$this->documentRepository,
+										$this->ruleRelationshipsRepository,
+										$this->formulaManager
+									);
 				$param['id_doc_myddleware'] = $idDoc;
 				$param['api'] = $this->api;
 				$documentManager->setParam($param);

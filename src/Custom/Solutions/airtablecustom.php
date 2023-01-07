@@ -64,7 +64,14 @@ class airtablecustom extends airtable {
 			)
 		) {
 			// Change the document type 
-			$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+			$documentManager = new DocumentManager(
+										$this->logger, 
+										$this->connection, 
+										$this->entityManager,
+										$this->documentRepository,
+										$this->ruleRelationshipsRepository,
+										$this->formulaManager
+									);
 			$paramDoc['id_doc_myddleware'] = $param['document']['id'];
 			$paramDoc['jobId'] = $param['jobId'];
 			$documentManager->setParam($paramDoc);

@@ -47,7 +47,14 @@ class sendinbluecustom extends sendinblue {
 						if ($contactIdDeleted == $record['target_id']) {
 							$paramDoc['id_doc_myddleware'] = $idDoc;
 							$paramDoc['jobId'] = $param['jobId'];
-							$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+							$documentManager = new DocumentManager(
+										$this->logger, 
+										$this->connection, 
+										$this->entityManager,
+										$this->documentRepository,
+										$this->ruleRelationshipsRepository,
+										$this->formulaManager
+									);
 							$documentManager->setParam($paramDoc);
 							$documentManager->updateTargetId($contactNotDeleted);
 						}
@@ -64,7 +71,14 @@ class sendinbluecustom extends sendinblue {
 		// Get all source field of the ruleId
 		$paramDoc['id_doc_myddleware'] = $idDoc;
 		$paramDoc['jobId'] = $param['jobId'];
-		$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+		$documentManager = new DocumentManager(
+										$this->logger, 
+										$this->connection, 
+										$this->entityManager,
+										$this->documentRepository,
+										$this->ruleRelationshipsRepository,
+										$this->formulaManager
+									);
 		$documentManager->setParam($paramDoc);			
 		$documentManager->generateDocLog('S', 'Try to delete contact '.$contactId.' from Sendinblue.');
 
@@ -137,7 +151,14 @@ class sendinbluecustom extends sendinblue {
 		) {
 			try {
 				$this->connection->beginTransaction();
-				$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager);
+				$documentManager = new DocumentManager(
+										$this->logger, 
+										$this->connection, 
+										$this->entityManager,
+										$this->documentRepository,
+										$this->ruleRelationshipsRepository,
+										$this->formulaManager
+									);
 				$param['id_doc_myddleware'] = $idDoc;
 				$param['api'] = $this->api;
 				$documentManager->setParam($param);
