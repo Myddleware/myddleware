@@ -751,6 +751,13 @@ class suitecrmcore extends solution
 
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
                         continue;
+                        // Note are sent using setNoteAttachement function 
+                        if (
+                            $param['module'] == 'Notes'
+                            and $key == 'filecontents'
+                        ) {
+                            continue;
+                        }
                     }
 
                     // Note are sent using setNoteAttachement function 
@@ -799,23 +806,6 @@ class suitecrmcore extends solution
         return $result;
     }
 
-    // Function to delete a record
-    public function deleteData($param): array
-    {
-        // We set the flag deleted to 1 and we call the update function
-        foreach ($param['data'] as $idDoc => $data) {
-            $param['data'][$idDoc]['deleted'] = 1;
-        }
-
-        // In case of many to many relationship, the delettion is done by using createRelationship function
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            return $this->createRelationship($param);
-        }
-
-        return $this->updateData($param);
-    }
-
-
     // Function to send a note
 	protected function setNoteAttachement($data, $noteId) {					
 		$setNoteAttachementParameters = array(
@@ -839,8 +829,25 @@ class suitecrmcore extends solution
 		}				
 	}
 
-    // Build the query for read data to SuiteCRM
+    
+    // Function to delete a record
+    public function deleteData($param): array
+    {
+        // We set the flag deleted to 1 and we call the update function
+        foreach ($param['data'] as $idDoc => $data) {
+            $param['data'][$idDoc]['deleted'] = 1;
+        }
 
+        // In case of many to many relationship, the delettion is done by using createRelationship function
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            return $this->createRelationship($param);
+        }
+
+        return $this->updateData($param);
+    }
+
+	
+    // Build the query for read data to SuiteCRM
     /**
      * @throws \Exception
      */

@@ -84,6 +84,7 @@ class rulecore
     private ?RuleOrderRepository $ruleOrderRepository;
     private ?SessionInterface $session;
     protected FormulaManager $formulaManager;
+    private $dataSource;
 
     public function __construct(
         LoggerInterface $logger,
@@ -1401,7 +1402,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->ckeckPredecessorDocuments($arrayIdDocument);
+            $response = $this->checkPredecessorDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Predecessor_OK';
@@ -1510,13 +1511,14 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($value['source_date_modified']);
+                    unset($sendData->{$key}['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($value['id_doc_myddleware']);
+                    unset($sendData->{$key}['id_doc_myddleware']);
                 }
-                $sendData[$key] = $value;
+                
             }
+            
 
             return $sendData;
         }
@@ -1606,9 +1608,11 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
-                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
-                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
+
+						// Allows to get the history fields, necessary for updating the SAP for instance
+                        foreach ($send['data'] as $docId => $value) {
+                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
+                        }
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
@@ -1724,10 +1728,9 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // Allows to get the history fields, necessary for updating the SAP for instance
-                        foreach ($send['data'] as $docId => $value) {
-                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
-                        }
+                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
+                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
@@ -1759,7 +1762,6 @@ class rulecore
 
         return $response;
     }
-
 
     // Check before we send a record deletion
     protected function checkBeforeDelete($send)
@@ -1957,9 +1959,12 @@ class rulecore
         $limit = ' LIMIT '.$this->limit;
         // Si un document est en paramètre alors on filtre la requête sur le document
         if (!empty($documentId)) {
-            $documentFilter = " document.id = '$documentId'";
+            $documentFilter = " 	document.id = '$documentId'
+								AND document.deleted = 0 ";
         } elseif (!empty($parentDocId)) {
-            $documentFilter = " document.parent_id = '$parentDocId' AND document.rule_id = '$parentRuleId' ";
+            $documentFilter = " 	document.parent_id = '$parentDocId' 
+								AND document.rule_id = '$parentRuleId'
+								AND document.deleted = 0 ";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
         }
