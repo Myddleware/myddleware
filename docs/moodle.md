@@ -22,6 +22,10 @@ Here is the list of available modules in source (reading) and target (writing) :
 
 # Install the plugin Myddleware in Moodle. 
 
+<video src="file/tuto_moodle_new.mp4" width="800"  controls></video>
+
+[![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
+
 Go to the administration of the site and then ``Plugins`` and ``Install plugins``
 
 ![Install plugins](images/moodle/install_plugins.PNG)
