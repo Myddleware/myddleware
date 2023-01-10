@@ -490,7 +490,7 @@ class salesforcecore extends solution {
 				$parameter['attributes'] = array('type' => $param['module'], 'referenceId' => 'Ref'.$i);
 			    foreach ($data as $key => $value) {		
 			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
-					if (in_array($key, array('Myddleware_element_id'))) {
+					if (in_array($key, array('Myddleware_element_id','id_doc_myddleware','source_date_modified'))) {
 						continue;
 					}
 			        elseif ($key == 'target_id') {
@@ -605,7 +605,7 @@ class salesforcecore extends solution {
 				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
 					// On n'envoie jamais le champ Myddleware_element_id à Salesforce
-					if (in_array($key, array('Myddleware_element_id'))) {
+					if (in_array($key, array('Myddleware_element_id','id_doc_myddleware','source_date_modified'))) {
 						continue;
 					}
 			        elseif ($key == 'target_id') {
@@ -644,10 +644,10 @@ class salesforcecore extends solution {
 				) {
 					$parameters['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
 				}				
-				$parameters = json_encode($parameters);
 				
+				$parameters = json_encode($parameters);
 				// Appel de la requête				
-                $query_request_data = $this->call($query_url, $parameters, true);             
+                $query_request_data = $this->call($query_url, $parameters, true);             				
 				
 				if ($query_request_data === true) {
 					$result[$idDoc] = array(
