@@ -45,7 +45,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
  */
 class yousigncore extends solution
 {
-    protected $callLimit = 10;
+    protected $callLimit = 100;
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
     protected bool $sendDeletion = true;
@@ -218,10 +218,10 @@ class yousigncore extends solution
 			} else {
 				$endpoint = $moduleApi.'?itemsPerPage='.$this->callLimit.'&pagination=true&page='.$nbPage.'&updatedAt[after]='.$dateRef;	
 			}
-	
+
 			// Call YouSign API			
 			$responseYouSign = $this->youSignCall($endpoint);
-			
+
 			// Format response
 			if (!empty($responseYouSign)) {
 				// Add a dimension to the array if the call is executed with an id. By this way we will get the same format result than the call by reference date
@@ -245,11 +245,13 @@ class yousigncore extends solution
 			$nbPage++;			
 		// Stop if there is no more record to read
 		// or if we read a specific record
+		// or if we reach the rule limit
 		} while (
 				!empty($response)
 			AND count($response) >= $this->callLimit
 			AND empty($param['query']['id'])
-		);			
+			AND count($result) <= $param['limit']
+		);		
         return $result;
     }
 
