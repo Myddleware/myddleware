@@ -352,6 +352,16 @@ class suitecrmcore extends solution
                     }
                 }
             }
+			if ($module == 'Notes') {
+				$this->moduleFields['filecontents'] = [
+					'label' => 'File contents',
+					'type' => 'text',
+					'type_bdd' => 'text',
+					'required' => 0,
+					'required_relationship' => 0,
+					'relate' => false,
+				];
+			}
 
             return $this->moduleFields;
         } catch (\Exception $e) {
