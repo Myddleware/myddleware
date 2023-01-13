@@ -660,7 +660,8 @@ class mysqlcustom extends mysql {
 						)
 					) {
 						$param['data'][$idDoc]['email_updated'] = 1;					
-					} else {
+					// Email can always be updated if compet REEC isn't created
+					} elseif (!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])) {
 						unset($param['data'][$idDoc]['email']);				
 					}					
 						
