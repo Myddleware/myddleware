@@ -1051,6 +1051,33 @@ class jobcore
 
         return true;
     }
+
+    public function checkJob()
+    {
+        try {
+            $sqlParams = 'SELECT MAX(job.begin) AS job_begin , MAX(log.created) AS log_created
+            FROM job 
+            INNER JOIN log	ON job.id = log.job_id
+            WHERE log.job_id = :id
+            AND  TIMESTAMPDIFF(SECOND, job.begin, log.created) BETWEEN -900 AND 900;';
+            $stmt = $this->connection->prepare($sqlParams);
+            $result = $stmt->executeQuery();
+            $jobs = $result->fetchAllAssociative();
+            if (!empty($jobs)) {
+                foreach ($jobs as $job) {
+                    $jobOrder[] = $job['job_begin'];
+                }
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            return false;
+        }
+        if (empty($jobOrder)) {
+            return null;
+        }
+
+        return $jobOrder;
+    }
 }
 class JobManager extends jobcore
 {
