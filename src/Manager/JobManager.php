@@ -891,6 +891,9 @@ class jobcore
             $this->logData['Open'] = 0;
             $this->logData['Error'] = 0;
             $this->logData['paramJob'] = $this->paramJob;
+            if (!empty($documentDetail)){
+                $this->id = $documentDetail->getId();
+            }
             $sqlParams = '	SELECT 
 								count(distinct document.id) nb,
 								document.global_status
