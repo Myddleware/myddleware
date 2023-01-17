@@ -151,7 +151,8 @@ class TaskController extends AbstractController
             $em = $this->getDoctrine()->getManager();
 
             // Get job detail
-            $jobData = $this->jobManager->getLogData($taskStop);
+            $this->jobManager->setId($taskStop->getId());
+            $jobData = $this->jobManager->getLogData();
 
             // Stop task and update statistics
             $taskStop->setOpen($jobData['Open']);

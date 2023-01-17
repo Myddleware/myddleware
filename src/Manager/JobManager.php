@@ -134,6 +134,11 @@ class jobcore
         return $this->id;
     }
 
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
     public function getMessage(): string
     {
         return $this->message;
@@ -882,7 +887,7 @@ class jobcore
     }
 
     // Récupération des données du job
-    public function getLogData($documentDetail = false)
+    public function getLogData()
     {
         try {
             // Récupération du nombre de document envoyé et en erreur pour ce job
@@ -891,9 +896,6 @@ class jobcore
             $this->logData['Open'] = 0;
             $this->logData['Error'] = 0;
             $this->logData['paramJob'] = $this->paramJob;
-            if (!empty($documentDetail)){
-                $this->id = $documentDetail->getId();
-            }
             $sqlParams = '	SELECT 
 								count(distinct document.id) nb,
 								document.global_status
