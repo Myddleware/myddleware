@@ -670,29 +670,43 @@ $(function () {
 		}
 	});
 
-	
+	console.log("0 before test");
 
+	// If I double click on the element li inside the element (an ul) with the id flux_target
 	$("#flux_target").on("dblclick", 'li', function () {
+		console.log("1 inside the main function");
 
+		// If the attribute data-gbl (for global) is error or open
 		if ($('#gblstatus').attr('data-gbl') == 'error' || $('#gblstatus').attr('data-gbl') == 'open') {
+			console.log("1 gblstatus check validated inside the 1st if");
+			// Retrieves the class of the element we clicked on
 			verif = $(this).attr('class');
+			// Finds the class of the first li element within #flux_target
 			first = $('li:first', '#flux_target').attr('class');
 			classe = $(this).attr('class');
 
+			console.log("1 inside error test affter declare first and classe")
+			// If verif 
 			if (typeof verif !== "undefined" && first === "undefined" != classe !== "undefined") {
 
+				console.log('2 inside verif/firtst/classe if');
 				value = $(this).find('.value').text();
 				$(this).find('.value').remove();
 				$(this).append('<input id="' + classe + '" type="text" value="' + value + '" /><div data-value="' + classe + '" class="btn-group btn-group-xs"><span class="glyphicon glyphicon-ok cursor"></span><span class="load"></span></div>');
+				$(this).append('<button class="btn-success">Validate</button>');
+				console.log("2 after doing the append");
 			}
 		}
 
 	});
-
+	console.log("0 before flux target click test");
 	$("#flux_target").on("click", 'div', function () {
+		console.log('1 inside onclick flux');
 		saveInputFlux($(this), inputs_flux);
+		console.log('1 inside onclick flux after save input');
 	});
 
+	console.log('0 after test');
 
 		// Rev 1.1.0 Upload Files ------------------------------
 	// Fermeture de la fancybox
