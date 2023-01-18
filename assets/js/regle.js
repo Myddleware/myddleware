@@ -687,7 +687,7 @@ $(function () {
 
 			console.log("1 inside error test affter declare first and classe")
 			// If verif 
-			if (typeof verif !== "undefined" && first === "undefined" != classe !== "undefined") {
+			if (typeof verif !== "undefined" && first === "undefined" && classe !== "undefined") {
 
 				console.log('2 inside verif/firtst/classe if');
 				value = $(this).find('.value').text();
