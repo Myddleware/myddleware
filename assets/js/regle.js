@@ -670,10 +670,9 @@ $(function () {
 		}
 	});
 
-
-	// If I double click on the element li inside the element (an ul) with the id flux_target
-	$("#flux_target").on("dblclick", 'li', function () {
-
+// If I double click on the element li inside the element (an ul) with the id flux_target
+$("#flux_target").on("dblclick", 'li', function () {
+	
 		// If the attribute data-gbl (for global) is error or open
 		if ($('#gblstatus').attr('data-gbl') == 'error' || $('#gblstatus').attr('data-gbl') == 'open') {
 			// Retrieves the class of the element we clicked on
@@ -683,29 +682,26 @@ $(function () {
 			classe = $(this).attr('class');
 
 			// If the type of the class attribute is not undefinde for the #flux_target element
-			// And if the class of the first element is undefined
+			// different if the class of the first element is undefined
 			// And if the class of the clicked element is not undefined
 			if (typeof verif !== "undefined" && first === "undefined" != classe !== "undefined") {
 
 				// save the text to a variable
 				value = $(this).find('.value').text();
-				// Removes the value
+				// Removes the original value of the field
 				$(this).find('.value').remove();
 				// Add a new field
-				$(this).append('<input id="' + classe + '" type="text" value="' + value + '" /><div data-value="' + classe + '" class="btn-group btn-group-xs"><span class="glyphicon glyphicon-ok"></span><span class="load"></span></div>');
+				newElement = $(this).append('<input id="' + classe + '" type="text" value="' + value + '" /><button type="submit" data-value="' + classe + '" class="btn-group btn-group-xs load"><i class="fa fa-check-circle"></i ></button> ');
+				$(this).append(newElement);
 				// add a save button
-				$(this).append('<button class="save-field-flux btn-success">Validate</button>');
 			}
 		}
-
 	});
 
 	// If the div in flux_target is clicked, then wec call the saveInputFlux function
-	$("#flux_target").on("click", 'button.save-field-flux', function () {
-		console.log('saved');
+	$("#flux_target").on("click", '.load', function () {
 		saveInputFlux($(this), inputs_flux);
 	});
-
 
 		// Rev 1.1.0 Upload Files ------------------------------
 	// Fermeture de la fancybox
