@@ -1161,7 +1161,7 @@ class rulecore
                 throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
             }
             if ($documentId !== null) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
             //if user clicked on cancel all transfers of a rule
             elseif ('cancelDocumentJob' === $event) {
