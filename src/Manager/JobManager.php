@@ -1052,31 +1052,104 @@ class jobcore
         return true;
     }
 
-    public function checkJob()
+    public function checkJob($period = null)
     {
         try {
-            $sqlParams = 'SELECT MAX(job.begin) AS job_begin , MAX(log.created) AS log_created
-            FROM job 
-            INNER JOIN log	ON job.id = log.job_id
-            WHERE log.job_id = :id
-            AND  TIMESTAMPDIFF(SECOND, job.begin, log.created) BETWEEN -900 AND 900;';
-            $stmt = $this->connection->prepare($sqlParams);
-            $result = $stmt->executeQuery();
-            $jobs = $result->fetchAllAssociative();
-            if (!empty($jobs)) {
-                foreach ($jobs as $job) {
-                    $jobOrder[] = $job['job_begin'];
+            if ($period === null) {
+                $period = 900;
+            }
+            $id = [];
+            $jobsId = $this->checkJobId();
+
+            foreach ($jobsId as $jobId) {
+                foreach ($jobId as $value) {
+                    $sqlParams = "SELECT MAX(job.begin) AS job_begin , MAX(log.created) AS log_created
+                    FROM job 
+                    INNER JOIN log	ON job.id = log.job_id
+                    WHERE job.status = 'start'
+                    AND job.id = :value
+                    AND  TIMESTAMPDIFF(SECOND, job.begin, log.created) BETWEEN - $period AND $period;";
+
+                    $stmt = $this->connection->prepare($sqlParams);
+                    $stmt->bindValue('value', $value);
+                    $result = $stmt->executeQuery();
+            
+                    $jobs = $result->fetchAllAssociative();
+                    if($jobs[0]["job_begin"] === null || $jobs[0]["log_created"] === null){
+                        $this->closeCheckJob($value);
+                    }
                 }
             }
+
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
-        if (empty($jobOrder)) {
+        // if (empty($jobOrder)) {
+        //     return null;
+        // }
+        return true;
+    }
+
+    public function checkJobId()
+    {
+        try {
+            $sqlParams = "SELECT job.id 
+            FROM job 
+            WHERE job.status = 'start'";
+            $stmt = $this->connection->prepare($sqlParams);
+            $result = $stmt->executeQuery();
+            $jobsId = $result->fetchAllAssociative();
+        } catch (Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            return false;
+        }
+        if (empty($jobsId)) {
             return null;
         }
+        return $jobsId;
+    }
 
-        return $jobOrder;
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function closeCheckJob($value)
+    {
+        // Update table job
+        return $this->updateCheckJob($value);
+    }
+
+        /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function updateCheckJob($value): bool
+    {
+        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+        try {
+           // $idJob = $this->id;
+            $now = gmdate('Y-m-d H:i:s');
+            $message = $this->message;
+            if (!empty($this->message)) {
+                $message = htmlspecialchars($this->message);
+            }
+            $query_header = "UPDATE job 
+							SET 
+								end = :now, 
+								status = 'End'
+							WHERE id = :id; ";
+            $stmt = $this->connection->prepare($query_header);
+            $stmt->bindValue('now', $now);
+            $stmt->bindValue('id', $value);
+            $result = $stmt->executeQuery();
+            $this->connection->commit(); // -- COMMIT TRANSACTION
+        } catch (Exception $e) {
+            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+
+            return false;
+        }
+        return true;
     }
 }
 class JobManager extends jobcore

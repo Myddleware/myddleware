@@ -26,6 +26,7 @@
 namespace App\Command;
 
 use Exception;
+use App\Entity\Job;
 use App\Manager\JobManager;
 use Psr\Log\LoggerInterface;
 use App\Repository\JobRepository;
@@ -57,7 +58,7 @@ class CheckJobCommand extends Command
         $this
             ->setName('myddleware:checkjob')
             ->setDescription('check job every 900 secondes')
-            ->addArgument('jobId', InputArgument::OPTIONAL)
+            ->addArgument('period', InputArgument::OPTIONAL, 'Period in seconds')
         ;
     }
 
@@ -67,13 +68,18 @@ class CheckJobCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $jobId = $input->getArgument('jobId');
+        $period = $input->getArgument('period');;
         $force = 1;
+
+        if ($period === null) {
+            $period = 900;
+        }
+        
         // if (empty($force)) {
         //     $force = 1;
         // }
 
-        $rule = $this->jobRepository->findOneBy(['id' => $jobId]);
+        // $job = $this->jobRepository->findOneBy(['id' => $jobId]);
         // if (null === $rule) {
         //     throw new Exception('No rule found. Please add values to run this action.');
         // }
@@ -82,7 +88,7 @@ class CheckJobCommand extends Command
         // // Set the API value
         // $this->jobManager->setApi((bool) $api);
 
-        $data = $this->jobManager->initJob('test', 1);
+        $data = $this->jobManager->initJob('checkJob', 1);
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
@@ -93,7 +99,8 @@ class CheckJobCommand extends Command
         // If the query is by id, we use the flag that leads to massIdRerun()
         // Otherwise we use the regular rerun
        // if ()) {
-            $this->jobManager->checkJob(); 
+  
+            $this->jobManager->checkJob($period); 
 
         // }else $this->jobManager->checkJob();
 
@@ -109,7 +116,6 @@ class CheckJobCommand extends Command
                 $this->logger->error($responseCloseJob['message']);
             }
         }
-
         return 1;
     }
 }
