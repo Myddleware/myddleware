@@ -26,7 +26,6 @@
 namespace App\Command;
 
 use Exception;
-use App\Entity\Job;
 use App\Manager\JobManager;
 use Psr\Log\LoggerInterface;
 use App\Repository\JobRepository;
@@ -39,17 +38,14 @@ class CheckJobCommand extends Command
 {
     private LoggerInterface $logger;
     private JobManager $jobManager;
-    private JobRepository $jobRepository;
 
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
-        JobRepository $jobRepository,
         $name = null
     ) {
         $this->logger = $logger;
         $this->jobManager = $jobManager;
-        $this->jobRepository = $jobRepository;
         parent::__construct($name);
     }
 
@@ -57,8 +53,8 @@ class CheckJobCommand extends Command
     {
         $this
             ->setName('myddleware:checkjob')
-            ->setDescription('check job every 900 secondes')
-            ->addArgument('period', InputArgument::OPTIONAL, 'Period in seconds')
+            ->setDescription('check if the job is too long')
+            ->addArgument('period', InputArgument::OPTIONAL, 'Default value : 900')
         ;
     }
 
@@ -71,23 +67,6 @@ class CheckJobCommand extends Command
         $period = $input->getArgument('period');;
         $force = 1;
 
-        if ($period === null) {
-            $period = 900;
-        }
-        
-        // if (empty($force)) {
-        //     $force = 1;
-        // }
-
-        // $job = $this->jobRepository->findOneBy(['id' => $jobId]);
-        // if (null === $rule) {
-        //     throw new Exception('No rule found. Please add values to run this action.');
-        // }
-        // $api = $input->getArgument('api');
-
-        // // Set the API value
-        // $this->jobManager->setApi((bool) $api);
-
         $data = $this->jobManager->initJob('checkJob', 1);
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
@@ -95,16 +74,7 @@ class CheckJobCommand extends Command
 
             return 0;
         }
-
-        // If the query is by id, we use the flag that leads to massIdRerun()
-        // Otherwise we use the regular rerun
-       // if ()) {
-  
-            $this->jobManager->checkJob($period); 
-
-        // }else $this->jobManager->checkJob();
-
-        // Close job if it has been created
+        $this->jobManager->checkJob($period); 
         $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($responseCloseJob['message'])) {
