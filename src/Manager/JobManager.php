@@ -1058,12 +1058,14 @@ class jobcore
         return true;
     }
 
+    //check if the job is too long
     public function checkJob($period)
     {
         try {
             if (empty($period)) {
                 $period = $this->checkJobPeriod;
             }
+            //Search only jobs with status start
             $sqlParams = "SELECT DISTINCT job.id
             FROM job 
                 INNER JOIN log    
@@ -1071,7 +1073,6 @@ class jobcore
             WHERE
                     job.status = 'start'
                 AND TIMESTAMPDIFF(SECOND,  log.created, NOW()) > :period;";
-
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('period', $period);
 
@@ -1079,12 +1080,9 @@ class jobcore
             $jobs = $result->fetchAllAssociative();
             foreach ($jobs as $job) {
             $jobManagerChekJob = clone $this;
-            $jobManagerChekJob->setId($job[0]);
-
-            $jobManagerChekJob->closeJob();
-        
+            $jobManagerChekJob->setId($job['id']);
+            $jobManagerChekJob->closeJob();    
             }
-
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;

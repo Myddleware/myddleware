@@ -64,6 +64,7 @@ class CheckJobCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        
         $period = $input->getArgument('period');;
         $force = 1;
 
@@ -71,7 +72,6 @@ class CheckJobCommand extends Command
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
-
             return 0;
         }
         $this->jobManager->checkJob($period); 
