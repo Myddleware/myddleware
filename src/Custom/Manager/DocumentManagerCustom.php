@@ -583,20 +583,20 @@ class DocumentManagerCustom extends DocumentManager
 		return $matchingrows;
 	}
 	
-	public function ckeckParentDocument() {
+	public function checkParentDocument(): bool {
 		try {				
 			// If the sendinblue contact is not found in the contact rule, we search in the coupon rule
-			if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
-				$chekParent = parent::ckeckParentDocument();	
+			if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered		
+				$chekParent = parent::checkParentDocument();	
 				if ($chekParent) {
 					return $chekParent;
 				}
 				// Change relationship if not found
 				$keyRelParent = array_search('parent_id', array_column($this->ruleRelationships, 'field_name_target'));
-				if ($keyRelParent === false) {
+				if ($keyRelParent === false) {				
 					throw new \Exception('Relatiobnship with contact id missing for this rule.');	
-				}
-				$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
+				}					
+				$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon						
 			}
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -605,7 +605,7 @@ class DocumentManagerCustom extends DocumentManager
 			$this->logger->error($this->message);
 			return false;
 		}	
-		$chekParent = parent::ckeckParentDocument();
+		$chekParent = parent::checkParentDocument();
 
 		// In case there is no contact or coupon found in Myddlewarere for the email, we try to find the email address directly from SuiteCRM
 		// If we don't find the email address we cancel the document 
@@ -634,7 +634,7 @@ class DocumentManagerCustom extends DocumentManager
 				if (empty($result)){
 					$this->toBeCancel[$this->id] = true;
 					// Call again the check parent function to cancel the document using the attribut toBeCancel
-					parent::ckeckParentDocument();
+					parent::checkParentDocument();
 				}
 			}
 		}

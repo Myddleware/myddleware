@@ -200,11 +200,10 @@ class RuleManagerCustom extends RuleManager
 					$this->changeStatus($docId, 'Cancel', 'Telephone invalide. Myddleware va notifier la COMET et effacer ce numéro invalide. ');
 				}
 				
-				// If there is an "nprocessable Entity" errro when we try to create a binome for the first time
+				// If there is an "Unprocessable Entity" errro when we try to create/update a binome for the first time
 				// Then we try to send again both contacts and referent
 				if (
 						$this->ruleId == '61a930273441b' 	// 	Aiko binome
-					AND	$type == 'C' 						// Creation only
 					AND	$documentData['attempt'] == 1 		// Only the first try
 					AND	(
 							strpos($response['error'], 'Unprocessable Entity returned') !== false
