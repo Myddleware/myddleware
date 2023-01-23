@@ -207,6 +207,7 @@ class databasecore extends solution
     public function readData($param)
     {
         $result = [];
+        $result['date_ref'] = $param['date_ref'];
         // Decode field name (converted in method get_module_fields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
         try {
@@ -542,8 +543,8 @@ class databasecore extends solution
 							GROUP BY source_id";
                 $stmt = $connection->prepare($query);
                 $stmt->bindValue(':id_rule', $param['rule']['id']);
-                $result = $stmt->executeQuery();
-                $documents = $result->fetchAllAssociative();
+                $resultQuery = $stmt->executeQuery();
+                $documents = $resultQuery->fetchAllAssociative();
 
                 // Test all document found in Myddleware
                 foreach ($documents as $document) {
