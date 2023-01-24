@@ -1078,10 +1078,12 @@ class jobcore
 
             $result = $stmt->executeQuery();
             $jobs = $result->fetchAllAssociative();
+
             foreach ($jobs as $job) {
-            $jobManagerChekJob = clone $this;
-            $jobManagerChekJob->setId($job['id']);
-            $jobManagerChekJob->closeJob();    
+                //clone because, the job that is not the current job
+                $jobManagerChekJob = clone $this;
+                $jobManagerChekJob->setId($job['id']);
+                $jobManagerChekJob->closeJob();    
             }
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
