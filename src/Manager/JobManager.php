@@ -65,6 +65,8 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
+	protected int $limitDelete = 1000;
+    protected int $nbCallMaxDelete = 50;
 
     private ParameterBagInterface $parameterBagInterface;
 
@@ -778,12 +780,13 @@ class jobcore
      * @throws Exception
      */
     public function clearData()
-    {
+    { 	
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "	SELECT 
 							rule.id,
 							rule.name,
-							ruleparam.value days
+							ruleparam.value days,
+							deleted
 						FROM rule
 							INNER JOIN ruleparam
 								ON rule.id = ruleparam.rule_id
@@ -792,17 +795,21 @@ class jobcore
         $stmt = $this->connection->prepare($sqlParams);
         $result = $stmt->executeQuery();
         $rules = $result->fetchAllAssociative();
+		// Calculate the limit for selection
+		$limit = $this->nbCallMaxDelete * $this->limitDelete;
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
+				echo date('Y-m-d H:i:s').' - Rule '.$rule['name'].chr(10);
                 // Calculate the date corresponding depending the rule parameters
                 $limitDate = new DateTime('now', new DateTimeZone('GMT'));
                 $limitDate->modify('-'.$rule['days'].' days');
-                // Delete document data
-                $this->connection->beginTransaction();
-                try {
-                    $deleteSource = "
-						DELETE documentdata
+				
+				// Delete document data
+                // Select the list of documentdata to be deleted
+				try {
+					$deleteSourceSelection = "
+						SELECT documentdata.doc_id
 						FROM document
 							INNER JOIN documentdata
 								ON document.id = documentdata.doc_id
@@ -810,55 +817,156 @@ class jobcore
 								document.rule_id = :ruleId
 							AND document.global_status IN ('Close','Cancel')
 							AND document.deleted = 0 
-							AND document.date_modified < :limitDate	";
-                    $stmt = $this->connection->prepare($deleteSource);
-                    $stmt->bindValue('ruleId', $rule['id']);
-                    $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $result = $stmt->executeQuery();
-                    if ($result->rowCount() > 0) {
-                        $this->message .= $result->rowCount().' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
-                    }
-                    $this->connection->commit(); // -- COMMIT TRANSACTION
+							AND document.date_modified < :limitDate
+						LIMIT ".$limit;
+					// Get selection
+					$stmt = $this->connection->prepare($deleteSourceSelection);
+					$stmt->bindValue('ruleId', $rule['id']);
+					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
+					$resultDeleteSourceSelection = $stmt->executeQuery();
+					$documentIds = $resultDeleteSourceSelection->fetchAllAssociative();
+					// $this->connection->commit(); // -- COMMIT TRANSACTION
+				} catch (Exception $e) {
+                    // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+                    $this->message .= 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->logger->error($this->message);
+                }
+				
+                try {
+					$count = 0;
+					$nbCall = 0;
+					// Delete data using pack size of $this->limitDelete rows
+					// Continue while we have results and if the program dosn't reach the limit call
+					while (
+							!empty($documentIds)
+						AND $nbCall < $this->nbCallMaxDelete
+					){
+						$i = 0;
+						$nbCall++;
+						
+						// Prepare delete query
+						if (!empty($documentIds)) {
+							$idString = '';
+							// Build IN parameter
+							foreach ($documentIds as $key => $documentId) {
+								if ($i >= $this->limitDelete) {
+									break;
+								}
+								$i++;
+								$idString .= "'".$documentId['doc_id']."',";
+								unset($documentIds[$key]);
+							}
+							$idString = rtrim($idString, ',');
+							if (!empty($idString)) {
+								$this->connection->beginTransaction();
+								// Delete rows in table documentdata
+								$deleteDocumentData = "DELETE FROM documentdata WHERE doc_id IN (".$idString.")";
+								$stmtDelete = $this->connection->prepare($deleteDocumentData);
+								$result = $stmtDelete->executeQuery();
+								// Save the number of rows deleted
+								if ($result->rowCount() > 0) {
+									$count += $result->rowCount();
+								}
+								$this->connection->commit(); // -- COMMIT TRANSACTION
+							}
+						}
+					}
                 } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                     $this->message .= 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->logger->error($this->message);
                 }
+				// Add log 
+				if ($count > 0) {
+					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. '.chr(10);
+					$this->message .= $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+				}
 
-                // Delete log for these rule
-                $this->connection->beginTransaction();
-                try {
-                    $deleteLog = "
-						DELETE log
+				// Delete log
+                // Select the list of log to be deleted
+				try {
+					$deleteLogSelection = "
+						SELECT log.id
 						FROM log
 							INNER JOIN document
 								ON log.doc_id = document.id
 						WHERE 
-								log.rule_id = :ruleId
+								document.rule_id = :ruleId
 							AND log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
 							AND document.global_status IN ('Close','Cancel')
 							AND document.deleted = 0 
-							AND document.date_modified < :limitDate	";
-                    $stmt = $this->connection->prepare($deleteLog);
-                    $stmt->bindValue('ruleId', $rule['id']);
-                    $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-                    $result = $stmt->executeQuery();
-                    if ($result->rowCount() > 0) {
-                        $this->message .= $result->rowCount().' rows deleted in the table Log for the rule '.$rule['name'].'. ';
-                    }
-                    $this->connection->commit(); // -- COMMIT TRANSACTION
+							AND document.date_modified < :limitDate	
+						LIMIT ".$limit;
+					// Get selection
+					$stmt = $this->connection->prepare($deleteLogSelection);
+					$stmt->bindValue('ruleId', $rule['id']);
+					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
+					$resultDeleteLogSelection = $stmt->executeQuery();
+					$logIds = $resultDeleteLogSelection->fetchAllAssociative();
+				} catch (Exception $e) {
+                    $this->message .= 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->logger->error($this->message);
+                }
+
+
+                try {
+					$count = 0;
+					$nbCall = 0;
+					// Delete data using pack size of $this->limitDelete rows
+					// Continue while we have results and if the program dosn't reach the limit call
+					while (
+							!empty($logIds)
+						AND $nbCall < $this->nbCallMaxDelete
+					){
+						$i = 0;
+						$nbCall++;
+						
+						// Prepare delete query
+						if (!empty($logIds)) {
+							$idString = '';
+							// Build IN parameter
+							foreach ($logIds as $key => $logId) {
+								if ($i >= $this->limitDelete) {
+									break;
+								}
+								$i++;
+								$idString .= "'".$logId['id']."',";
+								unset($logIds[$key]);
+							}
+							$idString = rtrim($idString, ',');
+							if (!empty($idString)) {
+								$this->connection->beginTransaction();
+								// Delete rows in table log
+								$deleteLog = "DELETE FROM log WHERE id IN (".$idString.")";
+								$stmtDeleteLog = $this->connection->prepare($deleteLog);
+								$result = $stmtDeleteLog->executeQuery();
+								// Save the number of rows deleted
+								if ($result->rowCount() > 0) {
+									$count += $result->rowCount();
+								}
+								$this->connection->commit(); // -- COMMIT TRANSACTION
+							}
+						}
+						
+					} 
                 } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                     $this->message .= 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->logger->error($this->message);
                 }
+				// Add log 
+				if ($count > 0) {
+					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Log for the rule '.$rule['name'].'. '.chr(10);
+					$this->message .= $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+				}	  
             }
         }
-        $this->connection->beginTransaction();
+		
+		// Delete job
         try {
             $limitDate = new DateTime('now', new DateTimeZone('GMT'));
             $limitDate->modify('-'.$this->nbDayClearJob.' days');
-            // Suppression des jobs de transfert vide
+            // Remove empty jobs
             $deleteJob = " 	
 				DELETE 
 				FROM job
@@ -871,18 +979,33 @@ class jobcore
 					AND cancel = 0
 					AND error = 0
 					AND end < :limitDate
-			";
-            $stmt = $this->connection->prepare($deleteJob);
-            $stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-            $result = $stmt->executeQuery();
-            if ($result->rowCount() > 0) {
-                $this->message .= $result->rowCount().' rows deleted in the table Job. ';
-            }
-            $this->connection->commit(); // -- COMMIT TRANSACTION
+					AND job.id NOT IN (select job_id from log) 
+				LIMIT ".$this->limitDelete;
+			$nbCall = 0;
+			$count = 0;
+			do {
+				$nbCall++;
+				$this->connection->beginTransaction();
+				$stmt = $this->connection->prepare($deleteJob);
+				$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
+				$resultDeleteJob = $stmt->executeQuery();
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				// Save the number of rows deleted
+				$count += $resultDeleteJob->rowCount();
+			} while (
+					$resultDeleteJob->rowCount() > 0
+				AND $nbCall < $this->nbCallMaxDelete
+			);
+			
+			// Add log 
+			if ($count > 0) {
+				$this->message .= $count.' rows deleted in the table Job. ';
+				echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Job. '.chr(10);
+			}
         } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Failed to clear logs and the documents data: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->message .= 'Failed to clear job: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);		
         }
     }
 

@@ -553,6 +553,7 @@ solution:
         14_day: 14 days
         30_day: 30 days
         60_day: 60 days
+        90_day: 90 days
 
 error:
     connexion: Connection failed

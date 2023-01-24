@@ -551,6 +551,7 @@ solution:
         14_day: 14 jours
         30_day: 30 jours
         60_day: 60 jours
+        90_day: 90 jours
         
 error:
     connexion: Connexion impossible

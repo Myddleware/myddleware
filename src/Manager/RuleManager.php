@@ -2301,6 +2301,7 @@ class rulecore
                                 '14' => 'solution.params.14_day',
                                 '30' => 'solution.params.30_day',
                                 '60' => 'solution.params.60_day',
+                                '90' => 'solution.params.90_day',
                             ],
             ],
             [
