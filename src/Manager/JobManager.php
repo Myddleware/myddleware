@@ -67,6 +67,7 @@ class jobcore
     protected int $nbDayClearJob = 7;
 	protected int $limitDelete = 1000;
     protected int $nbCallMaxDelete = 50;
+    protected int $checkJobPeriod = 900;
 
     private ParameterBagInterface $parameterBagInterface;
 
@@ -1177,6 +1178,40 @@ class jobcore
             return false;
         }
 
+        return true;
+    }
+
+    //check if the job is too long
+    public function checkJob($period)
+    {
+        try {
+            if (empty($period)) {
+                $period = $this->checkJobPeriod;
+            }
+            //Search only jobs with status start
+            $sqlParams = "SELECT DISTINCT job.id
+            FROM job 
+                INNER JOIN log    
+                    ON job.id = log.job_id
+            WHERE
+                    job.status = 'start'
+                AND TIMESTAMPDIFF(SECOND,  log.created, NOW()) > :period;";
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue('period', $period);
+
+            $result = $stmt->executeQuery();
+            $jobs = $result->fetchAllAssociative();
+
+            foreach ($jobs as $job) {
+                //clone because, the job that is not the current job
+                $jobManagerChekJob = clone $this;
+                $jobManagerChekJob->setId($job['id']);
+                $jobManagerChekJob->closeJob();    
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            return false;
+        }
         return true;
     }
 }
