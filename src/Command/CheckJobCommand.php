@@ -25,43 +25,36 @@
 
 namespace App\Command;
 
-use App\Manager\JobManager;
-use App\Repository\RuleRepository;
 use Exception;
+use App\Manager\JobManager;
 use Psr\Log\LoggerInterface;
+use App\Repository\JobRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ReadRecordCommand extends Command
+class CheckJobCommand extends Command
 {
     private LoggerInterface $logger;
     private JobManager $jobManager;
-    private RuleRepository $ruleRepository;
 
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
-        RuleRepository $ruleRepository,
         $name = null
     ) {
         $this->logger = $logger;
         $this->jobManager = $jobManager;
-        $this->ruleRepository = $ruleRepository;
         parent::__construct($name);
     }
 
     protected function configure()
     {
         $this
-            ->setName('myddleware:readrecord')
-            ->setDescription('Read specific records for a rule')
-            ->addArgument('ruleId', InputArgument::REQUIRED, 'Rule used to read the records')
-            ->addArgument('filterQuery', InputArgument::REQUIRED, 'Filter used to read data in the source application, eg : id')
-            ->addArgument('filterValues', InputArgument::REQUIRED, 'Values corresponding to the fileter separated by comma, eg : 1256,4587')
-            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
-            ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
+            ->setName('myddleware:checkjob')
+            ->setDescription('check if the job is too long')
+            ->addArgument('period', InputArgument::OPTIONAL, 'Default value : 900')
         ;
     }
 
@@ -71,40 +64,15 @@ class ReadRecordCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $ruleId = $input->getArgument('ruleId');
-        $filterQuery = $input->getArgument('filterQuery');
-        $filterValues = $input->getArgument('filterValues');
-        $force = $input->getArgument('force');
-        if (empty($force)) {
-            $force = false;
-        }
+        $period = $input->getArgument('period');
 
-        $rule = $this->ruleRepository->findOneBy(['id' => $ruleId, 'deleted' => false]);
-        if (null === $rule) {
-            throw new Exception('No rule found. Please add values to run this action.');
-        }
-        $api = $input->getArgument('api');
-
-        // Set the API value
-        $this->jobManager->setApi((bool) $api);
-
-        $data = $this->jobManager->initJob('read records with filter '.$filterQuery.' IN ('.$filterValues.')', $force);
+        $data = $this->jobManager->initJob('checkJob', 1);
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);
-
             return 0;
         }
-
-        $output->writeln('1;'.$this->jobManager->getId());  // This is requiered to display the log (link creation with job id) when the job is run manually
-
-        // If the query is by id, we use the flag that leads to massIdRerun()
-        // Otherwise we use the regular rerun
-        if ($filterQuery === 'id') {
-            $this->jobManager->readRecord($rule, $filterQuery, $filterValues, 1);    
-        }else $this->jobManager->readRecord($rule, $filterQuery, $filterValues);
-
-        // Close job if it has been created
+        $this->jobManager->checkJob($period); 
         $responseCloseJob = $this->jobManager->closeJob();
 
         if (!empty($responseCloseJob['message'])) {
