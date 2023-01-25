@@ -35,8 +35,11 @@ class mysqlcustom extends mysql {
 		try {		
 			// If SuiteCRM
 			if (
-					$paramConnexion['ids']['login']['conn_id'] == $this->mysqlCometConnId
-				 OR	$paramConnexion['login'] == $this->mysqlCometUser
+				 	$paramConnexion['login'] == $this->mysqlCometUser
+				 OR (
+						!empty($paramConnexion['ids']['login']['conn_id'])
+					AND $paramConnexion['ids']['login']['conn_id'] == $this->mysqlCometConnId
+				)
 			) {				
 				$this->suiteCRMConnexion = true;
 				return $this->connexionSuiteCRM();
