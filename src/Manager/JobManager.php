@@ -737,7 +737,7 @@ class jobcore
                 }
                 // Ecriture du fichier
                 $yaml = Yaml::dump($templateArray, 4);
-                file_put_contents($this->parameterBagInterface->get('kernel.root_dir').'/Templates/'.$nomTemplate.'.yml', $yaml);
+                file_put_contents($this->parameterBagInterface->get('kernel.project_dir').'/src/Templates/'.$nomTemplate.'.yml', $yaml);
             }
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
