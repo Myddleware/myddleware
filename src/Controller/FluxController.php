@@ -291,7 +291,6 @@ class FluxController extends AbstractController
                 $data['limit'] = $searchLimit->getValue();
             }
 
-            $r = $this->documentRepository->getFluxPagination($data);
             if (empty($data['source_content'])) {
                 $this->sessionService->removeFluxFilterSourceContent();
             }
