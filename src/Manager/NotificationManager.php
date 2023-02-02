@@ -157,7 +157,7 @@ class NotificationManager
             }
         } else {
             $message =
-                    (new Swift_Message($this->translator->trans('email_alert.subject')))
+                    (new Swift_Message($subject))
                     ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
                     ->setBody($textMail);
             // Send the message to all admins
