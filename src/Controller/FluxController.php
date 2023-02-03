@@ -284,6 +284,7 @@ class FluxController extends AbstractController
         }
         
         $conditions = 0;
+        $doNotSearch = false;
         //---[ FORM ]-------------------------
         if ($form->get('click_filter')->isClicked()) {
             $data = $form->getData();
@@ -364,10 +365,22 @@ class FluxController extends AbstractController
             $data['type']               = $this->sessionService->getFluxFilterType();
             $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
             $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
-       }
+            // No search if no filter and page = 1. 
+			// We keep searching if someone searched without filter and clicke on another page
+			if (
+                    count(array_filter($data)) === 0
+                AND $page == 1
+            ) {
+                $doNotSearch = true;
+            }
+        }
 
-        $resultSearch = $this->searchDocuments($data, $page, $limit); 
-        // $r = $this->documentRepository->getFluxPagination($data);
+        if (!$doNotSearch) {
+			$resultSearch = $this->searchDocuments($data, $page, $limit); 
+		} else {
+			$resultSearch = array();
+		}
+
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $resultSearch,
             'maxPerPage' => $this->params['pager'] ?? 25,
@@ -411,100 +424,98 @@ class FluxController extends AbstractController
     }
 
     
-protected function searchDocuments($data, $page = 1, $limit = 1000) {
-    $join = '';
-    $where = '';
- //   $nbRecordPage = $this->params['pager'] ?? 25;
- //   $offset = ($page-1) * $nbRecordPage;
+    protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        $join = '';
+        $where = '';
 
-    // Build the WHERE depending on $data
-    // Source content
-    if (!empty($data['source_content'])) {
-        $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
-        $where .= " AND document_data_source.data LIKE :source_content 
-                    AND document_data_source.type = 'S'";
-    }
-    // Target content
-    if (!empty($data['target_content'])) {
-        $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
-        $where .= " AND document_data_target.data LIKE :target_content 
-                    AND document_data_target.type = 'T'";
-    }
-    // Date modified (start) 
-    if (!empty($data['date_modif_start'])) {
-        $where .= " AND document.date_modified >= :dateModifiedStart ";
-    }
-    // Date modified (end)
-    if (!empty($data['date_modif_end'])) {
-        $where .= " AND document.date_modified <= :dateModifiedEnd ";
-    }
-    // Rule
-    if (
-            !empty($data['rule'])
-         OR !empty($data['customWhere']['rule'])
-    ) {
-        $where .= " AND rule.name = :ruleName ";
-    }
-    // Status
-    if (!empty($data['status'])) {
-        $where .= " AND document.status = :status ";
-    }
-
-    // customWhere can have several status (open and error from the error dashlet in the home page)
-    if (!empty($data['customWhere']['gblstatus'])) {
-        $i = 0;
-        $where .= " AND ( ";
-        foreach($data['customWhere']['gblstatus'] as $globalStatus) {
-            $where .= " document.global_status = :gblstatus".$i." OR";
-            $i++;
+        // Build the WHERE depending on $data
+        // Source content
+        if (!empty($data['source_content'])) {
+            $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
+            $where .= " AND document_data_source.data LIKE :source_content 
+                        AND document_data_source.type = 'S'";
         }
-        $where = rtrim($where, 'OR').' )';
-    } elseif (!empty($data['gblstatus'])) {
-        $where .= " AND document.global_status = :gblstatus ";
-    }
+        // Target content
+        if (!empty($data['target_content'])) {
+            $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
+            $where .= " AND document_data_target.data LIKE :target_content 
+                        AND document_data_target.type = 'T'";
+        }
+        // Date modified (start) 
+        if (!empty($data['date_modif_start'])) {
+            $where .= " AND document.date_modified >= :dateModifiedStart ";
+        }
+        // Date modified (end)
+        if (!empty($data['date_modif_end'])) {
+            $where .= " AND document.date_modified <= :dateModifiedEnd ";
+        }
+        // Rule
+        if (
+                !empty($data['rule'])
+            OR !empty($data['customWhere']['rule'])
+        ) {
+            $where .= " AND rule.name = :ruleName ";
+        }
+        // Status
+        if (!empty($data['status'])) {
+            $where .= " AND document.status = :status ";
+        }
 
-    // Type
-    if (!empty($data['type'])) {
-        $where .= " AND document.type = :type ";
-    }
-    // Target ID
-    if (!empty($data['target_id'])) {
-        $where .= " AND document.target_id LIKE :target_id ";
-    }
-    // Source ID
-    if (!empty($data['source_id'])) {
-        $where .= " AND document.source_id LIKE :source_id ";
-    }
+        // customWhere can have several status (open and error from the error dashlet in the home page)
+        if (!empty($data['customWhere']['gblstatus'])) {
+            $i = 0;
+            $where .= " AND ( ";
+            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+                $where .= " document.global_status = :gblstatus".$i." OR";
+                $i++;
+            }
+            $where = rtrim($where, 'OR').' )';
+        } elseif (!empty($data['gblstatus'])) {
+            $where .= " AND document.global_status = :gblstatus ";
+        }
 
-    // Build query
-    $query = "
-        SELECT 
-            document.id, 
-            document.date_created, 
-            document.date_modified, 
-            document.status, 
-            document.source_id, 
-            document.target_id, 
-            document.source_date_modified, 
-            document.mode, 
-            document.type, 
-            document.attempt, 
-            document.global_status, 
-            users.username, 
-            rule.name as rule_name, 
-            rule.id as rule_id 
-        FROM document 
-            INNER JOIN rule	
-                ON document.rule_id = rule.id
-            INNER JOIN users
-                ON document.created_by = users.id "
-            .$join. 
-        " WHERE 
-                document.deleted = 0 "
-                .$where.
-        " ORDER BY document.date_modified DESC"
-        ." LIMIT ". $limit;
-        
+        // Type
+        if (!empty($data['type'])) {
+            $where .= " AND document.type = :type ";
+        }
+        // Target ID
+        if (!empty($data['target_id'])) {
+            $where .= " AND document.target_id LIKE :target_id ";
+        }
+        // Source ID
+        if (!empty($data['source_id'])) {
+            $where .= " AND document.source_id LIKE :source_id ";
+        }
+
+        // Build query
+        $query = "
+            SELECT 
+                document.id, 
+                document.date_created, 
+                document.date_modified, 
+                document.status, 
+                document.source_id, 
+                document.target_id, 
+                document.source_date_modified, 
+                document.mode, 
+                document.type, 
+                document.attempt, 
+                document.global_status, 
+                users.username, 
+                rule.name as rule_name, 
+                rule.id as rule_id 
+            FROM document 
+                INNER JOIN rule	
+                    ON document.rule_id = rule.id
+                INNER JOIN users
+                    ON document.created_by = users.id "
+                .$join. 
+            " WHERE 
+                    document.deleted = 0 "
+                    .$where.
+            " ORDER BY document.date_modified DESC"
+            ." LIMIT ". $limit;
+            
         
         $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
         // Add parameters to the query
