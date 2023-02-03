@@ -128,7 +128,7 @@ class FluxController extends AbstractController
         return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
     }
 
-   /**
+    /**
      * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
      * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
      */
@@ -284,6 +284,7 @@ class FluxController extends AbstractController
         }
         
         $conditions = 0;
+		$doNotSearch = false;
         //---[ FORM ]-------------------------
         if ($form->get('click_filter')->isClicked()) {
             $data = $form->getData();
@@ -364,10 +365,22 @@ class FluxController extends AbstractController
             $data['type']               = $this->sessionService->getFluxFilterType();
             $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
             $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+            // No search if no filter and page = 1. 
+			// We keep searching if someone searched without filter and clicke on another page
+			if (
+                    count(array_filter($data)) === 0
+                AND $page == 1
+            ) {
+                $doNotSearch = true;
+            }
         }
 
-        $resultSearch = $this->searchDocuments($data, $page, $limit); 
-        // $r = $this->documentRepository->getFluxPagination($data);
+        if (!$doNotSearch) {
+			$resultSearch = $this->searchDocuments($data, $page, $limit); 
+		} else {
+			$resultSearch = array();
+		}
+
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $resultSearch,
             'maxPerPage' => $this->params['pager'] ?? 25,
