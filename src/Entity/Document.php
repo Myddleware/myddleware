@@ -414,8 +414,9 @@ class Document
         return $this;
     }
 
-    public function setDocumentData(string $docId, DocumentData $newData, string $dataType)
+    public function setDocumentData(string $docId, array $newValues, string $dataType)
     {
+        // check if data of that type with this docid and this data fields
         if($data->getDocId() === $docId
             && $data->getType() === $dataType)
             {
