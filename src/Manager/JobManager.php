@@ -585,13 +585,53 @@ class jobcore
     }
 
     // Remove all data flagged deleted in the database
-    public function pruneDatabase()
+    public function pruneDatabase(): void
     {
-        // Documents
-
-        // Rules
-
-        // Connectors
+        // Récupération de chaque règle et du paramètre de temps de suppression
+        $sqlParams = "DELETE documentdata, documentaudit, documentrelationship, log
+        FROM document
+            LEFT OUTER JOIN documentdata
+                ON document.id = documentdata.doc_id
+            LEFT OUTER JOIN documentaudit
+                ON document.id = documentaudit.doc_id
+            LEFT OUTER JOIN documentrelationship
+                ON document.id = documentrelationship.doc_id
+            LEFT OUTER JOIN log
+                ON document.id = log.doc_id
+        WHERE
+            document.deleted = 1;
+            
+            
+        DELETE FROM document
+        WHERE
+            document.deleted = 1;
+            
+        DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
+        FROM rule
+            LEFT OUTER JOIN ruleaudit
+                ON rule.id = ruleaudit.rule_id
+            LEFT OUTER JOIN rulefield
+                ON rule.id = rulefield.rule_id
+            LEFT OUTER JOIN rulefilter
+                ON rule.id = rulefilter.rule_id
+            LEFT OUTER JOIN ruleorder
+                ON rule.id = ruleorder.rule_id
+            LEFT OUTER JOIN ruleparam
+                ON rule.id = ruleparam.rule_id
+                LEFT OUTER JOIN ruleparamaudit
+                    ON ruleparam.id = ruleparamaudit.rule_param_id
+            LEFT OUTER JOIN rulerelationship
+                ON rule.id = rulerelationship.rule_id
+        WHERE
+            rule.deleted = 1;
+            
+            
+        DELETE FROM rule
+        WHERE
+            rule.deleted = 1;
+            ";
+        $stmt = $this->connection->prepare($sqlParams);
+        $result = $stmt->executeQuery();
     }
 
     public function getRules($force = false)
