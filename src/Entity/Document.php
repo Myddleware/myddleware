@@ -413,4 +413,13 @@ class Document
 
         return $this;
     }
+
+    public function setDocumentData(string $docId, DocumentData $newData, string $dataType)
+    {
+        if($data->getDocId() === $docId
+            && $data->getType() === $dataType)
+            {
+                $data->setData($newData);
+            }
+    }
 }
