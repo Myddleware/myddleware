@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -170,17 +171,13 @@ class SecurityController extends AbstractController
      *
      * @throws Exception
      */
-    public function reset(Request $request, $token)
+    public function reset(Request $request, $token,  UserPasswordEncoderInterface $encoder)
     {
         if (!$token) {
-            // dump($request);
             $form = $this->createForm(UserForgotPasswordType::class);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
-                
-
                 $email = $form->get('email')->getData();
-                // dump($email);
                 /** @var User|null $user */
                 $user = $this->userRepository->findOneBy(['email' => $email]);
                 if (!$user) {
@@ -192,9 +189,7 @@ class SecurityController extends AbstractController
                     $this->entityManager->flush();
 
                     try {
-                        dump("inside try");
                         $this->notificationManager->resetPassword($user);
-                        dump("after notif mail");
 
                         return new Response('Un email a été envoyé sur '.$user->getEmail().' avec un lien de réinitialisation du mot de passe.');
                     } catch (Exception $e) {
@@ -215,14 +210,18 @@ class SecurityController extends AbstractController
 
         $form = $this->createForm(ResetPasswordType::class, $user);
         $form->handleRequest($request);
+        
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('plainPassword')->getData();
-            $salt = $user->getSalt();
-            $this->securityService->hashPassword($password, $salt);
-            $user->setPassword($password);
-            $this->entityManager->flush();
-
-            return $this->redirectToRoute('regle_panel');
+            //TODO: vérif avec le password user $form->get('oldPassword')->getData() === $user->getPlainPassword()
+            if(!empty($form->get('oldPassword')->getData())){
+                $password = $form->get('plainPassword')->getData();
+                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($newEncodedPassword);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+    
+                return $this->redirectToRoute('regle_panel');
+            }
         }
 
         return $this->render('Login/reset.html.twig', [
