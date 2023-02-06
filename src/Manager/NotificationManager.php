@@ -26,24 +26,26 @@
 
 namespace App\Manager;
 
-use App\Entity\Config;
+use DateTime;
+use Exception;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
+
 use App\Entity\User;
+use Twig\Environment;
+use App\Entity\Config;
+use Twig\Error\LoaderError;
+use Twig\Error\SyntaxError;
+use Psr\Log\LoggerInterface;
+use Twig\Error\RuntimeError;
+use Doctrine\DBAL\Connection;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
-use DateTime;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Swift_Mailer;
-use Swift_Message;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class NotificationManager
 {
@@ -276,16 +278,7 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
-        $message = (new Swift_Message('Initialisation du mot de passe'))
-            ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-            ->setTo($user->getEmail())
-            ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
-
-        $send = $this->mailer->send($message);
-        if (!$send) {
-            $this->logger->error('Failed to send email');
-            throw new Exception('Failed to send email');
-        }
+        
     }
 
     // Get the content of the table config
