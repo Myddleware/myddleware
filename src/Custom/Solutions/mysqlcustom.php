@@ -492,7 +492,7 @@ class mysqlcustom extends mysql {
 
 			/* DEBUT RECUPERATION DES DONNEES EN APPELANT SUITECRM */
 			// Envoie de la requête à SuiteCRM et non à la base de données						
-			$res = $this->suitecrm->send_query($requestSQL);			
+			$res = $this->suitecrm->send_query($requestSQL);
 			$queryResult = json_decode($res);		
 			if ($queryResult->status != 'success') {
 				throw new \Exception('Error call function send_special_query : '.$queryResult->message);
@@ -549,9 +549,9 @@ class mysqlcustom extends mysql {
 		return $result;
 	} // read($param)
 	
-		// Function to buid the SELECT query
+	// Function to buid the SELECT query
 	protected function buildQuery($param, $query): string {
-		// If deletetion not requested we add the filter on deleted field (only for COMET connector)		
+		// If deletetion not requested we add the filter on deleted field (only for COMET connector)
 		if (
 				empty($param['ruleParams']['deletion'])
 			AND (
@@ -564,6 +564,8 @@ class mysqlcustom extends mysql {
 						AND $param['rule']['conn_id_source']!= $this->mysqlREECConnId				
 					)
 				)
+			// No deleted field for custom tables
+			AND substr($param['module'], -5) != '_cstm'
 		) {		
 			$query['where'] .= ' AND '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.'.deleted = 0 ';
 		}

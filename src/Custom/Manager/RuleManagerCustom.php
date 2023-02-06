@@ -39,11 +39,12 @@ class RuleManagerCustom extends RuleManager
 
 		// List of rules with custom action
 		$ruleList = array(
-							'5ce3621156127', //Engagés
-							'5d01a630c217c', //Contact composante
+							'5ce3621156127', // Engagés
+							'5d01a630c217c', // Contact composante
 							'5ce362b962b63', // composante
 							'5f847b2242138', // Etablissement sup 
 							'5ce454613bb17', // Formation
+							'5cf98651a17f3', // REEC - Users
 							'61a920fae25c5', // Aiko - Contact 
 							'61a930273441b', // Aiko Binomes
 							'61a9190e40965', // Aiko Referent
@@ -52,7 +53,7 @@ class RuleManagerCustom extends RuleManager
 							'6273905a05cb2', // Esp Rep - Contacts repérants
 							'633d94b3ce61e', // Mobilisation - Participation RI -> comet relance
 							'627153382dc34', // Mobilisation - Participations RI
-							'625fcd2ed442f' // Mobilisation - Coupons
+							'625fcd2ed442f'  // Mobilisation - Coupons
 					);
 		// If no response or another rule, we don't do any custom action
 		if (
@@ -61,7 +62,7 @@ class RuleManagerCustom extends RuleManager
 		) {
 			return $responses;
 		}
-		
+
 		// Get the type if absent (in case of reading a specific record
 		if (empty($type)) {
 			$documentData = $this->getDocumentHeader($documentId);
@@ -69,10 +70,9 @@ class RuleManagerCustom extends RuleManager
 				$type = $documentData['type'];
 			}
 		}
-		
+
 		// Custom actions
 		foreach ($responses as $docId => $response) {
-
 			// Get the source_id of the document 
 			$document = array();
 			$sql = "SELECT document.source_id FROM document WHERE id = '$docId'";
@@ -146,6 +146,13 @@ class RuleManagerCustom extends RuleManager
 				) {
 					$this->generatePoleRelationship('62743060350ed', $document['source_id'], 'record_id', true);  // Esp Rep - Contact repérant - Pôle
 				}
+			
+				// If a users has been sent to REEC, we send the custom data too
+				if (
+					$this->ruleId == '5cf98651a17f3' // REEC - Users
+				) {	
+					$this->generatePoleRelationship('63e1007614977', $document['source_id'], 'id', true);  // 	REEC - Users custom
+				}
 
 				/****************************************/
 				/************** AirTable Aiko ****************/
@@ -178,9 +185,21 @@ class RuleManagerCustom extends RuleManager
 					$targetData = $this->getDocumentData($docId, 'T');
 					$this->generatePoleRelationship('633ef1ecf11db', $document['source_id'], 'id', true, array('values' => array('id' => $targetData['fp_events_leads_1leads_idb'], 'date_modified' => gmdate('Y-m-d H:i:s'))));  // Mobilisation - relance rdv pris -> comet
 				}
-			}
+			// In case of UPDATE
+			} elseif (
+					!empty($response['id']) 
+				AND	$response['id'] != '-1'
+				AND !empty($document['source_id'])
+				AND	$type == 'U' 
+			) {
+				// If a users has been sent to REEC, we send the custom data too
+				if (
+					$this->ruleId == '5cf98651a17f3' // REEC - Users
+				) {
+					$this->generatePoleRelationship('63e1007614977', $document['source_id'], 'id', true);  // 	REEC - Users custom
+				}
 			// In case of error
-			elseif (
+			} elseif (
 					!empty($response['id']) 
 				AND	$response['id'] == '-1'
 				AND !empty($document['source_id'])
