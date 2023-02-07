@@ -29,6 +29,7 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
@@ -416,11 +417,46 @@ class Document
 
     public function setDocumentData(string $docId, array $newValues, string $dataType)
     {
+        
         // check if data of that type with this docid and this data fields
-        if($data->getDocId() === $docId
-            && $data->getType() === $dataType)
+        if (empty($docId)) {
+            throw new Exception("No document id provided");
+        }
+        
+        if(empty($newValues)) {
+            throw new Exception("No data provided");
+        }
+        
+        if(empty($dataType)) {
+            throw new Exception("No data type provided");
+        }
+        
+        if($dataType !== 'S'
+        & $dataType !== 'T'
+        & $dataType !== 'H'
+        ) {
+            throw new Exception("This is not  the correct data type. Source, Target, or History is required");
+        }
+        
+        $oldData = $this->getDatas();
+        foreach ($newValues as $oneValue)
+        {
+            foreach ($oldData as $oneData)
             {
-                $data->setData($newData);
+                if($oneData->getData() === $oneValue)
+                {
+                    $oneData->setData($oneValue);
+                }
             }
+        }
+        // if ($newValues === $oldData)
+        // {
+        //     throw new Exception('Old and new data identical. Aborting data change.');
+        // }
+        // if($oldData->getDocId() === $docId
+        //     && $oldData->getType() === $dataType)
+        //     {
+        //         $oldData->setData($newData);
+        //     }
     }
 }

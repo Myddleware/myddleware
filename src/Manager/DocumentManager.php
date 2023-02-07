@@ -1177,6 +1177,18 @@ class documentcore
     // Permet de charger les données du système source pour ce document
     protected function getDocumentData($type)
     {
+        $testDocId = '63ce5b893db591.69227369';
+        $documentEntityTest = $this->entityManager
+        ->getRepository(Document::class)
+        ->find($testDocId);
+        $testValues = ['name' => 'John DOLLARD'];
+        $testTypeDoc = "S";
+
+        $testFunction = $documentEntityTest->setDocumentData($testDocId, $testValues, $testTypeDoc);
+
+
+
+
         try {
             $documentDataEntity = $this->entityManager
                             // ->getRepository('RegleBundle:DocumentData')
