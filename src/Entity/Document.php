@@ -417,56 +417,70 @@ class Document
 
     public function setDocumentData(string $docId, array $newValues, string $dataType)
     {
-        
-        // check if data of that type with this docid and this data fields
-        if (empty($docId)) {
-            throw new Exception("No document id provided");
-        }
-        
-        if(empty($newValues)) {
-            throw new Exception("No data provided");
-        }
-        
-        if(empty($dataType)) {
-            throw new Exception("No data type provided");
-        }
-        
-        if($dataType !== 'S'
-        & $dataType !== 'T'
-        & $dataType !== 'H'
-        ) {
-            throw new Exception("This is not  the correct data type. Source, Target, or History is required");
-        }
-        
-        $oldData = $this->getDatas();
-        foreach ($newValues as $oneKey => $oneValue)
-        {
-            foreach ($oldData as $oneData)
-            {
-                $arrayJsonOldData = json_decode($oneData->getData(), true);
-                $arrayJsonNewData = [];
-                foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
-                {
-                    if($jsonElementKey === $oneKey)
-                    {
-                        // $oneData->setData($oneValue);
-                        $arrayJsonNewData[$jsonElementKey] = $oneValue;
-                    } else {
-                        $arrayJsonNewData[$jsonElementKey] = $jsonElementValue;
-                    }
-                }
-                $newDecodedData = json_encode($arrayJsonNewData, true);
-                $oneData->setData($newDecodedData);
+        // $documentData = $this->getDatas()->filter(function (DocumentData $documentData) use ($dataType) {
+        //     return $dataType === $documentData->getType();
+        // })->first();
+        // $docCompareType = $documentData->getType();
+
+        // if ($dataType === "T") {
+        // if (!empty($documentData) && ($docCompareType === $dataType)) {
+
+            // check if data of that type with this docid and this data fields
+            if (empty($docId)) {
+                throw new Exception("No document id provided");
             }
-        }
-        // if ($newValues === $oldData)
-        // {
-        //     throw new Exception('Old and new data identical. Aborting data change.');
+
+
+            if (empty($newValues)) {
+                throw new Exception("No data provided");
+            }
+
+            if (empty($dataType)) {
+                throw new Exception("No data type provided");
+            }
+
+            if (
+                $dataType !== 'S'
+                & $dataType !== 'T'
+                & $dataType !== 'H'
+            ) {
+                throw new Exception("This is not  the correct data type. Source, Target, or History is required");
+            }
+
+            $oldData = $this->getDataByType($dataType);
+            foreach ($newValues as $oneKey => $oneValue)
+            //Todo: test if oldData not empty
+            //Todo : only loop if same type as argument
+            //todo use getdatabytype
+            {
+                // $arrayJsonOldData = json_decode($oldData, true);
+                // $arrayJsonNewData = [];
+                // foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
+                // {
+                foreach ($oldData as $oldKey => $oldValue)
+                    if ($oldKey === $oneKey) {
+                        if ($oldValue !== $oneValue) {
+                            // $oneData->setData($oneValue);
+                            $newValues[$oldKey] = $oneValue;
+                        }
+                        // $arrayJsonNewData[$jsonElementKey] = $oneValue;
+                    } else {
+                        $newValues[$oldKey] = $oldValue;
+                    }
+            }
+            // $newDecodedData = json_encode($arrayJsonNewData, true);
+            // $this->getDataByType($dataType)->setData($newValues);
+            $dataDestination = $this->getDatas();
+            foreach ($dataDestination as $oneDataset) {
+                if (
+                    // $oneDataset->getDocId() === $docId
+                    $oneDataset->getType() === $dataType
+                ) {
+                    $oneDataset->setData(json_encode($newValues, true));
+                    // $oneDataset->setData($newValues);
+                }
+            }
         // }
-        // if($oldData->getDocId() === $docId
-        //     && $oldData->getType() === $dataType)
-        //     {
-        //         $oldData->setData($newData);
-        //     }
     }
+    
 }
