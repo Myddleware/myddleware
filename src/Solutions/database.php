@@ -668,6 +668,8 @@ class databasecore extends solution
     public function getFieldsParamUpd($type, $module): array
     {
         try {
+			// Clear moduleFields in case we connect 2 database (source and target)
+			$this->moduleFields = array();
             $fieldsSource = $this->get_module_fields($module, $type, false);
             // List only real database field so we remove the Myddleware_element_id field
             unset($fieldsSource['Myddleware_element_id']);
