@@ -81,9 +81,9 @@ class hubspotcore extends solution
     {
         return [
             [
-                'name' => 'apikey',
+                'name' => 'accesstoken',
                 'type' => PasswordType::class,
-                'label' => 'solution.fields.apikey',
+                'label' => 'solution.fields.accesstoken',
             ],
         ];
     }
@@ -94,7 +94,7 @@ class hubspotcore extends solution
         parent::login($paramConnexion);
         try {
             // $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->paramConnexion['apikey']);
-			$this->hubspot = \HubSpot\Factory::createWithAccessToken('pat-na1-8c75004f-3e79-4b97-9273-db0720a5be65');
+			$this->hubspot = \HubSpot\Factory::createWithAccessToken($this->paramConnexion['accesstoken']);
             $response = $this->hubspot->crm()->contacts()->basicApi()->getPage();
 
             $filter = new \HubSpot\Client\Crm\Contacts\Model\Filter();
@@ -131,11 +131,11 @@ class hubspotcore extends solution
 
 
 
-            if (!empty($result['exec']['message'])) {
-                throw new \Exception($result['exec']['message']);
-            } elseif (empty($result)) {
-                throw new \Exception('Failed to connect but no error returned by Hubspot. ');
-            }
+            // if (!empty($result['exec']['message'])) {
+                // throw new \Exception($result['exec']['message']);
+            // } elseif (empty($result)) {
+                // throw new \Exception('Failed to connect but no error returned by Hubspot. ');
+            // }
             $this->connexion_valide = true;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

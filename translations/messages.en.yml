@@ -499,6 +499,7 @@ solution:
         username: Username
         password: Password
         accesskey: Access key
+        accesstoken: Access token
         url: Url
         token: Token
         tokensecret: Secret token
