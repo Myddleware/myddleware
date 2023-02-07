@@ -29,6 +29,9 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class hubspotcore extends solution
 {
+    protected $hubspot;
+	
+	
     protected string $url = 'https://api.hubapi.com/';
     protected string $version = 'v1';
     protected bool $readLast = false;
@@ -90,7 +93,44 @@ class hubspotcore extends solution
     {
         parent::login($paramConnexion);
         try {
-            $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->paramConnexion['apikey']);
+            // $result = $this->call($this->url.'properties/'.$this->version.'/contacts/properties?hapikey='.$this->paramConnexion['apikey']);
+			$this->hubspot = \HubSpot\Factory::createWithAccessToken('pat-na1-8c75004f-3e79-4b97-9273-db0720a5be65');
+            $response = $this->hubspot->crm()->contacts()->basicApi()->getPage();
+
+            $filter = new \HubSpot\Client\Crm\Contacts\Model\Filter();
+            // $filter
+            //     ->setOperator('EQ')
+            //     ->setPropertyName('email')
+            //     ->setValue('testhub@sfaure.fr');
+
+            $filter
+                ->setOperator('GTE')
+                ->setPropertyName('lastmodifieddate')
+                ->setValue('1659706902000'); //15/04/2022
+            
+            $filterGroup = new \HubSpot\Client\Crm\Contacts\Model\FilterGroup();
+            $filterGroup->setFilters([$filter]);
+            
+            $searchRequest = new \HubSpot\Client\Crm\Contacts\Model\PublicObjectSearchRequest();
+            $searchRequest->setFilterGroups([$filterGroup]);
+
+            $sorts = [
+                [
+                    'propertyName' => 'lastmodifieddate',
+                    'direction' => 'ASCENDING',
+                ],
+            ];
+            $searchRequest->setSorts($sorts);
+            $searchRequest->setLimit(100);
+            
+            // Get specific properties
+            $searchRequest->setProperties(['firstname', 'lastname', 'date_of_birth', 'email']);
+            
+            // @var CollectionResponseWithTotalSimplePublicObject $contactsPage
+            $contactsPage = $this->hubspot->crm()->contacts()->searchApi()->doSearch($searchRequest);
+
+
+
             if (!empty($result['exec']['message'])) {
                 throw new \Exception($result['exec']['message']);
             } elseif (empty($result)) {
