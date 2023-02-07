@@ -439,14 +439,24 @@ class Document
         }
         
         $oldData = $this->getDatas();
-        foreach ($newValues as $oneValue)
+        foreach ($newValues as $oneKey => $oneValue)
         {
             foreach ($oldData as $oneData)
             {
-                if($oneData->getData() === $oneValue)
+                $arrayJsonOldData = json_decode($oneData->getData(), true);
+                $arrayJsonNewData = [];
+                foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
                 {
-                    $oneData->setData($oneValue);
+                    if($jsonElementKey === $oneKey)
+                    {
+                        // $oneData->setData($oneValue);
+                        $arrayJsonNewData[$jsonElementKey] = $oneValue;
+                    } else {
+                        $arrayJsonNewData[$jsonElementKey] = $jsonElementValue;
+                    }
                 }
+                $newDecodedData = json_encode($arrayJsonNewData, true);
+                $oneData->setData($newDecodedData);
             }
         }
         // if ($newValues === $oldData)
