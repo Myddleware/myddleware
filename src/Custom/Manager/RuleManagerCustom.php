@@ -63,16 +63,15 @@ class RuleManagerCustom extends RuleManager
 			return $responses;
 		}
 
-		// Get the type if absent (in case of reading a specific record
-		if (empty($type)) {
-			$documentData = $this->getDocumentHeader($documentId);
-			if (!empty($documentData['type'])) {
-				$type = $documentData['type'];
-			}
-		}
 
 		// Custom actions
 		foreach ($responses as $docId => $response) {
+			// Get the type
+			$documentData = $this->getDocumentHeader($docId);
+			if (!empty($documentData['type'])) {
+				$type = $documentData['type'];
+			}
+			
 			// Get the source_id of the document 
 			$document = array();
 			$sql = "SELECT document.source_id FROM document WHERE id = '$docId'";
