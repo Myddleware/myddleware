@@ -448,36 +448,38 @@ class Document
             }
 
             $oldData = $this->getDataByType($dataType);
-            foreach ($newValues as $oneKey => $oneValue)
-            //Todo: test if oldData not empty
-            //Todo : only loop if same type as argument
-            //todo use getdatabytype
-            {
-                // $arrayJsonOldData = json_decode($oldData, true);
-                // $arrayJsonNewData = [];
-                // foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
-                // {
-                foreach ($oldData as $oldKey => $oldValue)
-                    if ($oldKey === $oneKey) {
-                        if ($oldValue !== $oneValue) {
-                            // $oneData->setData($oneValue);
-                            $newValues[$oldKey] = $oneValue;
+            if(!empty($oldData)){
+                foreach ($newValues as $oneKey => $oneValue)
+                //Todo: test if oldData not empty
+                //Todo : only loop if same type as argument
+                //todo use getdatabytype
+                {
+                    // $arrayJsonOldData = json_decode($oldData, true);
+                    // $arrayJsonNewData = [];
+                    // foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
+                    // {
+                    foreach ($oldData as $oldKey => $oldValue)
+                        if ($oldKey === $oneKey) {
+                            if ($oldValue !== $oneValue) {
+                                // $oneData->setData($oneValue);
+                                $newValues[$oldKey] = $oneValue;
+                            }
+                            // $arrayJsonNewData[$jsonElementKey] = $oneValue;
+                        } else {
+                            $newValues[$oldKey] = $oldValue;
                         }
-                        // $arrayJsonNewData[$jsonElementKey] = $oneValue;
-                    } else {
-                        $newValues[$oldKey] = $oldValue;
+                }
+                // $newDecodedData = json_encode($arrayJsonNewData, true);
+                // $this->getDataByType($dataType)->setData($newValues);
+                $dataDestination = $this->getDatas();
+                foreach ($dataDestination as $oneDataset) {
+                    if (
+                        // $oneDataset->getDocId() === $docId
+                        $oneDataset->getType() === $dataType
+                    ) {
+                        $oneDataset->setData(json_encode($newValues, true));
+                        // $oneDataset->setData($newValues);
                     }
-            }
-            // $newDecodedData = json_encode($arrayJsonNewData, true);
-            // $this->getDataByType($dataType)->setData($newValues);
-            $dataDestination = $this->getDatas();
-            foreach ($dataDestination as $oneDataset) {
-                if (
-                    // $oneDataset->getDocId() === $docId
-                    $oneDataset->getType() === $dataType
-                ) {
-                    $oneDataset->setData(json_encode($newValues, true));
-                    // $oneDataset->setData($newValues);
                 }
             }
         // }
