@@ -415,16 +415,9 @@ class Document
         return $this;
     }
 
+    // Function to manually edit the data inside a Myddleware Document
     public function setDocumentData(string $docId, array $newValues, string $dataType)
     {
-        // $documentData = $this->getDatas()->filter(function (DocumentData $documentData) use ($dataType) {
-        //     return $dataType === $documentData->getType();
-        // })->first();
-        // $docCompareType = $documentData->getType();
-
-        // if ($dataType === "T") {
-        // if (!empty($documentData) && ($docCompareType === $dataType)) {
-
             // check if data of that type with this docid and this data fields
             if (empty($docId)) {
                 throw new Exception("No document id provided");
@@ -447,42 +440,31 @@ class Document
                 throw new Exception("This is not  the correct data type. Source, Target, or History is required");
             }
 
+            // Build the new data array from the old one and the function arguments
             $oldData = $this->getDataByType($dataType);
             if(!empty($oldData)){
                 foreach ($newValues as $oneKey => $oneValue)
-                //Todo: test if oldData not empty
-                //Todo : only loop if same type as argument
-                //todo use getdatabytype
                 {
-                    // $arrayJsonOldData = json_decode($oldData, true);
-                    // $arrayJsonNewData = [];
-                    // foreach($arrayJsonOldData as $jsonElementKey => $jsonElementValue)
-                    // {
                     foreach ($oldData as $oldKey => $oldValue)
                         if ($oldKey === $oneKey) {
                             if ($oldValue !== $oneValue) {
-                                // $oneData->setData($oneValue);
                                 $newValues[$oldKey] = $oneValue;
                             }
-                            // $arrayJsonNewData[$jsonElementKey] = $oneValue;
                         } else {
                             $newValues[$oldKey] = $oldValue;
                         }
                 }
-                // $newDecodedData = json_encode($arrayJsonNewData, true);
-                // $this->getDataByType($dataType)->setData($newValues);
+
+                // Updat the data of the right type
                 $dataDestination = $this->getDatas();
                 foreach ($dataDestination as $oneDataset) {
                     if (
-                        // $oneDataset->getDocId() === $docId
                         $oneDataset->getType() === $dataType
                     ) {
                         $oneDataset->setData(json_encode($newValues, true));
-                        // $oneDataset->setData($newValues);
                     }
                 }
             }
-        // }
     }
     
 }

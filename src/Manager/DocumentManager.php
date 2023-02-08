@@ -100,7 +100,6 @@ class documentcore
         'Not_found' => 'Error',
     ];
 
-    private int $documentDataSwitcher = 1;
     // Instanciation de la classe de génération de log Symfony
     public function __construct(
         LoggerInterface $logger,
@@ -1178,24 +1177,13 @@ class documentcore
     // Permet de charger les données du système source pour ce document
     protected function getDocumentData($type)
     {
-        // $testDocId = '63ce5b893db591.69227369';
-        // $testDocId = "63e2be647af851.18390631";
-        // $testDocId = 'e29c64f7-0bca-7d35-5f28-63ce5b3af951';
         $documentEntityTest = $this->entityManager
         ->getRepository(Document::class)
         ->find($this->id);
-        $testValues = ['name' => 'John DOLLARD'];
-        // $testTypeDoc = "T";
+        $testValues = ['name' => 'Patate'];
         if ($type === "T")
         {
-            if ($this->documentDataSwitcher === 1)
-            {
-                $this->documentDataSwitcher = 2;
                 $documentEntityTest->setDocumentData($this->id, $testValues, $type);
-            } elseif ($this->documentDataSwitcher === 2)
-            {
-                $this->documentDataSwitcher = 1;
-            }
         }
 
 
