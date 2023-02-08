@@ -1177,27 +1177,16 @@ class documentcore
     // Permet de charger les données du système source pour ce document
     protected function getDocumentData($type)
     {
-        $documentEntityTest = $this->entityManager
-        ->getRepository(Document::class)
-        ->find($this->id);
-        $testValues = ['name' => 'Patate'];
-        if ($type === "T")
-        {
-                $documentEntityTest->setDocumentData($this->id, $testValues, $type);
-        }
-
-
-
-
         try {
             $documentDataEntity = $this->entityManager
-                            // ->getRepository('RegleBundle:DocumentData')
-                            ->getRepository(DocumentData::class)
-                            ->findOneBy([
-                                        'doc_id' => $this->id,
-                                        'type' => $type,
-                                        ]
-                                );
+                // ->getRepository('RegleBundle:DocumentData')
+                ->getRepository(DocumentData::class)
+                ->findOneBy(
+                    [
+                        'doc_id' => $this->id,
+                        'type' => $type,
+                    ]
+                );
             // Generate data array
             if (!empty($documentDataEntity)) {
                 return json_decode($documentDataEntity->getData(), true);
@@ -1207,7 +1196,6 @@ class documentcore
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
-
         return false;
     }
 
