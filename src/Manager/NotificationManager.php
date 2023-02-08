@@ -47,6 +47,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+
 class NotificationManager
 {
     protected EntityManagerInterface $entityManager;
@@ -279,10 +280,7 @@ class NotificationManager
     public function resetPassword(User $user)
     {
         // Get the mailerurl from the .env.local to send the mail to reset the password
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-        }
-        $mailerUrlEnv = getenv('MAILER_URL');
+        $mailerUrlEnv = $_ENV["MAILER_URL"];
         if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
             $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
 

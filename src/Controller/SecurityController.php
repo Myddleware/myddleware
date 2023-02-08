@@ -193,7 +193,7 @@ class SecurityController extends AbstractController
 
                         return new Response('Un email a été envoyé sur '.$user->getEmail().' avec un lien de réinitialisation du mot de passe.');
                     } catch (Exception $e) {
-                        return new Response('Impossible d\'envoyer un email.');
+                        return new Response('Impossible d\'envoyer un email. '.$e->getMessage());
                     }
             }
 
