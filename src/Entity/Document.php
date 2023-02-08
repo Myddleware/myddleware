@@ -423,7 +423,6 @@ class Document
                 throw new Exception("No document id provided");
             }
 
-
             if (empty($newValues)) {
                 throw new Exception("No data provided");
             }
