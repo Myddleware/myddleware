@@ -278,7 +278,39 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
-        
+        // Get the mailerurl from the .env.local to send the mail to reset the password
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+        }
+        $mailerUrlEnv = getenv('MAILER_URL');
+        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+
+            $host = $mailerUrlArray[0];
+            $port = $mailerUrlArray[1];
+            $hostUser = $mailerUrlArray[4];
+            $hostPassword = $mailerUrlArray[5];
+            $auth_mode = $mailerUrlArray[3];
+            $encryption = $mailerUrlArray[2];
+            $transport = new Swift_SmtpTransport($host, $port);
+            $transport->setUsername($hostUser);
+            $transport->setPassword($hostPassword);
+            $transport->setAuthMode($auth_mode);
+            $transport->setEncryption($encryption);
+
+            $mailer = new Swift_Mailer($transport);
+            $message = (new \Swift_Message('Initialisation du mot de passe'))
+            ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+            ->setTo($user->getEmail())
+                ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
+            $send = $mailer->send($message);
+            if (!$send) {
+                $this->logger->error('Failed to send email');
+                throw new Exception('Failed to send email');
+            }
+        } else {
+            throw new Exception('There is no MAILER_URL in the .env.local !');
+        }
     }
 
     // Get the content of the table config
@@ -293,5 +325,23 @@ class NotificationManager
                 }
             }
         }
+    }
+
+    // Takes MAILER_URL and turns it into an array with all parameters
+    public function envMailerUrlToArray(string $envString): array
+    {
+        $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
+        $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
+        $envArrayBeforeSplitHostPort = explode($delimiters[0], $envStringQuestionMarks);
+        $noTsplitHostPort = $envArrayBeforeSplitHostPort[0];
+        $splitHostPort = explode(':', $noTsplitHostPort);
+        $port = $splitHostPort[2];
+        $hostWithSlashes = $splitHostPort[1];
+        $hostWithoutSlashes = substr($hostWithSlashes, 2);
+        $hostAndPort = [$hostWithoutSlashes, $port];
+
+        $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
+        $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
+        return $envArray;
     }
 }
