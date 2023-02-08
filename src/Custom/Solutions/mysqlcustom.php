@@ -71,6 +71,31 @@ class mysqlcustom extends mysql {
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
 		// Call standard function
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
+		$newRole = "";
+		if ($param['rule']['id'] == '5ce3621156127') {
+			if( !empty($param['rule']['roles_reec_c']) &&
+				$param['rule']['roles_reec_c'] === 'ROLE_MENTORE' ||
+				$param['rule']['roles_reec_c'] === 'ROLE_REPERANT' ||
+				$param['rule']['roles_reec_c'] === 'ROLE_ETABLISSEMENT' ||
+				$param['rule']['roles_reec_c'] === 'ROLE_VOLONTAIRE')
+				{
+					//$data['roles_reec_c']
+					// return $this->checkData($param, $data);	
+				}
+
+		}else if($param['rule']['id'] == '5cf98651a17f3') {
+			if(empty($param['rule']['roles_reec_c'])){
+				if( !empty($param['rule']['roles_reec_c']) &&
+				$param['rule']['roles_reec_c'] === 'ROLE_SALARIE' ||
+				$param['rule']['roles_reec_c'] === 'ROLE_SIEGE' ||
+				$param['rule']['roles_reec_c'] === 'ROLE_ADMIN')
+				{
+
+					//return $this->checkData($param, $data);	
+				}
+			}
+		
+		}
 		return $this->checkData($param, $data);	
 	}
 	
