@@ -210,18 +210,21 @@ class SecurityController extends AbstractController
 
         $form = $this->createForm(ResetPasswordType::class, $user);
         $form->handleRequest($request);
-        
+
         if ($form->isSubmitted() && $form->isValid()) {
-            //TODO: vérif avec le password user $form->get('oldPassword')->getData() === $user->getPlainPassword()
-            if(!empty($form->get('oldPassword')->getData())){
-                $password = $form->get('plainPassword')->getData();
+            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+            // first we test whether the old password input is correct
+            if ($encoder->isPasswordValid($user, $oldPassword)) {
                 $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
                 $user->setPassword($newEncodedPassword);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-    
+
                 return $this->redirectToRoute('regle_panel');
+            } else {
             }
+
+            return $this->redirectToRoute('regle_panel');
         }
 
         return $this->render('Login/reset.html.twig', [
