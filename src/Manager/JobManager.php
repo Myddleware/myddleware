@@ -593,13 +593,7 @@ class jobcore
         try {
             $requestCounter = 0;
             $maxNumberOfRequests = $this->limitOfRequestExecution;
-            $listOfSqlParams = [
-                "SELECT log.id
-            FROM log
-            LEFT OUTER JOIN document ON log.doc_id = document.id
-            WHERE document.deleted = 1
-            LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)"
-            ];
+            $listOfSqlParams = $this->getListOfSqlParams();
             foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
             {
                 while ($requestCounter < $maxNumberOfRequests) {
@@ -615,6 +609,19 @@ class jobcore
         }
     }
 
+    public function getListOfSqlParams(): array
+    {
+        $listOfSqlParams = [
+            "SELECT log.id
+        FROM log
+        LEFT OUTER JOIN document ON log.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)"
+        ];
+
+        return $listOfSqlParams;
+    }
+
     public function findItemsToDelete($oneSqlParam): array
     {
             $stmt = $this->connection->prepare($oneSqlParam);
@@ -626,7 +633,6 @@ class jobcore
             {
                 throw new Exception("There are no items to delete");
             }
-            
         return $itemIds;
     }
 
@@ -645,9 +651,7 @@ class jobcore
             $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
             $sqlParams = sprintf($oneDeleteStatement, $placeholders);
             $stmt = $this->connection->prepare($sqlParams);
-
             $stmt->execute($itemIds);
-
         } catch (Exception $e) {
             $this->message .= 'Error  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
