@@ -13,10 +13,10 @@ class UserForgotPasswordType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('username', EmailType::class, [
+            ->add('email', EmailType::class, [
                 'label' => false,
                 'attr' => [
-                    'placeholder' => 'username',
+                    'placeholder' => 'email',
                 ],
                 'constraints' => new Assert\NotBlank(),
             ]);
