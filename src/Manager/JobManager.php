@@ -674,7 +674,8 @@ class jobcore
         
         $ruleparamaudit = "DELETE ruleparamaudit
         FROM ruleparamaudit
-        LEFT OUTER JOIN rule ON ruleparamaudit.rule_id = rule.id
+        LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
+        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
         WHERE rule.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
