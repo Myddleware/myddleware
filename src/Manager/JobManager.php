@@ -590,129 +590,118 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        $paramDocumentData = "DELETE documentdata
+        $statementList = [
+        "DELETE documentdata
         FROM documentdata
         LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1;
+        WHERE document.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $paramDocumentRelationships = "DELETE documentrelationship
+        "DELETE documentrelationship
         FROM documentrelationship
         LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1;
+        WHERE document.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
-        $paramDocumentAudit = "DELETE documentaudit
+        "DELETE documentaudit
         FROM documentaudit
         LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1;
+        WHERE document.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
         
-        $paramDocumentLogs = "DELETE log
+        "DELETE log
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1;
+        WHERE document.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $paramDocument = "DELETE document
+        "DELETE document
         FROM document
-        WHERE document.deleted = 1;
+        WHERE document.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
-        $ruleaudit = "DELETE ruleaudit
+        "DELETE ruleaudit
         FROM ruleaudit
         LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
-        $rulefield = "DELETE rulefield
+        "DELETE rulefield
         FROM rulefield
         LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $rulefilter = "DELETE rulefilter
+        "DELETE rulefilter
         FROM rulefilter
         LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $ruleorder = "DELETE ruleorder
+        "DELETE ruleorder
         FROM ruleorder
         LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
-        $ruleparam = "DELETE ruleparam
+        "DELETE ruleparam
         FROM ruleparam
         LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $ruleparamaudit = "DELETE ruleparamaudit
+        "DELETE ruleparamaudit
         FROM ruleparamaudit
         LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
         LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
 
-        $rulerelationship = "DELETE rulerelationship
+        "DELETE rulerelationship
         FROM rulerelationship
         LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            ",
         
-        $rule = "DELETE rule
+        "DELETE rule
         FROM rule
-        WHERE rule.deleted = 1;
+        WHERE rule.deleted = 1
         
         LIMIT :limitOfDeletePerRequest
-            ";
+            "
+        ];
         
 
 
-        
-        $this->removeDeletedRowsFromTable($paramDocumentData);
-        $this->removeDeletedRowsFromTable($paramDocumentRelationships);
-        $this->removeDeletedRowsFromTable($paramDocumentAudit);
-        $this->removeDeletedRowsFromTable($paramDocumentLogs);
-        $this->removeDeletedRowsFromTable($paramDocument);
-
-        $this->removeDeletedRowsFromTable($ruleaudit);
-        $this->removeDeletedRowsFromTable($rulefield);
-        $this->removeDeletedRowsFromTable($rulefilter);
-        $this->removeDeletedRowsFromTable($ruleorder);
-        $this->removeDeletedRowsFromTable($ruleparam);
-        $this->removeDeletedRowsFromTable($ruleparamaudit);
-        $this->removeDeletedRowsFromTable($rulerelationship);
-        $this->removeDeletedRowsFromTable($rule);
-
-
+        foreach ($statementList as $statement)
+        {
+            $this->removeDeletedRowsFromTable($statement);
+        }
     }
 
     public function removeDeletedRowsFromTable($sqlParams)
