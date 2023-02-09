@@ -32,8 +32,6 @@ use App\Repository\RuleRepository;
 use DateTime;
 use DateTimeZone;
 use Doctrine\DBAL\Connection as DriverConnection;
-use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -731,6 +729,9 @@ class jobcore
                 $result = $stmt->executeQuery();
                 $resultCount = $result->rowCount();
             }
+            unset($result);
+            unset($stmt);
+
         } catch (Exception $e) {
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
