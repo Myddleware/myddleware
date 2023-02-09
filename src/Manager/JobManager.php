@@ -46,6 +46,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use PDO;
 
 class jobcore
 {
@@ -632,13 +633,13 @@ class jobcore
         $sqlParams = "DELETE FROM document
         WHERE
             document.deleted = 1
-        limit :
+        limit :limitOfDocumentsPerRequest
         ";
-
         $stmt = $this->connection->prepare($sqlParams);
+        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+
         $executionCounter = 0;
         $resultCount = 1;
-
 
         while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
