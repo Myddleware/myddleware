@@ -67,7 +67,9 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitDelete = 10;
+	protected int $limitOfDocumentsPerRequest = 3;
+	protected int $limitOfRequestExecution = 2;
+    protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
 
@@ -589,10 +591,10 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        // $this->deleteDocumentAdditionalData();
+        $this->deleteDocumentAdditionalData();
         $this->deleteDocuments();
-        $this->deleteRuleAdditionalInformation();
-        $this->deleteRules();
+        // $this->deleteRuleAdditionalInformation();
+        // $this->deleteRules();
         // die('fin du programme');
     }
 
@@ -617,7 +619,7 @@ class jobcore
         $resultCount = 1;
 
 
-        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
             $result = $stmt->executeQuery();
             $resultCount = $result->rowCount();
@@ -629,14 +631,16 @@ class jobcore
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "DELETE FROM document
         WHERE
-            document.deleted = 1";
+            document.deleted = 1
+        limit :
+        ";
 
         $stmt = $this->connection->prepare($sqlParams);
         $executionCounter = 0;
         $resultCount = 1;
 
 
-        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
             $result = $stmt->executeQuery();
             $resultCount = $result->rowCount();
@@ -670,7 +674,7 @@ class jobcore
         $resultCount = 1;
 
 
-        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
             $result = $stmt->executeQuery();
             $resultCount = $result->rowCount();
@@ -689,7 +693,7 @@ class jobcore
         $resultCount = 1;
 
 
-        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
             $result = $stmt->executeQuery();
             $resultCount = $result->rowCount();
