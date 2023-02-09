@@ -624,7 +624,25 @@ class jobcore
         FROM documentdata
         LEFT OUTER JOIN document ON documentdata.doc_id = document.id
         WHERE document.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)"
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)",
+
+        "SELECT documentaudit.id
+        FROM documentaudit
+        LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentaudit WHERE id IN (%s)",
+
+        "SELECT documentrelationship.id
+        FROM documentrelationship
+        LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
+
+        "SELECT document.id
+        FROM document
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
+
         ];
 
         return $listOfSqlParams;
