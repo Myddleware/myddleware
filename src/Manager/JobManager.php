@@ -32,6 +32,8 @@ use App\Repository\RuleRepository;
 use DateTime;
 use DateTimeZone;
 use Doctrine\DBAL\Connection as DriverConnection;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -65,7 +67,7 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitDelete = 1000;
+	protected int $limitDelete = 10;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
 
@@ -587,6 +589,15 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
+        // $this->deleteDocumentAdditionalData();
+        $this->deleteDocuments();
+        $this->deleteRuleAdditionalInformation();
+        $this->deleteRules();
+        // die('fin du programme');
+    }
+
+    public function deleteDocumentAdditionalData()
+    {
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "DELETE documentdata, documentaudit, documentrelationship, log
         FROM document
@@ -599,14 +610,43 @@ class jobcore
             LEFT OUTER JOIN log
                 ON document.id = log.doc_id
         WHERE
-            document.deleted = 1;
-            
-            
-        DELETE FROM document
+            document.deleted = 1";
+
+        $stmt = $this->connection->prepare($sqlParams);
+        $executionCounter = 0;
+        $resultCount = 1;
+
+
+        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+            $executionCounter++;
+            $result = $stmt->executeQuery();
+            $resultCount = $result->rowCount();
+        }
+    }
+
+    public function deleteDocuments()
+    {
+        // Récupération de chaque règle et du paramètre de temps de suppression
+        $sqlParams = "DELETE FROM document
         WHERE
-            document.deleted = 1;
-            
-        DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
+            document.deleted = 1";
+
+        $stmt = $this->connection->prepare($sqlParams);
+        $executionCounter = 0;
+        $resultCount = 1;
+
+
+        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+            $executionCounter++;
+            $result = $stmt->executeQuery();
+            $resultCount = $result->rowCount();
+        }
+    }
+
+    public function deleteRuleAdditionalInformation()
+    {
+        // Récupération de chaque règle et du paramètre de temps de suppression
+        $sqlParams = "DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
         FROM rule
             LEFT OUTER JOIN ruleaudit
                 ON rule.id = ruleaudit.rule_id
@@ -623,16 +663,39 @@ class jobcore
             LEFT OUTER JOIN rulerelationship
                 ON rule.id = rulerelationship.rule_id
         WHERE
-            rule.deleted = 1;
-            
-            
-        DELETE FROM rule
-        WHERE
-            rule.deleted = 1;
-            ";
+            rule.deleted = 1";
+
         $stmt = $this->connection->prepare($sqlParams);
-        $result = $stmt->executeQuery();
+        $executionCounter = 0;
+        $resultCount = 1;
+
+
+        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+            $executionCounter++;
+            $result = $stmt->executeQuery();
+            $resultCount = $result->rowCount();
+        }
     }
+
+    public function deleteRules()
+    {
+        // Récupération de chaque règle et du paramètre de temps de suppression
+        $sqlParams = "DELETE FROM rule
+        WHERE
+            rule.deleted = 1";
+
+        $stmt = $this->connection->prepare($sqlParams);
+        $executionCounter = 0;
+        $resultCount = 1;
+
+
+        while ($resultCount > 0 && $executionCounter < $this->limitDelete) {
+            $executionCounter++;
+            $result = $stmt->executeQuery();
+            $resultCount = $result->rowCount();
+        }
+    }
+
 
     public function getRules($force = false)
     {
