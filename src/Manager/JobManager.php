@@ -591,11 +591,11 @@ class jobcore
     public function pruneDatabase(): void
     {
         try {
-            $requestCounter = 0;
             $maxNumberOfRequests = $this->limitOfRequestExecution;
             $listOfSqlParams = $this->getListOfSqlParams();
             foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
             {
+                $requestCounter = 0;
                 while ($requestCounter < $maxNumberOfRequests) {
                     $requestCounter++;
                     $itemIds = $this->findItemsToDelete($oneSqlParam);
