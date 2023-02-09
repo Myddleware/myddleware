@@ -661,11 +661,11 @@ class jobcore
         WHERE rule.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefilter WHERE id IN (%s)",
 
-        "SELECT ruleorder.id
+        "SELECT ruleorder.rule_id
         FROM ruleorder
         LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
         WHERE rule.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE id IN (%s)",
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE rule_id IN (%s)",
 
         "SELECT ruleparam.id
         FROM ruleparam
@@ -709,8 +709,10 @@ class jobcore
     public function cleanItemIds($itemIds)
     {
         $cleanItemIds = [];
-        foreach ($itemIds as $oneId) {
-            $cleanItemIds[] = $oneId['id'];
+        foreach ($itemIds as $oneIdKey => $oneIdValue) {
+            foreach ($oneIdValue as $oneInnerKey => $oneInnerValue) {
+                    $cleanItemIds[] = $oneInnerValue;
+            }
         }
         return $cleanItemIds;
     }
