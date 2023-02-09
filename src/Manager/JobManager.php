@@ -599,6 +599,8 @@ class jobcore
                 while ($requestCounter < $maxNumberOfRequests) {
                     $requestCounter++;
                     $itemIds = $this->findItemsToDelete($oneSqlParam);
+                    if(empty($itemIds))
+                        break;
                     $cleanItemIds = $this->cleanItemIds($itemIds);
                     $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
                 }
@@ -616,7 +618,13 @@ class jobcore
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
         WHERE document.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)"
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
+
+        "SELECT documentdata.id
+        FROM documentdata
+        LEFT OUTER JOIN document ON documentdata.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)"
         ];
 
         return $listOfSqlParams;
@@ -629,10 +637,6 @@ class jobcore
             $result = $stmt->executeQuery();
             $itemIds= [];
             $itemIds = $result->fetchAllAssociative();
-            if(empty($itemIds))
-            {
-                throw new Exception("There are no items to delete");
-            }
         return $itemIds;
     }
 
