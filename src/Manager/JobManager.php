@@ -600,6 +600,7 @@ class jobcore
 
     public function deleteDocumentAdditionalData()
     {
+        try{
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "DELETE documentdata, documentaudit, documentrelationship, log
         FROM document
@@ -627,33 +628,41 @@ class jobcore
             $result = $stmt->executeQuery();
             $resultCount = $result->rowCount();
         }
+    } catch (Exception $e) {
+        $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+    }
     }
 
     public function deleteDocuments()
     {
-        // Récupération de chaque règle et du paramètre de temps de suppression
-        $sqlParams = "DELETE FROM document
+        try {
+            // Récupération de chaque règle et du paramètre de temps de suppression
+            $sqlParams = "DELETE FROM document
         WHERE
             document.deleted = 1
         LIMIT :limitOfDocumentsPerRequest
         ";
-        $stmt = $this->connection->prepare($sqlParams);
-        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
 
-        $executionCounter = 0;
-        $resultCount = 1;
+            $executionCounter = 0;
+            $resultCount = 1;
 
-        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-            $executionCounter++;
-            $result = $stmt->executeQuery();
-            $resultCount = $result->rowCount();
+            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
+                $executionCounter++;
+                $result = $stmt->executeQuery();
+                $resultCount = $result->rowCount();
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
     public function deleteRuleAdditionalInformation()
     {
-        // Récupération de chaque règle et du paramètre de temps de suppression
-        $sqlParams = "DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
+        try {
+            // Récupération de chaque règle et du paramètre de temps de suppression
+            $sqlParams = "DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
         FROM rule
             LEFT OUTER JOIN ruleaudit
                 ON rule.id = ruleaudit.rule_id
@@ -674,39 +683,46 @@ class jobcore
         LIMIT :limitOfDocumentsPerRequest
             ";
 
-        $stmt = $this->connection->prepare($sqlParams);
-        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
 
-        $executionCounter = 0;
-        $resultCount = 1;
+            $executionCounter = 0;
+            $resultCount = 1;
 
-        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-            $executionCounter++;
-            $result = $stmt->executeQuery();
-            $resultCount = $result->rowCount();
+            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
+                $executionCounter++;
+                $result = $stmt->executeQuery();
+                $resultCount = $result->rowCount();
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
     public function deleteRules()
     {
-        // Récupération de chaque règle et du paramètre de temps de suppression
-        $sqlParams = "DELETE FROM rule
+        try {
+            // Récupération de chaque règle et du paramètre de temps de suppression
+            $sqlParams = "DELETE FROM rule
         WHERE
             rule.deleted = 1
         LIMIT :limitOfDocumentsPerRequest    
         ";
 
-        $stmt = $this->connection->prepare($sqlParams);
-        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
 
-        $executionCounter = 0;
-        $resultCount = 1;
+            $executionCounter = 0;
+            $resultCount = 1;
 
 
-        while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-            $executionCounter++;
-            $result = $stmt->executeQuery();
-            $resultCount = $result->rowCount();
+            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
+                $executionCounter++;
+                $result = $stmt->executeQuery();
+                $resultCount = $result->rowCount();
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
