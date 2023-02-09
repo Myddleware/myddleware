@@ -66,7 +66,7 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitOfDeletePerRequest = 3;
+	protected int $limitOfDeletePerRequest = 20;
 	protected int $limitOfRequestExecution = 2;
     protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
@@ -590,133 +590,84 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        $statementList = [
-        "DELETE documentdata
-        FROM documentdata
-        LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1;
-        
-        LIMIT :limitOfDeletePerRequest
-            ",
-        
-        "DELETE documentrelationship
-        FROM documentrelationship
-        LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1;
-        
-        LIMIT :limitOfDeletePerRequest
-            ",
+        $requestCounter = 0;
+        $maxNumberOfRequests = $this->limitOfRequestExecution;
+        while ($requestCounter < $maxNumberOfRequests) {
+            $requestCounter++;
+            $itemIds = $this->findItemsToDelete();
+            if (empty($itemIds))
+            {
+                throw new Exception("There are no items to delete.");
+            }
+            $cleanItemIds = $this->cleanItemIds($itemIds);
+            $this->deleteSelectedItems($cleanItemIds);
+        }
+    }
 
-        "DELETE documentaudit
-        FROM documentaudit
-        LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1;
-        
-        LIMIT :limitOfDeletePerRequest
-            ",
-
-        
-        "DELETE log
-        FROM log
-        LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1;
-        
-        LIMIT :limitOfDeletePerRequest
-            ",
-        
-        "DELETE document
-        FROM document
-        WHERE document.deleted = 1;
-        
-        LIMIT :limitOfDeletePerRequest
-            ",
-
-        // "DELETE ruleaudit
-        // FROM ruleaudit
-        // LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-
-        // "DELETE rulefield
-        // FROM rulefield
-        // LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-        
-        // "DELETE rulefilter
-        // FROM rulefilter
-        // LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-        
-        // "DELETE ruleorder
-        // FROM ruleorder
-        // LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-
-        // "DELETE ruleparam
-        // FROM ruleparam
-        // LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-        
-        // "DELETE ruleparamaudit
-        // FROM ruleparamaudit
-        // LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
-        // LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-
-        // "DELETE rulerelationship
-        // FROM rulerelationship
-        // LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     ",
-        
-        // "DELETE rule
-        // FROM rule
-        // WHERE rule.deleted = 1;
-        
-        // LIMIT :limitOfDeletePerRequest
-        //     "
-        ];
-        
+    public function findItemsToDelete(): array
+    {
+        try {
+            $sqlParams = "SELECT log.id
+            FROM log
+            LEFT OUTER JOIN document ON log.doc_id = document.id
+            WHERE document.deleted = 1
+            LIMIT :limitOfDeletePerRequest";
 
 
-        foreach ($statementList as $statement)
-        {
-            $this->removeDeletedRowsFromTable($statement);
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
+            $result = $stmt->executeQuery();
+            $itemIds= [];
+            $itemIds = $result->fetchAllAssociative();
+            if(empty($itemIds))
+            {
+                throw new Exception("Error while looking for the item ids");
+            }
+            
+        } catch (Exception $e) {
+            $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);
+        }
+        return $itemIds;
+    }
+
+    public function cleanItemIds($itemIds)
+    {
+        $cleanItemIds = [];
+        foreach ($itemIds as $oneId) {
+            $cleanItemIds[] = $oneId['id'];
+        }
+        return $cleanItemIds;
+    }
+
+    public function deleteSelectedItems(array $itemIds)
+    {
+        try {
+            $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
+            $sqlParams = "DELETE FROM log WHERE id IN ($placeholders)";
+            $stmt = $this->connection->prepare($sqlParams);
+
+            $stmt->execute($itemIds);
+
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
     public function removeDeletedRowsFromTable($sqlParams)
     {
         try {
-            $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
-
+            
             $executionCounter = 0;
             $resultCount = 1;
-
+            
             while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
+                $stmt = $this->connection->prepare($sqlParams);
+                $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
                 $executionCounter++;
                 $result = $stmt->executeQuery();
                 $resultCount = $result->rowCount();
+                unset($stmt);
                 unset($result);
             }
 
