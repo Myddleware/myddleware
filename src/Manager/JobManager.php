@@ -598,15 +598,15 @@ class jobcore
             FROM log
             LEFT OUTER JOIN document ON log.doc_id = document.id
             WHERE document.deleted = 1
-            LIMIT :limitOfDeletePerRequest"
+            LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)"
             ];
-            foreach ($listOfSqlParams as $oneSqlParam)
+            foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
             {
                 while ($requestCounter < $maxNumberOfRequests) {
                     $requestCounter++;
                     $itemIds = $this->findItemsToDelete($oneSqlParam);
                     $cleanItemIds = $this->cleanItemIds($itemIds);
-                    $this->deleteSelectedItems($cleanItemIds);
+                    $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
                 }
             }
         } catch (Exception $e) {
@@ -615,9 +615,9 @@ class jobcore
         }
     }
 
-    public function findItemsToDelete($sqlParams): array
+    public function findItemsToDelete($oneSqlParam): array
     {
-            $stmt = $this->connection->prepare($sqlParams);
+            $stmt = $this->connection->prepare($oneSqlParam);
             $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
             $result = $stmt->executeQuery();
             $itemIds= [];
@@ -639,11 +639,11 @@ class jobcore
         return $cleanItemIds;
     }
 
-    public function deleteSelectedItems(array $itemIds)
+    public function deleteSelectedItems(array $itemIds, string $oneDeleteStatement)
     {
         try {
             $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
-            $sqlParams = "DELETE FROM log WHERE id IN ($placeholders)";
+            $sqlParams = sprintf($oneDeleteStatement, $placeholders);
             $stmt = $this->connection->prepare($sqlParams);
 
             $stmt->execute($itemIds);
