@@ -593,29 +593,52 @@ class jobcore
     public function pruneDatabase(): void
     {
         $this->deleteDocumentAdditionalData();
-        $this->deleteDocuments();
-        $this->deleteRuleAdditionalInformation();
-        $this->deleteRules();
+        $this->deleteDocumentAdditionalRelationships();
+        
+        // $this->deleteDocuments();
+        // $this->deleteRuleAdditionalInformation();
+        // $this->deleteRules();
     }
 
     public function deleteDocumentAdditionalData()
     {
         try {
             // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE documentdata, documentaudit, documentrelationship, log
-        FROM document
-            LEFT OUTER JOIN documentdata
-                ON document.id = documentdata.doc_id
-            LEFT OUTER JOIN documentaudit
-                ON document.id = documentaudit.doc_id
-            LEFT OUTER JOIN documentrelationship
-                ON document.id = documentrelationship.doc_id
-            LEFT OUTER JOIN log
-                ON document.id = log.doc_id
-        WHERE
-            document.deleted = 1
-        LIMIT :limitOfDeletePerRequest
-            ";
+            $sqlParams = "DELETE documentdata
+            FROM documentdata
+            LEFT OUTER JOIN document ON documentdata.doc_id = document.id
+            WHERE document.deleted = 1;
+            
+            LIMIT :limitOfDeletePerRequest
+                ";
+
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
+
+            $executionCounter = 0;
+            $resultCount = 1;
+
+            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
+                $executionCounter++;
+                $result = $stmt->executeQuery();
+                $resultCount = $result->rowCount();
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+        }
+    }
+
+    public function deleteDocumentAdditionalRelationships()
+    {
+        try {
+            // Récupération de chaque règle et du paramètre de temps de suppression
+            $sqlParams = "DELETE documentrelationship
+            FROM documentrelationship
+            LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
+            WHERE document.deleted = 1;
+            
+            LIMIT :limitOfDeletePerRequest
+                ";
 
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
