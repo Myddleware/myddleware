@@ -66,7 +66,7 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitOfDeletePerRequest = 20;
+	protected int $limitOfDeletePerRequest = 3;
 	protected int $limitOfRequestExecution = 2;
     protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
@@ -667,12 +667,6 @@ class jobcore
         WHERE rule.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE rule_id IN (%s)",
 
-        "SELECT ruleparam.id
-        FROM ruleparam
-        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
-
         "SELECT rulerelationship.id
         FROM rulerelationship
         LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
@@ -684,13 +678,18 @@ class jobcore
         LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
             LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
         WHERE rule.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparamaudit WHERE id IN (%s)",
+
+        "SELECT ruleparam.id
+        FROM ruleparam
+        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
 
         "SELECT rule.id
         FROM rule
         WHERE rule.deleted = 1
-        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)",
-
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
         ];
 
         return $listOfSqlParams;
