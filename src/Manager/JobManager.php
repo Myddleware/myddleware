@@ -590,30 +590,33 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        $requestCounter = 0;
-        $maxNumberOfRequests = $this->limitOfRequestExecution;
-        while ($requestCounter < $maxNumberOfRequests) {
-            $requestCounter++;
-            $itemIds = $this->findItemsToDelete();
-            if (empty($itemIds))
-            {
-                throw new Exception("There are no items to delete.");
-            }
-            $cleanItemIds = $this->cleanItemIds($itemIds);
-            $this->deleteSelectedItems($cleanItemIds);
-        }
-    }
-
-    public function findItemsToDelete(): array
-    {
         try {
-            $sqlParams = "SELECT log.id
+            $requestCounter = 0;
+            $maxNumberOfRequests = $this->limitOfRequestExecution;
+            $listOfSqlParams = [
+                "SELECT log.id
             FROM log
             LEFT OUTER JOIN document ON log.doc_id = document.id
             WHERE document.deleted = 1
-            LIMIT :limitOfDeletePerRequest";
+            LIMIT :limitOfDeletePerRequest"
+            ];
+            foreach ($listOfSqlParams as $oneSqlParam)
+            {
+                while ($requestCounter < $maxNumberOfRequests) {
+                    $requestCounter++;
+                    $itemIds = $this->findItemsToDelete($oneSqlParam);
+                    $cleanItemIds = $this->cleanItemIds($itemIds);
+                    $this->deleteSelectedItems($cleanItemIds);
+                }
+            }
+        } catch (Exception $e) {
+            $this->message .= 'Error  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->logger->error($this->message);
+        }
+    }
 
-
+    public function findItemsToDelete($sqlParams): array
+    {
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
             $result = $stmt->executeQuery();
@@ -621,13 +624,9 @@ class jobcore
             $itemIds = $result->fetchAllAssociative();
             if(empty($itemIds))
             {
-                throw new Exception("Error while looking for the item ids");
+                throw new Exception("There are no items to delete");
             }
             
-        } catch (Exception $e) {
-            $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
-        }
         return $itemIds;
     }
 
@@ -650,29 +649,8 @@ class jobcore
             $stmt->execute($itemIds);
 
         } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
-    }
-
-    public function removeDeletedRowsFromTable($sqlParams)
-    {
-        try {
-            
-            $executionCounter = 0;
-            $resultCount = 1;
-            
-            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-                $stmt = $this->connection->prepare($sqlParams);
-                $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
-                $executionCounter++;
-                $result = $stmt->executeQuery();
-                $resultCount = $result->rowCount();
-                unset($stmt);
-                unset($result);
-            }
-
-        } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->message .= 'Error  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);
         }
     }
 
