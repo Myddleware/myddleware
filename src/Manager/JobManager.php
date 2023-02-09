@@ -68,7 +68,7 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitOfDocumentsPerRequest = 3;
+	protected int $limitOfDeletePerRequest = 3;
 	protected int $limitOfRequestExecution = 2;
     protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
@@ -614,11 +614,11 @@ class jobcore
                 ON document.id = log.doc_id
         WHERE
             document.deleted = 1
-        LIMIT :limitOfDocumentsPerRequest
+        LIMIT :limitOfDeletePerRequest
             ";
 
         $stmt = $this->connection->prepare($sqlParams);
-        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+        $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
 
         $executionCounter = 0;
         $resultCount = 1;
@@ -640,10 +640,10 @@ class jobcore
             $sqlParams = "DELETE FROM document
         WHERE
             document.deleted = 1
-        LIMIT :limitOfDocumentsPerRequest
+        LIMIT :limitOfDeletePerRequest
         ";
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
 
             $executionCounter = 0;
             $resultCount = 1;
@@ -680,11 +680,11 @@ class jobcore
                 ON rule.id = rulerelationship.rule_id
         WHERE
             rule.deleted = 1
-        LIMIT :limitOfDocumentsPerRequest
+        LIMIT :limitOfDeletePerRequest
             ";
 
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
 
             $executionCounter = 0;
             $resultCount = 1;
@@ -706,11 +706,11 @@ class jobcore
             $sqlParams = "DELETE FROM rule
         WHERE
             rule.deleted = 1
-        LIMIT :limitOfDocumentsPerRequest    
+        LIMIT :limitOfDeletePerRequest    
         ";
 
             $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
 
             $executionCounter = 0;
             $resultCount = 1;
