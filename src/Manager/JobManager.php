@@ -594,9 +594,8 @@ class jobcore
     {
         $this->deleteDocumentAdditionalData();
         $this->deleteDocuments();
-        // $this->deleteRuleAdditionalInformation();
-        // $this->deleteRules();
-        // die('fin du programme');
+        $this->deleteRuleAdditionalInformation();
+        $this->deleteRules();
     }
 
     public function deleteDocumentAdditionalData()
@@ -613,12 +612,15 @@ class jobcore
             LEFT OUTER JOIN log
                 ON document.id = log.doc_id
         WHERE
-            document.deleted = 1";
+            document.deleted = 1
+        LIMIT :limitOfDocumentsPerRequest
+            ";
 
         $stmt = $this->connection->prepare($sqlParams);
+        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+
         $executionCounter = 0;
         $resultCount = 1;
-
 
         while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
@@ -633,7 +635,7 @@ class jobcore
         $sqlParams = "DELETE FROM document
         WHERE
             document.deleted = 1
-        limit :limitOfDocumentsPerRequest
+        LIMIT :limitOfDocumentsPerRequest
         ";
         $stmt = $this->connection->prepare($sqlParams);
         $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
@@ -668,12 +670,15 @@ class jobcore
             LEFT OUTER JOIN rulerelationship
                 ON rule.id = rulerelationship.rule_id
         WHERE
-            rule.deleted = 1";
+            rule.deleted = 1
+        LIMIT :limitOfDocumentsPerRequest
+            ";
 
         $stmt = $this->connection->prepare($sqlParams);
+        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+
         $executionCounter = 0;
         $resultCount = 1;
-
 
         while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
             $executionCounter++;
@@ -687,9 +692,13 @@ class jobcore
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "DELETE FROM rule
         WHERE
-            rule.deleted = 1";
+            rule.deleted = 1
+        LIMIT :limitOfDocumentsPerRequest    
+        ";
 
         $stmt = $this->connection->prepare($sqlParams);
+        $stmt->bindValue(':limitOfDocumentsPerRequest', (int) trim($this->limitOfDocumentsPerRequest), PDO::PARAM_INT);
+
         $executionCounter = 0;
         $resultCount = 1;
 
