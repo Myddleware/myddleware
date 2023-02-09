@@ -73,7 +73,8 @@ class mysqlcustom extends mysql {
 	
 	// Clean id empty for foreign key
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
-		$newRole = "";
+		
+		// Manage roles field for reec. We have to merge data coming from 2 rules users custom and engagé by using the history data
 		if (in_array($param['rule']['id'], array('5ce3621156127','63e1007614977'))) { // REEC users custom / engagé
 			// Error if no history data
 			if (empty($param['dataHistory'][$idDoc])) {
