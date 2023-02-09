@@ -592,152 +592,138 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        $this->deleteDocumentAdditionalData();
-        $this->deleteDocumentAdditionalRelationships();
+        $paramDocumentData = "DELETE documentdata
+        FROM documentdata
+        LEFT OUTER JOIN document ON documentdata.doc_id = document.id
+        WHERE document.deleted = 1;
         
-        // $this->deleteDocuments();
-        // $this->deleteRuleAdditionalInformation();
-        // $this->deleteRules();
-    }
-
-    public function deleteDocumentAdditionalData()
-    {
-        try {
-            // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE documentdata
-            FROM documentdata
-            LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-            WHERE document.deleted = 1;
-            
-            LIMIT :limitOfDeletePerRequest
-                ";
-
-            $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
-
-            $executionCounter = 0;
-            $resultCount = 1;
-
-            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-                $executionCounter++;
-                $result = $stmt->executeQuery();
-                $resultCount = $result->rowCount();
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
-    }
-
-    public function deleteDocumentAdditionalRelationships()
-    {
-        try {
-            // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE documentrelationship
-            FROM documentrelationship
-            LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-            WHERE document.deleted = 1;
-            
-            LIMIT :limitOfDeletePerRequest
-                ";
-
-            $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
-
-            $executionCounter = 0;
-            $resultCount = 1;
-
-            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-                $executionCounter++;
-                $result = $stmt->executeQuery();
-                $resultCount = $result->rowCount();
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
-    }
-
-    public function deleteDocuments()
-    {
-        try {
-            // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE FROM document
-        WHERE
-            document.deleted = 1
         LIMIT :limitOfDeletePerRequest
-        ";
-            $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
-
-            $executionCounter = 0;
-            $resultCount = 1;
-
-            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-                $executionCounter++;
-                $result = $stmt->executeQuery();
-                $resultCount = $result->rowCount();
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
-    }
-
-    public function deleteRuleAdditionalInformation()
-    {
-        try {
-            // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
-        FROM rule
-            LEFT OUTER JOIN ruleaudit
-                ON rule.id = ruleaudit.rule_id
-            LEFT OUTER JOIN rulefield
-                ON rule.id = rulefield.rule_id
-            LEFT OUTER JOIN rulefilter
-                ON rule.id = rulefilter.rule_id
-            LEFT OUTER JOIN ruleorder
-                ON rule.id = ruleorder.rule_id
-            LEFT OUTER JOIN ruleparam
-                ON rule.id = ruleparam.rule_id
-                LEFT OUTER JOIN ruleparamaudit
-                    ON ruleparam.id = ruleparamaudit.rule_param_id
-            LEFT OUTER JOIN rulerelationship
-                ON rule.id = rulerelationship.rule_id
-        WHERE
-            rule.deleted = 1
+            ";
+        
+        $paramDocumentRelationships = "DELETE documentrelationship
+        FROM documentrelationship
+        LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
+        WHERE document.deleted = 1;
+        
         LIMIT :limitOfDeletePerRequest
             ";
 
-            $stmt = $this->connection->prepare($sqlParams);
-            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
+        $paramDocumentAudit = "DELETE documentaudit
+        FROM documentaudit
+        LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
+        WHERE document.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
 
-            $executionCounter = 0;
-            $resultCount = 1;
+        
+        $paramDocumentLogs = "DELETE log
+        FROM log
+        LEFT OUTER JOIN document ON log.doc_id = document.id
+        WHERE document.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+        $paramDocument = "DELETE document
+        FROM document
+        WHERE document.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
 
-            while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
-                $executionCounter++;
-                $result = $stmt->executeQuery();
-                $resultCount = $result->rowCount();
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-        }
+        $ruleaudit = "DELETE ruleaudit
+        FROM ruleaudit
+        LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+
+        $rulefield = "DELETE rulefield
+        FROM rulefield
+        LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+        $rulefilter = "DELETE rulefilter
+        FROM rulefilter
+        LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+        $ruleorder = "DELETE ruleorder
+        FROM ruleorder
+        LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+
+        $ruleparam = "DELETE ruleparam
+        FROM ruleparam
+        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+        $ruleparamaudit = "DELETE ruleparamaudit
+        FROM ruleparamaudit
+        LEFT OUTER JOIN rule ON ruleparamaudit.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+
+        $rulerelationship = "DELETE rulerelationship
+        FROM rulerelationship
+        LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+        $rule = "DELETE rule
+        FROM rule
+        WHERE rule.deleted = 1;
+        
+        LIMIT :limitOfDeletePerRequest
+            ";
+        
+
+
+        
+        $this->removeDeletedRowsFromTable($paramDocumentData);
+        $this->removeDeletedRowsFromTable($paramDocumentRelationships);
+        $this->removeDeletedRowsFromTable($paramDocumentAudit);
+        $this->removeDeletedRowsFromTable($paramDocumentLogs);
+        $this->removeDeletedRowsFromTable($paramDocument);
+
+        $this->removeDeletedRowsFromTable($ruleaudit);
+        $this->removeDeletedRowsFromTable($rulefield);
+        $this->removeDeletedRowsFromTable($rulefilter);
+        $this->removeDeletedRowsFromTable($ruleorder);
+        $this->removeDeletedRowsFromTable($ruleparam);
+        $this->removeDeletedRowsFromTable($ruleparamaudit);
+        $this->removeDeletedRowsFromTable($rulerelationship);
+        $this->removeDeletedRowsFromTable($rule);
+
+
     }
 
-    public function deleteRules()
+    public function removeDeletedRowsFromTable($sqlParams)
     {
         try {
-            // Récupération de chaque règle et du paramètre de temps de suppression
-            $sqlParams = "DELETE FROM rule
-        WHERE
-            rule.deleted = 1
-        LIMIT :limitOfDeletePerRequest    
-        ";
-
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
 
             $executionCounter = 0;
             $resultCount = 1;
-
 
             while ($resultCount > 0 && $executionCounter < $this->limitOfRequestExecution) {
                 $executionCounter++;
@@ -748,7 +734,6 @@ class jobcore
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
-
 
     public function getRules($force = false)
     {
