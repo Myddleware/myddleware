@@ -594,7 +594,7 @@ class jobcore
         "DELETE documentdata
         FROM documentdata
         LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
             ",
@@ -602,7 +602,7 @@ class jobcore
         "DELETE documentrelationship
         FROM documentrelationship
         LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
             ",
@@ -610,7 +610,7 @@ class jobcore
         "DELETE documentaudit
         FROM documentaudit
         LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
             ",
@@ -619,81 +619,81 @@ class jobcore
         "DELETE log
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
             ",
         
         "DELETE document
         FROM document
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1;
         
         LIMIT :limitOfDeletePerRequest
             ",
 
-        "DELETE ruleaudit
-        FROM ruleaudit
-        LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE ruleaudit
+        // FROM ruleaudit
+        // LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
 
-        "DELETE rulefield
-        FROM rulefield
-        LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE rulefield
+        // FROM rulefield
+        // LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
         
-        "DELETE rulefilter
-        FROM rulefilter
-        LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE rulefilter
+        // FROM rulefilter
+        // LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
         
-        "DELETE ruleorder
-        FROM ruleorder
-        LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE ruleorder
+        // FROM ruleorder
+        // LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
 
-        "DELETE ruleparam
-        FROM ruleparam
-        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE ruleparam
+        // FROM ruleparam
+        // LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
         
-        "DELETE ruleparamaudit
-        FROM ruleparamaudit
-        LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
-        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE ruleparamaudit
+        // FROM ruleparamaudit
+        // LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
+        // LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
 
-        "DELETE rulerelationship
-        FROM rulerelationship
-        LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
-        WHERE rule.deleted = 1
+        // "DELETE rulerelationship
+        // FROM rulerelationship
+        // LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            ",
+        // LIMIT :limitOfDeletePerRequest
+        //     ",
         
-        "DELETE rule
-        FROM rule
-        WHERE rule.deleted = 1
+        // "DELETE rule
+        // FROM rule
+        // WHERE rule.deleted = 1;
         
-        LIMIT :limitOfDeletePerRequest
-            "
+        // LIMIT :limitOfDeletePerRequest
+        //     "
         ];
         
 
@@ -717,9 +717,8 @@ class jobcore
                 $executionCounter++;
                 $result = $stmt->executeQuery();
                 $resultCount = $result->rowCount();
+                unset($result);
             }
-            unset($result);
-            unset($stmt);
 
         } catch (Exception $e) {
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
