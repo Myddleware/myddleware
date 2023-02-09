@@ -643,6 +643,54 @@ class jobcore
         WHERE document.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
 
+        "SELECT ruleaudit.id
+        FROM ruleaudit
+        LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleaudit WHERE id IN (%s)",
+
+        "SELECT rulefield.id
+        FROM rulefield
+        LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefield WHERE id IN (%s)",
+
+        "SELECT rulefilter.id
+        FROM rulefilter
+        LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefilter WHERE id IN (%s)",
+
+        "SELECT ruleorder.id
+        FROM ruleorder
+        LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE id IN (%s)",
+
+        "SELECT ruleparam.id
+        FROM ruleparam
+        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
+
+        "SELECT rulerelationship.id
+        FROM rulerelationship
+        LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
+
+        "SELECT ruleparamaudit.id
+        FROM ruleparamaudit
+        LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
+            LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
+
+        "SELECT rule.id
+        FROM rule
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)",
+
         ];
 
         return $listOfSqlParams;
