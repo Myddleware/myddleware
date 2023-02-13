@@ -497,6 +497,7 @@ solution:
         username: Utilisateur
         password: Mot de passe
         accesskey: Access key
+        accesstoken: Access token
         url: Url
         token: Jeton
         useraccesstoken: Token utilisateur

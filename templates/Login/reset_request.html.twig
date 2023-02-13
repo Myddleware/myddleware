@@ -30,10 +30,10 @@
     <div id="reset_password">
         {{ form_start(form) }}
         <div class="input-group row">
-            <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.username ) }}</label>
+            <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.email ) }}</label>
             <div class="col-sm-12">
-                {{ form_widget(form.username, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
-                {{ form_errors (form.username) }}
+                {{ form_widget(form.email, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
+                {{ form_errors (form.email) }}
                 <div>
                     <p><input class="btn-primary rounded" id="reset-password-button-request" type="submit" value="Reset password"></p>
                 </div>

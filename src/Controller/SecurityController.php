@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -170,20 +171,21 @@ class SecurityController extends AbstractController
      *
      * @throws Exception
      */
-    public function reset(Request $request, $token)
+    public function reset(Request $request, $token,  UserPasswordEncoderInterface $encoder)
     {
         if (!$token) {
             $form = $this->createForm(UserForgotPasswordType::class);
             $form->handleRequest($request);
-            if ($form->isSubmitted()) {
-                $username = $form->get('username')->getData();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $email = $form->get('email')->getData();
                 /** @var User|null $user */
-                $user = $this->userRepository->findOneBy(['username' => $username]);
+                $user = $this->userRepository->findOneBy(['email' => $email]);
                 if (!$user) {
-                    $form->get('username')->addError(new FormError('Aucune utilisateur avec ce username n\'a été trouvée.'));
+                    $form->get('email')->addError(new FormError('Aucune utilisateur avec cet email n\'a été trouvée.'));
                 }
-                if ($form->isValid()) {
+
                     $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+                    // dump($user);
                     $this->entityManager->flush();
 
                     try {
@@ -191,9 +193,8 @@ class SecurityController extends AbstractController
 
                         return new Response('Un email a été envoyé sur '.$user->getEmail().' avec un lien de réinitialisation du mot de passe.');
                     } catch (Exception $e) {
-                        return new Response('Impossible d\'envoyer un email.');
+                        return new Response('Impossible d\'envoyer un email. '.$e->getMessage());
                     }
-                }
             }
 
             return $this->render('Login/reset_request.html.twig', [
@@ -209,12 +210,19 @@ class SecurityController extends AbstractController
 
         $form = $this->createForm(ResetPasswordType::class, $user);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('plainPassword')->getData();
-            $salt = $user->getSalt();
-            $this->securityService->hashPassword($password, $salt);
-            $user->setPassword($password);
-            $this->entityManager->flush();
+            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+            // first we test whether the old password input is correct
+            if ($encoder->isPasswordValid($user, $oldPassword)) {
+                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($newEncodedPassword);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+
+                return $this->redirectToRoute('regle_panel');
+            } else {
+            }
 
             return $this->redirectToRoute('regle_panel');
         }
