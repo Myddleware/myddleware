@@ -1260,7 +1260,7 @@ class jobcore
             }
 
             // Get the document detail if requested
-            if ($documentDetail) {
+            if (isset($documentDetail) && $documentDetail) {
                 $sqlParamsDoc = '	SELECT DISTINCT document.*
 								FROM log
 									INNER JOIN document
