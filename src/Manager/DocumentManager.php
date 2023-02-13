@@ -1179,13 +1179,14 @@ class documentcore
     {
         try {
             $documentDataEntity = $this->entityManager
-                            // ->getRepository('RegleBundle:DocumentData')
-                            ->getRepository(DocumentData::class)
-                            ->findOneBy([
-                                        'doc_id' => $this->id,
-                                        'type' => $type,
-                                        ]
-                                );
+                // ->getRepository('RegleBundle:DocumentData')
+                ->getRepository(DocumentData::class)
+                ->findOneBy(
+                    [
+                        'doc_id' => $this->id,
+                        'type' => $type,
+                    ]
+                );
             // Generate data array
             if (!empty($documentDataEntity)) {
                 return json_decode($documentDataEntity->getData(), true);
@@ -1195,7 +1196,6 @@ class documentcore
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
-
         return false;
     }
 
@@ -2086,6 +2086,62 @@ class documentcore
             $this->createDocLog();
 
             return false;
+        }
+    }
+
+    // Function to manually edit the data inside a Myddleware Document
+    public function updateDocumentData(string $docId, array $newValues, string $dataType)
+    {
+        // check if data of that type with this docid and this data fields
+        if (empty($docId)) {
+            throw new Exception("No document id provided");
+        }
+        if (empty($newValues)) {
+            throw new Exception("No data provided");
+        }
+        if (empty($dataType)) {
+            throw new Exception("No data type provided");
+        }
+        if (
+            $dataType !== 'S'
+            & $dataType !== 'T'
+            & $dataType !== 'H'
+        ) {
+            throw new Exception("This is not the correct data type. Source, Target, or History is required");
+        }
+
+        // Get the document data corresponding on the type in input
+        $documentDataEntity = $this->entityManager
+                            ->getRepository(DocumentData::class)
+                            ->findOneBy([
+                                        'doc_id' => $docId,
+                                        'type' => $dataType,
+                                        ]
+                                );
+        if (empty($documentDataEntity)) {
+            throw new Exception("No document data found for the document ".$docId." and the type ".$dataType.".");
+        }
+        // Compare data                        
+        $oldData = json_decode($documentDataEntity->getData());
+        if(!empty($oldData)){
+            foreach ($newValues as $key => $Value) {
+                foreach ($oldData as $oldKey => $oldValue) {
+                    if ($oldKey === $key) {
+                        if ($oldValue !== $Value) {
+                            $newValues[$oldKey] = $Value;
+                            $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
+                        }
+                    } else {
+                        $newValues[$oldKey] = $oldValue;
+                    }
+                }
+            }
+            $this->typeError = 'I';
+            $this->createDocLog();
+            // Update the data of the right type
+            $documentDataEntity->setData(json_encode($newValues, true));
+            $this->entityManager->persist($documentDataEntity);
+            $this->entityManager->flush();
         }
     }
 

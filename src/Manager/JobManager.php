@@ -44,6 +44,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use PDO;
 
 class jobcore
 {
@@ -65,7 +66,12 @@ class jobcore
     protected int $api = 0; 	// Specify if the class is called by the API
     protected $env;
     protected int $nbDayClearJob = 7;
-	protected int $limitDelete = 1000;
+	protected int $limitOfDeletePerRequest = 3;
+	protected int $limitOfRequestExecution = 10;
+	protected int $noDocumentsTablesToEmptyCounter;
+	protected int $noRulesTablesToEmptyCounter;
+
+    protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
 
@@ -587,51 +593,190 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        // Récupération de chaque règle et du paramètre de temps de suppression
-        $sqlParams = "DELETE documentdata, documentaudit, documentrelationship, log
+        $this->noDocumentsTablesToEmptyCounter = 0;
+        $this->noRulesTablesToEmptyCounter = 0;
+        try {
+            $this->processDeletableItems($this->getListOfSqlDocumentParams(), 'document');
+            // Start deleteing rules when there is no more documents to delete
+            if($this->noDocumentsTablesToEmptyCounter === 4)
+            {
+                $this->processDeletableItems($this->documentSqlParams(), 'document');
+            }
+            if($this->noDocumentsTablesToEmptyCounter === 5)
+            {
+                $this->processDeletableItems($this->getListOfSqlRuleParams(), 'rule');
+                if ($this->noRulesTablesToEmptyCounter === 7)
+                {
+                    $this->processDeletableItems($this->ruleSqlParams(), 'rule');
+                }
+            }
+        } catch (Exception $e) {
+            $this->message .= 'Error  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+            $this->logger->error($this->message);
+        }
+    }
+
+    public function processDeletableItems($listOfSqlParams, $tableTypeToDelete)
+    {
+        foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
+            {
+                $requestCounter = 0;
+                while ($requestCounter < $this->limitOfRequestExecution) {
+                    $requestCounter++;
+                    $itemIds = $this->findItemsToDelete($oneSqlParam);
+                    if(empty($itemIds)) {
+                        if($tableTypeToDelete === 'document')
+                        {
+                            $this->noDocumentsTablesToEmptyCounter++;
+                            break;
+                        }
+                        else {
+                            $this->noRulesTablesToEmptyCounter++;
+                            break;
+                        }
+                    }
+                    $cleanItemIds = $this->cleanItemIds($itemIds);
+                    $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
+                }
+            }
+    }
+
+    public function getListOfSqlDocumentParams(): array
+    {
+        $listOfSqlDocumentParams = [
+            "SELECT log.id
+        FROM log
+        LEFT OUTER JOIN document ON log.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
+
+        "SELECT documentdata.id
+        FROM documentdata
+        LEFT OUTER JOIN document ON documentdata.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)",
+
+        "SELECT documentaudit.id
+        FROM documentaudit
+        LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentaudit WHERE id IN (%s)",
+
+        "SELECT documentrelationship.id
+        FROM documentrelationship
+        LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
+        ];
+
+        return $listOfSqlDocumentParams;
+    }
+
+    public function documentSqlParams()
+    {
+        $listOfSqlDocumentParams = [
+            "SELECT document.id
         FROM document
-            LEFT OUTER JOIN documentdata
-                ON document.id = documentdata.doc_id
-            LEFT OUTER JOIN documentaudit
-                ON document.id = documentaudit.doc_id
-            LEFT OUTER JOIN documentrelationship
-                ON document.id = documentrelationship.doc_id
-            LEFT OUTER JOIN log
-                ON document.id = log.doc_id
-        WHERE
-            document.deleted = 1;
-            
-            
-        DELETE FROM document
-        WHERE
-            document.deleted = 1;
-            
-        DELETE ruleaudit, rulefield, rulefilter, ruleorder, ruleparam, ruleparamaudit, rulerelationship
+        WHERE document.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
+        ];
+        return $listOfSqlDocumentParams;
+    }
+
+    public function getListOfSqlRuleParams()
+    {
+        $listOfSqlRuleParams = [
+        "SELECT ruleaudit.id
+        FROM ruleaudit
+        LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleaudit WHERE id IN (%s)",
+
+        "SELECT rulefield.id
+        FROM rulefield
+        LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefield WHERE id IN (%s)",
+
+        "SELECT rulefilter.id
+        FROM rulefilter
+        LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefilter WHERE id IN (%s)",
+
+        "SELECT ruleorder.rule_id
+        FROM ruleorder
+        LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE rule_id IN (%s)",
+
+        "SELECT rulerelationship.id
+        FROM rulerelationship
+        LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
+
+        "SELECT ruleparamaudit.id
+        FROM ruleparamaudit
+        LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
+            LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparamaudit WHERE id IN (%s)",
+
+        "SELECT ruleparam.id
+        FROM ruleparam
+        LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
+        ];
+
+        return $listOfSqlRuleParams;
+    }
+
+    public function ruleSqlParams()
+    {
+        $listOfSqlRuleParams = [
+        "SELECT rule.id
         FROM rule
-            LEFT OUTER JOIN ruleaudit
-                ON rule.id = ruleaudit.rule_id
-            LEFT OUTER JOIN rulefield
-                ON rule.id = rulefield.rule_id
-            LEFT OUTER JOIN rulefilter
-                ON rule.id = rulefilter.rule_id
-            LEFT OUTER JOIN ruleorder
-                ON rule.id = ruleorder.rule_id
-            LEFT OUTER JOIN ruleparam
-                ON rule.id = ruleparam.rule_id
-                LEFT OUTER JOIN ruleparamaudit
-                    ON ruleparam.id = ruleparamaudit.rule_param_id
-            LEFT OUTER JOIN rulerelationship
-                ON rule.id = rulerelationship.rule_id
-        WHERE
-            rule.deleted = 1;
-            
-            
-        DELETE FROM rule
-        WHERE
-            rule.deleted = 1;
-            ";
-        $stmt = $this->connection->prepare($sqlParams);
-        $result = $stmt->executeQuery();
+        WHERE rule.deleted = 1
+        LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
+        ];
+
+        return $listOfSqlRuleParams;
+    }
+    
+    public function findItemsToDelete($oneSqlParam): array
+    {
+            $stmt = $this->connection->prepare($oneSqlParam);
+            $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
+            $result = $stmt->executeQuery();
+            $itemIds= [];
+            $itemIds = $result->fetchAllAssociative();
+        return $itemIds;
+    }
+
+    public function cleanItemIds($itemIds)
+    {
+        $cleanItemIds = [];
+        foreach ($itemIds as $oneIdKey => $oneIdValue) {
+            foreach ($oneIdValue as $oneInnerKey => $oneInnerValue) {
+                    $cleanItemIds[] = $oneInnerValue;
+            }
+        }
+        return $cleanItemIds;
+    }
+
+    public function deleteSelectedItems(array $itemIds, string $oneDeleteStatement)
+    {
+        try {
+            $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
+            $sqlParams = sprintf($oneDeleteStatement, $placeholders);
+            $stmt = $this->connection->prepare($sqlParams);
+            $stmt->execute($itemIds);
+        } catch (Exception $e) {
+            $this->message .= 'Error  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);
+        }
     }
 
     public function getRules($force = false)
@@ -1115,7 +1260,7 @@ class jobcore
             }
 
             // Get the document detail if requested
-            if ($documentDetail) {
+            if (isset($documentDetail) && $documentDetail) {
                 $sqlParamsDoc = '	SELECT DISTINCT document.*
 								FROM log
 									INNER JOIN document

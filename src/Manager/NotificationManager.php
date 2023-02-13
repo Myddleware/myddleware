@@ -26,24 +26,27 @@
 
 namespace App\Manager;
 
-use App\Entity\Config;
+use DateTime;
+use Exception;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
+
 use App\Entity\User;
+use Twig\Environment;
+use App\Entity\Config;
+use Twig\Error\LoaderError;
+use Twig\Error\SyntaxError;
+use Psr\Log\LoggerInterface;
+use Twig\Error\RuntimeError;
+use Doctrine\DBAL\Connection;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
-use DateTime;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Swift_Mailer;
-use Swift_Message;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 
 class NotificationManager
 {
@@ -276,15 +279,35 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
-        $message = (new Swift_Message('Initialisation du mot de passe'))
+        // Get the mailerurl from the .env.local to send the mail to reset the password
+        $mailerUrlEnv = $_ENV["MAILER_URL"];
+        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+
+            $host = $mailerUrlArray[0];
+            $port = $mailerUrlArray[1];
+            $hostUser = $mailerUrlArray[4];
+            $hostPassword = $mailerUrlArray[5];
+            $auth_mode = $mailerUrlArray[3];
+            $encryption = $mailerUrlArray[2];
+            $transport = new Swift_SmtpTransport($host, $port);
+            $transport->setUsername($hostUser);
+            $transport->setPassword($hostPassword);
+            $transport->setAuthMode($auth_mode);
+            $transport->setEncryption($encryption);
+
+            $mailer = new Swift_Mailer($transport);
+            $message = (new \Swift_Message('Initialisation du mot de passe'))
             ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
             ->setTo($user->getEmail())
-            ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
-
-        $send = $this->mailer->send($message);
-        if (!$send) {
-            $this->logger->error('Failed to send email');
-            throw new Exception('Failed to send email');
+                ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
+            $send = $mailer->send($message);
+            if (!$send) {
+                $this->logger->error('Failed to send email');
+                throw new Exception('Failed to send email');
+            }
+        } else {
+            throw new Exception('There is no MAILER_URL in the .env.local !');
         }
     }
 
@@ -300,5 +323,23 @@ class NotificationManager
                 }
             }
         }
+    }
+
+    // Takes MAILER_URL and turns it into an array with all parameters
+    public function envMailerUrlToArray(string $envString): array
+    {
+        $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
+        $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
+        $envArrayBeforeSplitHostPort = explode($delimiters[0], $envStringQuestionMarks);
+        $noTsplitHostPort = $envArrayBeforeSplitHostPort[0];
+        $splitHostPort = explode(':', $noTsplitHostPort);
+        $port = $splitHostPort[2];
+        $hostWithSlashes = $splitHostPort[1];
+        $hostWithoutSlashes = substr($hostWithSlashes, 2);
+        $hostAndPort = [$hostWithoutSlashes, $port];
+
+        $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
+        $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
+        return $envArray;
     }
 }
