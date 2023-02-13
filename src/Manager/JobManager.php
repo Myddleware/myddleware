@@ -67,7 +67,10 @@ class jobcore
     protected $env;
     protected int $nbDayClearJob = 7;
 	protected int $limitOfDeletePerRequest = 3;
-	protected int $limitOfRequestExecution = 2;
+	protected int $limitOfRequestExecution = 10;
+	protected int $noDocumentsTablesToEmptyCounter;
+	protected int $noRulesTablesToEmptyCounter;
+
     protected int $limitDelete;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
@@ -590,44 +593,52 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
-        $noDocumentsToDeleteCounter = 0;
+        $this->noDocumentsTablesToEmptyCounter = 0;
+        $this->noRulesTablesToEmptyCounter = 0;
         try {
-            $maxNumberOfRequests = $this->limitOfRequestExecution;
-            $listOfSqlParams = $this->getListOfSqlDocumentParams();
-            foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
-            {
-                $requestCounter = 0;
-                while ($requestCounter < $maxNumberOfRequests) {
-                    $requestCounter++;
-                    $itemIds = $this->findItemsToDelete($oneSqlParam);
-                    if(empty($itemIds))
-                    $noDocumentsToDeleteCounter++;
-                        break;
-                    $cleanItemIds = $this->cleanItemIds($itemIds);
-                    $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
-                }
-            }
-
+            $this->processDeletableItems($this->getListOfSqlDocumentParams(), 'document');
             // Start deleteing rules when there is no more documents to delete
-            if($noDocumentsToDeleteCounter=== 5)
+            if($this->noDocumentsTablesToEmptyCounter === 4)
             {
-                $listOfSqlParams = $this->getListOfSqlRuleParams();
-                foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement) {
-                    $requestCounter = 0;
-                    while ($requestCounter < $maxNumberOfRequests) {
-                        $requestCounter++;
-                        $itemIds = $this->findItemsToDelete($oneSqlParam);
-                        if (empty($itemIds))
-                            break;
-                        $cleanItemIds = $this->cleanItemIds($itemIds);
-                        $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
-                    }
+                $this->processDeletableItems($this->documentSqlParams(), 'document');
+            }
+            if($this->noDocumentsTablesToEmptyCounter === 5)
+            {
+                $this->processDeletableItems($this->getListOfSqlRuleParams(), 'rule');
+                if ($this->noRulesTablesToEmptyCounter === 7)
+                {
+                    $this->processDeletableItems($this->ruleSqlParams(), 'rule');
                 }
             }
         } catch (Exception $e) {
             $this->message .= 'Error  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($this->message);
         }
+    }
+
+    public function processDeletableItems($listOfSqlParams, $tableTypeToDelete)
+    {
+        foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
+            {
+                $requestCounter = 0;
+                while ($requestCounter < $this->limitOfRequestExecution) {
+                    $requestCounter++;
+                    $itemIds = $this->findItemsToDelete($oneSqlParam);
+                    if(empty($itemIds)) {
+                        if($tableTypeToDelete === 'document')
+                        {
+                            $this->noDocumentsTablesToEmptyCounter++;
+                            break;
+                        }
+                        else {
+                            $this->noRulesTablesToEmptyCounter++;
+                            break;
+                        }
+                    }
+                    $cleanItemIds = $this->cleanItemIds($itemIds);
+                    $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
+                }
+            }
     }
 
     public function getListOfSqlDocumentParams(): array
@@ -656,14 +667,19 @@ class jobcore
         LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
         WHERE document.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
+        ];
 
-        "SELECT document.id
+        return $listOfSqlDocumentParams;
+    }
+
+    public function documentSqlParams()
+    {
+        $listOfSqlDocumentParams = [
+            "SELECT document.id
         FROM document
         WHERE document.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
         ];
-
-
         return $listOfSqlDocumentParams;
     }
 
@@ -712,7 +728,14 @@ class jobcore
         LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
         WHERE rule.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
+        ];
 
+        return $listOfSqlRuleParams;
+    }
+
+    public function ruleSqlParams()
+    {
+        $listOfSqlRuleParams = [
         "SELECT rule.id
         FROM rule
         WHERE rule.deleted = 1
@@ -721,7 +744,7 @@ class jobcore
 
         return $listOfSqlRuleParams;
     }
-
+    
     public function findItemsToDelete($oneSqlParam): array
     {
             $stmt = $this->connection->prepare($oneSqlParam);
