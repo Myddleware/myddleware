@@ -1179,13 +1179,14 @@ class documentcore
     {
         try {
             $documentDataEntity = $this->entityManager
-                            // ->getRepository('RegleBundle:DocumentData')
-                            ->getRepository(DocumentData::class)
-                            ->findOneBy([
-                                        'doc_id' => $this->id,
-                                        'type' => $type,
-                                        ]
-                                );
+                // ->getRepository('RegleBundle:DocumentData')
+                ->getRepository(DocumentData::class)
+                ->findOneBy(
+                    [
+                        'doc_id' => $this->id,
+                        'type' => $type,
+                    ]
+                );
             // Generate data array
             if (!empty($documentDataEntity)) {
                 return json_decode($documentDataEntity->getData(), true);
@@ -1195,7 +1196,6 @@ class documentcore
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
-
         return false;
     }
 
