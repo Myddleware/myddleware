@@ -39,6 +39,7 @@ class LoadCronJobData implements FixtureInterface
         ['period' => '0 * * * *', 'command' => 'myddleware:notification alert', 'enable' => 0, 'description' => 'Alert when a task is blocked'],
         ['period' => '0 0 * * *', 'command' => 'myddleware:notification ALL', 'enable' => 0, 'description' => 'Send notification every day'],
         ['period' => '0 0 * * *', 'command' => 'myddleware:cleardata', 'enable' => 0, 'description' => 'Clean data'],
+        ['period' => '0 0 1 * *', 'command' => 'myddleware:prunedatabase', 'enable' => 0, 'description' => 'Delete all rules and document with the flag deleted = 1'],
     ];
 
     public function load(ObjectManager $manager)
