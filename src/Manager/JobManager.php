@@ -590,9 +590,10 @@ class jobcore
     // Remove all data flagged deleted in the database
     public function pruneDatabase(): void
     {
+        $noDocumentsToDeleteCounter = 0;
         try {
             $maxNumberOfRequests = $this->limitOfRequestExecution;
-            $listOfSqlParams = $this->getListOfSqlParams();
+            $listOfSqlParams = $this->getListOfSqlDocumentParams();
             foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
             {
                 $requestCounter = 0;
@@ -600,9 +601,27 @@ class jobcore
                     $requestCounter++;
                     $itemIds = $this->findItemsToDelete($oneSqlParam);
                     if(empty($itemIds))
+                    $noDocumentsToDeleteCounter++;
                         break;
                     $cleanItemIds = $this->cleanItemIds($itemIds);
                     $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
+                }
+            }
+
+            // Start deleteing rules when there is no more documents to delete
+            if($noDocumentsToDeleteCounter=== 5)
+            {
+                $listOfSqlParams = $this->getListOfSqlRuleParams();
+                foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement) {
+                    $requestCounter = 0;
+                    while ($requestCounter < $maxNumberOfRequests) {
+                        $requestCounter++;
+                        $itemIds = $this->findItemsToDelete($oneSqlParam);
+                        if (empty($itemIds))
+                            break;
+                        $cleanItemIds = $this->cleanItemIds($itemIds);
+                        $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
+                    }
                 }
             }
         } catch (Exception $e) {
@@ -611,9 +630,9 @@ class jobcore
         }
     }
 
-    public function getListOfSqlParams(): array
+    public function getListOfSqlDocumentParams(): array
     {
-        $listOfSqlParams = [
+        $listOfSqlDocumentParams = [
             "SELECT log.id
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
@@ -642,7 +661,15 @@ class jobcore
         FROM document
         WHERE document.deleted = 1
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
+        ];
 
+
+        return $listOfSqlDocumentParams;
+    }
+
+    public function getListOfSqlRuleParams()
+    {
+        $listOfSqlRuleParams = [
         "SELECT ruleaudit.id
         FROM ruleaudit
         LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
@@ -692,7 +719,7 @@ class jobcore
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
         ];
 
-        return $listOfSqlParams;
+        return $listOfSqlRuleParams;
     }
 
     public function findItemsToDelete($oneSqlParam): array
