@@ -47,14 +47,20 @@
 	color: white;
 }
 
-.white {
+#myd_connexion .white {
 	min-width: 300px; 
-	width: 350px;
-    background-color: white;
-    padding: 20px;
-    margin: auto;
+	width: 300px;
+	background-color: white;
+}
+
+.white-reset {
+	background-color: white;
+	padding: 20px;
+	margin: auto;
 	margin-top: 100px;
 	box-shadow: 1px 1px 9px 0px rgba(50, 50, 50, 0.75);
+	min-width: 300px; 
+	width: 350px;
 }
 
 #myd_connexion .logo {
