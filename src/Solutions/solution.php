@@ -803,6 +803,12 @@ class solutioncore
         if (isset($record['Myddleware_element_id'])) {
             unset($record['Myddleware_element_id']);
         }
+		if (isset($record['id_doc_myddleware'])) {
+            unset($record['id_doc_myddleware']);
+        }
+		if (isset($record['source_date_modified'])) {
+            unset($record['source_date_modified']);
+        }
 
         return $record;
     }
