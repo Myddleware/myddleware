@@ -114,10 +114,10 @@ final class CronRunCommand extends BaseCommand
                 $this->waitProcesses($processes);
                 $style->info($job->getFullCommand().' : End '.date('Y-m-d h:i:s'));
                 $processes = [];
-
-                $style->success('All jobs are finished.');
-                return CronJobResult::EXIT_CODE_SUCCEEDED;
             }
+			
+			$style->success('All jobs are finished.');
+			return CronJobResult::EXIT_CODE_SUCCEEDED;
         }else{
             $style->error('Your crontabs are disabled');
             return CronJobResult::EXIT_CODE_FAILED;

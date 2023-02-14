@@ -148,6 +148,22 @@ class sendinbluecore extends solution
                 'required_relationship' => false,
                 'relate' => false,
             ];
+			$this->moduleFields['emailBlacklisted'] = [
+                'label' => 'Email blacklisted',
+                'required' => false,
+                'type' => 'bool',
+                'type_bdd' => 'bool',
+                'required_relationship' => false,
+                'relate' => false,
+            ];
+			$this->moduleFields['smsBlacklisted'] = [
+                'label' => 'SMS blacklisted',
+                'required' => false,
+                'type' => 'bool',
+                'type_bdd' => 'bool',
+                'required_relationship' => false,
+                'relate' => false,
+            ];
 
             return $this->moduleFields;
         } catch (\Exception $e) {
@@ -451,16 +467,26 @@ class sendinbluecore extends solution
      * @throws \SendinBlue\Client\ApiException
      */
     protected function create($param, $record, $idDoc = null): ?int
-    {
-        // Import or create new contact for sendinblue
-        $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
-        $createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
-        $createContact['email'] = $record['email'];
-        // Add attributes
-        $createContact['attributes'] = $record;
-        $result = $apiInstance->createContact($createContact);
-
-        return $result->getId();
+    {    
+		try {
+			// Import or create new contact for sendinblue
+			$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
+			$createContact = new \SendinBlue\Client\Model\CreateContact(); // Values to create a contact
+			$createContact['email'] = $record['email'];
+			// Add attributes
+			$createContact['attributes'] = $record;
+			// Change the position of the data emailBlacklisted and smsBlacklisted
+			if (isset($updateContact['attributes']['emailBlacklisted'])) {
+				$updateContact['emailBlacklisted'] = $updateContact['attributes']['emailBlacklisted'];
+			}
+			if (isset($updateContact['attributes']['smsBlacklisted'])) {
+				$updateContact['smsBlacklisted'] = $updateContact['attributes']['smsBlacklisted'];
+			}	
+			$result = $apiInstance->createContact($createContact);
+		} catch (\Exception $e) {
+            throw new \Exception('Exception when calling ContactsApi->createContact: '.$e->getMessage());
+        }
+		return $result->getId();
     }
 
     // Update the record
@@ -476,6 +502,13 @@ class sendinbluecore extends solution
             // target_id contains the id of the record to be modified
             $identifier = $record['target_id'];
             $updateContact['attributes'] = $record;
+			// Change the position of the data emailBlacklisted and smsBlacklisted
+			if (isset($updateContact['attributes']['emailBlacklisted'])) {
+				$updateContact['emailBlacklisted'] = $updateContact['attributes']['emailBlacklisted'];
+			}
+			if (isset($updateContact['attributes']['smsBlacklisted'])) {
+				$updateContact['smsBlacklisted'] = $updateContact['attributes']['smsBlacklisted'];
+			}			
             $result = $apiInstance->updateContact($identifier, $updateContact);
         } catch (\Exception $e) {
             throw new \Exception('Exception when calling ContactsApi->updateContact: '.$e->getMessage());

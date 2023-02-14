@@ -219,7 +219,7 @@ class moodlecore extends solution
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     // We don't send Myddleware_element_id field to Moodle
-                    if ('Myddleware_element_id' == $key) {
+                    if (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
                         continue;
                     }
                     if (!empty($value)) {
@@ -334,7 +334,7 @@ class moodlecore extends solution
                     if ('target_id' == $key) {
                         continue;
                     // We don't send Myddleware_element_id field to Moodle
-                    } elseif ('Myddleware_element_id' == $key) {
+                    } elseif (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
                         continue;
                     }
                     if (!empty($value)) {

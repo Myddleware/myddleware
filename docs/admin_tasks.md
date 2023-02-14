@@ -125,8 +125,6 @@ git fetch
 git checkout origin/main -ft
 ```
 
-> If you have custom code, delete the src/Myddleware directory.
-
 #### Automatic Myddleware upgrade
 
 You can upgrade Myddleware to its latest version with this command, which will run a series of jobs in the background :

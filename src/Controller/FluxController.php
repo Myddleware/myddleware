@@ -276,7 +276,15 @@ class FluxController extends AbstractController
             $this->sessionService->removeFluxFilter();
         }
 
+        // Get the limit parameter
+        $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+        $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+        if (!empty($searchLimit)) {
+            $limit = $searchLimit->getValue();
+        }
+        
         $conditions = 0;
+        $doNotSearch = false;
         //---[ FORM ]-------------------------
         if ($form->get('click_filter')->isClicked()) {
             $data = $form->getData();
@@ -284,15 +292,9 @@ class FluxController extends AbstractController
             $data['search'] = $search;
             $data['page'] = $page;
 
-            // Get the limit parameter
-            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
-            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-            if (!empty($searchLimit)) {
-                $data['limit'] = $searchLimit->getValue();
-            }
-
-            $r = $this->documentRepository->getFluxPagination($data);
-            if (empty($data['source_content'])) {
+            if (!empty($data['source_content']) && is_string($data['source_content'])) {
+                $this->sessionService->setFluxFilterSourceContent($data['source_content']);
+            } else {
                 $this->sessionService->removeFluxFilterSourceContent();
             }
 
@@ -335,7 +337,7 @@ class FluxController extends AbstractController
             if (!empty($data['type'])) {
                 $this->sessionService->setFluxFilterType($data['type']);
             } else {
-                $this->sessionService->removeFluxFilterGblStatus();
+                $this->sessionService->removeFluxFilterType();
             }
 
             if (!empty($data['target_id'])) {
@@ -349,12 +351,38 @@ class FluxController extends AbstractController
             } else {
                 $this->sessionService->removeFluxFilterSourceId();
             }
-        } // end clicked
+       } // end clicked
         //---[ FORM ]-------------------------
+        // In case of pagination
+        else {
+            $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
+            $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
+            $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
+            $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
+            $data['rule']               = $this->sessionService->getFluxFilterRuleName();
+            $data['status']             = $this->sessionService->getFluxFilterStatus();
+            $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
+            $data['type']               = $this->sessionService->getFluxFilterType();
+            $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
+            $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+            // No search if no filter and page = 1. 
+			// We keep searching if someone searched without filter and clicke on another page
+			if (
+                    count(array_filter($data)) === 0
+                AND $page == 1
+            ) {
+                $doNotSearch = true;
+            }
+        }
 
-        $r = $this->documentRepository->getFluxPagination($data);
+        if (!$doNotSearch) {
+			$resultSearch = $this->searchDocuments($data, $page, $limit); 
+		} else {
+			$resultSearch = array();
+		}
+
         $compact = $this->nav_pagination([
-            'adapter_em_repository' => $r,
+            'adapter_em_repository' => $resultSearch,
             'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
         ], false);
@@ -393,6 +421,156 @@ class FluxController extends AbstractController
         }
 
         throw $this->createNotFoundException('Error');
+    }
+
+    
+    protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        $join = '';
+        $where = '';
+
+        // Build the WHERE depending on $data
+        // Source content
+        if (!empty($data['source_content'])) {
+            $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
+            $where .= " AND document_data_source.data LIKE :source_content 
+                        AND document_data_source.type = 'S'";
+        }
+        // Target content
+        if (!empty($data['target_content'])) {
+            $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
+            $where .= " AND document_data_target.data LIKE :target_content 
+                        AND document_data_target.type = 'T'";
+        }
+        // Date modified (start) 
+        if (!empty($data['date_modif_start'])) {
+            $where .= " AND document.date_modified >= :dateModifiedStart ";
+        }
+        // Date modified (end)
+        if (!empty($data['date_modif_end'])) {
+            $where .= " AND document.date_modified <= :dateModifiedEnd ";
+        }
+        // Rule
+        if (
+                !empty($data['rule'])
+            OR !empty($data['customWhere']['rule'])
+        ) {
+            $where .= " AND rule.name = :ruleName ";
+        }
+        // Status
+        if (!empty($data['status'])) {
+            $where .= " AND document.status = :status ";
+        }
+
+        // customWhere can have several status (open and error from the error dashlet in the home page)
+        if (!empty($data['customWhere']['gblstatus'])) {
+            $i = 0;
+            $where .= " AND ( ";
+            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+                $where .= " document.global_status = :gblstatus".$i." OR";
+                $i++;
+            }
+            $where = rtrim($where, 'OR').' )';
+        } elseif (!empty($data['gblstatus'])) {
+            $where .= " AND document.global_status = :gblstatus ";
+        }
+
+        // Type
+        if (!empty($data['type'])) {
+            $where .= " AND document.type = :type ";
+        }
+        // Target ID
+        if (!empty($data['target_id'])) {
+            $where .= " AND document.target_id LIKE :target_id ";
+        }
+        // Source ID
+        if (!empty($data['source_id'])) {
+            $where .= " AND document.source_id LIKE :source_id ";
+        }
+
+        // Build query
+        $query = "
+            SELECT 
+                document.id, 
+                document.date_created, 
+                document.date_modified, 
+                document.status, 
+                document.source_id, 
+                document.target_id, 
+                document.source_date_modified, 
+                document.mode, 
+                document.type, 
+                document.attempt, 
+                document.global_status, 
+                users.username, 
+                rule.name as rule_name, 
+                rule.id as rule_id 
+            FROM document 
+                INNER JOIN rule	
+                    ON document.rule_id = rule.id
+                INNER JOIN users
+                    ON document.created_by = users.id "
+                .$join. 
+            " WHERE 
+                    document.deleted = 0 "
+                    .$where.
+            " ORDER BY document.date_modified DESC"
+            ." LIMIT ". $limit;
+            
+        
+        $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
+        // Add parameters to the query
+        // Source content
+        if (!empty($data['source_content'])) {
+            $stmt->bindValue(':source_content', "%".$data['source_content']."%");
+        }
+        // Target content
+        if (!empty($data['target_content'])) {
+            $stmt->bindValue(':target_content', "%".$data['target_content']."%");
+        }
+        // Date modified start
+        if (!empty($data['date_modif_start'])) {
+            $stmt->bindValue(':dateModifiedStart', str_replace(',','',$data['date_modif_start']));
+        }
+        // Date modified end
+        if (!empty($data['date_modif_end'])) {
+            $stmt->bindValue(':dateModifiedEnd', $data['date_modif_end']);
+        }
+        // Rule
+        if (
+                !empty($data['rule'])
+             OR !empty($data['customWhere']['rule'])
+         ) {
+            $ruleFilter = trim((!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']));
+            $stmt->bindValue(':ruleName', $ruleFilter);
+        }
+        // Status
+        if (!empty($data['status'])) {
+            $stmt->bindValue(':status', $data['status']);
+        }
+        // customWhere can have several status (open and error from the error dashlet in the home page)
+        if (!empty($data['customWhere']['gblstatus'])) {
+            $i = 0;
+            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+                $stmt->bindValue(':gblstatus'.$i, $gblstatus);
+                $i++;
+            }
+        } elseif (!empty($data['gblstatus'])) {
+            $stmt->bindValue(':gblstatus', $data['gblstatus']);
+        }
+        // Type
+        if (!empty($data['type'])) {
+            $stmt->bindValue(':type', $data['type']);
+        }
+        // Target id
+        if (!empty($data['target_id'])) {
+            $stmt->bindValue(':target_id', $data['target_id']);
+        }
+        // Source id
+        if (!empty($data['source_id'])) {
+            $stmt->bindValue(':source_id', $data['source_id']);
+        }
+        // Run the query and return the results
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
     /**

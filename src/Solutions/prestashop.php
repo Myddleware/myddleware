@@ -999,7 +999,7 @@ class prestashopcore extends solution
         if (in_array($param['module'], ['order_details','shop_urls'])) {
             return 'id';
         }
-        if (in_array($param['ruleParams']['mode'], ['0', 'S'])) {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'])) {
             return 'date_upd';
         } elseif ('C' == $param['ruleParams']['mode']) {
             return 'date_add';

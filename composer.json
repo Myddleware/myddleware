@@ -15,7 +15,7 @@
   },
   "prefer-stable": true,
     "require": {
-    "php": ">=8.1.7,<8.2.1",
+    "php": ">=8.1.0,<8.3.0",
     "ext-ctype": "*",
     "ext-curl": "*",
     "ext-iconv": "*",
@@ -34,6 +34,7 @@
     "doctrine/orm": "2.13.*",
     "friendsofsymfony/jsrouting-bundle": "2.8.*",
     "hautelook/alice-bundle": "2.9.*",
+    "hubspot/api-client": "^4.0",
     "illuminate/encryption": "5.3.*@dev",
     "incenteev/composer-parameter-handler": "2.1.*",
     "javanile/vtiger-client": "^0.0.13",

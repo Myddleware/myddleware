@@ -296,13 +296,12 @@ class rulecore
                 $c = (($this->solutionTarget->connexion_valide) ? true : false);
             }
             if (!empty($loginResult['error'])) {
-                return $loginResult;
+                throw new \Exception($loginResult['error']);
             }
 
             return $c;
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
             return false;
         }
     }
@@ -1161,7 +1160,7 @@ class rulecore
                 throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
             }
             if ($documentId !== null) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
             //if user clicked on cancel all transfers of a rule
             elseif ('cancelDocumentJob' === $event) {
@@ -2301,6 +2300,7 @@ class rulecore
                                 '14' => 'solution.params.14_day',
                                 '30' => 'solution.params.30_day',
                                 '60' => 'solution.params.60_day',
+                                '90' => 'solution.params.90_day',
                             ],
             ],
             [

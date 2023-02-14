@@ -104,7 +104,8 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 2, 23);
             $job = $this->jobRepository->find($return['jobId']);
             // Get the job statistics
-            $jobData = $this->jobManager->getLogData($job);
+            $this->jobManager->setId($job->getId());
+            $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
             }
@@ -175,7 +176,8 @@ class ApiController extends AbstractController
 
             // Get the job statistics
             $job = $this->jobRepository->find($return['jobId']);
-            $jobData = $this->jobManager->getLogData($job);
+            $this->jobManager->setId($job->getId());
+            $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
             }
@@ -285,7 +287,7 @@ class ApiController extends AbstractController
             // Get the job statistics even if the job has failed
             if (!empty($job->id)) {
                 $return['jobId'] = $job->id;
-                $jobData = $job->getLogData(1);
+                $jobData = $job->getLogData();
                 if (!empty($jobData['jobError'])) {
                     $return['error'] .= $jobData['jobError'];
                 }
@@ -361,7 +363,7 @@ class ApiController extends AbstractController
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
             $job->id = $return['jobId'];
-            $jobData = $job->getLogData(1);
+            $jobData = $job->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
             }
@@ -427,7 +429,7 @@ class ApiController extends AbstractController
             // Get the job statistics
             $job = $this->container->get('myddleware_job.job');
             $job->id = $return['jobId'];
-            $jobData = $job->getLogData(1);
+            $jobData = $job->getLogData();
             $return['jobData'] = $jobData;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());

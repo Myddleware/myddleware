@@ -1,0 +1,62 @@
+name: moodle_salesforce_user_enrolment_course
+description: 'Send Moodle courses, users and enrolments to Salesforce contacts and opportunities'
+rules:
+    -
+        name: Contact
+        nameSlug: contact
+        sourceSolution: moodle
+        targetSolution: salesforce
+        sourceModule: users
+        targetModule: Contact
+        fields:
+            - { target: LastName, source: lastname, formula: null }
+            - { target: Description, source: description, formula: null }
+            - { target: Email, source: email, formula: null }
+            - { target: FirstName, source: firstname, formula: null }
+            - { target: HomePhone, source: phone2, formula: null }
+            - { target: MailingCity, source: city, formula: null }
+            - { target: MailingCountry, source: country, formula: null }
+            - { target: MailingStreet, source: address, formula: null }
+            - { target: MobilePhone, source: phone1, formula: null }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: duplicate_fields, value: Email }
+    -
+        name: Course
+        nameSlug: course
+        sourceSolution: moodle
+        targetSolution: salesforce
+        sourceModule: courses
+        targetModule: Opportunity
+        fields:
+            - { target: CloseDate, source: enddate;startdate;timecreated, formula: '({enddate}=="" ? ({startdate}=="" ? changeFormatDate( {timecreated}+31536000, "U", "Y-m-d") : changeFormatDate( {startdate}+31536000, "U", "Y-m-d")) : changeFormatDate( {enddate}, "U", "Y-m-d"))' }
+            - { target: Name, source: fullname, formula: null }
+            - { target: StageName, source: my_value, formula: '"Closed Won"' }
+        params:
+            - { name: description, value: '' }
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+    -
+        name: Enrolments
+        nameSlug: enrolments
+        sourceSolution: moodle
+        targetSolution: salesforce
+        sourceModule: get_enrolments_by_date
+        targetModule: OpportunityContactRole
+        fields:
+            - { target: Role, source: my_value, formula: '"Student"' }
+        relationships:
+            - { fieldNameSource: userid, fieldNameTarget: ContactId, fieldId: contact, parent: false }
+            - { fieldNameSource: courseid, fieldNameTarget: OpportunityId, fieldId: course, parent: false }
+        params:
+            - { name: limit, value: '100' }
+            - { name: delete, value: '60' }
+            - { name: datereference, value: '1970-01-01 00:00:00' }
+            - { name: mode, value: '0' }
+            - { name: description, value: '' }

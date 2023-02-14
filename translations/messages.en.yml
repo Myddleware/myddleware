@@ -499,6 +499,7 @@ solution:
         username: Username
         password: Password
         accesskey: Access key
+        accesstoken: Access token
         url: Url
         token: Token
         tokensecret: Secret token
@@ -553,6 +554,7 @@ solution:
         14_day: 14 days
         30_day: 30 days
         60_day: 60 days
+        90_day: 90 days
 
 error:
     connexion: Connection failed

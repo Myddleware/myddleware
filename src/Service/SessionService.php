@@ -953,7 +953,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['rule'];
+        return $myddlewareSession['flux_filter']['c']['rule'] ?? null;
     }
 
     public function setFluxFilterGlobalStatus($gblstatus)
@@ -968,7 +968,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['gblstatus'];
+        return $myddlewareSession['flux_filter']['c']['gblstatus'] ?? null;
     }
 
     public function setFluxFilterStatus($status)
@@ -983,7 +983,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['status'];
+        return $myddlewareSession['flux_filter']['c']['status'] ?? null;
     }
 
     public function setFluxFilterType($type)
@@ -998,7 +998,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['type'];
+        return $myddlewareSession['flux_filter']['c']['type'] ?? null;
     }
 
     public function setFluxFilterSourceId($sourceId)
@@ -1013,7 +1013,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['target_id'];
+        return $myddlewareSession['flux_filter']['c']['target_id'] ?? null;
     }
 
     public function setFluxFilterTargetId($targetId)
@@ -1028,7 +1028,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['source_id'];
+        return $myddlewareSession['flux_filter']['c']['source_id'] ?? null;
     }
 
     public function setFluxFilterDateCreateStart($dateCreateStart)
@@ -1059,21 +1059,21 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['date_create_start'];
+        return $myddlewareSession['flux_filter']['c']['date_create_start'] ?? null;
     }
 
     public function getFluxFilterSourceContent()
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['source_content'];
+        return $myddlewareSession['flux_filter']['c']['source_content'] ?? null;
     }
 
     public function getFluxFilterTargetContent()
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['target_content'];
+        return $myddlewareSession['flux_filter']['c']['target_content'] ?? null;
     }
 
     public function setFluxFilterDateCreateEnd($dateCreateEnd)
@@ -1088,7 +1088,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['date_create_end'];
+        return $myddlewareSession['flux_filter']['c']['date_create_end'] ?? null;
     }
 
     public function setFluxFilterDateModifStart($dateModifStart)
@@ -1103,7 +1103,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['date_modif_start'];
+        return $myddlewareSession['flux_filter']['c']['date_modif_start'] ?? null;
     }
 
     public function setFluxFilterDateModifEnd($dateModifEnd)
@@ -1118,7 +1118,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
 
-        return $myddlewareSession['flux_filter']['c']['date_modif_end'];
+        return $myddlewareSession['flux_filter']['c']['date_modif_end'] ?? null;
     }
 
     public function removeFluxFilter()
