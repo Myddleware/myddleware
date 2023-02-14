@@ -291,7 +291,7 @@ class sugarcrmcore extends solution
         $filterArgs = [
             'max_num' => $param['limit'],
             'offset' => 0,
-            'fields' => implode($param['fields'], ','),
+            'fields' => implode(',',$param['fields']),
             'order_by' => 'date_modified',
             'deleted' => $deleted,
         ];
