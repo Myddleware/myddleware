@@ -784,3 +784,12 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fldlykbiwpJHc9YII'=> array( 'label' => 'ID Comet (from POLES)', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
+
+// USC
+$moduleFields['appALljzTMc2wjLV1'] = array (
+	'VSC' => array(
+		'fldf87kv05S5Uv0aN'=> array( 'label' => 'Prénom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldWn7hqHKTfxHHP1'=> array( 'label' => 'STATUT DOSSIER', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldtYqvR5IhbfYG3G'=> array( 'label' => 'STATUT Contrat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+	),
+);
