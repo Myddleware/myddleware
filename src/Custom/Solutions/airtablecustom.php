@@ -12,7 +12,7 @@ class airtablecustom extends airtable {
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
 								'app5ustIjI5taRXJS' => 'CONTACTS',
-								'appALljzTMc2wjLV1' => 'VSC',
+								'appALljzTMc2wjLV1' => 'USC',
 							);
 
 	protected $modules = array(
@@ -38,7 +38,7 @@ class airtablecustom extends airtable {
 														'RECONDUCTION' => 'RECONDUCTION'
 													),
 								'appALljzTMc2wjLV1' => array(
-														'VSC' => 'VSC'
+														'USC' => 'USC'
 													),
 							);
 

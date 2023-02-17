@@ -787,7 +787,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 
 // USC
 $moduleFields['appALljzTMc2wjLV1'] = array (
-	'VSC' => array(
+	'USC' => array(
 		'fldf87kv05S5Uv0aN'=> array( 'label' => 'Prénom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldWn7hqHKTfxHHP1'=> array( 'label' => 'STATUT DOSSIER', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldtYqvR5IhbfYG3G'=> array( 'label' => 'STATUT Contrat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
