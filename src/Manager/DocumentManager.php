@@ -25,18 +25,19 @@
 
 namespace App\Manager;
 
+use Exception;
 use App\Entity\Document;
 use App\Entity\DocumentData;
+use Psr\Log\LoggerInterface;
+use App\Entity\DocumentAudit;
+use Doctrine\DBAL\Connection;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use App\Repository\RuleRelationShipRepository;
 use App\Entity\DocumentData as DocumentDataEntity;
 use App\Entity\DocumentRelationship as DocumentRelationship;
-use App\Repository\DocumentRepository;
-use App\Repository\RuleRelationShipRepository;
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use App\Entity\DocumentAudit;
 
 class documentcore
 {
@@ -2122,48 +2123,62 @@ class documentcore
 
         // Get the document data corresponding on the type in input
         $documentDataEntity = $this->entityManager
-                            ->getRepository(DocumentData::class)
-                            ->findOneBy([
-                                        'doc_id' => $docId,
-                                        'type' => $dataType,
-                                        ]
-                                );
-        if (empty($documentDataEntity)) {
-            throw new Exception("No document data found for the document ".$docId." and the type ".$dataType.".");
+            ->getRepository(DocumentData::class)
+            ->findOneBy(
+                [
+                    'doc_id' => $docId,
+                    'type' => $dataType,
+                ]
+            );
+        // Compare data     
+
+        if (!empty($documentDataEntity)) {
+            $documentData = $documentDataEntity->getData();
         }
-        // Compare data                        
-        $oldData = json_decode($documentDataEntity->getData());
-        if(!empty($oldData)){
-            foreach ($newValues as $key => $Value) {
-                foreach ($oldData as $oldKey => $oldValue) {
-                    if ($oldKey === $key) {
-                        if ($oldValue !== $Value) {
-                            $newValues[$oldKey] = $Value;
-                            $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
+
+        if (!empty($documentData)) {
+            $oldData = json_decode($documentDataEntity->getData());
+            if (!empty($oldData)) {
+                foreach ($newValues as $key => $Value) {
+                    foreach ($oldData as $oldKey => $oldValue) {
+                        if ($oldKey === $key) {
+                            if ($oldValue !== $Value) {
+                                $newValues[$oldKey] = $Value;
+                                $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')) . ' document value changed  from  ' . $oldValue . ' to ' . $Value . '. ';
+                            }
+                        } else {
+                            $newValues[$oldKey] = $oldValue;
                         }
-                    } else {
-                        $newValues[$oldKey] = $oldValue;
                     }
                 }
+                $this->typeError = 'I';
+                $this->createDocLog();
+                // Update the data of the right type
+                $documentDataEntity->setData(json_encode($newValues, true));
+
+                // Insert in audit
+
+                $CurrentDocument = $this->entityManager
+                    ->getRepository(Document::class)
+                    ->findOneBy(
+                        [
+                            'id' => $docId,
+                        ]
+                    );
+                $oneDocDataAudit = new DocumentAudit();
+                $documentUser = $CurrentDocument->getCreatedBy();
+                $documentUserId = $documentUser->getId();
+                $oneDocDataAudit->setDoc($docId);
+                $oneDocDataAudit->setDateModified(new \DateTime());
+                $oneDocDataAudit->setBefore($documentDataEntity->getData());
+                $oneDocDataAudit->setAfter(json_encode($newValues, true));
+                $oneDocDataAudit->setByUser($documentUserId);
+                $oneDocDataAudit->setName('documentdata');
+                $this->entityManager->persist($oneDocDataAudit);
+
+                $this->entityManager->persist($documentDataEntity);
+                $this->entityManager->flush();
             }
-            $this->typeError = 'I';
-            $this->createDocLog();
-            // Update the data of the right type
-            $documentDataEntity->setData(json_encode($newValues, true));
-
-            // Insert in audit
-            $oneDocAudit = new DocumentAudit();
-            $oneDocAudit->setDoc($request->get('flux'));
-            $oneDocAudit->setDateModified(new \DateTime());
-            $oneDocAudit->setBefore($beforeValue);
-            $oneDocAudit->setAfter($value);
-            $oneDocAudit->setByUser($this->getUser()->getId());
-            $oneDocAudit->setName($fields);
-            $em->persist($oneDocAudit);
-            $em->flush();
-
-            $this->entityManager->persist($documentDataEntity);
-            $this->entityManager->flush();
         }
     }
 
