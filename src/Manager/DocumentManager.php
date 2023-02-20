@@ -36,6 +36,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Entity\DocumentAudit;
 
 class documentcore
 {
@@ -1177,6 +1178,15 @@ class documentcore
     // Permet de charger les données du système source pour ce document
     protected function getDocumentData($type)
     {
+        $documentEntityTest = $this->entityManager
+        ->getRepository(Document::class)
+        ->find($this->id);
+        $testValues = ['name' => 'Patate'];
+        if ($type === "T")
+        {
+                $this->updateDocumentData($this->id, $testValues, $type);
+        }
+
         try {
             $documentDataEntity = $this->entityManager
                 // ->getRepository('RegleBundle:DocumentData')
@@ -2140,6 +2150,18 @@ class documentcore
             $this->createDocLog();
             // Update the data of the right type
             $documentDataEntity->setData(json_encode($newValues, true));
+
+            // Insert in audit
+            $oneDocAudit = new DocumentAudit();
+            $oneDocAudit->setDoc($request->get('flux'));
+            $oneDocAudit->setDateModified(new \DateTime());
+            $oneDocAudit->setBefore($beforeValue);
+            $oneDocAudit->setAfter($value);
+            $oneDocAudit->setByUser($this->getUser()->getId());
+            $oneDocAudit->setName($fields);
+            $em->persist($oneDocAudit);
+            $em->flush();
+
             $this->entityManager->persist($documentDataEntity);
             $this->entityManager->flush();
         }
