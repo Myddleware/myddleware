@@ -2121,11 +2121,17 @@ class documentcore
                     'type' => $dataType,
                 ]
             );
-        // Compare data     
+         
 
         if (!empty($documentDataEntity)) {
             $documentData = $documentDataEntity->getData();
         }
+
+        // Values for the database and twig
+        $changedBeforeDataString = "";
+        $changedBeforeDataArray = [];
+        $changedAfterDataString = "";
+        $changedAfterDataArray = [];
 
         if (!empty($documentData)) {
             $oldData = json_decode($documentDataEntity->getData());
@@ -2136,6 +2142,10 @@ class documentcore
                             if ($oldValue !== $Value) {
                                 $newValues[$oldKey] = $Value;
                                 $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')) . ' document value changed  from  ' . $oldValue . ' to ' . $Value . '. ';
+
+                                // Only add the values that have changed
+                                $changedBeforeDataArray[$oldKey] = $oldValue;
+                                $changedAfterDataArray[$oldKey] = $Value;
                             }
                         } else {
                             $newValues[$oldKey] = $oldValue;
@@ -2148,7 +2158,8 @@ class documentcore
                 $documentDataEntity->setData(json_encode($newValues, true));
 
                 // Insert in audit
-
+                $changedAfterDataString = json_encode($changedAfterDataArray, true);
+                $changedBeforeDataString = json_encode($changedBeforeDataArray, true);
                 $CurrentDocument = $this->entityManager
                     ->getRepository(Document::class)
                     ->findOneBy(
@@ -2156,13 +2167,15 @@ class documentcore
                             'id' => $docId,
                         ]
                     );
+
+                // Create the audit
                 $oneDocDataAudit = new DocumentAudit();
                 $documentUser = $CurrentDocument->getCreatedBy();
                 $documentUserId = $documentUser->getId();
                 $oneDocDataAudit->setDoc($docId);
                 $oneDocDataAudit->setDateModified(new \DateTime());
-                $oneDocDataAudit->setBefore($documentData);
-                $oneDocDataAudit->setAfter(json_encode($newValues, true));
+                $oneDocDataAudit->setBefore($changedBeforeDataString);
+                $oneDocDataAudit->setAfter($changedAfterDataString);
                 $oneDocDataAudit->setByUser($documentUserId);
                 $oneDocDataAudit->setName('documentdata');
                 $this->entityManager->persist($oneDocDataAudit);
