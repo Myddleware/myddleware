@@ -1179,15 +1179,6 @@ class documentcore
     // Permet de charger les données du système source pour ce document
     protected function getDocumentData($type)
     {
-        $documentEntityTest = $this->entityManager
-        ->getRepository(Document::class)
-        ->find($this->id);
-        $testValues = ['name' => 'Patate'];
-        if ($type === "T")
-        {
-                $this->updateDocumentData($this->id, $testValues, $type);
-        }
-
         try {
             $documentDataEntity = $this->entityManager
                 // ->getRepository('RegleBundle:DocumentData')
@@ -2170,7 +2161,7 @@ class documentcore
                 $documentUserId = $documentUser->getId();
                 $oneDocDataAudit->setDoc($docId);
                 $oneDocDataAudit->setDateModified(new \DateTime());
-                $oneDocDataAudit->setBefore($documentDataEntity->getData());
+                $oneDocDataAudit->setBefore($documentData);
                 $oneDocDataAudit->setAfter(json_encode($newValues, true));
                 $oneDocDataAudit->setByUser($documentUserId);
                 $oneDocDataAudit->setName('documentdata');
