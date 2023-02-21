@@ -5,13 +5,21 @@ namespace App\Form\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 class ItemFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name', Filters\TextFilterType::class);
+        $builder
+            ->add('name', Filters\TextFilterType::class)
+            ->add('save', SubmitType::class, [
+                'attr' => [
+                    'class' => 'btn btn-outline-success mb-2',
+                ],
+            ])
+        ;
     }
 
     public function getBlockPrefix()
