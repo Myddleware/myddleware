@@ -53,6 +53,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+// use the ItemFilterType
+use App\Form\Type\ItemFilterType;
 
 /**
  * @Route("/rule")
@@ -128,10 +130,35 @@ class FluxController extends AbstractController
         return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
     }
 
+    public function testFilterAction(Request $request)
+    {
+        $form = $this->get('form.factory')->create(ItemFilterType::class);
+
+        if ($request->query->has($form->getName())) {
+            // manually bind values from the request
+            $form->submit($request->query->get($form->getName()));
+
+            // initialize a query builder
+            $filterBuilder = $this->get('doctrine.orm.entity_manager')
+                ->getRepository('ProjectSuperBundle:MyEntity')
+                ->createQueryBuilder('e');
+
+            // build the query from the given form object
+            $this->get('lexik_form_filter.query_builder_updater')->addFilterConditions($form, $filterBuilder);
+
+            // now look at the DQL =)
+            var_dump($filterBuilder->getDql());
+        }
+
+        return $this->render('testFilter.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
     /**
      * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
      * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
-     */
+     */ 
     public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
         //--- Liste status traduction
