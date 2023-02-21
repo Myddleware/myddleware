@@ -35,7 +35,7 @@ class DuplicateRuleFormType extends AbstractType
                 'query_builder' => function (EntityRepository $er) use ($solutionSources) {
                     return $er->createQueryBuilder('c')
                         ->leftJoin('c.solution', 's')
-                         ->where('s.id = :solution_id')
+                         ->where('s.id = :solution_id AND c.deleted = 0')
                          ->setParameter('solution_id', $solutionSources);
                 },
             ])
@@ -46,7 +46,7 @@ class DuplicateRuleFormType extends AbstractType
                  'query_builder' => function (EntityRepository $er) use ($solutionTargets) {
                      return $er->createQueryBuilder('c')
                          ->leftJoin('c.solution', 's')
-                         ->where('s.id = :solution_id')
+                         ->where('s.id = :solution_id AND c.deleted = 0')
                          ->setParameter('solution_id', $solutionTargets);
                  },
              ])
