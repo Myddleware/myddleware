@@ -728,6 +728,10 @@ class FluxController extends AbstractController
             } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
+            // Get the data audit
+            $dataAudit = $em->getRepository(DocumentAudit::class)->findBy(['doc' => $id]);
+
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
@@ -736,6 +740,7 @@ class FluxController extends AbstractController
                     'source' => $sourceData,
                     'target' => $targetData,
                     'history' => $historyData,
+                    'dataAudit' => $dataAudit ? $dataAudit : null,
                     'doc' => $doc[0],
                     'nb' => $compact['nb'],
                     'entities' => $compact['entities'],

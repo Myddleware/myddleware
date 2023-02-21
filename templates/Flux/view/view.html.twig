@@ -591,6 +591,47 @@
 							</p>
 						</div>
 						<div class="clr"></div>
+						<table class="listepager table">
+								{% if dataAudit is not empty %}
+									<tr>
+										<th>{{'Audit id'}}</th>
+										<th>{{'Document id'}}</th>
+										<th>{{'Date modified'}}</th>
+										<th>{{'Before value'}}</th>
+										<th>{{'After value'}}</th>
+										<th>{{'User Id'}}</th>
+										<th>{{'Field Name'}}</th>
+									</tr>
+									{% for audit in dataAudit %}
+										<tr>
+											<td class="ctr">
+												{{ audit.id }}
+											</td>
+											<td class="ctr">
+												{{ audit.doc }}
+											</td>
+											
+											<td class="ctr">
+												{{ audit.dateModified|date('d/m/Y H:i:s') }}
+											</td>
+											<td class="ctr">
+												{{ audit.before }}
+											</td>
+											<td class="ctr">
+												{{ audit.after }}
+											</td>
+											<td class="ctr">
+												{{ audit.byUser }}
+											</td>
+
+											<td class="ctr">
+												{{ audit.name }}
+											</td>
+										</tr>
+									{% endfor %}
+								{% endif %}
+							</table>
+
 					{% endif %}
 					<div id="message">
 
