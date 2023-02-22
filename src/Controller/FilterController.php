@@ -112,23 +112,25 @@ class FilterController extends AbstractController
      */ 
     public function testFilterAction(Request $request)
     {
-        $form = $this->createForm(ItemFilterType::class);
+        $form = $this->createForm(ItemFilterType::class, null, [
+            'entityManager' => $this->getDoctrine()->getManager()]);
 
-        $rules = $this->entityManager->getRepository(Rule::class)->findBy(['deleted' => 0]);
+        // $rules = $this->entityManager->getRepository(Rule::class)->findAll();
+
         // Rule list
-        $listRuleName = [];
+        // $listRuleName = $this->getNameOfAllRules($this->getBasicRuleInfoOfAllRules($this->getAllRules()));
         
-        foreach ($rules as $r) {
-            $listRuleName[$r->getName()] = $r->getName();
-        }
+        // foreach ($rules as $r) {
+        //     $listRuleName[$r->getName()] = $r->getName();
+        // }
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            //    $documentIdString = $form->get('id')->getData();
+               $documentIdString = $form->get('id')->getData();
 
-            // return $this->render('testFilter.html.twig', array(
-            //     'doc' => $documentIdString
-            // ));
+            return $this->render('testFilter.html.twig', array(
+                'doc' => $documentIdString
+            ));
         }
 
 
@@ -185,7 +187,9 @@ class FilterController extends AbstractController
 
         return $this->render('testFilter.html.twig', array(
             'form' => $form->createView(),
-            'rules' => $listRuleName
+            // 'rules' => $listRuleName
         ));
     }
+
+    
 }
