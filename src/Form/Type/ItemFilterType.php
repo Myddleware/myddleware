@@ -26,6 +26,7 @@ class ItemFilterType extends AbstractType
                     '- Select your filters -' => 'default',
                     'Rule name' => 'ruleName',
                     'Date of modification' => 'dateModified',
+
                     'Id' => 'id',
                     'Date start' => 'dateCreated',
                     'Module source' => 'moduleSource',
@@ -36,6 +37,7 @@ class ItemFilterType extends AbstractType
                     'Created by' => 'createdBy',
                     'Modified by' => 'modifiedBy',
                 ],
+
                 'attr' => [
                     'class' => 'form-control',
                 ],
@@ -43,6 +45,7 @@ class ItemFilterType extends AbstractType
             ->add('id', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+
                     'class' => 'form-control mt-2',
                     'id' => 'id',
                     'placeholder' => 'Id',
@@ -54,11 +57,13 @@ class ItemFilterType extends AbstractType
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
+
                 ],
             ])
             ->add('dateModified', DateTimeType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+
                     'placeholder' => 'Date modified',
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateModified'
@@ -94,6 +99,7 @@ class ItemFilterType extends AbstractType
                     'hidden'=> 'hidden',
                     'placeholder' => 'Name slug',
                     'class' => 'form-control mt-2',
+
                     'id' => 'nameSlug'
                 ],
             ])
@@ -132,6 +138,7 @@ class ItemFilterType extends AbstractType
             ->add('save', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-primary mb-2',
+
                 ],
             ]);
             // $builder->add('options', Filters\CollectionAdapterFilterType::class, array(
