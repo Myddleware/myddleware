@@ -25,8 +25,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Rule;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
+use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Service\UserManagerInterface;
@@ -41,10 +43,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+// use the ItemFilterType
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-// use the ItemFilterType
-use App\Form\Type\ItemFilterType;
 
 
 /**
@@ -113,6 +114,23 @@ class FilterController extends AbstractController
     {
         $form = $this->createForm(ItemFilterType::class);
 
+        $rules = $this->entityManager->getRepository(Rule::class)->findBy(['deleted' => 0]);
+        // Rule list
+        $listRuleName = [];
+        
+        foreach ($rules as $r) {
+            $listRuleName[$r->getName()] = $r->getName();
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            //    $documentIdString = $form->get('id')->getData();
+
+            // return $this->render('testFilter.html.twig', array(
+            //     'doc' => $documentIdString
+            // ));
+        }
+
 
         // if ($form->isValid() && $form->isSubmitted()) {
 
@@ -143,8 +161,31 @@ class FilterController extends AbstractController
         //     var_dump($filterBuilder->getDql());
         // }
 
+       // $form = $this->get('form.factory')->create(ItemFilterType::class);
+
+        //valid 
+    
+        
+
+        // if ($request->query->has($form->getName())) {
+        //     // manually bind values from the request
+        //     $form->submit($request->query->get($form->getName()));
+
+        //     // initialize a query builder
+        //     $filterBuilder = $this->get('doctrine.orm.entity_manager')
+        //         ->getRepository('ProjectSuperBundle:MyEntity')
+        //         ->createQueryBuilder('e');
+
+        //     // build the query from the given form object
+        //     $this->get('lexik_form_filter.query_builder_updater')->addFilterConditions($form, $filterBuilder);
+
+        //     // now look at the DQL =)
+        //     var_dump($filterBuilder->getDql());
+        //}
+
         return $this->render('testFilter.html.twig', array(
             'form' => $form->createView(),
+            'rules' => $listRuleName
         ));
     }
 }

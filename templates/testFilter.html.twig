@@ -27,23 +27,46 @@
 {% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 <!-- testFilter.html.twig -->
-<form method="get" action="." class ="m-2">
+<section class="p-5">
+      <h2 class="text-center m-3">Filters</h2>
       {{ form_start(form) }}
-            {{ form_widget(form.filter) }}
-            {{ form_widget(form.id) }}
-            {{ form_widget(form.dateCreated) }}
-            {{ form_widget(form.dateModified) }}
-            {{ form_widget(form.moduleSource) }}
-            {{ form_widget(form.moduleTarget) }}
-            {{ form_widget(form.name) }}
-            {{ form_widget(form.nameSlug) }}
-            {{ form_widget(form.connectorSource) }}
-            {{ form_widget(form.connectorTarget) }}
-            {{ form_widget(form.createdBy) }}
-            {{ form_widget(form.modifiedBy) }}
-            {{ form_widget(form.save) }}
+            <div class="input-group">
+                  {{ form_widget(form.filter) }}
+                  <div class="btn btn-primary">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                  </div>
+            </div>
+          
+            <div class="">
+                  {{ form_widget(form.id) }}
+                  {{ form_widget(form.dateCreated) }}
+                  {{ form_widget(form.dateModified) }}
+                  {{ form_widget(form.moduleSource) }}
+                  {{ form_widget(form.moduleTarget) }} 
+
+                  {{ form_widget(form.ruleName ) }}  
+
+                  {{ form_widget(form.nameSlug) }}
+                  {{ form_widget(form.connectorSource) }}
+                  {{ form_widget(form.connectorTarget) }}
+                  {{ form_widget(form.createdBy) }}
+                  {{ form_widget(form.modifiedBy) }}
+            </div>
+            <div class="input-group mt-2">
+                  {{ form_widget(form.save) }}
+                  <div class="btn btn-primary mb-2">
+                        <i class="fa fa-search"></i>
+                  </div>
+            </div>
+
+            {# {{ dump(doc) }} #}
+
       {{ form_end(form) }}
 
+</section>
+<section class="p-5">
+
+</section>
 
 {% endblock %}
 

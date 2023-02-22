@@ -3,7 +3,6 @@
 namespace App\Form\Type;
 
 use App\Entity\Rule;
-use DateTime;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 
@@ -24,10 +23,10 @@ class ItemFilterType extends AbstractType
         $builder
             ->add('filter', Filters\ChoiceFilterType::class, [               
                 'choices' => [
-                    'Name' => 'name',
+                    '- Select your filters -' => 'default',
+                    'Rule name' => 'ruleName',
                     'Date of modification' => 'dateModified',
-                    'Statut' => 'statut',
-                    'Document content' => 'doc_content',
+
                     'Id' => 'id',
                     'Date start' => 'dateCreated',
                     'Module source' => 'moduleSource',
@@ -38,76 +37,108 @@ class ItemFilterType extends AbstractType
                     'Created by' => 'createdBy',
                     'Modified by' => 'modifiedBy',
                 ],
+
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('id', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
-                    'id' => 'id'
+
+                    'class' => 'form-control mt-2',
+                    'id' => 'id',
+                    'placeholder' => 'Id',
                 ],
             ])
             ->add('dateCreated' , DateTimeType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
-                    'id' => 'dateCreated'
+                    'class' => 'form-control mt-2 calendar',
+                    'id' => 'dateCreated',
+                    'placeholder' => 'Date start',
+
                 ],
             ])
             ->add('dateModified', DateTimeType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+
+                    'placeholder' => 'Date modified',
+                    'class' => 'form-control mt-2 calendar',
                     'id' => 'dateModified'
                 ],
             ])
             ->add('moduleSource', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Module source',
+                    'class' => 'form-control mt-2',
                     'id' => 'moduleSource'
                 ],
             ])
             ->add('moduleTarget', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Module target',
+                    'class' => 'form-control mt-2',
                     'id' => 'moduleTarget'
                 ],
             ])
-            ->add('name', TextType::class, [
+            ->add('ruleName',  Filters\ChoiceFilterType::class, [
+                'choices'  => Rule::getNameTest(),
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Name',
+                    'class' => 'form-control mt-2',
                     'id' => 'name'
                 ],
             ])
             ->add('nameSlug', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Name slug',
+                    'class' => 'form-control mt-2',
+
                     'id' => 'nameSlug'
                 ],
             ])
             ->add('connectorSource', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Connector source',
+                    'class' => 'form-control mt-2',
                     'id' => 'connectorSource'
                 ],
             ])
             ->add('connectorTarget', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Connector target',
+                    'class' => 'form-control mt-2',
                     'id' => 'connectorTarget'
                 ],
             ])
             ->add('createdBy', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Created by',
+                    'class' => 'form-control mt-2',
                     'id' => 'createdBy'
                 ],
             ])
             ->add('modifiedBy', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
+                    'placeholder' => 'Modified by',
+                    'class' => 'form-control mt-2',
                     'id' => 'modifiedBy'
                 ],
             ])
             ->add('save', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn btn-outline-success mb-2',
+                    'class' => 'btn btn-primary mb-2',
+
                 ],
             ]);
             // $builder->add('options', Filters\CollectionAdapterFilterType::class, array(
