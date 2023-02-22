@@ -231,7 +231,9 @@ class RuleRepository extends ServiceEntityRepository
 
         $results = $qb->getQuery()->getScalarResult();
 
-        return array_column($results, 'name');
+        $curatedResults =  array_column($results, 'name');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
     }
 
 }
