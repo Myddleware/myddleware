@@ -25,8 +25,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Rule;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
+use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Service\UserManagerInterface;
@@ -41,10 +43,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+// use the ItemFilterType
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-// use the ItemFilterType
-use App\Form\Type\ItemFilterType;
 
 
 /**
@@ -112,14 +113,22 @@ class FilterController extends AbstractController
     public function testFilterAction(Request $request)
     {
         $form = $this->createForm(ItemFilterType::class);
+        $rules = $this->entityManager->getRepository(Rule::class)->findBy(['deleted' => 0]);
+        // Rule list
+        $listRuleName = [];
+        
+        foreach ($rules as $r) {
+            $listRuleName[$r->getName()] = $r->getName();
+        }
 
+        if ($form->isSubmitted() && $form->isValid()) {
 
-        // if ($form->isValid() && $form->isSubmitted()) {
+            //    $documentIdString = $form->get('id')->getData();
 
-
-            
-        //     return $this->redirect($this->generateUrl(''));
-        // }
+            // return $this->render('testFilter.html.twig', array(
+            //     'doc' => $documentIdString
+            // ));
+        }
 
        // $form = $this->get('form.factory')->create(ItemFilterType::class);
 
@@ -141,10 +150,11 @@ class FilterController extends AbstractController
 
         //     // now look at the DQL =)
         //     var_dump($filterBuilder->getDql());
-        // }
+        //}
 
         return $this->render('testFilter.html.twig', array(
             'form' => $form->createView(),
+            'rules' => $listRuleName
         ));
     }
 }

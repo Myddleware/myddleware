@@ -653,4 +653,10 @@ class Rule
     {
         return $this->id;
     }
+
+    public static function getNameTest(): array
+    {
+
+        return ['ruleName', 'rule'];
+    }
 }
