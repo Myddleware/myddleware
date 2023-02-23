@@ -122,6 +122,7 @@ class FilterController extends AbstractController
             'entityManager' => $this->getDoctrine()->getManager()
         ]);
 
+        if ($form->get('save')->isClicked()) {
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
@@ -133,7 +134,10 @@ class FilterController extends AbstractController
 
             // get filtered results
             $documents = $filterQueryBuilder->getQuery()->getResult();
-        } else {
+        } 
+        
+    }
+        else {
             // get all documents if form is not submitted or invalid
             $documents = $this->documentRepository->findAll();
         }
