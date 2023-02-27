@@ -113,8 +113,7 @@ class FilterController extends AbstractController
     }
 
     /**
-     * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
-     * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
+     * @Route("/document/list", name="document_list")
      */
     public function testFilterAction(Request $request)
     {
@@ -122,21 +121,32 @@ class FilterController extends AbstractController
             'entityManager' => $this->getDoctrine()->getManager()
         ]);
 
-        if ($form->get('save')->isClicked()) {
+        // $data = $form->getData();
+        
+        // $queryBuilder = $this->documentRepository->createQueryBuilder('d');
+        
+        // // apply filters to query builder
+        // $filterQueryBuilder = $this->get('lexik_form_filter.query_builder_updater')
+        //     ->addFilterConditions($form, $queryBuilder);
+        
+        // // get filtered results
+        // $documents = $filterQueryBuilder->getQuery()->getResult();
+        
+        // Get the name of the form
+        $formName = $form->getName();
+        // Get the submitted data for the form
+        // $submittedData = $request->request->get($formName);
+        $submittedData = $request->get($formName);
+        
+        // Submit the form with the submitted data
+        $form->submit($submittedData);
+        
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            $queryBuilder = $this->documentRepository->createQueryBuilder('d');
-
-            // apply filters to query builder
-            $filterQueryBuilder = $this->get('lexik_form_filter.query_builder_updater')
-                ->addFilterConditions($form, $queryBuilder);
-
-            // get filtered results
-            $documents = $filterQueryBuilder->getQuery()->getResult();
+             // get the filtered data
+             $formData = $form->getData();
+             $documents = $this->documentRepository->findBy($formData);
         } 
         
-    }
         else {
             // get all documents if form is not submitted or invalid
             $documents = $this->documentRepository->findAll();
