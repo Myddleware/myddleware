@@ -8,15 +8,16 @@ use Doctrine\ORM\QueryBuilder;
 
 use App\Repository\RuleRepository;
 use Symfony\Component\Form\FormBuilder;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderExecuterInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 
 class ItemFilterType extends AbstractType
@@ -25,27 +26,6 @@ class ItemFilterType extends AbstractType
     {
         $entityManager = $options['entityManager'];
         $builder
-            ->add('filter', Filters\ChoiceFilterType::class, [               
-                'choices' => [
-                    '- Select your filters -' => 'default',
-                    'Rule name' => 'ruleName',
-                    'Date of modification' => 'dateModified',
-
-                    'Id' => 'id',
-                    'Date start' => 'dateCreated',
-                    'Module source' => 'moduleSource',
-                    'Module target' => 'moduleTarget',
-                    'Name slug' => 'nameSlug',
-                    'Connector source' => 'connectorSource',
-                    'Connector target' => 'connectorTarget',
-                    'Created by' => 'createdBy',
-                    'Modified by' => 'modifiedBy',
-                ],
-
-                'attr' => [
-                    'class' => 'form-control',
-                ],
-            ])
             ->add('id', TextType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
@@ -55,25 +35,30 @@ class ItemFilterType extends AbstractType
                     'placeholder' => 'Id',
                 ],
             ])
-            ->add('dateCreated' , DateTimeType::class, [
+            ->add('dateCreated', DateTimeType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
-
+                ],
+                'constraints' => [
+                    new NotBlank(),
                 ],
             ])
             ->add('dateModified', DateTimeType::class, [
                 'attr' => [
                     'hidden'=> 'hidden',
-
                     'placeholder' => 'Date modified',
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateModified'
                 ],
+                'constraints' => [
+                    new NotBlank(),
+                ],
             ])
-            ->add('moduleSource', TextType::class, [
+            ->add('moduleSource', Filters\ChoiceFilterType::class, [
+                'choices'  => RuleRepository::findModuleSource($entityManager),
                 'attr' => [
                     'hidden'=> 'hidden',
                     'placeholder' => 'Module source',
@@ -81,7 +66,8 @@ class ItemFilterType extends AbstractType
                     'id' => 'moduleSource'
                 ],
             ])
-            ->add('moduleTarget', TextType::class, [
+            ->add('moduleTarget', Filters\ChoiceFilterType::class, [
+                'choices'  => RuleRepository::findModuleTarget($entityManager),
                 'attr' => [
                     'hidden'=> 'hidden',
                     'placeholder' => 'Module target',
@@ -89,7 +75,7 @@ class ItemFilterType extends AbstractType
                     'id' => 'moduleTarget'
                 ],
             ])
-            ->add('ruleName',  Filters\ChoiceFilterType::class, [
+            ->add('name',  Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findActiveRulesNames($entityManager),
                 'attr' => [
                     'hidden'=> 'hidden',
@@ -98,7 +84,8 @@ class ItemFilterType extends AbstractType
                     'id' => 'name'
                 ],
             ])
-            ->add('nameSlug', TextType::class, [
+            ->add('nameSlug',Filters\ChoiceFilterType::class, [
+                'choices'  => RuleRepository::findNameSlug($entityManager),
                 'attr' => [
                     'hidden'=> 'hidden',
                     'placeholder' => 'Name slug',
@@ -142,7 +129,6 @@ class ItemFilterType extends AbstractType
             ->add('save', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-primary mb-2',
-
                 ],
             ]);
     }

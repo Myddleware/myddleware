@@ -27,11 +27,13 @@ namespace App\Controller;
 
 use App\Entity\Rule;
 use Psr\Log\LoggerInterface;
+use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
 use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
 use App\Service\UserManagerInterface;
+use App\Repository\DocumentRepository;
 use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,13 +43,12 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+// use the ItemFilterType
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-// use the ItemFilterType
+
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
-use App\Repository\DocumentRepository;
 
 
 /**
@@ -121,6 +122,7 @@ class FilterController extends AbstractController
             'entityManager' => $this->getDoctrine()->getManager()
         ]);
 
+        $formFilter = $this->createForm(FilterType::class, null);
         // $data = $form->getData();
         
         // $queryBuilder = $this->documentRepository->createQueryBuilder('d');
@@ -139,11 +141,19 @@ class FilterController extends AbstractController
         $submittedData = $request->get($formName);
         
         // Submit the form with the submitted data
-        $form->submit($submittedData);
+        // $form->submit($submittedData);
         
         if ($form->isSubmitted() && $form->isValid()) {
-             // get the filtered data
-             $formData = $form->getData();
+            dd('toto');
+            // get the filtered data
+            $formData = $form->getData();
+            foreach ($formData as $key => $value) {
+                 if (is_null($value)) {
+                    unset($formData[$key]); 
+                }
+            }
+
+
              $documents = $this->documentRepository->findBy($formData);
         } 
         
@@ -155,6 +165,7 @@ class FilterController extends AbstractController
         return $this->render('testFilter.html.twig', [
             'documents' => $documents,
             'form' => $form->createView(),
+            'formFilter'=> $formFilter->createView(),
         ]);
 
 

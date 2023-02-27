@@ -236,4 +236,49 @@ class RuleRepository extends ServiceEntityRepository
         return $finalResults;
     }
 
+    public static function findModuleSource(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.moduleSource')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'moduleSource');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
+    public static function findModuleTarget(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.moduleTarget')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'moduleTarget');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
+    public static function findNameSlug(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.nameSlug')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'nameSlug');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
 }
