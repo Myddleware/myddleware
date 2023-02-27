@@ -40,19 +40,17 @@
             </div>
           
             <div class="">
-                  {{ form_widget(form.id) }}
-                  {{ form_widget(form.dateCreated) }}
-                  {{ form_widget(form.dateModified) }}
-                  {{ form_widget(form.moduleSource) }}
-                  {{ form_widget(form.moduleTarget) }} 
-
-                  {{ form_widget(form.name ) }}  
-
-                  {{ form_widget(form.nameSlug) }}
-                  {{ form_widget(form.connectorSource) }}
-                  {{ form_widget(form.connectorTarget) }}
-                  {{ form_widget(form.createdBy) }}
-                  {{ form_widget(form.modifiedBy) }}
+                  {{ form_widget(form.id, {'required': false}) }}
+                  {{ form_widget(form.dateCreated, {'required': false}) }}
+                  {{ form_widget(form.dateModified, {'required': false}) }}
+                  {{ form_widget(form.moduleSource, {'required': false}) }}
+                  {{ form_widget(form.moduleTarget, {'required': false}) }} 
+                  {{ form_widget(form.name, {'required': false}) }}  
+                  {{ form_widget(form.nameSlug, {'required': false}) }}
+                  {{ form_widget(form.connectorSource, {'required': false}) }}
+                  {{ form_widget(form.connectorTarget, {'required': false}) }}
+                  {{ form_widget(form.createdBy, {'required': false}) }}
+                  {{ form_widget(form.modifiedBy, {'required': false}) }}
             </div>
             <div class="input-group mt-2">
                   {{ form_widget(form.save) }}

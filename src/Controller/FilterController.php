@@ -144,7 +144,6 @@ class FilterController extends AbstractController
         // $form->submit($submittedData);
         
         if ($form->isSubmitted() && $form->isValid()) {
-            dd('toto');
             // get the filtered data
             $formData = $form->getData();
             foreach ($formData as $key => $value) {
