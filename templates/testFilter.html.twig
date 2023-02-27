@@ -60,12 +60,53 @@
             </div>
 
             {# {{ dump(doc) }} #}
-
       {{ form_end(form) }}
 
 </section>
 <section class="p-5">
-
+      <h2 class="text-center m-3">Documents</h2>
+      <div class="table-responsive">
+            <table class="table">
+                  <thead>
+                        <tr>
+                              <th>ID</th>
+                              <th>Date Created</th>
+                              <th>Date Modified</th>
+                              <th>Module Source</th>
+                              <th>Module Target</th>
+                              <th>Rule Name</th>
+                              <th>Name Slug</th>
+                              <th>Connector Source</th>
+                              <th>Connector Target</th>
+                              <th>Created By</th>
+                              <th>Modified By</th>
+                        </tr>
+                  </thead>
+                  <tbody>
+                        {% if documents is defined and documents is not empty %}
+                              {% for document in documents %}
+                                    <tr>
+                                          <td>{{ document.id }}</td>
+                                          <td>{{ document.dateCreated|date('Y-m-d H:i:s') }}</td>
+                                          <td>{{ document.dateModified|date('Y-m-d H:i:s') }}</td>
+                                          {# <td>{{ document.moduleSource }}</td>
+                                          <td>{{ document.moduleTarget }}</td>
+                                          <td>{{ document.ruleName }}</td>
+                                          <td>{{ document.nameSlug }}</td>
+                                          <td>{{ document.connectorSource }}</td>
+                                          <td>{{ document.connectorTarget }}</td>
+                                          <td>{{ document.createdBy }}</td>
+                                          <td>{{ document.modifiedBy }}</td> #}
+                                    </tr>
+                              {% endfor %}
+                        {% else %}
+                              <tr>
+                                    <td colspan="11">No documents found.</td>
+                              </tr>
+                        {% endif %}
+                  </tbody>
+            </table>
+      </div>
 </section>
 
 {% endblock %}

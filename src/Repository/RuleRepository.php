@@ -28,11 +28,12 @@ namespace App\Repository;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Rule|null find($id, $lockMode = null, $lockVersion = null)
@@ -218,4 +219,21 @@ class RuleRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+
+    public static function findActiveRulesNames(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.name')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'name');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
 }

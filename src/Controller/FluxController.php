@@ -128,6 +128,10 @@ class FluxController extends AbstractController
         return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
     }
 
+    /**
+     * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
+     * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
+     */
     public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
         //--- Liste status traduction

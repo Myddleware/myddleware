@@ -6,20 +6,24 @@ use App\Entity\Rule;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 
+use App\Repository\RuleRepository;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderExecuterInterface;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 class ItemFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $entityManager = $options['entityManager'];
         $builder
             ->add('filter', Filters\ChoiceFilterType::class, [               
                 'choices' => [
@@ -86,7 +90,7 @@ class ItemFilterType extends AbstractType
                 ],
             ])
             ->add('ruleName',  Filters\ChoiceFilterType::class, [
-                'choices'  => Rule::getNameTest(),
+                'choices'  => RuleRepository::findActiveRulesNames($entityManager),
                 'attr' => [
                     'hidden'=> 'hidden',
                     'placeholder' => 'Name',
@@ -141,19 +145,6 @@ class ItemFilterType extends AbstractType
 
                 ],
             ]);
-            // $builder->add('options', Filters\CollectionAdapterFilterType::class, array(
-               
-            //     'add_shared' => function (FilterBuilderExecuterInterface $qbe)  {
-            //         $closure = function (QueryBuilder $filterBuilder, $alias, $joinAlias, Expr $expr) {
-            //             // add the join clause to the doctrine query builder
-            //             // the where clause for the label and color fields will be added automatically with the right alias later by the Lexik\Filter\QueryBuilderUpdater
-            //             $filterBuilder->leftJoin($alias . '.options', $joinAlias);
-            //         };
-    
-            //         // then use the query builder executor to define the join and its alias.
-            //         $qbe->addOnce($qbe->getAlias().'.options', 'opt', $closure);
-            //     },
-            // ));
     }
 
     public function getBlockPrefix()
@@ -168,5 +159,8 @@ class ItemFilterType extends AbstractType
             'validation_groups' => array('filtering'), // avoid NotBlank() constraint-related message
             'data_class' => Rule::class,
         ));
+
+        $resolver->setRequired('entityManager');
+        $resolver->setAllowedTypes('entityManager', EntityManagerInterface::class);
     }
 }
