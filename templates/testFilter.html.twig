@@ -27,29 +27,52 @@
 {% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 <!-- testFilter.html.twig -->
-<section class="p-5">
+<div class="px-5">
       <h2 class="text-center m-3">Filters</h2>
       {{ form_start(formFilter) }}
+      <div class="input-group">
             {{ form_widget(formFilter.filter) }}
-      {{ form_end(formFilter) }}
-      {{ form_start(form) }}
-            <div class="input-group">
-                  <div class="btn btn-primary">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                  </div>
+      
+            <div class="btn btn-primary">
+                  <i class="fa fa-plus" aria-hidden="true"></i>
             </div>
+      </div>
+       {{ form_end(formFilter) }}
+      {{ form_start(form) }}
+      
           
-            <div class="">
+            <div class="m-3">
+                  {{ form_label(form.id, 'ID', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.id, {'required': false}) }}
+
+                  {{ form_label(form.dateCreated, 'date created', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.dateCreated, {'required': false}) }}
+
+                  {{ form_label(form.dateModified, 'Date modified', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.dateModified, {'required': false}) }}
+
+                  {{ form_label(form.moduleSource, 'Module source', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.moduleSource, {'required': false}) }}
-                  {{ form_widget(form.moduleTarget, {'required': false}) }} 
-                  {{ form_widget(form.name, {'required': false}) }}  
+
+                  {{ form_label(form.moduleTarget, 'Module target', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.moduleTarget, {'required': false}) }}
+
+                  {{ form_label(form.name, 'Name', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.name, {'required': false}) }}
+
+                  {{ form_label(form.nameSlug, 'Name slug', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.nameSlug, {'required': false}) }}
+
+                  {{ form_label(form.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.connectorSource, {'required': false}) }}
+
+                  {{ form_label(form.connectorTarget, 'Connector target', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.connectorTarget, {'required': false}) }}
+
+                  {{ form_label(form.createdBy, 'Created by', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.createdBy, {'required': false}) }}
+
+                  {{ form_label(form.modifiedBy, 'Modified by', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.modifiedBy, {'required': false}) }}
             </div>
             <div class="input-group mt-2">
@@ -62,7 +85,7 @@
             {# {{ dump(doc) }} #}
       {{ form_end(form) }}
 
-</section>
+</div>
 <section class="p-5">
       <h2 class="text-center m-3">Documents</h2>
       <div class="table-responsive">
