@@ -109,8 +109,8 @@
                         </tr>
                   </thead>
                   <tbody>
-                        {% if documents is defined and documents is not empty %}
-                              {% for document in documents %}
+                        {% if pager is defined and pager is not empty %}
+                              {% for document in pager %}
                                     <tr>
                                           <td>{{ document.id }}</td>
                                           {# <td>{{ document.dateCreated|date('Y-m-d H:i:s') }}</td> #}
