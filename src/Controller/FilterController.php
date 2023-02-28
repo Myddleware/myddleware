@@ -124,7 +124,6 @@ class FilterController extends AbstractController
         ]);
 
         $formFilter = $this->createForm(FilterType::class, null);
-        
 
         $form->handleRequest($request);
         

@@ -76,7 +76,6 @@ class ItemFilterType extends AbstractType
             ])
             ->add('name',  Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findActiveRulesNames($entityManager),
-                'multiple' => true,
                 'attr' => [
                     'hidden'=> 'true',
                     'placeholder' => 'Name',
