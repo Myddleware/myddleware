@@ -151,9 +151,7 @@ class FilterController extends AbstractController
                     unset($formData[$key]); 
                 }
             }
-
-
-             $documents = $this->documentRepository->findBy($formData);
+            $documents = $this->documentRepository->findBy($formData);
         } 
         
         else {

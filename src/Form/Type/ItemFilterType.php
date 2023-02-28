@@ -28,8 +28,7 @@ class ItemFilterType extends AbstractType
         $builder
             ->add('id', TextType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
-
+                    'hidden'=> 'true',
                     'class' => 'form-control mt-2',
                     'id' => 'id',
                     'placeholder' => 'Id',
@@ -37,7 +36,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('dateCreated', DateTimeType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
@@ -48,7 +47,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('dateModified', DateTimeType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Date modified',
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'dateModified'
@@ -60,7 +59,7 @@ class ItemFilterType extends AbstractType
             ->add('moduleSource', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleSource($entityManager),
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Module source',
                     'class' => 'form-control mt-2',
                     'id' => 'moduleSource'
@@ -69,7 +68,7 @@ class ItemFilterType extends AbstractType
             ->add('moduleTarget', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleTarget($entityManager),
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Module target',
                     'class' => 'form-control mt-2',
                     'id' => 'moduleTarget'
@@ -78,7 +77,7 @@ class ItemFilterType extends AbstractType
             ->add('name',  Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findActiveRulesNames($entityManager),
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Name',
                     'class' => 'form-control mt-2',
                     'id' => 'name'
@@ -87,7 +86,7 @@ class ItemFilterType extends AbstractType
             ->add('nameSlug',Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findNameSlug($entityManager),
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Name slug',
                     'class' => 'form-control mt-2',
 
@@ -96,7 +95,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('connectorSource', TextType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Connector source',
                     'class' => 'form-control mt-2',
                     'id' => 'connectorSource'
@@ -104,7 +103,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('connectorTarget', TextType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Connector target',
                     'class' => 'form-control mt-2',
                     'id' => 'connectorTarget'
@@ -112,7 +111,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('createdBy', TextType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Created by',
                     'class' => 'form-control mt-2',
                     'id' => 'createdBy'
@@ -120,7 +119,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('modifiedBy', TextType::class, [
                 'attr' => [
-                    'hidden'=> 'hidden',
+                    'hidden'=> 'true',
                     'placeholder' => 'Modified by',
                     'class' => 'form-control mt-2',
                     'id' => 'modifiedBy'
