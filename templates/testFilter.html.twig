@@ -37,7 +37,22 @@
                   <i class="fa fa-plus" aria-hidden="true"></i>
             </div>
       </div>
-       {{ form_end(formFilter) }}
+      {{ form_end(formFilter) }}
+      {{ form_start(formDoc) }}       
+            <div class="m-3">
+                  {{ form_label(formDoc.status, 'Status', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(formDoc.status, {'required': false}) }}
+
+                  {{ form_label(formDoc.type, 'Type', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(formDoc.type, {'required': false}) }}
+
+                  {{ form_label(formDoc.target, 'Target id', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(formDoc.target, {'required': false}) }}
+
+                  {{ form_label(formDoc.source, 'Source id', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(formDoc.source, {'required': false}) }}
+            </div>
+      {{ form_end(formDoc) }}
       {{ form_start(form) }}
       
           
@@ -83,10 +98,7 @@
                         <i class="fa fa-search"></i>
                   </div>
             </div>
-
-            {# {{ dump(doc) }} #}
       {{ form_end(form) }}
-
 </div>
 <section class="p-5">
       <h2 class="text-center m-3">Documents</h2>
