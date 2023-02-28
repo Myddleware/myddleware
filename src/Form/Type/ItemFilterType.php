@@ -95,7 +95,6 @@ class ItemFilterType extends AbstractType
                     'hidden'=> 'true',
                     'placeholder' => 'Name slug',
                     'class' => 'form-control mt-2',
-
                     'id' => 'nameSlug'
                 ],
             ])
