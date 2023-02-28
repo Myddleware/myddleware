@@ -236,6 +236,20 @@ class RuleRepository extends ServiceEntityRepository
         return $finalResults;
     }
 
+    public static function findActiveRulesIds(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.id')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'id');
+        return $curatedResults;
+    }
+
     public static function findModuleSource(EntityManagerInterface $entityManager)
     {
         $qb = $entityManager->createQueryBuilder();
