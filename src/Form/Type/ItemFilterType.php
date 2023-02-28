@@ -3,14 +3,7 @@
 namespace App\Form\Type;
 
 use App\Entity\Rule;
-use App\Entity\Document;
-use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\QueryBuilder;
-
-use Doctrine\ORM\Mapping\Entity;
 use App\Repository\RuleRepository;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Form\FormBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;

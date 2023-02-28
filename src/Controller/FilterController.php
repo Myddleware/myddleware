@@ -31,6 +31,7 @@ use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
+use App\Form\Type\DocFilterType;
 use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Repository\RuleRepository;
@@ -42,15 +43,15 @@ use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 // use the ItemFilterType
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpKernel\KernelInterface;
 
+use Symfony\Component\HttpKernel\KernelInterface;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -128,33 +129,34 @@ class FilterController extends AbstractController
         $form = $this->createForm(ItemFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager()
         ]);
+        $formDoc = $this->createForm(DocFilterType::class, null, [
+            'entityManager' => $this->getDoctrine()->getManager()
+        ]);
 
         $formFilter = $this->createForm(FilterType::class, null);
 
-        $form->handleRequest($request);
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            $formDoc->handleRequest($request);
         
-        if ($form->isSubmitted() && $form->isValid()) {
-            
-            $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
-            $cleanData = [
-                'rule' => $rules[$form->get('name')->getData()],
-            ];
+            if ($form->isSubmitted() && $formDoc->isSubmitted() && $form->isValid() && $formDoc->isValid()) {
+                $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
+                $cleanData = [
+                    'rule' => $rules[$form->get('name')->getData()],
+                ];
 
-            $limit = $this->getLimitConfig();
-            $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
-            $documents = $searchParameters['documents'];
-            $page = $searchParameters['page'];
-            $limit = $searchParameters['limit'];
-            
-
-
-            
-        } else {
-            $documents = [];
-            $page = 1;
-            // $this->params['pager'] = 25;
+                $limit = $this->getLimitConfig();
+                $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
+                $documents = $searchParameters['documents'];
+                $page = $searchParameters['page'];
+                $limit = $searchParameters['limit'];
+            } else {
+                    $documents = [];
+                    $page = 1;
+                    // $this->params['pager'] = 25;
+                }
         }
-
+        
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $documents,
             // 'maxPerPage' => $this->params['pager'] ?? 25,
@@ -168,6 +170,7 @@ class FilterController extends AbstractController
             'pager' => $compact['pager'],
             // 'documents' => $documents,
             'form' => $form->createView(),
+            'formDoc' => $formDoc->createView(), 
             'formFilter'=> $formFilter->createView(),
         ]);
 
