@@ -17,17 +17,21 @@ class FilterType extends AbstractType
             ->add('filter', Filters\ChoiceFilterType::class, [               
                 'choices' => [
                     '- Select your filters -' => 'default',
-                    'Rule name' => 'name',
-                    'Date of modification' => 'dateModified',
                     'Id' => 'id',
+                    'Rule name' => 'name',
+                    'Name slug' => 'nameSlug',
+                    'Date of modification' => 'dateModified',
                     'Date start' => 'dateCreated',
                     'Module source' => 'moduleSource',
                     'Module target' => 'moduleTarget',
-                    'Name slug' => 'nameSlug',
                     'Connector source' => 'connectorSource',
                     'Connector target' => 'connectorTarget',
                     'Created by' => 'createdBy',
                     'Modified by' => 'modifiedBy',
+                    'Source id' => 'sourceId',
+                    'Target id' => 'targetId',
+                    'Status' => 'status',
+                    'Type' => 'type',
                 ],
 
                 'attr' => [

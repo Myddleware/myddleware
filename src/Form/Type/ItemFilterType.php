@@ -3,14 +3,18 @@
 namespace App\Form\Type;
 
 use App\Entity\Rule;
+use App\Entity\Document;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 
+use Doctrine\ORM\Mapping\Entity;
 use App\Repository\RuleRepository;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\FormBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -36,10 +40,9 @@ class ItemFilterType extends AbstractType
                 ],
             ])
             ->add('dateCreated', DateTimeType::class, [
-                'widget' => 'single_text',
+                // 'widget' => 'single_text',
                 'attr' => [
                     'hidden'=> 'true',
-                    'type' => 'date',
                     'class' => 'form-control mt-2 ',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
@@ -49,9 +52,8 @@ class ItemFilterType extends AbstractType
                 ],
             ])
             
-            
-            ->add('dateModified', DateType::class, [
-                'widget' => 'single_text',
+            ->add('dateModified', DateTimeType::class, [
+                // 'widget' => 'single_text',
                 'attr' => [
                     'hidden'=> 'true',
                     'placeholder' => 'Date modified',
