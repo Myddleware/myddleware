@@ -13,6 +13,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -35,9 +36,11 @@ class ItemFilterType extends AbstractType
                 ],
             ])
             ->add('dateCreated', DateTimeType::class, [
+                'widget' => 'single_text',
                 'attr' => [
                     'hidden'=> 'true',
-                    'class' => 'form-control mt-2 calendar',
+                    'type' => 'date',
+                    'class' => 'form-control mt-2 ',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
                 ],
@@ -45,11 +48,14 @@ class ItemFilterType extends AbstractType
                     new NotBlank(),
                 ],
             ])
-            ->add('dateModified', DateTimeType::class, [
+            
+            
+            ->add('dateModified', DateType::class, [
+                'widget' => 'single_text',
                 'attr' => [
                     'hidden'=> 'true',
                     'placeholder' => 'Date modified',
-                    'class' => 'form-control mt-2 calendar',
+                    'class' => 'form-control mt-2',
                     'id' => 'dateModified'
                 ],
                 'constraints' => [
