@@ -26,6 +26,8 @@
 namespace App\Controller;
 
 use App\Entity\Rule;
+use App\Entity\Config;
+use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
@@ -33,20 +35,24 @@ use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Repository\RuleRepository;
 use App\Form\Type\ResetPasswordType;
+use Pagerfanta\Adapter\ArrayAdapter;
 use App\Service\UserManagerInterface;
 use App\Repository\DocumentRepository;
 use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+// use the ItemFilterType
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
+
+use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-// use the ItemFilterType
+
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -134,16 +140,33 @@ class FilterController extends AbstractController
                 'rule' => $rules[$form->get('name')->getData()],
             ];
 
-             $documents = $this->searchDocuments($cleanData, 1, 1000);
-        } 
-        
-        else {
-            // get all documents if form is not submitted or invalid
-            $documents = array();
+            $limit = $this->getLimitConfig();
+            $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
+            $documents = $searchParameters['documents'];
+            $page = $searchParameters['page'];
+            $limit = $searchParameters['limit'];
+            
+
+
+            
+        } else {
+            $documents = [];
+            $page = 1;
+            // $this->params['pager'] = 25;
         }
 
+        $compact = $this->nav_pagination([
+            'adapter_em_repository' => $documents,
+            // 'maxPerPage' => $this->params['pager'] ?? 25,
+            'maxPerPage' => 25,
+            'page' => $page,
+        ], false);
+        
+        
+
         return $this->render('testFilter.html.twig', [
-            'documents' => $documents,
+            'pager' => $compact['pager'],
+            // 'documents' => $documents,
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
         ]);
@@ -154,6 +177,45 @@ class FilterController extends AbstractController
             'form' => $form->createView(),
             // 'rules' => $listRuleName
         ));
+    }
+
+
+    public function getLimitConfig()
+    {
+        // Get the limit parameter
+        $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+        $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+        if (!empty($searchLimit)) {
+            $limit = $searchLimit->getValue();
+        }
+        return $limit;
+    }
+
+
+    public function prepareSearch($cleanData, $page = 1, $limit = 1000)
+    {
+        $doNotSearch = false;
+
+            if (
+                count(array_filter($cleanData)) === 0
+                and $page == 1
+            ) {
+                $doNotSearch = true;
+            }
+
+            if (!$doNotSearch) {
+                $documents = $this->searchDocuments($cleanData, $page, $limit);
+                // $resultSearch = $this->searchDocuments($data, $page, $limit); 
+            } else {
+                $documents = array();
+            }
+
+        $searchParameters = [
+            'documents' => $documents,
+            'page' => $page,
+            'limit' => $limit,
+        ];
+        return $searchParameters;
     }
 
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
@@ -303,5 +365,40 @@ class FilterController extends AbstractController
         }
         // Run the query and return the results
         return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
+    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
+    private function nav_pagination($params, $orm = true)
+    {
+        /*
+            * adapter_em_repository = requete
+            * maxPerPage = integer
+            * page = page en cours
+            */
+
+        if (is_array($params)) {
+            $compact = [];
+            if ($orm) {
+                $queryBuilder = $params['adapter_em_repository'];
+                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+                $compact['pager'] = $pagerfanta;
+            } else {
+                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            }
+            $maxPerPage = intval($params['maxPerPage']);
+            $currentPage = intval($params['page']);
+            $compact['pager']->setMaxPerPage($maxPerPage);
+            try {
+                $compact['pager']->setCurrentPage($currentPage);
+                $compact['nb'] = $compact['pager']->getNbResults();
+                $compact['entities'] = $compact['pager']->getCurrentPageResults();
+            } catch (NotValidCurrentPageException $e) {
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            }
+
+            return $compact;
+        }
+
+        return false;
     }
 }
