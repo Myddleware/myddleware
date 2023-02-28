@@ -97,31 +97,30 @@
                               <th>ID</th>
                               <th>Date Created</th>
                               <th>Date Modified</th>
-                              <th>Module Source</th>
-                              <th>Module Target</th>
-                              <th>Rule Name</th>
-                              <th>Name Slug</th>
-                              <th>Connector Source</th>
-                              <th>Connector Target</th>
-                              <th>Created By</th>
-                              <th>Modified By</th>
+                              <th>Status</th>
+                              <th>Source id</th>
+                              <th>Target id</th>
+                              <th>Type</th>
+                              <th>Global status</th>
+                              <th>Rule name</th>
+                              <th>Rule id</th>
                         </tr>
                   </thead>
                   <tbody>
                         {% if pager is defined and pager is not empty %}
                               {% for document in pager %}
+                              {# {{ dump(document) }} #}
                                     <tr>
                                           <td>{{ document.id }}</td>
-                                          {# <td>{{ document.dateCreated|date('Y-m-d H:i:s') }}</td> #}
-                                          {# <td>{{ document.dateModified|date('Y-m-d H:i:s') }}</td> #}
-                                          {# <td>{{ document.moduleSource }}</td>
-                                          <td>{{ document.moduleTarget }}</td>
-                                          <td>{{ document.ruleName }}</td>
-                                          <td>{{ document.nameSlug }}</td>
-                                          <td>{{ document.connectorSource }}</td>
-                                          <td>{{ document.connectorTarget }}</td>
-                                          <td>{{ document.createdBy }}</td>
-                                          <td>{{ document.modifiedBy }}</td> #}
+                                          <td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
+                                          <td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
+                                          <td>{{ document.status }}</td>
+                                          <td>{{ document.source_id }}</td>
+                                          <td>{{ document.target_id }}</td>
+                                          <td>{{ document.type }}</td>
+                                          <td>{{ document.global_status }}</td>
+                                          <td>{{ document.rule_name }}</td>
+                                          <td>{{ document.rule_id }}</td>
                                     </tr>
                               {% endfor %}
                         {% else %}
