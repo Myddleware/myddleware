@@ -31,6 +31,7 @@ use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
 use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
+use App\Repository\RuleRepository;
 use App\Form\Type\ResetPasswordType;
 use App\Service\UserManagerInterface;
 use App\Repository\DocumentRepository;
@@ -42,11 +43,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 // use the ItemFilterType
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -123,40 +124,25 @@ class FilterController extends AbstractController
         ]);
 
         $formFilter = $this->createForm(FilterType::class, null);
-        // $data = $form->getData();
         
-        // $queryBuilder = $this->documentRepository->createQueryBuilder('d');
-        
-        // // apply filters to query builder
-        // $filterQueryBuilder = $this->get('lexik_form_filter.query_builder_updater')
-        //     ->addFilterConditions($form, $queryBuilder);
-        
-        // // get filtered results
-        // $documents = $filterQueryBuilder->getQuery()->getResult();
-        
-        // Get the name of the form
-        $formName = $form->getName();
-        // Get the submitted data for the form
-        // $submittedData = $request->request->get($formName);
-        $submittedData = $request->get($formName);
-        
-        // Submit the form with the submitted data
-        // $form->submit($submittedData);
+
+        $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-            // get the filtered data
             $formData = $form->getData();
-            foreach ($formData as $key => $value) {
-                 if (is_null($value)) {
-                    unset($formData[$key]); 
-                }
-            }
-            $documents = $this->documentRepository->findBy($formData);
+
+            $rules = RuleRepository::findActiveRulesIds($this->entityManager);
+            
+            $cleanData = [
+                'rule' => $rules[$form->get('name')->getData()],
+            ];
+
+             $documents = $this->documentRepository->findBy($cleanData);
         } 
         
         else {
             // get all documents if form is not submitted or invalid
-            $documents = $this->documentRepository->findAll();
+            $documents = array();
         }
 
         return $this->render('testFilter.html.twig', [
