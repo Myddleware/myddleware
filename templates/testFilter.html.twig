@@ -58,9 +58,13 @@
                   {{ form_widget(form.moduleTarget, {'required': false}) }}
 
                   {{ form_label(form.name, 'Name', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.name, {'required': false}) }}
+                  {{ form_widget(form.name, {'required': false, 'attr': {'class': 'form-control', 'multiple': 'multiple'}}) }}
+                  {{ form_errors(form.name) }}
 
                   {{ form_label(form.nameSlug, 'Name slug', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.moduleTarget, {'required': false}) }} 
+
+
                   {{ form_widget(form.nameSlug, {'required': false}) }}
 
                   {{ form_label(form.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
@@ -110,8 +114,8 @@
                               {% for document in documents %}
                                     <tr>
                                           <td>{{ document.id }}</td>
-                                          <td>{{ document.dateCreated|date('Y-m-d H:i:s') }}</td>
-                                          <td>{{ document.dateModified|date('Y-m-d H:i:s') }}</td>
+                                          {# <td>{{ document.dateCreated|date('Y-m-d H:i:s') }}</td> #}
+                                          {# <td>{{ document.dateModified|date('Y-m-d H:i:s') }}</td> #}
                                           {# <td>{{ document.moduleSource }}</td>
                                           <td>{{ document.moduleTarget }}</td>
                                           <td>{{ document.ruleName }}</td>

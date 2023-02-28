@@ -221,7 +221,7 @@ class RuleRepository extends ServiceEntityRepository
     }
 
 
-    public static function findActiveRulesNames(EntityManagerInterface $entityManager)
+    public static function findActiveRulesNames(EntityManagerInterface $entityManager, bool $isDocSearchResult=false)
     {
         $qb = $entityManager->createQueryBuilder();
 
@@ -233,6 +233,9 @@ class RuleRepository extends ServiceEntityRepository
 
         $curatedResults =  array_column($results, 'name');
         $finalResults = array_flip($curatedResults);
+        if ($isDocSearchResult) {
+            $finalResults = array_flip($finalResults);
+        }
         return $finalResults;
     }
 
