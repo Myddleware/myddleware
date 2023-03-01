@@ -59,6 +59,7 @@ class ItemFilterType extends AbstractType
             ])
             ->add('moduleSource', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleSource($entityManager),
+                
                 'attr' => [
                     'hidden'=> 'true',
                     'placeholder' => 'Module source',
