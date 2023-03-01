@@ -100,6 +100,12 @@
             </div>
       {{ form_end(form) }}
 </div>
+<div class="col mt-4">
+						<a class="btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+							<i class="fas fa-redo"></i>
+							{{'list_flux.btn.filter_delete'|trans}}
+						</a>
+					</div>
 <section class="p-5">
       <h2 class="text-center m-3">Documents</h2>
       <div class="table-responsive">
