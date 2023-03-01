@@ -97,6 +97,20 @@
             </div>
       {{ form_end(form) }}
 </div>
+<div class="col mt-4">
+						<a class="btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+							<i class="fas fa-redo"></i>
+							{{'list_flux.btn.filter_delete'|trans}}
+						</a>
+					</div>
+                              <div class="p-3 row">
+			<p>
+				<a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
+					(<span></span>)</a>
+				<a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
+					(<span></span>)</a>
+			</p>
+		</div>
 <section class="p-5">
       <h2 class="text-center m-3">Documents</h2>
       <div class="table-responsive">
@@ -147,9 +161,26 @@
 				</div>
 </section>
 
+{% block javascript %}
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		{{ encore_entry_script_tags('app') }}
+	{% endblock javascript %}
+	<script type="text/javascript">
+		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
+		var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
+		var path_img = "{{ asset('build/images/regle/') }}";
+		var lang = "{{ app.request.locale }}";
+		var mass_cancel = "{{ path('flux_mass_cancel') }}";
+		var mass_run = "{{ path('flux_mass_run') }}";
+		// DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
+		start = new dtsel.DTS('#form_date_modif_end',  {
+			showTime: true
+			});
+		end = new dtsel.DTS('#form_date_modif_start',  {
+			showTime: true
+			});
+	</script>
+
 {% endblock %}
 
 {% block cssin %}{% endblock cssin %}
-
-{% block js %}
-{% endblock js %}

@@ -582,7 +582,7 @@ class FluxController extends AbstractController
             $this->sessionService->removeFluxFilter();
         }
 
-        return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
     }
 
     /**

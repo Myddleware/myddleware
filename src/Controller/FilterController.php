@@ -162,7 +162,8 @@ class FilterController extends AbstractController
             $timezone = $this->getUser()->getTimezone();
         }
 
-        if ($request->isMethod('POST') || $page !== 1) {
+
+        if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
             $form->handleRequest($request);
             //$formDoc->handleRequest($request);
         
@@ -183,26 +184,24 @@ class FilterController extends AbstractController
             $conditions = 0;
             $doNotSearch = false;
 
-            if ($form->get('save')->isClicked() || $page !== 1) {
+            if ($form->get('save')->isClicked() || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
 
             if ($form->isSubmitted() && $form->isValid()) {
                 
+
+                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
+
 
                     $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
                     $documentsType = DocumentRepository::findDocType($this->entityManager, true);
                     $lstCategory = $this->entityManager->getRepository(Document::class)->findAll();
                     
+
                     $data = [];
                     if (!empty($form->get('itemFilter')->get('name'))) {
                         $data['rule'] = $rules[$form->get('itemFilter')->get('name')];
                     } else {
                         $data['rule'] = null;
-                    }
-                   // dd($formDoc, $form);
-                    if (!empty($form->get('docFilter')->get('type'))) {
-                        $data['type'] = $documentsType[$form->get('docFilter')->get('type')];
-                    } else {
-                        $data['type'] = null;
                     }
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -217,7 +216,7 @@ class FilterController extends AbstractController
                     } else {
                         $this->sessionService->removeFluxFilterSourceContent();
                     }
-        
+
                     if (!empty($data['target_content']) && is_string($data['target_content'])) {
                         $this->sessionService->setFluxFilterTargetContent($data['target_content']);
                     } else {
@@ -375,6 +374,28 @@ class FilterController extends AbstractController
 
     }
 
+    public function verifyIfEmptyFilters()
+    {
+        $isEmpty = true;
+        $data['target_content']     = $this->sessionService->getFluxFilterSourceContent();
+        $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
+        $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
+        $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
+        $data['rule']               = $this->sessionService->getFluxFilterRuleName();
+        $data['status']             = $this->sessionService->getFluxFilterStatus();
+        $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
+        $data['type']               = $this->sessionService->getFluxFilterType();
+        $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
+        $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+
+        foreach ($data as $key => $value) {
+            if (!empty($value)) {
+                $isEmpty = false;
+                break;
+            }
+        }
+        return $isEmpty;
+    }
 
     public function getLimitConfig()
     {
