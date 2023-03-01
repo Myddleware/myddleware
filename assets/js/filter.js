@@ -1,18 +1,21 @@
 $(document).ready(function() {
     $('#item_filter_filter').on('change', function() {
+        
         var selectedValue = $(this).val();
-        $('#item_filter_' + selectedValue).removeAttr('hidden');
-
-        // Récupérer l'élément label
-        var labelFor = $('label[for="item_filter_' + selectedValue + '"]');
+        $('#combined_filter_document_' + selectedValue).removeAttr('hidden');
+        $('#combined_filter_rule_' + selectedValue).removeAttr('hidden');
+        
+        // Get the label element
+        var labelFor = $('label[for="combined_filter_document_' + selectedValue + '"]');
         var labelForValue = labelFor.attr('for');
-        // Récupérer à nouveau l'élément label
-        var labelFor = $('label[for="item_filter_' + selectedValue + '"]');
+        // Get the label element again
+        var labelForRule = $('label[for="combined_filter_rule_' + selectedValue + '"]');
         var labelForValue = labelFor.attr('for');
-
         labelFor.removeAttr('hidden');
+        labelForRule.removeAttr('hidden');
     });
 });
+
 
 
 

@@ -27,38 +27,40 @@ namespace App\Controller;
 
 use App\Entity\Rule;
 use App\Entity\Config;
+use App\Entity\Document;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
+use App\Service\SessionService;
 use App\Form\Type\DocFilterType;
 use App\Form\Type\ItemFilterType;
 use App\Form\Type\ProfileFormType;
 use App\Repository\RuleRepository;
 use App\Form\Type\ResetPasswordType;
 use Pagerfanta\Adapter\ArrayAdapter;
+use App\Form\Type\CombinedFilterType;
 use App\Service\UserManagerInterface;
 use App\Repository\DocumentRepository;
 use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
+// use the ItemFilterType
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
-// use the ItemFilterType
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
 use Symfony\Component\HttpKernel\KernelInterface;
+
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
-use App\Service\SessionService;
 
 
 /**
@@ -141,16 +143,17 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-        $form = $this->createForm(ItemFilterType::class, null, [
-            'entityManager' => $this->getDoctrine()->getManager()
-        ]);
-        $formDoc = $this->createForm(DocFilterType::class, null, [
-            'entityManager' => $this->getDoctrine()->getManager()
-        ]);
-
+        // $formRule = $this->createForm(ItemFilterType::class, null, [
+        //     'entityManager' => $this->getDoctrine()->getManager()
+        // ]);
+        // $formDoc = $this->createForm(DocFilterType::class, null, [
+        //     'entityManager' => $this->getDoctrine()->getManager()
+        // ]);
         $formFilter = $this->createForm(FilterType::class, null);
-
-        
+        $form = $this->createForm(CombinedFilterType::class, null, [
+            'entityManager' => $this->getDoctrine()->getManager(),
+        ]);
+             
         $conditions = 0;
         //Check the user timezone
         if ($timezone = '') {
@@ -161,7 +164,7 @@ class FilterController extends AbstractController
 
         if ($request->isMethod('POST') || $page !== 1) {
             $form->handleRequest($request);
-            $formDoc->handleRequest($request);
+            //$formDoc->handleRequest($request);
         
 
             $data = [];
@@ -182,30 +185,31 @@ class FilterController extends AbstractController
 
             if ($form->get('save')->isClicked() || $page !== 1) {
 
-            if (($form->isSubmitted() || $formDoc->isSubmitted()) && ($form->isValid() || $formDoc->isValid())) {
-                    $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
+            if ($form->isSubmitted() && $form->isValid()) {
+                
 
+                    $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
+                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
+                    $lstCategory = $this->entityManager->getRepository(Document::class)->findAll();
+                    
                     $data = [];
-                    if (isset($rules[$form->get('name')->getData()])) {
-                        $data['rule'] = $rules[$form->get('name')->getData()];
+                    if (!empty($form->get('itemFilter')->get('name'))) {
+                        $data['rule'] = $rules[$form->get('itemFilter')->get('name')];
                     } else {
                         $data['rule'] = null;
                     }
-
-                    if (!empty($form->get('id')->getData())) {
-                        $data['id'] = $form->get('id')->getData();
+                   // dd($formDoc, $form);
+                    if (!empty($form->get('docFilter')->get('type'))) {
+                        $data['type'] = $documentsType[$form->get('docFilter')->get('type')];
                     } else {
-                        $data['id'] = null;
+                        $data['type'] = null;
                     }
-
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);
                         }
                     }
-
                     
-
                     if ($page === 1) {
                     // Store the filter in session
                     if (!empty($data['source_content']) && is_string($data['source_content'])) {
@@ -357,7 +361,7 @@ class FilterController extends AbstractController
 
         return $this->render('testFilter.html.twig', [
             'form' => $form->createView(),
-            'formDoc' => $formDoc->createView(), 
+            //'formDoc' => $formDoc->createView(), 
             'formFilter'=> $formFilter->createView(),
             // 'pager' => $compact['pager'],
             'documents' => $documents,

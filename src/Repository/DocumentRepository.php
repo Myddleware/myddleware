@@ -401,15 +401,18 @@ class DocumentRepository extends ServiceEntityRepository
     {
         $qb = $entityManager->createQueryBuilder();
 
+        
         $qb->select('d.type')
         ->from('App\Entity\Document', 'd')
-        ->where('d.deleted = 0');
+        ->where('d.deleted = 0')
+        ->groupBy('d.type');
 
-        $results = $qb->getQuery()->getScalarResult();
-
+        $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
         $curatedResults =  array_column($results, 'type');
-        $finalResults = array_flip($curatedResults);
-        return $finalResults;
+        $final = array_flip($curatedResults);
+        //$finale = array_flip($test);
+
+        return $final;
     }
     
     public static function findStatusType(EntityManagerInterface $entityManager)

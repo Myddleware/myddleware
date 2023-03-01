@@ -38,62 +38,59 @@
             </div>
       </div>
       {{ form_end(formFilter) }}
-      {{ form_start(formDoc) }}       
+      {{ form_start(form) }}       
             <div class="m-3">
-                  {{ form_label(formDoc.status, 'Status', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(formDoc.status, {'required': false}) }}
+                {{ form_label(form.document.status, 'Status', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.status, {'required': false}) }}
 
-                  {{ form_label(formDoc.type, 'Type', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(formDoc.type, {'required': false}) }}
+                  {{ form_label(form.document.type, 'Type', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.type, {'required': false}) }}
 
-                  {{ form_label(formDoc.target, 'Target id', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(formDoc.target, {'required': false}) }}
+                  {{ form_label(form.document.target, 'Target id', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.target, {'required': false}) }}
 
-                  {{ form_label(formDoc.source, 'Source id', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(formDoc.source, {'required': false}) }}
-            </div>
-      {{ form_end(formDoc) }}
-      {{ form_start(form) }}
-      
+                  {{ form_label(form.document.source, 'Source id', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.source, {'required': false}) }}
+            </div>      
           
             <div class="m-3">
-                  {{ form_label(form.id, 'ID', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.id, {'required': false}) }}
+                  {{ form_label(form.rule.id, 'ID', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.id, {'required': false}) }}
 
-                  {{ form_label(form.dateCreated, 'date created', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.dateCreated, {'required': false}) }}
+                  {{ form_label(form.rule.dateCreated, 'date created', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.dateCreated, {'required': false}) }}
 
-                  {{ form_label(form.dateModified, 'Date modified', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.dateModified, {'required': false}) }}
+                  {{ form_label(form.rule.dateModified, 'Date modified', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.dateModified, {'required': false}) }}
 
-                  {{ form_label(form.moduleSource, 'Module source', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.moduleSource, {'required': false}) }}
+                  {{ form_label(form.rule.moduleSource, 'Module source', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.moduleSource, {'required': false}) }}
 
-                  {{ form_label(form.moduleTarget, 'Module target', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.moduleTarget, {'required': false}) }}
+                  {{ form_label(form.rule.moduleTarget, 'Module target', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
 
-                  {{ form_label(form.name, 'Name', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
-                  {{ form_errors(form.name) }}
+                  {{ form_label(form.rule.name, 'Name', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
+                  {{ form_errors(form.rule.name) }}
 
 
-                  {{ form_label(form.nameSlug, 'Name slug', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.nameSlug, {'required': false}) }}
+                  {{ form_label(form.rule.nameSlug, 'Name slug', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.nameSlug, {'required': false}) }}
 
-                  {{ form_label(form.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.connectorSource, {'required': false}) }}
+                  {{ form_label(form.rule.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.connectorSource, {'required': false}) }}
 
-                  {{ form_label(form.connectorTarget, 'Connector target', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.connectorTarget, {'required': false}) }}
+                  {{ form_label(form.rule.connectorTarget, 'Connector target', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
 
-                  {{ form_label(form.createdBy, 'Created by', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.createdBy, {'required': false}) }}
+                  {{ form_label(form.rule.createdBy, 'Created by', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.createdBy, {'required': false}) }}
 
-                  {{ form_label(form.modifiedBy, 'Modified by', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.modifiedBy, {'required': false}) }}
+                  {{ form_label(form.rule.modifiedBy, 'Modified by', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.rule.modifiedBy, {'required': false}) }}
             </div>
             <div class="input-group mt-2">
-                  {{ form_widget(form.save) }}
+                  {{ form_widget(form.rule.save) }}
                   <div class="btn btn-primary mb-2">
                         <i class="fa fa-search"></i>
                   </div>
