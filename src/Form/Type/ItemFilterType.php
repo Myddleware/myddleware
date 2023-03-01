@@ -125,11 +125,6 @@ class ItemFilterType extends AbstractType
                     'class' => 'form-control mt-2',
                     'id' => 'modifiedBy'
                 ],
-            ])
-            ->add('save', SubmitType::class, [
-                'attr' => [
-                    'class' => 'btn btn-primary mb-2',
-                ],
             ]);
     }
 

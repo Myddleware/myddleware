@@ -198,8 +198,8 @@ class FilterController extends AbstractController
                     
 
                     $data = [];
-                    if (!empty($form->get('itemFilter')->get('name'))) {
-                        $data['rule'] = $rules[$form->get('itemFilter')->get('name')];
+                    if (!empty($form->get('rule')->getData()->getName()) || $form->get('rule')->getData()->getName() === '0') {
+                        $data['rule'] = $rules[$form->get('rule')->getData()->getName()];
                     } else {
                         $data['rule'] = null;
                     }
