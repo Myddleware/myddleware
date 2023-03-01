@@ -143,6 +143,11 @@
                   </tbody>
             </table>
       </div>
+      <div class="d-flex justify-content-center">
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'document_list_page'}) }}
+					{% endif %}
+				</div>
 </section>
 
 {% endblock %}

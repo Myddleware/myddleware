@@ -58,6 +58,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+use App\Service\SessionService;
+
 
 /**
  * @Route("/rule")
@@ -75,7 +77,7 @@ class FilterController extends AbstractController
     /**
      * @var ParameterBagInterface
      */
-    private $params;
+    protected $params;
     /**
      * @var TranslatorInterface
      */
@@ -99,8 +101,10 @@ class FilterController extends AbstractController
     private $alert;
 
     private DocumentRepository $documentRepository;
-
+    private SessionService $sessionService;
+    
     public function __construct(
+        SessionService $sessionService,
         KernelInterface $kernel,
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
@@ -110,21 +114,32 @@ class FilterController extends AbstractController
         AlertBootstrapInterface $alert,
         DocumentRepository $documentRepository,
     ) {
+        $this->sessionService = $sessionService;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
         $this->logger = $logger;
         $this->entityManager = $entityManager;
-        $this->params = $params;
+        // $this->params = $params;
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
         $this->documentRepository = $documentRepository;
+
+        // Init parameters
+        $configRepository = $this->entityManager->getRepository(Config::class);
+        $configs = $configRepository->findAll();
+        if (!empty($configs)) {
+            foreach ($configs as $config) {
+                $this->params[$config->getName()] = $config->getvalue();
+            }
+        }
     }
 
     /**
-     * @Route("/document/list", name="document_list")
+     * @Route("/document/list/search-{search}", name="document_list", defaults={"page"=1})
+     * @Route("/document/list/page-{page}", name="document_list_page", requirements={"page"="\d+"})
      */
-    public function testFilterAction(Request $request)
+    public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
         $form = $this->createForm(ItemFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager()
@@ -135,51 +150,126 @@ class FilterController extends AbstractController
 
         $formFilter = $this->createForm(FilterType::class, null);
 
+        
+        $conditions = 0;
+        //Check the user timezone
+        if ($timezone = '') {
+            $timezone = 'UTC';
+        } else {
+            $timezone = $this->getUser()->getTimezone();
+        }
+
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
             $formDoc->handleRequest($request);
         
-            if ($form->isSubmitted() && $formDoc->isSubmitted() && $form->isValid() && $formDoc->isValid()) {
-                $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
-                $cleanData = [
-                    'rule' => $rules[$form->get('name')->getData()],
-                ];
 
-                $limit = $this->getLimitConfig();
-                $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
-                $documents = $searchParameters['documents'];
-                $page = $searchParameters['page'];
-                $limit = $searchParameters['limit'];
-            } else {
+            $data = [];
+            if (!empty($this->sessionService->getFluxFilterWhere())) {
+                $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
+                $this->sessionService->removeFluxFilter();
+            }
+    
+            // Get the limit parameter
+            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+            if (!empty($searchLimit)) {
+                $limit = $searchLimit->getValue();
+            }
+            
+            $conditions = 0;
+            $doNotSearch = false;
+
+            if ($form->get('save')->isClicked()) {
+
+            if (($form->isSubmitted() || $formDoc->isSubmitted()) && ($form->isValid() || $formDoc->isValid())) {
+                    $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
+                    $cleanData = [
+                        'rule' => $rules[$form->get('name')->getData()],
+                    ];
+
+                    $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
+                    $documents = $searchParameters['documents'];
+                    $page = $searchParameters['page'];
+                    $limit = $searchParameters['limit'];
+                } else {
                     $documents = [];
                     $page = 1;
                     // $this->params['pager'] = 25;
+
+                    if (
+                        count(array_filter($data)) === 0
+                        and $page == 1
+                    ) {
+                        $doNotSearch = true;
+                    }
                 }
-        }
+
+                if ($doNotSearch) {
+                    $documents = array();
+                }
+                
         
-        $compact = $this->nav_pagination([
-            'adapter_em_repository' => $documents,
-            // 'maxPerPage' => $this->params['pager'] ?? 25,
-            'maxPerPage' => 25,
-            'page' => $page,
-        ], false);
+                $compact = $this->nav_pagination([
+                    'adapter_em_repository' => $documents,
+                    'maxPerPage' => $this->params['pager'] ?? 25,
+                    'page' => $page,
+                ], false);
+        
+                // Si tout se passe bien dans la pagination
+                if ($compact) {
+                    // Si aucune règle
+                    if ($compact['nb'] < 1 && !intval($compact['nb'])) {
+                        $compact['entities'] = '';
+                        $compact['pager'] = '';
+                    }
+        
+                    // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
+                    if ($this->sessionService->isFluxFilterCExist()) {
+                        $conditions = 1;
+                    }
+        
+                    
+        
+                }
+        
+                // throw $this->createNotFoundException('Error');
+
+            } // end if click_filter
+
+        } // end if POST
+
+        // else {
+        //     $documents = [];
+        //             $page = 1;
+        // }
+        
+        if (!isset($compact)) {
+            $documents = [];
+
+            $compact = $this->nav_pagination([
+                'adapter_em_repository' => $documents,
+                'maxPerPage' => 25,
+                'page' => 1,
+            ], false);
+        }
         
         
 
         return $this->render('testFilter.html.twig', [
-            'pager' => $compact['pager'],
-            // 'documents' => $documents,
             'form' => $form->createView(),
             'formDoc' => $formDoc->createView(), 
             'formFilter'=> $formFilter->createView(),
+            // 'pager' => $compact['pager'],
+            'documents' => $documents,
+            // 'form' => $form->createView(),
+            'nb' => $compact['nb'],
+            'entities' => $compact['entities'],
+            'pager' => $compact['pager'],
+            'condition' => $conditions,
+            'timezone' => $timezone,
         ]);
 
-
-
-        return $this->render('testFilter.html.twig', array(
-            'form' => $form->createView(),
-            // 'rules' => $listRuleName
-        ));
     }
 
 
