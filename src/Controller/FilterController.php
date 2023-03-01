@@ -159,7 +159,7 @@ class FilterController extends AbstractController
             $timezone = $this->getUser()->getTimezone();
         }
 
-        if ($request->isMethod('POST')) {
+        if ($request->isMethod('POST') || $page !== 1) {
             $form->handleRequest($request);
             $formDoc->handleRequest($request);
         
@@ -180,21 +180,114 @@ class FilterController extends AbstractController
             $conditions = 0;
             $doNotSearch = false;
 
-            if ($form->get('save')->isClicked()) {
+            if ($form->get('save')->isClicked() || $page !== 1) {
 
             if (($form->isSubmitted() || $formDoc->isSubmitted()) && ($form->isValid() || $formDoc->isValid())) {
                     $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
-                    $cleanData = [
-                        'rule' => $rules[$form->get('name')->getData()],
-                    ];
 
-                    $searchParameters = $this->prepareSearch($cleanData, 1, $limit);
-                    $documents = $searchParameters['documents'];
-                    $page = $searchParameters['page'];
-                    $limit = $searchParameters['limit'];
-                } else {
-                    $documents = [];
-                    $page = 1;
+                    $data = [];
+                    if (isset($rules[$form->get('name')->getData()])) {
+                        $data['rule'] = $rules[$form->get('name')->getData()];
+                    } else {
+                        $data['rule'] = null;
+                    }
+
+                    if (!empty($form->get('id')->getData())) {
+                        $data['id'] = $form->get('id')->getData();
+                    } else {
+                        $data['id'] = null;
+                    }
+
+                    foreach ($data as $key => $value) {
+                        if (is_null($value)) {
+                            unset($data[$key]);
+                        }
+                    }
+
+                    
+
+                    if ($page === 1) {
+                    // Store the filter in session
+                    if (!empty($data['source_content']) && is_string($data['source_content'])) {
+                        $this->sessionService->setFluxFilterSourceContent($data['source_content']);
+                    } else {
+                        $this->sessionService->removeFluxFilterSourceContent();
+                    }
+        
+                    if (!empty($data['target_content']) && is_string($data['target_content'])) {
+                        $this->sessionService->setFluxFilterTargetContent($data['target_content']);
+                    } else {
+                        $this->sessionService->removeFluxFilterTargetContent();
+                    }
+        
+                    if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+                        $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+                    } else {
+                        $this->sessionService->removeFluxFilterDateModifStart();
+                    }
+        
+                    if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+                        $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
+                    } else {
+                        $this->sessionService->removeFluxFilterDateModifEnd();
+                    }
+        
+                    if (!empty($data['rule']) && is_string($data['rule'])) {
+                        $this->sessionService->setFluxFilterRuleName($data['rule']);
+                    } else {
+                        $this->sessionService->removeFluxFilterRuleName();
+                    }
+        
+                    if (!empty($data['status'])) {
+                        $this->sessionService->setFluxFilterStatus($data['status']);
+                    } else {
+                        $this->sessionService->removeFluxFilterStatus();
+                    }
+        
+                    if (!empty($data['gblstatus'])) {
+                        $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+                    } else {
+                        $this->sessionService->removeFluxFilterGblStatus();
+                    }
+        
+                    if (!empty($data['type'])) {
+                        $this->sessionService->setFluxFilterType($data['type']);
+                    } else {
+                        $this->sessionService->removeFluxFilterType();
+                    }
+        
+                    if (!empty($data['target_id'])) {
+                        $this->sessionService->setFluxFilterTargetId($data['target_id']);
+                    } else {
+                        $this->sessionService->removeFluxFilterTargetId();
+                    }
+        
+                    if (!empty($data['source_id'])) {
+                        $this->sessionService->setFluxFilterSourceId($data['source_id']);
+                    } else {
+                        $this->sessionService->removeFluxFilterSourceId();
+                    }
+                } // end if page === 1
+
+                else { // if page different from 1 so pagination
+                        
+
+                }
+
+                } else { // if form is not valid
+                        $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
+                        $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
+                        $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
+                        $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
+                        $data['rule']               = $this->sessionService->getFluxFilterRuleName();
+                        $data['status']             = $this->sessionService->getFluxFilterStatus();
+                        $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
+                        $data['type']               = $this->sessionService->getFluxFilterType();
+                        $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
+                        $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+
+                    // $documents = [];
+                    // $page = 1;
                     // $this->params['pager'] = 25;
 
                     if (
@@ -209,6 +302,12 @@ class FilterController extends AbstractController
                     $documents = array();
                 }
                 
+                if (!$doNotSearch) {
+                    $searchParameters = $this->prepareSearch($data, $page, $limit);
+                    $documents = $searchParameters['documents'];
+                    $page = $searchParameters['page'];
+                    $limit = $searchParameters['limit'];
+                }
         
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $documents,
