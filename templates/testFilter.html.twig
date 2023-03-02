@@ -26,7 +26,7 @@
 {% block title %}{{parent()}} | {{'title.task.list'|trans}}{% endblock %}
 {% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
-<!-- testFilter.html.twig -->
+<!-- removeFilterFilter.html.twig -->
 <div class="px-5">
       <h2 class="text-center m-3">Filters</h2>
       {{ form_start(formFilter) }}
@@ -40,54 +40,105 @@
       {{ form_end(formFilter) }}
       {{ form_start(form) }}       
             <div class="m-3">
+             
                 {{ form_label(form.document.status, 'Status', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.document.status, {'required': false}) }}
+                  <div class="input-group status" hidden = true>
+                        {{ form_widget(form.document.status, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 status">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.document.type, 'Type', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group type" hidden = true>
                   {{ form_widget(form.document.type, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 type">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.document.target, 'Target id', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group target" hidden = true>
                   {{ form_widget(form.document.target, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 target">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.document.source, 'Source id', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group source" hidden = true>
                   {{ form_widget(form.document.source, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 source">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
             </div>      
           
             <div class="m-3">
                   {{ form_label(form.rule.id, 'ID', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group id" hidden = true>
                   {{ form_widget(form.rule.id, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 id">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.dateCreated, 'date created', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group dateCreated" hidden = true>
                   {{ form_widget(form.rule.dateCreated, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 dateCreated">
+                              <i class="fa fa-times" aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.dateModified, 'Date modified', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group dateModified" hidden = true>
                   {{ form_widget(form.rule.dateModified, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 dateModified">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.moduleSource, 'Module source', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group moduleSource" hidden = true>
                   {{ form_widget(form.rule.moduleSource, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 moduleSource">
+                              <i class="fa fa-times" aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.moduleTarget, 'Module target', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group moduleTarget" hidden = true>
                   {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 moduleTarget">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.name, 'Name', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group name" hidden = true>
                   {{ form_widget(form.rule.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
+                        <div class="removeFilter btn btn-danger mt-2 name">
+                              <i class="fa fa-times name" aria-hidden="true"></i>
+                        </div>
+                  </div>
                   {{ form_errors(form.rule.name) }}
 
-
-                  {{ form_label(form.rule.nameSlug, 'Name slug', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.rule.nameSlug, {'required': false}) }}
-
                   {{ form_label(form.rule.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group connectorSource" hidden = true>
                   {{ form_widget(form.rule.connectorSource, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 connectorSource">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
 
                   {{ form_label(form.rule.connectorTarget, 'Connector target', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group connectorTarget" hidden = true>
                   {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
-
-                  {{ form_label(form.rule.createdBy, 'Created by', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.rule.createdBy, {'required': false}) }}
-
-                  {{ form_label(form.rule.modifiedBy, 'Modified by', {'label_attr': {'hidden': true}}) }}
-                  {{ form_widget(form.rule.modifiedBy, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 connectorTarget">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
             </div>
             <div class="input-group mt-2">
                   {{ form_widget(form.save) }}
@@ -98,7 +149,7 @@
       {{ form_end(form) }}
 </div>
 <div class="col mt-4">
-						<a class="btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+						<a class="removeFilter btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
 							<i class="fas fa-redo"></i>
 							{{'list_flux.btn.filter_delete'|trans}}
 						</a>
