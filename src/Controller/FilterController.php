@@ -188,21 +188,32 @@ class FilterController extends AbstractController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 
+                $ruleRepository = $this->entityManager->getRepository(Rule::class);
+                $rules = $ruleRepository->findAll();
+                $ruleName = [];
+               // $ruleModuleSource = [];
+                foreach($rules as $value){
+                    if ($value->getDeleted() == false) {
+                        $ruleName[] = $value->getName();
+                        //$ruleModuleSource[] = $value->getModuleSource();
+                    }
+                }
+                    if (($form->get('rule')->getData()->getName() !== null)
 
-                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
-
-
-                    $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
-                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
-                    $lstCategory = $this->entityManager->getRepository(Document::class)->findAll();
-                    
-
-                    $data = [];
-                    if (!empty($form->get('rule')->getData()->getName()) || $form->get('rule')->getData()->getName() === '0') {
-                        $data['rule'] = $rules[$form->get('rule')->getData()->getName()];
-                    } else {
+        
+                    || $form->get('rule')->getData()->getName() === '0'
+                    ) {
+                        $data['rule'] = $ruleName[$form->get('rule')->getData()->getName()];
+                    }elseif(empty($form->get('rule')->getData()->getName())){
                         $data['rule'] = null;
                     }
+                    // if ($form->get('rule')->getData()->getModuleSource() !== null) {
+                    //     $data['rule'] = $ruleModuleSource[$form->get('rule')->getData()->getModuleSource()];
+                    // }
+                    // else {
+                    //     $data['rule'] = null;
+                    // }
+                    
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);
@@ -278,6 +289,20 @@ class FilterController extends AbstractController
                 }
 
                 } else { // if form is not valid
+
+                    // return $this->render('testFilter.html.twig', [
+                    //     'form' => $form->createView(),
+                    //     //'formDoc' => $formDoc->createView(), 
+                    //     'formFilter'=> $formFilter->createView(),
+                    //     // 'pager' => $compact['pager'],
+                    //     // 'documents' => $documents,
+                    //     // // 'form' => $form->createView(),
+                    //     // 'nb' => $compact['nb'],
+                    //     // 'entities' => $compact['entities'],
+                    //     // 'pager' => $compact['pager'],
+                    //     'condition' => $conditions,
+                    //     'timezone' => $timezone,
+                    // ]);
                         $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
                         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
                         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
