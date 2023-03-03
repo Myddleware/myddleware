@@ -26,6 +26,15 @@ class suitecrmcustom extends suitecrm
         'default' => ['name'],
     ];
 	
+	// Redefine get_modules method
+    public function get_modules($type = 'source')
+    {
+		// Add module convert coupon
+		$modules = parent::get_modules($type);
+		$modules['convert_coupon'] = 'Convert Coupon';
+		return $modules;
+    }
+	
 	// Add aiko field to be able to filter on it
 	public function get_module_fields($module, $type = 'source', $param = null): array
 	{
@@ -49,6 +58,16 @@ class suitecrmcustom extends suitecrm
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
 				'label' => 'Filtre Myddleware',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => false
+			);
+		}
+		// Add field coupon_id in module convert_coupon
+		if ($module == 'convert_coupon') {
+			$this->moduleFields['coupon_id'] = array(
+				'label' => 'ID coupon',
 				'type' => 'varchar(255)',
 				'type_bdd' => 'varchar(255)',
 				'required' => 0,
