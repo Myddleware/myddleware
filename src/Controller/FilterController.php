@@ -198,6 +198,9 @@ class FilterController extends AbstractController
                         //$ruleModuleSource[] = $value->getModuleSource();
                     }
                 }
+
+                $issetName = ($form->get('rule')->getData()->isNameSet());
+                if ($issetName) {
                     if (($form->get('rule')->getData()->getName() !== null)
 
         
@@ -207,13 +210,25 @@ class FilterController extends AbstractController
                     }elseif(empty($form->get('rule')->getData()->getName())){
                         $data['rule'] = null;
                     }
+                } else {
+                    $data['rule'] = null;
+                }
                     // if ($form->get('rule')->getData()->getModuleSource() !== null) {
-                    //     $data['rule'] = $ruleModuleSource[$form->get('rule')->getData()->getModuleSource()];
+                    //     $data['module_source'] = $ruleModuleSource[$form->get('rule')->getData()->getModuleSource()];
                     // }
                     // else {
-                    //     $data['rule'] = null;
+                    //     $data['module_source'] = null;
                     // }
                     
+
+                    // if (($form->get('status')->getData()->getName() !== null) || $form->get('status')->getData()->getName() === '0'
+                    // ) {
+                    //     $data['status'] = $form->get('rule')->getData()->getName();
+                    // }elseif(empty($form->get('status')->getData()->getName())){
+                    //     $data['status'] = null;
+                    // }
+
+
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);
