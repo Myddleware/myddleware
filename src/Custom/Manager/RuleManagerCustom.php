@@ -146,12 +146,12 @@ class RuleManagerCustom extends RuleManager
 					$this->generatePoleRelationship('62743060350ed', $document['source_id'], 'record_id', true);  // Esp Rep - Contact repérant - Pôle
 				}
 			
-				// If a users has been sent to REEC, we send the custom data too
+				/* // If a users has been sent to REEC, we send the custom data too
 				if (
 					$this->ruleId == '5cf98651a17f3' // REEC - Users
 				) {	
 					$this->generatePoleRelationship('63e1007614977', $document['source_id'], 'id', true);  // 	REEC - Users custom
-				}
+				} */
 
 				/****************************************/
 				/************** AirTable Aiko ****************/
@@ -191,12 +191,12 @@ class RuleManagerCustom extends RuleManager
 				AND !empty($document['source_id'])
 				AND	$type == 'U' 
 			) {
-				// If a users has been sent to REEC, we send the custom data too
+				/* // If a users has been sent to REEC, we send the custom data too
 				if (
 					$this->ruleId == '5cf98651a17f3' // REEC - Users
 				) {
 					$this->generatePoleRelationship('63e1007614977', $document['source_id'], 'id', true);  // 	REEC - Users custom
-				}
+				} */
 			// In case of error
 			} elseif (
 					!empty($response['id']) 
