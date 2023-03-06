@@ -62,6 +62,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+use App\Manager\DocumentManager;
+
+
 
 /**
  * @Route("/rule")
@@ -186,47 +189,52 @@ class FilterController extends AbstractController
 
             if ($form->get('save')->isClicked() || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                
-                $ruleRepository = $this->entityManager->getRepository(Rule::class);
-                $rules = $ruleRepository->findAll();
-                $ruleName = [];
-               // $ruleModuleSource = [];
-                foreach($rules as $value){
-                    if ($value->getDeleted() == false) {
-                        $ruleName[] = $value->getName();
-                        //$ruleModuleSource[] = $value->getModuleSource();
+                if ($form->isSubmitted() && $form->isValid()) {
+
+                    $ruleRepository = $this->entityManager->getRepository(Rule::class);
+                    $rules = $ruleRepository->findAll();
+                    $ruleName = [];
+                    foreach ($rules as $value) {
+                        if ($value->getDeleted() == false) {
+                            $ruleName[] = $value->getName();
+                        }
                     }
-                }
 
-                $issetName = ($form->get('rule')->getData()->isNameSet());
-                if ($issetName) {
-                    if (($form->get('rule')->getData()->getName() !== null)
+                    $issetName = ($form->get('rule')->getData()->isNameSet());
+                    if ($issetName) {
+                        if (($form->get('rule')->getData()->getName() !== null)
 
-        
-                    || $form->get('rule')->getData()->getName() === '0'
-                    ) {
-                        $data['rule'] = $ruleName[$form->get('rule')->getData()->getName()];
-                    }elseif(empty($form->get('rule')->getData()->getName())){
+
+                            || $form->get('rule')->getData()->getName() === '0'
+                        ) {
+                            $data['rule'] = $ruleName[$form->get('rule')->getData()->getName()];
+                        } elseif (empty($form->get('rule')->getData()->getName())) {
+                            $data['rule'] = null;
+                        }
+                    } else {
                         $data['rule'] = null;
                     }
-                } else {
-                    $data['rule'] = null;
-                }
-                    // if ($form->get('rule')->getData()->getModuleSource() !== null) {
-                    //     $data['module_source'] = $ruleModuleSource[$form->get('rule')->getData()->getModuleSource()];
-                    // }
-                    // else {
-                    //     $data['module_source'] = null;
-                    // }
-                    
 
-                    // if (($form->get('status')->getData()->getName() !== null) || $form->get('status')->getData()->getName() === '0'
-                    // ) {
-                    //     $data['status'] = $form->get('rule')->getData()->getName();
-                    // }elseif(empty($form->get('status')->getData()->getName())){
-                    //     $data['status'] = null;
-                    // }
+                    // Statuses
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isStatusSet()) {
+                            $documentTest = $form->get('document');
+                            $documentTestData = $documentTest->getData();
+                            $docStatus = $documentTestData->getStatus();
+
+
+                            $statuses = DocumentRepository::findStatusType($this->entityManager);
+                            $inversedStatuses = array_flip($statuses);
+
+
+                            $data['status'] = $inversedStatuses[$docStatus];
+                        } else {
+                            $data['status'] = null;
+                        }
+                    } else {
+                        $data['status'] = null;
+                    }
+
 
 
                     foreach ($data as $key => $value) {

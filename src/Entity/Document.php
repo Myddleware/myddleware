@@ -466,6 +466,10 @@ class Document
         return $this;
     }
 
-    
+    public function isStatusSet(): bool
+    {
+        // test with isset if the name property is set
+        return isset($this->status);
+    }
     
 }
