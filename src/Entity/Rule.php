@@ -659,4 +659,16 @@ class Rule
 
         return ['ruleName', 'rule'];
     }
+
+    public function isNameSet(): bool
+    {
+        // test with isset if the name property is set
+        return isset($this->name);
+    }
+
+    public function isModuleSourceSet(): bool
+    {
+        return isset($this->moduleSource);
+    }
+
 }

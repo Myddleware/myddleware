@@ -23,8 +23,8 @@
 *********************************************************************************/ #} 
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.task.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
+{% block title %}{{parent()}} | {{'title.flux.list'|trans}}{% endblock %}
+{% block titlesm %}{{'title.flux.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
@@ -69,6 +69,14 @@
                   <div class="input-group source" hidden = true>
                   {{ form_widget(form.document.source, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 source">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
+
+                  {{ form_label(form.document.sourceDateModified, 'Référence', {'label_attr': {'hidden': true}}) }}
+                   <div class="input-group target" hidden = true>
+                  {{ form_widget(form.document.sourceDateModified, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 sourceDateModified">
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
                   </div>

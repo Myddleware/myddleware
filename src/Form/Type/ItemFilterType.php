@@ -84,6 +84,9 @@ class ItemFilterType extends AbstractType
                     'class' => 'form-control mt-2',
                     'id' => 'name'
                 ],
+                'constraints' => [
+                    new NotBlank(),
+                ],
             ])
             ->add('connectorSource', TextType::class, [
                 'attr' => [

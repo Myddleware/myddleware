@@ -1031,6 +1031,13 @@ class SessionService
         return $myddlewareSession['flux_filter']['c']['source_id'] ?? null;
     }
 
+    public function getFluxFilterModuleSource()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+
+        return $myddlewareSession['flux_filter']['c']['module_source'] ?? null;
+    }
+
     public function setFluxFilterDateCreateStart($dateCreateStart)
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -1321,6 +1328,14 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
 
         return isset($myddlewareSession['flux_filter']['c']['date_create_end']);
+    }
+
+    
+    public function isFluxFilterCModuleSourceExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+
+        return isset($myddlewareSession['flux_filter']['c']['module_source']);
     }
 
     public function isFluxFilterExist(): bool

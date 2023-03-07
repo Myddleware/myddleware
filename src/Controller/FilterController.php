@@ -62,6 +62,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+use App\Manager\DocumentManager;
+
+
 
 /**
  * @Route("/rule")
@@ -186,23 +189,123 @@ class FilterController extends AbstractController
 
             if ($form->get('save')->isClicked() || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                
+                if ($form->isSubmitted() && $form->isValid()) {
 
-                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
+                    $ruleRepository = $this->entityManager->getRepository(Rule::class);
+                    $rules = $ruleRepository->findAll();
+                    $ruleName = [];
+                    foreach ($rules as $value) {
+                        if ($value->getDeleted() == false) {
+                            $ruleName[] = $value->getName();
+                        }
+                    }
 
-
-                    $rules = RuleRepository::findActiveRulesNames($this->entityManager, true);
-                    $documentsType = DocumentRepository::findDocType($this->entityManager, true);
-                    $lstCategory = $this->entityManager->getRepository(Document::class)->findAll();
-                    
-
-                    $data = [];
-                    if (!empty($form->get('rule')->getData()->getName()) || $form->get('rule')->getData()->getName() === '0') {
-                        $data['rule'] = $rules[$form->get('rule')->getData()->getName()];
+                    $issetName = ($form->get('rule')->getData()->isNameSet());
+                    // Rule name
+                    if ($issetName) {
+                        if (($form->get('rule')->getData()->getName() !== null)
+                            || $form->get('rule')->getData()->getName() === '0'
+                        ) {
+                            $data['rule'] = $ruleName[$form->get('rule')->getData()->getName()];
+                        } elseif (empty($form->get('rule')->getData()->getName())) {
+                            $data['rule'] = null;
+                        }
                     } else {
                         $data['rule'] = null;
                     }
+
+                    // Statuses
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isStatusSet()) {
+                            $documentTest = $form->get('document');
+                            $documentTestData = $documentTest->getData();
+                            $docStatus = $documentTestData->getStatus();
+
+                            $statuses = DocumentRepository::findStatusType($this->entityManager);
+                            $inversedStatuses = array_flip($statuses);
+
+
+                            $data['status'] = $inversedStatuses[$docStatus];
+                        } else {
+                            $data['status'] = null;
+                        }
+                    } else {
+                        $data['status'] = null;
+                    }
+
+                    // Source Module
+                    if ($form->get('rule')->getData() !== null) {
+                        if ($form->get('rule')->getData()->isModuleSourceSet()) {
+                            $ruleTest = $form->get('rule');
+                            $ruleTestData = $ruleTest->getData();
+                            $ruleModuleSource = $ruleTestData->getModuleSource();
+                            
+                            
+                            $sourceModules = RuleRepository::findModuleSource($this->entityManager);
+                            $inversedModules = array_flip($sourceModules);
+                            
+                            
+                            $data['module_source'] = $inversedModules[$ruleModuleSource];
+                        } else {
+                            $data['module_source'] = null;
+                        }
+                    } else {
+                        $data['module_source'] = null;
+                    }
+
+
+                    // // Reference
+                    // if ($form->get('document')->getData() !== null) {
+                    //     if ($form->get('document')->getData()->IsSourceDateModifiedSet()) {
+                    //         $datasTest = $form->get('document');
+                    //         $datasDatas = $datasTest->getData();
+                    //         // dump($datasDatas);
+                    //         // die('fin du programme');
+
+                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
+                    //         $inversedStatuses = array_flip($statuses);
+
+
+                    //         $data['status'] = $inversedStatuses[$docStatus];
+                    //     } else {
+                    //         $data['status'] = null;
+                    //     }
+                    // } else {
+                    //     $data['status'] = null;
+                    // }
+                    
+
+
+
+                    // dump($form);
+                    // die('fin du programme');
+                    // // Source Content
+                    // if ($form->get('document')->getData() !== null) {
+                    //     if ($form->get('document')->getData()->isDatasSet()) {
+                    //         die('fin du programme');
+                    //         $datasTest = $form->get('document');
+                    //         $datasDatas = $datasTest->getData();
+                    //         dump($datasDatas);
+
+                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
+                    //         $inversedStatuses = array_flip($statuses);
+
+
+                    //         $data['status'] = $inversedStatuses[$docStatus];
+                    //     } else {
+                    //         $data['status'] = null;
+                    //     }
+                    // } else {
+                    //     $data['status'] = null;
+                    // }
+
+
+
+
+
+                    // dump($data);
+                    // die('fin du programme');
+
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);
@@ -270,6 +373,12 @@ class FilterController extends AbstractController
                     } else {
                         $this->sessionService->removeFluxFilterSourceId();
                     }
+                    
+                    if (!empty($data['module_source'])) {
+                        $this->sessionService->isFluxFilterCModuleSourceExist($data['module_source']);
+                    } else {
+                        $this->sessionService->removeFluxFilterSourceId();
+                    }
                 } // end if page === 1
 
                 else { // if page different from 1 so pagination
@@ -278,6 +387,20 @@ class FilterController extends AbstractController
                 }
 
                 } else { // if form is not valid
+
+                    // return $this->render('testFilter.html.twig', [
+                    //     'form' => $form->createView(),
+                    //     //'formDoc' => $formDoc->createView(), 
+                    //     'formFilter'=> $formFilter->createView(),
+                    //     // 'pager' => $compact['pager'],
+                    //     // 'documents' => $documents,
+                    //     // // 'form' => $form->createView(),
+                    //     // 'nb' => $compact['nb'],
+                    //     // 'entities' => $compact['entities'],
+                    //     // 'pager' => $compact['pager'],
+                    //     'condition' => $conditions,
+                    //     'timezone' => $timezone,
+                    // ]);
                         $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
                         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
                         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
@@ -288,6 +411,7 @@ class FilterController extends AbstractController
                         $data['type']               = $this->sessionService->getFluxFilterType();
                         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
                         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+                        $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
 
                     // $documents = [];
                     // $page = 1;
@@ -387,6 +511,7 @@ class FilterController extends AbstractController
         $data['type']               = $this->sessionService->getFluxFilterType();
         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+        $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
 
         foreach ($data as $key => $value) {
             if (!empty($value)) {
@@ -470,6 +595,10 @@ class FilterController extends AbstractController
         // Status
         if (!empty($data['status'])) {
             $where .= " AND document.status = :status ";
+        }
+         // Module source
+         if (!empty($data['module_source'])) {
+            $where .= " AND rule.module_source = :module_source ";
         }
 
         // customWhere can have several status (open and error from the error dashlet in the home page)
@@ -557,6 +686,10 @@ class FilterController extends AbstractController
         // Status
         if (!empty($data['status'])) {
             $stmt->bindValue(':status', $data['status']);
+        }
+        // Module source
+        if (!empty($data['module_source'])) {
+            $stmt->bindValue(':module_source', $data['module_source']);
         }
         // customWhere can have several status (open and error from the error dashlet in the home page)
         if (!empty($data['customWhere']['gblstatus'])) {

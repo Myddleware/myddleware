@@ -466,6 +466,19 @@ class Document
         return $this;
     }
 
-    
+    public function isStatusSet(): bool
+    {
+        return isset($this->status);
+    }
+
+    public function isDatasSet(): bool
+    {
+        return isset($this->datas);
+    }
+
+    public function IsSourceDateModifiedSet(): bool
+    {
+        return isset($this->sourceDateModified);
+    }
     
 }

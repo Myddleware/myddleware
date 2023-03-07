@@ -23,7 +23,7 @@ class CombinedFilterType extends AbstractType
         ]);
         // add save button to builder
         $builder->add('save', SubmitType::class, [
-            'attr' => ['class' => 'btn btn-primary'],
+            'attr' => ['class' => 'btn btn-primary mb-2'],
         ]);
     }
 
