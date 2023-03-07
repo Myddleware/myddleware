@@ -81,13 +81,15 @@
                         </div>
                   </div>
 
-                  {{ form_label(form.document.sourceDateModified, 'Référence', {'label_attr': {'hidden': true}}) }}
-                   <div class="input-group target" hidden = true>
+                  {{ form_label(form.document.sourceDateModified, 'Reference', {'label_attr': {'hidden': true}}) }}
+                   <div class="input-group sourceDateModified" hidden = true>
                   {{ form_widget(form.document.sourceDateModified, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 sourceDateModified">
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
                   </div>
+
+                  
             </div>      
           
             <div class="m-3">

@@ -310,6 +310,18 @@ class FilterController extends AbstractController
                         $data['type'] = null;
                     }
 
+                    // Reference date start
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isReferenceStartDateSet()) {
+                            $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d H:i:s');
+                        } else {
+                            $data['date_modif_start'] = null;
+                        }
+                    } else {
+                        $data['date_modif_start'] = null;
+                    }
+
+
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {

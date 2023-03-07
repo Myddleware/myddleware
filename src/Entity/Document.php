@@ -500,5 +500,11 @@ class Document
     {
         return isset($this->type);
     }
+
+    // is reference start date set
+    public function isReferenceStartDateSet(): bool
+    {
+        return isset($this->sourceDateModified);
+    }
     
 }

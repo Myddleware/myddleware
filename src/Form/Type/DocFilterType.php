@@ -66,7 +66,7 @@ class DocFilterType extends AbstractType
                     //'choices'  => DocumentRepository::findModuleSource($entityManager),
                     'attr' => [
                         'hidden'=> 'true',
-                        'placeholder' => 'Source content',
+                        'placeholder' => 'Reference',
                         'class' => 'form-control mt-2',
                         'id' => 'sourceDateModified'
                 ],

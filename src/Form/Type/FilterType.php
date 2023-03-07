@@ -20,7 +20,7 @@ class FilterType extends AbstractType
                     'Id' => 'id',
                     'Rule name' => 'name',
                     'Date of modification' => 'dateModified',
-                    'Date of modification Source' => 'sourceDateModified',
+                    'Reference date start' => 'sourceDateModified',
                     'Date Created' => 'dateCreated',
                     'Module source' => 'moduleSource',
                     'Module target' => 'moduleTarget',
