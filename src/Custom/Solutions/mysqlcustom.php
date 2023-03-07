@@ -75,7 +75,7 @@ class mysqlcustom extends mysql {
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
 		
 		// Manage roles field for reec. We have to merge data coming from 2 rules users custom and engagé by using the history data
-		if (in_array($param['rule']['id'], array('5ce3621156127','63e36ccb8c97a'))) { // REEC users custom / engagé
+		if (in_array($param['rule']['id'], array('5ce3621156127','5d01a630c217c', '63e1007614977', '6273905a05cb2'))) { // REEC users custom / engagé
 			// Error if no history data
 			if (empty($param['dataHistory'][$idDoc])) {
 				throw new \Exception('History data is requiered to calculate the filed role_reec. Errror because history data is empty.');
@@ -110,8 +110,9 @@ class mysqlcustom extends mysql {
 			if (empty($targetRoles)) {
 				$targetRoles = $sourceRoles;
 			} elseif (!empty($sourceRoles)) {
-				$targetRoles = array_merge($targetRoles, $sourceRoles);
+				$targetRoles = array_unique(array_merge($targetRoles, $sourceRoles));
 			}
+
 			if ($data['roles'] != serialize($targetRoles)) {
 				$data['roles'] = serialize($targetRoles);
 
