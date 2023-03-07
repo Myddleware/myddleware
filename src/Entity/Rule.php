@@ -671,4 +671,8 @@ class Rule
         return isset($this->moduleSource);
     }
 
+    public function isModuleTargetSet(): bool
+    {
+        return isset($this->moduleTarget);
+    }
 }

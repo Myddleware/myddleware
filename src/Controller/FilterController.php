@@ -265,6 +265,26 @@ class FilterController extends AbstractController
                         $data['module_source'] = null;
                     }
 
+                    // Target module
+                    if ($form->get('rule')->getData() !== null) {
+                        if ($form->get('rule')->getData()->isModuleTargetSet()) {
+                            $ruleTestTarget = $form->get('rule');
+                            $ruleTestDataTarget = $ruleTestTarget->getData();
+                            $ruleModuleTarget = $ruleTestDataTarget->getModuleTarget();
+                            
+                            
+                            $targetModules = RuleRepository::findModuleTarget($this->entityManager);
+                            $inversedModules = array_flip($targetModules);
+                            
+                            
+                            $data['module_target'] = $inversedModules[$ruleModuleTarget];
+                        } else {
+                            $data['module_target'] = null;
+                        }
+                    } else {
+                        $data['module_target'] = null;
+                    }
+
                     // Source
                     if ($form->get('document')->getData() !== null) {
                         if ($form->get('document')->getData()->isSourceSet()) {
@@ -313,7 +333,7 @@ class FilterController extends AbstractController
                     // Reference date start
                     if ($form->get('document')->getData() !== null) {
                         if ($form->get('document')->getData()->isReferenceStartDateSet()) {
-                            $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d H:i:s');
+                            $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d, H:i:s');
                         } else {
                             $data['date_modif_start'] = null;
                         }
@@ -394,9 +414,15 @@ class FilterController extends AbstractController
                     }
                     
                     if (!empty($data['module_source'])) {
-                        $this->sessionService->setFluxFilteModuleSource($data['module_source']);
+                        $this->sessionService->setFluxFilterModuleSource($data['module_source']);
                     } else {
                         $this->sessionService->removeFluxFilterSourceId();
+                    }
+
+                    if (!empty($data['module_target'])) {
+                        $this->sessionService->setFluxFilterModuleTarget($data['module_target']);
+                    } else {
+                        $this->sessionService->removeFluxFilterTargetId();
                     }
                 } // end if page === 1
 
@@ -431,6 +457,7 @@ class FilterController extends AbstractController
                         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
                         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
                         $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
+                        $data['module_target']      = $this->sessionService->getFluxFilterModuleTarget();
 
                     // $documents = [];
                     // $page = 1;
@@ -620,6 +647,11 @@ class FilterController extends AbstractController
             $where .= " AND rule.module_source = :module_source ";
         }
 
+        // Module target
+        if (!empty($data['module_target'])) {
+            $where .= " AND rule.module_target = :module_target ";
+        }
+
         // customWhere can have several status (open and error from the error dashlet in the home page)
         if (!empty($data['customWhere']['gblstatus'])) {
             $i = 0;
@@ -662,7 +694,8 @@ class FilterController extends AbstractController
                 document.global_status, 
                 users.username,
                 rule.name as rule_name, 
-                rule.module_source, 
+                rule.module_source,
+                rule.module_target,
                 rule.id as rule_id 
             FROM document 
                 INNER JOIN rule	
@@ -710,6 +743,10 @@ class FilterController extends AbstractController
         // Module source
         if (!empty($data['module_source'])) {
             $stmt->bindValue(':module_source', $data['module_source']);
+        }
+        // Module target
+        if (!empty($data['module_target'])) {
+            $stmt->bindValue(':module_target', $data['module_target']);
         }
         // customWhere can have several status (open and error from the error dashlet in the home page)
         if (!empty($data['customWhere']['gblstatus'])) {
