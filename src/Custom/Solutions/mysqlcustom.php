@@ -4,11 +4,13 @@ namespace App\Custom\Solutions;
 use App\Solutions\mysql;
 use App\Solutions\suitecrm;
 use App\Custom\Manager\DocumentManagerCustom;
+use App\Manager\DocumentManager;
 
 use Symfony\Bridge\Monolog\Logger;
 use Myddleware\RegleBundle\Classes\rule as ruleMyddleware;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType; 
+
 
 //Sinon on met la classe suivante
 class mysqlcustom extends mysql {
@@ -29,6 +31,8 @@ class mysqlcustom extends mysql {
 	 * @var SolutionManager
 	 */
 	private $solutionManager;
+
+	private $documentManager;
 		
 	// Si le connecteur est MySQL pour le COMET alros on change la connexion pour utiliser le webservice custom de SuiteCRM
 	public function login($paramConnexion) {	
@@ -69,6 +73,66 @@ class mysqlcustom extends mysql {
 	
 	// Clean id empty for foreign key
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
+		
+		// Manage roles field for reec. We have to merge data coming from 2 rules users custom and engagé by using the history data
+		if (in_array($param['rule']['id'], array('5ce3621156127','63e36ccb8c97a'))) { // REEC users custom / engagé
+			// Error if no history data
+			if (empty($param['dataHistory'][$idDoc])) {
+				throw new \Exception('History data is requiered to calculate the filed role_reec. Errror because history data is empty.');
+			}
+			// Roles by type (engagé or user)
+			$userRoles = array('ROLE_SALARIE','ROLE_SIEGE','ROLE_ADMIN');
+			$engageRoles = array('ROLE_MENTOR','ROLE_VOLONTAIRE');
+			$partenaireRoles = array('ROLE_ETABLISSEMENT');
+			$reperantRoles = array('ROLE_REPERANT');
+
+			// Get the roles to be sent
+			$targetRoles = array();
+			$sourceRoles = unserialize($data['roles']);
+			$historyRoles = unserialize($param['dataHistory'][$idDoc]['roles']);
+			// Keep the right history roles if exists
+			if (!empty($historyRoles)) {
+				if ($param['rule']['id'] == '5ce3621156127') { // REEC engagé
+					// Always keep the non engage role
+					$targetRoles = array_intersect($historyRoles, array_merge($userRoles,$partenaireRoles,$reperantRoles));
+				} elseif ($param['rule']['id'] == '63e36ccb8c97a') { // REEC user custom
+					// Always keep the non user role
+					$targetRoles = array_intersect($historyRoles, array_merge($engageRoles,$partenaireRoles,$reperantRoles));
+				} elseif ($param['rule']['id'] == '5d01a630c217c') { //  REEC - Contact - Composante
+					// Always keep the non contact partenaire role
+					$targetRoles = array_intersect($historyRoles, array_merge($userRoles,$engageRoles,$reperantRoles));
+				} elseif ($param['rule']['id'] == '6273905a05cb2') { //  Esp Rep - Contacts repérants
+					// Always keep the non reperant role
+					$targetRoles = array_intersect($historyRoles, array_merge($userRoles,$engageRoles,$partenaireRoles));
+				}
+			}
+			// Merge the roles coming from the source and the roles coming from the history
+			if (empty($targetRoles)) {
+				$targetRoles = $sourceRoles;
+			} elseif (!empty($sourceRoles)) {
+				$targetRoles = array_merge($targetRoles, $sourceRoles);
+			}
+			if ($data['roles'] != serialize($targetRoles)) {
+				$data['roles'] = serialize($targetRoles);
+
+				// Change the document data 
+				if (!isset($this->documentManager)) {
+					$this->documentManager = new DocumentManager(
+						$this->logger, 
+						$this->connection, 
+						$this->entityManager,
+						$this->documentRepository,
+						$this->ruleRelationshipsRepository,
+						$this->formulaManager
+					);
+				}
+				$paramDoc['id_doc_myddleware'] = $idDoc;
+				$paramDoc['jobId'] = $param['jobId'];
+				$this->documentManager->setParam($paramDoc);
+				$this->documentManager->updateDocumentData($idDoc, array('roles'=>$data['roles']), 'T');
+			};
+		}
+
 		// Call standard function
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		return $this->checkData($param, $data);	

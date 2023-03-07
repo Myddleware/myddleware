@@ -295,13 +295,12 @@ class rulecore
                 $c = (($this->solutionTarget->connexion_valide) ? true : false);
             }
             if (!empty($loginResult['error'])) {
-                return $loginResult;
+                throw new \Exception($loginResult['error']);
             }
 
             return $c;
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
             return false;
         }
     }
