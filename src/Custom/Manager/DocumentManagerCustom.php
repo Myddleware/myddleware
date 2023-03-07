@@ -384,8 +384,19 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Cancel';
 		}
 
+		// Generate a document for the rule REEC - Users custom each time a document is generated for a user
+		if (
+				!empty($this->document_data['rule_id'])
+			and !empty($this->document_data['source_id'])
+			and	$this->document_data['rule_id'] == '5cf98651a17f3' // REEC - Users
+			and	$new_status == 'Ready_to_send'
+		) {
+			$this->generateDocument('63e1007614977', $this->document_data['source_id'], 'id', false);	// REEC - Users custom
+		}
+
 		$updateStatus = parent::updateStatus($new_status);
 
+		
 		return $updateStatus;
 	}
 

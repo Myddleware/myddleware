@@ -11,7 +11,10 @@ class airtablecustom extends airtable {
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
-								'app5ustIjI5taRXJS' => 'CONTACTS',
+								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
+								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
+								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
+								'appuC7nsCbe7TxqwK' => 'VSC',			// USC PREPROD
 							);
 
 	protected $modules = array(
@@ -34,7 +37,27 @@ class airtablecustom extends airtable {
 														'POLES' => 'POLES',
 														'UTILISATEURS' => 'UTILISATEURS',
 														'PARTICIPATION_RI' => 'PARTICIPATION RI',
-														'RECONDUCTION' => 'RECONDUCTION'
+														'RECONDUCTION' => 'RECONDUCTION',
+														'RENDEZ-VOUS' => 'RENDEZ-VOUS'
+													),
+								'appP31F11PgaT1f6H' => array(
+														'COUPONS' => 'COUPONS',
+														'CONTACTS' => 'CONTACTS',
+														'Relation_POLE' => 'Relation POLE',
+														'COMPOSANTES' => 'COMPOSANTES',
+														'ETABLISSEMENTS' => 'ETABLISSEMENTS',
+														'EVENEMENTS' => 'EVENEMENTS',
+														'POLES' => 'POLES',
+														'UTILISATEURS' => 'UTILISATEURS',
+														'PARTICIPATION_RI' => 'PARTICIPATION RI',
+														'RECONDUCTION' => 'RECONDUCTION',
+														'RENDEZ-VOUS' => 'RENDEZ-VOUS'
+													),
+								'appALljzTMc2wjLV1' => array(
+														'VSC' => 'VSC'
+													),
+								'appuC7nsCbe7TxqwK' => array(
+														'VSC' => 'VSC'
 													),
 							);
 
