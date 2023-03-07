@@ -37,29 +37,20 @@ class DocFilterType extends AbstractType
                 //'choices'  => DocumentRepository::findModuleSource($entityManager),
                 'attr' => [
                     'hidden'=> 'true',
-                    'placeholder' => 'Module source',
+                    'placeholder' => 'Source Id',
                     'class' => 'form-control mt-2',
-                    'id' => 'source_id'
+                    'id' => 'source'
                 ],
             ])
             ->add('target',  TextType::class, [
                 // 'choices'  => RuleRepository::findModuleSource($entityManager),
                 'attr' => [
                     'hidden' => 'true',
-                    'placeholder' => 'Module source',
+                    'placeholder' => 'Target Id',
                     'class' => 'form-control mt-2',
-                    'id' => 'target_id'
+                    'id' => 'target'
                 ],
             ])
-            //     ->add('datas',  TextType::class, [
-            //         //'choices'  => DocumentRepository::findModuleSource($entityManager),
-            //         'attr' => [
-            //             'hidden'=> 'true',
-            //             'placeholder' => 'Source content',
-            //             'class' => 'form-control mt-2',
-            //             'id' => 'datas'
-            //     ],
-            // ])
                 ->add('sourceDateModified',  DateTimeType::class, [
                     //'choices'  => DocumentRepository::findModuleSource($entityManager),
                     'attr' => [

@@ -480,5 +480,15 @@ class Document
     {
         return isset($this->sourceDateModified);
     }
+
+    public function isSourceSet(): bool
+    {
+        return isset($this->source);
+    }
+
+    public function isTargetSet(): bool
+    {
+        return isset($this->target);
+    }
     
 }

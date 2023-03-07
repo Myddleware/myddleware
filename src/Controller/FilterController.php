@@ -146,12 +146,7 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-        // $formRule = $this->createForm(ItemFilterType::class, null, [
-        //     'entityManager' => $this->getDoctrine()->getManager()
-        // ]);
-        // $formDoc = $this->createForm(DocFilterType::class, null, [
-        //     'entityManager' => $this->getDoctrine()->getManager()
-        // ]);
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager(),
@@ -168,8 +163,6 @@ class FilterController extends AbstractController
 
         if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
             $form->handleRequest($request);
-            //$formDoc->handleRequest($request);
-        
 
             $data = [];
             if (!empty($this->sessionService->getFluxFilterWhere())) {
@@ -253,58 +246,29 @@ class FilterController extends AbstractController
                         $data['module_source'] = null;
                     }
 
+                    // Source
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isSourceSet()) {
 
-                    // // Reference
-                    // if ($form->get('document')->getData() !== null) {
-                    //     if ($form->get('document')->getData()->IsSourceDateModifiedSet()) {
-                    //         $datasTest = $form->get('document');
-                    //         $datasDatas = $datasTest->getData();
-                    //         // dump($datasDatas);
-                    //         // die('fin du programme');
-
-                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
-                    //         $inversedStatuses = array_flip($statuses);
-
-
-                    //         $data['status'] = $inversedStatuses[$docStatus];
-                    //     } else {
-                    //         $data['status'] = null;
-                    //     }
-                    // } else {
-                    //     $data['status'] = null;
-                    // }
+                            $data['source_id'] = $form->get('document')->getData()->getSource();
+                        } else {
+                            $data['source_id'] = null;
+                        }
+                    } else {
+                        $data['source_id'] = null;
+                    }
                     
+                    // Target 
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isTargetSet()) {
 
-
-
-                    // dump($form);
-                    // die('fin du programme');
-                    // // Source Content
-                    // if ($form->get('document')->getData() !== null) {
-                    //     if ($form->get('document')->getData()->isDatasSet()) {
-                    //         die('fin du programme');
-                    //         $datasTest = $form->get('document');
-                    //         $datasDatas = $datasTest->getData();
-                    //         dump($datasDatas);
-
-                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
-                    //         $inversedStatuses = array_flip($statuses);
-
-
-                    //         $data['status'] = $inversedStatuses[$docStatus];
-                    //     } else {
-                    //         $data['status'] = null;
-                    //     }
-                    // } else {
-                    //     $data['status'] = null;
-                    // }
-
-
-
-
-
-                    // dump($data);
-                    // die('fin du programme');
+                            $data['target_id'] = $form->get('document')->getData()->getTarget();
+                        } else {
+                            $data['target_id'] = null;
+                        }
+                    } else {
+                        $data['target_id'] = null;
+                    }
 
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
