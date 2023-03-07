@@ -201,10 +201,9 @@ class FilterController extends AbstractController
                     }
 
                     $issetName = ($form->get('rule')->getData()->isNameSet());
+                    // Rule name
                     if ($issetName) {
                         if (($form->get('rule')->getData()->getName() !== null)
-
-
                             || $form->get('rule')->getData()->getName() === '0'
                         ) {
                             $data['rule'] = $ruleName[$form->get('rule')->getData()->getName()];
@@ -221,7 +220,6 @@ class FilterController extends AbstractController
                             $documentTest = $form->get('document');
                             $documentTestData = $documentTest->getData();
                             $docStatus = $documentTestData->getStatus();
-
 
                             $statuses = DocumentRepository::findStatusType($this->entityManager);
                             $inversedStatuses = array_flip($statuses);
@@ -256,25 +254,25 @@ class FilterController extends AbstractController
                     }
 
 
-                    // Reference
-                    if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->IsSourceDateModifiedSet()) {
-                            $datasTest = $form->get('document');
-                            $datasDatas = $datasTest->getData();
-                            dump($datasDatas);
-                            die('fin du programme');
+                    // // Reference
+                    // if ($form->get('document')->getData() !== null) {
+                    //     if ($form->get('document')->getData()->IsSourceDateModifiedSet()) {
+                    //         $datasTest = $form->get('document');
+                    //         $datasDatas = $datasTest->getData();
+                    //         // dump($datasDatas);
+                    //         // die('fin du programme');
 
-                            $statuses = DocumentRepository::findStatusType($this->entityManager);
-                            $inversedStatuses = array_flip($statuses);
+                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
+                    //         $inversedStatuses = array_flip($statuses);
 
 
-                            $data['status'] = $inversedStatuses[$docStatus];
-                        } else {
-                            $data['status'] = null;
-                        }
-                    } else {
-                        $data['status'] = null;
-                    }
+                    //         $data['status'] = $inversedStatuses[$docStatus];
+                    //     } else {
+                    //         $data['status'] = null;
+                    //     }
+                    // } else {
+                    //     $data['status'] = null;
+                    // }
                     
 
 
@@ -305,8 +303,8 @@ class FilterController extends AbstractController
 
 
 
-                    dump($data);
-                    die('fin du programme');
+                    // dump($data);
+                    // die('fin du programme');
 
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -375,6 +373,12 @@ class FilterController extends AbstractController
                     } else {
                         $this->sessionService->removeFluxFilterSourceId();
                     }
+                    
+                    if (!empty($data['module_source'])) {
+                        $this->sessionService->isFluxFilterCModuleSourceExist($data['module_source']);
+                    } else {
+                        $this->sessionService->removeFluxFilterSourceId();
+                    }
                 } // end if page === 1
 
                 else { // if page different from 1 so pagination
@@ -407,6 +411,7 @@ class FilterController extends AbstractController
                         $data['type']               = $this->sessionService->getFluxFilterType();
                         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
                         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+                        $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
 
                     // $documents = [];
                     // $page = 1;
@@ -506,6 +511,7 @@ class FilterController extends AbstractController
         $data['type']               = $this->sessionService->getFluxFilterType();
         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+        $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
 
         foreach ($data as $key => $value) {
             if (!empty($value)) {
@@ -589,6 +595,10 @@ class FilterController extends AbstractController
         // Status
         if (!empty($data['status'])) {
             $where .= " AND document.status = :status ";
+        }
+         // Module source
+         if (!empty($data['module_source'])) {
+            $where .= " AND rule.module_source = :module_source ";
         }
 
         // customWhere can have several status (open and error from the error dashlet in the home page)
@@ -676,6 +686,10 @@ class FilterController extends AbstractController
         // Status
         if (!empty($data['status'])) {
             $stmt->bindValue(':status', $data['status']);
+        }
+        // Module source
+        if (!empty($data['module_source'])) {
+            $stmt->bindValue(':module_source', $data['module_source']);
         }
         // customWhere can have several status (open and error from the error dashlet in the home page)
         if (!empty($data['customWhere']['gblstatus'])) {
