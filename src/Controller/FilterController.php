@@ -375,7 +375,7 @@ class FilterController extends AbstractController
                     }
                     
                     if (!empty($data['module_source'])) {
-                        $this->sessionService->isFluxFilterCModuleSourceExist($data['module_source']);
+                        $this->sessionService->setFluxFilteModuleSource($data['module_source']);
                     } else {
                         $this->sessionService->removeFluxFilterSourceId();
                     }
@@ -641,8 +641,9 @@ class FilterController extends AbstractController
                 document.type, 
                 document.attempt, 
                 document.global_status, 
-                users.username, 
+                users.username,
                 rule.name as rule_name, 
+                rule.module_source, 
                 rule.id as rule_id 
             FROM document 
                 INNER JOIN rule	

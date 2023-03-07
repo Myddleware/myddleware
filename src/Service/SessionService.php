@@ -1009,6 +1009,13 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
+    public function setFluxFilteModuleSource($moduleSource)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['flux_filter']['c']['module_source'] = $moduleSource;
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
     public function getFluxFilterTargetId()
     {
         $myddlewareSession = $this->getMyddlewareSession();
