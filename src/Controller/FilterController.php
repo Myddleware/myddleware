@@ -289,6 +289,28 @@ class FilterController extends AbstractController
                         $data['target_id'] = null;
                     }
 
+                    // Document type
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isTypeSet()) {
+
+                            $listOfTypes = 
+                            [
+                                'flux.type.create' => 'C',
+                                'flux.type.update' => 'U',
+                                'flux.type.delete' => 'D',
+                                'flux.type.search' => 'S',
+                            ];
+                            
+
+                            $data['type'] = $listOfTypes[$form->get('document')->getData()->getType()];
+                        } else {
+                            $data['type'] = null;
+                        }
+                    } else {
+                        $data['type'] = null;
+                    }
+
+                    // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);

@@ -495,5 +495,10 @@ class Document
     {
         return isset($this->globalStatus);
     }
+
+    public function isTypeSet(): bool
+    {
+        return isset($this->type);
+    }
     
 }

@@ -72,7 +72,7 @@ class DocFilterType extends AbstractType
                 ],
             ])
             ->add('type',Filters\ChoiceFilterType::class, [
-                'choices'  => DocumentRepository::findDocType($entityManager),
+                'choices'  => DocumentManager::lstType(),
                 'attr' => [
                     'hidden'=> 'true',
                     'placeholder' => 'Name slug',
