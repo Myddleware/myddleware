@@ -88,15 +88,6 @@ class ItemFilterType extends AbstractType
                     new NotBlank(),
                 ],
             ])
-            ->add('nameSlug',Filters\ChoiceFilterType::class, [
-                'choices'  => RuleRepository::findNameSlug($entityManager),
-                'attr' => [
-                    'hidden'=> 'true',
-                    'placeholder' => 'Name slug',
-                    'class' => 'form-control mt-2',
-                    'id' => 'nameSlug'
-                ],
-            ])
             ->add('connectorSource', TextType::class, [
                 'attr' => [
                     'hidden'=> 'true',
@@ -111,22 +102,6 @@ class ItemFilterType extends AbstractType
                     'placeholder' => 'Connector target',
                     'class' => 'form-control mt-2',
                     'id' => 'connectorTarget'
-                ],
-            ])
-            ->add('createdBy', TextType::class, [
-                'attr' => [
-                    'hidden'=> 'true',
-                    'placeholder' => 'Created by',
-                    'class' => 'form-control mt-2',
-                    'id' => 'createdBy'
-                ],
-            ])
-            ->add('modifiedBy', TextType::class, [
-                'attr' => [
-                    'hidden'=> 'true',
-                    'placeholder' => 'Modified by',
-                    'class' => 'form-control mt-2',
-                    'id' => 'modifiedBy'
                 ],
             ]);
     }
