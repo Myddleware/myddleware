@@ -490,5 +490,10 @@ class Document
     {
         return isset($this->target);
     }
+
+    public function isGlobalStatusSet(): bool
+    {
+        return isset($this->globalStatus);
+    }
     
 }

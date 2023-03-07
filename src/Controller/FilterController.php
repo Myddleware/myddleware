@@ -226,6 +226,25 @@ class FilterController extends AbstractController
                         $data['status'] = null;
                     }
 
+
+                    // Global Statuses
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->isGlobalStatusSet()) {
+                            $statusList = [
+                                'flux.gbl_status.open' => 'Open',
+                                'flux.gbl_status.close' => 'Close',
+                                'flux.gbl_status.cancel' => 'Cancel',
+                                'flux.gbl_status.error' => 'Error',
+                            ];
+
+                            $data['gblstatus'] = $statusList[$form->get('document')->getData()->getGlobalStatus()];
+                        } else {
+                            $data['gblstatus'] = null;
+                        }
+                    } else {
+                        $data['gblstatus'] = null;
+                    }
+
                     // Source Module
                     if ($form->get('rule')->getData() !== null) {
                         if ($form->get('rule')->getData()->isModuleSourceSet()) {
@@ -275,6 +294,8 @@ class FilterController extends AbstractController
                             unset($data[$key]);
                         }
                     }
+
+                    // dd($data);
                     
                     if ($page === 1) {
                     // Store the filter in session

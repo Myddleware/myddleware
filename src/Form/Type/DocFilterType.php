@@ -17,6 +17,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderExecuterInterface;
+use App\Manager\DocumentManager;
+
 
 class DocFilterType extends AbstractType
 {
@@ -31,6 +33,15 @@ class DocFilterType extends AbstractType
                     'class' => 'form-control mt-2',
                     'id' => 'status',
                     'placeholder' => 'status',
+                ],
+            ])
+            ->add('globalStatus',Filters\ChoiceFilterType::class, [
+                'choices'  => DocumentManager::lstGblStatus(),
+                'attr' => [
+                    'hidden'=> 'true',
+                    'class' => 'form-control mt-2',
+                    'id' => 'globalStatus',
+                    'placeholder' => 'Global Status',
                 ],
             ])
             ->add('source',  TextType::class, [

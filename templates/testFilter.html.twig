@@ -49,6 +49,14 @@
                         </div>
                   </div>
 
+                {{ form_label(form.document.globalStatus, 'Status', {'label_attr': {'hidden': true}}) }}
+                  <div class="input-group globalStatus" hidden = true>
+                        {{ form_widget(form.document.globalStatus, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 globalStatus">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
+
                   {{ form_label(form.document.type, 'Type', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group type" hidden = true>
                   {{ form_widget(form.document.type, {'required': false}) }}
