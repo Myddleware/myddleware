@@ -95,7 +95,7 @@ class mysqlcustom extends mysql {
 				if ($param['rule']['id'] == '5ce3621156127') { // REEC engagé
 					// Always keep the non engage role
 					$targetRoles = array_intersect($historyRoles, array_merge($userRoles,$partenaireRoles,$reperantRoles));
-				} elseif ($param['rule']['id'] == '63e36ccb8c97a') { // REEC user custom
+				} elseif ($param['rule']['id'] == '63e1007614977') { // REEC user custom
 					// Always keep the non user role
 					$targetRoles = array_intersect($historyRoles, array_merge($engageRoles,$partenaireRoles,$reperantRoles));
 				} elseif ($param['rule']['id'] == '5d01a630c217c') { //  REEC - Contact - Composante
