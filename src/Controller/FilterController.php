@@ -235,7 +235,78 @@ class FilterController extends AbstractController
                         $data['status'] = null;
                     }
 
+                    // Source Module
+                    if ($form->get('rule')->getData() !== null) {
+                        if ($form->get('rule')->getData()->isModuleSourceSet()) {
+                            $ruleTest = $form->get('rule');
+                            $ruleTestData = $ruleTest->getData();
+                            $ruleModuleSource = $ruleTestData->getModuleSource();
+                            
+                            
+                            $sourceModules = RuleRepository::findModuleSource($this->entityManager);
+                            $inversedModules = array_flip($sourceModules);
+                            
+                            
+                            $data['module_source'] = $inversedModules[$ruleModuleSource];
+                        } else {
+                            $data['module_source'] = null;
+                        }
+                    } else {
+                        $data['module_source'] = null;
+                    }
 
+
+                    // Reference
+                    if ($form->get('document')->getData() !== null) {
+                        if ($form->get('document')->getData()->IsSourceDateModifiedSet()) {
+                            $datasTest = $form->get('document');
+                            $datasDatas = $datasTest->getData();
+                            dump($datasDatas);
+                            die('fin du programme');
+
+                            $statuses = DocumentRepository::findStatusType($this->entityManager);
+                            $inversedStatuses = array_flip($statuses);
+
+
+                            $data['status'] = $inversedStatuses[$docStatus];
+                        } else {
+                            $data['status'] = null;
+                        }
+                    } else {
+                        $data['status'] = null;
+                    }
+                    
+
+
+
+                    // dump($form);
+                    // die('fin du programme');
+                    // // Source Content
+                    // if ($form->get('document')->getData() !== null) {
+                    //     if ($form->get('document')->getData()->isDatasSet()) {
+                    //         die('fin du programme');
+                    //         $datasTest = $form->get('document');
+                    //         $datasDatas = $datasTest->getData();
+                    //         dump($datasDatas);
+
+                    //         $statuses = DocumentRepository::findStatusType($this->entityManager);
+                    //         $inversedStatuses = array_flip($statuses);
+
+
+                    //         $data['status'] = $inversedStatuses[$docStatus];
+                    //     } else {
+                    //         $data['status'] = null;
+                    //     }
+                    // } else {
+                    //     $data['status'] = null;
+                    // }
+
+
+
+
+
+                    dump($data);
+                    die('fin du programme');
 
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {

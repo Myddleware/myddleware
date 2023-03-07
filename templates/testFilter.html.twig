@@ -23,8 +23,8 @@
 *********************************************************************************/ #} 
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.task.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
+{% block title %}{{parent()}} | {{'title.flux.list'|trans}}{% endblock %}
+{% block titlesm %}{{'title.flux.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 <!-- testFilter.html.twig -->
 <div class="px-5">
@@ -51,6 +51,12 @@
 
                   {{ form_label(form.document.source, 'Source id', {'label_attr': {'hidden': true}}) }}
                   {{ form_widget(form.document.source, {'required': false}) }}
+                  
+                  {{ form_label(form.document.sourceDateModified, 'Référence', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.sourceDateModified, {'required': false}) }}
+
+                  {# {{ form_label(form.document.datas, 'Source content', {'label_attr': {'hidden': true}}) }}
+                  {{ form_widget(form.document.datas, {'required': false}) }} #}
             </div>      
           
             <div class="m-3">

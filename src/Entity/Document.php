@@ -468,8 +468,17 @@ class Document
 
     public function isStatusSet(): bool
     {
-        // test with isset if the name property is set
         return isset($this->status);
+    }
+
+    public function isDatasSet(): bool
+    {
+        return isset($this->datas);
+    }
+
+    public function IsSourceDateModifiedSet(): bool
+    {
+        return isset($this->sourceDateModified);
     }
     
 }
