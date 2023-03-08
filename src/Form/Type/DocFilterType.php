@@ -1,6 +1,7 @@
 <?php
 namespace App\Form\Type;
 
+use DateTime;
 use App\Entity\Document;
 use App\Manager\DocumentManager;
 use App\Repository\DocumentRepository;
@@ -22,7 +23,7 @@ class DocFilterType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $entityManager = $options['entityManager'];
-        $dateModified = new \DateTime('now');
+        // $dateModified = new \DateTime('now');
         $builder
             ->add('status',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentRepository::findStatusType($entityManager),
@@ -69,20 +70,20 @@ class DocFilterType extends AbstractType
                     'id' => 'type'
                 ],
             ])
-            ->add('sourceDateModified',  DateTimeType::class, [
-                    //'choices'  => DocumentRepository::findModuleSource($entityManager),
-                   // 'widget' => 'text',
-                    'format' => 'yyyy-MM-dd HH:mm:ss',
-                    'html5' => false,
-            
-                    //'widget'      => 'integer',
-                    'attr' => [
-                        'hidden'=> 'true',
-                        'placeholder' => 'Reference',
-                        'class' => 'form-control mt-2',
-                        'id' => 'sourceDateModified'
+            ->add('date_modif_start', DateTimeType::class, [
+                'required' => false,
+                // 'widget' => 'choice',
+                // 'html5' => false,
+                // 'format' => 'yyyy-MM-dd HH:mm:ss',
+                'attr' => [
+                    'hidden' => 'true',
+                    'placeholder' => 'Date of modification Start',
+                    'class' => 'form-control mt-2',
+                    'id' => 'date_modif_start'
                 ],
             ]);
+
+
            
     }
 

@@ -343,6 +343,15 @@ class FilterController extends AbstractController
                     } else {
                         $data['target_content'] = null;
                     }
+
+                    // Date modif start
+                    if ($form->get('document')->getData() !== null) {
+                        // dd($form->get('document')->getData());
+
+                        $data['date_modif_start'] = $form->get('document')->getData()['date_modif_start']->format('Y-m-d, H:i:s');
+                    } else {
+                        $data['date_modif_start'] = null;
+                    }
                     
                     // Remove the null values
                     foreach ($data as $key => $value) {
@@ -488,20 +497,15 @@ class FilterController extends AbstractController
                     'maxPerPage' => $this->params['pager'] ?? 25,
                     'page' => $page,
                 ], false);
-        
+                
                 // Si tout se passe bien dans la pagination
                 if ($compact) {
                     // Si aucune règle
-                    if ($compact['nb'] < 1 && !intval($compact['nb'])) {
-                        $compact['entities'] = '';
-                        $compact['pager'] = '';
-                    }
-        
                     // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
                     if ($this->sessionService->isFluxFilterCExist()) {
                         $conditions = 1;
                     }
-        
+                    
                     
         
                 }
@@ -516,7 +520,6 @@ class FilterController extends AbstractController
         //     $documents = [];
         //             $page = 1;
         // }
-        
         if (!isset($compact)) {
             $documents = [];
 
