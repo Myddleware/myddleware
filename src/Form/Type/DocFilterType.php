@@ -1,5 +1,4 @@
 <?php
-// ItemFilterType.php
 namespace App\Form\Type;
 
 use App\Entity\Document;
@@ -83,27 +82,8 @@ class DocFilterType extends AbstractType
                         'class' => 'form-control mt-2',
                         'id' => 'sourceDateModified'
                 ],
-            ])
-           
-            ->add('dateModified', DateIntervalDocType::class, [
-                'data' => [
-                    'dateModified' => [
-                        'date_modif_start' => $dateModified,
-                        'date_modif_end' => $dateModified,
-                    ],
-                ],
-                        
-                //'widget' => 'integer',
-                'label' => false,
-                'required' => false,
-                //'format' => 'yyyy-MM-dd HH:mm:ss',
-                'attr' => [
-                    'hidden'=> 'true',
-                    'placeholder' => 'Reference',
-                    'class' => 'form-control mt-2',
-                    'id' => 'dateModified'
-                ],
             ]);
+           
     }
 
     public function getBlockPrefix()
@@ -117,7 +97,6 @@ class DocFilterType extends AbstractType
             'csrf_protection' => false,
             'validation_groups' => array('filtering'),
             'entityManager' => null,
-            'data_class' => Document::class,
             'method' => 'GET',
             ));
 
