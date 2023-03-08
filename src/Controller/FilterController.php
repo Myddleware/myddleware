@@ -331,8 +331,9 @@ class FilterController extends AbstractController
                     } else {
                         $data['type'] = null;
                     }
-
-                    // Reference date start
+                    $startDate = $form->get('document')->get('dateModified')->get('date_modif_start')->getData()->getDateModified()->format('Y-m-d, H:i:s');
+                    $endDate = $form->get('document')->get('dateModified')->get('date_modif_end')->getData()->getDateModified()->format('Y-m-d, H:i:s');
+                    dd($startDate, $endDate);
                     if ($form->get('document')->getData() !== null) {
                         if ($form->get('document')->getData()->isReferenceStartDateSet()) {
                             $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d, H:i:s');
@@ -342,6 +343,18 @@ class FilterController extends AbstractController
                     } else {
                         $data['date_modif_start'] = null;
                     }
+                   
+
+                    // Reference date start
+                    // if ($form->get('document')->getData() !== null) {
+                    //     if ($form->get('document')->getData()->isReferenceStartDateSet()) {
+                    //         $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d, H:i:s');
+                    //     } else {
+                    //         $data['date_modif_start'] = null;
+                    //     }
+                    // } else {
+                    //     $data['date_modif_start'] = null;
+                    // }
 
 
                     // Remove the null values

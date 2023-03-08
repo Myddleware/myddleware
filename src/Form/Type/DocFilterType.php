@@ -17,9 +17,13 @@ use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 class DocFilterType extends AbstractType
 {
+
+   
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $entityManager = $options['entityManager'];
+        $dateModified = new \DateTime('now');
         $builder
             ->add('status',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentRepository::findStatusType($entityManager),
@@ -66,7 +70,7 @@ class DocFilterType extends AbstractType
                     'id' => 'type'
                 ],
             ])
-                ->add('sourceDateModified',  DateTimeType::class, [
+            ->add('sourceDateModified',  DateTimeType::class, [
                     //'choices'  => DocumentRepository::findModuleSource($entityManager),
                    // 'widget' => 'text',
                     'format' => 'yyyy-MM-dd HH:mm:ss',
@@ -82,6 +86,12 @@ class DocFilterType extends AbstractType
             ])
            
             ->add('dateModified', DateIntervalDocType::class, [
+                'data' => [
+                    'dateModified' => [
+                        'date_modif_start' => $dateModified,
+                        'date_modif_end' => $dateModified,
+                    ],
+                ],
                         
                 //'widget' => 'integer',
                 'label' => false,

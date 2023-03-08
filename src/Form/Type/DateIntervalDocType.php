@@ -35,10 +35,10 @@ class DateIntervalDocType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('start', DateTimeType::class, [
+            ->add('date_modif_start', DateTimeType::class, [
                 'label' => 'Start date',
             ])
-            ->add('end', DateTimeType::class, [
+            ->add('date_modif_end', DateTimeType::class, [
                 'label' => 'End date',
             ]);
     }
