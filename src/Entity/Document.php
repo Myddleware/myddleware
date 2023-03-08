@@ -465,45 +465,5 @@ class Document
 
         return $this;
     }
-
-    public function isStatusSet(): bool
-    {
-        return isset($this->status);
-    }
-
-    public function isDatasSet(): bool
-    {
-        return isset($this->datas);
-    }
-
-    public function IsSourceDateModifiedSet(): bool
-    {
-        return isset($this->sourceDateModified);
-    }
-
-    public function isSourceSet(): bool
-    {
-        return isset($this->source);
-    }
-
-    public function isTargetSet(): bool
-    {
-        return isset($this->target);
-    }
-
-    public function isGlobalStatusSet(): bool
-    {
-        return isset($this->globalStatus);
-    }
-
-    public function isTypeSet(): bool
-    {
-        return isset($this->type);
-    }
-
-    public function isReferenceStartDateSet(): bool
-    {
-        return isset($this->sourceDateModified);
-    }
     
 }
