@@ -226,7 +226,6 @@ class FilterController extends AbstractController
                         $data['status'] = null;
                     }
 
-                    // dd($data);
 
                     // Global Statuses
                     if ($form->get('document')->getData()) {
@@ -336,6 +335,13 @@ class FilterController extends AbstractController
                         $data['source_content'] = $form->get('sourceContent')->getData()['sourceContent'];
                     } else {
                         $data['source_content'] = null;
+                    }
+                    
+                    // Target Content
+                    if ($form->get('sourceContent')->getData() !== null) {
+                        $data['target_content'] = $form->get('sourceContent')->getData()['targetContent'];
+                    } else {
+                        $data['target_content'] = null;
                     }
                     
                     // Remove the null values
