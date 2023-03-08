@@ -151,7 +151,7 @@ class FilterController extends AbstractController
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager(),
         ]);
-             
+        
         $conditions = 0;
         //Check the user timezone
         if ($timezone = '') {
@@ -162,8 +162,10 @@ class FilterController extends AbstractController
 
 
         if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
+           
             $form->handleRequest($request);
 
+            
             $data = [];
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();

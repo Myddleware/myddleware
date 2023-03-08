@@ -44,19 +44,6 @@ class ItemFilterType extends AbstractType
                     new NotBlank(),
                 ],
             ])
-            
-            ->add('dateModified', DateTimeType::class, [
-                // 'widget' => 'single_text',
-                'attr' => [
-                    'hidden'=> 'true',
-                    'placeholder' => 'Date modified',
-                    'class' => 'form-control mt-2',
-                    'id' => 'dateModified'
-                ],
-                'constraints' => [
-                    new NotBlank(),
-                ],
-            ])
             ->add('moduleSource', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleSource($entityManager),
                 
