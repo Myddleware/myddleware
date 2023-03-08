@@ -38,7 +38,18 @@
             </div>
       </div>
       {{ form_end(formFilter) }}
-      {{ form_start(form) }}       
+      {{ form_start(form) }}
+
+      <div class="m-3">
+            {{ form_label(form.sourceContent.sourceContent, 'Source Content', {'label_attr': {'hidden': true}}) }}
+                        <div class="input-group sourceContent" hidden = true>
+            {{ form_widget(form.sourceContent.sourceContent, {'required': false}) }}
+                  <div class="removeFilter btn btn-danger mt-2 sourceContent">
+                        <i class="fa fa-times " aria-hidden="true"></i>
+                  </div>
+                        </div>
+      </div>
+
             <div class="m-3">
              
                 {{ form_label(form.document.status, 'Status', {'label_attr': {'hidden': true}}) }}

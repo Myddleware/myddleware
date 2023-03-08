@@ -9,11 +9,14 @@ $(document).ready(function() {
 
         $('#combined_filter_document_' + selectedValue).removeAttr('hidden');
         $('#combined_filter_rule_' + selectedValue).removeAttr('hidden');
+        $('#combined_filter_sourceContent_' + selectedValue).removeAttr('hidden');
 
         var labelFor = $('label[for="combined_filter_document_' + selectedValue + '"]');
         var labelForRule = $('label[for="combined_filter_rule_' + selectedValue + '"]');
+        var labelForsourceContent = $('label[for="combined_filter_sourceContent_' + selectedValue + '"]');
         labelFor.removeAttr('hidden');
         labelForRule.removeAttr('hidden');
+        labelForsourceContent.removeAttr('hidden');
         // Show the labels associated with the above elements
 
         $('.' + selectedValue).removeAttr('hidden');
@@ -33,12 +36,18 @@ $(document).ready(function() {
         $('#combined_filter_document_' + lastClass).val('')
         $('#combined_filter_rule_' + lastClass).attr('hidden', true);
         $('#combined_filter_rule_' + lastClass).val('');
+        
+        $('#combined_filter_sourceContent_' + lastClass).attr('hidden', true);
+        $('#combined_filter_sourceContent_' + lastClass).val('');
+
         // Hide the elements with IDs 'combined_filter_document_{lastClass}' and 'combined_filter_rule_{lastClass}'
 
         var labelFor = $('label[for="combined_filter_document_' + lastClass + '"]');
         var labelForRule = $('label[for="combined_filter_rule_' + lastClass + '"]');
+        var labelForsourceContent = $('label[for="combined_filter_sourceContent_' + lastClass + '"]');
         labelFor.attr('hidden', true);
         labelForRule.attr('hidden', true);
+        labelForsourceContent.attr('hidden', true);
         // Hide the labels associated with the above elements
 
         $('.' + lastClass).attr('hidden', true);

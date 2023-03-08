@@ -31,6 +31,7 @@ class FilterType extends AbstractType
                     'Status' => 'status',
                     'Global Status' => 'globalStatus',
                     'Type' => 'type',
+                    'Source Content' => 'sourceContent',
                 ],
 
                 'attr' => [

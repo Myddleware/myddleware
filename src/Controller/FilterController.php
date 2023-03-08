@@ -341,7 +341,18 @@ class FilterController extends AbstractController
                         $data['date_modif_start'] = null;
                     }
 
-
+                    if($data['date_modif_start'] === "2018-01-01, 00:00:00")
+                    {
+                        $data['date_modif_start'] = null;
+                    }
+                    
+                    // Source Content
+                    if ($form->get('sourceContent')->getData() !== null) {
+                        $data['source_content'] = $form->get('sourceContent')->getData()['sourceContent'];
+                    } else {
+                        $data['source_content'] = null;
+                    }
+                    
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -349,7 +360,6 @@ class FilterController extends AbstractController
                         }
                     }
 
-                    // dd($data);
                     
                     if ($page === 1) {
                     // Store the filter in session
@@ -547,7 +557,7 @@ class FilterController extends AbstractController
     public function verifyIfEmptyFilters()
     {
         $isEmpty = true;
-        $data['target_content']     = $this->sessionService->getFluxFilterSourceContent();
+        $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
         $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
