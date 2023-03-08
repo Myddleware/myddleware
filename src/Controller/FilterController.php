@@ -209,18 +209,16 @@ class FilterController extends AbstractController
                         $data['rule'] = null;
                     }
 
+
                     // Statuses
                     if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isStatusSet()) {
-                            $documentTest = $form->get('document');
-                            $documentTestData = $documentTest->getData();
-                            $docStatus = $documentTestData->getStatus();
+                        if (!empty($form->get('document')->getData()['status'])) {
+                            $statusIndex = $form->get('document')->getData()['status'];
 
                             $statuses = DocumentRepository::findStatusType($this->entityManager);
                             $inversedStatuses = array_flip($statuses);
 
-
-                            $data['status'] = $inversedStatuses[$docStatus];
+                            $data['status'] = $inversedStatuses[$statusIndex];
                         } else {
                             $data['status'] = null;
                         }
@@ -228,10 +226,11 @@ class FilterController extends AbstractController
                         $data['status'] = null;
                     }
 
+                    // dd($data);
 
                     // Global Statuses
-                    if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isGlobalStatusSet()) {
+                    if ($form->get('document')->getData()) {
+                        if (!empty($form->get('document')->getData()['globalStatus'])) {
                             $statusList = [
                                 'flux.gbl_status.open' => 'Open',
                                 'flux.gbl_status.close' => 'Close',
@@ -239,7 +238,7 @@ class FilterController extends AbstractController
                                 'flux.gbl_status.error' => 'Error',
                             ];
 
-                            $data['gblstatus'] = $statusList[$form->get('document')->getData()->getGlobalStatus()];
+                            $data['gblstatus'] = $statusList[$form->get('document')->getData()['globalStatus']];
                         } else {
                             $data['gblstatus'] = null;
                         }
@@ -289,9 +288,8 @@ class FilterController extends AbstractController
 
                     // Source
                     if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isSourceSet()) {
-
-                            $data['source_id'] = $form->get('document')->getData()->getSource();
+                        if (!empty($form->get('document')->getData()['source'])) {
+                            $data['source_id'] = $form->get('document')->getData()['source'];
                         } else {
                             $data['source_id'] = null;
                         }
@@ -301,9 +299,9 @@ class FilterController extends AbstractController
                     
                     // Target 
                     if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isTargetSet()) {
+                        if (!empty($form->get('document')->getData()['target'])) {
 
-                            $data['target_id'] = $form->get('document')->getData()->getTarget();
+                            $data['target_id'] = $form->get('document')->getData()['target'];
                         } else {
                             $data['target_id'] = null;
                         }
@@ -313,7 +311,7 @@ class FilterController extends AbstractController
 
                     // Document type
                     if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isTypeSet()) {
+                        if (!empty($form->get('document')->getData()['type'])) {
 
                             $listOfTypes = 
                             [
@@ -324,43 +322,15 @@ class FilterController extends AbstractController
                             ];
                             
 
-                            $data['type'] = $listOfTypes[$form->get('document')->getData()->getType()];
+                            $data['type'] = $listOfTypes[$form->get('document')->getData()['type']];
                         } else {
                             $data['type'] = null;
                         }
                     } else {
                         $data['type'] = null;
                     }
-                    $startDate = $form->get('document')->get('dateModified')->get('date_modif_start')->getData()->getDateModified()->format('Y-m-d, H:i:s');
-                    $endDate = $form->get('document')->get('dateModified')->get('date_modif_end')->getData()->getDateModified()->format('Y-m-d, H:i:s');
-                    dd($startDate, $endDate);
-                    if ($form->get('document')->getData() !== null) {
-                        if ($form->get('document')->getData()->isReferenceStartDateSet()) {
-                            $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d, H:i:s');
-                        } else {
-                            $data['date_modif_start'] = null;
-                        }
-                    } else {
-                        $data['date_modif_start'] = null;
-                    }
-                   
 
-                    // Reference date start
-                    // if ($form->get('document')->getData() !== null) {
-                    //     if ($form->get('document')->getData()->isReferenceStartDateSet()) {
-                    //         $data['date_modif_start'] = $form->get('document')->getData()->getSourceDateModified()->format('Y-m-d, H:i:s');
-                    //     } else {
-                    //         $data['date_modif_start'] = null;
-                    //     }
-                    // } else {
-                    //     $data['date_modif_start'] = null;
-                    // }
 
-                    if($data['date_modif_start'] === "2018-01-01, 00:00:00")
-                    {
-                        $data['date_modif_start'] = null;
-                    }
-                    
                     // Source Content
                     if ($form->get('sourceContent')->getData() !== null) {
                         $data['source_content'] = $form->get('sourceContent')->getData()['sourceContent'];
