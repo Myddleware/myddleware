@@ -99,7 +99,13 @@
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
                   </div>
-
+                  {{ form_label(form.document.dateModified, 'dateModified', {'label_attr': {'hidden': true}}) }}
+                   <div class="input-group dateModified" hidden = true>
+                  {{ form_widget(form.document.dateModified, {'required': false}) }}
+                        <div class="removeFilter btn btn-danger mt-2 dateModified">
+                              <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                  </div>
                   
             </div>      
           
@@ -117,14 +123,6 @@
                   {{ form_widget(form.rule.dateCreated, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 dateCreated">
                               <i class="fa fa-times" aria-hidden="true"></i>
-                        </div>
-                  </div>
-
-                  {{ form_label(form.rule.dateModified, 'Date modified', {'label_attr': {'hidden': true}}) }}
-                  <div class="input-group dateModified" hidden = true>
-                  {{ form_widget(form.rule.dateModified, {'required': false}) }}
-                        <div class="removeFilter btn btn-danger mt-2 dateModified">
-                              <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
                   </div>
 
@@ -176,20 +174,21 @@
                   </div>
             </div>
       {{ form_end(form) }}
-</div>
-<div class="col mt-4">
-						<a class="removeFilter btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
-							<i class="fas fa-redo"></i>
-							{{'list_flux.btn.filter_delete'|trans}}
-						</a>
-					</div>
-                              <div class="p-3 row">
-			<p>
-				<a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
-					(<span></span>)</a>
-				<a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
-					(<span></span>)</a>
-			</p>
+            </div>
+            <div class="col mt-4">
+                  <a class="removeFilter btn btn-danger" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+                        <i class="fas fa-redo"></i>
+                        {{'list_flux.btn.filter_delete'|trans}}
+                  </a>
+            </div>
+                  <div class="p-3 row">
+                        <p>
+                              <a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
+                                    (<span></span>)</a>
+                              <a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
+                                    (<span></span>)</a>
+                        </p>
+                  </div>
 		</div>
 <section class="p-5">
       <h2 class="text-center m-3">Documents</h2>
