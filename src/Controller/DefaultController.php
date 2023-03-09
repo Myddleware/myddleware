@@ -169,10 +169,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 $this->getInstanceBdd();
                 $compact['nb'] = 0;
-
+				$pager = $this->tools->getParamValue('ruleListPager');
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser()),
-                    'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 20,
+                    'maxPerPage' => isset($pager) ? $pager : 20,
                     'page' => $page,
                 ]);
 
