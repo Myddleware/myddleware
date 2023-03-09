@@ -73,7 +73,7 @@ $moduleFields['appX0PhUGIkBTcWBE'] = array (
 );
 
 // Mobilisation
-$moduleFields['app5ustIjI5taRXJS'] = array (
+$moduleFields['appP31F11PgaT1f6H'] = array (
 	'CONTACTS' => array(
 		'fld9r01QCAuHTzVXV'=> array( 'label' => 'ID :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldmXFx32djX8NrZ1'=> array( 'label' => 'Nom :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -808,7 +808,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 ); 
 
 // USC
-$moduleFields['appALljzTMc2wjLV1'] = array (
+$moduleFields['appuC7nsCbe7TxqwK'] = array (
 	'VSC' => array(
 		'fldYTDACt6NSccA8J'=> array( 'label' => 'LABEL ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldQnNZjtozyk1F44'=> array( 'label' => 'Origine Afev ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
