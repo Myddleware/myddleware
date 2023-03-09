@@ -21,6 +21,7 @@ class FilterType extends AbstractType
                     'Rule name' => 'name',
                     // 'Reference date start' => 'sourceDateModified',
                     'Date of modification Start' => 'date_modif_start',
+                    'Date of modification End' => 'date_modif_end',
                     // 'Date Created' => 'dateCreated',
                     'Module source' => 'moduleSource',
                     'Module target' => 'moduleTarget',

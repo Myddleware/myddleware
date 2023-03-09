@@ -331,28 +331,37 @@ class FilterController extends AbstractController
 
 
                     // Source Content
-                    if ($form->get('sourceContent')->getData() !== null) {
+                    if (!empty($form->get('sourceContent')->getData()['sourceContent'])) {
                         $data['source_content'] = $form->get('sourceContent')->getData()['sourceContent'];
                     } else {
                         $data['source_content'] = null;
                     }
                     
                     // Target Content
-                    if ($form->get('sourceContent')->getData() !== null) {
+                    if (!empty($form->get('sourceContent')->getData()['targetContent'])) {
                         $data['target_content'] = $form->get('sourceContent')->getData()['targetContent'];
                     } else {
                         $data['target_content'] = null;
                     }
 
                     // Date modif start
-                    if ($form->get('document')->getData() !== null) {
-                        // dd($form->get('document')->getData());
+                    if (!empty($form->get('document')->getData()['date_modif_start'])) {
 
                         $data['date_modif_start'] = $form->get('document')->getData()['date_modif_start']->format('Y-m-d, H:i:s');
                     } else {
                         $data['date_modif_start'] = null;
                     }
+
                     
+                    // Date modif start
+                    if (!empty($form->get('document')->getData()['date_modif_end'])) {
+
+                        $data['date_modif_end'] = $form->get('document')->getData()['date_modif_end']->format('Y-m-d, H:i:s');
+                    } else {
+                        $data['date_modif_end'] = null;
+                    }
+
+
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -434,6 +443,7 @@ class FilterController extends AbstractController
                     } else {
                         $this->sessionService->removeFluxFilterTargetId();
                     }
+
                 } // end if page === 1
 
                 else { // if page different from 1 so pagination

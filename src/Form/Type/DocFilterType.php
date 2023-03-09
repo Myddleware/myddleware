@@ -81,6 +81,20 @@ class DocFilterType extends AbstractType
                     'class' => 'form-control mt-2',
                     'id' => 'date_modif_start'
                 ],
+                // 'data' => new \DateTime()
+            ])
+            ->add('date_modif_end', DateTimeType::class, [
+                'required' => false,
+                // 'widget' => 'choice',
+                // 'html5' => false,
+                // 'format' => 'yyyy-MM-dd HH:mm:ss',
+                'attr' => [
+                    'hidden' => 'true',
+                    'placeholder' => 'Date of modification End',
+                    'class' => 'form-control mt-2',
+                    'id' => 'date_modif_end'
+                ],
+                // 'data' => new \DateTime()
             ]);
 
 
