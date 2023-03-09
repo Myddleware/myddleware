@@ -42,6 +42,7 @@ class DocFilterType extends AbstractType
                     'id' => 'globalStatus',
                     'placeholder' => 'Global Status',
                 ],
+                'multiple' => true, // enable multiple choices
             ])
             ->add('source',  TextType::class, [
                 //'choices'  => DocumentRepository::findModuleSource($entityManager),

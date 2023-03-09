@@ -922,9 +922,7 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
         if (!empty($where)) {
-            foreach ($where as $key => $value) {
-                $myddlewareSession['flux_filter']['customWhere'][$key] = $value;
-            }
+            $myddlewareSession['flux_filter']['customWhere'] = $where;
         }
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
@@ -934,8 +932,7 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $customWhere = null;
         if (!empty($myddlewareSession['flux_filter']['customWhere'])) {
-            $customWhere = $myddlewareSession['flux_filter']['customWhere'];
-            unset($myddlewareSession['flux_filter']['customWhere']);
+            $customWhere = $myddlewareSession['flux_filter'];
         }
 
         return $customWhere;

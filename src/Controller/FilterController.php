@@ -169,7 +169,6 @@ class FilterController extends AbstractController
             $data = [];
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
-                $this->sessionService->removeFluxFilter();
             }
     
             // Get the limit parameter
@@ -237,13 +236,27 @@ class FilterController extends AbstractController
                                 'flux.gbl_status.error' => 'Error',
                             ];
 
-                            $data['gblstatus'] = $statusList[$form->get('document')->getData()['globalStatus']];
+                            // if the array $form->get('document')->getData()['globalStatus'] has a length superior to 1
+                            // we need to create a customWhere
+                            if (count($form->get('document')->getData()['globalStatus']) > 1) {
+                                $data['customWhere']['gblstatus'] = [];
+                                foreach ($form->get('document')->getData()['globalStatus'] as $key => $value) {
+                                    $data['customWhere']['gblstatus'][] = $statusList[$value];
+                                }
+                            } else {
+                                $data['gblstatus'] = $statusList[$form->get('document')->getData()['globalStatus'][0]];
+                            }
+
+                            
                         } else {
                             $data['gblstatus'] = null;
                         }
                     } else {
                         $data['gblstatus'] = null;
                     }
+
+
+                    
 
                     // Source Module
                     if ($form->get('rule')->getData() !== null) {
@@ -371,7 +384,11 @@ class FilterController extends AbstractController
 
                     
                     if ($page === 1) {
-                    // Store the filter in session
+
+                    if (!empty($data['customWhere']) && is_array($data['customWhere'])) {
+                        $this->sessionService->setFluxFilterWhere($data['customWhere']);
+                    }
+
                     if (!empty($data['source_content']) && is_string($data['source_content'])) {
                         $this->sessionService->setFluxFilterSourceContent($data['source_content']);
                     } else {
@@ -453,19 +470,7 @@ class FilterController extends AbstractController
 
                 } else { // if form is not valid
 
-                    // return $this->render('testFilter.html.twig', [
-                    //     'form' => $form->createView(),
-                    //     //'formDoc' => $formDoc->createView(), 
-                    //     'formFilter'=> $formFilter->createView(),
-                    //     // 'pager' => $compact['pager'],
-                    //     // 'documents' => $documents,
-                    //     // // 'form' => $form->createView(),
-                    //     // 'nb' => $compact['nb'],
-                    //     // 'entities' => $compact['entities'],
-                    //     // 'pager' => $compact['pager'],
-                    //     'condition' => $conditions,
-                    //     'timezone' => $timezone,
-                    // ]);
+                        $data['customWhere']        = $this->sessionService->getFluxFilterWhere();
                         $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
                         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
                         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
@@ -478,10 +483,6 @@ class FilterController extends AbstractController
                         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
                         $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
                         $data['module_target']      = $this->sessionService->getFluxFilterModuleTarget();
-
-                    // $documents = [];
-                    // $page = 1;
-                    // $this->params['pager'] = 25;
 
                     if (
                         count(array_filter($data)) === 0
@@ -526,10 +527,6 @@ class FilterController extends AbstractController
 
         } // end if POST
 
-        // else {
-        //     $documents = [];
-        //             $page = 1;
-        // }
         if (!isset($compact)) {
             $documents = [];
 
@@ -544,11 +541,8 @@ class FilterController extends AbstractController
 
         return $this->render('testFilter.html.twig', [
             'form' => $form->createView(),
-            //'formDoc' => $formDoc->createView(), 
             'formFilter'=> $formFilter->createView(),
-            // 'pager' => $compact['pager'],
             'documents' => $documents,
-            // 'form' => $form->createView(),
             'nb' => $compact['nb'],
             'entities' => $compact['entities'],
             'pager' => $compact['pager'],
@@ -561,6 +555,7 @@ class FilterController extends AbstractController
     public function verifyIfEmptyFilters()
     {
         $isEmpty = true;
+        $data['customWhere']        = $this->sessionService->getFluxFilterWhere();
         $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
@@ -765,7 +760,7 @@ class FilterController extends AbstractController
         // customWhere can have several status (open and error from the error dashlet in the home page)
         if (!empty($data['customWhere']['gblstatus'])) {
             $i = 0;
-            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+            foreach($data['customWhere']['gblstatus'] as $globalStatusIndex => $gblstatus) {
                 $stmt->bindValue(':gblstatus'.$i, $gblstatus);
                 $i++;
             }
