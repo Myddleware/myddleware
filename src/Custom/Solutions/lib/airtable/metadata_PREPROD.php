@@ -523,8 +523,8 @@ $moduleFields['appP31F11PgaT1f6H'] = array (
         
 		'fldxtydc2mZOdOBfu'=> array( 'label' => 'Label', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldUko2rmiJv8uooM'=> array( 'label' => 'record_type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldNHqlGf5PJhYCMN'=> array( 'label' => 'pole_id', 'type' => 'text', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
-		'fldWsjwPo27DVlYMy'=> array( 'label' => 'record_id', 'type' => 'text', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldxgZxZXc0q08U9C'=> array( 'label' => 'pole_id', 'type' => 'text', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldG1SI869ikEvg9n'=> array( 'label' => 'record_id', 'type' => 'text', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 		
 	),
 	'COMPOSANTES' => array(
