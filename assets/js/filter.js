@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    // console.log('filter.js loaded');
     // This function is executed when the document has loaded completely
 
     $('#item_filter_filter').on('change', function() {
@@ -21,6 +22,14 @@ $(document).ready(function() {
 
         $('.' + selectedValue).removeAttr('hidden');
         // Show all elements with the class name equal to the selected value
+
+
+        // append a input checkbox to the selected value of the select element
+        console.log(selectedValue);
+        $('#combined_filter_rule_' + selectedValue).after('<div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="inversed_gandalf" value="cabotin"></div>');
+
+
+
     });
 
     $('.removeFilter').on('click', function() {
@@ -52,31 +61,6 @@ $(document).ready(function() {
 
         $('.' + lastClass).attr('hidden', true);
         // Hide all elements with the class name equal to the last class name of the clicked element      
-    });
-
-    $(".boutonInversion").on('click', function() {
-
-        var classe = $('.boutonInversion').parent().attr('class').split(' ').pop(); //ModuleSource
-
-        // print toto to the console
-
-        
-
-        console.log(classe);
-        //Formulaire
-        var test2 = $('#combined_filter_document_' + classe).val()
-        var test1 = $('#combined_filter_rule_' + classe).val();
-        
-        var test = $('#combined_filter_sourceContent_' + classe).val();
-
-        console.log(test, test1, test2, classe);
-
-        var texteBouton = $(this).text(); // Récupérer le texte du bouton
-        var nouveauTexte = texteBouton == "reverse" ? "unreverse" : "reverse"; // Inverser la valeur du texte
-        $(this).text(nouveauTexte); // Mettre à jour le texte du bouton
-
-        //console.log(nouveauTexte);
-        $('#inversion').val(nouveauTexte +' '+ classe);
     });
 
 });
