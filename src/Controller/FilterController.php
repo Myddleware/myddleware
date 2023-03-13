@@ -401,81 +401,29 @@ class FilterController extends AbstractController
                     
                     if ($page === 1) {
 
-                    if (!empty($data['customWhere']) && is_array($data['customWhere'])) {
-                        $this->sessionService->setFluxFilterWhere($data['customWhere']);
-                    }
-
-                    if (!empty($data['source_content']) && is_string($data['source_content'])) {
-                        $this->sessionService->setFluxFilterSourceContent($data['source_content']);
-                    } else {
-                        $this->sessionService->removeFluxFilterSourceContent();
-                    }
-
-                    if (!empty($data['target_content']) && is_string($data['target_content'])) {
-                        $this->sessionService->setFluxFilterTargetContent($data['target_content']);
-                    } else {
-                        $this->sessionService->removeFluxFilterTargetContent();
-                    }
-        
-                    if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-                        $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
-                    } else {
-                        $this->sessionService->removeFluxFilterDateModifStart();
-                    }
-        
-                    if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-                        $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
-                    } else {
-                        $this->sessionService->removeFluxFilterDateModifEnd();
-                    }
-        
-                    if (!empty($data['rule']) && is_string($data['rule'])) {
-                        $this->sessionService->setFluxFilterRuleName($data['rule']);
-                    } else {
-                        $this->sessionService->removeFluxFilterRuleName();
-                    }
-        
-                    if (!empty($data['status'])) {
-                        $this->sessionService->setFluxFilterStatus($data['status']);
-                    } else {
-                        $this->sessionService->removeFluxFilterStatus();
-                    }
-        
-                    if (!empty($data['gblstatus'])) {
-                        $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
-                    } else {
-                        $this->sessionService->removeFluxFilterGblStatus();
-                    }
-        
-                    if (!empty($data['type'])) {
-                        $this->sessionService->setFluxFilterType($data['type']);
-                    } else {
-                        $this->sessionService->removeFluxFilterType();
-                    }
-        
-                    if (!empty($data['target_id'])) {
-                        $this->sessionService->setFluxFilterTargetId($data['target_id']);
-                    } else {
-                        $this->sessionService->removeFluxFilterTargetId();
-                    }
-        
-                    if (!empty($data['source_id'])) {
-                        $this->sessionService->setFluxFilterSourceId($data['source_id']);
-                    } else {
-                        $this->sessionService->removeFluxFilterSourceId();
-                    }
-                    
-                    if (!empty($data['module_source'])) {
-                        $this->sessionService->setFluxFilterModuleSource($data['module_source']);
-                    } else {
-                        $this->sessionService->removeFluxFilterSourceId();
-                    }
-
-                    if (!empty($data['module_target'])) {
-                        $this->sessionService->setFluxFilterModuleTarget($data['module_target']);
-                    } else {
-                        $this->sessionService->removeFluxFilterTargetId();
-                    }
+                        $filterMap = [
+                            'customWhere' => 'FluxFilterWhere',
+                            'source_content' => 'FluxFilterSourceContent',
+                            'target_content' => 'FluxFilterTargetContent',
+                            'date_modif_start' => 'FluxFilterDateModifStart',
+                            'date_modif_end' => 'FluxFilterDateModifEnd',
+                            'rule' => 'FluxFilterRuleName',
+                            'status' => 'FluxFilterStatus',
+                            'gblstatus' => 'FluxFilterGlobalStatus',
+                            'type' => 'FluxFilterType',
+                            'target_id' => 'FluxFilterTargetId',
+                            'source_id' => 'FluxFilterSourceId',
+                            'module_source' => 'FluxFilterModuleSource',
+                            'module_target' => 'FluxFilterModuleTarget'
+                          ];
+                          
+                          foreach ($filterMap as $dataKey => $filterName) {
+                            if (!empty($data[$dataKey])) {
+                              $this->sessionService->{'set'.$filterName}($data[$dataKey]);
+                            } elseif ($dataKey !== 'customWhere') {
+                              $this->sessionService->{'remove'.$filterName}();
+                            }
+                          }
 
                 } // end if page === 1
 

@@ -1219,7 +1219,7 @@ class SessionService
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    public function removeFluxFilterGblStatus()
+    public function removeFluxFilterGlobalStatus()
     {
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['flux_filter']['c']['gblstatus']);
@@ -1231,6 +1231,22 @@ class SessionService
     {
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['flux_filter']['c']['target_id']);
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
+    public function removeFluxFilterModuleSource()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['module_source']);
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
+    public function removeFluxFilterModuleTarget()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['module_target']);
 
         $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
@@ -1357,6 +1373,7 @@ class SessionService
         return isset($myddlewareSession['flux_filter']['c']['module_source']);
     }
 
+    
     public function isFluxFilterExist(): bool
     {
         $myddlewareSession = $this->getMyddlewareSession();
