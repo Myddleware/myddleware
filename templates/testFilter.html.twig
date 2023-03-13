@@ -47,6 +47,9 @@
                         <div class="removeFilter btn btn-danger mt-2 sourceContent">
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
+                         <div class="btn btn-primary mt-2 sourceContent">
+                              <div class="boutonInversion">reverse</div>
+                        </div>
                   </div>
 
                   {{ form_label(form.sourceContent.targetContent, 'Target Content', {'label_attr': {'hidden': true}}) }}
@@ -54,6 +57,9 @@
                         {{ form_widget(form.sourceContent.targetContent, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 targetContent">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 targetContent">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
@@ -68,6 +74,9 @@
                         <div class="removeFilter btn btn-danger mt-2 status">
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
+                         <div class="btn btn-primary mt-2 status">
+                              <div class="boutonInversion">reverse</div>
+                        </div>
                   </div>
 
                 {{ form_label(form.document.globalStatus, 'Status', {'label_attr': {'hidden': true}}) }}
@@ -76,45 +85,63 @@
                         <div class="removeFilter btn btn-danger mt-2 globalStatus">
                               <i class="fa fa-times " aria-hidden="true"></i>
                         </div>
+                         <div class="btn btn-primary mt-2 globalStatus">
+                              <div class="boutonInversion">reverse</div>
+                        </div>
                   </div>
 
                   {{ form_label(form.document.type, 'Type', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group type" hidden = true>
-                  {{ form_widget(form.document.type, {'required': false}) }}
+                        {{ form_widget(form.document.type, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 type">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 type">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.document.target, 'Target id', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group target" hidden = true>
-                  {{ form_widget(form.document.target, {'required': false}) }}
+                        {{ form_widget(form.document.target, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 target">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 target">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.document.source, 'Source id', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group source" hidden = true>
-                  {{ form_widget(form.document.source, {'required': false}) }}
+                        {{ form_widget(form.document.source, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 source">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 source">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.document.date_modif_start, 'Date Modified Start', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group date_modif_start" hidden = true>
-                  {{ form_widget(form.document.date_modif_start, {'required': false}) }}
+                        {{ form_widget(form.document.date_modif_start, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 date_modif_start">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 date_modif_start">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.document.date_modif_end, 'Date Modified End', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group date_modif_end" hidden = true>
-                  {{ form_widget(form.document.date_modif_end, {'required': false}) }}
+                        {{ form_widget(form.document.date_modif_end, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 date_modif_end">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 date_modif_end">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
@@ -123,58 +150,80 @@
             <div class="m-3">
                   {{ form_label(form.rule.id, 'ID', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group id" hidden = true>
-                  {{ form_widget(form.rule.id, {'required': false}) }}
+                        {{ form_widget(form.rule.id, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 id">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 id">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.rule.dateCreated, 'date created', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group dateCreated" hidden = true>
-                  {{ form_widget(form.rule.dateCreated, {'required': false}) }}
+                        {{ form_widget(form.rule.dateCreated, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 dateCreated">
                               <i class="fa fa-times" aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 dateCreated">
+                              <div class="boutonInversion">reverse</div>
+                              <input type="hidden" name="inversion" id="inversion" value="reverse">
                         </div>
                   </div>
 
                   {{ form_label(form.rule.moduleSource, 'Module source', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group moduleSource" hidden = true>
-                  {{ form_widget(form.rule.moduleSource, {'required': false}) }}
+                        {{ form_widget(form.rule.moduleSource, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 moduleSource">
                               <i class="fa fa-times" aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 boutonInversion moduleSource">
+                              reverse
                         </div>
                   </div>
 
                   {{ form_label(form.rule.moduleTarget, 'Module target', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group moduleTarget" hidden = true>
-                  {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
+                        {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 moduleTarget">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 moduleTarget">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.rule.name, 'Name', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group name" hidden = true>
-                  {{ form_widget(form.rule.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(form.rule.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
                         <div class="removeFilter btn btn-danger mt-2 name">
                               <i class="fa fa-times name" aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 name">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
                   {{ form_errors(form.rule.name) }}
 
                   {{ form_label(form.rule.connectorSource, 'Connector source', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group connectorSource" hidden = true>
-                  {{ form_widget(form.rule.connectorSource, {'required': false}) }}
+                        {{ form_widget(form.rule.connectorSource, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 connectorSource">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 connectorSource">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
 
                   {{ form_label(form.rule.connectorTarget, 'Connector target', {'label_attr': {'hidden': true}}) }}
                   <div class="input-group connectorTarget" hidden = true>
-                  {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
+                        {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
                         <div class="removeFilter btn btn-danger mt-2 connectorTarget">
                               <i class="fa fa-times " aria-hidden="true"></i>
+                        </div>
+                         <div class="btn btn-primary mt-2 connectorTarget">
+                              <div class="boutonInversion">reverse</div>
                         </div>
                   </div>
             </div>

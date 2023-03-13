@@ -51,6 +51,32 @@ $(document).ready(function() {
         // Hide the labels associated with the above elements
 
         $('.' + lastClass).attr('hidden', true);
-        // Hide all elements with the class name equal to the last class name of the clicked element
+        // Hide all elements with the class name equal to the last class name of the clicked element      
     });
+
+    $(".boutonInversion").on('click', function() {
+
+        var classe = $('.boutonInversion').parent().attr('class').split(' ').pop(); //ModuleSource
+
+        // print toto to the console
+
+        
+
+        console.log(classe);
+        //Formulaire
+        var test2 = $('#combined_filter_document_' + classe).val()
+        var test1 = $('#combined_filter_rule_' + classe).val();
+        
+        var test = $('#combined_filter_sourceContent_' + classe).val();
+
+        console.log(test, test1, test2, classe);
+
+        var texteBouton = $(this).text(); // Récupérer le texte du bouton
+        var nouveauTexte = texteBouton == "reverse" ? "unreverse" : "reverse"; // Inverser la valeur du texte
+        $(this).text(nouveauTexte); // Mettre à jour le texte du bouton
+
+        //console.log(nouveauTexte);
+        $('#inversion').val(nouveauTexte +' '+ classe);
+    });
+
 });
