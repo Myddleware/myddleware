@@ -146,6 +146,7 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        // dd($request);
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager(),
@@ -164,7 +165,7 @@ class FilterController extends AbstractController
            
             $form->handleRequest($request);
 
-            
+            // dd($form->getData());
             $data = [];
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();

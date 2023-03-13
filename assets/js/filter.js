@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    // console.log('filter.js loaded');
     // This function is executed when the document has loaded completely
 
     $('#item_filter_filter').on('change', function() {
@@ -21,6 +22,14 @@ $(document).ready(function() {
 
         $('.' + selectedValue).removeAttr('hidden');
         // Show all elements with the class name equal to the selected value
+
+
+        // append a input checkbox to the selected value of the select element
+        console.log(selectedValue);
+        $('#combined_filter_rule_' + selectedValue).after('<div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="inversed_gandalf" value="cabotin"></div>');
+
+
+
     });
 
     $('.removeFilter').on('click', function() {
@@ -51,6 +60,7 @@ $(document).ready(function() {
         // Hide the labels associated with the above elements
 
         $('.' + lastClass).attr('hidden', true);
-        // Hide all elements with the class name equal to the last class name of the clicked element
+        // Hide all elements with the class name equal to the last class name of the clicked element      
     });
+
 });
