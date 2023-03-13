@@ -146,7 +146,6 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->getDoctrine()->getManager(),
@@ -374,6 +373,15 @@ class FilterController extends AbstractController
                         $data['date_modif_end'] = null;
                     }
 
+                    // if form source data get content operator is rule, then
+                    if(!empty($form->get('sourceContent')->getData()['operator'])) {
+                        $data['operator'] = $form->get('sourceContent')->getData()['operator'];
+                    } else {
+                        $data['operator'] = null;
+                    }
+
+                    // dd($data);
+                    // data['source_content_operator'] = 'rule'
 
                     // Remove the null values
                     foreach ($data as $key => $value) {
@@ -619,6 +627,7 @@ class FilterController extends AbstractController
         $join = '';
         $where = '';
 
+
         // Build the WHERE depending on $data
         // Source content
         if (!empty($data['source_content'])) {
@@ -645,7 +654,14 @@ class FilterController extends AbstractController
                 !empty($data['rule'])
             OR !empty($data['customWhere']['rule'])
         ) {
-            $where .= " AND rule.name = :ruleName ";
+            if (isset($data['operator'])) {
+                if ($data['operator'] == 'name') {
+                    $where .= " AND rule.name != :ruleName ";
+                }
+                
+            } else {
+                $where .= " AND rule.name = :ruleName ";
+            }
         }
         // Status
         if (!empty($data['status'])) {

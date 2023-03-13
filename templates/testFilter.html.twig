@@ -178,6 +178,10 @@
                         </div>
                   </div>
             </div>
+            
+           {{ form_label(form.sourceContent.operator, 'Negative operator')}}
+           {{ form_widget(form.sourceContent.operator, {'attr': {'class': 'form-control'}}) }}
+
             <div class="input-group mt-2">
                   {{ form_widget(form.save) }}
                   <div class="btn btn-primary mb-2">
