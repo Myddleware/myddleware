@@ -1,23 +1,61 @@
 $(function() {
-    // This function is executed when the value of the 'item_filter_filter' select element changes
+    // Define an array of filters, each containing a name and selector
+    var filters = [
+      { name: 'name', selector: '#combined_filter_rule_name' },
+      { name: 'dateCreated', selector: '#combined_filter_rule_dateCreated' },
+      { name: 'id', selector: '#combined_filter_rule_id' },
+      { name: 'moduleSource', selector: '#combined_filter_rule_moduleSource' },
+      { name: 'moduleTarget', selector: '#combined_filter_rule_moduleTarget' },
+      { name: 'status', selector: '#combined_filter_document_status' },
+      { name: 'globalStatus', selector: '#combined_filter_document_globalStatus' },
+      { name: 'source', selector: '#combined_filter_document_source' },
+      { name: 'target', selector: '#combined_filter_document_target' },
+      { name: 'type', selector: '#combined_filter_document_type' },
+      { name: 'date_modif_start', selector: '#combined_filter_document_date_modif_start' },
+      { name: 'date_modif_end', selector: '#combined_filter_document_date_modif_end' },
+      { name: 'sourceContent', selector: '#combined_filter_sourceContent_sourceContent' },      
+      { name: 'targetContent', selector: '#combined_filter_sourceContent_targetContent' }
+    ];
+    
+    // Function to show a filter if its value is not empty
+    function showFilter(filter) {
+      if ($(filter.selector).val() !== '') {
+        $('#' + filter.name).removeAttr('hidden');
+      }
+      //GlobalStatus
+      if (filter.name === 'globalStatus' && $(filter.selector).val() != []) {
+        console.log($(filter.selector).val());
+        console.log(filter.name);
+        $('#' + filter.name).removeAttr('hidden');
+      }
+    }
+    
+    // Function to hide a filter and clear its value
+    function hideFilter(filter) {
+      var lastClass = filter.selector.split('_').pop();
+      $('#combined_filter_document_' + lastClass + ', #combined_filter_rule_' + lastClass + ', #combined_filter_sourceContent_' + lastClass).val('');
+      $('#' + filter.name).attr('hidden', true);
+    }
+    
+    // Show all filters that have a value initially
+    filters.forEach(function(filter) {
+      showFilter(filter);
+    });
+    
+    // Show a filter when the corresponding option is selected
     $('#item_filter_filter').on('change', function() {
-
-        var selectedValue = $(this).val();
-        $('#combined_filter_document_' + selectedValue + ', #combined_filter_rule_' + selectedValue + ', #combined_filter_sourceContent_' + selectedValue).removeAttr('hidden');
-        $('label[for="combined_filter_document_' + selectedValue + '"], label[for="combined_filter_rule_' + selectedValue + '"], label[for="combined_filter_sourceContent_' + selectedValue + '"]').removeAttr('hidden');
-        $('.' + selectedValue).removeAttr('hidden');
-
-        $('#combined_filter_rule_' + selectedValue).after('<div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="inversed_gandalf" value="cabotin"></div>');
+      var selectedValue = $(this).val();
+      $('#' + selectedValue).removeAttr('hidden');
     });
 
-    // This function is executed when an element with the 'removeFilter' class is clicked
-    $('.removeFilter').on('click', function() {
-        var lastClass = $(this).attr('class').split(' ').pop();
-        
-        // Hide all elements with the class name equal to the last class name of the clicked element   
-        $('#combined_filter_document_' + lastClass + ', #combined_filter_rule_' + lastClass + ', #combined_filter_sourceContent_' + lastClass).attr('hidden', true);
-        $('#combined_filter_document_' + lastClass + ', #combined_filter_rule_' + lastClass + ', #combined_filter_sourceContent_' + lastClass).val('');
-        $('label[for="combined_filter_document_' + lastClass + '"], label[for="combined_filter_rule_' + lastClass + '"], label[for="combined_filter_sourceContent_' + lastClass + '"]').attr('hidden', true);
-        $('.' + lastClass).attr('hidden', true);
+    // Remove Filter
+    $('.removeFilters').on('click', function() {
+      var lastClass = $(this).attr('class').split(' ').pop();
+      filters.forEach(function(filter) {
+        if (filter.name === lastClass) {
+          hideFilter(filter);
+        }
+      });
     });
-});
+  });
+  

@@ -17,7 +17,6 @@ class SourceDataFilterType extends AbstractType
         $builder
         ->add('sourceContent',  TextType::class, [
             'attr' => [
-                'hidden'=> 'true',
                 'placeholder' => 'Source Content',
                 'class' => 'form-control mt-2',
                 'id' => 'sourceContent'
@@ -25,7 +24,6 @@ class SourceDataFilterType extends AbstractType
         ])
         ->add('targetContent',  TextType::class, [
             'attr' => [
-                'hidden'=> 'true',
                 'placeholder' => 'Target Content',
                 'class' => 'form-control mt-2',
                 'id' => 'targetContent'

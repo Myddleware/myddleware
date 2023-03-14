@@ -28,7 +28,6 @@ class DocFilterType extends AbstractType
             ->add('status',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentRepository::findStatusType($entityManager),
                 'attr' => [
-                    'hidden'=> 'true',
                     'class' => 'form-control mt-2',
                     'id' => 'status',
                     'placeholder' => 'status',
@@ -37,7 +36,6 @@ class DocFilterType extends AbstractType
             ->add('globalStatus',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentManager::lstGblStatus(),
                 'attr' => [
-                    'hidden'=> 'true',
                     'class' => 'form-control mt-2',
                     'id' => 'globalStatus',
                     'placeholder' => 'Global Status',
@@ -47,7 +45,6 @@ class DocFilterType extends AbstractType
             ->add('source',  TextType::class, [
                 //'choices'  => DocumentRepository::findModuleSource($entityManager),
                 'attr' => [
-                    'hidden'=> 'true',
                     'placeholder' => 'Source Id',
                     'class' => 'form-control mt-2',
                     'id' => 'source'
@@ -56,7 +53,6 @@ class DocFilterType extends AbstractType
             ->add('target',  TextType::class, [
                 // 'choices'  => RuleRepository::findModuleSource($entityManager),
                 'attr' => [
-                    'hidden' => 'true',
                     'placeholder' => 'Target Id',
                     'class' => 'form-control mt-2',
                     'id' => 'target'
@@ -65,7 +61,6 @@ class DocFilterType extends AbstractType
             ->add('type',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentManager::lstType(),
                 'attr' => [
-                    'hidden'=> 'true',
                     'placeholder' => 'Name slug',
                     'class' => 'form-control mt-2',
                     'id' => 'type'
@@ -77,7 +72,6 @@ class DocFilterType extends AbstractType
                 // 'html5' => false,
                 // 'format' => 'yyyy-MM-dd HH:mm:ss',
                 'attr' => [
-                    'hidden' => 'true',
                     'placeholder' => 'Date of modification Start',
                     'class' => 'form-control mt-2',
                     'id' => 'date_modif_start'
@@ -90,7 +84,6 @@ class DocFilterType extends AbstractType
                 // 'html5' => false,
                 // 'format' => 'yyyy-MM-dd HH:mm:ss',
                 'attr' => [
-                    'hidden' => 'true',
                     'placeholder' => 'Date of modification End',
                     'class' => 'form-control mt-2',
                     'id' => 'date_modif_end'
