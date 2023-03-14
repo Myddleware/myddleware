@@ -19,14 +19,21 @@ $(function() {
     
     // Function to show a filter if its value is not empty
     function showFilter(filter) {
-      if ($(filter.selector).val() !== '') {
+      if ($(filter.selector).val() !== '' && $(filter.selector).val().length > 0) {
         $('#' + filter.name).removeAttr('hidden');
       }
       //GlobalStatus
-      if (filter.name === 'globalStatus' && $(filter.selector).val() != []) {
-        console.log($(filter.selector).val());
-        console.log(filter.name);
-        $('#' + filter.name).removeAttr('hidden');
+      if (filter.name === 'globalStatus') {
+        // if the length of $(filter.selector).val() is above 1, it means that the value is an array
+        // if ($(filter.selector).val().length > 1) {
+          console.log(filter.name);
+          console.log($(filter.selector).val());
+          console.log($(filter.selector).val().length);
+          // $('#' + filter.name).removeAttr('hidden');
+        // }
+
+        // $('#' + filter.name).removeAttr('hidden');
+
       }
     }
     

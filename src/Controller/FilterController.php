@@ -202,7 +202,7 @@ class FilterController extends AbstractController
                         $documentFormData = $form->get('document')->getData();
                         $ruleFormData = $form->get('rule')->getData();
                         $sourceFormData = $form->get('sourceContent')->getData();
-                        
+                        $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName);
                         // Rule name
                         if ($ruleFormData->isNameSet()) {
                             if (($ruleFormData->getName() !== null)
@@ -559,6 +559,48 @@ class FilterController extends AbstractController
         return $data;
     }
     
+
+    public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName)
+    {
+        $data = [
+            'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
+            'status' => ($documentFormData['status']) ? $documentFormData['status'] : null,
+            'gblstatus' => ($documentFormData['globalStatus']) ? $documentFormData['globalStatus'] : null,
+            'module_source' => null,
+            'module_target' => null,
+            'source_id' => null,
+            'target_id' => null,
+            'type' => null,
+            'source_content' => null,
+            'target_content' => null,
+            'date_modif_start' => null,
+            'date_modif_end' => null,
+            'operator' => null,
+        ];
+
+        return $data;
+    }
+
+    public function getRuleNameData($ruleFormData, $ruleName)
+    {
+        if ($ruleFormData->isNameSet()) {
+            return $ruleName[$ruleFormData->getName()];
+        }
+    }
+
+    public function getStatusData($documentFormData)
+    {
+        if ($documentFormData->isStatusSet()) {
+            return $documentFormData->getStatus();
+        }
+    }
+
+    public function getGlobalStatusData($documentFormData)
+    {
+        if ($documentFormData->isGlobalStatusSet()) {
+            return $documentFormData->getGlobalStatus();
+        }
+    }
 
     public function getLimitConfig()
     {
