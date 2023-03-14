@@ -43,9 +43,9 @@
             <div class="m-3">
                   <div id="sourceContent" hidden="true">
                         {{ form_label(form.sourceContent.sourceContent, 'Source Content') }}
-                        <div class="input-group sourceContent">
+                        <div class="input-group">
                               {{ form_widget(form.sourceContent.sourceContent, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 sourceContent">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters sourceContent">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -53,9 +53,9 @@
 
                   <div id="targetContent" hidden="true">
                         {{ form_label(form.sourceContent.targetContent, 'Target Content') }}
-                        <div class="input-group targetContent">
+                        <div class="input-group">
                               {{ form_widget(form.sourceContent.targetContent, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 targetContent">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters targetContent">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -65,9 +65,9 @@
             <div class="m-3">
                   <div id="status" hidden="true">
                         {{ form_label(form.document.status, 'Status') }}
-                        <div class="input-group status">
+                        <div class="input-group">
                               {{ form_widget(form.document.status, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 h-25 status">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters status">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -75,9 +75,9 @@
 
                   <div id="globalStatus" hidden="true">
                         {{ form_label(form.document.globalStatus, 'Status') }}
-                        <div class="input-group globalStatus">
+                        <div class="input-group">
                               {{ form_widget(form.document.globalStatus, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 h-25 globalStatus">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters globalStatus">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -85,9 +85,9 @@
 
                   <div id="type" hidden="true">
                         {{ form_label(form.document.type, 'Type') }}
-                        <div class="input-group type">
+                        <div class="input-group">
                               {{ form_widget(form.document.type, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 type">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters type">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -95,19 +95,19 @@
 
                   <div id="target" hidden="true">
                         {{ form_label(form.document.target, 'Target id') }}
-                        <div class="input-group target">
+                        <div class="input-group">
                               {{ form_widget(form.document.target, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 target">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters target">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
                   </div>
 
-                  <div id="source" hidden="true">
-                        {{ form_label(form.document.source, 'Source id') }}
-                        <div class="input-group source">
-                              {{ form_widget(form.document.source, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 source" style="width: 39px;">
+                  <div id="sourceId" hidden="true">
+                        {{ form_label(form.document.sourceId, 'Source id') }}
+                        <div class="input-group">
+                              {{ form_widget(form.document.sourceId, {'required': false}) }}
+                              <div class="btn btn-danger mt-2 h-25 removeFilters sourceId">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -115,9 +115,9 @@
 
                   <div id="date_modif_start" hidden="true">
                         {{ form_label(form.document.date_modif_start, 'Date Modified Start') }}
-                        <div class="input-group date_modif_start">
+                        <div class="input-group">
                               {{ form_widget(form.document.date_modif_start, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 h-25 date_modif_start">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters date_modif_start">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -125,9 +125,9 @@
 
                   <div id="date_modif_end" hidden="true">
                         {{ form_label(form.document.date_modif_end, 'Date Modified End') }}
-                        <div class="input-group date_modif_end">
+                        <div class="input-group">
                               {{ form_widget(form.document.date_modif_end, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 h-25 date_modif_end">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters date_modif_end">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -137,9 +137,9 @@
             <div class="m-3">
                   <div id="id" hidden="true">
                         {{ form_label(form.rule.id, 'ID') }}
-                        <div class="input-group id">
+                        <div class="input-group">
                               {{ form_widget(form.rule.id, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 id">
+                              <div class="btn btn-danger mt-2 removeFilters id">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -147,9 +147,9 @@
 
                   <div id="dateCreated" hidden="true">
                         {{ form_label(form.rule.dateCreated, 'date created') }}
-                        <div class="input-group dateCreated">
+                        <div class="input-group">
                               {{ form_widget(form.rule.dateCreated, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 h-25 dateCreated">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters dateCreated">
                                     <i class="fa fa-times" aria-hidden="true"></i>
                               </div>
                         </div>
@@ -157,9 +157,9 @@
 
                   <div id="moduleSource" hidden="true">
                         {{ form_label(form.rule.moduleSource, 'Module source') }}
-                        <div class="input-group moduleSource">
+                        <div class="input-group">
                               {{ form_widget(form.rule.moduleSource, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 moduleSource">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters moduleSource">
                                     <i class="fa fa-times" aria-hidden="true"></i>
                               </div>
                         </div>
@@ -167,9 +167,9 @@
 
                   <div id="moduleTarget" hidden="true">
                         {{ form_label(form.rule.moduleTarget, 'Module target') }}
-                        <div class="input-group moduleTarget">
+                        <div class="input-group">
                               {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 moduleTarget">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters moduleTarget">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -177,9 +177,9 @@
 
                   <div id="name" hidden="true">
                         {{ form_label(form.rule.name, 'Name') }}
-                        <div class="input-group name">
+                        <div class="input-group">
                               {{ form_widget(form.rule.name, {'required': false, 'attr': {'class': 'form-control'}}) }}
-                              <div class="removeFilters btn btn-danger mt-2 name">
+                              <div class="btn btn-danger removeFilters name">
                                     <i class="fa fa-times name" aria-hidden="true"></i>
                               </div>
                         </div>
@@ -187,9 +187,9 @@
 
                   <div id="connectorSource" hidden="true">
                         {{ form_label(form.rule.connectorSource, 'Connector source') }}
-                        <div class="input-group connectorSource">
+                        <div class="input-group">
                               {{ form_widget(form.rule.connectorSource, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 connectorSource">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters connectorSource">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>
@@ -197,9 +197,9 @@
 
                   <div id="connectorTarget" hidden="true">
                         {{ form_label(form.rule.connectorTarget, 'Connector target') }}
-                        <div class="input-group connectorTarget">
+                        <div class="input-group">
                               {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
-                              <div class="removeFilters btn btn-danger mt-2 connectorTarget">
+                              <div class="btn btn-danger mt-2 h-25 removeFilters connectorTarget">
                                     <i class="fa fa-times " aria-hidden="true"></i>
                               </div>
                         </div>

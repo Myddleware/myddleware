@@ -8,7 +8,7 @@ $(function() {
       { name: 'moduleTarget', selector: '#combined_filter_rule_moduleTarget' },
       { name: 'status', selector: '#combined_filter_document_status' },
       { name: 'globalStatus', selector: '#combined_filter_document_globalStatus' },
-      { name: 'source', selector: '#combined_filter_document_source' },
+      { name: 'sourceId', selector: '#combined_filter_document_sourceId' },
       { name: 'target', selector: '#combined_filter_document_target' },
       { name: 'type', selector: '#combined_filter_document_type' },
       { name: 'date_modif_start', selector: '#combined_filter_document_date_modif_start' },
@@ -21,19 +21,6 @@ $(function() {
     function showFilter(filter) {
       if ($(filter.selector).val() !== '' && $(filter.selector).val().length > 0) {
         $('#' + filter.name).removeAttr('hidden');
-      }
-      //GlobalStatus
-      if (filter.name === 'globalStatus') {
-        // if the length of $(filter.selector).val() is above 1, it means that the value is an array
-        // if ($(filter.selector).val().length > 1) {
-          console.log(filter.name);
-          console.log($(filter.selector).val());
-          console.log($(filter.selector).val().length);
-          // $('#' + filter.name).removeAttr('hidden');
-        // }
-
-        // $('#' + filter.name).removeAttr('hidden');
-
       }
     }
     
@@ -53,8 +40,9 @@ $(function() {
     $('#item_filter_filter').on('change', function() {
       var selectedValue = $(this).val();
       $('#' + selectedValue).removeAttr('hidden');
+      $('.removeFilters.' + selectedValue).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="'+selectedValue+'" value="reverse"><label for="'+selectedValue+'">Reverse</label></div>');
     });
-
+    
     // Remove Filter
     $('.removeFilters').on('click', function() {
       var lastClass = $(this).attr('class').split(' ').pop();
