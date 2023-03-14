@@ -433,20 +433,7 @@ class FilterController extends AbstractController
                 }
 
                 } else { // if form is not valid
-
-                        $data['customWhere']        = $this->sessionService->getFluxFilterWhere();
-                        $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
-                        $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
-                        $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
-                        $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
-                        $data['rule']               = $this->sessionService->getFluxFilterRuleName();
-                        $data['status']             = $this->sessionService->getFluxFilterStatus();
-                        $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
-                        $data['type']               = $this->sessionService->getFluxFilterType();
-                        $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
-                        $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
-                        $data['module_source']      = $this->sessionService->getFluxFilterModuleSource();
-                        $data['module_target']      = $this->sessionService->getFluxFilterModuleTarget();
+                        $data = $this->getFluxFilterData();
 
                     if (
                         count(array_filter($data)) === 0
@@ -545,7 +532,33 @@ class FilterController extends AbstractController
         return true;
     }
 
-
+    public function getFluxFilterData() {
+        $data = [];
+    
+        $filterMap = [
+            'customWhere' => 'FluxFilterWhere',
+            'source_content' => 'FluxFilterSourceContent',
+            'target_content' => 'FluxFilterTargetContent',
+            'date_modif_start' => 'FluxFilterDateModifStart',
+            'date_modif_end' => 'FluxFilterDateModifEnd',
+            'rule' => 'FluxFilterRuleName',
+            'status' => 'FluxFilterStatus',
+            'gblstatus' => 'FluxFilterGlobalStatus',
+            'type' => 'FluxFilterType',
+            'target_id' => 'FluxFilterTargetId',
+            'source_id' => 'FluxFilterSourceId',
+            'module_source' => 'FluxFilterModuleSource',
+            'module_target' => 'FluxFilterModuleTarget'
+        ];
+    
+        foreach ($filterMap as $dataKey => $filterName) {
+            $value = $this->sessionService->{'get'.$filterName}();
+                $data[$dataKey] = $value;
+        }
+    
+        return $data;
+    }
+    
 
     public function getLimitConfig()
     {
