@@ -27,7 +27,7 @@ class FilterType extends AbstractType
                     'Module target' => 'moduleTarget',
                     // 'Connector source' => 'connectorSource',
                     // 'Connector target' => 'connectorTarget',
-                    'Source id' => 'source',
+                    'Source id' => 'sourceId',
                     'Target id' => 'target',
                     'Status' => 'status',
                     'Global Status' => 'globalStatus',

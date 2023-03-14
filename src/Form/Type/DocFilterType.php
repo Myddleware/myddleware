@@ -42,7 +42,7 @@ class DocFilterType extends AbstractType
                 ],
                 'multiple' => true, // enable multiple choices
             ])
-            ->add('source',  TextType::class, [
+            ->add('sourceId',  TextType::class, [
                 //'choices'  => DocumentRepository::findModuleSource($entityManager),
                 'attr' => [
                     'placeholder' => 'Source Id',
