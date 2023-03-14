@@ -27,44 +27,26 @@ namespace App\Controller;
 
 use App\Entity\Rule;
 use App\Entity\Config;
-use App\Entity\Document;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use App\Form\Type\FilterType;
 use App\Manager\ToolsManager;
 use App\Service\SessionService;
-use App\Form\Type\DocFilterType;
-use App\Form\Type\ItemFilterType;
-use App\Form\Type\ProfileFormType;
 use App\Repository\RuleRepository;
-use App\Form\Type\ResetPasswordType;
 use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\CombinedFilterType;
-use App\Service\UserManagerInterface;
 use App\Repository\DocumentRepository;
 use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
-// use the ItemFilterType
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
-
 use Pagerfanta\Exception\NotValidCurrentPageException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
-use App\Manager\DocumentManager;
-
-
 
 /**
  * @Route("/rule")
@@ -113,7 +95,6 @@ class FilterController extends AbstractController
         KernelInterface $kernel,
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $params,
         TranslatorInterface $translator,
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert,
@@ -124,7 +105,6 @@ class FilterController extends AbstractController
         $this->env = $kernel->getEnvironment();
         $this->logger = $logger;
         $this->entityManager = $entityManager;
-        // $this->params = $params;
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
@@ -146,10 +126,9 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-        // dd($request);
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
-            'entityManager' => $this->getDoctrine()->getManager(),
+            'entityManager' => $this->entityManager,
         ]);
         
         $conditions = 0;
@@ -160,19 +139,16 @@ class FilterController extends AbstractController
             $timezone = $this->getUser()->getTimezone();
         }
 
-
         if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
            
             $form->handleRequest($request);
-
-            // dd($form->getData());
             $data = [];
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             }
     
             // Get the limit parameter
-            $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+            $configRepository = $this->entityManager->getRepository(Config::class);
             $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
             if (!empty($searchLimit)) {
                 $limit = $searchLimit->getValue();
@@ -180,119 +156,96 @@ class FilterController extends AbstractController
             
             $conditions = 0;
             $doNotSearch = false;
+            if ($form->isSubmitted() && $form->isValid()) {
 
-            if ($form->get('save')->isClicked() || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
-
-                if ($form->isSubmitted() && $form->isValid()) {
-
-                    $ruleRepository = $this->entityManager->getRepository(Rule::class);
-                    $rules = $ruleRepository->findAll();
-                    $ruleName = [];
-                    foreach ($rules as $value) {
-                        if ($value->getDeleted() == false) {
-                            $ruleName[] = $value->getName();
-                        }
+                $ruleRepository = $this->entityManager->getRepository(Rule::class);
+                $rules = $ruleRepository->findAll();
+                $ruleName = [];
+                foreach ($rules as $value) {
+                    if ($value->getDeleted() == false) {
+                        $ruleName[] = $value->getName();
                     }
+                }
+                $documentFormData = $form->get('document')->getData();
+                $ruleFormData = $form->get('rule')->getData();
+                $sourceFormData = $form->get('sourceContent')->getData();
 
-                    // if form get document get data is not null or form get rule get data is not null or form get source get data is not null
-                    if ($form->get('document')->getData() !== null 
-                    || $form->get('rule')->getData() !== null 
-                    || $form->get('sourceContent')->getData() !== null) {
-
-                        $documentFormData = $form->get('document')->getData();
-                        $ruleFormData = $form->get('rule')->getData();
-                        $sourceFormData = $form->get('sourceContent')->getData();
-                        $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName);
-                        
-
-                        // dd($data);
+                // if form get document get data is not null or form get rule get data is not null or form get source get data is not null
+                if ($documentFormData !== null || $ruleFormData !== null || $sourceFormData !== null) {
+                    $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName);
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
                             unset($data[$key]);
                         }
                     }
-
-                    // dd($data);
                 } // end form data not null
-                    
-                    if ($page === 1) {
+                
+                if ($page === 1) {
 
-                        $filterMap = [
-                            'customWhere' => 'FluxFilterWhere',
-                            'source_content' => 'FluxFilterSourceContent',
-                            'target_content' => 'FluxFilterTargetContent',
-                            'date_modif_start' => 'FluxFilterDateModifStart',
-                            'date_modif_end' => 'FluxFilterDateModifEnd',
-                            'rule' => 'FluxFilterRuleName',
-                            'status' => 'FluxFilterStatus',
-                            'gblstatus' => 'FluxFilterGlobalStatus',
-                            'type' => 'FluxFilterType',
-                            'target_id' => 'FluxFilterTargetId',
-                            'source_id' => 'FluxFilterSourceId',
-                            'module_source' => 'FluxFilterModuleSource',
-                            'module_target' => 'FluxFilterModuleTarget'
-                          ];
-                          
-                          foreach ($filterMap as $dataKey => $filterName) {
-                            if (!empty($data[$dataKey])) {
-                              $this->sessionService->{'set'.$filterName}($data[$dataKey]);
-                            } elseif ($dataKey !== 'customWhere') {
-                              $this->sessionService->{'remove'.$filterName}();
-                            }
-                          }
+                    $filterMap = [
+                        'customWhere' => 'FluxFilterWhere',
+                        'source_content' => 'FluxFilterSourceContent',
+                        'target_content' => 'FluxFilterTargetContent',
+                        'date_modif_start' => 'FluxFilterDateModifStart',
+                        'date_modif_end' => 'FluxFilterDateModifEnd',
+                        'rule' => 'FluxFilterRuleName',
+                        'status' => 'FluxFilterStatus',
+                        'gblstatus' => 'FluxFilterGlobalStatus',
+                        'type' => 'FluxFilterType',
+                        'target_id' => 'FluxFilterTargetId',
+                        'source_id' => 'FluxFilterSourceId',
+                        'module_source' => 'FluxFilterModuleSource',
+                        'module_target' => 'FluxFilterModuleTarget'
+                        ];
+                        
+                    foreach ($filterMap as $dataKey => $filterName) {
+                        if (!empty($data[$dataKey])) {
+                            $this->sessionService->{'set'.$filterName}($data[$dataKey]);
+                        } elseif ($dataKey !== 'customWhere') {
+                            $this->sessionService->{'remove'.$filterName}();
+                        }
+                    }
 
                 } // end if page === 1
-
                 else { // if page different from 1 so pagination
-                        
-
                 }
+            } else { // if form is not valid
+                    $data = $this->getFluxFilterData();
 
-                } else { // if form is not valid
-                        $data = $this->getFluxFilterData();
-
-                    if (
-                        count(array_filter($data)) === 0
-                        and $page == 1
-                    ) {
-                        $doNotSearch = true;
-                    }
+                if (
+                    count(array_filter($data)) === 0
+                    and $page == 1
+                ) {
+                    $doNotSearch = true;
                 }
+            }
 
-                if ($doNotSearch) {
-                    $documents = array();
+            if ($doNotSearch) {
+                $documents = array();
+            }
+            
+            if (!$doNotSearch) {
+                $searchParameters = $this->prepareSearch($data, $page, $limit);
+                $documents = $searchParameters['documents'];
+                $page = $searchParameters['page'];
+                $limit = $searchParameters['limit'];
+            }
+    
+            $compact = $this->nav_pagination([
+                'adapter_em_repository' => $documents,
+                'maxPerPage' => $this->params['pager'] ?? 25,
+                'page' => $page,
+            ], false);
+            
+            // Si tout se passe bien dans la pagination
+            if ($compact) {
+                // Si aucune règle
+                // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
+                if ($this->sessionService->isFluxFilterCExist()) {
+                    $conditions = 1;
                 }
-                
-                if (!$doNotSearch) {
-                    $searchParameters = $this->prepareSearch($data, $page, $limit);
-                    $documents = $searchParameters['documents'];
-                    $page = $searchParameters['page'];
-                    $limit = $searchParameters['limit'];
-                }
-        
-                $compact = $this->nav_pagination([
-                    'adapter_em_repository' => $documents,
-                    'maxPerPage' => $this->params['pager'] ?? 25,
-                    'page' => $page,
-                ], false);
-                
-                // Si tout se passe bien dans la pagination
-                if ($compact) {
-                    // Si aucune règle
-                    // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
-                    if ($this->sessionService->isFluxFilterCExist()) {
-                        $conditions = 1;
-                    }
-                    
-                    
-        
-                }
-        
-                // throw $this->createNotFoundException('Error');
-
-            } // end if click_filter
-
+            }
         } // end if POST
 
         if (!isset($compact)) {
@@ -305,8 +258,6 @@ class FilterController extends AbstractController
             ], false);
         }
         
-        
-
         return $this->render('testFilter.html.twig', [
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
@@ -317,7 +268,6 @@ class FilterController extends AbstractController
             'condition' => $conditions,
             'timezone' => $timezone,
         ]);
-
     }
 
     public function verifyIfEmptyFilters()
@@ -345,7 +295,6 @@ class FilterController extends AbstractController
                 return false;
             }
         }
-
         return true;
     }
 
@@ -379,7 +328,6 @@ class FilterController extends AbstractController
 
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName)
     {
-        // dd($documentFormData);
         $data = [
             'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
             'status' => ($documentFormData['status']) ? $documentFormData['status'] : null,
@@ -453,7 +401,7 @@ class FilterController extends AbstractController
     public function getLimitConfig()
     {
         // Get the limit parameter
-        $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+        $configRepository = $this->entityManager->getRepository(Config::class);
         $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
         if (!empty($searchLimit)) {
             $limit = $searchLimit->getValue();
@@ -461,38 +409,27 @@ class FilterController extends AbstractController
         return $limit;
     }
 
-
-    public function prepareSearch($cleanData, $page = 1, $limit = 1000)
+    //TO DO : check if ok 
+    public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
-        $doNotSearch = false;
-
-            if (
-                count(array_filter($cleanData)) === 0
-                and $page == 1
-            ) {
-                $doNotSearch = true;
-            }
-
-            if (!$doNotSearch) {
-                $documents = $this->searchDocuments($cleanData, $page, $limit);
-                // $resultSearch = $this->searchDocuments($data, $page, $limit); 
-            } else {
-                $documents = array();
-            }
-
-        $searchParameters = [
+        if (empty($cleanData) && $page === 1) {
+            return [
+                'documents' => [],
+                'page' => $page,
+                'limit' => $limit,
+            ];
+        }
+        $documents = $this->searchDocuments($cleanData, $page, $limit);
+        return [
             'documents' => $documents,
             'page' => $page,
             'limit' => $limit,
         ];
-        return $searchParameters;
     }
 
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
-        // dd($data);
         $join = '';
         $where = '';
-
 
         // Build the WHERE depending on $data
         // Source content
@@ -601,7 +538,7 @@ class FilterController extends AbstractController
             ." LIMIT ". $limit;
             
         
-        $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
+        $stmt = $this->entityManager->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content
         if (!empty($data['source_content'])) {
@@ -669,10 +606,10 @@ class FilterController extends AbstractController
     private function nav_pagination($params, $orm = true)
     {
         /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
+        * adapter_em_repository = requete
+        * maxPerPage = integer
+        * page = page en cours
+        */
 
         if (is_array($params)) {
             $compact = [];
@@ -693,10 +630,8 @@ class FilterController extends AbstractController
             } catch (NotValidCurrentPageException $e) {
                 throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
-
             return $compact;
         }
-
         return false;
     }
 }
