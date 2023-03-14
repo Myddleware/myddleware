@@ -203,192 +203,9 @@ class FilterController extends AbstractController
                         $ruleFormData = $form->get('rule')->getData();
                         $sourceFormData = $form->get('sourceContent')->getData();
                         $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName);
-                        // Rule name
-                        if ($ruleFormData->isNameSet()) {
-                            if (($ruleFormData->getName() !== null)
-                            || $ruleFormData->getName() === '0'
-                            ) {
-                                $data['rule'] = $ruleName[$ruleFormData->getName()];
-                            } elseif (empty($ruleFormData->getName())) {
-                                $data['rule'] = null;
-                            }
-                        } else {
-                            $data['rule'] = null;
-                        }
                         
-                        
-                        // Statuses
-                            if (!empty($documentFormData['status'])) {
-                                $statusIndex = $documentFormData['status'];
-                                
-                                $statuses = DocumentRepository::findStatusType($this->entityManager);
-                                $inversedStatuses = array_flip($statuses);
-                                
-                                $data['status'] = $inversedStatuses[$statusIndex];
-                            } else {
-                                $data['status'] = null;
-                            }
-                        
-                    
 
-                    // Global Statuses
-                    if ($documentFormData) {
-                        if (!empty($documentFormData['globalStatus'])) {
-                            $statusList = [
-                                'flux.gbl_status.open' => 'Open',
-                                'flux.gbl_status.close' => 'Close',
-                                'flux.gbl_status.cancel' => 'Cancel',
-                                'flux.gbl_status.error' => 'Error',
-                            ];
-
-                            // if the array $documentFormData['globalStatus'] has a length superior to 1
-                            // we need to create a customWhere
-                            if (count($documentFormData['globalStatus']) > 1) {
-                                $data['customWhere']['gblstatus'] = [];
-                                foreach ($documentFormData['globalStatus'] as $key => $value) {
-                                    $data['customWhere']['gblstatus'][] = $statusList[$value];
-                                }
-                            } else {
-                                $data['gblstatus'] = $statusList[$documentFormData['globalStatus'][0]];
-                            }
-
-                            
-                        } else {
-                            $data['gblstatus'] = null;
-                        }
-                    } else {
-                        $data['gblstatus'] = null;
-                    }
-
-
-                    
-
-                    // Source Module
-                    if ($ruleFormData !== null) {
-                        if ($ruleFormData->isModuleSourceSet()) {
-                            $ruleTest = $form->get('rule');
-                            $ruleTestData = $ruleTest->getData();
-                            $ruleModuleSource = $ruleTestData->getModuleSource();
-                            
-                            
-                            $sourceModules = RuleRepository::findModuleSource($this->entityManager);
-                            $inversedModules = array_flip($sourceModules);
-                            
-                            
-                            $data['module_source'] = $inversedModules[$ruleModuleSource];
-                        } else {
-                            $data['module_source'] = null;
-                        }
-                    } else {
-                        $data['module_source'] = null;
-                    }
-
-                    // Target module
-                    if ($ruleFormData !== null) {
-                        if ($ruleFormData->isModuleTargetSet()) {
-                            $ruleTestTarget = $form->get('rule');
-                            $ruleTestDataTarget = $ruleTestTarget->getData();
-                            $ruleModuleTarget = $ruleTestDataTarget->getModuleTarget();
-                            
-                            
-                            $targetModules = RuleRepository::findModuleTarget($this->entityManager);
-                            $inversedModules = array_flip($targetModules);
-                            
-                            
-                            $data['module_target'] = $inversedModules[$ruleModuleTarget];
-                        } else {
-                            $data['module_target'] = null;
-                        }
-                    } else {
-                        $data['module_target'] = null;
-                    }
-
-                    // Source
-                    if ($documentFormData !== null) {
-                        if (!empty($documentFormData['source'])) {
-                            $data['source_id'] = $documentFormData['source'];
-                        } else {
-                            $data['source_id'] = null;
-                        }
-                    } else {
-                        $data['source_id'] = null;
-                    }
-                    
-                    // Target 
-                    if ($documentFormData !== null) {
-                        if (!empty($documentFormData['target'])) {
-
-                            $data['target_id'] = $documentFormData['target'];
-                        } else {
-                            $data['target_id'] = null;
-                        }
-                    } else {
-                        $data['target_id'] = null;
-                    }
-
-                    // Document type
-                    if ($documentFormData !== null) {
-                        if (!empty($documentFormData['type'])) {
-
-                            $listOfTypes = 
-                            [
-                                'flux.type.create' => 'C',
-                                'flux.type.update' => 'U',
-                                'flux.type.delete' => 'D',
-                                'flux.type.search' => 'S',
-                            ];
-                            
-
-                            $data['type'] = $listOfTypes[$documentFormData['type']];
-                        } else {
-                            $data['type'] = null;
-                        }
-                    } else {
-                        $data['type'] = null;
-                    }
-
-
-                    // Source Content
-                    if (!empty($sourceFormData['sourceContent'])) {
-                        $data['source_content'] = $sourceFormData['sourceContent'];
-                    } else {
-                        $data['source_content'] = null;
-                    }
-                    
-                    // Target Content
-                    if (!empty($sourceFormData['targetContent'])) {
-                        $data['target_content'] = $sourceFormData['targetContent'];
-                    } else {
-                        $data['target_content'] = null;
-                    }
-
-                    // Date modif start
-                    if (!empty($documentFormData['date_modif_start'])) {
-
-                        $data['date_modif_start'] = $documentFormData['date_modif_start']->format('Y-m-d, H:i:s');
-                    } else {
-                        $data['date_modif_start'] = null;
-                    }
-
-                    
-                    // Date modif start
-                    if (!empty($documentFormData['date_modif_end'])) {
-
-                        $data['date_modif_end'] = $documentFormData['date_modif_end']->format('Y-m-d, H:i:s');
-                    } else {
-                        $data['date_modif_end'] = null;
-                    }
-
-                    // if form source data get content operator is rule, then
-                    if(!empty($sourceFormData['operator'])) {
-                        $data['operator'] = $sourceFormData['operator'];
-                    } else {
-                        $data['operator'] = null;
-                    }
-
-                    // dd($data);
-                    // data['source_content_operator'] = 'rule'
-
+                        // dd($data);
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -562,22 +379,24 @@ class FilterController extends AbstractController
 
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName)
     {
+        // dd($documentFormData);
         $data = [
             'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
             'status' => ($documentFormData['status']) ? $documentFormData['status'] : null,
             'gblstatus' => ($documentFormData['globalStatus']) ? $documentFormData['globalStatus'] : null,
-            'module_source' => null,
-            'module_target' => null,
-            'source_id' => null,
-            'target_id' => null,
-            'type' => null,
-            'source_content' => null,
-            'target_content' => null,
-            'date_modif_start' => null,
-            'date_modif_end' => null,
+            'module_source' => ($ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
+            'module_target' => ($ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
+            'source_id' => ($documentFormData['sourceId']) ? $documentFormData['sourceId'] : null,
+            'target_id' => ($documentFormData['target']) ? $documentFormData['target'] : null,
+            'type' => ($documentFormData['type']) ? $this->getDocumentType($documentFormData) : null,
+            'source_content' => $sourceFormData['sourceContent'] ?? null,
+            'target_content' => $sourceFormData['targetContent'] ?? null,
+            'date_modif_start' => $documentFormData['date_modif_start'] ? $documentFormData['date_modif_start']->format('Y-m-d, H:i:s') : null,
+            'date_modif_end' => $documentFormData['date_modif_end'] ? $documentFormData['date_modif_end']->format('Y-m-d, H:i:s') : null,
             'operator' => null,
         ];
 
+        // dd($data);
         return $data;
     }
 
@@ -591,7 +410,7 @@ class FilterController extends AbstractController
     public function getStatusData($documentFormData)
     {
         if ($documentFormData->isStatusSet()) {
-            return $documentFormData->getStatus();
+            return true;
         }
     }
 
@@ -600,6 +419,35 @@ class FilterController extends AbstractController
         if ($documentFormData->isGlobalStatusSet()) {
             return $documentFormData->getGlobalStatus();
         }
+    }
+
+    public function getDocumentType($documentFormData)
+    {
+        $listOfTypes = 
+        [
+            'flux.type.create' => 'C',
+            'flux.type.update' => 'U',
+            'flux.type.delete' => 'D',
+            'flux.type.search' => 'S',
+        ];
+
+        return $listOfTypes[$documentFormData['type']];
+    }
+
+    public function getModuleSourceData($ruleFormData)
+    {
+        $sourceModules = RuleRepository::findModuleSource($this->entityManager);
+        $inversedModules = array_flip($sourceModules);
+
+        return $inversedModules[$ruleFormData->getModuleSource()];
+    }
+
+    public function getModuleTargetData($ruleFormData)
+    {
+        $targetModules = RuleRepository::findModuleTarget($this->entityManager);
+        $inversedModules = array_flip($targetModules);
+
+        return $inversedModules[$ruleFormData->getModuleTarget()];
     }
 
     public function getLimitConfig()
@@ -641,6 +489,7 @@ class FilterController extends AbstractController
     }
 
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        // dd($data);
         $join = '';
         $where = '';
 
