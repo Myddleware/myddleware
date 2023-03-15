@@ -52,5 +52,47 @@ $(function() {
         }
       });
     });
+
+    // Save filters to localStorage
+    function saveFiltersToLocalStorage() {
+      var storedFilters = {};
+      filters.forEach(function(filter) {
+        storedFilters[filter.name] = {
+          value: $(filter.selector).val(),
+          hidden: $('#' + filter.name).attr('hidden') === 'hidden'
+        };
+      });
+      localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
+    }
+
+    function loadFiltersFromLocalStorage() {
+      var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
+      if (storedFilters) {
+        filters.forEach(function(filter) {
+          if (storedFilters[filter.name]) {
+            $(filter.selector).val(storedFilters[filter.name].value);
+            if (storedFilters[filter.name].hidden) {
+              hideFilter(filter);
+            } else {
+              showFilter(filter);
+            }
+          }
+        });
+      }
+    }
+
+  // Load filters from localStorage on page load
+    loadFiltersFromLocalStorage();
+
+  // Save filters to localStorage when the form is submitted
+  $('form').on('submit', function() {
+    saveFiltersToLocalStorage();
+  });
+
+  // Clear localStorage when the clear button is clicked
+  $('.removeFilter').on('click', function() {
+    localStorage.clear();
+  });
+
   });
   

@@ -506,9 +506,7 @@ class FilterController extends AbstractController
             OR !empty($data['customWhere']['rule'])
         ) {
             if (isset($data['operators']['name'])) {
-                // if ($data['operators'] == 'name') {
                     $where .= " AND rule.name != :ruleName ";
-                // }
                 
             } else {
                 $where .= " AND rule.name = :ruleName ";
