@@ -175,8 +175,10 @@ class FilterController extends AbstractController
 
                 // if form get document get data is not null or form get rule get data is not null or form get source get data is not null
                 if ($documentFormData !== null || $ruleFormData !== null || $sourceFormData !== null) {
+
                     $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators);
-                    // dd($data);
+
+
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -454,7 +456,6 @@ class FilterController extends AbstractController
     }
 
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
-        // dd($data);
         $join = '';
         $where = '';
 

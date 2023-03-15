@@ -32,9 +32,9 @@ class ItemFilterType extends AbstractType
                 ],
             ])
             ->add('dateCreated', DateTimeType::class, [
-                // 'widget' => 'single_text',
+                'widget' => 'single_text',
                 'attr' => [
-                    'class' => 'form-control mt-2 ',
+                    'class' => 'form-control mt-2 caleendar',
                     'id' => 'dateCreated',
                     'placeholder' => 'Date start',
                 ],
@@ -63,7 +63,7 @@ class ItemFilterType extends AbstractType
                 'choices'  => RuleRepository::findActiveRulesNames($entityManager),
                 'attr' => [
                     'placeholder' => 'Name',
-                    'class' => 'form-control',
+                    'class' => 'form-control mt-2',
                     'id' => 'name'
                 ],
                 'constraints' => [
