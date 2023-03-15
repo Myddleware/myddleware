@@ -31,17 +31,6 @@ class ItemFilterType extends AbstractType
                     'placeholder' => 'Id',
                 ],
             ])
-            ->add('dateCreated', DateTimeType::class, [
-                'widget' => 'single_text',
-                'attr' => [
-                    'class' => 'form-control mt-2 caleendar',
-                    'id' => 'dateCreated',
-                    'placeholder' => 'Date start',
-                ],
-                'constraints' => [
-                    new NotBlank(),
-                ],
-            ])
             ->add('moduleSource', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleSource($entityManager),
                 

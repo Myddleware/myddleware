@@ -2,7 +2,6 @@ $(function() {
     // Define an array of filters, each containing a name and selector
     var filters = [
       { name: 'name', selector: '#combined_filter_rule_name' },
-      { name: 'dateCreated', selector: '#combined_filter_rule_dateCreated' },
       { name: 'id', selector: '#combined_filter_rule_id' },
       { name: 'moduleSource', selector: '#combined_filter_rule_moduleSource' },
       { name: 'moduleTarget', selector: '#combined_filter_rule_moduleTarget' },
