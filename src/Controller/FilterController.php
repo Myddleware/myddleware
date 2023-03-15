@@ -648,36 +648,34 @@ class FilterController extends AbstractController
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-    private function nav_pagination($params, $orm = true)
+    //Create pagination using the Pagerfanta Bundle based on a request
+    private function nav_pagination(array $params, bool $orm = true): array
     {
         /*
-        * adapter_em_repository = requete
-        * maxPerPage = integer
-        * page = page en cours
-        */
+         * adapter_em_repository = requete
+         * maxPerPage = integer
+         * page = page en cours
+         */
 
-        if (is_array($params)) {
-            $compact = [];
-            if ($orm) {
-                $queryBuilder = $params['adapter_em_repository'];
-                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
-                $compact['pager'] = $pagerfanta;
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-            $maxPerPage = intval($params['maxPerPage']);
-            $currentPage = intval($params['page']);
-            $compact['pager']->setMaxPerPage($maxPerPage);
-            try {
-                $compact['pager']->setCurrentPage($currentPage);
-                $compact['nb'] = $compact['pager']->getNbResults();
-                $compact['entities'] = $compact['pager']->getCurrentPageResults();
-            } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            }
-            return $compact;
+        $compact = [];
+        if ($orm) {
+            $queryBuilder = $params['adapter_em_repository'];
+            $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+            $compact['pager'] = $pagerfanta;
+        } else {
+            $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
         }
-        return false;
+    
+        $compact['pager']->setMaxPerPage(intval($params['maxPerPage']));
+    
+        try {
+            $compact['pager']->setCurrentPage(intval($params['page']));
+            $compact['nb'] = $compact['pager']->getNbResults();
+            $compact['entities'] = $compact['pager']->getCurrentPageResults();
+        } catch (NotValidCurrentPageException $e) {
+            throw $this->createNotFoundException(sprintf('Page not found. %s %s %d', $e->getMessage(), $e->getFile(), $e->getLine()));
+        }
+    
+        return $compact;
     }
 }
