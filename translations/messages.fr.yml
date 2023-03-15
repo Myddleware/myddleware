@@ -314,7 +314,8 @@ list_flux:
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
-        date_modified: Date de modification
+        date_modified_start: Date de modification (début)
+        date_modified_end: Date de modification (fin)
         rule: Règle
         status: Statut
         global_status: Statut global 
@@ -326,7 +327,11 @@ list_flux:
         name: Nom
         content: Contenu du document
         source_content: Source
-        target_content: Target
+        target_content: Cible
+        connector_target: Connector cible
+        connector_source: Connector Source
+        module_target: Module cible
+        module_source: Module source
     tab:
         id: Doc Id
         name: Nom
