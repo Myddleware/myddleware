@@ -18,7 +18,7 @@ class FilterType extends AbstractType
                 'choices' => [
                     '- Select your filters -' => 'default',
                     'Rule name' => 'name',
-                    // 'Reference date start' => 'sourceDateModified',
+                    'Reference' => 'reference',
                     'Date of modification Start' => 'date_modif_start',
                     'Date of modification End' => 'date_modif_end',
                     'Module source' => 'moduleSource',

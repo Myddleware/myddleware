@@ -332,6 +332,7 @@ list_flux:
         connector_source: Connector Source
         module_target: Module cible
         module_source: Module source
+        reference: Référence
     tab:
         id: Doc Id
         name: Nom

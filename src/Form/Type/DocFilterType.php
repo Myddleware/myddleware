@@ -49,6 +49,13 @@ class DocFilterType extends AbstractType
                     'id' => 'target'
                 ],
             ])
+            ->add('reference',  TextType::class, [
+                'attr' => [
+                    'placeholder' => 'Reference',
+                    'class' => 'form-control mt-2',
+                    'id' => 'reference'
+                ],
+            ])
             ->add('type',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentManager::lstType(),
                 'attr' => [

@@ -998,6 +998,29 @@ class SessionService
         return $myddlewareSession['flux_filter']['c']['type'] ?? null;
     }
 
+    public function getFluxFilterReference()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+
+        return $myddlewareSession['flux_filter']['c']['reference'] ?? null;
+    }
+
+    public function setFluxFilterReference($reference)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['flux_filter']['c']['reference'] = $reference;
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
+    public function removeFluxFilterReference()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['reference']);
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
     public function setFluxFilterSourceId($sourceId)
     {
         $myddlewareSession = $this->getMyddlewareSession();

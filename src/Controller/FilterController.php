@@ -145,7 +145,6 @@ class FilterController extends AbstractController
             $data = [];
             $operators = $request->request->all();
             unset($operators['combined_filter']);
-            // dd($data);
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             }
@@ -190,6 +189,7 @@ class FilterController extends AbstractController
                 if ($page === 1) {
 
                     $filterMap = [
+                        'reference' => 'FluxFilterReference',
                         'operators' => 'FluxFilterOperators',
                         'customWhere' => 'FluxFilterWhere',
                         'source_content' => 'FluxFilterSourceContent',
@@ -280,6 +280,7 @@ class FilterController extends AbstractController
     public function verifyIfEmptyFilters()
     {
         $filterMap = [
+            'reference' => 'FluxFilterReference',
             'operators' => 'FluxFilterOperators',
             'customWhere' => 'FluxFilterWhere',
             'source_content' => 'FluxFilterSourceContent',
@@ -310,6 +311,7 @@ class FilterController extends AbstractController
         $data = [];
     
         $filterMap = [
+            'reference' => 'FluxFilterReference',
             'operators' => 'FluxFilterOperators',
             'customWhere' => 'FluxFilterWhere',
             'source_content' => 'FluxFilterSourceContent',
@@ -339,6 +341,7 @@ class FilterController extends AbstractController
     {
         try {
             $data = [
+                'reference' => ($documentFormData['reference']) ? $documentFormData['reference'] : null,
                 'rule' => ($ruleFormData !== null && $ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
                 'status' => ($documentFormData['status']) ? $this->getStatusData($documentFormData) : null,
                 'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
@@ -356,7 +359,6 @@ class FilterController extends AbstractController
             ];
             
             
-
             return $data;
         } catch (\Exception $e) {
             throw new \Exception('Failed to create data from form: ' . $e->getMessage());
@@ -485,6 +487,17 @@ class FilterController extends AbstractController
         // Date modified (end)
         if (!empty($data['date_modif_end'])) {
             $where .= " AND document.date_modified <= :dateModifiedEnd ";
+        }
+
+        // Reference
+        if (!empty($data['reference'])
+            OR !empty($data['customWhere']['reference'])) {
+            if (isset($data['operators']['reference'])) {
+
+                $where .= " AND document.source_date_modified <= :reference ";
+            } else {
+                $where .= " AND document.source_date_modified >= :reference ";
+            }
         }
 
         // Rule
@@ -625,6 +638,12 @@ class FilterController extends AbstractController
         if (!empty($data['date_modif_end'])) {
             $stmt->bindValue(':dateModifiedEnd', $data['date_modif_end']);
         }
+
+        // Reference
+        if (!empty($data['reference'])) {
+            $stmt->bindValue(':reference', $data['reference']);
+        }
+
         // Rule
         if (
                 !empty($data['rule'])
