@@ -143,6 +143,9 @@ class FilterController extends AbstractController
            
             $form->handleRequest($request);
             $data = [];
+            $operators = $request->request->all();
+            unset($operators['combined_filter']);
+            // dd($data);
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             }
@@ -172,7 +175,10 @@ class FilterController extends AbstractController
 
                 // if form get document get data is not null or form get rule get data is not null or form get source get data is not null
                 if ($documentFormData !== null || $ruleFormData !== null || $sourceFormData !== null) {
-                    $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName);
+
+                    $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators);
+
+
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -326,12 +332,12 @@ class FilterController extends AbstractController
     }
     
 
-    public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName)
+    public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
         $data = [
             'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
             'status' => ($documentFormData['status']) ? $documentFormData['status'] : null,
-            'gblstatus' => ($documentFormData['globalStatus']) ? $documentFormData['globalStatus'] : null,
+            'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
             'module_source' => ($ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
             'module_target' => ($ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
             'source_id' => ($documentFormData['sourceId']) ? $documentFormData['sourceId'] : null,
@@ -341,10 +347,10 @@ class FilterController extends AbstractController
             'target_content' => $sourceFormData['targetContent'] ?? null,
             'date_modif_start' => $documentFormData['date_modif_start'] ? $documentFormData['date_modif_start']->format('Y-m-d, H:i:s') : null,
             'date_modif_end' => $documentFormData['date_modif_end'] ? $documentFormData['date_modif_end']->format('Y-m-d, H:i:s') : null,
-            'operator' => null,
+            'operators' => $operators ?? null,
+            'customWhere' => $this->getGlobalStatusData($documentFormData)['customWhere'] ?? null,
         ];
 
-        // dd($data);
         return $data;
     }
 
@@ -364,9 +370,25 @@ class FilterController extends AbstractController
 
     public function getGlobalStatusData($documentFormData)
     {
-        if ($documentFormData->isGlobalStatusSet()) {
-            return $documentFormData->getGlobalStatus();
+        $statusList = [
+            'flux.gbl_status.open' => 'Open',
+            'flux.gbl_status.close' => 'Close',
+            'flux.gbl_status.cancel' => 'Cancel',
+            'flux.gbl_status.error' => 'Error',
+        ];
+
+        if (count($documentFormData['globalStatus']) > 1) {
+            $data['customWhere']['gblstatus'] = [];
+            foreach ($documentFormData['globalStatus'] as $key => $value) {
+                $data['customWhere']['gblstatus'][] = $statusList[$value];
+            }
+        } elseif (count($documentFormData['globalStatus']) == 1){
+            $data['gblstatus'] = $statusList[$documentFormData['globalStatus'][0]];
+        } else {
+            $data['gblstatus'] = null;
         }
+
+        return $data;   
     }
 
     public function getDocumentType($documentFormData)
@@ -457,10 +479,10 @@ class FilterController extends AbstractController
                 !empty($data['rule'])
             OR !empty($data['customWhere']['rule'])
         ) {
-            if (isset($data['operator'])) {
-                if ($data['operator'] == 'name') {
+            if (isset($data['operators']['name'])) {
+                // if ($data['operators'] == 'name') {
                     $where .= " AND rule.name != :ruleName ";
-                }
+                // }
                 
             } else {
                 $where .= " AND rule.name = :ruleName ";
