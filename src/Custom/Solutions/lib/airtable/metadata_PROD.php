@@ -392,7 +392,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 		'fldylPfYOq5DaUNy6'=> array( 'label' => 'Autre E-mail : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldiVpKSwGGOLhZEH'=> array( 'label' => 'E-mail Opt Out : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldqTUZ8hWoIWioOg'=> array( 'label' => 'E-mail invalide : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldPS5UAYRw7NGPlp'=> array( 'label' => 'Date de naissance :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldPS5UAYRw7NGPlp'=> array( 'label' => 'Date de naissance :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldygT8WOtF4sZclp'=> array( 'label' => 'Nom sur le portail :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldcnYhSGq4ZXMClx'=> array( 'label' => 'Portail application:', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldxsoqHeoo2W7KmK'=> array( 'label' => 'Site web', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
