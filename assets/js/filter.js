@@ -18,7 +18,8 @@ $(function() {
     
     // Function to show a filter if its value is not empty
     function showFilter(filter) {
-      if ($(filter.selector).val() !== '' && $(filter.selector).val().length > 0) {
+      var filterValue = $(filter.selector).val();
+      if (filterValue !== null && filterValue !== '' && filterValue.length > 0) {
         $('#' + filter.name).removeAttr('hidden');
       }
     }
