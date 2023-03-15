@@ -2,6 +2,7 @@ $(function() {
     // Define an array of filters, each containing a name and selector
     var filters = [
       { name: 'name', selector: '#combined_filter_rule_name' },
+      { name: 'reference', selector: '#combined_filter_document_reference' },
       { name: 'moduleSource', selector: '#combined_filter_rule_moduleSource' },
       { name: 'moduleTarget', selector: '#combined_filter_rule_moduleTarget' },
       { name: 'status', selector: '#combined_filter_document_status' },
