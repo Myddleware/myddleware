@@ -1,11 +1,8 @@
 <?php
 namespace App\Form\Type;
 
-use DateTime;
-use App\Entity\Document;
 use App\Manager\DocumentManager;
 use App\Repository\DocumentRepository;
-use App\Controller\DateIntervalDocType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,13 +14,9 @@ use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 class DocFilterType extends AbstractType
 {
-
-   
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $entityManager = $options['entityManager'];
-        // $dateModified = new \DateTime('now');
         $builder
             ->add('status',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentRepository::findStatusType($entityManager),
