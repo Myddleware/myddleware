@@ -38,7 +38,9 @@ $(function() {
     $('#item_filter_filter').on('change', function() {
       var selectedValue = $(this).val();
       $('#' + selectedValue).removeAttr('hidden');
-      $('.removeFilters.' + selectedValue).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="'+selectedValue+'" value="reverse"><label for="'+selectedValue+'">Reverse</label></div>');
+      if (selectedValue !== 'date_modif_start' && selectedValue !== 'date_modif_end' && selectedValue !== 'sourceId' && selectedValue !== 'target' &&selectedValue !== 'sourceContent' && selectedValue !== 'targetContent') {
+        $('.removeFilters.' + selectedValue).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="'+selectedValue+'" value="reverse"><label for="'+selectedValue+'">Reverse</label></div>');
+      }
     });
     
     // Remove Filter
