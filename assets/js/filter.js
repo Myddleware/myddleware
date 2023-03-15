@@ -61,7 +61,8 @@ $(function() {
       filters.forEach(function(filter) {
         storedFilters[filter.name] = {
           value: $(filter.selector).val(),
-          hidden: $('#' + filter.name).attr('hidden') === 'hidden'
+          hidden: $('#' + filter.name).attr('hidden') === 'hidden',
+          reverse: $('[name="' + filter.name + '"][type="checkbox"]').prop('checked')
         };
       });
       localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
@@ -77,6 +78,10 @@ $(function() {
               hideFilter(filter);
             } else {
               showFilter(filter);
+              if (filter.name !== 'date_modif_start' && filter.name !== 'date_modif_end' && filter.name !== 'sourceId' && filter.name !== 'target' && filter.name !== 'sourceContent' && filter.name !== 'targetContent') {
+                $('.removeFilters.' + filter.name).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="' + filter.name + '" value="reverse"><label for="' + filter.name + '">Reverse</label></div>');
+                $('[name="' + filter.name + '"][type="checkbox"]').prop('checked', storedFilters[filter.name].reverse);
+              }
             }
           }
         });
