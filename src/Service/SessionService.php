@@ -1088,6 +1088,14 @@ class SessionService
         return $myddlewareSession['flux_filter']['c']['date_create_start'] ?? null;
     }
 
+    public function getFluxFilterOperators()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+
+        return $myddlewareSession['flux_filter']['c']['operators'] ?? null;
+    }
+
+
     public function getFluxFilterSourceContent()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -1100,6 +1108,23 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
 
         return $myddlewareSession['flux_filter']['c']['target_content'] ?? null;
+    }
+
+
+    public function setFluxFilterOperators($operators)
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['flux_filter']['c']['operators'] = $operators;
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
+    public function removeFluxFilterOperators()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['c']['operators']);
+
+        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function setFluxFilterDateCreateEnd($dateCreateEnd)

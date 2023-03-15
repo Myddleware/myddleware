@@ -188,6 +188,7 @@ class FilterController extends AbstractController
                 if ($page === 1) {
 
                     $filterMap = [
+                        'operators' => 'FluxFilterOperators',
                         'customWhere' => 'FluxFilterWhere',
                         'source_content' => 'FluxFilterSourceContent',
                         'target_content' => 'FluxFilterTargetContent',
@@ -277,6 +278,7 @@ class FilterController extends AbstractController
     public function verifyIfEmptyFilters()
     {
         $filterMap = [
+            'operators' => 'FluxFilterOperators',
             'customWhere' => 'FluxFilterWhere',
             'source_content' => 'FluxFilterSourceContent',
             'target_content' => 'FluxFilterTargetContent',
@@ -306,6 +308,7 @@ class FilterController extends AbstractController
         $data = [];
     
         $filterMap = [
+            'operators' => 'FluxFilterOperators',
             'customWhere' => 'FluxFilterWhere',
             'source_content' => 'FluxFilterSourceContent',
             'target_content' => 'FluxFilterTargetContent',
@@ -334,7 +337,7 @@ class FilterController extends AbstractController
     {
         $data = [
             'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
-            'status' => ($documentFormData['status']) ? $documentFormData['status'] : null,
+            'status' => ($documentFormData['status']) ? $this->getStatusData($documentFormData) : null,
             'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
             'module_source' => ($ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
             'module_target' => ($ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
@@ -361,9 +364,12 @@ class FilterController extends AbstractController
 
     public function getStatusData($documentFormData)
     {
-        if ($documentFormData->isStatusSet()) {
-            return true;
-        }
+        $statusIndex = $documentFormData['status'];
+                        
+        $statuses = DocumentRepository::findStatusType($this->entityManager);
+        $inversedStatuses = array_flip($statuses);
+        
+        return $inversedStatuses[$statusIndex];
     }
 
     public function getGlobalStatusData($documentFormData)
@@ -487,13 +493,31 @@ class FilterController extends AbstractController
                 $where .= " AND rule.name = :ruleName ";
             }
         }
+
         // Status
-        if (!empty($data['status'])) {
-            $where .= " AND document.status = :status ";
+        if (
+            !empty($data['status'])
+            or !empty($data['customWhere']['status'])
+        ) {
+            if (isset($data['operators']['status'])) {
+                $where .= " AND document.status != :status ";
+            } else {
+                $where .= " AND document.status = :status ";
+            }
         }
-         // Module source
-         if (!empty($data['module_source'])) {
-            $where .= " AND rule.module_source = :module_source ";
+
+        // Module source
+        if (
+            !empty($data['module_source'])
+            or !empty($data['customWhere']['module_source'])
+        ) {
+            if (isset($data['operators']['moduleSource'])) {
+                $where .= " AND rule.module_source != :module_source ";
+            } else {
+                $where .= " AND rule.module_source = :module_source ";
+            }
+
+            // $where .= " AND rule.module_source = :module_source ";
         }
 
         // Module target
