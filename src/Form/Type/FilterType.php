@@ -35,7 +35,7 @@ class FilterType extends AbstractType
                     'Source Content' => 'sourceContent',
                     'Target Content' => 'targetContent',
                 ],
-
+                'data' => 'default',
                 'attr' => [
                     'class' => 'form-control',
                 ],
