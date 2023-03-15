@@ -338,11 +338,11 @@ class FilterController extends AbstractController
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
         $data = [
-            'rule' => ($ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
+            'rule' => ($ruleFormData !== null && $ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
             'status' => ($documentFormData['status']) ? $this->getStatusData($documentFormData) : null,
             'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
-            'module_source' => ($ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
-            'module_target' => ($ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
+            'module_source' => ($ruleFormData !== null && $ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
+            'module_target' => ($ruleFormData !== null && $ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
             'source_id' => ($documentFormData['sourceId']) ? $documentFormData['sourceId'] : null,
             'target_id' => ($documentFormData['target']) ? $documentFormData['target'] : null,
             'type' => ($documentFormData['type']) ? $this->getDocumentType($documentFormData) : null,
@@ -480,6 +480,7 @@ class FilterController extends AbstractController
         if (!empty($data['date_modif_end'])) {
             $where .= " AND document.date_modified <= :dateModifiedEnd ";
         }
+
         // Rule
         if (
                 !empty($data['rule'])
@@ -518,12 +519,31 @@ class FilterController extends AbstractController
                 $where .= " AND rule.module_source = :module_source ";
             }
 
-            // $where .= " AND rule.module_source = :module_source ";
         }
 
         // Module target
-        if (!empty($data['module_target'])) {
-            $where .= " AND rule.module_target = :module_target ";
+        if (
+            !empty($data['module_target'])
+            or !empty($data['customWhere']['module_target'])
+        ) {
+            if (isset($data['operators']['moduleTarget'])) {
+                $where .= " AND rule.module_target != :module_target ";
+            } else {
+                $where .= " AND rule.module_target = :module_target ";
+            }
+        }
+
+
+        // Document type
+        if (
+            !empty($data['type'])
+            or !empty($data['customWhere']['type'])
+        ) {
+            if (isset($data['operators']['type'])) {
+                $where .= " AND document.type != :type ";
+            } else {
+                $where .= " AND document.type = :type ";
+            }
         }
 
         // customWhere can have several status (open and error from the error dashlet in the home page)
@@ -539,10 +559,7 @@ class FilterController extends AbstractController
             $where .= " AND document.global_status = :gblstatus ";
         }
 
-        // Type
-        if (!empty($data['type'])) {
-            $where .= " AND document.type = :type ";
-        }
+        
         // Target ID
         if (!empty($data['target_id'])) {
             $where .= " AND document.target_id LIKE :target_id ";
