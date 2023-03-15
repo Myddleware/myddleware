@@ -19,11 +19,11 @@ class DocFilterType extends AbstractType
         $entityManager = $options['entityManager'];
         $builder
             ->add('status',Filters\ChoiceFilterType::class, [
-                'choices'  => DocumentRepository::findStatusType($entityManager),
+                'choices'  => DocumentManager::lstStatus(),
                 'attr' => [
                     'class' => 'form-control mt-2',
                     'id' => 'status',
-                    'placeholder' => 'status',
+                    'placeholder' => 'Status',
                 ],
             ])
             ->add('globalStatus',Filters\ChoiceFilterType::class, [

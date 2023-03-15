@@ -375,11 +375,27 @@ class FilterController extends AbstractController
     public function getStatusData($documentFormData)
     {
         $statusIndex = $documentFormData['status'];
-                        
-        $statuses = DocumentRepository::findStatusType($this->entityManager);
-        $inversedStatuses = array_flip($statuses);
+
+        $statuses =   [
+            'flux.status.new' => 'New',
+            'flux.status.predecessor_ok' => 'Predecessor_OK',
+            'flux.status.relate_ok' => 'Relate_OK',
+            'flux.status.transformed' => 'Transformed',
+            'flux.status.ready_to_send' => 'Ready_to_send',
+            'flux.status.filter_ok' => 'Filter_OK',
+            'flux.status.send' => 'Send',
+            'flux.status.filter' => 'Filter',
+            'flux.status.no_send' => 'No_send',
+            'flux.status.cancel' => 'Cancel',
+            'flux.status.filter_ko' => 'Filter_KO',
+            'flux.status.predecessor_ko' => 'Predecessor_KO',
+            'flux.status.relate_ko' => 'Relate_KO',
+            'flux.status.error_transformed' => 'Error_transformed',
+            'flux.status.error_checking' => 'Error_checking',
+            'flux.status.error_sending' => 'Error_sending',
+        ];
         
-        return $inversedStatuses[$statusIndex];
+        return $statuses[$statusIndex];
     }
 
     public function getGlobalStatusData($documentFormData)
@@ -445,7 +461,6 @@ class FilterController extends AbstractController
         return $limit;
     }
 
-    //TO DO : check if ok 
     public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
         if (empty($cleanData) && $page === 1) {
