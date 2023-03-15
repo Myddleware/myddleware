@@ -43,7 +43,6 @@ class DocFilterType extends AbstractType
                 'multiple' => true, // enable multiple choices
             ])
             ->add('sourceId',  TextType::class, [
-                //'choices'  => DocumentRepository::findModuleSource($entityManager),
                 'attr' => [
                     'placeholder' => 'Source Id',
                     'class' => 'form-control mt-2',
@@ -51,7 +50,6 @@ class DocFilterType extends AbstractType
                 ],
             ])
             ->add('target',  TextType::class, [
-                // 'choices'  => RuleRepository::findModuleSource($entityManager),
                 'attr' => [
                     'placeholder' => 'Target Id',
                     'class' => 'form-control mt-2',
@@ -74,7 +72,6 @@ class DocFilterType extends AbstractType
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'date_modif_start'
                 ],
-                // 'data' => new \DateTime()
             ])
             ->add('date_modif_end', DateTimeType::class, [
                 'widget' => 'single_text',
@@ -84,7 +81,6 @@ class DocFilterType extends AbstractType
                     'class' => 'form-control mt-2 calendar',
                     'id' => 'date_modif_end'
                 ],
-                // 'data' => new \DateTime()
             ]);
 
 

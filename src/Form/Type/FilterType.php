@@ -17,16 +17,12 @@ class FilterType extends AbstractType
             ->add('filter', Filters\ChoiceFilterType::class, [               
                 'choices' => [
                     '- Select your filters -' => 'default',
-                    // 'Id' => 'id',
                     'Rule name' => 'name',
                     // 'Reference date start' => 'sourceDateModified',
                     'Date of modification Start' => 'date_modif_start',
                     'Date of modification End' => 'date_modif_end',
-                    // 'Date Created' => 'dateCreated',
                     'Module source' => 'moduleSource',
                     'Module target' => 'moduleTarget',
-                    // 'Connector source' => 'connectorSource',
-                    // 'Connector target' => 'connectorTarget',
                     'Source id' => 'sourceId',
                     'Target id' => 'target',
                     'Status' => 'status',

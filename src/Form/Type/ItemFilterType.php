@@ -1,5 +1,5 @@
 <?php
-// ItemFilterType.php
+
 namespace App\Form\Type;
 
 use App\Entity\Rule;
@@ -7,15 +7,10 @@ use App\Repository\RuleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
-use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderExecuterInterface;
 
 
 class ItemFilterType extends AbstractType
@@ -24,13 +19,6 @@ class ItemFilterType extends AbstractType
     {
         $entityManager = $options['entityManager'];
         $builder
-            ->add('id', TextType::class, [
-                'attr' => [
-                    'class' => 'form-control mt-2',
-                    'id' => 'id',
-                    'placeholder' => 'Id',
-                ],
-            ])
             ->add('moduleSource', Filters\ChoiceFilterType::class, [
                 'choices'  => RuleRepository::findModuleSource($entityManager),
                 
