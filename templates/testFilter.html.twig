@@ -203,22 +203,26 @@
                         {{'list_flux.btn.filter_delete'|trans}}
                   </a>
             </div>
-                  <div class="p-3 row">
-                        <p>
-                              <a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
-                                    (<span></span>)</a>
-                              <a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
-                                    (<span></span>)</a>
-                        </p>
-                  </div>
+            <div class="p-5 row">
+                  <p>
+                        <a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
+                              (<span></span>)</a>
+                        <a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
+                              (<span></span>)</a>
+                  </p>
+            </div>
 		</div>
-<section class="p-5">
+<section class="p-3">
       <h2 class="text-center m-3">Documents</h2>
       <div class="table-responsive">
-            <table class="table">
+            <table class="listepagerflux table">
                   <thead>
                         <tr>
+                              <th scope="col">
+                                    <input id="massselectall" type="checkbox" name="massselectall"/>
+                              </th>
                               <th>{{'list_flux.tab.id'|trans}}</th>
+                              <th>{{'list_flux.tab.name'|trans}}</th>
                               <th>{{'list_flux.tab.date_created'|trans}}</th>
                               <th>{{'list_flux.tab.date_modified'|trans}}</th>
                               <th>{{'list_flux.tab.statut'|trans}}</th>
@@ -226,22 +230,41 @@
                               <th>{{'list_flux.tab.target_id'|trans}}</th>
                               <th>{{'list_flux.tab.type'|trans}}</th>
                               <th>{{'list_flux.tab.source_date_modified'|trans}}</th>
-                              <th>{{'list_flux.tab.name'|trans}}</th>
                         </tr>
                   </thead>
                   <tbody>
                         {% if pager is defined and pager is not empty %}
                               {% for document in pager %}
                                     <tr>
-                                          <td>{{ document.id }}</td>
+                                          <td>
+                                                {% if document.global_status|lower == 'close' or document.global_status|lower == 'cancel' %}
+                                                      <input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
+                                                {% else %}
+                                                      <input type="checkbox" name="{{ document.id }}"/>
+                                                {% endif %}
+                                          </td>
+                                          <td><a href="{{ path('flux_info',{'id' : document.id }) }}">{{ document.id }}</a></td>                                          
+                                          <td><a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="">{{ document.rule_name }}</a></td>
                                           <td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
                                           <td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
-                                          <td>{{ document.status }}</td>
+                                          <td class="ctr" id="documents_filters">
+                                                <div class="gblstatus_{{ document.global_status|lower }}">
+                                                {{ document.status }}
+                                                {% if document.global_status|lower == 'close' %}
+                                                      <i class="fa fa-check"></i>
+                                                {% elseif document.global_status|lower == 'error' or document.global_status|lower == 'open' %}
+                                                      <i class="fa fa-times"></i>
+                                                {% elseif document.global_status|lower == 'open' %}
+                                                      <span class="glyphicon glyphicon-repeat">
+                                                {% elseif document.global_status|lower == 'cancel' %}
+                                                      <i class="fa fa-exclamation"></i>
+                                                {% endif %}
+                                                </div>
+                                          </td>
                                           <td>{{ document.source_id }}</td>
                                           <td>{{ document.target_id }}</td>
                                           <td>{{ document.type }}</td>
                                           <td>{{ document.source_date_modified }}</td>
-                                          <td>{{ document.rule_name }}</td>
                                     </tr>
                               {% endfor %}
                         {% else %}
