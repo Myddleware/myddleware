@@ -337,24 +337,30 @@ class FilterController extends AbstractController
 
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
-        $data = [
-            'rule' => ($ruleFormData !== null && $ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
-            'status' => ($documentFormData['status']) ? $this->getStatusData($documentFormData) : null,
-            'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
-            'module_source' => ($ruleFormData !== null && $ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
-            'module_target' => ($ruleFormData !== null && $ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
-            'source_id' => ($documentFormData['sourceId']) ? $documentFormData['sourceId'] : null,
-            'target_id' => ($documentFormData['target']) ? $documentFormData['target'] : null,
-            'type' => ($documentFormData['type']) ? $this->getDocumentType($documentFormData) : null,
-            'source_content' => $sourceFormData['sourceContent'] ?? null,
-            'target_content' => $sourceFormData['targetContent'] ?? null,
-            'date_modif_start' => $documentFormData['date_modif_start'] ? $documentFormData['date_modif_start']->format('Y-m-d, H:i:s') : null,
-            'date_modif_end' => $documentFormData['date_modif_end'] ? $documentFormData['date_modif_end']->format('Y-m-d, H:i:s') : null,
-            'operators' => $operators ?? null,
-            'customWhere' => $this->getGlobalStatusData($documentFormData)['customWhere'] ?? null,
-        ];
+        try {
+            $data = [
+                'rule' => ($ruleFormData !== null && $ruleFormData->isNameSet()) ? $ruleName[$ruleFormData->getName()] : null,
+                'status' => ($documentFormData['status']) ? $this->getStatusData($documentFormData) : null,
+                'gblstatus' => $this->getGlobalStatusData($documentFormData)['gblstatus'] ?? null,
+                'module_source' => ($ruleFormData !== null && $ruleFormData->isModuleSourceSet()) ? $this->getModuleSourceData($ruleFormData) : null,
+                'module_target' => ($ruleFormData !== null && $ruleFormData->isModuleTargetSet()) ? $this->getModuleTargetData($ruleFormData) : null,
+                'source_id' => ($documentFormData['sourceId']) ? $documentFormData['sourceId'] : null,
+                'target_id' => ($documentFormData['target']) ? $documentFormData['target'] : null,
+                'type' => ($documentFormData['type']) ? $this->getDocumentType($documentFormData) : null,
+                'source_content' => $sourceFormData['sourceContent'] ?? null,
+                'target_content' => $sourceFormData['targetContent'] ?? null,
+                'date_modif_start' => $documentFormData['date_modif_start'] ? $documentFormData['date_modif_start']->format('Y-m-d, H:i:s') : null,
+                'date_modif_end' => $documentFormData['date_modif_end'] ? $documentFormData['date_modif_end']->format('Y-m-d, H:i:s') : null,
+                'operators' => $operators ?? null,
+                'customWhere' => $this->getGlobalStatusData($documentFormData)['customWhere'] ?? null,
+            ];
+            
+            
 
-        return $data;
+            return $data;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to create data from form: ' . $e->getMessage());
+        }
     }
 
     public function getRuleNameData($ruleFormData, $ruleName)
