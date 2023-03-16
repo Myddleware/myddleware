@@ -26,6 +26,15 @@
 {% block title %}{{parent()}} | {{'title.flux.list'|trans}}{% endblock %}
 {% block titlesm %}{{'title.flux.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
+
+{% for type, messages in app.flashes %}
+		{% for message in messages %}
+			<div class="alert alert-{{ type }}" role="alert">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endfor %}
+
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
       <h2 class="text-center m-3">Filters</h2>

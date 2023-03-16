@@ -96,6 +96,13 @@ $(function() {
     saveFiltersToLocalStorage();
   });
 
+  // if a link with the class page-link is clicked, save the filters to localStorage
+  $('.page-link').on('click', function() {
+    console.log('page-link clicked');
+    saveFiltersToLocalStorage();
+    loadFiltersFromLocalStorage();
+  });
+
   // Clear localStorage when the clear button is clicked
   $('.removeFilter').on('click', function() {
     localStorage.clear();

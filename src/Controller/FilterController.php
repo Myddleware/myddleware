@@ -239,11 +239,19 @@ class FilterController extends AbstractController
                 $limit = $searchParameters['limit'];
             }
     
-            $compact = $this->nav_pagination([
-                'adapter_em_repository' => $documents,
-                'maxPerPage' => $this->params['pager'] ?? 25,
-                'page' => $page,
-            ], false);
+            try {
+                $compact = $this->nav_pagination([
+                    'adapter_em_repository' => $documents,
+                    'maxPerPage' => $this->params['pager'] ?? 25,
+                    'page' => $page,
+                ], false);
+                //code...
+            } catch (\Throwable $th) {
+                // redirect to the list page
+                // add a flash errore message that says there are not enough results for pagination
+                $this->addFlash('error', 'Pagination error, return to page 1');
+                return $this->redirectToRoute('document_list');
+            }
             
             // Si tout se passe bien dans la pagination
             if ($compact) {
