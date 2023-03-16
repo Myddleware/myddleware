@@ -132,12 +132,10 @@ class FilterController extends AbstractController
         ]);
         
         $conditions = 0;
-        //Check the user timezone
-        if ($timezone = '') {
-            $timezone = 'UTC';
-        } else {
-            $timezone = $this->getUser()->getTimezone();
-        }
+
+        // set the timezone
+        $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+
 
         if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
            
