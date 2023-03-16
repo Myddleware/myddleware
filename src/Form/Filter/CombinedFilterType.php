@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Form\Type;
+namespace App\Form\Filter;
 
-use App\Form\Type\DocFilterType;
-use App\Form\Type\ItemFilterType;
-use App\Form\Type\SourceDataFilterType;
+use App\Form\Filter\DocFilterType;
+use App\Form\Filter\RuleFilterType;
+use App\Form\Filter\SourceDataFilterType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -18,7 +18,7 @@ class CombinedFilterType extends AbstractType
             'required' => false,
             'entityManager' => $options['entityManager'],
         ]);
-        $builder->add('rule', ItemFilterType::class, [
+        $builder->add('rule', RuleFilterType::class, [
             'required' => false,
             'entityManager' => $options['entityManager'],
         ]);

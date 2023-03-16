@@ -1,5 +1,5 @@
 <?php
-namespace App\Form\Type;
+namespace App\Form\Filter;
 
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 

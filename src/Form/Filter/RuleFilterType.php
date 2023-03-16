@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form\Type;
+namespace App\Form\Filter;
 
 use App\Entity\Rule;
 use App\Repository\RuleRepository;
@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 
-class ItemFilterType extends AbstractType
+class RuleFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

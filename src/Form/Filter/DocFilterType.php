@@ -1,5 +1,5 @@
 <?php
-namespace App\Form\Type;
+namespace App\Form\Filter;
 
 use App\Manager\DocumentManager;
 use App\Repository\DocumentRepository;
