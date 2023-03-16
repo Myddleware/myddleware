@@ -215,8 +215,6 @@ class FilterController extends AbstractController
                     }
 
                 } // end if page === 1
-                else { // if page different from 1 so pagination
-                }
             } else { // if form is not valid
                     $data = $this->getFluxFilterData();
 
