@@ -45,15 +45,7 @@ $(function() {
       }
     });
     
-    // Remove Filter
-    $('.removeFilters').on('click', function() {
-      var lastClass = $(this).attr('class').split(' ').pop();
-      filters.forEach(function(filter) {
-        if (filter.name === lastClass) {
-          hideFilter(filter);
-        }
-      });
-    });
+    
 
     // Save filters to localStorage
     function saveFiltersToLocalStorage() {
@@ -104,8 +96,18 @@ $(function() {
   });
 
   // Clear localStorage when the clear button is clicked
-  $('.removeFilter').on('click', function() {
-    localStorage.clear();
+  // $('.removeFilters').on('click', function() {
+    // });
+    
+    // Remove Filter
+    $('.removeFilters').on('click', function() {
+      var lastClass = $(this).attr('class').split(' ').pop();
+      filters.forEach(function(filter) {
+        if (filter.name === lastClass) {
+          hideFilter(filter);
+          localStorage.clear();
+      }
+    });
   });
 
   });
