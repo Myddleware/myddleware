@@ -41,7 +41,10 @@ $(function() {
       var selectedValue = $(this).val();
       $('#' + selectedValue).removeAttr('hidden');
       if (selectedValue !== 'date_modif_start' && selectedValue !== 'date_modif_end' && selectedValue !== 'sourceId' && selectedValue !== 'target' &&selectedValue !== 'sourceContent' && selectedValue !== 'targetContent') {
-        $('.removeFilters.' + selectedValue).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="'+selectedValue+'" value="reverse"><label for="'+selectedValue+'">Reverse</label></div>');
+        // If there isn't already a reverse checkbox, add one
+        if (!$('[name="' + selectedValue + '"][type="checkbox"]').length) {
+          $('.removeFilters.' + selectedValue).after('<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="'+selectedValue+'" value="reverse"><label for="'+selectedValue+'">Reverse</label></div>');
+        }
       }
     });
     
@@ -95,9 +98,7 @@ $(function() {
     loadFiltersFromLocalStorage();
   });
 
-  // Clear localStorage when the clear button is clicked
-  // $('.removeFilters').on('click', function() {
-    // });
+
     
     // Remove Filter
     $('.removeFilters').on('click', function() {
