@@ -120,6 +120,9 @@ class FilterController extends AbstractController
         }
     }
 
+
+    // Function to disylay the documents with filters
+
     /**
      * @Route("/document/list/search-{search}", name="document_list", defaults={"page"=1})
      * @Route("/document/list/page-{page}", name="document_list_page", requirements={"page"="\d+"})
@@ -170,7 +173,7 @@ class FilterController extends AbstractController
                 $ruleFormData = $form->get('rule')->getData();
                 $sourceFormData = $form->get('sourceContent')->getData();
 
-                // if form get document get data is not null or form get rule get data is not null or form get source get data is not null
+                // If form get document get data is not null or form get rule get data is not null or form get source get data is not null
                 if ($documentFormData !== null || $ruleFormData !== null || $sourceFormData !== null) {
 
                     $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators);
@@ -186,6 +189,7 @@ class FilterController extends AbstractController
                 
                 if ($page === 1) {
 
+                    // If the form is submitted and the form is valid, we save the filters in the session
                     $filterMap = [
                         'reference' => 'FluxFilterReference',
                         'operators' => 'FluxFilterOperators',
@@ -204,6 +208,7 @@ class FilterController extends AbstractController
                         'module_target' => 'FluxFilterModuleTarget'
                         ];
                         
+                    // Save the filters in the session using the session service and the filter map
                     foreach ($filterMap as $dataKey => $filterName) {
                         if (!empty($data[$dataKey])) {
                             $this->sessionService->{'set'.$filterName}($data[$dataKey]);
@@ -224,10 +229,12 @@ class FilterController extends AbstractController
                 }
             }
 
+            // Return an empty array if the form is not valid so that there will be no documents to display
             if ($doNotSearch) {
                 $documents = array();
             }
             
+            // If the form is valid, we prepare the search
             if (!$doNotSearch) {
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
@@ -241,7 +248,6 @@ class FilterController extends AbstractController
                     'maxPerPage' => $this->params['pager'] ?? 25,
                     'page' => $page,
                 ], false);
-                //code...
             } catch (\Throwable $th) {
                 // redirect to the list page
                 // add a flash errore message that says there are not enough results for pagination
@@ -249,10 +255,10 @@ class FilterController extends AbstractController
                 return $this->redirectToRoute('document_list');
             }
             
-            // Si tout se passe bien dans la pagination
+            // If everything is ok with the pagination
             if ($compact) {
-                // Si aucune règle
-                // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
+                // If no rule
+                // display the button to delete the filters if the conditions come from the dashboard
                 if ($this->sessionService->isFluxFilterCExist()) {
                     $conditions = 1;
                 }
@@ -262,6 +268,7 @@ class FilterController extends AbstractController
         if (!isset($compact)) {
             $documents = [];
 
+            // default pagination
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $documents,
                 'maxPerPage' => 25,
@@ -281,6 +288,7 @@ class FilterController extends AbstractController
         ]);
     }
 
+    // Verify if each filter is empty, and return true if all filters are empty
     public function verifyIfEmptyFilters()
     {
         $filterMap = [
@@ -311,6 +319,7 @@ class FilterController extends AbstractController
         return true;
     }
 
+    // Get the data from the session service and return an array
     public function getFluxFilterData() {
         $data = [];
     
@@ -340,7 +349,7 @@ class FilterController extends AbstractController
         return $data;
     }
     
-
+    // Get the data from the form and return an array
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
         try {
@@ -369,6 +378,7 @@ class FilterController extends AbstractController
         }
     }
 
+    // Get the names of the rules
     public function getRuleNameData($ruleFormData, $ruleName)
     {
         if ($ruleFormData->isNameSet()) {
@@ -376,6 +386,7 @@ class FilterController extends AbstractController
         }
     }
 
+    // Get the data from the statuses
     public function getStatusData($documentFormData)
     {
         $statusIndex = $documentFormData['status'];
@@ -402,6 +413,7 @@ class FilterController extends AbstractController
         return $statuses[$statusIndex];
     }
 
+    // Get the data from the global statuses
     public function getGlobalStatusData($documentFormData)
     {
         $statusList = [
@@ -425,6 +437,7 @@ class FilterController extends AbstractController
         return $data;   
     }
 
+    // Get the data from the document type
     public function getDocumentType($documentFormData)
     {
         $listOfTypes = 
@@ -438,6 +451,7 @@ class FilterController extends AbstractController
         return $listOfTypes[$documentFormData['type']];
     }
 
+    // Get the data from the module source
     public function getModuleSourceData($ruleFormData)
     {
         $sourceModules = RuleRepository::findModuleSource($this->entityManager);
@@ -446,6 +460,7 @@ class FilterController extends AbstractController
         return $inversedModules[$ruleFormData->getModuleSource()];
     }
 
+    // Get the data from the module target
     public function getModuleTargetData($ruleFormData)
     {
         $targetModules = RuleRepository::findModuleTarget($this->entityManager);
@@ -454,6 +469,7 @@ class FilterController extends AbstractController
         return $inversedModules[$ruleFormData->getModuleTarget()];
     }
 
+    // Get the data from the configuration of the limimt of the search
     public function getLimitConfig()
     {
         // Get the limit parameter
@@ -465,6 +481,7 @@ class FilterController extends AbstractController
         return $limit;
     }
 
+    // Initialize the search for pagination and limit and launch the search of the documents
     public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
         if (empty($cleanData) && $page === 1) {
@@ -482,6 +499,7 @@ class FilterController extends AbstractController
         ];
     }
 
+    // Search the documents using a query
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
         $join = '';
         $where = '';
