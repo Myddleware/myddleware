@@ -1,4 +1,18 @@
 $(function() {
+
+    $('.fa-angle-down').on('click',function(){
+        $(this).toggleClass('fa-angle-up fa-angle-down');
+        var colClass = $(this).attr('class').split(' ')[1] + 'Col';
+        $('.' + colClass + ' i').not(this).removeClass('fa-angle-up').addClass('fa-angle-down');
+    });
+
+    $('.vg-inline--fa fa-angle-up').on('click',function(){
+      $(this).toggleClass('fa-angle-down fa-angle-up');
+      var colClass = $(this).attr('class').split(' ')[1] + 'Col';
+      $('.' + colClass + ' i').not(this).removeClass('fa-angle-down').addClass('fa-angle-up');
+    });
+
+  
     // Define an array of filters, each containing a name and selector
     var filters = [
       { name: 'name', selector: '#combined_filter_rule_name' },
@@ -87,7 +101,6 @@ $(function() {
         });
       }
     }
-
   // Load filters from localStorage on page load
     loadFiltersFromLocalStorage();
 
@@ -107,6 +120,7 @@ $(function() {
   $('.removeFilter').on('click', function() {
     localStorage.clear();
   });
+
 
   });
   
