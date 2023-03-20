@@ -423,6 +423,12 @@ class databasecore extends solution
             throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
         }
 
+        // Check if the row has been created
+        $affectedRows = $q->rowCount();
+        if ($affectedRows == 0) {
+            throw new Exception('No row was created for the id : ' . $idTarget);
+        }
+
         // If the target reference field isn't in data sent
         if (!isset($idTarget)) {
             // If the target reference field is a primary key auto increment, we retrive the value here
