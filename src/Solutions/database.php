@@ -387,6 +387,7 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
+        try {
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
             throw new Exception('targetFieldId has to be specified for the data creation.');
@@ -423,13 +424,24 @@ class databasecore extends solution
             throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
         }
 
+        // Check if the row has been created
+        $affectedRows = $q->rowCount();
+        if ($affectedRows === 0) {
+            throw new Exception('No row was created for the id : ' . $idTarget);
+        }
+
         // If the target reference field isn't in data sent
         if (!isset($idTarget)) {
             // If the target reference field is a primary key auto increment, we retrive the value here
             $idTarget = $this->pdo->lastInsertId();
         }
 
-        return $idTarget;
+        $result = $idTarget;
+        } catch (Exception $e) {
+            $result = $e->getMessage();
+        } finally {
+            return $result;
+        }
     }
 
     /**
@@ -437,6 +449,7 @@ class databasecore extends solution
      */
     protected function update($param, $record, $idDoc = null)
     {
+        try {
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
@@ -464,8 +477,8 @@ class databasecore extends solution
             throw new Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
         }
         // No modification
-        if (0 == $q->rowCount()) {
-            $this->message = 'There is no error but the query hasn\'t modified any record.';
+        if ($q->rowCount() === 0) {
+            throw new Exception('No row was updated for the id : ' . $record['target_id']);
         }
         // Several modifications
         if (
@@ -475,7 +488,12 @@ class databasecore extends solution
             throw new Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
-        return $record['target_id'];
+        $result = $record['target_id'];
+        } catch (Exception $e) {
+            $result = $e->getMessage();
+        } finally {
+            return $result;
+        }
     }
 
     /**

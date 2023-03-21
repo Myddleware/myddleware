@@ -412,6 +412,11 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
+                    if (strpos($recordId, 'No row was created for the id') !== false) {
+                        throw new \Exception($recordId);
+                    }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
@@ -498,6 +503,11 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
+                    if (strpos($recordId, 'No row was updated for the id') !== false) {
+                        throw new \Exception($recordId);
+                    }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
