@@ -509,8 +509,7 @@ class databasecore extends solution
             throw new Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
         }
 
-        // No modification
-        // if ($q->rowCount() === 0) {
+        // No deletion
         if ($q->rowCount() === 0) {
             throw new Exception('No row was deleted for the id : ' . $record['target_id']);
         }
