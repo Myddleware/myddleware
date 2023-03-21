@@ -387,7 +387,7 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
-        try {
+        
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
             throw new Exception('targetFieldId has to be specified for the data creation.');
@@ -425,8 +425,7 @@ class databasecore extends solution
         }
 
         // Check if the row has been created
-        $affectedRows = $q->rowCount();
-        if ($affectedRows === 0) {
+        if ($q->rowCount() === 0) {
             throw new Exception('No row was created for the id : ' . $idTarget);
         }
 
@@ -436,12 +435,8 @@ class databasecore extends solution
             $idTarget = $this->pdo->lastInsertId();
         }
 
-        $result = $idTarget;
-        } catch (Exception $e) {
-            $result = $e->getMessage();
-        } finally {
-            return $result;
-        }
+        return $idTarget;
+        
     }
 
     /**
@@ -449,7 +444,6 @@ class databasecore extends solution
      */
     protected function update($param, $record, $idDoc = null)
     {
-        try {
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
@@ -488,12 +482,7 @@ class databasecore extends solution
             throw new Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
-        $result = $record['target_id'];
-        } catch (Exception $e) {
-            $result = $e->getMessage();
-        } finally {
-            return $result;
-        }
+        return $record['target_id'];
     }
 
     /**
