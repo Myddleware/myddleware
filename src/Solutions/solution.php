@@ -412,6 +412,10 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
+                    if (strpos($recordId, 'No row was created for the id') !== false) {
+                        throw new \Exception($recordId);
+                    }
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
@@ -493,6 +497,11 @@ class solutioncore
                     $record = $this->checkDataBeforeUpdate($param, $record, $idDoc);
                     // Call create methode
                     $recordId = $this->update($param, $record, $idDoc);
+
+                    // if the string contains "No row was updated for the id" then we throw an error
+                    if (strpos($recordId, 'No row was updated for the id') !== false) {
+                        throw new \Exception($recordId);
+                    }
 
                     // Exception if no Id retruned
                     if (empty($recordId)) {

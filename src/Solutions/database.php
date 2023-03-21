@@ -387,55 +387,61 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
-        // Get the target reference field
-        if (!isset($param['ruleParams']['targetFieldId'])) {
-            throw new Exception('targetFieldId has to be specified for the data creation.');
-        }
-
-        // Query init
-        $sql = 'INSERT INTO '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' (';
-        $values = '(';
-        // We build the query with every fields
-        foreach ($record as $key => $value) {
-            if ('target_id' == $key) {
-                continue;
-            // If the target reference field is in data sent, we save it to update the document
-            } elseif ($key == $param['ruleParams']['targetFieldId']) {
-                $idTarget = $value;
+        try {
+            // Get the target reference field
+            if (!isset($param['ruleParams']['targetFieldId'])) {
+                throw new Exception('targetFieldId has to be specified for the data creation.');
             }
-            // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+
+            // Query init
+            $sql = 'INSERT INTO ' . $this->stringSeparatorOpen . $param['module'] . $this->stringSeparatorClose . ' (';
+            $values = '(';
+            // We build the query with every fields
+            foreach ($record as $key => $value) {
+                if ('target_id' == $key) {
+                    continue;
+                    // If the target reference field is in data sent, we save it to update the document
+                } elseif ($key == $param['ruleParams']['targetFieldId']) {
+                    $idTarget = $value;
+                }
+                // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
+                $sql .= $this->stringSeparatorOpen . rawurldecode($key) . $this->stringSeparatorClose . ',';
+                $values .= ('null' == $value ? 'null,' : "'" . $this->escape($value) . "',");
+            }
+
+            // Remove the last coma
+            $sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
+            $values = substr($values, 0, -1);
+            $values .= ')'; // VALUES (value1,value2,value3,...)
+            $sql .= ') VALUES ' . $values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
+            // Query validation
+            $sql = $this->queryValidation($param, 'create', $sql, $record);
+
+            $q = $this->pdo->prepare($sql);
+            $exec = $q->execute();
+            if (!$exec) {
+                $errorInfo = $this->pdo->errorInfo();
+                throw new Exception('Create: ' . $errorInfo[2] . ' . Query : ' . $sql);
+            }
+
+            // Check if the row has been created
+            $affectedRows = $q->rowCount();
+            if ($affectedRows == 0) {
+                throw new Exception('No row was created for the id : ' . $idTarget);
+            }
+
+            // If the target reference field isn't in data sent
+            if (!isset($idTarget)) {
+                // If the target reference field is a primary key auto increment, we retrive the value here
+                $idTarget = $this->pdo->lastInsertId();
+            }
+
+            $result = $idTarget;
+        } catch (Exception $e) {
+            $result = $e->getMessage();
+        } finally {
+            return $result;
         }
-
-        // Remove the last coma
-        $sql = substr($sql, 0, -1); // INSERT INTO table_name (column1,column2,column3,...)
-        $values = substr($values, 0, -1);
-        $values .= ')'; // VALUES (value1,value2,value3,...)
-        $sql .= ') VALUES '.$values; // INSERT INTO table_name (column1,column2,column3,...) VALUES (value1,value2,value3,...)
-        // Query validation
-        $sql = $this->queryValidation($param, 'create', $sql, $record);
-
-        $q = $this->pdo->prepare($sql);
-        $exec = $q->execute();
-        if (!$exec) {
-            $errorInfo = $this->pdo->errorInfo();
-            throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
-        }
-
-        // Check if the row has been created
-        $affectedRows = $q->rowCount();
-        if ($affectedRows == 0) {
-            throw new Exception('No row was created for the id : ' . $idTarget);
-        }
-
-        // If the target reference field isn't in data sent
-        if (!isset($idTarget)) {
-            // If the target reference field is a primary key auto increment, we retrive the value here
-            $idTarget = $this->pdo->lastInsertId();
-        }
-
-        return $idTarget;
     }
 
     /**
@@ -443,6 +449,7 @@ class databasecore extends solution
      */
     protected function update($param, $record, $idDoc = null)
     {
+        try{
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
@@ -471,7 +478,7 @@ class databasecore extends solution
         }
         // No modification
         if (0 == $q->rowCount()) {
-            $this->message = 'There is no error but the query hasn\'t modified any record.';
+            throw new Exception('No row was updated for the id : ' . $record['target_id']);
         }
         // Several modifications
         if (
@@ -481,7 +488,13 @@ class databasecore extends solution
             throw new Exception('Update query has modified several records. It should never happens. Please check that your id in your database is unique. Query : '.$sql);
         }
 
-        return $record['target_id'];
+            $result = $record['target_id'];
+            return $recordId;
+        } catch (Exception $e) {
+            $result = $e->getMessage();
+        } finally {
+            return $result;
+        }
     }
 
     /**
