@@ -129,6 +129,10 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        // dd($request);
+        $sortField = 'status';
+        $sortOrder = 'DESC';
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
@@ -238,6 +242,10 @@ class FilterController extends AbstractController
             if (!$doNotSearch) {
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
+                // if $sortField, $sortOrder not null, then sort the documents accordingly
+                if ($sortField && $sortOrder) {
+                    $documents = $this->sortDocuments($documents, $sortField, $sortOrder);
+                }
                 $page = $searchParameters['page'];
                 $limit = $searchParameters['limit'];
             }
@@ -286,6 +294,22 @@ class FilterController extends AbstractController
             'condition' => $conditions,
             'timezone' => $timezone,
         ]);
+    }
+
+    // // function to sort the documents
+    public function sortDocuments(array $documents, string $sortField, string $sortOrder){
+        // Sort the arrray of documents according to the sortField and sortOrder
+        $sort = array();
+        foreach ($documents as $key => $value) {
+            $sort[$key] = $value[$sortField];
+        }
+        if ($sortOrder == 'ASC') {
+            array_multisort($sort, SORT_ASC, $documents);
+        } else {
+            array_multisort($sort, SORT_DESC, $documents);
+        }
+
+        return $documents;
     }
 
     // Verify if each filter is empty, and return true if all filters are empty
@@ -482,7 +506,7 @@ class FilterController extends AbstractController
     }
 
     // Initialize the search for pagination and limit and launch the search of the documents
-    public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000, $sortField, $sortOrder): array
+    public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
         if (empty($cleanData) && $page === 1) {
             return [
@@ -491,7 +515,7 @@ class FilterController extends AbstractController
                 'limit' => $limit,
             ];
         }
-        $documents = $this->searchDocuments($cleanData, $page, $limit, $sortField, $sortOrder);
+        $documents = $this->searchDocuments($cleanData, $page, $limit);
         return [
             'documents' => $documents,
             'page' => $page,
@@ -500,7 +524,7 @@ class FilterController extends AbstractController
     }
 
     // Search the documents using a query
-    protected function searchDocuments($data, $page = 1, $limit = 1000, $sortField = null, $sortOrder = null) {
+    protected function searchDocuments($data, $page = 1, $limit = 1000) {
         $join = '';
         $where = '';
 
