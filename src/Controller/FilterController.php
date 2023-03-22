@@ -482,7 +482,7 @@ class FilterController extends AbstractController
     }
 
     // Initialize the search for pagination and limit and launch the search of the documents
-    public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
+    public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000, $sortField, $sortOrder): array
     {
         if (empty($cleanData) && $page === 1) {
             return [
@@ -491,7 +491,7 @@ class FilterController extends AbstractController
                 'limit' => $limit,
             ];
         }
-        $documents = $this->searchDocuments($cleanData, $page, $limit);
+        $documents = $this->searchDocuments($cleanData, $page, $limit, $sortField, $sortOrder);
         return [
             'documents' => $documents,
             'page' => $page,
@@ -500,7 +500,7 @@ class FilterController extends AbstractController
     }
 
     // Search the documents using a query
-    protected function searchDocuments($data, $page = 1, $limit = 1000) {
+    protected function searchDocuments($data, $page = 1, $limit = 1000, $sortField = null, $sortOrder = null) {
         $join = '';
         $where = '';
 
@@ -622,6 +622,8 @@ class FilterController extends AbstractController
         if (!empty($data['source_id'])) {
             $where .= " AND document.source_id LIKE :source_id ";
         }
+
+        // if not empty 
 
         // Build query
         $query = "
