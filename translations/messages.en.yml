@@ -308,6 +308,7 @@ list_flux:
         filter: Filter
         filter_delete: Clear all filters
         cancel: Cancel documents
+        reloadcancel: Cancel and rerun documents
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
         mass_reload_confirm: Reload the selected documents?   

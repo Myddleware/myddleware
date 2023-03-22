@@ -653,6 +653,25 @@ $(function () {
 		}
 	});
 
+	$('#cancelreloadflux').on('click', function () {
+		if (confirm(confirm_cancel)) { // Clic sur OK
+			$.ajax({
+				type: "POST",
+				url: mass_cancel,
+				beforeSend: function () {
+					btn_action_fct(); // Animation
+				},
+				data: {
+					ids: massFluxTab,
+					reload: true
+				},
+				success: function (data) { // code_html contient le HTML renvoyé
+					location.reload();
+				}
+			});
+		}
+	});
+
 	$('#reloadflux').on('click', function () {
 		if (confirm(confirm_reload)) { // Clic sur OK
 			$.ajax({
@@ -1690,9 +1709,11 @@ function showBtnFlux(massFluxTab) {
 	if (massFluxTab.length == 0) {
 		$('#cancelflux').hide();
 		$('#reloadflux').hide();
+		$('#cancelreloadflux').hide();
 	} else {
 		$('#cancelflux').show();
 		$('#reloadflux').show();
+		$('#cancelreloadflux').show();
 	}
 }
 
@@ -1711,6 +1732,7 @@ function massAddFlux(id, cond, massFluxTab) {
 	// Display the number of elements in the array
 	$('#cancelflux').find('span').html(massFluxTab.length);
 	$('#reloadflux').find('span').html(massFluxTab.length);
+	$('#cancelreloadflux').find('span').html(massFluxTab.length);
 }
 
 

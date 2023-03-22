@@ -131,7 +131,7 @@ class FilterController extends AbstractController
     {
         // dd($request);
         $sortField = 'status';
-        $sortOrder = 'DESC';
+        $sortOrder = 'ASC';
 
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
@@ -142,7 +142,6 @@ class FilterController extends AbstractController
 
         // set the timezone
         $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
-
 
         if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
            
@@ -243,9 +242,9 @@ class FilterController extends AbstractController
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
                 // if $sortField, $sortOrder not null, then sort the documents accordingly
-                if ($sortField && $sortOrder) {
-                    $documents = $this->sortDocuments($documents, $sortField, $sortOrder);
-                }
+                // if ($sortField && $sortOrder) {
+                //     $documents = $this->sortDocuments($documents, $sortField, $sortOrder);
+                // }
                 $page = $searchParameters['page'];
                 $limit = $searchParameters['limit'];
             }

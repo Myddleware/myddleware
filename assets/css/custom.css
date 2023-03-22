@@ -228,6 +228,16 @@ menu .caret, #myd_top .caret {
 	border-color: #198BCA!important;
 }
 
+.btn-dark {
+	background-color: #74e602!important;
+	border-color: #74e602!important;
+}
+
+.btn-dark:hover {
+    background-color: #68ce02!important;
+    border-color: #68ce02!important;
+}
+
 .btn-primary:hover {
 	background-color: #0F66A9!important;
 	border-color: #0F66A9!important;

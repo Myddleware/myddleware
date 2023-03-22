@@ -306,6 +306,7 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
         mass_reload_confirm: Relancer les documents selectionnés ?

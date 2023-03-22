@@ -844,7 +844,7 @@ class FluxController extends AbstractController
     /**
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")
      */
-    public function fluxReadRecord($id): RedirectResponse
+    public function fluxReadRecord($id, bool $massRerun = false): RedirectResponse
     {
         try {
             if (!empty($id)) {
@@ -855,6 +855,9 @@ class FluxController extends AbstractController
                     if (!empty($doc->getSource())) {
                         $this->jobManager->runBackgroundJob('readrecord', [$doc->getRule(), 'id', $doc->getSource()]);
                     }
+                }
+                if ($massRerun == true) {
+                    return null;
                 }
             }
 
@@ -884,6 +887,13 @@ class FluxController extends AbstractController
     {
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+        }
+        // if isset post reload =  true then action mass transfer rerun post id
+        if (isset($_POST['reload']) && $_POST['reload'] == 'true') {
+            // for each id in post id, run flux read record
+            foreach ($_POST['ids'] as $id) {
+                $this->fluxReadRecord($id, true);
+            }
         }
         exit;
     }

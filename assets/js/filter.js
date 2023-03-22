@@ -1,25 +1,25 @@
 $(function() {
 
-  // $("span").on("click", function () {
-  //   var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon"); // Trouver l'icône dans l'élément cliqué
-  //   if (icon.hasClass("fa-angle-down")) { icon.removeClass("fa-angle-down").addClass("fa-angle-up"); } else { icon.removeClass("fa-angle-up").addClass("fa-angle-down"); }
-  // });
-
-  $("span[data-sort]").on("click", function () {
-    var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon");
-    var sortField = $(this).data("sort");
-    var sortOrder = icon.hasClass("fa-angle-down") ? "asc" : "desc";
-  
-    if (icon.hasClass("fa-angle-down")) {
-      icon.removeClass("fa-angle-down").addClass("fa-angle-up");
-    } else {
-      icon.removeClass("fa-angle-up").addClass("fa-angle-down");
-    }
-  
-    localStorage.setItem("sortField", sortField);
-    localStorage.setItem("sortOrder", sortOrder);
-    $('form').submit();
+  $("span").on("click", function () {
+    var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon"); // Trouver l'icône dans l'élément cliqué
+    if (icon.hasClass("fa-angle-down")) { icon.removeClass("fa-angle-down").addClass("fa-angle-up"); } else { icon.removeClass("fa-angle-up").addClass("fa-angle-down"); }
   });
+
+  // $("span[data-sort]").on("click", function () {
+  //   var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon");
+  //   var sortField = $(this).data("sort");
+  //   var sortOrder = icon.hasClass("fa-angle-down") ? "asc" : "desc";
+  
+  //   if (icon.hasClass("fa-angle-down")) {
+  //     icon.removeClass("fa-angle-down").addClass("fa-angle-up");
+  //   } else {
+  //     icon.removeClass("fa-angle-up").addClass("fa-angle-down");
+  //   }
+  
+  //   localStorage.setItem("sortField", sortField);
+  //   localStorage.setItem("sortOrder", sortOrder);
+  //   $('form').submit();
+  // });
   
   
     // Define an array of filters, each containing a name and selector

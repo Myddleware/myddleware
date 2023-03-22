@@ -38,7 +38,7 @@
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
       <h2 class="text-center m-3">Filters</h2>
-      {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'get' }) }}
+      {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
       <div class="input-group">
             {{ form_widget(formFilter.filter) }}
@@ -48,7 +48,7 @@
             </div>
       </div>
       {{ form_end(formFilter) }}
-      {{ form_start(form, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'get' }) }}
+      {{ form_start(form, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
 
             <div class="m-3">
@@ -229,6 +229,8 @@
                         <a id="cancelflux" class="btn btn-warning" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
                               (<span></span>)</a>
                         <a id="reloadflux" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
+                              (<span></span>)</a>
+                        <a id="cancelreloadflux" class="btn btn-dark" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
                               (<span></span>)</a>
                   </p>
             </div>
