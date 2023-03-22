@@ -392,7 +392,7 @@ $moduleFields['appP31F11PgaT1f6H'] = array (
 		'fldiUorhwxgkT45VV'=> array( 'label' => 'Autre E-mail : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fld2uYWbeNRvurh1w'=> array( 'label' => 'E-mail Opt Out : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldastbrZ3zpFsGb5'=> array( 'label' => 'E-mail invalide : 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldzrE6TGYHOwQ7Ie'=> array( 'label' => 'Date de naissance :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldzrE6TGYHOwQ7Ie'=> array( 'label' => 'Date de naissance :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldiPskfwAQLb9uIe'=> array( 'label' => 'Nom sur le portail :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldWWxtboxfGGWUIm'=> array( 'label' => 'Portail application:', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldh1XC0WvzJFh2Jz'=> array( 'label' => 'Site web', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -811,8 +811,8 @@ $moduleFields['appP31F11PgaT1f6H'] = array (
 // USC
 $moduleFields['appuC7nsCbe7TxqwK'] = array (
 	'VSC' => array(
-		'fldYTDACt6NSccA8J'=> array( 'label' => 'LABEL ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldQnNZjtozyk1F44'=> array( 'label' => 'Origine Afev ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldYTDACt6NSccA8J'=> array( 'label' => 'LABEL ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldQnNZjtozyk1F44'=> array( 'label' => 'Origine Afev ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldcFb17mY1fYJCeR'=> array( 'label' => 'Civilité', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fld9ZTooJuUahJFLw'=> array( 'label' => 'Prénom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldYN98fvNkAwQEdL'=> array( 'label' => 'Nationalité', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
