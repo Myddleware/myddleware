@@ -88,6 +88,16 @@ class moodlecore extends solution
                 'type' => PasswordType::class,
                 'label' => 'solution.fields.token',
             ],
+			[
+                'name' => 'user_custom_fields',
+                'type' => TextType::class,
+                'label' => 'solution.moodle.user_custom_fields',
+            ],
+			[
+                'name' => 'course_custom_fields',
+                'type' => TextType::class,
+                'label' => 'solution.moodle.course_custom_fields',
+            ],
         ];
     }
 
@@ -154,6 +164,8 @@ class moodlecore extends solution
                 }
             }
 
+			// Add user custom fields
+			$this->addCustomFields($module, $type, $param);
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -563,6 +575,37 @@ class moodlecore extends solution
                 break;
         }
     }
+
+	// Function to add custom fields for course and user modules.
+	// The custom fields are stored into the connector parameters
+	protected function addCustomFields($module, $type, $param) {
+		$customFields = array();
+		// Check if custom fields exist
+		if (
+				$module == 'users'
+			AND !empty($this->paramConnexion['user_custom_fields'])
+		) {
+			$customFields = explode(',',$this->paramConnexion['user_custom_fields']);
+		} elseif (
+				$module == 'users'
+			AND !empty($this->paramConnexion['course_custom_fields'])
+		) {
+			$customFields = explode(',',$this->paramConnexion['course_custom_fields']);
+		}
+		// Add the custom fields in the attribute $moduleFields
+		if (!empty($customFields)) {
+			foreach ($customFields as $customField) {
+				$this->moduleFields[$customField] = [
+					'label' => $customField,
+					'type' => 'varchar(255)',
+					'type_bdd' => 'varchar(255)',
+					'required' => 0,
+					'required_relationship' => 0,
+					'relate' => false,
+				];
+			}
+		}
+	}
 }
 
 class moodle extends moodlecore

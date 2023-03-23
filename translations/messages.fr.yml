@@ -553,7 +553,10 @@ solution:
         30_day: 30 jours
         60_day: 60 jours
         90_day: 90 jours
-        
+    moodle:
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
+
 error:
     connexion: Connexion impossible
     general: Erreur inattendue

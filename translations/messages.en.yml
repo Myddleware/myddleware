@@ -555,6 +555,9 @@ solution:
         30_day: 30 days
         60_day: 60 days
         90_day: 90 days
+    moodle:
+        user_custom_fields: User custom fields (shortname separated by coma)
+        course_custom_fields: Course custom fields (shortname separated by coma)
 
 error:
     connexion: Connection failed
