@@ -225,17 +225,28 @@ class moodlecore extends solution
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
             try {
+                $arrayCustomFields = $this->paramConnexion['user_custom_fields'] = explode(',', $this->paramConnexion['user_custom_fields']);
+
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
                     // We don't send Myddleware_element_id field to Moodle
-                    if (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
+                    if (in_array($key, array('Myddleware_element_id', 'source_date_modified', 'id_doc_myddleware'))) {
                         continue;
                     }
                     if (!empty($value)) {
-                        $obj->$key = $value;
+                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+                        if (in_array($key, $arrayCustomFields)) {
+                            $customField = new \stdClass();
+                            $customField->type = $key;
+                            $customField->value = $value;
+                            $obj->customfields[] = $customField;
+                            
+                        } else {
+                            $obj->$key = $value;
+                        }
                     }
                 }
                 switch ($param['module']) {
