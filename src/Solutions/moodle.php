@@ -181,28 +181,15 @@ class moodlecore extends solution
     {
         try {
             $result = [];
-
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
             // Get function to call Moodle
             $functionName = $this->getFunctionName($param);
-            // Prepare custom field list
-            if (
-                    $param['module'] == 'users'
-                AND !empty($this->paramConnexion['user_custom_fields'])
-            ) {
-                $customFieldList = explode(',',$this->paramConnexion['user_custom_fields']);
-                $attributeName = 'name';
-                $attributeValue = 'value';
-            }
-            if (
-                    $param['module'] == 'courses'
-                AND !empty($this->paramConnexion['course_custom_fields'])
-            ) {
-                $customFieldList = explode(',',$this->paramConnexion['course_custom_fields']);
-                $attributeName = 'shortname';
-                $attributeValue = 'valueraw';
-            }
+            // Get the custom fields set in the connector
+            $customFieldList = $this->getCustomFields($param);
+            // Init the attribute name and value for custom fields
+            $attributeName = ($param['module'] == 'courses' ? 'shortname' : 'name');
+            $attributeValue = ($param['module'] == 'courses' ? 'valueraw' : 'value');
 
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
@@ -274,7 +261,8 @@ class moodlecore extends solution
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
             try {
-                $arrayCustomFields = $this->paramConnexion['user_custom_fields'] = explode(',', $this->paramConnexion['user_custom_fields']);
+                // Get the custom fields set in the connector
+                $customFieldList = $this->getCustomFields($param);
 
                 // Check control before create
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
@@ -287,7 +275,7 @@ class moodlecore extends solution
                     }
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
-                        if (in_array($key, $arrayCustomFields)) {
+                        if (in_array($key, $customFieldList)) {
                             $customField = new \stdClass();
                             $customField->type = $key;
                             $customField->value = $value;
@@ -400,6 +388,8 @@ class moodlecore extends solution
             try {
                 // Check control before update
                 $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
+                // Get the custom fields set in the connector
+                $customFieldList = $this->getCustomFields($param);
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
@@ -410,7 +400,16 @@ class moodlecore extends solution
                         continue;
                     }
                     if (!empty($value)) {
-                        $obj->$key = $value;
+                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+                        if (in_array($key, $customFieldList)) {
+                            $customField = new \stdClass();
+                            $customField->type = $key;
+                            $customField->value = $value;
+                            $obj->customfields[] = $customField;
+                            
+                        } else {
+                            $obj->$key = $value;
+                        }
                     }
                 }
 
@@ -634,6 +633,24 @@ class moodlecore extends solution
                 return 'timemodified';
                 break;
         }
+    }
+
+    // Get the custom fields depending on the module
+    protected function getCustomFields ($param) {
+        // User and course Moodle fields aren't stored in the same parameter
+        if (
+                $param['module'] == 'users'
+            AND !empty($this->paramConnexion['user_custom_fields'])
+        ) {
+            return explode(',',$this->paramConnexion['user_custom_fields']);
+        }
+        if (
+                $param['module'] == 'courses'
+            AND !empty($this->paramConnexion['course_custom_fields'])
+        ) {
+            return explode(',',$this->paramConnexion['course_custom_fields']);
+        } 
+        return null;
     }
 
 	// Function to add custom fields for course and user modules.
