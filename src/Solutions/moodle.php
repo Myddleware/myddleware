@@ -192,12 +192,16 @@ class moodlecore extends solution
                 AND !empty($this->paramConnexion['user_custom_fields'])
             ) {
                 $customFieldList = explode(',',$this->paramConnexion['user_custom_fields']);
+                $attributeName = 'name';
+                $attributeValue = 'value';
             }
             if (
                     $param['module'] == 'courses'
                 AND !empty($this->paramConnexion['course_custom_fields'])
             ) {
                 $customFieldList = explode(',',$this->paramConnexion['course_custom_fields']);
+                $attributeName = 'shortname';
+                $attributeValue = 'valueraw';
             }
 
             // Call to Moodle
@@ -234,9 +238,9 @@ class moodlecore extends solution
                                 $customFieldValue = '';
                                 $customFieldName = '';
                                 foreach($customField->KEY as $customFieldValues) {
-                                    if ($customFieldValues->attributes()->__toString() == 'name') {
+                                    if ($customFieldValues->attributes()->__toString() == $attributeName) {
                                         $customFieldName = $customFieldValues->VALUE->__toString();
-                                    } elseif ($customFieldValues->attributes()->__toString() == 'value') {
+                                    } elseif ($customFieldValues->attributes()->__toString() == $attributeValue) {
                                         $customFieldValue = $customFieldValues->VALUE->__toString();
                                     }
                                 }
