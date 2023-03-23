@@ -186,6 +186,19 @@ class moodlecore extends solution
             $parameters = $this->setParameters($param);
             // Get function to call Moodle
             $functionName = $this->getFunctionName($param);
+            // Prepare custom field list
+            if (
+                    $param['module'] == 'users'
+                AND !empty($this->paramConnexion['user_custom_fields'])
+            ) {
+                $customFieldList = explode(',',$this->paramConnexion['user_custom_fields']);
+            }
+            if (
+                    $param['module'] == 'courses'
+                AND !empty($this->paramConnexion['course_custom_fields'])
+            ) {
+                $customFieldList = explode(',',$this->paramConnexion['course_custom_fields']);
+            }
 
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
@@ -194,14 +207,47 @@ class moodlecore extends solution
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
             }
-
             // Transform the data to Myddleware format
             if (!empty($xml->MULTIPLE->SINGLE)) {
                 foreach ($xml->MULTIPLE->SINGLE as $data) {
+                    $row = array();
+                    // Init custom fields to empty because Moodle returns custom field only if they exist for the current record
+                    if (!empty($customFieldList)) {
+                        foreach($customFieldList as $custom) {
+                            $row[$custom] = '';
+                        }
+                    }
                     foreach ($data as $field) {
                         // Get all the requested fields
-                        if (false !== array_search($field->attributes()->__toString(), $param['fields'])) {
+                        if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {
                             $row[$field->attributes()->__toString()] = $field->VALUE->__toString();
+                        }
+                        // Manage custom field
+                        elseif (
+                                $field->attributes()->__toString() == 'customfields'
+                            AND !empty($customFieldList)
+                        ) {
+                            // Get the curstom field values
+                            // Loop on each custom field returns by Moodle
+                            foreach($field->MULTIPLE->SINGLE as $customField) {
+                                // Get the name and the value of each field
+                                $customFieldValue = '';
+                                $customFieldName = '';
+                                foreach($customField->KEY as $customFieldValues) {
+                                    if ($customFieldValues->attributes()->__toString() == 'name') {
+                                        $customFieldName = $customFieldValues->VALUE->__toString();
+                                    } elseif ($customFieldValues->attributes()->__toString() == 'value') {
+                                        $customFieldValue = $customFieldValues->VALUE->__toString();
+                                    }
+                                }
+                                // Set the custom value to the output result
+                                if (
+                                        !empty($customFieldName)
+                                    AND in_array($customFieldName, $customFieldList)
+                                ) {
+                                    $row[$customFieldName] = $customFieldValue;
+                                }
+                            }
                         }
                     }
                     $result[] = $row;
@@ -211,7 +257,6 @@ class moodlecore extends solution
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($result['error']);
         }
-
         return $result;
     }
 
@@ -587,7 +632,7 @@ class moodlecore extends solution
 		) {
 			$customFields = explode(',',$this->paramConnexion['user_custom_fields']);
 		} elseif (
-				$module == 'users'
+				$module == 'courses'
 			AND !empty($this->paramConnexion['course_custom_fields'])
 		) {
 			$customFields = explode(',',$this->paramConnexion['course_custom_fields']);
