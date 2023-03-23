@@ -531,6 +531,8 @@ solution:
         applicationName: Nom de l'application
         hashkey: Clé de hachage
         authid: Id auth
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
@@ -553,9 +555,6 @@ solution:
         30_day: 30 jours
         60_day: 60 jours
         90_day: 90 jours
-    moodle:
-        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
-        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
 
 error:
     connexion: Connexion impossible

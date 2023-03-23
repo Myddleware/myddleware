@@ -91,12 +91,12 @@ class moodlecore extends solution
 			[
                 'name' => 'user_custom_fields',
                 'type' => TextType::class,
-                'label' => 'solution.moodle.user_custom_fields',
+                'label' => 'solution.fields.user_custom_fields',
             ],
 			[
                 'name' => 'course_custom_fields',
                 'type' => TextType::class,
-                'label' => 'solution.moodle.course_custom_fields',
+                'label' => 'solution.fields.course_custom_fields',
             ],
         ];
     }

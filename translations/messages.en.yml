@@ -533,6 +533,8 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        user_custom_fields: User custom fields (shortname separated by coma)
+        course_custom_fields: Course custom fields (shortname separated by coma)
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -555,9 +557,6 @@ solution:
         30_day: 30 days
         60_day: 60 days
         90_day: 90 days
-    moodle:
-        user_custom_fields: User custom fields (shortname separated by coma)
-        course_custom_fields: Course custom fields (shortname separated by coma)
 
 error:
     connexion: Connection failed
