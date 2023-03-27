@@ -49,6 +49,22 @@ class DocFilterType extends AbstractType
                     'id' => 'target'
                 ],
             ])
+            ->add('sort_field',  TextType::class, [
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'invisible sort',
+                    'class' => 'form-control mt-2',
+                    'id' => 'sort_field'
+                ],
+            ])
+            ->add('sort_order',  TextType::class, [
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'invisible sort',
+                    'class' => 'form-control mt-2',
+                    'id' => 'sort_order'
+                ],
+            ])
             ->add('reference',  TextType::class, [
                 'attr' => [
                     'placeholder' => 'Reference',

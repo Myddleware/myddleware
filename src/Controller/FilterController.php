@@ -129,9 +129,6 @@ class FilterController extends AbstractController
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-        // dd($request);
-        $sortField = 'status';
-        $sortOrder = 'ASC';
 
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
@@ -208,7 +205,9 @@ class FilterController extends AbstractController
                         'target_id' => 'FluxFilterTargetId',
                         'source_id' => 'FluxFilterSourceId',
                         'module_source' => 'FluxFilterModuleSource',
-                        'module_target' => 'FluxFilterModuleTarget'
+                        'module_target' => 'FluxFilterModuleTarget',
+                        'sort_field' => 'FluxFilterSortField',
+                        'sort_order' => 'FluxFilterSortOrder',
                         ];
                         
                     // Save the filters in the session using the session service and the filter map
@@ -329,7 +328,9 @@ class FilterController extends AbstractController
             'target_id' => 'FluxFilterTargetId',
             'source_id' => 'FluxFilterSourceId',
             'module_source' => 'FluxFilterModuleSource',
-            'module_target' => 'FluxFilterModuleTarget'
+            'module_target' => 'FluxFilterModuleTarget',
+            'sort_field' => 'FluxFilterSortField',
+            'sort_order' => 'FluxFilterSortOrder',
         ];
 
         foreach ($filterMap as $dataKey => $filterName) {
@@ -361,7 +362,9 @@ class FilterController extends AbstractController
             'target_id' => 'FluxFilterTargetId',
             'source_id' => 'FluxFilterSourceId',
             'module_source' => 'FluxFilterModuleSource',
-            'module_target' => 'FluxFilterModuleTarget'
+            'module_target' => 'FluxFilterModuleTarget',
+            'sort_field' => 'FluxFilterSortField',
+            'sort_order' => 'FluxFilterSortOrder',
         ];
     
         foreach ($filterMap as $dataKey => $filterName) {
@@ -392,6 +395,8 @@ class FilterController extends AbstractController
                 'date_modif_end' => $documentFormData['date_modif_end'] ? $documentFormData['date_modif_end']->format('Y-m-d, H:i:s') : null,
                 'operators' => $operators ?? null,
                 'customWhere' => $this->getGlobalStatusData($documentFormData)['customWhere'] ?? null,
+                'sort_field' => $documentFormData['sort_field'] ?? null,
+                'sort_order' => $documentFormData['sort_order'] ?? null,
             ];
             
             
@@ -524,6 +529,8 @@ class FilterController extends AbstractController
 
     // Search the documents using a query
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
+
+
         $join = '';
         $where = '';
 
@@ -646,6 +653,21 @@ class FilterController extends AbstractController
             $where .= " AND document.source_id LIKE :source_id ";
         }
 
+        // sort_field
+        if (!empty($data['sort_field'])) {
+            $orderBy = " ORDER BY ".$data['sort_field'];
+        } else {
+            $orderBy = " ORDER BY document.date_modified";
+        }
+
+        // sort_order
+        if (!empty($data['sort_order'])) {
+            $orderBy .= " ".$data['sort_order'];
+        } else {
+            $orderBy .= " DESC";
+        }
+        
+
         // if not empty 
 
         // Build query
@@ -676,7 +698,7 @@ class FilterController extends AbstractController
             " WHERE 
                     document.deleted = 0 "
                     .$where.
-            " ORDER BY document.date_modified DESC"
+            $orderBy
             ." LIMIT ". $limit;
             
         

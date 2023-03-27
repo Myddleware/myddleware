@@ -1,27 +1,42 @@
 $(function() {
 
+  console.log('test 0');
+  // if, on page load, the sort_field and sort_order are set in localStorage, set the form values to those values
+  if (localStorage.getItem("sort_field") !== null && localStorage.getItem("sort_order") !== null) {
+    // Find the element with the data-sort attribute that matches the sort_field value
+    var element = $("span[data-sort='" + localStorage.getItem("sort_field") + "']");
+    // Give the element the correct class according to the sort_order value
+    if (localStorage.getItem("sort_order") === "DESC") {
+      element.find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statusIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon").removeClass("fa-angle-down").addClass("fa-angle-up");
+    } else {
+      element.find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statusIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon").removeClass("fa-angle-up").addClass("fa-angle-down");
+    }
+  }
+
   $("span").on("click", function () {
-    var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon"); // Trouver l'icône dans l'élément cliqué
-    if (icon.hasClass("fa-angle-down")) { icon.removeClass("fa-angle-down").addClass("fa-angle-up"); } else { icon.removeClass("fa-angle-up").addClass("fa-angle-down"); }
+    
+    var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statusIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon"); // Trouver l'icône dans l'élément cliqué
+    if (icon.hasClass("fa-angle-down")) {
+      icon.removeClass("fa-angle-down").addClass("fa-angle-up");
+    $('#combined_filter_document_sort_field').val($(this).data("sort"));
+    $('#combined_filter_document_sort_order').val('DESC');
+    localStorage.setItem("sort_field", $(this).data("sort"));
+    localStorage.setItem("sort_order", 'DESC');
+
+      $('form').submit();
+    } else {
+      icon.removeClass("fa-angle-up").addClass("fa-angle-down");
+    $('#combined_filter_document_sort_field').val($(this).data("sort"));
+    $('#combined_filter_document_sort_order').val('ASC');
+    localStorage.setItem("sort_field", $(this).data("sort"));
+    localStorage.setItem("sort_order", 'ASC');
+    // console.log($(this).data("sort"));
+
+      // console.log('test 3');
+      $('form').submit();
+    }
   });
 
-  // $("span[data-sort]").on("click", function () {
-  //   var icon = $(this).find(".nameIcon, .date_createdIcon, .idIcon, .date_modifiedIcon, .statutIcon, .source_idIcon, .target_idIcon, .typeIcon, .source_date_modifiedIcon");
-  //   var sortField = $(this).data("sort");
-  //   var sortOrder = icon.hasClass("fa-angle-down") ? "asc" : "desc";
-  
-  //   if (icon.hasClass("fa-angle-down")) {
-  //     icon.removeClass("fa-angle-down").addClass("fa-angle-up");
-  //   } else {
-  //     icon.removeClass("fa-angle-up").addClass("fa-angle-down");
-  //   }
-  
-  //   localStorage.setItem("sortField", sortField);
-  //   localStorage.setItem("sortOrder", sortOrder);
-  //   $('form').submit();
-  // });
-  
-  
     // Define an array of filters, each containing a name and selector
     var filters = [
       { name: 'name', selector: '#combined_filter_rule_name' },
@@ -115,7 +130,7 @@ $(function() {
 
   // if a link with the class page-link is clicked, save the filters to localStorage
   $('.page-link').on('click', function() {
-    console.log('page-link clicked');
+    // console.log('page-link clicked');
     saveFiltersToLocalStorage();
     loadFiltersFromLocalStorage();
   });
