@@ -318,6 +318,7 @@ $moduleFields['appP31F11PgaT1f6H'] = array (
 
 	'COUPONS' => array(
 		'fldcs5vUp6OXVYow8'=> array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldFOeVLBpE6FifyD'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldWwzOtDyGYp7Jh3'=> array( 'label' => 'Nom :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldcoGv5fzr7yZQbD'=> array( 'label' => 'Date de création', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldiGycMILoHBvv1K'=> array( 'label' => 'Date de modification', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
