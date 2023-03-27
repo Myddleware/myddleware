@@ -218,7 +218,7 @@ yarn build
 | Cancel a document     | In the document view section, a super admin can force a document to be canceled. The button is hidden if the user doesn't have the required rights. | | | ✔         |
 | Rule detail commands  | In the rule detail view section, a super admin can cancel all documents at once, delete all documents, or delete the rule itself. Note that all documents must be deleted before deleting the rule. The buttons are hidden if the user doesn't have the required rights. | | | ✔       |
 | Open a document       | Open a document for viewing                                                                      | ✔    | ✔     | ✔           |
-| Delete a document     | Deactivate a document, but leave it in the database                                                               | ✔    | ✔     | ✔           |
+| Delete a document     | Delete the selected document                                                               | ✔    | ✔     | ✔           |
 | Cancel a document     | Cancel a document and change its status to "Cancel"                                                          | ✔    | ✔     | ✔           |
 | View a rule           | Open a rule and see its information                                                                          | ✔    | ✔     | ✔           |
 | Edit a rule         | Change important properties of a rule such as the fields or the relationships                                                                           | ✔    | ✔     | ✔           |
