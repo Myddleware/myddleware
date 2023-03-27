@@ -277,7 +277,12 @@ class moodlecore extends solution
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
                             $customField = new \stdClass();
-                            $customField->type = $key;
+                            // Param names are differents depending on the module
+                            if($param['module'] == 'users') {
+                                $customField->type = $key;
+                            } elseif($param['module'] == 'courses') {
+                                $customField->shortname = $key; 
+                            }
                             $customField->value = $value;
                             $obj->customfields[] = $customField;
                             
@@ -403,10 +408,14 @@ class moodlecore extends solution
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
                             $customField = new \stdClass();
-                            $customField->type = $key;
+                            // Param names are differents depending on the module
+                            if($param['module'] == 'users') {
+                                $customField->type = $key;
+                            } elseif($param['module'] == 'courses') {
+                                $customField->shortname = $key;
+                            }
                             $customField->value = $value;
                             $obj->customfields[] = $customField;
-                            
                         } else {
                             $obj->$key = $value;
                         }
