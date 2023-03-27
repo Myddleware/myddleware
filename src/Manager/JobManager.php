@@ -560,7 +560,7 @@ class jobcore
                 }
 
                 // We assign the id to an id section of the array
-                if ($usesDocumentIds === 1) {
+                if ($usesDocumentIds === 1 && !empty($documents)) {
                     $arrayOfDocumentIds[] = $documents[0]->id;
                     continue;
                 } elseif (!empty($documents)) {

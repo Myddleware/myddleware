@@ -844,7 +844,7 @@ class FluxController extends AbstractController
     /**
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")
      */
-    public function fluxReadRecord($id, bool $massRerun = false): RedirectResponse
+    public function fluxReadRecord($id, bool $massRerun = false): null|RedirectResponse
     {
         try {
             if (!empty($id)) {
