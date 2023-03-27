@@ -210,3 +210,22 @@ Once that's done, you now need to build your Myddleware instance for production 
 yarn build 
 ```
 
+## Admin Rights
+
+| Action                | Definition                                                                                       | Required Rights   |
+|-----------------------|--------------------------------------------------------------------------------------------------|-------------------|
+| Delete the logs       | Delete the logs of your current environment, to make debugging easier                           | Super Admin       |
+| Cancel a document     | In the document view section, a super admin can force a document to be canceled. The button is hidden if the user doesn't have the required rights. | Super Admin       |
+| Rule detail commands  | In the rule detail view section, a super admin can cancel all documents at once, delete all documents, or delete the rule itself. Note that all documents must be deleted before deleting the rule. The buttons are hidden if the user doesn't have the required rights. | Super Admin       |
+
+
+
+
+### Delete the logs
+![Delete the logs button](images/admin_tasks/delete_logs_button.png)
+
+### Cancel a Document
+![Cancel a document](images/admin_tasks/cancel_document.png)
+
+### Rule detail commands
+![Rule detail commands](images/admin_tasks/rule_tasks.png)
