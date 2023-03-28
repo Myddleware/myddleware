@@ -78,7 +78,8 @@ class airtablecustom extends airtable {
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
-				in_array($param['rule']['conn_id_target'], array(4,8))
+				!empty($param['rule'])
+			AND	in_array($param['rule']['conn_id_target'], array(4,8))
 			AND $param['document']['type'] == 'U'
 			AND $param['call_type'] == 'history'
 			AND !empty($result['error'])
@@ -107,6 +108,7 @@ class airtablecustom extends airtable {
 			$result['error'] = '';
 		}
 		
+		/* Aiko - Suppression isn't used anymore
 		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression
 			if (!empty($result['values'])) {
 				foreach ($result['values'] as $docId => $values) {
@@ -166,7 +168,7 @@ class airtablecustom extends airtable {
 					$documents = $ruleDeletion->generateDocuments($values['IDCOMET'], false, $deletionParam); 
 				}	
 			}
-		}
+		} */
 		return $result;
 	}
 	
