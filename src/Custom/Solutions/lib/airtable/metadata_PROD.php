@@ -18,6 +18,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
     ),
     'BINOMES' => array(
         'fldpdbxLe9B1H2i2J'=> array( 'label' => 'Id Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
+	   'fldCk97UWiy7d1r8U'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldmztRnwA4sKggFe' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldHIrkzh3zZQz7uc' => array( 'label' => 'Mise en place', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldjRJWMtHZdf6Or5' => array( 'label' => 'Fin', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -318,6 +319,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 
 	'COUPONS' => array(
 		'fldsTwjBHZDgcO69j'=> array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldVfFJsTitpW8XbO'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldcX0CaVrvhGXrUe'=> array( 'label' => 'Nom :', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldsP7jMxsgqPPyOO'=> array( 'label' => 'Date de création', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldy7Z0t0Ed0SldEV'=> array( 'label' => 'Date de modification', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -738,6 +740,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 	),
 	'PARTICIPATION_RI' => array(
 		'fldiXX1KBp4Gl55zw'=> array( 'label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldlHZqlwuHvxHjXr'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldYvyAHOntuqhWbC'=> array( 'label' => 'Date de modification', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldjyKAQSd1hDmgU9'=> array( 'label' => 'Supprimé', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldL4qph2Lg65xKjz'=> array( 'label' => 'IDA', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -759,6 +762,7 @@ $moduleFields['app5ustIjI5taRXJS'] = array (
 	),
 	'RECONDUCTION' => array(
 		'fldN5fuEjkkSuu4cU'=> array( 'label' => 'id_contact', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldFFXYXwmZ5aaaj7'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldcNMGCrOPVLnITR'=> array( 'label' => 'Prénom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldziCvgs87ctPWsE'=> array( 'label' => 'Nom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldMWnAxzSA6XiL3U'=> array( 'label' => 'Email:', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
