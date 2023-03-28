@@ -200,6 +200,21 @@ class toolscore
 
         return $php;
     }
+
+
+	public function getParamValue($paramName)
+    {
+        // Get the custom php version first
+        $select = "SELECT * FROM config WHERE name = :param_name";
+        $stmt = $this->connection->prepare($select);
+        $stmt->bindValue(':param_name', $paramName);
+        $result = $stmt->executeQuery();
+        $config = $result->fetchAssociative();
+        if (!empty($config['value'])) {
+            return $config['value'];
+        }
+        return null;
+    }
 }
 
 class ToolsManager extends toolscore

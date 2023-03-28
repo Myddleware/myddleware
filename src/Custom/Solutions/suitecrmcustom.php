@@ -31,13 +31,28 @@ class suitecrmcustom extends suitecrm
     {
 		// Add module convert coupon
 		$modules = parent::get_modules($type);
-		$modules['convert_coupon'] = 'Convert Coupon';
+		if ($type == 'target') {
+			$modules['convert_coupon'] = 'Convert Coupon';
+		}
 		return $modules;
     }
 	
 	// Add aiko field to be able to filter on it
 	public function get_module_fields($module, $type = 'source', $param = null): array
 	{
+		// Add field coupon_id in module convert_coupon
+		if ($module == 'convert_coupon') {
+			$this->moduleFields['coupon_id'] = array(
+				'label' => 'ID coupon',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => false
+			);
+			// No standard call because the module doesn't exist in SuiteCRM
+			return $this->moduleFields;
+		}
+
 		parent::get_module_fields($module, $type);
 		if ($module == 'Contacts') {
 			$this->moduleFields['aiko'] = array(
@@ -58,16 +73,6 @@ class suitecrmcustom extends suitecrm
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
 				'label' => 'Filtre Myddleware',
-				'type' => 'varchar(255)',
-				'type_bdd' => 'varchar(255)',
-				'required' => 0,
-				'relate' => false
-			);
-		}
-		// Add field coupon_id in module convert_coupon
-		if ($module == 'convert_coupon') {
-			$this->moduleFields['coupon_id'] = array(
-				'label' => 'ID coupon',
 				'type' => 'varchar(255)',
 				'type_bdd' => 'varchar(255)',
 				'required' => 0,
@@ -236,6 +241,48 @@ class suitecrmcustom extends suitecrm
 		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
 	}
 	
+	// Permet de mettre à jour un enregistrement
+    public function createData($param): array
+    {
+		if ($param['rule']['module_target'] == 'convert_coupon') { // Convert coupon
+			foreach ($param['data'] as $idDoc => $data) {
+				try {
+					// Error if no coupon ID
+					if (empty($data['coupon_id'])) {
+						throw new \Exception('No coupon id. Failed to convert the coupon. ');
+					} else {
+						// Send the coupon conversion
+						$get_parameters = array(
+							'session' => $this->session,
+							'coupon_id' => $data['coupon_id']
+						);
+						$convertCoupon = json_decode($this->call("convert_coupon", $get_parameters));
+						// Error if no contact id
+						if (empty($convertCoupon->contact_id)) {
+							throw new \Exception('error : '.$convertCoupon->error);
+						}
+						// Add the contact id in the result
+						$result[$idDoc] = array(
+							'id' => $convertCoupon->contact_id,
+							'error' => !$convertCoupon->success,
+						);
+					}
+				} catch (\Exception $e) {
+					$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$result[$idDoc] = [
+						'id' => '-1',
+						'error' => $error,
+					];
+				}
+				// Modification du statut du flux
+				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+			}
+			return $result;
+		}
+		// Call the standard function
+		return parent::createData($param);
+	}
+
 	// Permet de mettre à jour un enregistrement
     public function updateData($param): array
     {
@@ -453,6 +500,6 @@ class suitecrmcustom extends suitecrm
             $module = $rule->getModuleTarget();
             $recordId = $document->gettarget();
         }
-        return 'https://comet.afev.org/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+        return 'https://comet'.($_ENV['AFEV_ENV'] == 'PREPROD' ? '.preprod' : '').'.afev.org/index.php?module='.$module.'&action=DetailView&record='.$recordId;
     }
 }
