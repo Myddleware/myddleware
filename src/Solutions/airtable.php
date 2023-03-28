@@ -188,11 +188,13 @@ class airtablecore extends solution
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
 
-            // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
-			// Add the dateRefField in teh field list
-			if (array_search($dateRefField, $param['fields']) === false) {
-				$param['fields'][] = $dateRefField;
+            // Get the reference date field name only when we read using reference date
+			if (empty($param['query'])) {
+				$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+				// Add the dateRefField in teh field list
+				if (array_search($dateRefField, $param['fields']) === false) {
+					$param['fields'][] = $dateRefField;
+				}
 			}
             $stop = false;
             $page = 1;
