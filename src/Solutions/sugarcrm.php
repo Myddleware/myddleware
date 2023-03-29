@@ -286,6 +286,8 @@ class sugarcrmcore extends solution
             $deleted = true;
             $param['fields'][] = 'deleted';
         }
+		// Flag to know if Myddleware has read only deleted records
+		$onlyDeletion = true;
 
         // Init search parameters
         $filterArgs = [
@@ -336,7 +338,11 @@ class sugarcrmcore extends solution
                     and !empty($record->deleted)
                 ) {
                     $result[$record->id]['myddleware_deletion'] = true;
-                }
+                } else {
+					// At least one non deleted record read
+					$onlyDeletion = false;
+				}
+				
                 foreach ($param['fields'] as $field) {
                     // Sugar returns multilist value as array
                     if (
@@ -352,11 +358,15 @@ class sugarcrmcore extends solution
                     }
                     $result[$record->id][$field] = (!empty($record->$field) ? $record->$field : '');
                 }
-                // No data returned if record deleted, we set a default date (date ref to have no impact on the final date ref)
+                // No date modified returned if record deleted, we set a default date (the last reference date read)
                 if (!empty($result[$record->id]['myddleware_deletion'])) {
-                    $result[$record->id]['date_modified'] = $param['date_ref'];
+                    $result[$record->id]['date_modified'] = end($records)->date_modified;
                 }	
             }
+			// Error if only deletion records read
+			if ($onlyDeletion) {
+				throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Please increase the rule limit to include non deletion records.');
+			}
         }
 
         return $result;
