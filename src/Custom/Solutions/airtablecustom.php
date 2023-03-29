@@ -62,10 +62,10 @@ class airtablecustom extends airtable {
 							);
 
     protected $FieldsDuplicate = array(
-        'CONTACTS' => array('ID___COMET'),
-        'BINOMES' => array('ID___COMET'),
-        'POLE' => array('nom___du___pole'),
-        'REFERENTS' => array('ID___COMET'),
+        'CONTACTS' => array('fldXhleTPZRv0zBbd'),
+        'BINOMES' => array('fldpdbxLe9B1H2i2J'),
+        'POLE' => array('fldxWO5Cs8t9z7ZP8'),
+        'REFERENTS' => array('fldLt1pZEcUxKlTpH'),
         'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
 		'PARTICIPATION_RI' => array('fldL4qph2Lg65xKjz', 'fldtIpKCdlbykhkm5'),
 		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy')
