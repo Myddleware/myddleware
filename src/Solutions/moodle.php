@@ -116,6 +116,7 @@ class moodlecore extends solution
                     'get_user_compentencies_by_date' => 'Get user compentency',
                     'get_competency_module_completion_by_date' => 'Get compentency module completion',
                     'get_user_grades' => 'Get user grades',
+                    'groups' => 'Groups',
                 ];
             }
 
@@ -188,8 +189,8 @@ class moodlecore extends solution
             // Get the custom fields set in the connector
             $customFieldList = $this->getCustomFields($param);
             // Init the attribute name and value for custom fields
-            $attributeName = ($param['module'] == 'courses' ? 'shortname' : 'name');
-            $attributeValue = ($param['module'] == 'courses' ? 'valueraw' : 'value');
+            $attributeName = ($param['module'] == 'courses' || $param['module'] == 'groups' ? 'shortname' : 'name');
+            $attributeValue = ($param['module'] == 'courses'? 'valueraw' : 'value');
 
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
@@ -573,6 +574,7 @@ class moodlecore extends solution
             and empty($param['query']['id'])
         ) {
             // We use the standard function to search for a user (allow Myddleware to search a user by username or email)
+            dd( $param['module']);
             if ('users' == $param['module']) {
                 return 'core_user_get_users';
             } elseif ('courses' == $param['module']) {
@@ -584,6 +586,8 @@ class moodlecore extends solution
                 return 'local_myddleware_get_users_by_date';
             } elseif ('courses' == $param['module']) {
                 return 'local_myddleware_get_courses_by_date';
+            } elseif ('groups' == $param['module']) {
+                return 'local_myddleware_get_groups_by_date';
             }
         }
         // In all other cases
