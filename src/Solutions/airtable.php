@@ -188,11 +188,13 @@ class airtablecore extends solution
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
 
-            // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
-			// Add the dateRefField in teh field list
-			if (array_search($dateRefField, $param['fields']) === false) {
-				$param['fields'][] = $dateRefField;
+            // Get the reference date field name only when we read using reference date
+			if (empty($param['query'])) {
+				$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+				// Add the dateRefField in teh field list
+				if (array_search($dateRefField, $param['fields']) === false) {
+					$param['fields'][] = $dateRefField;
+				}
 			}
             $stop = false;
             $page = 1;
@@ -269,10 +271,14 @@ class airtablecore extends solution
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
-						
 						foreach ($param['fields'] as $field) {
 							if (!empty($record['fields'][$field])) {
-								$result['values'][$record['id']][$field] = $record['fields'][$field];
+								// If teh value is an array (relation), we take the first entry
+								if (is_array($record['fields'][$field])) {
+									$result['values'][$record['id']][$field] = $record['fields'][$field][0];
+								} else {
+									$result['values'][$record['id']][$field] = $record['fields'][$field];
+								}
 							} else {
                                 $result['values'][$record['id']][$field] = '';
                             }
