@@ -271,10 +271,14 @@ class airtablecore extends solution
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
-						
 						foreach ($param['fields'] as $field) {
 							if (!empty($record['fields'][$field])) {
-								$result['values'][$record['id']][$field] = $record['fields'][$field];
+								// If teh value is an array (relation), we take the first entry
+								if (is_array($record['fields'][$field])) {
+									$result['values'][$record['id']][$field] = $record['fields'][$field][0];
+								} else {
+									$result['values'][$record['id']][$field] = $record['fields'][$field];
+								}
 							} else {
                                 $result['values'][$record['id']][$field] = '';
                             }
