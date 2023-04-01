@@ -560,7 +560,7 @@ class rulecore
 
             // Order data in the date_modified order
             $modified = array_column($dataSourceValues, 'date_modified');
-            array_multisort($modified, SORT_DESC, $dataSourceValues);
+            array_multisort($modified, SORT_ASC, $dataSourceValues);
             foreach ($dataSourceValues as $value) {
                 // Check if the previous record has the same date_modified than the current record
                 // Check only if offset isn't managed into the source application connector
@@ -1413,7 +1413,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments($arrayIdDocument);
+            $response = $this->checkParentDocument($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Relate_OK';

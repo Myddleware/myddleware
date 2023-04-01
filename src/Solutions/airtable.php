@@ -43,7 +43,6 @@ class airtablecore extends solution
     protected string $airtableURL = 'https://api.airtable.com/v0/';
     protected string $metadataApiEndpoint = 'https://api.airtable.com/v0/meta/bases/';
 
-    protected array $required_fields = ['default' => ['createdTime', 'Last Modified']];
     /**
      * Airtable base.
      */
@@ -188,20 +187,15 @@ class airtablecore extends solution
             $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
             // Add required fields
             $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-            // There is a bug on the parameter returnFieldsByFieldId soit can't be used
-            // In case we use fieldsId, we need to get the label to compare with Airtable result (only field label are returned)
-			include 'lib/airtable/metadata.php';
-            foreach ($param['fields'] as $field) {
-                if ('fld' == substr($field, 0, 3)) {
-                    if (!empty($moduleFields[$baseID][$param['module']][$field]['label'])) {
-                        $fields[$field] = $moduleFields[$baseID][$param['module']][$field]['label'];
-                        continue;
-                    }
-                }
-                $fields[$field] = $field;
-            }
-            // Get the reference date field name
-            $dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+
+            // Get the reference date field name only when we read using reference date
+			if (empty($param['query'])) {
+				$dateRefField = $this->getDateRefName($param['module'], $param['ruleParams']['mode']);
+				// Add the dateRefField in teh field list
+				if (array_search($dateRefField, $param['fields']) === false) {
+					$param['fields'][] = $dateRefField;
+				}
+			}
             $stop = false;
             $page = 1;
             $offset = '';
@@ -213,7 +207,7 @@ class airtablecore extends solution
                 if (!empty($param['query'])) {
                     if (!empty($param['query']['id'])) {
                         $id = $param['query']['id'];
-                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id, $options);
+                        $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id.'?returnFieldsByFieldId=true', $options);
                         $statusCode = $response->getStatusCode();
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content2 = $response->getContent();
@@ -253,7 +247,7 @@ class airtablecore extends solution
 							$filterByFormula .= ')';
 						}
 						// Get all records corresponding to the filters
-						$response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?'.$filterByFormula, $options);
+						$response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?returnFieldsByFieldId=true&'.$filterByFormula, $options);
 						$statusCode = $response->getStatusCode();
 						$contentType = $response->getHeaders()['content-type'][0];
 						$content = $response->getContent();
@@ -262,7 +256,7 @@ class airtablecore extends solution
                 } else {
                     // all records
                     $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
-                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&pageSize=".$this->defaultLimit.'&maxRecords='.$param['limit'].$offset, $options);
+                    $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&returnFieldsByFieldId=true&pageSize=".$this->defaultLimit.'&maxRecords='.$param['limit'].$offset, $options);
                     $statusCode = $response->getStatusCode();
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
@@ -277,19 +271,18 @@ class airtablecore extends solution
                     $content = $this->convertResponse($param, $content['records']);
                     foreach ($content as $record) {
                         ++$currentCount;
-                        foreach ($fields as $key => $field) {
-                            $fieldWithSpace = str_replace('___', ' ', $field);
-                            if (isset($record['fields'][$fieldWithSpace])) {
-                                // Depending on the field type, the result can be an array, in this case we take the first result
-                                if (is_array($record['fields'][$fieldWithSpace])) {
-                                    $result['values'][$record['id']][$key] = current($record['fields'][$fieldWithSpace]);
-                                } else {
-                                    $result['values'][$record['id']][$key] = $record['fields'][$fieldWithSpace];
-                                }
-                            } else {
-                                $result['values'][$record['id']][$key] = '';
+						foreach ($param['fields'] as $field) {
+							if (!empty($record['fields'][$field])) {
+								// If teh value is an array (relation), we take the first entry
+								if (is_array($record['fields'][$field])) {
+									$result['values'][$record['id']][$field] = $record['fields'][$field][0];
+								} else {
+									$result['values'][$record['id']][$field] = $record['fields'][$field];
+								}
+							} else {
+                                $result['values'][$record['id']][$field] = '';
                             }
-                        }
+						}
 
                         // Get the reference date
                         if (!empty($record['fields'][$dateRefField])) {
@@ -328,7 +321,6 @@ class airtablecore extends solution
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
-
         return $result;
     }
 
@@ -524,7 +516,21 @@ class airtablecore extends solution
 
     public function getDateRefName($moduleSource, $ruleMode): string
     {
-        return 'Last Modified';
+		// Search the field id
+		include 'lib/airtable/metadata.php';
+		$found_key = array_search('Last Modified', array_column($moduleFields[$this->paramConnexion['projectid']][$moduleSource], 'label'), true);
+		// Error if not found
+		if ($found_key === false) {
+			throw new Exception('Failed to found the date reference field name in the metadata');
+		}
+		
+		// Get the field id 
+		$fieldId = key(array_slice($moduleFields[$this->paramConnexion['projectid']][$moduleSource], $found_key, $found_key));
+		if (empty($fieldId)) {
+			throw new Exception('Failed to found the id corresponding to the date reference field.');
+		}
+
+        return $fieldId;
     }
 
     /**

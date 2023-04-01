@@ -39,6 +39,8 @@ class moodlecore extends solution
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
         'get_user_grades' => ['id', 'timemodified'],
+        'groups' => ['id', 'timemodified'],
+        'group_members' => ['id', 'timeadded'],
     ];
 
     protected array $FieldsDuplicate = [
@@ -116,6 +118,8 @@ class moodlecore extends solution
                     'get_user_compentencies_by_date' => 'Get user compentency',
                     'get_competency_module_completion_by_date' => 'Get compentency module completion',
                     'get_user_grades' => 'Get user grades',
+                    'groups' => 'Groups',
+					'group_members' => 'Group members',
                 ];
             }
 
@@ -584,6 +588,10 @@ class moodlecore extends solution
                 return 'local_myddleware_get_users_by_date';
             } elseif ('courses' == $param['module']) {
                 return 'local_myddleware_get_courses_by_date';
+            } elseif ('groups' == $param['module']) {
+                return 'local_myddleware_get_groups_by_date';
+            } elseif ('group_members' == $param['module']) {
+                return 'local_myddleware_get_group_members_by_date';
             }
         }
         // In all other cases
@@ -638,6 +646,9 @@ class moodlecore extends solution
 					return 'timemodified';
 				}
                 break;
+            case 'group_members': 
+                return 'timeadded';
+                break; 
             default:
                 return 'timemodified';
                 break;
