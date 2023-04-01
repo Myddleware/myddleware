@@ -646,6 +646,9 @@ class moodlecore extends solution
 					return 'timemodified';
 				}
                 break;
+            case 'group_members': 
+                return 'timeadded';
+                break; 
             default:
                 return 'timemodified';
                 break;
