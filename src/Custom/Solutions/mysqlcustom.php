@@ -446,7 +446,16 @@ class mysqlcustom extends mysql {
 	} // get_module_fields($module) 
 	
 	// On se connecte à la base de données en lecture en utilisant l'accès à SuiteCRM etune fonction webservice custom
-	public function readData($param) {		
+	public function readData($param) {
+		// No read action for rule REEC - Users custom when we read using date ref. The rule can now be activated
+		if (
+				$param['rule']['id'] == '63e1007614977'
+			AND $param['call_type'] == 'read'
+			AND empty($param['query']['id'])
+		) {
+			return array();
+		}
+
 		// On appel le code custom que pour le connecteur MySQL COMET 
 		if (
 			(
@@ -610,7 +619,7 @@ class mysqlcustom extends mysql {
 		}
 		catch (\Exception $e) {
 		    $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-		}		
+		}
 		return $result;
 	} // read($param)
 	

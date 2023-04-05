@@ -391,7 +391,7 @@ class DocumentManagerCustom extends DocumentManager
 			and	$this->document_data['rule_id'] == '5cf98651a17f3' // REEC - Users
 			and	$new_status == 'Ready_to_send'
 		) {
-			$this->generateDocument('63e1007614977', $this->document_data['source_id'], 'id', false);	// REEC - Users custom
+			$this->generateDocument('63e1007614977', $this->document_data['source_id']);	// REEC - Users custom
 		}
 
 		$updateStatus = parent::updateStatus($new_status);
