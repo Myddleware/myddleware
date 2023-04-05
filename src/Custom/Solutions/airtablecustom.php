@@ -68,7 +68,8 @@ class airtablecustom extends airtable {
         'REFERENTS' => array('fldLt1pZEcUxKlTpH'),
         'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
 		'PARTICIPATION_RI' => array('fldL4qph2Lg65xKjz', 'fldtIpKCdlbykhkm5'),
-		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy')
+		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy'),
+		'VSC' => array('fldTpnnN8XfbLHADM')
         );
 
 
