@@ -183,6 +183,13 @@ class airtablecustom extends airtable {
 				unset($data['fldBQBCfr1ZgVJmE3']);
 			}
 		}
+		
+		if ($param['rule']['id'] == '61a930273441b') { // Aiko binome
+			if (empty($data['fldqGYsTr5EylIi2f'])) {	// if referent empty we remove it from the data sent
+				unset($data['fldqGYsTr5EylIi2f']);
+			}
+		}
+
         return $data;
     }
 
@@ -196,6 +203,13 @@ class airtablecustom extends airtable {
 				unset($data['fldBQBCfr1ZgVJmE3']);
 			}
 		}
+		
+		if ($param['rule']['id'] == '61a930273441b') { // Aiko binome
+			if (empty($data['fldqGYsTr5EylIi2f'])) {	// if referent empty we remove it from the data sent
+				unset($data['fldqGYsTr5EylIi2f']);
+			}
+		}
+
         return $data;
     }
 }
