@@ -99,10 +99,32 @@ class suitecrmcustom extends suitecrm
 					$aiko->value = '0';
 					$result->entry_list[$key]->name_value_list->aiko = $aiko;
 					if (
-						!empty($relationship
-							and !empty($relationship->link_list[0]->records))
+							!empty($relationship)
+						and !empty($relationship->link_list[0]->records)
 					) {
 						foreach ($relationship->link_list[0]->records as $binome) {
+							// Use the same filter than Airtable
+							if (
+								!empty($binome->link_value->statut_c->value)
+								and $binome->link_value->statut_c->value <> 'termine'
+								and $binome->link_value->statut_c->value <> 'annule'
+								and $binome->link_value->statut_c->value <> 'accompagnement_termine'
+								and !empty($binome->link_value->chatbot_c->value)
+								and $binome->link_value->chatbot_c->value <> 'non'
+							) {
+								// $result->entry_list[$key]->name_value_list->aiko->name = 'aiko';
+								$result->entry_list[$key]->name_value_list->aiko->value = '1';
+								break;
+							}
+						}
+					}
+					// Check the second relationship (should never happen because each contact type has its own relationship type)
+					if (
+							!empty($relationship)
+						and !empty($relationship->link_list[1]->records)
+						and empty($result->entry_list[$key]->name_value_list->aiko->value)
+					) {
+						foreach ($relationship->link_list[1]->records as $binome) {
 							// Use the same filter than Airtable
 							if (
 								!empty($binome->link_value->statut_c->value)
