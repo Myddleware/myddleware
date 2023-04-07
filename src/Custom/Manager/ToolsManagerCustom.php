@@ -57,7 +57,10 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['62695220e54ba'] = 'Mobilisation - Coupons vers Comet';
 			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
 		}
-		
+
+		if (current(array_keys($data['source'])) == 'Leads') {
+			$data['lst_rule']['62690f697e610'] = 'Mobilisation - Pôles';
+		}
 		
 		// Une règle avec le module Contacts de SuiteCRM peut être liée aux module user de MySQL
 		if (current(array_keys($data['source'])) == 'Contacts') {
@@ -82,7 +85,7 @@ class ToolsManagerCustom extends ToolsManager {
 		if (current(array_keys($data['source'])) == 'CRMC__etablissement_sup') {
 			$data['lst_rule']['5cddddcce2e3e'] = 'REEC - Poles';
 		}
-		
+
 		// Add bidirectional rule for Mobilisation - Participation RI
 		if ($data['regleId'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
 				$data['rule_params'][] = array(

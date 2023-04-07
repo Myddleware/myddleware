@@ -841,7 +841,7 @@ $moduleFields['appuC7nsCbe7TxqwK'] = array (
 		'fldNTdCkloZSLJ835'=> array( 'label' => 'Validation', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldnPczKO7jgCclEp'=> array( 'label' => 'STATUT Contrat', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldAImCif1rkOnVVu'=> array( 'label' => 'ELISA EDUCATIONNATIONALE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fld7AlwtbYi39d8Wp'=> array( 'label' => 'POLE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld7AlwtbYi39d8Wp'=> array( 'label' => 'POLE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 		'fldYNirrxmxzLLD52'=> array( 'label' => 'Validation contrat envoyé au tuteur', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldoqPYWCv7Bxyo0M'=> array( 'label' => 'DIPLÔME', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldCbVkYnwtfh3xTA'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
