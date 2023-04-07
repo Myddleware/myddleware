@@ -361,8 +361,12 @@ class documentcore
         }
         try {
             $filterOK = true;
-            // Si des filtres sont présents
-            if (!empty($ruleFilters)) {
+            // Only if there is a least one filter
+			// No filter on delete document as they will be filter after is Myddleware never sent the data
+            if (
+					!empty($ruleFilters)
+				AND $this->documentType != 'D'
+			) {
                 // Boucle sur les filtres
                 foreach ($ruleFilters as $ruleFilter) {
                     if (!$this->checkFilter($this->sourceData[$ruleFilter['target']], $ruleFilter['type'], $ruleFilter['value'])) {
