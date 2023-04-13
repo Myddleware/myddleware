@@ -693,7 +693,7 @@ class documentcore
             return true;
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
-            $this->docIdRefError = (is_array($result) and !empty($result['id']) ? $result['id'] : '');
+            $this->docIdRefError = ((is_array($result) and !empty($result['id'])) ? $result['id'] : '');
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
