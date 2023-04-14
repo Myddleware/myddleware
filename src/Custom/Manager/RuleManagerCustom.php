@@ -7,9 +7,9 @@ use App\Manager\RuleManager;
 class RuleManagerCustom extends RuleManager
 {
 
-	public function ckeckParentDocuments($documents = null)
+	public function checkParentDocuments($documents = null)
 	{
-		$responses = parent::ckeckParentDocuments($documents);
+		$responses = parent::checkParentDocuments($documents);
 
 		// Specific code 
 		// If relate_ko and rule binôme status is annule then we try to generate the missing contacts

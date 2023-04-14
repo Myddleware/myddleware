@@ -276,6 +276,25 @@ class DocumentManagerCustom extends DocumentManager
 			}
 		}
 		
+		// We cancel the document (Sendinblue - contact search into COMET) if we don't find the contact
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '64397bd8c4749' // Sendinblue - contact search into COMET
+			AND $new_status == 'Not_found'
+		) {			
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+		}
+		
+		// We cancel the document (Sendinblue - coupon search into COMET) if we don't find the coupon
+		if (
+				!empty($this->document_data['rule_id'])
+			AND	$this->document_data['rule_id'] == '64399ff31f587' // Sendinblue - coupon search into COMET
+			AND $new_status == 'Not_found'
+		) {			
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+		}
 
 		/************************************************/
 		/************         AIKO         **************/
@@ -607,7 +626,23 @@ class DocumentManagerCustom extends DocumentManager
 				if ($keyRelParent === false) {				
 					throw new \Exception('Relatiobnship with contact id missing for this rule.');	
 				}					
-				$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon						
+				$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
+				// Check the parent with the coupon rule
+				$chekParent = parent::checkParentDocument();
+				if ($chekParent) {
+					return $chekParent;
+				}
+				
+				// Change the relationship with the rule Sendinblue - contact search into COMET
+				$this->ruleRelationships[$keyRelParent]['field_id'] = '64397bd8c4749';	// Sendinblue - contact search into COMET	
+				$chekParent = parent::checkParentDocument();
+				if ($chekParent) {
+					return $chekParent;
+				}
+				
+				// Change the relationship with the rule Sendinblue - coupon search into COMET
+				$this->ruleRelationships[$keyRelParent]['field_id'] = '64399ff31f587';	// Sendinblue - coupon search into COMET	
+				
 			}
 		} catch (\Exception $e) {
 			$this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -669,8 +704,30 @@ class DocumentManagerCustom extends DocumentManager
 				throw new \Exception('Relatiobnship with contact id missing for this rule.');	
 			}
 			$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
-			// Save the email id linked to a coupon to change the parent type in function insertDataTable 
+			
+			$transform = parent::transformDocument();
+			if ($transform) {
+				// Save the email id linked to a coupon to change the parent type in function insertDataTable 
+				$this->emailCoupon[$this->sourceData['messageId']] = true;
+				return $transform;
+			}
+			
+			// Refresh the error flag
+			$this->transformError = false;
+			// Change the relationship with the rule Sendinblue - contact search into COMET
+			$this->ruleRelationships[$keyRelParent]['field_id'] = '64397bd8c4749';	// Sendinblue - contact search into COMET
+			$transform = parent::transformDocument();
+			if ($transform) {
+				// Save the email id linked to a coupon to change the parent type in function insertDataTable 
+				return $transform;
+			}
+			
+			// Refresh the error flag
+			$this->transformError = false;
+			// Change the relationship with the rule Sendinblue - coupon search into COMET
+			$this->ruleRelationships[$keyRelParent]['field_id'] = '64399ff31f587';	// Sendinblue - coupon search into COMET
 			$this->emailCoupon[$this->sourceData['messageId']] = true;
+				
 		}
 			
 		return parent::transformDocument();
@@ -684,6 +741,20 @@ class DocumentManagerCustom extends DocumentManager
 			}
 		}
 		return parent::insertDataTable($data, $type);
+	}
+	
+	protected function getRelationshipDirection($ruleRelationship) {
+		// When we change the relationship on the fly, we have to force the direction of the relationship
+		if (
+				$this->ruleRelationships[0]['rule_id'] == '6210fcbe4d654'	// Sendinblue - email delivered
+			AND	(
+					$this->ruleRelationships[0]['field_id'] == '64397bd8c4749'	// Sendinblue - contact search into COMET
+				 OR $this->ruleRelationships[0]['field_id'] == '64399ff31f587'	// Sendinblue - coupon search into COMET
+			)
+		) {
+			return '1';
+		}
+		return parent::getRelationshipDirection($ruleRelationship);
 	}
 	
 	// Connect to the source or target application
