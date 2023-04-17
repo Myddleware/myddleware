@@ -7,7 +7,7 @@ use App\Manager\RuleManager;
 class RuleManagerCustom extends RuleManager
 {
 
-	public function checkParentDocuments($documents = null)
+	public function checkParentDocuments($documents = null): array
 	{
 		$responses = parent::checkParentDocuments($documents);
 
