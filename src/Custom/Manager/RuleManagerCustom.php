@@ -197,8 +197,10 @@ class RuleManagerCustom extends RuleManager
 				) {
 					$this->generatePoleRelationship('63e1007614977', $document['source_id'], 'id', true);  // 	REEC - Users custom
 				} */
-			// In case of error
-			} elseif (
+			} 
+			
+			// In case of error (Create or Update)
+			if (
 					!empty($response['id']) 
 				AND	$response['id'] == '-1'
 				AND !empty($document['source_id'])
@@ -216,13 +218,15 @@ class RuleManagerCustom extends RuleManager
 					}
 					// We cancel this doc because the modification to COMET will generate another document without invalid phone number
 					$this->changeStatus($docId, 'Cancel', 'Telephone invalide. Myddleware va notifier la COMET et effacer ce numéro invalide. ');
-				}
-				
+				}			
 				// If there is an "Unprocessable Entity" errro when we try to create/update a binome for the first time
 				// Then we try to send again both contacts and referent
 				if (
 						$this->ruleId == '61a930273441b' 	// 	Aiko binome
-					AND	$documentData['attempt'] == 1 		// Only the first try
+					AND	(
+							$documentData['attempt'] == 1 		// Only the first try
+						 OR !empty($this->manual)				// Or manual run
+					) 
 					AND	(
 							strpos($response['error'], 'Unprocessable Entity returned') !== false
 						 OR	strpos($response['error'], 'HTTP/2 422') !== false
@@ -246,11 +250,14 @@ class RuleManagerCustom extends RuleManager
 				}
 				
 				// If there is an "nprocessable Entity" errro when we try to create a particpation RI for the first time
-				// Then we try to send again both contacts and referent
+				// Then we try to send again both Coupon and Participation RI
 				if (
 						$this->ruleId == '627153382dc34' 	// Mobilisation - Participations RI
 					AND	$type == 'C' 						// Creation only
-					AND	$documentData['attempt'] == 1 		// Only the first try
+					AND	(
+							$documentData['attempt'] == 1 		// Only the first try
+						 OR !empty($this->manual)				// Or manual run
+					) 
 					AND	(
 							strpos($response['error'], 'Unprocessable Entity returned') !== false
 						OR	strpos($response['error'], 'HTTP/2 422') !== false

@@ -273,6 +273,7 @@ class jobcore
                 foreach ($documentsError as $documentError) {
                     $this->ruleManager->setRule($documentError['rule_id']);
                     $this->ruleManager->setJobId($this->id);
+					$this->ruleManager->setManual($this->manual);
                     $this->ruleManager->setApi($this->api);
                     $errorActionDocument = $this->ruleManager->actionDocument($documentError['id'], 'rerun');
                     if (!empty($errorActionDocument)) {
@@ -487,6 +488,7 @@ class jobcore
                     if ($param['ruleId'] != $document['rule_id']) {
                         $this->ruleManager->setApi($this->api);
                         $this->ruleManager->setJobId($this->id);
+						$this->ruleManager->setManual($this->manual);
                         $this->ruleManager->setRule($document['rule_id']);
                     }
                     $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
@@ -530,6 +532,7 @@ class jobcore
             // We instanciate the rule
             $this->ruleManager->setRule($ruleId);
             $this->ruleManager->setJobId($this->id);
+			$this->ruleManager->setManual($this->manual);
             $this->ruleManager->setApi($this->api);
 
             // We create an array that will match the initial structure of the function
