@@ -253,7 +253,6 @@ class RuleManagerCustom extends RuleManager
 				// Then we try to send again both Coupon and Participation RI
 				if (
 						$this->ruleId == '627153382dc34' 	// Mobilisation - Participations RI
-					AND	$type == 'C' 						// Creation only
 					AND	(
 							$documentData['attempt'] == 1 		// Only the first try
 						 OR !empty($this->manual)				// Or manual run
