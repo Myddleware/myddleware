@@ -81,7 +81,8 @@ class formulafunctioncore
     public static function changeValue($var, $arrayKeyToValue, $acceptNull = null)
     {
         // Transform string into an array
-        $arrayKeyToValue = json_decode(str_replace(['(', ')', '\''], ['{', '}', '"'], $arrayKeyToValue), true);
+		// Change first and last characters (parentheses) by accolades
+        $arrayKeyToValue = json_decode('{'.str_replace([ '\''], [ '"'], substr($arrayKeyToValue,1,-1)).'}', true);
         if (in_array($var, array_keys($arrayKeyToValue))) {
             return $arrayKeyToValue[$var];
         }
@@ -89,7 +90,7 @@ class formulafunctioncore
             return '';
         }
     }
-
+	
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
     {
         // Transform $var into array
