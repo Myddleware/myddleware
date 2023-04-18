@@ -68,6 +68,7 @@ class documentcore
     protected $jobId;
     protected $key;
     protected $docIdRefError;
+	protected $env;
     protected bool $transformError = false;
     protected ?ToolsManager $tools;
     protected $api;    // Specify if the class is called by the API
@@ -122,6 +123,7 @@ class documentcore
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
+		$this->env = $parameterBagInterface->get('kernel.environment');
     }
 
     public static function lstGblStatus(): array
@@ -1926,7 +1928,11 @@ class documentcore
 								WHERE
 									id = :id
 								';
-            if (!$this->api) {
+            // We don't send output for the API and Myddleware UI
+			if (
+					!$this->api
+				AND $this->env != 'prod'
+			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
             // Suppression de la dernière virgule
@@ -1966,7 +1972,11 @@ class documentcore
 								WHERE
 									id = :id
 								';
-            if (!$this->api) {
+            // We don't send output for the API and Myddleware UI
+			if (
+					!$this->api
+				AND $this->env != 'prod'
+			) {
                 echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);
             }
             $stmt = $this->connection->prepare($query);
