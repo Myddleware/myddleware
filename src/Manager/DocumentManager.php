@@ -123,7 +123,7 @@ class documentcore
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
-		$this->env = $parameterBagInterface->get('kernel.environment');
+		$this->env = $_SERVER['APP_ENV'];
     }
 
     public static function lstGblStatus(): array
