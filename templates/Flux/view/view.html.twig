@@ -363,7 +363,7 @@
 												</td>
 												<td class="ctr">{{ flux.source }}</td>
 												<td class="ctr">{{ flux.target }}</td>
-												<td class="ctr">{{ flux.dateref|date("d/m/Y H:i:s", timezone) }}</td>
+												<td class="ctr">{{ flux.sourceDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 												<td class="ctr">{{ flux.type }}</td>
 												<td class="ctr">
 													<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
