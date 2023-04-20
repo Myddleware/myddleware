@@ -87,6 +87,7 @@ class RuleManagerCustom extends RuleManager
 				AND !empty($document['source_id'])
 				AND	$type == 'C' 
 			) {
+				/* // Code transfered to custom document class
 				if (
 					$this->ruleId == '5ce3621156127' //Engagés
 				) {
@@ -97,7 +98,7 @@ class RuleManagerCustom extends RuleManager
 					// En effet quand un engagé est envoyé dans REEC, il a peut être filtré avant et la relation avec la composante est donc filtrée aussi
 					// On force donc la relance de la relation composante - Engagé à chaque fois qu'un engagé est modifié	
 					$this->generatePoleRelationship('5f8486295b5a7', $document['source_id'], 'contact_id', true); // Composante - Engagé
-				}
+				} */
 
 				// Si un contact composante est envoyé dans REEC, on recherche également son pôle
 				// En effet un contact composante dont on  ajoute un mail ne sera plus filtré donc sera envoyé dans REEC,
