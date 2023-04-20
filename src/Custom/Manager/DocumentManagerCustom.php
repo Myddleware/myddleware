@@ -295,6 +295,17 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
 		}
+		
+		// No update from REEC to COMET if the contact hasn't been create from COMET
+		// Relate KO happens when a contact is created manually into REEC of if the contact is only a user in COMET not a contact
+		if (
+			!empty($this->document_data['rule_id'])
+			and	$this->document_data['rule_id'] == '60b0b881235e8' // REEC - Engagé vers COMET
+			and $new_status == 'Relate_KO'
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le contact REEC n\existe pas dans la COMET, la mise à jour est donc interrompue. ');
+		}
 
 		/************************************************/
 		/************         AIKO         **************/
@@ -411,6 +422,22 @@ class DocumentManagerCustom extends DocumentManager
 			and	$new_status == 'Ready_to_send'
 		) {
 			$this->generateDocument('63e1007614977', $this->document_data['source_id']);	// REEC - Users custom
+		}
+		
+		// Generate Pole and account relationship for creation only but before the duplicate search. 
+		// The contact could already exist thanks to the REEC user rule. So we need to check if this is a creation document before the duplicate search.
+		if (
+				$this->document_data['rule_id'] == '5ce3621156127' //Engagés
+			AND $new_status == 'Transformed'
+			AND $this->documentType == 'C'
+		) {
+			// Si un engagé est envoyé dans REEC, on recherche également son pôle
+			// En effet quand un engagé est reconduit, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
+			$this->generateDocument('5d081bd3e1234', $this->document_data['source_id'], 'record_id', true); // Engagé - pole
+			// Si un engagé est envoyé dans REEC, on recherche également sa composante
+			// En effet quand un engagé est envoyé dans REEC, il a peut être filtré avant et la relation avec la composante est donc filtrée aussi
+			// On force donc la relance de la relation composante - Engagé à chaque fois qu'un engagé est modifié	
+			$this->generateDocument('5f8486295b5a7', $this->document_data['source_id'], 'contact_id', true); // Composante - Engagé
 		}
 
 		$updateStatus = parent::updateStatus($new_status);
