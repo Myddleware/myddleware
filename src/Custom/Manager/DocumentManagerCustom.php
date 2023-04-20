@@ -427,17 +427,18 @@ class DocumentManagerCustom extends DocumentManager
 		// Generate Pole and account relationship for creation only but before the duplicate search. 
 		// The contact could already exist thanks to the REEC user rule. So we need to check if this is a creation document before the duplicate search.
 		if (
-				$this->document_data['rule_id'] == '5ce3621156127' //Engagés
+				!empty($this->document_data['rule_id'])
+			AND $this->document_data['rule_id'] == '5ce3621156127' //Engagés
 			AND $new_status == 'Transformed'
 			AND $this->documentType == 'C'
 		) {
 			// Si un engagé est envoyé dans REEC, on recherche également son pôle
 			// En effet quand un engagé est reconduit, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
-			$this->generateDocument('5d081bd3e1234', $this->document_data['source_id'], 'record_id', true); // Engagé - pole
+			$this->generateDocument('5d081bd3e1234', $this->document_data['source_id'], 'record_id', false); // Engagé - pole
 			// Si un engagé est envoyé dans REEC, on recherche également sa composante
 			// En effet quand un engagé est envoyé dans REEC, il a peut être filtré avant et la relation avec la composante est donc filtrée aussi
 			// On force donc la relance de la relation composante - Engagé à chaque fois qu'un engagé est modifié	
-			$this->generateDocument('5f8486295b5a7', $this->document_data['source_id'], 'contact_id', true); // Composante - Engagé
+			$this->generateDocument('5f8486295b5a7', $this->document_data['source_id'], 'contact_id', false); // Composante - Engagé
 		}
 
 		$updateStatus = parent::updateStatus($new_status);
