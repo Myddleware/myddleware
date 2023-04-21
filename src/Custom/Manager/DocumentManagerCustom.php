@@ -390,6 +390,17 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('L\'enregistrement est certainement déjà supprimé dans Airtable. Ce transfert de données est annulé. ');
 		}
+		
+		// Do not create a contact into USC
+		if (
+				!empty($this->document_data)
+			AND	$this->document_data['rule_id'] == '643eb15eb70ea'	// Mobilisation - Contact vers USC
+			AND $new_status == 'Error_checking'
+			AND	$this->documentType == 'C' // Creation
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('La COMET ne peut pas créer de contact dans USC. Ce transfert de données est annulé. ');
+		}
 
 		return $new_status;
 	}
