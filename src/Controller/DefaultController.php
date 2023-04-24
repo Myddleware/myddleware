@@ -2937,4 +2937,38 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             'formIdBatch' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/rule/update_description", name="update_rule_description", methods={"POST"})
+     */
+    public function updateDescription(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $description = $request->request->get('description');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // Retrieve the RuleParam entity using the ruleId
+        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
+
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+        }
+
+        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
+        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule->getRule(),
+            'name' => 'description'
+        ]);
+
+        // Check if the description entity was found
+        if (!$descriptionRuleParam) {
+            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        }
+
+        // Update the value of the description
+        $descriptionRuleParam->setValue($description);
+        $entityManager->flush();
+
+        return new Response('', Response::HTTP_OK);
+    }
 }
