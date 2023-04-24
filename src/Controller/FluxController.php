@@ -26,33 +26,34 @@
 
 namespace App\Controller;
 
-use App\Entity\Config;
-use App\Entity\Document;
-use App\Entity\DocumentAudit;
-use App\Entity\DocumentData;
-use App\Entity\DocumentRelationship;
+use Exception;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\DocumentManager;
-use App\Manager\JobManager;
-use App\Manager\SolutionManager;
-use App\Repository\DocumentRepository;
-use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Exception\NotValidCurrentPageException;
+use App\Entity\Config;
+use App\Entity\Document;
 use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Manager\JobManager;
+use App\Entity\DocumentData;
+use App\Entity\DocumentAudit;
+use App\Service\SessionService;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
+use App\Entity\DocumentRelationship;
+use Pagerfanta\Adapter\ArrayAdapter;
+use App\Form\Type\DocumentCommentType;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/rule")
@@ -728,10 +729,26 @@ class FluxController extends AbstractController
             } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
+            $formComment = $this->createForm(DocumentCommentType::class, null);
+
+            
+            $formComment->handleRequest($request);
+            if ($formComment->isSubmitted() && $formComment->isValid()) {
+                $comment = $formComment->getData();
+                $comment->setDocument($doc[0]);
+                $comment->setUser($this->getUser());
+                $em->persist($comment);
+                $em->flush();
+                $this->addFlash('success', 'Commentaire ajouté avec succès');
+            }
+            
+
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
                 [
+                    'formComment' => $formComment->createView(),
                     'current_document' => $id,
                     'source' => $sourceData,
                     'target' => $targetData,
