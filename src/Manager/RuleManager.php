@@ -560,7 +560,7 @@ class rulecore
 
             // Order data in the date_modified order
             $modified = array_column($dataSourceValues, 'date_modified');
-            array_multisort($modified, SORT_ASC, $dataSourceValues);
+            array_multisort($modified, SORT_DESC, $dataSourceValues);
             foreach ($dataSourceValues as $value) {
                 // Check if the previous record has the same date_modified than the current record
                 // Check only if offset isn't managed into the source application connector
