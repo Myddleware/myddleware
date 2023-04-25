@@ -43,14 +43,17 @@ class sugarcrmcore extends solution
 
     protected array $required_fields = ['default' => ['id', 'date_modified']];
 
-    protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected array $FieldsDuplicate = 
+	[
+        'default' => ['name'],
+		'Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
         'Prospects' => ['email1', 'name'],
-        'default' => ['name'],
+        'EmailAddresses' => ['email_address'],
     ];
-
+	
     public function getFieldsLogin(): array
     {
         return [
@@ -363,12 +366,18 @@ class sugarcrmcore extends solution
                     $result[$record->id]['date_modified'] = end($records)->date_modified;
                 }	
             }
+
 			// Error if only deletion records read
 			if ($onlyDeletion) {
-				throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Please increase the rule limit to include non deletion records.');
+				if (count($result) >= $param['limit']) {
+					throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Please increase the rule limit to include non deletion records.');
+				} else {
+					// If only deletion without new or modified record, we send no result. We wait for new or modified record. 
+					// Otherwise we will read the deleted record until a new or modified record is read because Sugar doesn't return modified date for deleted record.
+					return array();
+				}
 			}
         }
-
         return $result;
     }
 
