@@ -583,6 +583,13 @@
 
 
 					{# ------------- MESSAGE ------------- #}
+					{% for message in app.flashes('success') %}
+						<div class="alert alert-success">
+							{{ message }}
+						</div>
+					{% endfor %}
+
+
 					<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
 						{% if nb > 0 %}
 							<div id="fd-title-small" class="left">

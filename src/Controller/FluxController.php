@@ -738,31 +738,40 @@ class FluxController extends AbstractController
             if ($formComment->isSubmitted() && $formComment->isValid()) {
                 $comment = $formComment->getData()['comment'];
 
-                if ($formComment->getData()['comment'] == '') {
-                    $this->addFlash('error', 'Comment is empty !');
-
-                    return $this->redirectToRoute('flux_view', ['id' => $id]);
-                }
+                // create new job
+                $job = new Job();
+                $job->setBegin(new \DateTime());
+                $job->setEnd(new \DateTime());
+                $job->setParam('notification');
+                $job->setMessage('Comment log created. Comment: '.$comment);
+                $job->setOpen(0);
+                $job->setClose(0);
+                $job->setCancel(0);
+                $job->setManual(1);
+                $job->setApi(0);
+                $job->setError(0);
+                $job->setStatus('End');
+                $job->setId(uniqid(mt_rand(), true));
+                
+                $em->persist($job);
+                $em->flush();
+                
                 // Add log to indicate this action
                 $log = new Log();
                 $log->setDateCreated(new \DateTime());
                 $log->setType('I');
-                $currentJobId = "6441028761f3c6.74727999";
-                // Find the job with an id of $currentJobId
-                $currentJob = $em->getRepository(Job::class)->find($currentJobId);
-
-                // Sets the rule id of the log to the current rule
+                
                 $log->setRule($rule);
-
-
-                // $currentJob = $this->jobManager->getId();
-                $log->setJob($currentJob);
+                $log->setJob($job);
                 $log->setMessage($comment);
                 $log->setDocument($doc[0]);
                 $em->persist($log);
                 $em->flush();
                 
                 $this->addFlash('success', 'Comment successfully added !');
+
+                // Redirect the route to avoid resubmitting the form according to the PRG pattern
+                return $this->redirectToRoute('flux_info', ['id' => $id]);
             }
             
 
@@ -797,7 +806,6 @@ class FluxController extends AbstractController
                 ]
             );
         } catch (Exception $e) {
-            // return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
             return new Response($e->getMessage(), 500);
             
         }
