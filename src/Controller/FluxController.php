@@ -27,6 +27,7 @@
 namespace App\Controller;
 
 use Exception;
+use App\Entity\Job;
 use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
@@ -735,12 +736,33 @@ class FluxController extends AbstractController
             
             $formComment->handleRequest($request);
             if ($formComment->isSubmitted() && $formComment->isValid()) {
-                $comment = $formComment->getData();
-                $comment->setDocument($doc[0]);
-                $comment->setUser($this->getUser());
-                $em->persist($comment);
+                $comment = $formComment->getData()['comment'];
+
+                if ($formComment->getData()['comment'] == '') {
+                    $this->addFlash('error', 'Comment is empty !');
+
+                    return $this->redirectToRoute('flux_view', ['id' => $id]);
+                }
+                // Add log to indicate this action
+                $log = new Log();
+                $log->setDateCreated(new \DateTime());
+                $log->setType('I');
+                $currentJobId = "6441028761f3c6.74727999";
+                // Find the job with an id of $currentJobId
+                $currentJob = $em->getRepository(Job::class)->find($currentJobId);
+
+                // Sets the rule id of the log to the current rule
+                $log->setRule($rule);
+
+
+                // $currentJob = $this->jobManager->getId();
+                $log->setJob($currentJob);
+                $log->setMessage($comment);
+                $log->setDocument($doc[0]);
+                $em->persist($log);
                 $em->flush();
-                $this->addFlash('success', 'Commentaire ajouté avec succès');
+                
+                $this->addFlash('success', 'Comment successfully added !');
             }
             
 
@@ -775,8 +797,44 @@ class FluxController extends AbstractController
                 ]
             );
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            // return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return new Response($e->getMessage(), 500);
+            
         }
+    }
+
+    /**
+     * @Route("/rule/flux/comment", name="add_document_comment", methods={"POST"})
+     */
+    public function updateDescription(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $description = $request->request->get('description');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // Retrieve the RuleParam entity using the ruleId
+        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
+
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+        }
+
+        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
+        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule->getRule(),
+            'name' => 'description'
+        ]);
+
+        // Check if the description entity was found
+        if (!$descriptionRuleParam) {
+            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        }
+
+        // Update the value of the description
+        $descriptionRuleParam->setValue($description);
+        $entityManager->flush();
+
+        return new Response('', Response::HTTP_OK);
     }
 
     /**
