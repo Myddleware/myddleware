@@ -2413,7 +2413,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     $this->sessionService->removeParamRule($ruleKey);
                 }
                 $this->entityManager->getConnection()->commit();
-                $response = 1;
+                
+                $rule_id = $oneRule->getId();
+                $response = ['status' => 1, 'id' => $rule_id];
+                //$response = 1;
             } catch (Exception $e) {
                 $this->entityManager->getConnection()->rollBack();
                 $this->logger->error('2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')'));
