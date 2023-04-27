@@ -598,6 +598,7 @@ $(function () {
 
 	
 
+	// Mass action on flux list 
 	$('#massselectall').on('change', function () {
 		if ($(this).is(":checked")) {
 			remove = false;
@@ -627,11 +628,11 @@ $(function () {
 	});
 
 	$('input', '.listepagerflux td').on('change', function () {
-		id = $(this).parent().parent().attr('data-id');
+		// id = $(this).parent().parent().attr('data-id');
 		if ($(this).is(":checked")) {
-			massAddFlux(id, false, massFluxTab);
+			massAddFlux($(this).attr('name'), false, massFluxTab);
 		} else {
-			massAddFlux(id, true, massFluxTab);
+			massAddFlux($(this).attr('name'), true, massFluxTab);
 		}
 
 		showBtnFlux(massFluxTab);
@@ -647,6 +648,25 @@ $(function () {
 				},
 				data: {
 					ids: massFluxTab
+				},
+				success: function (data) { // code_html contient le HTML renvoyé
+					location.reload();
+				}
+			});
+		}
+	});
+
+	$('#cancelreloadflux').on('click', function () {
+		if (confirm(confirm_cancel)) { // Clic sur OK
+			$.ajax({
+				type: "POST",
+				url: mass_cancel,
+				beforeSend: function () {
+					btn_action_fct(); // Animation
+				},
+				data: {
+					ids: massFluxTab,
+					reload: true
 				},
 				success: function (data) { // code_html contient le HTML renvoyé
 					location.reload();
@@ -1669,12 +1689,15 @@ function require_relate() {
 // test si le champ à été selectionné pour pouvoir être utilisé comme référence afin d'éviter les doublons
 function fields_exist(fields_duplicate) {
 	var exist = 0;
+	// On parcours tous les champs de la liste
 	$('#cible').find("li.ch").each(function () {
 
 		var li = $(this);
+		// On récupère le nom du champ parent du champ 
 		var fields = li.parent().parent().parent();
 		var r = $.trim($(fields).find("h1").text());
 
+		// Si le nom du champ parent est le même que celui passé en paramètre, on incrémente le compteur
 		if (fields_duplicate == r) {
 			exist++;
 		}
@@ -1683,17 +1706,24 @@ function fields_exist(fields_duplicate) {
 	return exist;
 }
 
+// Affiche ou cache les boutons de la liste des flux en fonction du nombre de flux sélectionnés
 function showBtnFlux(massFluxTab) {
 
 	if (massFluxTab.length == 0) {
 		$('#cancelflux').hide();
 		$('#reloadflux').hide();
+		$('#cancelreloadflux').hide();
 	} else {
 		$('#cancelflux').show();
 		$('#reloadflux').show();
+		$('#cancelreloadflux').show();
 	}
 }
 
+// Add or remove the id of the flux to the array
+// If the id is already in the array, it is removed
+// If the id is not in the array, it is added
+// The number of elements in the array is displayed in the button
 function massAddFlux(id, cond, massFluxTab) {
 	if (id != '') {
 		if (cond == false) {
@@ -1702,9 +1732,10 @@ function massAddFlux(id, cond, massFluxTab) {
 			massFluxTab.splice($.inArray(id, massFluxTab), 1);
 		}
 	}
-
+	// Display the number of elements in the array
 	$('#cancelflux').find('span').html(massFluxTab.length);
 	$('#reloadflux').find('span').html(massFluxTab.length);
+	$('#cancelreloadflux').find('span').html(massFluxTab.length);
 }
 
 
@@ -1715,6 +1746,7 @@ function saveInputFlux(div, link) {
 	div.attr('data-value');
 	value = $('#' + fields);
 
+	// Ajax request to save the data in the database
 	$.ajax({
 		type: "POST",
 		url: link,

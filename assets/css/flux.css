@@ -72,23 +72,24 @@
 	background: #FFECCC;
 }
 
-#flux .gblstatus_open {
-	color: #845A00;
+#flux .gblstatus_open, #flux .documents_filters {
+	color: #0069B4;
 }
 
-#flux .gblstatus_error, #flux .log_e {
-	color: #D60405;
+#flux .gblstatus_error, #flux .log_e, #documents_filters .gblstatus_error {
+	color: #dc3545;
 }
 
-#flux .gblstatus_cancel, #flux .log_w {
-	color: #F1B753;
+#flux .gblstatus_cancel, #flux .log_w, #documents_filters .gblstatus_cancel {
+	color: #ffc107;
 }
 
-#flux .gblstatus_close, #flux .log_s  {
-	color: #9AA932;
+#flux .gblstatus_close, #flux .log_s, #documents_filters .gblstatus_close {
+	color: #19ca42;
 }
 
-#flux .gblstatus_close, #flux .gblstatus_cancel, #flux .gblstatus_error, #flux .gblstatus_open {
+#flux .gblstatus_close, #flux .gblstatus_cancel, #flux .gblstatus_error, #flux .gblstatus_open, 
+#documents_filters .gblstatus_close, #documents_filters .gblstatus_cancel, #documents_filters .gblstatus_error, #documents_filters .gblstatus_open{
 	font-weight: bold;
 }
 
@@ -145,3 +146,8 @@
 	margin-left: 20px;
 	margin-right: 20px;
 }
+
+
+/* NEW FILTER */
+
+

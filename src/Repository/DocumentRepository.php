@@ -31,6 +31,7 @@ use App\Entity\Rule;
 use App\Entity\User;
 use App\Manager\HomeManager;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
@@ -394,5 +395,38 @@ class DocumentRepository extends ServiceEntityRepository
         $qb->orderBy('document.dateModified', 'DESC');
 
         return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+
+    public static function findDocType(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        
+        $qb->select('d.type')
+        ->from('App\Entity\Document', 'd')
+        ->where('d.deleted = 0')
+        ->groupBy('d.type');
+
+        $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        $curatedResults =  array_column($results, 'type');
+        $final = array_flip($curatedResults);
+        //$finale = array_flip($test);
+
+        return $final;
+    }
+    
+    public static function findStatusType(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('d.status')
+        ->from('App\Entity\Document', 'd')
+        ->where('d.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'status');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
     }
 }

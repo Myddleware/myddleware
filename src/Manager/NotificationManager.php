@@ -51,7 +51,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class NotificationManager
 {
     protected EntityManagerInterface $entityManager;
-    protected $emailAddresses;
+    protected $emailAddresses = array();
     protected $configParams;
     protected ToolsManager $tools;
     private LoggerInterface $logger;
