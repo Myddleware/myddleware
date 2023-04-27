@@ -465,9 +465,9 @@ $(function () {
 	});
 
 	// Validation et vérification de l'ensemble du formulaire			
-	$("#validation", '#rule_mapping').on("click", function () {
-		before = $("#validation").attr('value'); // rev 1.08
-
+	$("#validation").on("click", function () {
+		before = $("#validation").attr('value');
+	
 		if (require() && require_params() && require_relate() && duplicate_fields_error()) {
 			$.ajax({
 				type: "POST",
@@ -480,40 +480,43 @@ $(function () {
 					duplicate: recup_fields_relate(),
 					filter: recup_filter(),
 				},
-				beforeSend: function () {	
-					$("#validation").attr('value', save_wait); // rev 1.08
+				beforeSend: function () {    
+					$("#validation").attr('value', save_wait);
 				},
 				success: function (data) {
-					if (data == 1) {
+					if (data.status == 1) {
 						alert(confirm_success);
-						$(location).attr('href', return_success);
+	
+						var path_template = $("#validation").data('url');
+						var path_view_detail = path_template.replace('placeholder_id', data.id);
+						$(location).attr('href', path_view_detail);
+	
 					} else {
 						data = data.split(';');
 						if (data[0] == 2) {
-							alert(data[1]); // Erreur personnalisé via beforeSave
+							alert(data[1]);
 						} else {
 							alert(confirm_error);
 						}
-						$("#validation").attr('value', before); // rev 1.08
+						$("#validation").attr('value', before);
 					}
-				}, // rev 1.08
+				},
 				statusCode: {
 					500: function (e) {
 						console.log(e.responseText);
 						alert('An error occured. Please check your server logs for more detailed information.');
-						$("#validation").attr('value', before); // rev 1.08
+						$("#validation").attr('value', before);
 					}
 				}
 			});
 		} else {
-			//alert('Il existe des champs obligatoires !');
 			$("#dialog").dialog({
 				draggable: false,
 				modal: true,
 				resizable: false
 			});
-
-			$("#validation").attr('value', before); // rev 1.08				
+	
+			$("#validation").attr('value', before);
 		}
 	});
 

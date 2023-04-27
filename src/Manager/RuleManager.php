@@ -1413,7 +1413,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->ckeckParentDocuments($arrayIdDocument);
+            $response = $this->checkParentDocument($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Relate_OK';

@@ -412,6 +412,7 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
@@ -498,6 +499,7 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,

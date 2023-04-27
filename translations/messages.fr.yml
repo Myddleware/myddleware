@@ -295,7 +295,7 @@ view_connector:
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
-        link: https://myddleware.github.io/myddleware/#/connectors_credentials
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
         
 list_flux:
     start: Début
@@ -538,6 +538,8 @@ solution:
         applicationName: Nom de l'application
         hashkey: Clé de hachage
         authid: Id auth
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
@@ -560,7 +562,7 @@ solution:
         30_day: 30 jours
         60_day: 60 jours
         90_day: 90 jours
-        
+
 error:
     connexion: Connexion impossible
     general: Erreur inattendue

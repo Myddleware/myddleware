@@ -340,7 +340,7 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.dateref'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
 								</tr>
@@ -363,7 +363,7 @@
 												</td>
 												<td class="ctr">{{ flux.source }}</td>
 												<td class="ctr">{{ flux.target }}</td>
-												<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s", timezone) }}</td>
+												<td class="ctr">{{ flux.sourceDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 												<td class="ctr">{{ flux.type }}</td>
 												<td class="ctr">
 													<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
