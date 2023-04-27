@@ -250,6 +250,8 @@
                               (<span></span>)</a>
                         <a id="cancelreloadflux" class="btn btn-dark" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
                               (<span></span>)</a>
+                        <a id="exportfluxcsv" class="btn btn-success" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.exportcsv'|trans}}
+                        </a>
                   </p>
             </div>
 		</div>
@@ -334,6 +336,8 @@
 		var lang = "{{ app.request.locale }}";
 		var mass_cancel = "{{ path('flux_mass_cancel') }}";
 		var mass_run = "{{ path('flux_mass_run') }}";
+            var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
+		var csvdocumentids = "{{ csvdocumentids }}";
 		// DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
 		start = new dtsel.DTS('#form_date_modif_end',  {
 			showTime: true

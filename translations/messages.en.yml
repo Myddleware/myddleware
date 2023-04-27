@@ -314,6 +314,7 @@ list_flux:
         mass_reload_confirm: Reload the selected documents?   
         delete: Delete documents
         mass_delete_confirm: Delete the selected documents?
+        exportcsv: Export Documents
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date

@@ -312,6 +312,7 @@ list_flux:
         mass_reload_confirm: Relancer les documents selectionnés ?
         delete: Supprimer documents
         mass_delete_confirm: Supprimer les documents sélectionnés ?
+        exportcsv: Exporter Documents
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création

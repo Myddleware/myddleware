@@ -27,15 +27,17 @@ namespace App\Controller;
 
 use App\Entity\Rule;
 use App\Entity\Config;
+use App\Entity\Document;
+use App\Entity\DocumentData;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
-use App\Form\Filter\FilterType;
 use App\Manager\ToolsManager;
+use App\Form\Filter\FilterType;
 use App\Service\SessionService;
 use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Form\Filter\CombinedFilterType;
 use App\Repository\DocumentRepository;
+use App\Form\Filter\CombinedFilterType;
 use App\Service\AlertBootstrapInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
@@ -282,6 +284,13 @@ class FilterController extends AbstractController
                 'page' => 1,
             ], false);
         }
+
+        // get the id of every document that will be return in the search results, and put them in a string where they are separated by a comma
+        $csvdocumentids = '';
+
+        foreach ($documents as $documentForCsv) {
+            $csvdocumentids .= $documentForCsv['id'].',';
+        }
         
         return $this->render('testFilter.html.twig', [
             'form' => $form->createView(),
@@ -292,6 +301,7 @@ class FilterController extends AbstractController
             'pager' => $compact['pager'],
             'condition' => $conditions,
             'timezone' => $timezone,
+            'csvdocumentids' => $csvdocumentids,
         ]);
     }
 
@@ -802,5 +812,98 @@ class FilterController extends AbstractController
         }
     
         return $compact;
+    }
+
+    /**
+     * @Route("/flux/export/csv", name="flux_export_docs_csv")
+     */
+    public function exportDocumentsToCsv(): Response
+    {
+        if (!(isset($_POST['csvdocumentids']))) {
+            throw $this->createNotFoundException('No document selected');
+        }
+
+        // converts the string of document ids into an array
+        $_POST['csvdocumentids'] = explode(',', $_POST['csvdocumentids']);
+
+        // fetches the documents from the database
+        $documents = $this->entityManager->getRepository(Document::class)->findBy(['id' => $_POST['csvdocumentids']]);
+
+        // creates the csv file
+        $fp = fopen('documents.csv', 'w');
+        // creates the header of the csv file according to the following sql of the document table
+        
+        $header = [
+            'id',
+            'rule_id',
+            'created_by',
+            'modified_by',
+            'date_created',
+            'date_modified',
+            'status',
+            'source_id',
+            'target_id',
+            'source_date_modified',
+            'mode',
+            'type',
+            'attempt',
+            'global_status',
+            'parent_id',
+            'deleted',
+            'source',
+            'target',
+            'history'
+        ];
+
+        // writes the header in the csv file
+        fputcsv($fp, $header);
+        // puts the data of each document in the csv file
+        foreach ($documents as $document) {
+            // Fetch the docmunet data: for each document, we have 3 types of data: source, target and history
+            // We fetch the data of each type and we put it in an string. If there is data, then we put it in the row, otherwise we put an empty string
+
+            $documentDataSource = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S'])->getData() : '';
+            $documentDataTarget = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T'])->getData() : '';
+            $documentDataHistory = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H'])->getData() : '';
+
+            $row = [
+                $document->getId(),
+                $document->getRule()->getId(),
+                $document->getCreatedBy(),
+                $document->getModifiedBy(),
+                $document->getDateCreated()->format('Y-m-d H:i:s'),
+                $document->getDateModified()->format('Y-m-d H:i:s'),
+                $document->getStatus(),
+                $document->getSource(),
+                $document->getTarget(),
+                $document->getSourceDateModified()->format('Y-m-d H:i:s'),
+                $document->getMode(),
+                $document->getType(),
+                $document->getAttempt(),
+                $document->getGlobalStatus(),
+                $document->getParentId(),
+                $document->getDeleted(),
+                $documentDataSource,
+                $documentDataTarget,
+                $documentDataHistory
+                // get the document document data if the doc id is the same as the document id and getType() is S, otherwise empty string
+                
+            ];
+            try {
+                fputcsv($fp, $row);
+            } catch (\Throwable $e) {
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            }
+        }
+
+        // closes the csv file
+        fclose($fp);
+
+        // adds message to the flashbag
+        $this->addFlash('success', 'Documents exported successfully');
+
+        // return response with status ok
+        return new Response('csv exported successfully', Response::HTTP_OK);
+
     }
 }
