@@ -26,33 +26,35 @@
 
 namespace App\Controller;
 
-use App\Entity\Config;
-use App\Entity\Document;
-use App\Entity\DocumentAudit;
-use App\Entity\DocumentData;
-use App\Entity\DocumentRelationship;
+use Exception;
+use App\Entity\Job;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\DocumentManager;
-use App\Manager\JobManager;
-use App\Manager\SolutionManager;
-use App\Repository\DocumentRepository;
-use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Exception\NotValidCurrentPageException;
+use App\Entity\Config;
+use App\Entity\Document;
 use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Manager\JobManager;
+use App\Entity\DocumentData;
+use App\Entity\DocumentAudit;
+use App\Service\SessionService;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
+use App\Entity\DocumentRelationship;
+use Pagerfanta\Adapter\ArrayAdapter;
+use App\Form\Type\DocumentCommentType;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/rule")
@@ -728,6 +730,49 @@ class FluxController extends AbstractController
             } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
+            $formComment = $this->createForm(DocumentCommentType::class, null);
+
+            
+            $formComment->handleRequest($request);
+            if ($formComment->isSubmitted() && $formComment->isValid()) {
+                $comment = $formComment->getData()['comment'];
+
+                // create new job
+                $job = new Job();
+                $job->setBegin(new \DateTime());
+                $job->setEnd(new \DateTime());
+                $job->setParam('notification');
+                $job->setMessage('Comment log created. Comment: '.$comment);
+                $job->setOpen(0);
+                $job->setClose(0);
+                $job->setCancel(0);
+                $job->setManual(1);
+                $job->setApi(0);
+                $job->setError(0);
+                $job->setStatus('End');
+                $job->setId(uniqid(mt_rand(), true));
+                
+                $em->persist($job);
+                $em->flush();
+                
+                // Add log to indicate this action
+                $log = new Log();
+                $log->setDateCreated(new \DateTime());
+                $log->setType('I');
+                
+                $log->setRule($rule);
+                $log->setJob($job);
+                $log->setMessage($comment);
+                $log->setDocument($doc[0]);
+                $em->persist($log);
+                $em->flush();
+                
+                $this->addFlash('success', 'Comment successfully added !');
+
+                // Redirect the route to avoid resubmitting the form according to the PRG pattern
+                return $this->redirectToRoute('flux_info', ['id' => $id]);
+            }
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
@@ -755,10 +800,12 @@ class FluxController extends AbstractController
                     'ctm_btn' => $list_btn,
                     'read_record_btn' => $solution_source->getReadRecord(),
                     'timezone' => $timezone,
+                    'formComment' => $formComment->createView(),
                 ]
             );
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            // return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
     }
 

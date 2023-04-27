@@ -25,17 +25,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Job;
+use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
 use App\Entity\Document;
-use App\Entity\DocumentData;
+use App\Entity\RuleParam;
 use Pagerfanta\Pagerfanta;
+use App\Entity\DocumentData;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Filter\FilterType;
 use App\Service\SessionService;
 use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
+use App\Form\Type\DocumentCommentType;
 use App\Repository\DocumentRepository;
 use App\Form\Filter\CombinedFilterType;
 use App\Service\AlertBootstrapInterface;
@@ -291,6 +295,8 @@ class FilterController extends AbstractController
         foreach ($documents as $documentForCsv) {
             $csvdocumentids .= $documentForCsv['id'].',';
         }
+
+        
         
         return $this->render('testFilter.html.twig', [
             'form' => $form->createView(),
@@ -303,6 +309,40 @@ class FilterController extends AbstractController
             'timezone' => $timezone,
             'csvdocumentids' => $csvdocumentids,
         ]);
+    }
+
+    /**
+     * @Route("/rule/flux/comment", name="add_document_comment", methods={"POST"})
+     */
+    public function updateDescription(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $description = $request->request->get('description');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // Retrieve the RuleParam entity using the ruleId
+        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
+
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+        }
+
+        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
+        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule->getRule(),
+            'name' => 'description'
+        ]);
+
+        // Check if the description entity was found
+        if (!$descriptionRuleParam) {
+            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        }
+
+        // Update the value of the description
+        $descriptionRuleParam->setValue($description);
+        $entityManager->flush();
+
+        return new Response('', Response::HTTP_OK);
     }
 
     // // function to sort the documents

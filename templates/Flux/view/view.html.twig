@@ -583,15 +583,37 @@
 
 
 					{# ------------- MESSAGE ------------- #}
-					{% if nb > 0 %}
-						<div id="fd-title-small" class="left">
-							<p>{{'view_flux.nblogs'|trans}}</p>
-							<p>
-								<span class="nb">{{ nb }}</span>
-							</p>
+					{% for message in app.flashes('success') %}
+						<div class="alert alert-success">
+							{{ message }}
 						</div>
-						<div class="clr"></div>
-					{% endif %}
+					{% endfor %}
+
+
+					<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
+						{% if nb > 0 %}
+							<div id="fd-title-small" class="left">
+								<p>{{'view_flux.nblogs'|trans}}</p>
+								<p>
+									<span class="nb">{{ nb }}</span>
+								</p>
+							</div>
+							<div class="clr"></div>
+						{% endif %}
+
+						<div class="l-5 flux-comment-container">
+
+						
+						{{ form_start(formComment) }}
+							{{ form_widget(formComment) }}
+							<button type="submit" class="btn btn-primary m-2 document-comment-submit">Comment</button>
+						{{ form_end(formComment) }}
+
+						</div>
+					</div>
+
+
+
 					<div id="message">
 
 						{% if nb > 0 %}
