@@ -134,7 +134,7 @@
 					<div class="description-field">
 					<p class="title">{{ 'solution.params.description' | trans }}</p>
 					<div class="value">{{ param.value }}</div>
-					<button class="edit-button btn btn-dark">{{ 'Edit' | trans }}</button>
+					<button class="edit-button btn btn-outline-primary">{{ 'Edit' | trans }}</button>
 					<form class="edit-form" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
 						<textarea name="description" class="form-control m-2" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
 						<input type="hidden" name="ruleId" value="{{ rule.id }}" />
