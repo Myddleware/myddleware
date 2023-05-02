@@ -229,13 +229,13 @@ menu .caret, #myd_top .caret {
 }
 
 .btn-dark {
-	background-color: #74e602!important;
-	border-color: #74e602!important;
+	background-color: #FF8C00!important;
+	border-color: #FF8C00!important;
 }
 
 .btn-dark:hover {
-    background-color: #68ce02!important;
-    border-color: #68ce02!important;
+    background-color: #d87700!important;
+    border-color: #d87700!important;
 }
 
 .btn-primary:hover {
