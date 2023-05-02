@@ -597,14 +597,8 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
     {
         try {
 
-            // $documentPage = $request->query->get('page', 1);
             $documentPage = (int)$page;
-            // $logPage = $request->query->get('logPage', 1);
             $logPage = (int)$logPage;
-
-
-            dump($documentPage);
-            dump($logPage);
 
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
@@ -772,12 +766,9 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
                 'pageParameterName' => 'logPage'
             ];
 
-            dump($logParams);
 // Get the paginated results for documents and logs
 $documentPagination = $this->nav_pagination_documents($docParams, false);
 $logPagination = $this->nav_pagination_logs($logParams, false);
-
-dump($logPagination);
 
 $formComment = $this->createForm(DocumentCommentType::class, null);
 

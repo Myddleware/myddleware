@@ -753,12 +753,8 @@ $("#flux_target").on("dblclick", 'li', function () {
 
 // ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
 
-console.log('before exportfluxcsv');
 // Function to export the flux to a csv file when clicking on the button with an id of exportfluxcsv
 $('#exportfluxcsv').on('click', function () {
-	console.log('in exportfluxcsv');
-
-	console.log('csvdocumentids', csvdocumentids);
 	// If the massFluxTab array is not empty
 		// Convert the massFluxTab array to CSV format
 		// const csvContent = arrayToCSV(massFluxTab);
@@ -773,12 +769,10 @@ $('#exportfluxcsv').on('click', function () {
 				csvdocumentids: csvdocumentids
 			},
 			success: function (data) { // code_html contient le HTML renvoyé
-				console.log('csv export done');
 			}
 		});
 });
 
-console.log('after exportfluxcsv');
 
 
 
