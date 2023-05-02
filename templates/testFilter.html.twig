@@ -43,9 +43,6 @@
       <div class="input-group">
             {{ form_widget(formFilter.filter) }}
       
-            <div class="btn btn-primary">
-                  <i class="fa fa-plus" aria-hidden="true"></i>
-            </div>
       </div>
       {{ form_end(formFilter) }}
       {{ form_start(form, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
