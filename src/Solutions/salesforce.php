@@ -775,12 +775,12 @@ class salesforcecore extends solution {
      */
     public function getRefFieldName($param): string
     {
-		if(in_array($param['ruleParams']['mode'],array("0","S"))) {
+		if(in_array($param['ruleParams']['mode'],array("0","S","U"))) {
 			return "LastModifiedDate";
 		} else if ($param['ruleParams']['mode'] == "C"){
 			return "CreatedDate";
 		} else {
-			throw new \Exception ("$param[ruleParams][mode] is not a correct Rule mode.");
+			throw new \Exception ($param['ruleParams']['mode']." is not a correct Rule mode.");
 		}
 		return "";
 	}
