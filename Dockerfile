@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 php:7.4.26-apache
+FROM --platform=linux/amd64 php:8.1.17-apache
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
