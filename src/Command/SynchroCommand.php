@@ -129,7 +129,7 @@ class SynchroCommand extends Command
                                     $this->jobManager->checkPredecessorDocuments();
 
                                     // Permet de valider qu'au moins un document parent(relation père) est existant
-                                    $this->jobManager->checkParentDocument();
+                                    $this->jobManager->checkParentDocuments();
 
                                     // Permet de transformer les docuement avant d'être envoyés à la cible
                                     $this->jobManager->transformDocuments();

@@ -698,7 +698,7 @@ class rulecore
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function checkParentDocument($documents = null): array
+    public function checkParentDocuments($documents = null): array
     {
         // include_once 'document.php';
         // Permet de charger dans la classe toutes les relations de la règle
@@ -1270,7 +1270,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->checkParentDocument([['id' => $id_document]]);
+            $response = $this->checkParentDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
@@ -1413,7 +1413,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->checkParentDocument($arrayIdDocument);
+            $response = $this->checkParentDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Relate_OK';
