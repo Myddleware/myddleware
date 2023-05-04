@@ -399,10 +399,6 @@ class airtablecore extends solution
                         ++$i;
                         continue;
                     }
-                    // Myddleware_element_id is a field only used by Myddleware. Not sent to the target application
-                    if (!empty($data['Myddleware_element_id'])) {
-                        unset($data['Myddleware_element_id']);
-                    }
 
                     $body['records'][$i]['fields'] = $data;
 
