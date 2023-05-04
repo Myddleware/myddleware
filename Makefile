@@ -1,8 +1,5 @@
 #!make
 
-init:
-	@docker-compose run --rm --no-deps myddleware bash docker/script/init.sh
-
 clean:
 	@docker-compose run --rm --no-deps myddleware bash docker/script/clean.sh
 
@@ -12,18 +9,18 @@ wait:
 clean-cache:
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
 
-update: init up
+update: up
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/* vendor
 	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer2.phar install --ignore-platform-reqs --no-scripts
 	@echo "Update done."
 
-refresh: init up
+refresh: up
 	@docker-compose -f docker-compose.yml run --rm myddleware rm -fr var/cache/*
 	@docker-compose -f docker-compose.yml run --rm myddleware chmod 777 -R var/cache/
 	@docker-compose -f docker-compose.yml up -d --force-recreate myddleware
 
-dump-autoload: init up
+dump-autoload: up
 	@docker-compose -f docker-compose.yml run --rm myddleware php composer.phar dump-autoload --no-scripts
 
 require-vtiger-client:
@@ -35,7 +32,7 @@ require-woocommerce-client:
 setup: js-build setup-database
 	@echo "Myddleware files and database setup completed."
 
-setup-database: wait init
+setup-database: wait
 	@docker-compose run --rm myddleware bash docker/script/setup-database.sh
 
 schedule:
@@ -51,16 +48,16 @@ logs: debug
 logs-rotate:
 	@docker-compose run --rm --no-deps myddleware bash docker/script/logs-rotate.sh
 
-debug: init
+debug:
 	@docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --remove-orphans
 
-prod: init fix
+prod:
 	@docker-compose --env-file .env.docker up -d --remove-orphans
 
 start: prod
 	@echo ">>> Myddleware is ready."
 
-recreate: init
+recreate:
 	@docker-compose -f docker-compose.yml up -d --remove-orphans --force-recreate
 
 restart: recreate
@@ -84,6 +81,7 @@ docker-stop-all:
 reset: clean
 	@bash docker/script/reset.sh
 
+# To install all necessary packages for Myddleware
 install: php-install js-install
 	@echo "Myddleware installation complete."
 
@@ -127,7 +125,6 @@ push:
 ## Develop
 ## -------
 dev: \
-	init \
 	fix \
 	dev-clean \
 	dev-up \

@@ -78,9 +78,9 @@ class solutioncore
     protected Connection $connection;
     protected ParameterBagInterface $parameterBagInterface;
     protected EntityManagerInterface $entityManager;
-    private DocumentRepository $documentRepository;
-    private RuleRelationShipRepository $ruleRelationshipsRepository;
-    private FormulaManager $formulaManager;
+    protected DocumentRepository $documentRepository;
+    protected RuleRelationShipRepository $ruleRelationshipsRepository;
+    protected FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,

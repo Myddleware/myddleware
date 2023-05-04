@@ -183,7 +183,7 @@ class sendinbluecore extends solution
         $result = [];
         // Function are differents depending on the type of record we read from Sendinblue
         switch ($param['module']) {
-               case 'transactionalEmailActivity':
+			case 'transactionalEmailActivity':
                 // event is required
                 if (empty($param['ruleParams']['event'])) {
                     throw new \Exception('No event selected. Please select an event on your rule. ');

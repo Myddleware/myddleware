@@ -23,3 +23,48 @@ services:
   #     decorates: App\Solutions\wordpress
   #     decoration_on_invalid: ignore
   #     decoration_priority: 1
+
+  App\Custom\Manager\DocumentManagerCustom:
+      decorates: App\Manager\DocumentManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Manager\FormulaFunctionManagerCustom:
+      decorates: App\Manager\FormulaFunctionManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Manager\ToolsManagerCustom:
+      decorates: App\Manager\ToolsManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Solutions\mysqlcustom:
+      decorates: App\Solutions\mysql
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Solutions\suitecrmcustom:
+      decorates: App\Solutions\suitecrm
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Manager\RuleManagerCustom:
+      decorates: App\Manager\RuleManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Solutions\airtablecustom:
+      decorates: App\Solutions\airtable
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Solutions\sendinbluecustom:
+      decorates: App\Solutions\sendinblue
+      decoration_on_invalid: ignore
+      decoration_priority: 1
+
+  App\Custom\Manager\NotificationManagerCustom:
+      decorates: App\Manager\NotificationManager
+      decoration_on_invalid: ignore
+      decoration_priority: 1
