@@ -277,10 +277,6 @@ class moodlecore extends solution
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
-                    // We don't send Myddleware_element_id field to Moodle
-                    if (in_array($key, array('Myddleware_element_id', 'source_date_modified', 'id_doc_myddleware'))) {
-                        continue;
-                    }
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
@@ -418,10 +414,7 @@ class moodlecore extends solution
                 foreach ($data as $key => $value) {
                     if ('target_id' == $key) {
                         continue;
-                    // We don't send Myddleware_element_id field to Moodle
-                    } elseif (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
-                        continue;
-                    }
+                    } 
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {

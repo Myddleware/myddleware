@@ -701,7 +701,7 @@ class vtigercrmcore extends solution
     // Clean a record by removing all Myddleware fields
     protected function cleanRecord($param, $data)
     {
-        $myddlewareFields = ['target_id', 'source_date_modified', 'id_doc_myddleware', 'Myddleware_element_id'];
+        $myddlewareFields = ['target_id'];
         foreach ($myddlewareFields as $myddlewareField) {
             if (array_key_exists($myddlewareField, $data)) {
                 unset($data[$myddlewareField]);

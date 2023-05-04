@@ -1510,15 +1510,15 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($sendData->{$key}['source_date_modified']);
+                    unset($sendData[$key]['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($sendData->{$key}['id_doc_myddleware']);
+                    unset($sendData[$key]['id_doc_myddleware']);
                 }
-                
+                if (isset($value['Myddleware_element_id'])) {
+                    unset($sendData[$key]['Myddleware_element_id']);
+                }     
             }
-            
-
             return $sendData;
         }
     }

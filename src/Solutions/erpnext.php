@@ -327,14 +327,12 @@ class erpnextcore extends solution
                 try {
                     foreach ($data as $key => $value) {
                         // We don't send Myddleware fields
-                        if (in_array($key, ['target_id', 'Myddleware_element_id'])) {
-                            if (
-                                    'target_id' == $key
-                                and !empty($value)
-                            ) {
-                                $url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.rawurlencode($value);
-                            }
-                            unset($data[$key]);
+						if (
+								'target_id' == $key
+							and !empty($value)
+						) {
+							$url = $this->paramConnexion['url'].'/api/resource/'.rawurlencode($param['module']).'/'.rawurlencode($value);
+							unset($data[$key]);
                         // if the data is a link
                         } elseif ('link_doctype' == $key) {
                             $data['links'] = [['link_doctype' => $data[$key], 'link_name' => $data['link_name']]];
