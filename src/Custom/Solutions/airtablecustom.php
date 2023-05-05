@@ -212,4 +212,41 @@ class airtablecustom extends airtable {
 
         return $data;
     }
+
+	// Redefine updateDocumentStatus standard function
+	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array {
+		// Make an integromat call if call OK to Mobilisation - Contacts webservice
+		if (
+				!empty($param['ruleId'])
+			AND	in_array($param['ruleId'], array('6303832f0a0b7')) // Mobilisation - Contacts webservice
+			AND $value['id'] != '-1'
+		) {
+			try {
+				// Integromat call
+				$return['contactId'] = $value['id'];
+				$json = json_encode($return);
+				$url = 'https://hook.integromat.com/88xslg5tbm19xwdbhofe3jcvrk8nh3fp'; // nouvelle URL
+				$curl = curl_init($url);
+				curl_setopt($curl, CURLOPT_POST, true);
+				curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+				curl_setopt($curl, CURLOPT_TIMEOUT, 300);
+				curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($curl, CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
+				$response = curl_exec($curl);
+				curl_close($curl);
+				// Erro if call not accpeted
+				if (
+						empty($response)
+					 OR strpos($response, 'Accepted') === false
+				) {
+					$value['error'] = (empty($value['error']) ? 'No response from integromat. ' : $value['error'].'No response from integromat. ' );
+					$value['id'] = '-1';
+					$forceStatus = 'Error_sending';
+				}
+			} catch (\Exception $e) {
+				$value['error'] = 'Failed to call integromat : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			}
+		}
+		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
+	}
 }
