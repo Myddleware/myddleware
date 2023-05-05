@@ -694,7 +694,7 @@ class moodlecore extends solution
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
         } 
-        return null;
+        return array();
     }
 
 	// Function to add custom fields for course and user modules.
