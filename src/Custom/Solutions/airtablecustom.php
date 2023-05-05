@@ -222,8 +222,19 @@ class airtablecustom extends airtable {
 			AND $value['id'] != '-1'
 		) {
 			try {
+				// Get the COMET contact ID
+				$sqlParams = 'SELECT * FROM document where id = :doc_id';
+				$stmt = $this->getConn()->prepare($sqlParams);
+				$stmt->bindValue(':doc_id', $idDoc);
+				$stmt->execute();
+				$result = $stmt->executeQuery();
+                $document = $result->fetchAssociative();
+				if (empty($document['source_id'])) {
+					throw new \Exception('No source id found on the document. ');
+				}
+
 				// Integromat call
-				$return['contactId'] = $value['id'];
+				$return['contactId'] = $document['source_id'];
 				$json = json_encode($return);
 				$url = 'https://hook.integromat.com/88xslg5tbm19xwdbhofe3jcvrk8nh3fp'; // nouvelle URL
 				$curl = curl_init($url);
@@ -239,12 +250,14 @@ class airtablecustom extends airtable {
 						empty($response)
 					 OR strpos($response, 'Accepted') === false
 				) {
-					$value['error'] = (empty($value['error']) ? 'No response from integromat. ' : $value['error'].'No response from integromat. ' );
+					$value['error'] = (empty($value['error']) ? 'No response from integromat. '.$return['contactId'] : $value['error'].'No response from integromat. ' );
 					$value['id'] = '-1';
 					$forceStatus = 'Error_sending';
 				}
 			} catch (\Exception $e) {
 				$value['error'] = 'Failed to call integromat : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$value['id'] = '-1';
+				$forceStatus = 'Error_sending';
 			}
 		}
 		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
