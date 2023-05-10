@@ -22,7 +22,8 @@ class airtablecustom extends airtable {
 														'CONTACTS' =>	'CONTACTS',
 														'BINOMES' =>	'BINOMES',
 														'POLE' => 		'POLES',
-														'REFERENTS' => 	'REFERENTS'
+														'REFERENTS' => 	'REFERENTS',
+														'REPONSE' => 	'REPONSE',
 													),
 								'appX0PhUGIkBTcWBE' =>  array(
 														'Aiko Auto Supr' => 'Aiko Auto Supr'
