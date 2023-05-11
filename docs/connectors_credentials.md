@@ -546,6 +546,7 @@ Myddleware uses the  [ssh2_connect()](https://www.php.net/manual/en/function.ssh
 and [ssh2_auth_password()](https://www.php.net/manual/en/function.ssh2-auth-password.php) PHP functions to connect to your FTP server.
 
 ### Moodle
+#### Module list
 
 Here is the list of available modules in source (reading) and target (writing) :
 
@@ -566,63 +567,131 @@ Here is the list of available modules in source (reading) and target (writing) :
 | User grades                    | Yes    | No     |
 
 
-Please, first install the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware).
 
-Generate your token by following [this Moodle tutorial](https://docs.moodle.org/400/en/Using_web_services).
+#### Install the plugin Myddleware in Moodle. 
 
-You can use this system role and assign it to the user linked to your token. 
-Click on this link to download it, then unzip it before importing it in Moodle :
-<a href="file/myddleware_moodle_role_1.3.xml" download>myddleware_moodle_role</a>
+<video src="file/tuto_moodle_new.mp4" width="800"  controls></video>
 
-To assign a role, go to ``Site administration`` > ``Users`` > ``Assign system roles``
+[![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
 
-![Access "Assign System role" page on Moodle Site Admin interface](images/credentials/moodle_assign_roles.png)
+Go to the administration of the site and then ``Plugins`` and ``Install plugins``
 
-Choose Myddleware role.
+![Install plugins](images/moodle/install_plugins.png)
 
-![Select Myddleware role](images/credentials/moodle_assign_myddleware_role.png)
+Then you can choose to install it from Moodle plugins directory if you Moodle instance is registered or you can install it from the archive that you can [download it here](https://moodle.org/plugins/local_myddleware)
 
-Then add the user you want to use in Myddleware :
+![Choose file](images/moodle/choose_file.png)
 
-![Select & add user with Myddleware role](images/credentials/moodle_assign_role_user_add.png)
+> This plugin contains several custom webservice functions required by Myddleware. 
 
-Then, go to ``Site administration`` > ``Plugins`` > ``Web services `` > ``External services``.
+Then click on ``Continue`` :  
 
-![Select & add user with Myddleware role](images/credentials/moodle_plugins_link.png)
+![Continue](images/moodle/continue_1.png)
 
-![Select & add user with Myddleware role](images/credentials/moodle_plugins_external_services_link.png)
+Click again on ``Continue`` :  
 
-Then, click on the ``functions`` link Myddleware corresponding to the Myddleware plugin.
+![Continue](images/moodle/continue_2.png)
 
-![Select & add user with Myddleware role](images/credentials/moodle_external_webservices.png)
+Then click on ``Upgrade Moodle database now`` :  
 
-Then, add all of these standard functions to your external service :
+![Upgrade database moodle](images/moodle/upgrade_database_moodle.png)
 
-- core_course_create_courses
-- core_course_get_categories
-- core_course_get_courses_by_field
-- core_course_update_courses
-- core_group_add_group_members
-- core_group_create_groups
-- core_user_create_users
-- core_user_get_users
-- core_user_update_users
-- core_webservice_get_site_info
-- enrol_manual_enrol_users
-- enrol_manual_unenrol_users
+Then click on ``Continue`` :  
 
-As well as all custom Myddleware functions starting with the ``local_myddleware_``  prefix: 
+![Upgrade new version](images/moodle/upgrade_new_version.png)
 
-![Select & add user with Myddleware role](images/credentials/moodle_functions_list.png)
+#### Enable web services
+
+Go to ``Site administration`` and then ``Server Web services`` and ``Overview``
+
+![Overview](images/moodle/overview.png)
+
+In the overview page, click on ``Enable web services`` and check the box :  
+
+![Enable web services](images/moodle/enable_web_service.png)
+
+In the overview page, click on ``Enable protocols`` and enable the REST one : 
+
+![Enable protocols](images/moodle/enable_protocols.png)
+
+In the overview, you should have ``Yes`` and ``REST``, then click on ``Create a specific user`` to create a user for Myddleware :
+
+![Create a specific use](images/moodle/create_specific_use.png)
+
+#### Create user and role 
+
+Create a new user, click on ``Site administration`` and then  ``Users`` and ``Add new user``
+
+![Create user](images/moodle/create_user.png)
+
+> Create the user that the web service will use, set an username, first name, surname, email address and set web service authentication. No need to set a password : 
+
+![Create user and role](images/moodle/create_user_role.png)
+
+Then import Myddleware’ s role in Go to ``Site administration`` -> ``Users`` -> ``Permissions`` -> ``Define roles`` :  
+
+![import Myddleware](images/moodle/import_myddleware.png)
+
+Then click on ``Add a new role`` :  
+
+![Add role](images/moodle/add_role.png)
+
+Download Myddleware’s role <a href="file/myddleware_moodle_role_1.4.xml" download>here</a>. 
+
+Add the xml file here and click on ``Continue``:  
+
+![Add role](images/moodle/add_role_xml.png)
+
+Then go to the bottom of the page and click on ``Create this role`` :  
+
+![Create this role](images/moodle/create_this_role.png)
+
+Assign this role to the user you have created. Go to ``Site administration`` -> ``Users`` -> ``Permissions`` -> ``Assign system roles``
+
+![Assign role](images/moodle/assign_role.png)
+
+> Click on ``Myddleware`` :  
+
+![Myddleware](images/moodle/myddleware.png)
+
+Then select Myddleware ‘s user and add it to the left column :  
+
+![Myddleware system](images/moodle/myddleware_system.png)
+
+#### Authorised users
+
+Go to Site administration -> Server -> Web services -> External services 
+
+![Moodle token](images/moodle/moodle_token.png)
+
+Click on ``Authorised users`` :  
+
+![External service](images/moodle/external_service.png)
+
+Then select Myddleware‘s user and add it to the left column :  
+
+![Select myddleware](images/moodle/select_myddleware.png)
 
 
-In the blue box you can see the standard functions. In the red box are the custom functions used by Myddleware to read data from Moodle. 
-The custom functions all have a name beginning with ``local_myddleware`` (there are more functions than displayed on the screenshot).  
-Make sure you have installed the [Myddleware Moodle plugin](https://moodle.org/plugins/local_myddleware) if you don’t find these functions in the list.
+> You shouldn’t have any missing capacity at the bottom of the page. 
 
-Finally, you can create your Moodle Myddleware connector by filling in your Moodle URL & token :
+Go to Site administration -> Server -> Web services -> Manage tokens 
 
-![Moodle connector credentials Myddleware form](images/credentials/moodle_connector_credentials.png)
+![Manage token](images/moodle/manage_token.png)
+
+Select Myddleware ‘s user and Myddleware service, then click on Save Changes :  
+
+![Create token](images/moodle/create_token.png)
+
+Then copy your token :  
+
+![Copy token](images/moodle/copy_token.png)
+
+#### Generate Moodle’s token 
+
+Finally, you can create your Moodle Myddleware connector by filling in your Moodle URL and your token : 
+
+![Finally](images/moodle/finally.png)
 
 ### RingCentral
 

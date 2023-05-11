@@ -84,6 +84,7 @@ class rulecore
     private ?RuleOrderRepository $ruleOrderRepository;
     private ?SessionInterface $session;
     protected FormulaManager $formulaManager;
+    private $dataSource;
 
     public function __construct(
         LoggerInterface $logger,
@@ -1159,7 +1160,7 @@ class rulecore
                 throw new \Exception($this->tools->getTranslation(['messages', 'rule', 'failed_create_directory']));
             }
             if ($documentId !== null) {
-                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' --env='.$this->env.' > '.$fileTmp.' &', $output);
+                exec($php.' '.__DIR__.'/../../bin/console myddleware:readrecord '.$ruleId.' id '.$documentId.' 1 --env='.$this->env.' > '.$fileTmp.' &', $output);
             }
             //if user clicked on cancel all transfers of a rule
             elseif ('cancelDocumentJob' === $event) {
@@ -1509,14 +1510,15 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($value['source_date_modified']);
+                    unset($sendData[$key]['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($value['id_doc_myddleware']);
+                    unset($sendData[$key]['id_doc_myddleware']);
                 }
-                $sendData[$key] = $value;
+                if (isset($value['Myddleware_element_id'])) {
+                    unset($sendData[$key]['Myddleware_element_id']);
+                }     
             }
-
             return $sendData;
         }
     }
@@ -1725,10 +1727,9 @@ class rulecore
                     // Modification des données dans la cible
                     elseif ('U' == $type) {
                         $send['data'] = $this->clearSendData($send['data']);
-                        // Allows to get the history fields, necessary for updating the SAP for instance
-                        foreach ($send['data'] as $docId => $value) {
-                            $send['dataHistory'][$docId] = $this->getDocumentData($docId, 'H');
-                        }
+                        // permet de récupérer les champ d'historique, nécessaire pour l'update de SAP par exemple
+                        $send['dataHistory'][$documentId] = $this->getDocumentData($documentId, 'H');
+                        $send['dataHistory'][$documentId] = $this->clearSendData($send['dataHistory'][$documentId]);
                         $response = $this->solutionTarget->updateData($send);
                     }
                     // Delete data from target application
@@ -1760,7 +1761,6 @@ class rulecore
 
         return $response;
     }
-
 
     // Check before we send a record deletion
     protected function checkBeforeDelete($send)
@@ -2300,6 +2300,7 @@ class rulecore
                                 '14' => 'solution.params.14_day',
                                 '30' => 'solution.params.30_day',
                                 '60' => 'solution.params.60_day',
+                                '90' => 'solution.params.90_day',
                             ],
             ],
             [

@@ -116,7 +116,6 @@ class ReadRecordCommand extends Command
                 $this->logger->error($responseCloseJob['message']);
             }
         }
-
         return 1;
     }
 }

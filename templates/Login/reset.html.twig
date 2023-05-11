@@ -27,24 +27,28 @@
 {% set body_class = 'login' %}
 
 {% block body %}
-	<div id="myd_connexion">
-		<div class="white">
-			<p class="ctr"><span class="logo"></span></p>
-			{{ form_start(form) }}
-			{{ form_start(form, {'attr': {'class': 'form-inline'}}) }}
-			  <div class="row" style="height: auto;">
-				  <div class="col-lg-12" style="height: auto;">
-					{{ form_label(form.plainPassword.first) }}
-					{{ form_widget(form.plainPassword.first) }}
-				  </div>
-			  </div>
-			  <div class="row" style="height: auto;">
-				  <div class="col-lg-12" style="height: auto;">
-					  {{ form_label(form.plainPassword.second) }}
-					  {{ form_widget(form.plainPassword.second) }}
-			  	  </div>
-			  </div>
-			<button class="btn-myd" type="submit">Reset</button>
-			{{ form_end(form) }}
-		</div>
+	<div class="white-reset">
+		<p class="ctr"><span class="logo"></span></p>
+		{{ form_start(form) }}
+		{{ form_start(form, {'attr': {'class': 'form-inline'}}) }}
+			<div class="row" style="height: auto;">
+				<div class="col-lg-12" style="height: auto;">
+				{{ form_label(form.plainPassword.first) }}
+				{{ form_widget(form.plainPassword.first) }}
+				</div>
+			</div>
+			<div class="row" style="height: auto;">
+				<div class="col-lg-12" style="height: auto;">
+					{{ form_label(form.plainPassword.second) }}
+					{{ form_widget(form.plainPassword.second) }}
+				</div>
+			</div>
+			<div class="row" style="height: auto;">
+				<div class="col-lg-12" style="height: auto;">
+					{{ form_label(form.oldPassword) }}
+					{{ form_widget(form.oldPassword) }}
+				</div>
+			</div>
+		{{ form_end(form) }}
+	</div>
 {% endblock %}

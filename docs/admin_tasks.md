@@ -125,8 +125,6 @@ git fetch
 git checkout origin/main -ft
 ```
 
-> If you have custom code, delete the src/Myddleware directory.
-
 #### Automatic Myddleware upgrade
 
 You can upgrade Myddleware to its latest version with this command, which will run a series of jobs in the background :
@@ -212,3 +210,29 @@ Once that's done, you now need to build your Myddleware instance for production 
 yarn build 
 ```
 
+## Admin Rights
+
+| Action                | Definition                                                                                       | User | Admin | Super Admin |
+|-----------------------|--------------------------------------------------------------------------------------------------|------|-------|-------------|
+| Delete the logs       | Delete the logs of your current environment, to make debugging easier                           |      |       | ✔           |
+| Cancel a document     | In the document view section, a super admin can force a document to be canceled. The button is hidden if the user doesn't have the required rights. | | | ✔         |
+| Rule detail commands  | In the rule detail view section, a super admin can cancel all documents at once, delete all documents, or delete the rule itself. Note that all documents must be deleted before deleting the rule. The buttons are hidden if the user doesn't have the required rights. | | | ✔       |
+| Open a document       | Open a document for viewing                                                                      | ✔    | ✔     | ✔           |
+| Delete a document     | Delete the selected document                                                               | ✔    | ✔     | ✔           |
+| Cancel a document     | Cancel a document and change its status to "Cancel"                                                          | ✔    | ✔     | ✔           |
+| View a rule           | Open a rule and see its information                                                                          | ✔    | ✔     | ✔           |
+| Edit a rule         | Change important properties of a rule such as the fields or the relationships                                                                           | ✔    | ✔     | ✔           |
+| Run a rule         | Launch the rule for all the documents based on the reference                                                                           | ✔    | ✔     | ✔           |
+
+
+
+
+
+### Delete the logs
+![Delete the logs button](images/admin_tasks/delete_logs_button.png)
+
+### Cancel a Document
+![Cancel a document](images/admin_tasks/cancel_document.png)
+
+### Rule detail commands
+![Rule detail commands](images/admin_tasks/rule_tasks.png)

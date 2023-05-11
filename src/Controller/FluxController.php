@@ -284,7 +284,7 @@ class FluxController extends AbstractController
         }
         
         $conditions = 0;
-		$doNotSearch = false;
+        $doNotSearch = false;
         //---[ FORM ]-------------------------
         if ($form->get('click_filter')->isClicked()) {
             $data = $form->getData();
@@ -572,7 +572,6 @@ class FluxController extends AbstractController
         // Run the query and return the results
         return $stmt->executeQuery()->fetchAllAssociative();
     }
-
 
     /**
      * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")

@@ -200,8 +200,8 @@ class toolscore
 
         return $php;
     }
-
-
+	
+	
 	public function getParamValue($paramName)
     {
         // Get the custom php version first
@@ -212,7 +212,7 @@ class toolscore
         $config = $result->fetchAssociative();
         if (!empty($config['value'])) {
             return $config['value'];
-        }
+        } 
         return null;
     }
 }

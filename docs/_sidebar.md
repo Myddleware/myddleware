@@ -6,7 +6,6 @@
 * [Admin Tasks](admin_tasks.md)
 * [Email notifications (SMTP)](smtp.md)
 * [Job scheduler & cron tasks](cron_jobs.md)
-* [Moodle](moodle.md)
 * [Myddleware API](api.md)
 * [Developer's Guide](dev_guide.md)
 * [Connectors](connectors_credentials.md)

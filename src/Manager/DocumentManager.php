@@ -1185,13 +1185,14 @@ class documentcore
     {
         try {
             $documentDataEntity = $this->entityManager
-                            // ->getRepository('RegleBundle:DocumentData')
-                            ->getRepository(DocumentData::class)
-                            ->findOneBy([
-                                        'doc_id' => $this->id,
-                                        'type' => $type,
-                                        ]
-                                );
+                // ->getRepository('RegleBundle:DocumentData')
+                ->getRepository(DocumentData::class)
+                ->findOneBy(
+                    [
+                        'doc_id' => $this->id,
+                        'type' => $type,
+                    ]
+                );
             // Generate data array
             if (!empty($documentDataEntity)) {
                 return json_decode($documentDataEntity->getData(), true);
@@ -1201,7 +1202,6 @@ class documentcore
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
-
         return false;
     }
 
@@ -1931,7 +1931,7 @@ class documentcore
             // We don't send output for the API and Myddleware UI
 			if (
 					!$this->api
-				AND $this->env != 'prod'
+				AND $this->env == 'background'
 			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }

@@ -29,6 +29,7 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
@@ -360,6 +361,57 @@ class Document
         }
     }
 
+    // Function to manually edit the data inside a Myddleware Document
+    public function updateDocumentData(string $docId, array $newValues, string $dataType)
+    {
+            // check if data of that type with this docid and this data fields
+            if (empty($docId)) {
+                throw new Exception("No document id provided");
+            }
+
+            if (empty($newValues)) {
+                throw new Exception("No data provided");
+            }
+
+            if (empty($dataType)) {
+                throw new Exception("No data type provided");
+            }
+
+            if (
+                $dataType !== 'S'
+                & $dataType !== 'T'
+                & $dataType !== 'H'
+            ) {
+                throw new Exception("This is not  the correct data type. Source, Target, or History is required");
+            }
+
+            // Build the new data array from the old one and the function arguments
+            $oldData = $this->getDataByType($dataType);
+            if(!empty($oldData)){
+                foreach ($newValues as $oneKey => $oneValue)
+                {
+                    foreach ($oldData as $oldKey => $oldValue)
+                        if ($oldKey === $oneKey) {
+                            if ($oldValue !== $oneValue) {
+                                $newValues[$oldKey] = $oneValue;
+                            }
+                        } else {
+                            $newValues[$oldKey] = $oldValue;
+                        }
+                }
+
+                // Updat the data of the right type
+                $dataDestination = $this->getDatas();
+                foreach ($dataDestination as $oneDataset) {
+                    if (
+                        $oneDataset->getType() === $dataType
+                    ) {
+                        $oneDataset->setData(json_encode($newValues, true));
+                    }
+                }
+            }
+    }
+
     /**
      * @return Collection|Log[]
      */
@@ -413,4 +465,7 @@ class Document
 
         return $this;
     }
+
+    
+    
 }

@@ -176,6 +176,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     'page' => $page,
                 ]);
 
+
                 // Si tout se passe bien dans la pagination
                 if ($compact) {
                     // Si aucune règle

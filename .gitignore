@@ -28,9 +28,6 @@
 # Custom directory
 /src/Custom/*
 
-# localfiles
-/src/localfiles
-
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
@@ -123,4 +120,12 @@ composer.phar
 ## PHPCSFixer
 .php-cs-fixer.php
 .php-cs-fixer.cache
-
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###

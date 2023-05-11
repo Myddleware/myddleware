@@ -207,6 +207,7 @@ class databasecore extends solution
     public function readData($param)
     {
         $result = [];
+        $result['date_ref'] = $param['date_ref'];
         // Decode field name (converted in method get_module_fields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
         try {
@@ -386,6 +387,7 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
+        
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
             throw new Exception('targetFieldId has to be specified for the data creation.');
@@ -422,6 +424,11 @@ class databasecore extends solution
             throw new Exception('Create: '.$errorInfo[2].' . Query : '.$sql);
         }
 
+        // Check if the row has been created
+        if ($q->rowCount() === 0) {
+            throw new Exception('No row was created for the id : ' . $idTarget);
+        }
+
         // If the target reference field isn't in data sent
         if (!isset($idTarget)) {
             // If the target reference field is a primary key auto increment, we retrive the value here
@@ -429,6 +436,7 @@ class databasecore extends solution
         }
 
         return $idTarget;
+        
     }
 
     /**
@@ -463,8 +471,8 @@ class databasecore extends solution
             throw new Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
         }
         // No modification
-        if (0 == $q->rowCount()) {
-            $this->message = 'There is no error but the query hasn\'t modified any record.';
+        if ($q->rowCount() === 0) {
+            throw new Exception('No row was updated for the id : ' . $record['target_id']);
         }
         // Several modifications
         if (
@@ -499,6 +507,11 @@ class databasecore extends solution
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
             throw new Exception('Delete: '.$errorInfo[2].' . Query : '.$sql);
+        }
+
+        // No deletion
+        if ($q->rowCount() === 0) {
+            throw new Exception('No row was deleted for the id : ' . $record['target_id']);
         }
 
         return $record['target_id'];
@@ -542,8 +555,8 @@ class databasecore extends solution
 							GROUP BY source_id";
                 $stmt = $connection->prepare($query);
                 $stmt->bindValue(':id_rule', $param['rule']['id']);
-                $result = $stmt->executeQuery();
-                $documents = $result->fetchAllAssociative();
+                $resultQuery = $stmt->executeQuery();
+                $documents = $resultQuery->fetchAllAssociative();
 
                 // Test all document found in Myddleware
                 foreach ($documents as $document) {

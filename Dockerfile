@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 php:7.4.26-apache
+FROM --platform=linux/amd64 php:8.1.17-apache
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
@@ -17,12 +17,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ 
 COPY composer.json ./composer.json
 COPY composer.lock ./composer.lock
 RUN composer install
-
-## Install PHP Accelerators
-RUN pecl install apcu \
-    && pecl install apcu_bc-1.0.3 \
-    && docker-php-ext-enable apcu --ini-name 10-docker-php-ext-apcu.ini \
-    && docker-php-ext-enable apc --ini-name 20-docker-php-ext-apc.ini
 
 ## Intall NodeJS
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \

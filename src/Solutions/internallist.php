@@ -71,7 +71,7 @@ class internallistcore extends solution
         }
     }
 
-	public function get_module_fields($module, $type = 'source', $param = null): array
+    public function get_module_fields($module, $type = 'source', $param = null): array
     {
         try {
             //get the data to obtain the fields of the row

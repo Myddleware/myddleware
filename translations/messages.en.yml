@@ -296,7 +296,7 @@ view_connector:
         help: Assistance
         link_help: Click here to have more information on this connector
     help:
-        link: https://myddleware.github.io/myddleware/#/connectors_credentials
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
 
 list_flux:
     start: Start
@@ -499,6 +499,7 @@ solution:
         username: Username
         password: Password
         accesskey: Access key
+        accesstoken: Access token
         url: Url
         token: Token
         tokensecret: Secret token
@@ -532,6 +533,8 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        user_custom_fields: User custom fields (shortname separated by coma)
+        course_custom_fields: Course custom fields (shortname separated by coma)
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -553,6 +556,7 @@ solution:
         14_day: 14 days
         30_day: 30 days
         60_day: 60 days
+        90_day: 90 days
 
 error:
     connexion: Connection failed

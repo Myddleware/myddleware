@@ -170,7 +170,7 @@ class JobSchedulerController extends AbstractController
     {
         $form = $this->createForm(JobSchedulerType::class, $entity, [
             'action' => $this->generateUrl('jobscheduler_update', ['id' => $entity->getId()]),
-            'method' => 'PUT',
+            'method' => 'POST',
         ]);
 
         $form->add('submit', SubmitType::class, ['label' => 'jobscheduler.update']);
@@ -386,7 +386,7 @@ class JobSchedulerController extends AbstractController
         // Field command can't be changed
         return $this->createForm(JobSchedulerCronType::class, $entity, [
                 'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
-                'method' => 'PUT',
+                'method' => 'POST',
             ])
             ->add('command', TextType::class, ['disabled' => true]
         );
@@ -395,7 +395,7 @@ class JobSchedulerController extends AbstractController
     /**
      * Edits an existing Crontab entity.
      *
-     * @Route("/{id}/update_crontab", name="crontab_update", methods={"POST", "PUT"})
+     * @Route("/{id}/update_crontab", name="crontab_update", methods={"POST"})
      */
     public function updateCrontab(Request $request, $id)
     {
@@ -406,7 +406,7 @@ class JobSchedulerController extends AbstractController
         $editForm = $this->createEditFormCrontab($entity);
         $editForm->handleRequest($request);
 
-        if ($editForm->isValid()) {
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->entityManager->flush();
 
             return $this->redirect($this->generateUrl('jobscheduler_cron_list'));

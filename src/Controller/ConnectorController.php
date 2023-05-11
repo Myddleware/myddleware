@@ -583,12 +583,12 @@ class ConnectorController extends AbstractController
 
         $form = $this->createForm(ConnectorType::class, $connector, [
             'action' => $this->generateUrl('connector_open', ['id' => $id]),
-            'method' => 'PUT',
+            'method' => 'POST',
             'attr' => ['fieldsLogin' => $fieldsLogin, 'secret' => $this->getParameter('secret')],
         ]);
 
         // If the connector has been changed
-        if ('PUT' == $request->getMethod()) {
+        if ('POST' == $request->getMethod()) {
             try {
                 $form->handleRequest($request);
                 // SAVE
