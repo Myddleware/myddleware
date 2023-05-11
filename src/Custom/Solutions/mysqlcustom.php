@@ -131,11 +131,17 @@ class mysqlcustom extends mysql {
 				$paramDoc['jobId'] = $param['jobId'];
 				$this->documentManager->setParam($paramDoc);
 				$this->documentManager->updateDocumentData($idDoc, array('roles'=>$data['roles']), 'T');
-			};
+			}
+			// If history equals target we don't send the data to the target
 			if (
-					!empty($historyRoles)
-				AND	!empty($targetRoles)
-				AND $historyRoles == $targetRoles
+				(
+						!empty($historyRoles)
+					AND	!empty($targetRoles)
+					AND $historyRoles == $targetRoles
+				) OR (
+						empty($historyRoles)
+					AND	empty($targetRoles)
+				)
 			) {
 				$value['id'] = $data['target_id'];
 				$value['error'] = 'Target and history data are equals. ';		
