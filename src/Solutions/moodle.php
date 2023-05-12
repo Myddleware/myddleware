@@ -48,6 +48,10 @@ class moodlecore extends solution
         'courses' => ['shortname', 'idnumber'],
     ];
 
+	protected array $createOnlyFields = [
+        'courses' => ['lang'],
+    ];
+	
     protected string $delaySearch = '-1 year';
 
     public function login($paramConnexion)
@@ -191,14 +195,14 @@ class moodlecore extends solution
             $functionName = $this->getFunctionName($param);
             // Get the custom fields set in the connector
             $customFieldList = $this->getCustomFields($param);
-            // Init the attribute name and value for custom fields
-            $attributeName = ($param['module'] == 'courses' ? 'shortname' : 'name');
+            // Init the attribute value for custom fields depending on the module
             $attributeValue = ($param['module'] == 'courses' ? 'valueraw' : 'value');
 
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
+
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
             }
@@ -229,7 +233,7 @@ class moodlecore extends solution
                                 $customFieldValue = '';
                                 $customFieldName = '';
                                 foreach($customField->KEY as $customFieldValues) {
-                                    if ($customFieldValues->attributes()->__toString() == $attributeName) {
+                                    if ($customFieldValues->attributes()->__toString() == 'shortname') {
                                         $customFieldName = $customFieldValues->VALUE->__toString();
                                     } elseif ($customFieldValues->attributes()->__toString() == $attributeValue) {
                                         $customFieldValue = $customFieldValues->VALUE->__toString();
@@ -273,10 +277,6 @@ class moodlecore extends solution
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
-                    // We don't send Myddleware_element_id field to Moodle
-                    if (in_array($key, array('Myddleware_element_id', 'source_date_modified', 'id_doc_myddleware'))) {
-                        continue;
-                    }
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
@@ -336,7 +336,17 @@ class moodlecore extends solution
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
+				
+				// Check if there is a warning
+				if (
+						!empty($xml->SINGLE)
+					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
+					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])
+				) {
+					throw new \Exception('ERROR : '.$xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
+				}
 
+				
                 // Réponse standard pour les modules avec retours
                 if (
                         !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
@@ -404,10 +414,7 @@ class moodlecore extends solution
                 foreach ($data as $key => $value) {
                     if ('target_id' == $key) {
                         continue;
-                    // We don't send Myddleware_element_id field to Moodle
-                    } elseif (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
-                        continue;
-                    }
+                    } 
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
@@ -466,6 +473,15 @@ class moodlecore extends solution
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
+				
+				// Check if there is a warning
+				if (
+						!empty($xml)
+					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
+					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])
+				) {
+					throw new \Exception('ERROR : '.$xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
+				}
 
                 // Réponse standard pour les modules avec retours
                 if (!empty($xml->ERRORCODE)) {
@@ -512,6 +528,14 @@ class moodlecore extends solution
 			AND isset($data['createpassword'])
 		) {
 			unset($data['createpassword']);
+		}
+		// Rempove create only field
+		if (!empty($this->createOnlyFields[$param['module']])) {
+			foreach($this->createOnlyFields[$param['module']] as $createOnlyField) {
+				if (isset($data[$createOnlyField])) {
+					unset($data[$createOnlyField]);
+				}
+			}
 		}
         return parent::checkDataBeforeUpdate($param, $data, $idDoc);
     }
@@ -670,7 +694,7 @@ class moodlecore extends solution
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
         } 
-        return null;
+        return array();
     }
 
 	// Function to add custom fields for course and user modules.

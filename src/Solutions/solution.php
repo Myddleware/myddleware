@@ -78,9 +78,9 @@ class solutioncore
     protected Connection $connection;
     protected ParameterBagInterface $parameterBagInterface;
     protected EntityManagerInterface $entityManager;
-    private DocumentRepository $documentRepository;
-    private RuleRelationShipRepository $ruleRelationshipsRepository;
-    private FormulaManager $formulaManager;
+    protected DocumentRepository $documentRepository;
+    protected RuleRelationShipRepository $ruleRelationshipsRepository;
+    protected FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -397,6 +397,7 @@ class solutioncore
     public function createData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -405,6 +406,10 @@ class solutioncore
 
                     // Check control before create
                     $record = $this->checkDataBeforeCreate($param, $record, $idDoc);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call create method
                     $recordId = $this->create($param, $record, $idDoc);
 
@@ -481,6 +486,7 @@ class solutioncore
     public function updateData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -492,6 +498,10 @@ class solutioncore
                     }
                     // Check control before create
                     $record = $this->checkDataBeforeUpdate($param, $record, $idDoc);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call create methode
                     $recordId = $this->update($param, $record, $idDoc);
 
@@ -535,6 +545,7 @@ class solutioncore
     public function deleteData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -543,6 +554,10 @@ class solutioncore
                     }
                     // Check control before delete
                     $record = $this->checkDataBeforeDelete($param, $record);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call delete methode
                     $recordId = $this->delete($param, $record);
 

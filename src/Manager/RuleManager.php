@@ -560,7 +560,7 @@ class rulecore
 
             // Order data in the date_modified order
             $modified = array_column($dataSourceValues, 'date_modified');
-            array_multisort($modified, SORT_ASC, $dataSourceValues);
+            array_multisort($modified, SORT_DESC, $dataSourceValues);
             foreach ($dataSourceValues as $value) {
                 // Check if the previous record has the same date_modified than the current record
                 // Check only if offset isn't managed into the source application connector
@@ -698,7 +698,7 @@ class rulecore
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function checkParentDocument($documents = null): array
+    public function checkParentDocuments($documents = null): array
     {
         // include_once 'document.php';
         // Permet de charger dans la classe toutes les relations de la règle
@@ -1270,7 +1270,7 @@ class rulecore
             $status = $this->documentManager->getStatus();
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->checkParentDocument([['id' => $id_document]]);
+            $response = $this->checkParentDocuments([['id' => $id_document]]);
             if (true === $response[$id_document]) {
                 $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
             } else {
@@ -1413,7 +1413,7 @@ class rulecore
             }
         }
         if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->checkParentDocument($arrayIdDocument);
+            $response = $this->checkParentDocuments($arrayIdDocument);
             if (true === $this->verifyMultiIdResponse($response)) {
                 // Update status if an action has been executed
                 $status = 'Relate_OK';
@@ -1510,15 +1510,15 @@ class rulecore
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
-                    unset($sendData->{$key}['source_date_modified']);
+                    unset($sendData[$key]['source_date_modified']);
                 }
                 if (isset($value['id_doc_myddleware'])) {
-                    unset($sendData->{$key}['id_doc_myddleware']);
+                    unset($sendData[$key]['id_doc_myddleware']);
                 }
-                
+                if (isset($value['Myddleware_element_id'])) {
+                    unset($sendData[$key]['Myddleware_element_id']);
+                }     
             }
-            
-
             return $sendData;
         }
     }
