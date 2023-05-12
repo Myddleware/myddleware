@@ -26,8 +26,11 @@
 
 namespace App\Controller;
 
+			   
+use App\Entity\Job;					
 use App\Entity\Config;
 use App\Entity\Document;
+use App\Form\Type\DocumentCommentType;							
 use App\Entity\DocumentAudit;
 use App\Entity\DocumentData;
 use App\Entity\DocumentRelationship;
@@ -582,16 +585,21 @@ class FluxController extends AbstractController
             $this->sessionService->removeFluxFilter();
         }
 
-        return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
     }
 
-    /**
-     * @Route("/flux/{id}/log/", name="flux_info", defaults={"page"=1})
-     * @Route("/flux/{id}/log/page-{page}", name="flux_info_page", requirements={"page"="\d+"})
-     */
-    public function fluxInfo(Request $request, $id, $page)
+/**
+ * @Route("/flux/{id}/log/{logPage}", name="flux_info", defaults={"page"=1, "logPage"=1})
+ * @Route("/flux/{id}/log/page-{page}/log-{logPage}", name="flux_info_page", requirements={"page"="\d+", "logPage"="\d+"})
+ */
+public function fluxInfo(Request $request, $id, $page, $logPage)
+
     {
         try {
+
+            $documentPage = (int)$page;
+            $logPage = (int)$logPage;
+
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
 
@@ -623,11 +631,10 @@ class FluxController extends AbstractController
             $historyData = $this->listeFluxTable($id, 'H');
 
             $compact = $this->nav_pagination([
-                'adapter_em_repository' => $em->getRepository(Log::class)
-                    ->findBy(
-                        ['document' => $id],
-                        ['id' => 'DESC']
-                    ),
+                'adapter_em_repository' => $em->getRepository(Document::class)->findBy(
+                    ['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0],
+                    ['dateModified' => 'DESC']
+                ),
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
             ], false);
@@ -695,6 +702,7 @@ class FluxController extends AbstractController
                 $historyDocuments = [];
             }
 
+
             // Add custom button
             $name_solution_target = $rule->getConnectorTarget()->getSolution()->getName();
             $solution_target = $this->solutionManager->get($name_solution_target);
@@ -728,6 +736,82 @@ class FluxController extends AbstractController
             } else {
                 $timezone = $this->getUser()->getTimezone();
             }
+
+            // Get the logs
+            $logs = $em->getRepository(Log::class)
+            ->findBy(
+                ['document' => $id],
+                ['id' => 'DESC']
+            );
+
+            // Set the parameters for document pagination
+            $docParams = [
+                'adapter_em_repository' => $em->getRepository(Document::class)->findBy(
+                    ['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0],
+                    ['dateModified' => 'DESC']
+                ),
+                'maxPerPage' => $this->params['pager'],
+                'page' => $documentPage,
+                'pageParameterName' => 'docPage'
+            ];
+
+            // Set the parameters for log pagination
+            $logParams = [
+                'adapter_em_repository' => $em->getRepository(Log::class)->findBy(
+                    ['document' => $id],
+                    ['id' => 'DESC']
+                ),
+                'maxPerPage' => $this->params['pager'],
+                'page' => $logPage,
+                'pageParameterName' => 'logPage'
+            ];
+
+// Get the paginated results for documents and logs
+$documentPagination = $this->nav_pagination_documents($docParams, false);
+$logPagination = $this->nav_pagination_logs($logParams, false);
+
+$formComment = $this->createForm(DocumentCommentType::class, null);
+
+
+            $formComment->handleRequest($request);
+            if ($formComment->isSubmitted() && $formComment->isValid()) {
+                $comment = $formComment->getData()['comment'];
+				
+                // create new job
+                $job = new Job();
+                $job->setBegin(new \DateTime());
+                $job->setEnd(new \DateTime());
+                $job->setParam('notification');
+                $job->setMessage('Comment log created. Comment: '.$comment);
+                $job->setOpen(0);
+                $job->setClose(0);
+                $job->setCancel(0);
+                $job->setManual(1);
+                $job->setApi(0);
+                $job->setError(0);
+                $job->setStatus('End');
+                $job->setId(uniqid(mt_rand(), true));
+                
+                $em->persist($job);
+                $em->flush();
+                
+                // Add log to indicate this action
+                $log = new Log();
+                $log->setDateCreated(new \DateTime());
+                $log->setType('I');
+                
+                $log->setRule($rule);
+                $log->setJob($job);
+                $log->setMessage($comment);
+                $log->setDocument($doc[0]);
+                $em->persist($log);
+                $em->flush();
+                
+                $this->addFlash('success', 'Comment successfully added !');
+
+                // Redirect the route to avoid resubmitting the form according to the PRG pattern
+                return $this->redirectToRoute('flux_info', ['id' => $id]);
+            }
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
@@ -750,15 +834,21 @@ class FluxController extends AbstractController
                     'parent_documents' => $parentDocuments,
                     'parent_Documents_Rule' => $parentDocumentsRule,
                     'nb_parent_documents' => count($parentDocuments),
-                    'history_documents' => $historyDocuments,
-                    'nb_history_documents' => count($historyDocuments),
+                    'history_documents' => $documentPagination['entities'],
+                    'nb_history_documents' => count($documentPagination['entities']),
                     'ctm_btn' => $list_btn,
                     'read_record_btn' => $solution_source->getReadRecord(),
                     'timezone' => $timezone,
+					'formComment' => $formComment->createView(),
+                    'logs' => $logs,
+                    'documentPagination' => $documentPagination,
+                    'logPagination' => $logPagination,
+                    'documentPage' => $documentPage,
+                    'logPage' => $logPage,
                 ]
             );
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
     }
 
@@ -856,6 +946,9 @@ class FluxController extends AbstractController
                         $this->jobManager->runBackgroundJob('readrecord', [$doc->getRule(), 'id', $doc->getSource()]);
                     }
                 }
+										 
+								
+				 
             }
 
             return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
@@ -885,6 +978,13 @@ class FluxController extends AbstractController
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
         }
+																			   
+																	
+														   
+											
+												 
+			 
+		 
         exit;
     }
 
@@ -929,6 +1029,84 @@ class FluxController extends AbstractController
                 $compact['pager']->setCurrentPage($currentPage);
                 $compact['nb'] = $compact['pager']->getNbResults();
                 $compact['entities'] = $compact['pager']->getCurrentPageResults();
+            } catch (NotValidCurrentPageException $e) {
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            }
+
+            return $compact;
+        }
+
+        return false;
+    }
+
+
+    private function nav_pagination_documents($params, $orm = true)
+    {
+        /*
+            * adapter_em_repository = requete
+            * maxPerPage = integer
+            * page = page en cours
+            */
+        if (is_array($params)) {
+
+            $pageParameterName = $params['pageParameterName'];
+
+            $compact = [];
+            if ($orm) {
+                $queryBuilder = $params['adapter_em_repository'];
+                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+                $compact['pager'] = $pagerfanta;
+            } else {
+                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            }
+            $maxPerPage = intval($params['maxPerPage']);
+            $currentPage = intval($params['page']);
+            $compact['pager']->setMaxPerPage($maxPerPage);
+            try {
+                $compact['pager']->setCurrentPage($currentPage);
+                $compact['nb'] = $compact['pager']->getNbResults();
+                $compact['entities'] = $compact['pager']->getCurrentPageResults();
+                $compact['pageParameterName'] = $pageParameterName;
+                
+            } catch (NotValidCurrentPageException $e) {
+                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            }
+
+            return $compact;
+        }
+
+        return false;
+    }
+
+
+    private function nav_pagination_logs($params, $orm = true)
+    {
+        /*
+            * adapter_em_repository = requete
+            * maxPerPage = integer
+            * page = page en cours
+            */
+
+        if (is_array($params)) {
+
+            $pageParameterName = $params['pageParameterName'];
+
+            $compact = [];
+            if ($orm) {
+                $queryBuilder = $params['adapter_em_repository'];
+                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+                $compact['pager'] = $pagerfanta;
+            } else {
+                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            }
+            $maxPerPage = intval($params['maxPerPage']);
+            $currentPage = intval($params['page']);
+            $compact['pager']->setMaxPerPage($maxPerPage);
+            try {
+                $compact['pager']->setCurrentPage($currentPage);
+                $compact['nb'] = $compact['pager']->getNbResults();
+                $compact['entities'] = $compact['pager']->getCurrentPageResults();
+                $compact['pageParameterName'] = $pageParameterName;
             } catch (NotValidCurrentPageException $e) {
                 throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }

@@ -71,7 +71,7 @@ class jobcore
 	protected int $noDocumentsTablesToEmptyCounter;
 	protected int $noRulesTablesToEmptyCounter;
 
-    protected int $limitDelete;
+    protected int $limitDelete = 1000;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
 
@@ -563,7 +563,7 @@ class jobcore
                 }
 
                 // We assign the id to an id section of the array
-                if ($usesDocumentIds === 1) {
+                if ($usesDocumentIds === 1 && !empty($documents)) {
                     $arrayOfDocumentIds[] = $documents[0]->id;
                     continue;
                 } elseif (!empty($documents)) {
