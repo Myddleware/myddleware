@@ -43,13 +43,15 @@ class DocumentManagerCustom extends DocumentManager
 
 	protected function beforeStatusChange($new_status) {	
 		// On annule la relation pôle - contact (user) si le contact (user) a été filtré
+		// On tente 2 fois l'envoi (attempt > 0) car la relation pourrait être lues avant le user et être annulé par erreur
 		if (
 			!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5cfa78d49c536' // Rule User - Pôle
 		) {
 			if (
-				strpos($this->message, 'No data for the field user_id.') !== false
+					strpos($this->message, 'No data for the field user_id.') !== false
 				and strpos($this->message, 'in the rule REEC - Users.') !== false
+				AND $this->attempt > 0
 			) {
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
