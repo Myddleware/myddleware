@@ -91,7 +91,7 @@ class formulafunctioncore
             return '';
         }
     }
-
+	
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
     {
         // Transform string into an array
