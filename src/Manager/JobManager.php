@@ -234,9 +234,9 @@ class jobcore
     }
 
     // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function checkParentDocument()
+    public function checkParentDocuments()
     {
-        $this->ruleManager->checkParentDocument();
+        $this->ruleManager->checkParentDocuments();
     }
 
     // Permet de trasformer les documents

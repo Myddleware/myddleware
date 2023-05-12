@@ -196,6 +196,7 @@ class airtablecore extends solution
 					$param['fields'][] = $dateRefField;
 				}
 			}
+			
             $stop = false;
             $page = 1;
             $offset = '';
@@ -285,7 +286,10 @@ class airtablecore extends solution
 						}
 
                         // Get the reference date
-                        if (!empty($record['fields'][$dateRefField])) {
+                        if (
+								!empty($dateRefField)
+							AND	!empty($record['fields'][$dateRefField])
+						) {
                             $dateModified = $record['fields'][$dateRefField];
                         // createdTime not allowed for reading action, only to get an history or a duplicate field
                         } elseif (
@@ -398,10 +402,6 @@ class airtablecore extends solution
                         $urlParamDelete .= (!empty($urlParamDelete) ? '&' : '').'records[]='.$data['target_id'];
                         ++$i;
                         continue;
-                    }
-                    // Myddleware_element_id is a field only used by Myddleware. Not sent to the target application
-                    if (!empty($data['Myddleware_element_id'])) {
-                        unset($data['Myddleware_element_id']);
                     }
 
                     $body['records'][$i]['fields'] = $data;
