@@ -1931,7 +1931,7 @@ class documentcore
             // We don't send output for the API and Myddleware UI
 			if (
 					!$this->api
-				AND $this->env != 'prod'
+				AND $this->env == 'background'
 			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
@@ -1975,7 +1975,7 @@ class documentcore
             // We don't send output for the API and Myddleware UI
 			if (
 					!$this->api
-				AND $this->env != 'prod'
+				AND $this->env == 'background'
 			) {
                 echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);
             }
@@ -2194,6 +2194,7 @@ class documentcore
     {
         try {
             $direction = $this->getRelationshipDirection($ruleRelationship);
+
             // En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
             // Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
             if ('-1' == $direction) {
