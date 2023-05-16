@@ -1,7 +1,7 @@
 <?php
 
 // Aiko
-$moduleFields['appdKFUpk2X2Ok8Dc'] = array (
+$moduleFields['apppq0nb5WI815V57'] = array ( //! the id was appdKFUpk2X2Ok8Dc and that is the id of prod, not preprod, if intentional keep in mind
     'CONTACTS' => array(
         'fld9XGHFATCBdkoD8'=> array( 'label' => 'ID Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
         'fldrEmPIO0QXKGBDM' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
@@ -103,6 +103,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
 		'fldrwRQWnCJ21SaMU' => array('label' => 'las', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldM1SC5Q4OGFN5vK' => array('label' => 'Nom Théorique', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldWp6GVrW4vddPt2' => array('label' => 'ID TMP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldsDjV47nqA04Ttl' => array('label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 	),
 );
 

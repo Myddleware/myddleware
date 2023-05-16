@@ -11,6 +11,7 @@ class airtablecustom extends airtable {
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
+								'apppq0nb5WI815V57' => 'Reponse',			// Aiko PREPROD Reponse
 								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
@@ -77,6 +78,41 @@ class airtablecustom extends airtable {
 	// Rededine read fucntion
 	public function readData($param): array {
 		$result = parent::readData($param);
+
+		// if the rule id is 645b827fb6151, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		if ($_POST["params"][1]["value"] === '645b827fb6151' && $param['module'] == 'REPONSE') {
+			if (!empty($result['values'])) {
+				foreach ($result['values'] as $docId => $values) {
+					if (!empty($values['fldC7m6zch8Cz6KWQ'])) {
+						// $result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = '';
+						// We make a switch case for the value of the field, if it is the 😡, 🙁, 😐, 🙂, 😍,  emoji then we convert it to the string respectively ">:(",
+						//  ":(",  
+						//  ":|",
+						// ":)",
+						// "<3"
+						switch ($values['fldC7m6zch8Cz6KWQ']) {
+							case '😡':
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 1;
+								break;
+							case '🙁':
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 2;
+								break;
+							case '😐':
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 3;
+								break;
+							case '🙂':
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 4;
+								break;
+							case '😍':
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 5;
+								break;
+							default:
+								$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = '';
+						}
+					}
+				}
+			}
+		}
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
