@@ -73,13 +73,13 @@ class mysqlcustom extends mysql {
 	
 	// Clean id empty for foreign key
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
-		
 		// Manage roles field for reec. We have to merge data coming from 2 rules users custom and engagé by using the history data
 		if (in_array($param['rule']['id'], array('5ce3621156127','5d01a630c217c', '63e1007614977', '6273905a05cb2'))) { // REEC users custom / engagé
 			// Error if no history data
 			if (empty($param['dataHistory'][$idDoc])) {
 				throw new \Exception('History data is requiered to calculate the filed role_reec. Errror because history data is empty.');
 			}
+
 			// Roles by type (engagé or user)
 			$userRoles = array('ROLE_SALARIE','ROLE_SIEGE','ROLE_ADMIN');
 			$engageRoles = array('ROLE_MENTOR','ROLE_VOLONTAIRE');
@@ -114,7 +114,8 @@ class mysqlcustom extends mysql {
 			}
 
 			if ($data['roles'] != serialize($targetRoles)) {
-				$data['roles'] = serialize($targetRoles);
+				// Set null to target values (not an empty array) if there is no role
+				$data['roles'] = (!empty($targetRoles) ? serialize($targetRoles) : 'null');
 
 				// Change the document data 
 				if (!isset($this->documentManager)) {
@@ -132,6 +133,11 @@ class mysqlcustom extends mysql {
 				$this->documentManager->setParam($paramDoc);
 				$this->documentManager->updateDocumentData($idDoc, array('roles'=>$data['roles']), 'T');
 			}
+
+			// Send null to REEC (not an empty array) if there is no role
+			if (empty($targetRoles)) {
+				$targetRoles = 'null';
+			}
 			// If history equals target we don't send the data to the target
 			if (
 				(
@@ -141,6 +147,10 @@ class mysqlcustom extends mysql {
 				) OR (
 						empty($historyRoles)
 					AND	empty($targetRoles)
+				)
+				OR (
+						empty($historyRoles)
+					AND	$targetRoles == 'null'
 				)
 			) {
 				$value['id'] = $data['target_id'];
