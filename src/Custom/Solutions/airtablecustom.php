@@ -148,6 +148,43 @@ class airtablecustom extends airtable {
 			}
 		}
 
+
+		// if the rule id is 645b827fb6151, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+			if (!empty($result['values'])) {
+				foreach ($result['values'] as $docId => $values) {
+					if (!empty($values['fld21ghhExTeEwnD8'])) {
+						// the value of the field is a string separated by a comma, such as "Discussions, Bibliothèque"
+						// we convert the value according to the following table;
+						$activity_list = [
+							'Autre activité' => 'autre_activite',
+							'Activités sur le numérique' => 'activite_numerique',
+							'Accès aux droits' => 'acces_droits',
+							'Révisions' => 'revisions',
+							'Découverte de la ville' => 'decouverte_ville',
+							'Découverte du campus' => 'decouverte_campus',
+							'Activité famille' => 'activite_famille',
+							'Sortie' => 'sortie',
+							'Lecture/Langage' => 'lecture',
+							'Bibliothèque' => 'biblio',
+							'Discussion' => 'Discussion',
+							'Orientation' => 'assistance_orientation',
+							'Devoirs' => 'Aide_devoirs',
+							'Activité ludique' => 'Activite_ludique',
+							'' => '',
+						];
+						// and we add ^ on each side of the value, so that it can used in the target. The result example should be "^Discussion^,^biblio^"
+						$result['values'][$docId]['fld21ghhExTeEwnD8'] = '^' . implode('^,^', array_map(function ($value) use ($activity_list) {
+							return $activity_list[$value];
+						}, explode(',', $values['fld21ghhExTeEwnD8']))) . '^';
+						
+
+						
+					}
+				}
+			}
+		}
+
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
 				!empty($param['rule'])

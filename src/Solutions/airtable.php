@@ -272,9 +272,16 @@ class airtablecore extends solution
                         ++$currentCount;
 						foreach ($param['fields'] as $field) {
 							if (!empty($record['fields'][$field])) {
-								// If teh value is an array (relation), we take the first entry
+								// If the value is an array (relation), we take the first entry
 								if (is_array($record['fields'][$field])) {
-									$result['values'][$record['id']][$field] = $record['fields'][$field][0];
+                                    // if the array has a length of 1, we take the first entry
+                                    if (count($record['fields'][$field]) === 1) {
+                                        $result['values'][$record['id']][$field] = $record['fields'][$field][0];
+                                    } else {
+                                        // if the array has a larger length than 1 we convert the array into a string separated by comma and space
+                                        $result['values'][$record['id']][$field] = implode(',', $record['fields'][$field]);
+                                    }
+									
 								} else {
 									$result['values'][$record['id']][$field] = $record['fields'][$field];
 								}
