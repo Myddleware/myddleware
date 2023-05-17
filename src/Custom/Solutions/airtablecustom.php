@@ -113,6 +113,40 @@ class airtablecustom extends airtable {
 				}
 			}
 		}
+		// if the rule id is 645b827fb6151, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+			if (!empty($result['values'])) {
+				foreach ($result['values'] as $docId => $values) {
+					if (!empty($values['fld4KzcfmV2P8F3E6'])) {
+						// $result['values'][$docId]['fld4KzcfmV2P8F3E6'] = '';
+						// We make a switch case for the value of the field, if it is the ⭐️, ⭐️⭐️, ⭐️⭐️⭐️, ⭐️⭐️⭐️⭐️, ⭐️⭐️⭐️⭐️⭐️,  emoji then we convert it to the string respectively ">:(",
+						//  ":(",  
+						//  ":|",
+						// ":)",
+						// "<3"
+						switch ($values['fld4KzcfmV2P8F3E6']) {
+							case '⭐️':
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 1;
+								break;
+							case '⭐️⭐️':
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 2;
+								break;
+							case '⭐️⭐️⭐️':
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 3;
+								break;
+							case '⭐️⭐️⭐️⭐️':
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 4;
+								break;
+							case '⭐️⭐️⭐️⭐️⭐️':
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 5;
+								break;
+							default:
+								$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = '';
+						}
+					}
+				}
+			}
+		}
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
 		if  (
