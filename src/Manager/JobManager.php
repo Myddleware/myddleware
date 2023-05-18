@@ -442,6 +442,7 @@ class jobcore
     public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus): bool
     {
         try {
+			$errors = array();
             if (empty($ids)) {
                 throw new Exception('No ids in the input parameter of the function massAction.');
             }
@@ -505,15 +506,22 @@ class jobcore
 						$this->ruleManager->setManual($this->manual);
                         $this->ruleManager->setRule($document['rule_id']);
                     }
-                    $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
+                    $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
+					// Save the error if exists
+					if (!empty($error)) {
+						$errors[] = $error[0];
+					}
                 }
             } else {
                 throw new Exception('No document found corresponding to the input parameters. No action done in the job massAction. ');
             }
+			// Log all erros 
+			if (!empty($errors)) {
+				throw new Exception(implode('|', $errors));
+			}
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
             return false;
         }
 
