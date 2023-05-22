@@ -11,7 +11,7 @@ class airtablecustom extends airtable {
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
-								'apppq0nb5WI815V57' => 'Reponse',			// Aiko PREPROD Reponse
+								'apppq0nb5WI815V57' => 'CONTACTS',			// Aiko PREPROD Reponse
 								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
@@ -86,8 +86,8 @@ class airtablecustom extends airtable {
 	public function readData($param): array {
 		$result = parent::readData($param);
 
-		// if the rule id is 645b827fb6151, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
-		if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		if (($param["rule"]["id"] === '646b571652230' || $_POST["params"][1]["value"] === '646b571652230') && $param['module'] == 'REPONSE') {
 			if (!empty($result['values'])) {
 				foreach ($result['values'] as $docId => $values) {
 					if (!empty($values['fldC7m6zch8Cz6KWQ'])) {
@@ -120,8 +120,8 @@ class airtablecustom extends airtable {
 				}
 			}
 		}
-		// if the rule id is 645b827fb6151, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
-		if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		if (($param["rule"]["id"] === '646b571652230' || $_POST["params"][1]["value"] === '646b571652230') && $param['module'] == 'REPONSE') {
 			if (!empty($result['values'])) {
 				foreach ($result['values'] as $docId => $values) {
 					if (!empty($values['fld4KzcfmV2P8F3E6'])) {
