@@ -87,8 +87,14 @@ class airtablecustom extends airtable {
 		$result = parent::readData($param);
 
 		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
+
+		$simulationParams = false;
+		if (!empty($_POST["params"][1]["value"]) && $_POST["params"][1]["value"] == '646b571652230') {
+			$simulationParams = true;
+		}
+
 		if (!empty($param)) {
-			if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+			if (($param["rule"]["id"] === '645b827fb6151' || $simulationParams) && $param['module'] == 'REPONSE') {
 				if (!empty($result['values'])) {
 					foreach ($result['values'] as $docId => $values) {
 						if (!empty($values['fldC7m6zch8Cz6KWQ'])) {
@@ -115,7 +121,7 @@ class airtablecustom extends airtable {
 					}
 				}
 			}
-			if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
+			if (($param["rule"]["id"] === '645b827fb6151' || $simulationParams) && $param['module'] == 'REPONSE') {
 				if (!empty($result['values'])) {
 					foreach ($result['values'] as $docId => $values) {
 						if (!empty($values['fld4KzcfmV2P8F3E6'])) {
