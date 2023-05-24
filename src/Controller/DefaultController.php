@@ -2371,6 +2371,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $oneRuleAudit->setRule($oneRule);
                 $oneRuleAudit->setDateCreated(new \DateTime());
                 $oneRuleAudit->setData($ruledata);
+                $oneRuleAudit->setCreatedBy($this->getUser());
                 $this->entityManager->persist($oneRuleAudit);
                 $this->entityManager->flush();
 
