@@ -153,10 +153,12 @@ class mysqlcustom extends mysql {
 					AND	$targetRoles == 'null'
 				)
 			) {
-				$value['id'] = $data['target_id'];
-				$value['error'] = 'Target and history data are equals. ';		
-				$this->updateDocumentStatus($idDoc, $value, $param, 'No_send');
-				return null;
+				// Even if the roles are equals, the other data can be different so we send the document without the role
+				// $value['id'] = $data['target_id'];
+				// $value['error'] = 'Target and history data are equals. ';		
+				// $this->updateDocumentStatus($idDoc, $value, $param, 'No_send');
+				// return null;
+				unset($data['roles']);
 			}
 		}
 		// Call standard function
