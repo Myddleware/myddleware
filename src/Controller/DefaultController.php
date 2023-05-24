@@ -327,7 +327,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
             $this->sessionService->setFluxFilterRuleName($rule->getName());
 
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return $this->redirect($this->generateUrl('document_list_page'));
         }
 
         /**
@@ -2371,6 +2371,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $oneRuleAudit->setRule($oneRule);
                 $oneRuleAudit->setDateCreated(new \DateTime());
                 $oneRuleAudit->setData($ruledata);
+                $oneRuleAudit->setCreatedBy($this->getUser());
                 $this->entityManager->persist($oneRuleAudit);
                 $this->entityManager->flush();
 
