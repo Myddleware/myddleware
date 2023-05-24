@@ -86,7 +86,7 @@ class airtablecustom extends airtable {
 	public function readData($param): array {
 		$result = parent::readData($param);
 
-		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be compatible with the database encoding which is utf8_general_ci
+		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
 		if (!empty($param)) {
 			if (($param["rule"]["id"] === '645b827fb6151' || $_POST["params"][1]["value"] === '645b827fb6151') && $param['module'] == 'REPONSE') {
 				if (!empty($result['values'])) {
