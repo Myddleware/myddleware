@@ -2950,6 +2950,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
         $entityManager = $this->getDoctrine()->getManager();
+        $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $ruleId,
+            'name' => 'description'
+        ]);
+        // if $description is the same as the previous one or is equal to 0 or is empty
+        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
+        }
 
         // Retrieve the RuleParam entity using the ruleId
         $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
