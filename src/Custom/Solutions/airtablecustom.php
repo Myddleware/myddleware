@@ -98,11 +98,15 @@ class airtablecustom extends airtable {
 
 		if (!empty($_POST["params"])) {
 			if (!empty($_POST["params"][1]["value"])) {
-				if ($_POST["params"][1]["name"] !== "bidirectional") {
+				if ($_POST["params"][1]["name"] === "bidirectional") {
+					// $ruleId = $_POST["params"][1]["value"];
+					$ruleId = $_POST["params"][2]["value"];
+					
+				} else {
 					$ruleId = $_POST["params"][1]["value"];
-					if ($ruleId === '646b571652230') {
-						$simulationParams = true;
-					}
+				}
+				if ($ruleId === '646b571652230') {
+					$simulationParams = true;
 				}
 			}
 		}
