@@ -153,11 +153,14 @@ class mysqlcustom extends mysql {
 					AND	$targetRoles == 'null'
 				)
 			) {
-				// Even if the roles are equals, the other data can be different so we send the document without the role
-				// $value['id'] = $data['target_id'];
-				// $value['error'] = 'Target and history data are equals. ';		
-				// $this->updateDocumentStatus($idDoc, $value, $param, 'No_send');
-				// return null;
+				// REEC user custom carries only the role modification so if roles are equals we cancel the document 
+				if ($param['rule']['id'] == '63e1007614977') { // REEC user custom
+					$value['id'] = $data['target_id'];
+					$value['error'] = 'Target and history roles are equals. No need to send the change to REEC. ';		
+					$this->updateDocumentStatus($idDoc, $value, $param, 'No_send');
+					return null;
+				} 
+				// For the other rules, even if the roles are equals, the other data can be different so we send the document without the role
 				unset($data['roles']);
 			}
 		}
