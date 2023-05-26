@@ -95,22 +95,25 @@ class airtablecustom extends airtable {
 		$readParams = false;
 		$moduleReponse = !empty($param['module']) && $param['module'] == 'REPONSE';
 
-		if (isset($_POST["params"]) && !empty($_POST["params"])) {
-			if (!empty($_POST["params"][1]["value"])) {
-				if ($_POST["params"][1]["name"] === "bidirectional") {
-					$ruleId = $_POST["params"][2]["value"];
-					
-				} else {
-					$ruleId = $_POST["params"][1]["value"];
-				}
+		if (isset($_POST["params"])) {
+			if (!empty($_POST["params"])) {
+				if (!empty($_POST["params"][1]["value"])) {
+					if ($_POST["params"][1]["name"] === "bidirectional") {
+						$ruleId = $_POST["params"][2]["value"];
+					} else {
+						$ruleId = $_POST["params"][1]["value"];
+					}
 					$simulationParams = true;
+				}
 			}
 		}
 
-		if(isset($param["rule"]) && !empty($param["rule"])){
-			if(!empty($param["rule"]["id"])) {
+		if (isset($param["rule"])) {
+			if (!empty($param["rule"])) {
+				if (!empty($param["rule"]["id"])) {
 					$ruleId = $param["rule"]["id"];
-						$readParams = true;
+					$readParams = true;
+				}
 			}
 		}
 
