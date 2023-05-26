@@ -89,7 +89,6 @@ class airtablecustom extends airtable {
 		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
 		//Todo: We will have to change the id on myddleware prod !!!
 
-		// if (($param["rule"]["id"] === '646b571652230' || $simulationParams) && $param['module'] == 'REPONSE') {
 
 		$aikoEmoji = false;
 		$simulationParams = false;
@@ -99,31 +98,24 @@ class airtablecustom extends airtable {
 		if (!empty($_POST["params"])) {
 			if (!empty($_POST["params"][1]["value"])) {
 				if ($_POST["params"][1]["name"] === "bidirectional") {
-					// $ruleId = $_POST["params"][1]["value"];
 					$ruleId = $_POST["params"][2]["value"];
 					
 				} else {
 					$ruleId = $_POST["params"][1]["value"];
 				}
-				if ($ruleId === '646b571652230') {
 					$simulationParams = true;
-				}
 			}
 		}
 
 		if (!empty($param["rule"])) {
 			if(!empty($param["rule"]["id"])) {
-				if ($param["rule"]["id"] !== '646b571652230') {
 					$ruleId = $param["rule"]["id"];
-					if ($ruleId === '646b571652230') {
 						$readParams = true;
-					}
-				}
 			}
 		}
 
 		// if (simulation params or read params) and module reponse then aiko emoji is true
-		if (($simulationParams || $readParams) && $moduleReponse) {
+		if (($simulationParams || $readParams) && $moduleReponse && $ruleId === '646b571652230') {
 			$aikoEmoji = true;
 		}
 
