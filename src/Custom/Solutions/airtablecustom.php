@@ -93,7 +93,7 @@ class airtablecustom extends airtable {
 		$aikoEmoji = false;
 		$simulationParams = false;
 		$readParams = false;
-		$moduleReponse = !empty($param['module']) && $param['module'] == 'REPONSE';
+		$moduleReponse = isset($param['module']) && !empty($param['module']) && $param['module'] == 'REPONSE';
 
 		if (isset($_POST["params"])) {
 			if (!empty($_POST["params"])) {
@@ -175,37 +175,37 @@ class airtablecustom extends airtable {
 
 
 		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
-		if  (
+		if (isset($param["rule"]) && isset($param["document"]) && isset($param["call_type"])) {
+			if (
 				!empty($param['rule'])
-			AND	in_array($param['rule']['conn_id_target'], array(4,8))
-			AND $param['document']['type'] == 'U'
-			AND $param['call_type'] == 'history'
-			AND !empty($result['error'])
-			AND (
-					strpos($result['error'], '404 Not Found')
-				 OR strpos($result['error'], '404  returned')	// Airtable has changed the error message
-			)
-		) {
-			// Change the document type 
-			$documentManager = new DocumentManager(
-										$this->logger, 
-										$this->connection, 
-										$this->entityManager,
-										$this->documentRepository,
-										$this->ruleRelationshipsRepository,
-										$this->formulaManager
-									);
-			$paramDoc['id_doc_myddleware'] = $param['document']['id'];
-			$paramDoc['jobId'] = $param['jobId'];
-			$documentManager->setParam($paramDoc);
-			// Add a log
-			$documentManager->generateDocLog('W','La donnee a ete supprimee dans Airtable. Le type de document passe donc de Update a Create. ');
-			// Set the create type to the document
-			$documentManager->updateType('C');
-			// Clear the error
-			$result['error'] = '';
+				and	in_array($param['rule']['conn_id_target'], array(4, 8))
+				and $param['document']['type'] == 'U'
+				and $param['call_type'] == 'history'
+				and !empty($result['error'])
+				and (strpos($result['error'], '404 Not Found')
+					or strpos($result['error'], '404  returned')	// Airtable has changed the error message
+				)
+			) {
+				// Change the document type 
+				$documentManager = new DocumentManager(
+					$this->logger,
+					$this->connection,
+					$this->entityManager,
+					$this->documentRepository,
+					$this->ruleRelationshipsRepository,
+					$this->formulaManager
+				);
+				$paramDoc['id_doc_myddleware'] = $param['document']['id'];
+				$paramDoc['jobId'] = $param['jobId'];
+				$documentManager->setParam($paramDoc);
+				// Add a log
+				$documentManager->generateDocLog('W', 'La donnee a ete supprimee dans Airtable. Le type de document passe donc de Update a Create. ');
+				// Set the create type to the document
+				$documentManager->updateType('C');
+				// Clear the error
+				$result['error'] = '';
+			}
 		}
-		
 		/* Aiko - Suppression isn't used anymore
 		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression
 			if (!empty($result['values'])) {
