@@ -73,13 +73,13 @@ class mysqlcustom extends mysql {
 	
 	// Clean id empty for foreign key
 	protected function checkDataBeforeUpdate($param, $data, $idDoc){
-		
 		// Manage roles field for reec. We have to merge data coming from 2 rules users custom and engagé by using the history data
 		if (in_array($param['rule']['id'], array('5ce3621156127','5d01a630c217c', '63e1007614977', '6273905a05cb2'))) { // REEC users custom / engagé
 			// Error if no history data
 			if (empty($param['dataHistory'][$idDoc])) {
 				throw new \Exception('History data is requiered to calculate the filed role_reec. Errror because history data is empty.');
 			}
+
 			// Roles by type (engagé or user)
 			$userRoles = array('ROLE_SALARIE','ROLE_SIEGE','ROLE_ADMIN');
 			$engageRoles = array('ROLE_MENTOR','ROLE_VOLONTAIRE');
@@ -114,7 +114,8 @@ class mysqlcustom extends mysql {
 			}
 
 			if ($data['roles'] != serialize($targetRoles)) {
-				$data['roles'] = serialize($targetRoles);
+				// Set null to target values (not an empty array) if there is no role
+				$data['roles'] = (!empty($targetRoles) ? serialize($targetRoles) : 'null');
 
 				// Change the document data 
 				if (!isset($this->documentManager)) {
@@ -131,9 +132,38 @@ class mysqlcustom extends mysql {
 				$paramDoc['jobId'] = $param['jobId'];
 				$this->documentManager->setParam($paramDoc);
 				$this->documentManager->updateDocumentData($idDoc, array('roles'=>$data['roles']), 'T');
-			};
-		}
+			}
 
+			// Send null to REEC (not an empty array) if there is no role
+			if (empty($targetRoles)) {
+				$targetRoles = 'null';
+			}
+			// If history equals target we don't send the data to the target
+			if (
+				(
+						!empty($historyRoles)
+					AND	!empty($targetRoles)
+					AND $historyRoles == $targetRoles
+				) OR (
+						empty($historyRoles)
+					AND	empty($targetRoles)
+				)
+				OR (
+						empty($historyRoles)
+					AND	$targetRoles == 'null'
+				)
+			) {
+				// REEC user custom carries only the role modification so if roles are equals we cancel the document 
+				if ($param['rule']['id'] == '63e1007614977') { // REEC user custom
+					$value['id'] = $data['target_id'];
+					$value['error'] = 'Target and history roles are equals. No need to send the change to REEC. ';		
+					$this->updateDocumentStatus($idDoc, $value, $param, 'No_send');
+					return null;
+				} 
+				// For the other rules, even if the roles are equals, the other data can be different so we send the document without the role
+				unset($data['roles']);
+			}
+		}
 		// Call standard function
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		return $this->checkData($param, $data);	

@@ -71,7 +71,7 @@ class jobcore
 	protected int $noDocumentsTablesToEmptyCounter;
 	protected int $noRulesTablesToEmptyCounter;
 
-    protected int $limitDelete;
+    protected int $limitDelete = 1000;
     protected int $nbCallMaxDelete = 50;
     protected int $checkJobPeriod = 900;
 
