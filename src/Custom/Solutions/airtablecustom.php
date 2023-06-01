@@ -77,7 +77,7 @@ class airtablecustom extends airtable {
         'REFERENTS' => array('fldLt1pZEcUxKlTpH'),
         'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
 		'PARTICIPATION_RI' => array('fldL4qph2Lg65xKjz', 'fldtIpKCdlbykhkm5'),
-		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy'),
+		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy', 'fldaLPQ8EbyOpk61X'),
 		'VSC' => array('fldTpnnN8XfbLHADM')
         );
 
@@ -88,7 +88,7 @@ class airtablecustom extends airtable {
         'REFERENTS' => array('fldX9mSLp6FDX6GRC'),
         'COMPOSANTES' => array('fldKeVBi8NgdsPJZE'),
 		'PARTICIPATION_RI' => array('fldvDZBAKSrNOH2Go', 'flddhYWVVsmf3rCJU'),
-		'Relation_POLE' => array('fldxgZxZXc0q08U9C', 'fldG1SI869ikEvg9n'),
+		'Relation_POLE' => array('fldxgZxZXc0q08U9C', 'fldG1SI869ikEvg9n','fldUko2rmiJv8uooM'),
 		'VSC' => array('fldAeyp1OXzWdrn9i')
         );
 
