@@ -25,6 +25,7 @@ class mysqlcustom extends mysql {
 	protected $FieldsDuplicate = array(	
 										'contact' => array('email'),
 										'coupon' => array('jeune_id'),
+										'record_pole' => array('pole_id','record_id'),
 								  );
 
 	 /**
