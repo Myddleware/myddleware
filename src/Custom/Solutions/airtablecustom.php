@@ -81,6 +81,17 @@ class airtablecustom extends airtable {
 		'VSC' => array('fldTpnnN8XfbLHADM')
         );
 
+	protected $fieldsDuplicatePreprod = array(
+        'CONTACTS' => array('fld9XGHFATCBdkoD8'),
+        'BINOMES' => array('fldBTw0xZ3m7UN5uE'),
+        'POLE' => array('fldJC9yod2efMSMh3'),
+        'REFERENTS' => array('fldX9mSLp6FDX6GRC'),
+        'COMPOSANTES' => array('fldKeVBi8NgdsPJZE'),
+		'PARTICIPATION_RI' => array('fldvDZBAKSrNOH2Go', 'flddhYWVVsmf3rCJU'),
+		'Relation_POLE' => array('fldxgZxZXc0q08U9C', 'fldG1SI869ikEvg9n'),
+		'VSC' => array('fldAeyp1OXzWdrn9i')
+        );
+
 
 	// Redefine read function
 	public function readData($param): array {
@@ -308,6 +319,18 @@ class airtablecustom extends airtable {
 		}
 
         return $data;
+    }
+	    
+	function getFieldsDuplicate($module)
+    {
+		if ($_ENV['AFEV_ENV'] == 'PREPROD') {
+			if (isset($this->fieldsDuplicatePreprod[$module])) {
+				return $this->fieldsDuplicatePreprod[$module];
+			} elseif (isset($this->fieldsDuplicatePreprod['default'])) {
+				return $this->fieldsDuplicatePreprod['default'];
+			}
+		}
+        return parent::getFieldsDuplicate($module);
     }
 
 	// Redefine updateDocumentStatus standard function
