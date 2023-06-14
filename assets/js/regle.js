@@ -284,6 +284,95 @@ $(function () {
 			$("#formule").dialog("close");
 		});
 
+		function checkBrackets(formula) {
+			var map = {
+				'(': ')',
+				'[': ']',
+				'{': '}'
+			}
+		
+			var pairTypes = Object.keys(map);
+		
+			for(var t=0; t<pairTypes.length; t++) {
+				var stack = [];
+				var pairs = [];
+				var currentPair = 0;
+				var errorAt = -1;
+		
+				var open = pairTypes[t];
+				var close = map[open];
+		
+				console.log('Checking pair type:', open+close);
+		
+				for (var i = 0; i < formula.length; i++) {
+					if (formula[i] === open) {
+						currentPair++;
+						stack.push({
+							'symbol': open,
+							'position': i,
+							'pairNum': currentPair
+						});
+						console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
+					}
+					else if (formula[i] === close) {
+						var last = stack.pop();
+		
+						if (!last) {
+							console.log('Found closing symbol without matching opening symbol at', i);
+							errorAt = i;
+							currentPair++;
+							break;
+						} else {
+							console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
+							if (!pairs.includes(last.pairNum)) {
+								pairs.push(last.pairNum);
+							}
+						}
+					}
+				}
+		
+				// If we still have unclosed brackets at the end of parsing, record an error
+				if (stack.length > 0) {
+					console.log('Found unbalanced pair at the end of the formula');
+					var lastUnbalanced = stack.pop();
+					errorAt = lastUnbalanced.position;
+					currentPair = lastUnbalanced.pairNum;
+				}
+		
+				var status = (stack.length === 0) && (errorAt === -1);
+				var unbalancedPair = status ? null : currentPair;
+		
+				var index = pairs.indexOf(unbalancedPair);
+				if (index > -1) {
+					pairs.splice(index, 1);
+				}
+		
+				console.log('Pair Type:', open + close);
+				console.log('Status:', status);
+				console.log('Error Position:', errorAt);
+				console.log('Unbalanced Pair:', unbalancedPair);
+				console.log('Balanced Pairs:', pairs);
+		
+				if (!status) {
+					return {
+						'status': status,
+						'error_at': errorAt,
+						'unbalanced_pair': unbalancedPair,
+						'balanced_pairs': pairs.sort((a, b) => a - b)
+					};
+				}
+			}
+		
+			return {
+				'status': true,
+				'error_at': -1,
+				'unbalanced_pair': null,
+				'balanced_pairs': []
+			};
+		}
+		
+		
+		
 		// Btn confirmation dialogue formule
 		$("#area_confirm").on("click", function () {
 			// Avant de confirmer la formule il faut la valider
@@ -370,19 +459,19 @@ $(function () {
 				}
 			}
 
-			if (leftBracket != rightBracket) {
-				alert('Your formula has an unbalanced number of brackets. You have ' + leftBracket + ' left brackets and ' + rightBracket + ' right brackets. Please check your formula.');
-				return false;
+			// if (leftBracket != rightBracket) {
+			// 	alert('Your formula has an unbalanced number of brackets. You have ' + leftBracket + ' left brackets and ' + rightBracket + ' right brackets. Please check your formula.');
+			// 	return false;
 
-			} if (leftParenthesis != rightParenthesis) {
-				alert('Your formula has an unbalanced number of parenthesis. You have ' + leftParenthesis + ' left parenthesis and ' + rightParenthesis + ' right parenthesis. Please check your formula.');
-				return false;
-			}
+			// } if (leftParenthesis != rightParenthesis) {
+			// 	alert('Your formula has an unbalanced number of parenthesis. You have ' + leftParenthesis + ' left parenthesis and ' + rightParenthesis + ' right parenthesis. Please check your formula.');
+			// 	return false;
+			// }
 
-			if (leftCurlyBracket != rightCurlyBracket) {
-				alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
-				return false;
-			}
+			// if (leftCurlyBracket != rightCurlyBracket) {
+			// 	alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
+			// 	return false;
+			// }
 
 			// If there is the substring null in the formula and it is not encased in two "" or two '', then return an error
 			if (myFormula.includes('null')) {
@@ -392,6 +481,12 @@ $(function () {
 					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
 					return false;
 				}
+			}
+
+			var result = checkBrackets(myFormula);
+			if (!result.status) {
+				alert('Your formula has unbalanced brackets at position ' + result.error_at + '. Bracket pair number ' + result.unbalanced_pair + ' is unbalanced. Bracket pair number ' + result.balanced_pairs.join(', ') + ' are balanced. Please check your formula.');
+				return false;
 			}
 
 			$.ajax({
