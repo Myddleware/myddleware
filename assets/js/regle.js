@@ -291,6 +291,133 @@ $(function () {
 			var myFormula = $('#area_insert').val(); // l'id du champ
 			var zone = $(this).parent().parent().find("#formule_table").text();
 
+			console.log('test 0');
+			console.log('this is the formula we are testing', myFormula);
+
+			// get all the ol with a class of "ui-droppable ui-sortable"
+			var ol = document.getElementsByClassName("ui-droppable ui-sortable");
+			console.log('these are all the ols with the right class', ol);
+
+			console.log('test 1');
+			// get all the children of the ol that are li
+			var li = ol[0].getElementsByTagName("li");
+
+			console.log('li', li);
+
+			// HTMLCollection { 0: li.ch
+			// 	, length: 1 }
+			// 	​
+			// 	0: <li class="ch" value="name">
+			// 	​
+			// 	length: 1
+			// 	​
+			// 	<prototype>: HTMLCollectionPrototype { item: item(), namedItem: namedItem(), length: Getter, … }
+
+			// the above is the result of the console.log(li) command, we want to the valeu of every li element, in that case, name
+
+			// get the value of the first li element
+			// var li_value = li[0].getAttribute("value");
+			// console.log('li_value', li_value);
+
+			var values = [];
+			// now instead of li[0].getAttribute("value"); I want to loop to get the value of every li element
+			for (var i = 0; i < li.length; i++) {
+				var li_value = li[i].getAttribute("value");
+				values.push(li_value);
+			}
+
+			var bracketError = false;
+			var emptyBracketError = false;
+			var missingFieldError = false;
+			var missingFieldList = [];
+
+
+			// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
+			// if it does not, or if the curly brackets are empty, then bracketError = true
+
+			// if there is no pair of curly brackets in myFormula, then bracketError = true
+			if (myFormula.includes('{') && myFormula.includes('}')) {
+				// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
+				for (var i = 0; i < values.length; i++) {
+					if (myFormula.includes(values[i])) {
+						continue;
+					} else {
+						missingFieldError = true;
+						missingFieldList.push(values[i]);
+					}
+				}
+			}
+
+			if (myFormula.includes('{}')) {
+				emptyBracketError = true;
+			}
+
+			if (emptyBracketError == true) {
+				// finds the position of the first empty bracket
+				var position = myFormula.indexOf('{}');
+				alert('Your bracket is empty at position ' + position + '.');
+				// prevents from exiting the current menu
+				return false;
+			}
+
+			if (bracketError == true && emptyBracketError == false) {
+				// finds the position of the first bracket of the pair
+
+				alert('Your bracket number ' + wrongbracket + ' has a wrong field');
+				// prevents from exiting the current menu
+				return false;
+			}
+			
+
+			if (missingFieldError == true) {
+				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
+				return false;
+			}
+
+			// if there are one or more unbalanced [, (, {,in myFormula, then bracketError = true
+			// algorithm to take count of every bracket in the formula and then compare the number of each type of bracket
+			// if the number of each type of bracket is not equal, then bracketError = true
+			// if the number of each type of bracket is equal, then bracketError = false
+			var leftBracket = 0;
+			var rightBracket = 0;
+			var leftParenthesis = 0;
+			var rightParenthesis = 0;
+			var leftCurlyBracket = 0;
+			var rightCurlyBracket = 0;
+
+
+		    for (var i = 0; i < myFormula.length; i++) {
+				if (myFormula[i] == '[') {
+					leftBracket++;
+				} else if (myFormula[i] == ']') {
+					rightBracket++;
+				} else if (myFormula[i] == '(') {
+					leftParenthesis++;
+				} else if (myFormula[i] == ')') {
+					rightParenthesis++;
+				} else if (myFormula[i] == '{') {
+					leftCurlyBracket++;
+				} else if (myFormula[i] == '}') {
+					rightCurlyBracket++;
+				}
+			}
+
+			if (leftBracket != rightBracket) {
+				alert('Your formula has an unbalanced number of brackets. You have ' + leftBracket + ' left brackets and ' + rightBracket + ' right brackets. Please check your formula.');
+				return false;
+
+			} if (leftParenthesis != rightParenthesis) {
+				alert('Your formula has an unbalanced number of parenthesis. You have ' + leftParenthesis + ' left parenthesis and ' + rightParenthesis + ' right parenthesis. Please check your formula.');
+				return false;
+			}
+
+			if (leftCurlyBracket != rightCurlyBracket) {
+				alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
+				return false;
+			}
+
+
+
 			$.ajax({
 				type: "POST",
 				url: path_formula,
