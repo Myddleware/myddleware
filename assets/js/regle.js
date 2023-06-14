@@ -286,38 +286,13 @@ $(function () {
 
 		// Btn confirmation dialogue formule
 		$("#area_confirm").on("click", function () {
-
 			// Avant de confirmer la formule il faut la valider
 			var myFormula = $('#area_insert').val(); // l'id du champ
 			var zone = $(this).parent().parent().find("#formule_table").text();
 
-			console.log('test 0');
-			console.log('this is the formula we are testing', myFormula);
-
 			// get all the ol with a class of "ui-droppable ui-sortable"
 			var ol = document.getElementsByClassName("ui-droppable ui-sortable");
-			console.log('these are all the ols with the right class', ol);
-
-			console.log('test 1');
-			// get all the children of the ol that are li
 			var li = ol[0].getElementsByTagName("li");
-
-			console.log('li', li);
-
-			// HTMLCollection { 0: li.ch
-			// 	, length: 1 }
-			// 	​
-			// 	0: <li class="ch" value="name">
-			// 	​
-			// 	length: 1
-			// 	​
-			// 	<prototype>: HTMLCollectionPrototype { item: item(), namedItem: namedItem(), length: Getter, … }
-
-			// the above is the result of the console.log(li) command, we want to the valeu of every li element, in that case, name
-
-			// get the value of the first li element
-			// var li_value = li[0].getAttribute("value");
-			// console.log('li_value', li_value);
 
 			var values = [];
 			// now instead of li[0].getAttribute("value"); I want to loop to get the value of every li element
@@ -331,11 +306,6 @@ $(function () {
 			var missingFieldError = false;
 			var missingFieldList = [];
 
-
-			// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
-			// if it does not, or if the curly brackets are empty, then bracketError = true
-
-			// if there is no pair of curly brackets in myFormula, then bracketError = true
 			if (myFormula.includes('{') && myFormula.includes('}')) {
 				// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
 				for (var i = 0; i < values.length; i++) {
@@ -348,6 +318,7 @@ $(function () {
 				}
 			}
 
+			// check for set of empty brackets
 			if (myFormula.includes('{}')) {
 				emptyBracketError = true;
 			}
@@ -361,13 +332,11 @@ $(function () {
 			}
 
 			if (bracketError == true && emptyBracketError == false) {
-				// finds the position of the first bracket of the pair
-
+				// finds the position of the first bracket of the pair that is wrong
 				alert('Your bracket number ' + wrongbracket + ' has a wrong field');
 				// prevents from exiting the current menu
 				return false;
 			}
-			
 
 			if (missingFieldError == true) {
 				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
@@ -384,7 +353,6 @@ $(function () {
 			var rightParenthesis = 0;
 			var leftCurlyBracket = 0;
 			var rightCurlyBracket = 0;
-
 
 		    for (var i = 0; i < myFormula.length; i++) {
 				if (myFormula[i] == '[') {
@@ -415,8 +383,6 @@ $(function () {
 				alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
 				return false;
 			}
-
-
 
 			$.ajax({
 				type: "POST",
