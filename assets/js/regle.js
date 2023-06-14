@@ -384,6 +384,16 @@ $(function () {
 				return false;
 			}
 
+			// If there is the substring null in the formula and it is not encased in two "" or two '', then return an error
+			if (myFormula.includes('null')) {
+				if (myFormula.includes('"null"') || myFormula.includes("'null'")) {
+					// do nothing
+				} else {
+					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
+					return false;
+				}
+			}
+
 			$.ajax({
 				type: "POST",
 				url: path_formula,
