@@ -379,16 +379,15 @@ $(function () {
 			var myFormula = $('#area_insert').val(); // l'id du champ
 			var zone = $(this).parent().parent().find("#formule_table").text();
 
-			// get all the ol with a class of "ui-droppable ui-sortable"
-			var ol = document.getElementsByClassName("ui-droppable ui-sortable");
-			var li = ol[0].getElementsByTagName("li");
-
 			var values = [];
-			// now instead of li[0].getAttribute("value"); I want to loop to get the value of every li element
-			for (var i = 0; i < li.length; i++) {
-				var li_value = li[i].getAttribute("value");
-				values.push(li_value);
-			}
+
+			// champs_insert is the id of the select element, add all the values of the options of the select element to the values array
+			$('#champs_insert option').each(function () {
+				values.push($(this).val());
+			});
+
+
+			console.log('these are the values', values);
 
 			var bracketError = false;
 			var emptyBracketError = false;
@@ -416,6 +415,8 @@ $(function () {
 				// finds the position of the first empty bracket
 				var position = myFormula.indexOf('{}');
 				alert('Your bracket is empty at position ' + position + '.');
+				missingFieldList = [];
+				values = [];
 				// prevents from exiting the current menu
 				return false;
 			}
@@ -423,12 +424,16 @@ $(function () {
 			if (bracketError == true && emptyBracketError == false) {
 				// finds the position of the first bracket of the pair that is wrong
 				alert('Your bracket number ' + wrongbracket + ' has a wrong field');
+				missingFieldList = [];
+				values = [];
 				// prevents from exiting the current menu
 				return false;
 			}
 
 			if (missingFieldError == true) {
 				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
+				missingFieldList = [];
+				values = [];
 				return false;
 			}
 
@@ -479,6 +484,8 @@ $(function () {
 					// do nothing
 				} else {
 					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
+					missingFieldList = [];
+					values = [];
 					return false;
 				}
 			}
@@ -486,8 +493,16 @@ $(function () {
 			var result = checkBrackets(myFormula);
 			if (!result.status) {
 				alert('Your formula has unbalanced brackets at position ' + result.error_at + '. Bracket pair number ' + result.unbalanced_pair + ' is unbalanced. Bracket pair number ' + result.balanced_pairs.join(', ') + ' are balanced. Please check your formula.');
+				missingFieldList = [];
+				values = [];
 				return false;
 			}
+
+			// empty the values array
+			missingFieldList = [];
+			values = [];
+			console.log('these are the values', values);
+
 
 			$.ajax({
 				type: "POST",
