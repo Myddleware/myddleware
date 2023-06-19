@@ -418,7 +418,7 @@ $(function () {
 				missingFieldList = [];
 				values = [];
 				// prevents from exiting the current menu
-				return false;
+				// return false;
 			}
 
 			if (bracketError == true && emptyBracketError == false) {
@@ -427,14 +427,14 @@ $(function () {
 				missingFieldList = [];
 				values = [];
 				// prevents from exiting the current menu
-				return false;
+				// return false;
 			}
 
 			if (missingFieldError == true) {
 				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
 				missingFieldList = [];
 				values = [];
-				return false;
+				// return false;
 			}
 
 			// if there are one or more unbalanced [, (, {,in myFormula, then bracketError = true
@@ -486,7 +486,7 @@ $(function () {
 					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
 					missingFieldList = [];
 					values = [];
-					return false;
+					// return false;
 				}
 			}
 
@@ -495,7 +495,7 @@ $(function () {
 				alert('Your formula has unbalanced brackets at position ' + result.error_at + '. Bracket pair number ' + result.unbalanced_pair + ' is unbalanced. Bracket pair number ' + result.balanced_pairs.join(', ') + ' are balanced. Please check your formula.');
 				missingFieldList = [];
 				values = [];
-				return false;
+				// return false;
 			}
 
 			// empty the values array
