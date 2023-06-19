@@ -284,12 +284,225 @@ $(function () {
 			$("#formule").dialog("close");
 		});
 
+		function checkBrackets(formula) {
+			var map = {
+				'(': ')',
+				'[': ']',
+				'{': '}'
+			}
+		
+			var pairTypes = Object.keys(map);
+		
+			for(var t=0; t<pairTypes.length; t++) {
+				var stack = [];
+				var pairs = [];
+				var currentPair = 0;
+				var errorAt = -1;
+		
+				var open = pairTypes[t];
+				var close = map[open];
+		
+				console.log('Checking pair type:', open+close);
+		
+				for (var i = 0; i < formula.length; i++) {
+					if (formula[i] === open) {
+						currentPair++;
+						stack.push({
+							'symbol': open,
+							'position': i,
+							'pairNum': currentPair
+						});
+						console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
+					}
+					else if (formula[i] === close) {
+						var last = stack.pop();
+		
+						if (!last) {
+							console.log('Found closing symbol without matching opening symbol at', i);
+							errorAt = i;
+							currentPair++;
+							break;
+						} else {
+							console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
+							if (!pairs.includes(last.pairNum)) {
+								pairs.push(last.pairNum);
+							}
+						}
+					}
+				}
+		
+				// If we still have unclosed brackets at the end of parsing, record an error
+				if (stack.length > 0) {
+					console.log('Found unbalanced pair at the end of the formula');
+					var lastUnbalanced = stack.pop();
+					errorAt = lastUnbalanced.position;
+					currentPair = lastUnbalanced.pairNum;
+				}
+		
+				var status = (stack.length === 0) && (errorAt === -1);
+				var unbalancedPair = status ? null : currentPair;
+		
+				var index = pairs.indexOf(unbalancedPair);
+				if (index > -1) {
+					pairs.splice(index, 1);
+				}
+		
+				console.log('Pair Type:', open + close);
+				console.log('Status:', status);
+				console.log('Error Position:', errorAt);
+				console.log('Unbalanced Pair:', unbalancedPair);
+				console.log('Balanced Pairs:', pairs);
+		
+				if (!status) {
+					return {
+						'status': status,
+						'error_at': errorAt,
+						'unbalanced_pair': unbalancedPair,
+						'balanced_pairs': pairs.sort((a, b) => a - b)
+					};
+				}
+			}
+		
+			return {
+				'status': true,
+				'error_at': -1,
+				'unbalanced_pair': null,
+				'balanced_pairs': []
+			};
+		}
+		
+		
+		
 		// Btn confirmation dialogue formule
 		$("#area_confirm").on("click", function () {
-
 			// Avant de confirmer la formule il faut la valider
 			var myFormula = $('#area_insert').val(); // l'id du champ
 			var zone = $(this).parent().parent().find("#formule_table").text();
+
+			var values = [];
+
+			// champs_insert is the id of the select element, add all the values of the options of the select element to the values array
+			$('#champs_insert option').each(function () {
+				values.push($(this).val());
+			});
+
+
+			console.log('these are the values', values);
+
+			var bracketError = false;
+			var emptyBracketError = false;
+			var missingFieldError = false;
+			var missingFieldList = [];
+
+			if (myFormula.includes('{') && myFormula.includes('}')) {
+				// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
+				for (var i = 0; i < values.length; i++) {
+					if (myFormula.includes(values[i])) {
+						continue;
+					} else {
+						missingFieldError = true;
+						missingFieldList.push(values[i]);
+					}
+				}
+			}
+
+			// check for set of empty brackets
+			if (myFormula.includes('{}')) {
+				emptyBracketError = true;
+			}
+
+			if (emptyBracketError == true) {
+				// finds the position of the first empty bracket
+				var position = myFormula.indexOf('{}');
+				alert('Your bracket is empty at position ' + position + '.');
+				missingFieldList = [];
+				values = [];
+				// prevents from exiting the current menu
+				// return false;
+			}
+
+			if (bracketError == true && emptyBracketError == false) {
+				// finds the position of the first bracket of the pair that is wrong
+				alert('Your bracket number ' + wrongbracket + ' has a wrong field');
+				missingFieldList = [];
+				values = [];
+				// prevents from exiting the current menu
+				// return false;
+			}
+
+			if (missingFieldError == true) {
+				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
+				missingFieldList = [];
+				values = [];
+				// return false;
+			}
+
+			// if there are one or more unbalanced [, (, {,in myFormula, then bracketError = true
+			// algorithm to take count of every bracket in the formula and then compare the number of each type of bracket
+			// if the number of each type of bracket is not equal, then bracketError = true
+			// if the number of each type of bracket is equal, then bracketError = false
+			var leftBracket = 0;
+			var rightBracket = 0;
+			var leftParenthesis = 0;
+			var rightParenthesis = 0;
+			var leftCurlyBracket = 0;
+			var rightCurlyBracket = 0;
+
+		    for (var i = 0; i < myFormula.length; i++) {
+				if (myFormula[i] == '[') {
+					leftBracket++;
+				} else if (myFormula[i] == ']') {
+					rightBracket++;
+				} else if (myFormula[i] == '(') {
+					leftParenthesis++;
+				} else if (myFormula[i] == ')') {
+					rightParenthesis++;
+				} else if (myFormula[i] == '{') {
+					leftCurlyBracket++;
+				} else if (myFormula[i] == '}') {
+					rightCurlyBracket++;
+				}
+			}
+
+			// if (leftBracket != rightBracket) {
+			// 	alert('Your formula has an unbalanced number of brackets. You have ' + leftBracket + ' left brackets and ' + rightBracket + ' right brackets. Please check your formula.');
+			// 	return false;
+
+			// } if (leftParenthesis != rightParenthesis) {
+			// 	alert('Your formula has an unbalanced number of parenthesis. You have ' + leftParenthesis + ' left parenthesis and ' + rightParenthesis + ' right parenthesis. Please check your formula.');
+			// 	return false;
+			// }
+
+			// if (leftCurlyBracket != rightCurlyBracket) {
+			// 	alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
+			// 	return false;
+			// }
+
+			// If there is the substring null in the formula and it is not encased in two "" or two '', then return an error
+			if (myFormula.includes('null')) {
+				if (myFormula.includes('"null"') || myFormula.includes("'null'")) {
+					// do nothing
+				} else {
+					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
+					missingFieldList = [];
+					values = [];
+					// return false;
+				}
+			}
+
+			var result = checkBrackets(myFormula);
+			if (!result.status) {
+				alert('Your formula has unbalanced brackets at position ' + result.error_at + '. Bracket pair number ' + result.unbalanced_pair + ' is unbalanced. Bracket pair number ' + result.balanced_pairs.join(', ') + ' are balanced. Please check your formula.');
+				missingFieldList = [];
+				values = [];
+				// return false;
+			}
+
+			// empty the values array
+			missingFieldList = [];
+			values = [];
+			console.log('these are the values', values);
+
 
 			$.ajax({
 				type: "POST",
