@@ -322,6 +322,7 @@
 {% block javascript %}
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		{{ encore_entry_script_tags('app') }}
+            {{ encore_entry_script_tags('filter') }}
 	{% endblock javascript %}
 	<script type="text/javascript">
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
