@@ -1,7 +1,7 @@
 <?php
 
 // Aiko
-$moduleFields['appdKFUpk2X2Ok8Dc'] = array (
+$moduleFields['apppq0nb5WI815V57'] = array ( //! the id was appdKFUpk2X2Ok8Dc and that is the id of prod, not preprod, if intentional keep in mind
     'CONTACTS' => array(
         'fld9XGHFATCBdkoD8'=> array( 'label' => 'ID Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
         'fldrEmPIO0QXKGBDM' => array( 'label' => 'Status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
@@ -61,6 +61,51 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
 		'fldMhVTz2PMcFEeHu'=> array( 'label' => 'BINOMES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true),
         'fldNxAS5krmn5Vqtt'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true),
     ),
+	'REPONSE' => array(
+		'fldEX5A3EY5i2IEVZ' => array('label' => 'LABEL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldjjHGW8g0SL9akr' => array('label' => 'seance_precedente_as_eu_lieux', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldTpr8qVL4yyU6KZ' => array('label' => 'motif_anulation', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldC7m6zch8Cz6KWQ' => array('label' => 'Notation seance precedente', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld21ghhExTeEwnD8' => array('label' => 'Activitée', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld4KzcfmV2P8F3E6' => array('label' => 'rating famille', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldTWmRmHLuMB5MZX' => array('label' => 'Message afev', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldC4WwYz4yvWRQvY' => array('label' => 'date_seance_precedante', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldrC3EYyKHMSEOol' => array('label' => 'num_suivi', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldwvV091nku5BpWE' => array('label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld9f85vrGMMSzskv' => array('label' => 'fruit', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldusRI6ugEA14mAx' => array('label' => 'question', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldse5joo941orK8V' => array('label' => 'type_bilan', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldmxAFCFVeBRfyi0' => array('label' => 'DUREE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld2Jh1qn4FBHsYUT' => array('label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldnXtvp0b01XvgxN' => array('label' => 'Numéro', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld8V7XnRYftHRxxq' => array('label' => 'BINOMES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldsYJN7xEzrRUI4o' => array('label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldW5qQGYwUsyKi7x' => array('label' => 'pole', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldhpZLQjqYXuLWMW' => array('label' => 'NB_semaine', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld23hon1Bs3MIq86' => array('label' => 'assigned_user_id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldEKQdv8NJdEyq7F' => array('label' => 'jeux', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldY1rd1CbECAlH11' => array('label' => 'DATE SEANCE DERNIER SUIVI', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldtrKdHxatRRmWa5' => array('label' => 'DATE SEANCE DERNIER JEUX', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldlxy2ImHL5Yb2yD' => array('label' => 'DERNIER?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldRzcR65mHyNYtI3' => array('label' => 'DEV RECORD ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld17PqJxPH95XLzp' => array('label' => 'activiter autre', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldf8g9NjTT3ksLSR' => array('label' => 'implication_famille', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldZgWLjfnOiHvOfp' => array('label' => 'travail_perso', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldZJSb3r3LJbdMAv' => array('label' => 'DEV NOTATION SEANCE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'flddwjdOiD0rIdT9k' => array('label' => 'DEV NOTATION IMPLICATION', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldhdso9DgPeD0pXn' => array('label' => 'DEV AGE REP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld404ixUzz0L58Fd' => array('label' => 'BOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldgoViwEh78Y0jYO' => array('label' => 'Presentiel', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldvxD7rogZ9dTQbM' => array('label' => 'LAST ANANAS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldWNz2xLH1EZE9bf' => array('label' => 'LAST POMME', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fld8vsA2F0hcPa6vw' => array('label' => 'LAST ORANGE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldkceLzr8f8GaYo1' => array('label' => 'DERNIER JEU DU FRUIT ?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldrwRQWnCJ21SaMU' => array('label' => 'las', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldM1SC5Q4OGFN5vK' => array('label' => 'Nom Théorique', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldWp6GVrW4vddPt2' => array('label' => 'ID TMP', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldsDjV47nqA04Ttl' => array('label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldMtaOTmMczbFnxq' => array('label' => 'Date', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+	),
 );
 
 // Aiko supp

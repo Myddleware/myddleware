@@ -11,6 +11,7 @@ class airtablecustom extends airtable {
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
+								'apppq0nb5WI815V57' => 'CONTACTS',			// Aiko PREPROD Reponse
 								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
@@ -18,11 +19,19 @@ class airtablecustom extends airtable {
 							);
 
 	protected $modules = array(
+								'apppq0nb5WI815V57' => array(
+														'CONTACTS' =>	'CONTACTS',
+														'BINOMES' =>	'BINOMES',
+														'POLE' => 		'POLES',
+														'REFERENTS' => 	'REFERENTS',
+														'REPONSE' => 	'REPONSE',
+													),
 								'appdKFUpk2X2Ok8Dc' => array(
 														'CONTACTS' =>	'CONTACTS',
 														'BINOMES' =>	'BINOMES',
 														'POLE' => 		'POLES',
-														'REFERENTS' => 	'REFERENTS'
+														'REFERENTS' => 	'REFERENTS',
+														'REPONSE' => 	'REPONSE',
 													),
 								'appX0PhUGIkBTcWBE' =>  array(
 														'Aiko Auto Supr' => 'Aiko Auto Supr'
@@ -68,7 +77,7 @@ class airtablecustom extends airtable {
         'REFERENTS' => array('fldLt1pZEcUxKlTpH'),
         'COMPOSANTES' => array('fld0FmpZqG5wJFrCP'),
 		'PARTICIPATION_RI' => array('fldL4qph2Lg65xKjz', 'fldtIpKCdlbykhkm5'),
-		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy'),
+		'Relation_POLE' => array('fldNHqlGf5PJhYCMN', 'fldWsjwPo27DVlYMy', 'fldaLPQ8EbyOpk61X'),
 		'VSC' => array('fldTpnnN8XfbLHADM')
         );
 
@@ -79,47 +88,135 @@ class airtablecustom extends airtable {
         'REFERENTS' => array('fldX9mSLp6FDX6GRC'),
         'COMPOSANTES' => array('fldKeVBi8NgdsPJZE'),
 		'PARTICIPATION_RI' => array('fldvDZBAKSrNOH2Go', 'flddhYWVVsmf3rCJU'),
-		'Relation_POLE' => array('fldxgZxZXc0q08U9C', 'fldG1SI869ikEvg9n'),
+		'Relation_POLE' => array('fldxgZxZXc0q08U9C', 'fldG1SI869ikEvg9n','fldUko2rmiJv8uooM'),
 		'VSC' => array('fldAeyp1OXzWdrn9i')
         );
 
 
-	// Rededine read fucntion
+	// Redefine read function
 	public function readData($param): array {
 		$result = parent::readData($param);
 
-		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
-		if  (
-				!empty($param['rule'])
-			AND	in_array($param['rule']['conn_id_target'], array(4,8))
-			AND $param['document']['type'] == 'U'
-			AND $param['call_type'] == 'history'
-			AND !empty($result['error'])
-			AND (
-					strpos($result['error'], '404 Not Found')
-				 OR strpos($result['error'], '404  returned')	// Airtable has changed the error message
-			)
-		) {
-			// Change the document type 
-			$documentManager = new DocumentManager(
-										$this->logger, 
-										$this->connection, 
-										$this->entityManager,
-										$this->documentRepository,
-										$this->ruleRelationshipsRepository,
-										$this->formulaManager
-									);
-			$paramDoc['id_doc_myddleware'] = $param['document']['id'];
-			$paramDoc['jobId'] = $param['jobId'];
-			$documentManager->setParam($paramDoc);
-			// Add a log
-			$documentManager->generateDocLog('W','La donnee a ete supprimee dans Airtable. Le type de document passe donc de Update a Create. ');
-			// Set the create type to the document
-			$documentManager->updateType('C');
-			// Clear the error
-			$result['error'] = '';
+		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
+		//Todo: We will have to change the id on myddleware prod !!!
+
+
+		$aikoEmoji = false;
+		$simulationParams = false;
+		$readParams = false;
+		$moduleReponse = isset($param['module']) && !empty($param['module']) && $param['module'] == 'REPONSE';
+
+		if (isset($_POST["params"])) {
+			if (!empty($_POST["params"])) {
+				if (!empty($_POST["params"][1]["value"])) {
+					if ($_POST["params"][1]["name"] === "bidirectional") {
+						$ruleId = $_POST["params"][2]["value"];
+					} else {
+						$ruleId = $_POST["params"][1]["value"];
+					}
+					$simulationParams = true;
+				}
+			}
 		}
-		
+
+		if (isset($param["rule"])) {
+			if (!empty($param["rule"])) {
+				if (!empty($param["rule"]["id"])) {
+					$ruleId = $param["rule"]["id"];
+					$readParams = true;
+				}
+			}
+		}
+
+		// if (simulation params or read params) and module reponse then aiko emoji is true
+		if (($simulationParams || $readParams) && $moduleReponse && $ruleId === '646b571652230') {
+			$aikoEmoji = true;
+		}
+
+		if ($aikoEmoji) {
+				if (!empty($result['values'])) {
+					foreach ($result['values'] as $docId => $values) {
+						if (!empty($values['fldC7m6zch8Cz6KWQ'])) {
+							switch ($values['fldC7m6zch8Cz6KWQ']) {
+								case '😡':
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 1;
+									break;
+								case '🙁':
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 2;
+									break;
+								case '😐':
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 3;
+									break;
+								case '🙂':
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 4;
+									break;
+								case '😍':
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 5;
+									break;
+								default:
+									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = '';
+							}
+						}
+
+						if (!empty($values['fld4KzcfmV2P8F3E6'])) {
+							switch ($values['fld4KzcfmV2P8F3E6']) {
+								case '⭐️':
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 1;
+									break;
+								case '⭐️⭐️':
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 2;
+									break;
+								case '⭐️⭐️⭐️':
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 3;
+									break;
+								case '⭐️⭐️⭐️⭐️':
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 4;
+									break;
+								case '⭐️⭐️⭐️⭐️⭐️':
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 5;
+									break;
+								default:
+									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = '';
+							}
+						}
+					}
+				}
+		}
+
+
+
+		// If we send an update to Airtable but if the data doesn't exist anymore into Airtable, we change the upadet to a creation
+		if (isset($param["rule"]) && isset($param["document"]) && isset($param["call_type"])) {
+			if (
+				!empty($param['rule'])
+				and	in_array($param['rule']['conn_id_target'], array(4, 8))
+				and $param['document']['type'] == 'U'
+				and $param['call_type'] == 'history'
+				and !empty($result['error'])
+				and (strpos($result['error'], '404 Not Found')
+					or strpos($result['error'], '404  returned')	// Airtable has changed the error message
+				)
+			) {
+				// Change the document type 
+				$documentManager = new DocumentManager(
+					$this->logger,
+					$this->connection,
+					$this->entityManager,
+					$this->documentRepository,
+					$this->ruleRelationshipsRepository,
+					$this->formulaManager
+				);
+				$paramDoc['id_doc_myddleware'] = $param['document']['id'];
+				$paramDoc['jobId'] = $param['jobId'];
+				$documentManager->setParam($paramDoc);
+				// Add a log
+				$documentManager->generateDocLog('W', 'La donnee a ete supprimee dans Airtable. Le type de document passe donc de Update a Create. ');
+				// Set the create type to the document
+				$documentManager->updateType('C');
+				// Clear the error
+				$result['error'] = '';
+			}
+		}
 		/* Aiko - Suppression isn't used anymore
 		if ($param['rule']['id'] == '61bb49a310715') {	// Aiko - Suppression
 			if (!empty($result['values'])) {
