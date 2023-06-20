@@ -692,14 +692,15 @@
 							{% set custom_route_next = custom_macros.custom_route_generator_next(logPage, documentPage) %}
 							
 
-
+							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
 							{# Use the generated custom_route in your links or wherever needed #}
-
-							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1}}</p>
+							{% if more_than_one_page %}
+							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{logPagination.pager.nbResults // logPagination.pager.maxPerPage}}</p>
 
 							<a class='m-1' href="{{ custom_route_first }}">First</a>
 							{% if logPagination.pager.currentPage > 1 %}
 								<a class='m-1' href="{{ custom_route_previous }}">Previous</a>
+							{% endif %}
 							{% endif %}
 
 
@@ -718,11 +719,19 @@
 
 							{# in between end #}
 
+							{# <pre>
+								{{ dump(logPagination.pager.nbResults) }}
+								{{ dump(logPagination.pager.maxPerPage) }}
+								{{ dump(logPagination.pager.nbResults % logPagination.pager.maxPerPage) }}
+								{{ dump(more_than_one_page) }}
+							</pre> #}
 
-							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 %}
+								
+
+							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
 								<a class='m-1' href="{{ custom_route_next }}">Next</a>
 							{% endif %}
-							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage %}
+							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
 								<a class='m-1' href="{{ custom_route_last }}">Last</a>
 							{% endif %}
 
