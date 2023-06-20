@@ -18,7 +18,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
     ),
     'BINOMES' => array(
         'fldpdbxLe9B1H2i2J'=> array( 'label' => 'Id Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
-	   'fldCk97UWiy7d1r8U'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+	    'fldCk97UWiy7d1r8U'=> array( 'label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldmztRnwA4sKggFe' => array( 'label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldHIrkzh3zZQz7uc' => array( 'label' => 'Mise en place', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldjRJWMtHZdf6Or5' => array( 'label' => 'Fin', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
@@ -46,7 +46,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'fld2fhMl4iq9tmKDw'=> array( 'label' => 'Mail', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fld4bERNFTWmgDvbP'=> array( 'label' => 'Numéro', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldxWO5Cs8t9z7ZP8'=> array( 'label' => 'Nom du pôle', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-        'fldo5QKuWcdpP2kbO' => array( 'label' => 'Comet ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldo5QKuWcdpP2kbO'=> array( 'label' => 'Comet ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldRV0oTqhwfO50Jl'=> array( 'label' => 'REFERENTS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'fld0O3YeE5HeGVVOJ'=> array( 'label' => 'BINOMES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
         'fldytfxVs6p0vo3Yr'=> array( 'label' => 'CONTACTS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 0, 'relate' => true), 
