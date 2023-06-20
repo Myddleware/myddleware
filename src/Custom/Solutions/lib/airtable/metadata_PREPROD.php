@@ -53,7 +53,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
     ),
     'REFERENTS' => array(
         'fldPM5v4hKSMQNdsE'=> array( 'label' => 'Nom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-        'fldC74H4byd2x4kOK'=> array( 'label' => 'Nom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldC74H4byd2x4kOK'=> array( 'label' => 'Prénom', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldX9mSLp6FDX6GRC'=> array( 'label' => 'ID Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldrNhxTKTaUFsgkw'=> array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
         'fldeTPHci0RufgtWG'=> array( 'label' => 'Mobile', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
