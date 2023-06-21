@@ -97,7 +97,7 @@ class airtablecustom extends airtable {
 	public function readData($param): array {
 		$result = parent::readData($param);
 
-		// if the rule id is 646b571652230, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
+		// if the rule id is 646b571652230 or 6491a6a34b732, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
 		//Todo: We will have to change the id on myddleware prod !!!
 
 
@@ -129,7 +129,7 @@ class airtablecustom extends airtable {
 		}
 
 		// if (simulation params or read params) and module reponse then aiko emoji is true
-		if (($simulationParams || $readParams) && $moduleReponse && $ruleId === '646b571652230') {
+		if (($simulationParams || $readParams) && $moduleReponse && ($ruleId === '646b571652230' || $ruleId === '6491a6a34b732')) {
 			$aikoEmoji = true;
 		}
 
