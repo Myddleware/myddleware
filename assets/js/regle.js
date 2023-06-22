@@ -748,8 +748,7 @@ $(function () {
 				$('#' + nameF.target + ' .ui-droppable').empty();
 
 				$.each(nameF.source, function (fieldid, fieldname) {
-					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + nameF.target + '</li>');
-
+					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldid + " (" + fieldname + ")" + '</li>')
 					// filter
 					addFilter(fieldid, path_info_field);
 				});
