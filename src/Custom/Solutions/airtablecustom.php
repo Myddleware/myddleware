@@ -136,47 +136,47 @@ class airtablecustom extends airtable {
 		if ($aikoEmoji) {
 				if (!empty($result['values'])) {
 					foreach ($result['values'] as $docId => $values) {
-						if (!empty($values['fldC7m6zch8Cz6KWQ'])) {
-							switch ($values['fldC7m6zch8Cz6KWQ']) {
+						if (!empty($values['fldqr1DNrnnwmlXuV'])) {
+							switch ($values['fldqr1DNrnnwmlXuV']) {
 								case '😡':
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 1;
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = 1;
 									break;
 								case '🙁':
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 2;
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = 2;
 									break;
 								case '😐':
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 3;
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = 3;
 									break;
 								case '🙂':
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 4;
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = 4;
 									break;
 								case '😍':
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = 5;
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = 5;
 									break;
 								default:
-									$result['values'][$docId]['fldC7m6zch8Cz6KWQ'] = '';
+									$result['values'][$docId]['fldqr1DNrnnwmlXuV'] = '';
 							}
 						}
 
-						if (!empty($values['fld4KzcfmV2P8F3E6'])) {
-							switch ($values['fld4KzcfmV2P8F3E6']) {
+						if (!empty($values['fldS4eJtB1hJVUgcb'])) {
+							switch ($values['fldS4eJtB1hJVUgcb']) {
 								case '⭐️':
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 1;
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = 1;
 									break;
 								case '⭐️⭐️':
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 2;
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = 2;
 									break;
 								case '⭐️⭐️⭐️':
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 3;
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = 3;
 									break;
 								case '⭐️⭐️⭐️⭐️':
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 4;
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = 4;
 									break;
 								case '⭐️⭐️⭐️⭐️⭐️':
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = 5;
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = 5;
 									break;
 								default:
-									$result['values'][$docId]['fld4KzcfmV2P8F3E6'] = '';
+									$result['values'][$docId]['fldS4eJtB1hJVUgcb'] = '';
 							}
 						}
 					}
