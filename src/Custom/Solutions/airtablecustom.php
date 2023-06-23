@@ -192,6 +192,8 @@ class airtablecustom extends airtable {
 				and	in_array($param['rule']['conn_id_target'], array(4, 8))
 				and $param['document']['type'] == 'U'
 				and $param['call_type'] == 'history'
+				// Excluded rules
+				and !in_array($param['rule']['id'], array('6493f82a6102a'))  //	Aiko - Suivi Mentorat vers Aiko
 				and !empty($result['error'])
 				and (strpos($result['error'], '404 Not Found')
 					or strpos($result['error'], '404  returned')	// Airtable has changed the error message
