@@ -147,7 +147,20 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('Le mentoré n\a pas été trouvé sur un coupon dans l\'epace repérant. Ce transfert de données est annulé. ');
 		}
-
+		
+		// We cancel the document from COMET to aiko if it does not comes from aiko
+		if (
+			!empty($this->document_data['rule_id'])
+			and	$this->document_data['rule_id'] == '6493f82a6102a' // 	Aiko - Suivi Mentorat vers Aiko
+			and $new_status == 'Error_checking'
+		) {
+			if (
+				strpos($this->message, 'The document is a creation but the rule mode is UPDATE ONLY.') !== false
+			) {
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Le suivi mentorat provient de la COMET mais n\'est pas supposé aller vers Aiko. ');
+			}
+		}
 		/* if (
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '5cffd54c8842b' // Rule Formation - Engagé
