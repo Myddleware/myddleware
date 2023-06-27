@@ -299,6 +299,10 @@ class airtablecustom extends airtable {
 				unset($data['fldqGYsTr5EylIi2f']);
 			}
 		}
+		
+		if ($param['rule']['id'] == '6493f82a6102a') { // 	Aiko - Suivi Mentorat vers Aiko
+			throw new \Exception('No possible to create a suivi in Airtable. ');
+		}
 
         return $data;
     }
