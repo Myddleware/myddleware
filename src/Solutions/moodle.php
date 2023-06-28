@@ -188,6 +188,13 @@ class moodlecore extends solution
     public function read($param): array
     {
         try {
+			// No read action in case of history on enrolment module
+			if (
+					in_array($param['module'], array('manual_enrol_users', 'manual_unenrol_users'))
+				AND $param['call_type'] == 'history'
+			) {
+				return array();
+			}
             $result = [];
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
@@ -471,12 +478,13 @@ class moodlecore extends solution
                 }
 
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                $response = $this->moodleClient->post($serverurl, $params);
+                $response = $this->moodleClient->post($serverurl, $params);			
                 $xml = simplexml_load_string($response);
 				
 				// Check if there is a warning
 				if (
 						!empty($xml)
+					AND $xml->count() != 0	// Empty xml
 					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
 					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])
 				) {
@@ -488,7 +496,7 @@ class moodlecore extends solution
                     throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' Debug : '.$xml->DEBUGINFO : ''));
                 }
                 // Si pas d'erreur et module sans retour alors on génère l'id
-                elseif (in_array($param['module'], ['manual_enrol_users'])) {
+                elseif (in_array($param['module'], ['manual_enrol_users', 'manual_unenrol_users'])) {
                     $result[$idDoc] = [
                         'id' => $obj->courseid.'_'.$obj->userid.'_'.$obj->roleid,
                         'error' => false,

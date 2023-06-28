@@ -133,6 +133,45 @@ $(function() {
 	});		
 });
 
+// --For 'description' in the detail view of the rule
+$('.edit-button').on('click', function() {
+	var field = $(this).parent();
+	var editForm = field.find('.edit-form');
+	var valueField = field.find('.value');
+	var newValueField = editForm.find('textarea');
+	var saveButton = editForm.find('button[type="submit"]');
+	// Retrieve the identifier of the rule
+	var ruleId = editForm.find('input[name="ruleId"]').val();
+  
+	valueField.hide();
+	editForm.show();
+	newValueField.val(valueField.text().trim());
+  
+	saveButton.on('click', function(event) {
+	  event.preventDefault();
+  
+	  var newValue = newValueField.val().trim();
+	  var updateUrl = editForm.attr('action');
+  
+	  $.ajax({
+		type: 'POST',
+		url: updateUrl,
+		data: {
+		  ruleId: ruleId,
+		  description: newValue
+		},
+		success: function(response) {
+		  valueField.text(newValue);
+		  valueField.show();
+		  editForm.hide();
+		},
+		error: function(error) {
+		  console.log(error);
+		}
+	  });
+	});
+  });
+
 // Récupère la liste des params
 function recup_params() {	
 	var params = [];	

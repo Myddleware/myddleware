@@ -267,6 +267,10 @@ class solutioncore
         return $this->moduleFields;
     }
 
+    function truncate($string, $length, $dots = "...") {
+        return strlen($string) > $length ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    }
+
     // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
     // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
     public function get_rule_custom_relationship($module, $type)
@@ -819,6 +823,12 @@ class solutioncore
     {
         if (isset($record['Myddleware_element_id'])) {
             unset($record['Myddleware_element_id']);
+        }
+		if (isset($record['id_doc_myddleware'])) {
+            unset($record['id_doc_myddleware']);
+        }
+		if (isset($record['source_date_modified'])) {
+            unset($record['source_date_modified']);
         }
 
         return $record;

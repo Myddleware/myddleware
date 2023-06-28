@@ -1788,12 +1788,12 @@ class rulecore
 									LEFT OUTER JOIN rulerelationship
 										 ON rule.id = rulerelationship.field_id
 										AND rulerelationship.field_name_target = 'Myddleware_element_id'
+										AND rulerelationship.rule_id <> rule.id
 								WHERE 
 										rule.conn_id_target = :conn_id_target
 									AND rule.module_target = :module_target
 									AND document.target_id = :target_id
 									AND document.source_id <> (SELECT source_id from document WHERE id = :docId)
-									AND rulerelationship.rule_id <> rule.id
 									AND document.deleted = 0
 									AND (
 												document.global_status <> 'Cancel'

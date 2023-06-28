@@ -139,11 +139,11 @@ class MassActionCommand extends Command
             }
         }
 
-        // Clear job message to avoid duplicate messages
-        $this->jobManager->setMessage('');
         // Close job if it has been created
         $responseCloseJob = $this->jobManager->closeJob();
-
+        // Clear job message to avoid duplicate messages
+        $this->jobManager->setMessage('');
+		
         if (!empty($this->jobManager->getMessage())) {
             if ($responseCloseJob) {
                 $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');

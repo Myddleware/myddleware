@@ -387,9 +387,9 @@
 														{% endif %}
 													</div>
 												</td>
-											</tr>
-										{% endfor %}
 									</tr>
+										{% endfor %}
+										
 									<tr>
 										<th>{{'list_flux.tab.id'|trans}}</th>
 										<th>{{'list_flux.tab.name'|trans}}</th>
@@ -402,13 +402,11 @@
 								{% endif %}
 							</table>
 							<div class="d-flex justify-content-center">
-								{% if pager.haveToPaginate %}
-									<div class="d-flex justify-content-center">
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
-										{% endif %}
-									</div>
-								{% endif %}
+
+							{# ------------- HISTORY DOCUMENTS ------------- #}
+    						{% if pager.haveToPaginate %}
+    						    {{ pagerfanta(documentPagination.pager, 'default', { (documentPagination.pageParameterName): documentPagination.pager.currentPage }) }}
+    						{% endif %}
 							</div>
 						{% endif %}
 					</div>
@@ -583,21 +581,43 @@
 
 
 					{# ------------- MESSAGE ------------- #}
-					{% if nb > 0 %}
-						<div id="fd-title-small" class="left">
-							<p>{{'view_flux.nblogs'|trans}}</p>
-							<p>
-								<span class="nb">{{ nb }}</span>
-							</p>
+					{% for message in app.flashes('success') %}
+						<div class="alert alert-success">
+							{{ message }}
 						</div>
-						<div class="clr"></div>
-					{% endif %}
+					{% endfor %}
+
+
+					<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
+						{% if nb > 0 %}
+							<div id="fd-title-small" class="left">
+								<p>{{'view_flux.nblogs'|trans}}</p>
+								<p>
+									<span class="nb">{{ nb }}</span>
+								</p>
+							</div>
+							<div class="clr"></div>
+						{% endif %}
+
+						<div class="l-5 flux-comment-container">
+
+						
+						{{ form_start(formComment) }}
+							{{ form_widget(formComment) }}
+							<button type="submit" class="btn btn-primary m-2 document-comment-submit">Comment</button>
+						{{ form_end(formComment) }}
+
+						</div>
+					</div>
+
+
+
 					<div id="message">
 
 						{% if nb > 0 %}
 
 							<table class="listepager table">
-								{% if entities is not empty %}
+								{% if logPagination.pager.currentPageResults is not empty %}
 									<tr>
 										<th>{{'view_flux.log.id'|trans}}</th>
 										<th>{{'view_flux.log.ref'|trans}}</th>
@@ -606,7 +626,7 @@
 										<th>{{'view_flux.log.type'|trans}}</th>
 										<th>{{'view_flux.log.msg'|trans}}</th>
 									</tr>
-									{% for log in entities %}
+									{% for log in logPagination.pager.currentPageResults %}
 										<tr class="fd_log_{{ log.getType|lower }}">
 											<td class="ctr">
 												{{ log.getId }}
@@ -659,20 +679,70 @@
 									</tr>
 								{% endif %}
 							</table>
+							{# ------------- LOGS ------------- #}
 							<div class="d-flex justify-content-center">
-								{% if pager.haveToPaginate %}
-									<div class="d-flex justify-content-center">
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
-										{% endif %}
-									</div>
-								{% endif %}
+
+							{# Import the macros file #}
+							{% import 'Flux/view/macros.html.twig' as custom_macros %}
+
+							{# Use the custom_route_generator macro with the required arguments (logPage, and documentPage) #}
+							{% set custom_route_first = custom_macros.custom_route_generator_first(logPage, documentPage) %}
+							{% set custom_route_previous = custom_macros.custom_route_generator_previous(logPage, documentPage) %}
+							{% set custom_route_last = custom_macros.custom_route_generator_last(logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1, documentPage) %}
+							{% set custom_route_next = custom_macros.custom_route_generator_next(logPage, documentPage) %}
+							
+
+							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
+							{# Use the generated custom_route in your links or wherever needed #}
+							{% if more_than_one_page %}
+							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{logPagination.pager.nbResults // logPagination.pager.maxPerPage}}</p>
+
+							<a class='m-1' href="{{ custom_route_first }}">First</a>
+							{% if logPagination.pager.currentPage > 1 %}
+								<a class='m-1' href="{{ custom_route_previous }}">Previous</a>
+							{% endif %}
+							{% endif %}
+
+
+							{# in betweeen #}
+
+							{% set between_pages = (logPagination.pager.nbResults // logPagination.pager.maxPerPage) - 1 %}
+
+							{% set more_than_two_pages = between_pages > 0 %}
+
+							{% if more_than_two_pages %}
+								{% for i in 2..(between_pages + 1) %}
+									{% set custom_route_between = custom_macros.custom_route_generator_between(i, documentPage) %}
+									<a class='m-1' href="{{ custom_route_between }}">{{ i }}</a>
+								{% endfor %}
+							{% endif %}
+
+							{# in between end #}
+
+							{# <pre>
+								{{ dump(logPagination.pager.nbResults) }}
+								{{ dump(logPagination.pager.maxPerPage) }}
+								{{ dump(logPagination.pager.nbResults % logPagination.pager.maxPerPage) }}
+								{{ dump(more_than_one_page) }}
+							</pre> #}
+
+								
+
+							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
+								<a class='m-1' href="{{ custom_route_next }}">Next</a>
+							{% endif %}
+							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
+								<a class='m-1' href="{{ custom_route_last }}">Last</a>
+							{% endif %}
+
+							
 							</div>
+							
 						{% else %}
 							<p>{{'view_flux.empty_log'|trans}}</p>
 						{% endif %}
 					</div>
-					{# ------------- MESSAGE ------------- #}
+					{# ------------- LOGS ------------- #}
 				</div>
 	<script type="text/javascript">
 		var path_img = "{{ asset('build/images/regle/') }}";

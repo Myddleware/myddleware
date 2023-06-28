@@ -23,12 +23,9 @@
 *********************************************************************************/
 
 #myd_top {
-	/* height: 35px; */
 	min-height: 40px;
-	/* max-height: 35px;	 */
 	background: #444446;
 	border-bottom: 4px solid #198BCA;
-	/* min-width: 1200px; */
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -41,8 +38,7 @@
 	height: 50px;
 	background: #198BCA;
 	margin: 0 auto;
-	/* width: 80vw; */
-		color: white;
+	color: white;
 	padding: 14px;		
 	font-weight: bold;	
 }
@@ -67,7 +63,6 @@ section  {
 	/* width: 80vw; */
 	min-height: 570px;
 	background: white !important;
-	/* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; */
 }
 
 footer {
@@ -187,7 +182,6 @@ footer {
 
 #notification {
     margin: 0 auto;
-    /* width: 80vw; */
     background:white;
     display:none;
 }

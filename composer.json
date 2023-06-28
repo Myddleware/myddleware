@@ -44,6 +44,7 @@
     "laminas/laminas-hydrator": "4.12.0",
     "laminas/laminas-stdlib": "3.16.1",
     "leafo/lessphp": "0.4.0",
+    "lexik/form-filter-bundle": "^7.0",
     "lexik/jwt-authentication-bundle": "2.16.*",
     "mautic/api-library": "^2.15",
     "nelmio/cors-bundle": "2.2.*",

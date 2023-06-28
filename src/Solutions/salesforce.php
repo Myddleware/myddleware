@@ -276,7 +276,7 @@ class salesforcecore extends solution {
                     // Récupération des listes déroulantes
                     if ($field['type']=='picklist') {
                         foreach($field['picklistValues'] as $option) {
-                            $this->moduleFields[$field['name']]['option'][$option['value']] = $option['label'];
+                            $this->moduleFields[$field['name']]['option'][$option['value']] = parent::truncate($option['label'], 80);
                         }
                          $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
                     }   
