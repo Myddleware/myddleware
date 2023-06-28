@@ -30,19 +30,21 @@ use DateTime;
 use Exception;
 use Swift_Mailer;
 use Swift_Message;
-use Swift_SmtpTransport;
-
 use App\Entity\User;
+
 use Twig\Environment;
 use App\Entity\Config;
+use Swift_SmtpTransport;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
 use Psr\Log\LoggerInterface;
 use Twig\Error\RuntimeError;
 use Doctrine\DBAL\Connection;
 use App\Repository\JobRepository;
+use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -64,6 +66,8 @@ class NotificationManager
     private RuleRepository $ruleRepository;
     private $fromEmail;
     private Environment $twig;
+    private ConfigRepository $configRepository;
+    private LogRepository $logRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -76,7 +80,9 @@ class NotificationManager
         Swift_Mailer $mailer,
         ToolsManager $tools,
         ParameterBagInterface $params,
-        Environment $twig
+        Environment $twig,
+        ConfigRepository $configRepository, 
+        LogRepository $logRepository
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -89,49 +95,97 @@ class NotificationManager
         $this->tools = $tools;
         $this->params = $params;
         $this->twig = $twig;
+        $this->configRepository = $configRepository;
+        $this->logRepository = $logRepository;
     }
 
     /**
-     * Send alert if a job is running too long.
+     * Send alert
      *
      * @throws Exception
      */
     public function sendAlert(): bool
     {
         try {
-            
-            // Set all config parameters
-            $this->setConfigParam();
-            if (empty($this->configParams['alert_time_limit'])) {
-				throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
-			}
-            // Calculate the date corresponding to the beginning still authorised
-            $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
-            $timeLimit->modify('-'.$this->configParams['alert_time_limit'].' minutes');
 
-            // Search if a job is lasting more time that the limit authorized
-            $job = $this->jobRepository->findJobStarted($timeLimit);
-            // If a job is found, we send the alert
-            if (!empty($job)) {
-                // Create text
-                $textMail = $this->translator->trans('email_alert.body', [
-                    '%min%' => $this->configParams['alert_time_limit'],
-                    '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
-                    '%id%' => $job->getId(),
-                    '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
-                ]);
-
-                return $this->send($textMail, $this->translator->trans('email_alert.subject'));
-            }
+            $this->sendAlertTaskTooLong();
+            $this->sendAlertLimitReached();
 
             return true;
+
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             throw new Exception($error);
         }
     }
-	
+
+     /**
+     * Send alert if a job is running too long.
+     *
+     * @throws Exception
+     */
+    public function sendAlertTaskTooLong(): bool
+    {
+        // Set all config parameters
+        $this->setConfigParam();
+        if (empty($this->configParams['alert_time_limit'])) {
+            throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
+        }
+        // Calculate the date corresponding to the beginning still authorised
+        $timeLimit = new DateTime('now', new \DateTimeZone('GMT'));
+        $timeLimit->modify('-'.$this->configParams['alert_time_limit'].' minutes');
+
+        // Search if a job is lasting more time that the limit authorized
+        $job = $this->jobRepository->findJobStarted($timeLimit);
+        // If a job is found, we send the alert
+        if (!empty($job)) {
+            // Create text
+            $textMail = $this->translator->trans('email_alert.body', [
+                '%min%' => $this->configParams['alert_time_limit'],
+                '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
+                '%id%' => $job->getId(),
+                '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
+            ]);
+
+            return $this->send($textMail, $this->translator->trans('email_alert.subject'));
+        }
+    }
+
+
+    /**
+     * Send alert if limit reached.
+     *
+     * @throws Exception
+     */
+    public function sendAlertLimitReached()
+    {
+        // Get alert_date_ref
+        $alertDateRef = $this->configRepository->findAlertDateRef();
+
+        // Get error message
+        $newErrorLogs = $this->logRepository->findNewErrorLogs(new \DateTime($alertDateRef));
+
+        //Send Alerte
+        if (!empty($newErrorLogs)) {
+
+        $textMail = "Des nouveaux logs d'erreur ont été trouvés :\n\n";
+
+        // TODO: à translate
+        foreach ($newErrorLogs as $log) {
+            $textMail .= "Date de création: " . $log['created'] . "\n";
+            $textMail .= "Type: " . $log['type'] . "\n";
+            $textMail .= "Message: " . $log['msg'] . "\n\n";
+        }
+
+        // TODO: check : envoyez l'e-mail
+        $this->send($textMail, "Alerte: Nouveaux logs d'erreur trouvés");
+        }
+        // Update alert_date_ref
+        $currentDate = new \DateTime();
+        $this->configRepository->setAlertDateRef($currentDate->format('Y-m-d H:i:s'));
+
+        }
 		
 	protected function send($textMail, $subject) {
 		// Get the email adresses of all ADMIN
