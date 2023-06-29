@@ -12,4 +12,15 @@ $(function(){
     });
 });
 
+$('#rule_name').on('keyup', function() {
+    var ruleName = $(this).val();
+    var url = $(this).data('url');
+
+    if (ruleName.length >= 3) {
+        $.get(url, { rule_name: ruleName }, function(data) {
+            // update the rules table with the new data
+        });
+    }
+});
+
 
