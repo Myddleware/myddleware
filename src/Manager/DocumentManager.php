@@ -1417,7 +1417,7 @@ class documentcore
                         // Trigger to redefine formula
                         $f = $this->changeFormula($f);
                         eval($f.';'); // exec
-                    } catch (\ParseError $e) {
+                    } catch (\Throwable $e) {
                         throw new \Exception('FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());
                     }
                     // Execute eval only if formula is valid
