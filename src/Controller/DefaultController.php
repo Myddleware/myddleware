@@ -156,24 +156,25 @@ use Symfony\Contracts\Translation\TranslatorInterface;
      * @Route("/list", name="regle_list", defaults={"page"=1})
      * @Route("/list/page-{page}", name="regle_list_page", requirements={"page"="\d+"})
      */
-    public function ruleListAction(int $page = 1, Request $request=null)
+    public function ruleListAction(int $page = 1, Request $request)
     {
         try {
 
             $ruleName = $request->query->get('rule_name');
 
+            // $rulename = "sui";
+
             if ($ruleName) {
-                $qb = $this->getDoctrine()->getRepository(Rule::class)->createQueryBuilder('r');
-                $qb->where($qb->expr()->like('r.name', ':name'))
-                    ->setParameter('name', '%' . $ruleName . '%');
-                $rules = $qb->getQuery()->getResult();
+                // $qb = $this->getDoctrine()->getRepository(Rule::class)->createQueryBuilder('r');
+                // $qb->where($qb->expr()->like('r.name', ':name'))
+                //     ->setParameter('name', '%' . $ruleName . '%');
+                // $rules = $qb->getQuery()->getResult();
 
                 // convert the rules to an array and return as JSON
-                $response = new JsonResponse();
-                $response->setData($rules);
+                // $response = new JsonResponse();
+                // $response->setData($rules);
 
-                return $response;
-            } else {
+                // return $response;
 
                 $key = $this->sessionService->getParamRuleLastKey();
                 if (null != $key && $this->sessionService->isRuleIdExist($key)) {
@@ -187,10 +188,34 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $compact['nb'] = 0;
                 $pager = $this->tools->getParamValue('ruleListPager');
                 $compact = $this->nav_pagination([
+                    'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser(), $ruleName),
+                    'maxPerPage' => isset($pager) ? $pager : 20,
+                    'page' => $page,
+                ]);
+
+                // dump($compact);
+            } else {
+
+                $key = $this->sessionService->getParamRuleLastKey();
+                if (null != $key && $this->sessionService->isRuleIdExist($key)) {
+                    $id = $this->sessionService->getRuleId($key);
+                    $this->sessionService->removeRuleId($key);
+
+                    return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+                }
+
+                $this->getInstanceBdd();
+
+                $compact['nb'] = 0;
+                $pager = $this->tools->getParamValue('ruleListPager');
+                $compact = $this->nav_pagination([
                     'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser()),
                     'maxPerPage' => isset($pager) ? $pager : 20,
                     'page' => $page,
                 ]);
+
+                // dump($compact);
+            }
 
                 // Si tout se passe bien dans la pagination
                 if ($compact) {
@@ -211,7 +236,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 }
                 throw $this->createNotFoundException('Error');
                 // ---------------
-            }
+            
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }

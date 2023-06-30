@@ -18,6 +18,7 @@ $('#rule_name').on('keyup', function() {
 
     if (ruleName.length >= 3) {
         $.get(url, { rule_name: ruleName }, function(data) {
+            console.log(data);
             // update the rules table with the new data
         });
     }

@@ -43,9 +43,9 @@
 			<p>{{'list_rule.total'|trans}}<p><span class="nb">{{ nb_rule }}</span>
 		</div>
 		<div class="clr"></div>
-		<form id="rulenamesearchbar" action="{{ path('regle_list_page') }}" method="get">
+		<form id="rulenamesearchbar" action="{{ path('regle_list') }}" method="get">
 			{# <input type="text" name="rule_name" placeholder="Search by rule name"> #}
-			<input type="text" id="rule_name" data-url="{{ path('regle_list_page') }}" class="form-control" placeholder="Search...">
+			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search...">
 			<button type="submit">
 			<i class="fa fa-search" aria-hidden="true"></i>
 			</button>

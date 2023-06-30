@@ -63,7 +63,7 @@ class RuleRepository extends ServiceEntityRepository
     }
 
     // Retourne toutes les règles d'un user
-    public function findListRuleByUser(User $user): Query
+    public function findListRuleByUser(User $user, $ruleName = null): Query
     {
         $sql = $this->createQueryBuilder('r')
             ->join('r.connectorSource', 'cs')
@@ -87,6 +87,12 @@ class RuleRepository extends ServiceEntityRepository
                  ->setParameter('user_id', $user->getId());
         } else {
             $sql->where('r.deleted = 0');
+        }
+
+        // Add search condition
+        if ($ruleName) {
+            $sql->andWhere('r.name LIKE :name')
+            ->setParameter('name', '%' . $ruleName . '%');
         }
 
         return $sql->getQuery();
