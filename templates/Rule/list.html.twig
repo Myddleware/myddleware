@@ -44,11 +44,7 @@
 		</div>
 		<div class="clr"></div>
 		<form id="rulenamesearchbar" action="{{ path('regle_list') }}" method="get">
-			{# <input type="text" name="rule_name" placeholder="Search by rule name"> #}
 			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search...">
-			<button type="submit">
-			<i class="fa fa-search" aria-hidden="true"></i>
-			</button>
 		</form>
 
 
@@ -167,7 +163,6 @@
 		var question = "Désirez-vous supprimer cette règle ?";
 		var confirm_exec_all = "{{'view_rule.action.confirm_exec_all'|trans}}";
 		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";
-		var regle_list = "{{ path('regle_list') }}";
 	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}

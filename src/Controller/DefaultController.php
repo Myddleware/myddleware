@@ -162,7 +162,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
             $ruleName = $request->query->get('rule_name');
 
-
             if ($ruleName) {
 
                 $key = $this->sessionService->getParamRuleLastKey();
@@ -182,7 +181,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     'page' => $page,
                 ]);
 
-                // dump($compact);
             } else {
 
                 $key = $this->sessionService->getParamRuleLastKey();
@@ -203,7 +201,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     'page' => $page,
                 ]);
 
-                // dump($compact);
             }
 
                 // Si tout se passe bien dans la pagination
@@ -224,7 +221,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     );
                 }
                 throw $this->createNotFoundException('Error');
-                // ---------------
             
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
