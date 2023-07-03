@@ -1911,18 +1911,25 @@ use App\Form\Type\RelationFilterType;
                     }
                 }
 
-
                 // get the array of array $ruleFieldsSource and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
-                $listOfSourceFieldsLabels = [];
+                $listOfSourceFieldsLabels = [
+                    'Source Fields' => [],
+                    'Target Fields' => [],
+                    'Relation Fields' => [],
+                ];
                 foreach ($ruleFieldsSource as $key => $value) {
-                    $listOfSourceFieldsLabels[$key] = $value['label'];
+                    $listOfSourceFieldsLabels['Source Fields'][$key] = $value['label'];
                 }
 
                 // get the array of array $ruleFieldsTarget and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
                 foreach ($ruleFieldsTarget as $key => $value) {
-                    $listOfSourceFieldsLabels[$key] = $value['label'];
+                    $listOfSourceFieldsLabels['Target Fields'][$key] = $value['label'];
                 }
 
+                foreach ($lst_relation_source_alpha as $key => $value) {
+                    $listOfSourceFieldsLabels['Relation Fields'][$key] = $value['label'];
+                }
+                
 
                 $form_all_related_fields = $this->createForm(RelationFilterType::class, null, [
                     'field_choices' => $listOfSourceFieldsLabels,
