@@ -73,6 +73,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Form\Type\RelationFilterType;
 
     /**
      * @Route("/rule")
@@ -1910,6 +1911,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     }
                 }
 
+                // create a form that uses RelationFilterType
+                $form_all_related_fields = $this->createForm(RelationFilterType::class, null, []);
+
                 //  rev 1.07 --------------------------
                 $result = [
                     'source' => $source['table'],
@@ -1921,6 +1925,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
+                    'form_all_related_fields' => $form_all_related_fields->createView(),
                     'lst_errorMissing' => $lst_errorMissing,
                     'lst_errorEmpty' => $lst_errorEmpty,
                     'params' => $this->sessionService->getParamRule($ruleKey),

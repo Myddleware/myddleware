@@ -1701,40 +1701,7 @@ function verifFields(field_id, show) {
 // ---- FILTRES DES CHAMPS CIBLE  --------------------------------------------------------
 
 // ---- FILTRES  -------------------------------------------------------------------------
-// Ajoute un champ
-function addFilter(field, path) {
-	// ajoute un champ uniquement s'il n'existe pas
-	if (existeFilter(field) == 0) {
-		if (field != 'my_value') {
-			console.log('field', field, 'path', path);
-			$('#fieldsfilter').append('<li id="filter_' + field + '" class="mt-2 d-flex justify-content-evenly align-items-baseline"><span class="name me-2 mt-2">' + field + '</span> <a class="fancybox me-2" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"> <i class="fas fa-question-circle"></i></a> <select class="filter mt-2 me-2 form-select">' + filter_liste + '</select><input type="text" value=""  class="form-control filter-input my-3" /> </li>');
-		}
-	}
-}
-// test si le champ existe déjà
-function existeFilter(field) {
-	view = 0;
-	$('#fieldsfilter').find("span.name").each(function () {
-		if ($.trim($(this).attr('value')) == field) {
-			view++;
-		}
-	});
 
-	return view;
-}
-// Delete a field from the Filters tab list 
-function removeFilter(field) {
-	view = 0;
-	$('#cible').find("li.ch").each(function () {
-
-		if ($(this).attr('value') == field) {
-			view++;
-		}
-	});
-	if (view < 2) {
-		$('#filter_' + field).remove();
-	}
-}
 // ---- FILTRES  -------------------------------------------------------------------------
 
 // ---- PARAMS ET VALIDATION  ------------------------------------------------------------

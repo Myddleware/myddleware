@@ -33,10 +33,25 @@
 
 <li>
 
-<span class="label">{{'test for fields'|trans}}</span>
+{# form widget that uses form_all_related_fields #}
+
+<div class="row">
+    <div class="col">
+        {{ form_row(form_all_related_fields.field) }}
+    </div>
+    <div class="col">
+        {{ form_row(form_all_related_fields.another_field) }}
+    </div>
+	<div class="col">
+		{{ form_row(form_all_related_fields.textarea_field) }}
+	</div>
+</div>
+
+
 
 </li>
 </ul>
+<span class="label">{{'test for fields 2'|trans}}</span>
 <div id="help-content-filters" class="help-content">
 	<h2>
 		{{'help.title'|trans}}
