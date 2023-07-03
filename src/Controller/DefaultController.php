@@ -1911,8 +1911,24 @@ use App\Form\Type\RelationFilterType;
                     }
                 }
 
-                // create a form that uses RelationFilterType
-                $form_all_related_fields = $this->createForm(RelationFilterType::class, null, []);
+
+                // get the array of array $ruleFieldsSource and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
+                $listOfSourceFieldsLabels = [];
+                foreach ($ruleFieldsSource as $key => $value) {
+                    $listOfSourceFieldsLabels[$key] = $value['label'];
+                }
+
+                // get the array of array $ruleFieldsTarget and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
+                foreach ($ruleFieldsTarget as $key => $value) {
+                    $listOfSourceFieldsLabels[$key] = $value['label'];
+                }
+
+
+                $form_all_related_fields = $this->createForm(RelationFilterType::class, null, [
+                    'field_choices' => $listOfSourceFieldsLabels,
+                    'another_field_choices' => $lst_filter
+                ]);
+                
 
                 //  rev 1.07 --------------------------
                 $result = [
@@ -1956,8 +1972,9 @@ use App\Form\Type\RelationFilterType;
                 $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
                 $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
 
-                return $this->redirect($this->generateUrl('regle_stepone_animation'));
-                exit;
+                // return $this->redirect($this->generateUrl('regle_stepone_animation'));
+                // exit;
+                dd($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
             }
         }
 

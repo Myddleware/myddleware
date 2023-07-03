@@ -2,7 +2,6 @@
 
 namespace App\Form\Type;
 
-
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,11 +19,7 @@ class RelationFilterType extends AbstractType
                     'placeholder' => 'Field',
                 ],
                 'empty_data' => null,
-                'choices' => [
-                    'test1' => 'test1',
-                    'test2' => 'test2',
-                    'test3' => 'test3',
-                ],
+                'choices' => $options['field_choices'],
                 'placeholder' => '- Choose a field -',
                 'required' => false
             ])
@@ -34,11 +29,7 @@ class RelationFilterType extends AbstractType
                     'placeholder' => 'Another Field',
                 ],
                 'empty_data' => null,
-                'choices' => [
-                    'test4' => 'test4',
-                    'test5' => 'test5',
-                    'test6' => 'test6',
-                ],
+                'choices' => $options['another_field_choices'],
                 'placeholder' => '- Choose another field -',
                 'required' => false
             ])
@@ -54,7 +45,8 @@ class RelationFilterType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            // Configure your form options here
+            'field_choices' => [],
+            'another_field_choices' => [],
         ]);
     }
 }
