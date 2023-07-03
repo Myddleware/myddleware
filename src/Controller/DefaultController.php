@@ -162,19 +162,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
             $ruleName = $request->query->get('rule_name');
 
-            // $rulename = "sui";
 
             if ($ruleName) {
-                // $qb = $this->getDoctrine()->getRepository(Rule::class)->createQueryBuilder('r');
-                // $qb->where($qb->expr()->like('r.name', ':name'))
-                //     ->setParameter('name', '%' . $ruleName . '%');
-                // $rules = $qb->getQuery()->getResult();
-
-                // convert the rules to an array and return as JSON
-                // $response = new JsonResponse();
-                // $response->setData($rules);
-
-                // return $response;
 
                 $key = $this->sessionService->getParamRuleLastKey();
                 if (null != $key && $this->sessionService->isRuleIdExist($key)) {
