@@ -16,7 +16,7 @@ class airtablecustom extends airtable {
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
 								'appuC7nsCbe7TxqwK' => 'VSC',			// USC PREPROD
-								'appgUF55WW7ApOTPQ' => 'Discord',		// discord PROD
+								'appgUF55WW7ApOTPQ' => 'tbleFELUyA5S3565t',		// discord PROD
 							);
 
 	protected $modules = array(
