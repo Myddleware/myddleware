@@ -70,7 +70,7 @@ class airtablecustom extends airtable {
 														'VSC' => 'VSC'
 													),
 								'appgUF55WW7ApOTPQ' => array(
-														'Discord' => 'Discord',
+														'tbleFELUyA5S3565t' => 'tbleFELUyA5S3565t',
 													),
 							);
 
