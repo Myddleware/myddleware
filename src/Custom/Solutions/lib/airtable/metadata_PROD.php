@@ -906,7 +906,7 @@ $moduleFields['appALljzTMc2wjLV1'] = array (
 
 // Discord
 $moduleFields['appgUF55WW7ApOTPQ'] = array (
-	'tbleFELUyA5S3565t' => array(
+	'Contacts COMET' => array(
 		'fldmyazAW2ZwPEef2'=> array( 'label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldqJcR86flmBy6wW'=> array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldoBJpUrfBHuaL7o'=> array( 'label' => 'Engagement', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
