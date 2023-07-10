@@ -69,6 +69,13 @@ class suitecrmcustom extends suitecrm
 												'required' => 0,
 												'relate' => false
 											);
+            $this->moduleFields['myd_filter_suivi'] = array(
+												'label' => 'Filter Suivi',
+												'type' => 'varchar(255)',
+												'type_bdd' => 'varchar(255)',
+												'required' => 0,
+												'relate' => false
+											);
 		}
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
@@ -188,6 +195,25 @@ class suitecrmcustom extends suitecrm
 				}			
 			}
 		}
+
+		// Add a filter so that if the param module is Suivi, for each $read, we check as key record and if not empty interlocuteur_c, and not empty type_suivi_bilan_c, then if type_suivi_bilan_c is equal to SuivirattrapageREEC then we read the record
+		if (
+				$param['module'] == 'CRMC_Suivi'
+			AND $param['call_type'] == 'read'
+		) {
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read[$key]['myd_filter_suivi'] = 0;
+				if (
+						!empty($record['interlocuteur_c'])
+					AND !empty($record['type_suivi_bilan_c'])
+					AND $record['type_suivi_bilan_c'] == 'SuivirattrapageREEC'
+				) {
+					$read[$key]['myd_filte_suivi'] = 1;
+				}
+			}
+		} 
+
 		if (
 				!empty($param['rule']['id'])
 			AND	$param['rule']['id'] == '5ce362b962b63'
