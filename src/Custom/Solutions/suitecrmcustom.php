@@ -69,16 +69,20 @@ class suitecrmcustom extends suitecrm
 												'required' => 0,
 												'relate' => false
 											);
-            $this->moduleFields['myd_filter_suivi'] = array(
-												'label' => 'Filter Suivi',
-												'type' => 'varchar(255)',
-												'type_bdd' => 'varchar(255)',
-												'required' => 0,
-												'relate' => false
-											);
 		}
 		if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
+				'label' => 'Filtre Myddleware',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => false
+			);
+		}
+
+		// if module = crmc suivi
+		if ($module == 'CRMC_Suivi') {
+			$this->moduleFields['myd_filter_suivi'] = array(
 				'label' => 'Filtre Myddleware',
 				'type' => 'varchar(255)',
 				'type_bdd' => 'varchar(255)',
