@@ -221,7 +221,7 @@ class suitecrmcustom extends suitecrm
 			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
 		}
 		
-		// We set the document to cancel when we try to update a converted status for a coupon
+		// We set the document to cancel when we try to update a converted status for a Coupon
 		if (
 				!empty($param['ruleId'])
 			AND	in_array($param['ruleId'], array('633ef1ecf11db')) // Mobilisation - relance rdv pris -> comet
