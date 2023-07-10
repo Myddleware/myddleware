@@ -207,7 +207,15 @@ class suitecrmcustom extends suitecrm
 				if (
 						!empty($record['interlocuteur_c'])
 					AND !empty($record['type_suivi_bilan_c'])
-					AND $record['type_suivi_bilan_c'] == 'SuivirattrapageREEC'
+					AND (
+						($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND $record['interlocuteur_c'] == 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND $record['interlocuteur_c'] !== 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'Suiviregulier' AND $record['interlocuteur_c'] == 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'Suivimentoratdaccueil' AND $record['interlocuteur_c'] == 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoeffectue' AND $record['interlocuteur_c'] == 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoannule' AND $record['interlocuteur_c'] == 'engage')
+					)
+					// TODO or autres type && interlo engage
 				) {
 					$read[$key]['myd_filte_suivi'] = 1;
 				}
