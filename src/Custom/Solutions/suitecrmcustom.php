@@ -212,16 +212,17 @@ class suitecrmcustom extends suitecrm
 						!empty($record['interlocuteur_c'])
 					AND !empty($record['type_suivi_bilan_c'])
 					AND (
-						($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND $record['interlocuteur_c'] == 'engage')
+						// record interlocuteurc contains the string engage with strpos diff from 0
+						($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND strpos($record['interlocuteur_c'], 'engage') !== false)
 					|| ($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND $record['interlocuteur_c'] !== 'engage')
-					|| ($record['type_suivi_bilan_c'] == 'Suiviregulier' AND $record['interlocuteur_c'] == 'engage')
-					|| ($record['type_suivi_bilan_c'] == 'Suivimentoratdaccueil' AND $record['interlocuteur_c'] == 'engage')
-					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoeffectue' AND $record['interlocuteur_c'] == 'engage')
-					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoannule' AND $record['interlocuteur_c'] == 'engage')
+					|| ($record['type_suivi_bilan_c'] == 'Suiviregulier' AND strpos($record['interlocuteur_c'], 'engage') !== false)
+					|| ($record['type_suivi_bilan_c'] == 'Suivimentoratdaccueil' AND strpos($record['interlocuteur_c'], 'engage') !== false)
+					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoeffectue' AND strpos($record['interlocuteur_c'], 'engage') !== false)
+					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoannule' AND strpos($record['interlocuteur_c'], 'engage') !== false)
 					)
 					// TODO or autres type && interlo engage
 				) {
-					$read[$key]['myd_filte_suivi'] = 1;
+					$read[$key]['myd_filter_suivi'] = 1;
 				}
 			}
 		} 
