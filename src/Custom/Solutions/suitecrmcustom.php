@@ -12,7 +12,7 @@ class suitecrmcustom extends suitecrm
 {
 
 	protected int $limitCall = 100;
-	public $anneeScolaire = '2022_2023';
+	public $anneeScolaire = '2023_2024';
 	//public $anneeScolaire2 = '2022'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
 	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi', 'Leads');
