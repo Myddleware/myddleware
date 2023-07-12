@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
@@ -17,6 +16,7 @@ class RelationFilterType extends AbstractType
                 'label' => 'Field',
                 'attr' => [
                     'placeholder' => 'Field',
+                    'id' => 'field_filter_rule',
                 ],
                 'empty_data' => null,
                 'choices' => $options['field_choices'],
@@ -27,6 +27,7 @@ class RelationFilterType extends AbstractType
                 'label' => 'Another Field',
                 'attr' => [
                     'placeholder' => 'Another Field',
+                    'id' => 'another_field_filter_rule',
                 ],
                 'empty_data' => null,
                 'choices' => $options['another_field_choices'],
@@ -37,6 +38,7 @@ class RelationFilterType extends AbstractType
                 'label' => 'Your Text',
                 'attr' => [
                     'placeholder' => 'Enter some text here...',
+                    'id' => 'textarea_field_filter_rule',
                 ],
                 'required' => false
             ]);
