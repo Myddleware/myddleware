@@ -85,8 +85,8 @@ class LogRepository extends ServiceEntityRepository
     public function findNewErrorLogs($alertDateRef)
     {
         return $this->createQueryBuilder('l')
-            ->select('l.date_created, l.type, l.message')
-            ->where('l.date_created > :alertDateRef')
+            ->select('l.created, l.type, l.message')
+            ->where('l.created > :alertDateRef')
             ->andWhere('l.type = :type')
             ->setParameter('alertDateRef', $alertDateRef)
             ->setParameter('type', 'E')
