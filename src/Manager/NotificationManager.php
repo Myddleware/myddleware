@@ -175,8 +175,6 @@ class NotificationManager
 
         // TODO: à translate
         foreach ($newErrorLogs as $log) {
-            // $textMail .= "eDate d création: " . new \DateTime($log['created']) . "\n";
-            // takes the date of the log created which is a datetime object and converts it to a string
             $textMail .= "Date de création: " . $log['created']->format('Y-m-d H:i:s') . "\n";
             $textMail .= "Type: " . $log['type'] . "\n";
             $textMail .= "Message: " . $log['message'] . "\n\n";
