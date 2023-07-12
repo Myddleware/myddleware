@@ -200,7 +200,7 @@ class suitecrmcustom extends suitecrm
 			}
 		}
 
-		// Add a filter so that if the param module is Suivi, for each $read, we check as key record and if not empty interlocuteur_c, and not empty type_suivi_bilan_c, then if type_suivi_bilan_c is equal to SuivirattrapageREEC then we read the record
+		// Set the new filter to 1 if the interlocuteur is engage OR if the bilan type is SuivirattrapageREEC
 		if (
 				$param['module'] == 'CRMC_Suivi'
 			AND $param['call_type'] == 'read'
@@ -209,18 +209,14 @@ class suitecrmcustom extends suitecrm
 				// Record filtered by default
 				$read[$key]['myd_filter_suivi'] = 0;
 				if (
-						!empty($record['interlocuteur_c'])
-					AND !empty($record['type_suivi_bilan_c'])
-					AND (
-						// record interlocuteurc contains the string engage with strpos diff from 0
-						($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND strpos($record['interlocuteur_c'], 'engage') !== false)
-					|| ($record['type_suivi_bilan_c'] == 'SuivirattrapageREEC' AND $record['interlocuteur_c'] !== 'engage')
-					|| ($record['type_suivi_bilan_c'] == 'Suiviregulier' AND strpos($record['interlocuteur_c'], 'engage') !== false)
-					|| ($record['type_suivi_bilan_c'] == 'Suivimentoratdaccueil' AND strpos($record['interlocuteur_c'], 'engage') !== false)
-					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoeffectue' AND strpos($record['interlocuteur_c'], 'engage') !== false)
-					|| ($record['type_suivi_bilan_c'] == 'SuiviAikoannule' AND strpos($record['interlocuteur_c'], 'engage') !== false)
+					(
+							!empty($record['interlocuteur_c'])
+						AND	strpos($record['interlocuteur_c'], 'engage') !== false
+					)  
+					OR (
+							!empty($record['type_suivi_bilan_c'])
+						AND	$record['type_suivi_bilan_c'] == 'SuivirattrapageREEC'
 					)
-					// TODO or autres type && interlo engage
 				) {
 					$read[$key]['myd_filter_suivi'] = 1;
 				}
