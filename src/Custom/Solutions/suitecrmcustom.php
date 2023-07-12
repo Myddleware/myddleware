@@ -79,6 +79,17 @@ class suitecrmcustom extends suitecrm
 				'relate' => false
 			);
 		}
+
+		// if module = crmc suivi
+		if ($module == 'CRMC_Suivi') {
+			$this->moduleFields['myd_filter_suivi'] = array(
+				'label' => 'Filtre Myddleware',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => false
+			);
+		}
 		return $this->moduleFields;
 	}
 
@@ -188,6 +199,30 @@ class suitecrmcustom extends suitecrm
 				}			
 			}
 		}
+
+		// Set the new filter to 1 if the interlocuteur is engage OR if the bilan type is SuivirattrapageREEC
+		if (
+				$param['module'] == 'CRMC_Suivi'
+			AND $param['call_type'] == 'read'
+		) {
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read[$key]['myd_filter_suivi'] = 0;
+				if (
+					(
+							!empty($record['interlocuteur_c'])
+						AND	strpos($record['interlocuteur_c'], 'engage') !== false
+					)  
+					OR (
+							!empty($record['type_suivi_bilan_c'])
+						AND	$record['type_suivi_bilan_c'] == 'SuivirattrapageREEC'
+					)
+				) {
+					$read[$key]['myd_filter_suivi'] = 1;
+				}
+			}
+		} 
+
 		if (
 				!empty($param['rule']['id'])
 			AND	$param['rule']['id'] == '5ce362b962b63'
