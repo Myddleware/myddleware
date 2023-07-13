@@ -115,6 +115,7 @@ class RuleManagerCustom extends RuleManager
 						$this->ruleId == '5ce362b962b63'	// composante
 				) { 
 					$this->generatePoleRelationship('5cfaca925116f', $document['source_id'], 'record_id', true);  // composante - pole
+					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'account_id', true); // REEC - Composante - Contact composante
 				}
 
 				// Si un établissement est envoyée dans REEC, on recherche également son pôle
