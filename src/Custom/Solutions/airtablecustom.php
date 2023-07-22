@@ -11,11 +11,12 @@ class airtablecustom extends airtable {
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
-								'apppq0nb5WI815V57' => 'CONTACTS',			// Aiko PREPROD Reponse
+								'apppq0nb5WI815V57' => 'CONTACTS',		// Aiko PREPROD Reponse
 								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
 								'appuC7nsCbe7TxqwK' => 'VSC',			// USC PREPROD
+								'appgUF55WW7ApOTPQ' => 'Contacts COMET',		// discord PROD
 							);
 
 	protected $modules = array(
@@ -67,6 +68,9 @@ class airtablecustom extends airtable {
 													),
 								'appuC7nsCbe7TxqwK' => array(
 														'VSC' => 'VSC'
+													),
+								'appgUF55WW7ApOTPQ' => array(
+														'Contacts COMET' => 'Contacts COMET',
 													),
 							);
 
