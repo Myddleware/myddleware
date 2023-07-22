@@ -102,11 +102,12 @@ class RuleManagerCustom extends RuleManager
 
 				// Si un contact composante est envoyé dans REEC, on recherche également son pôle
 				// En effet un contact composante dont on  ajoute un mail ne sera plus filtré donc sera envoyé dans REEC,
-				// Cependant, dans ce cas, on n'enverra pas son pôle qui est une données qui a été créée dans le passé 
+				// Cependant, dans ce cas, on n'enverra pas son pôle et sa composante qui est une données qui a été créée dans le passé 
 				if (
 					$this->ruleId == '5d01a630c217c'	//Contact composante
 				) { 
 					$this->generatePoleRelationship('5d163d3c1d837', $document['source_id'], 'record_id', true);  // contact composante - pole
+					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'contact_id', true); // REEC - Composante - Contact composante
 				}
 
 				// Si une composante est envoyée dans REEC, on recherche également son pôle 
@@ -115,6 +116,7 @@ class RuleManagerCustom extends RuleManager
 						$this->ruleId == '5ce362b962b63'	// composante
 				) { 
 					$this->generatePoleRelationship('5cfaca925116f', $document['source_id'], 'record_id', true);  // composante - pole
+					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'account_id', true); // REEC - Composante - Contact composante
 				}
 
 				// Si un établissement est envoyée dans REEC, on recherche également son pôle
