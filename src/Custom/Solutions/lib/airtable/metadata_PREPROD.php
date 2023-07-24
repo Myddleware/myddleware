@@ -899,3 +899,13 @@ $moduleFields['appuC7nsCbe7TxqwK'] = array (
 	),
 );
 
+// Discord
+$moduleFields['appgUF55WW7ApOTPQ'] = array (
+	'Contacts COMET' => array(
+		'fldmyazAW2ZwPEef2'=> array( 'label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldqJcR86flmBy6wW'=> array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldoBJpUrfBHuaL7o'=> array( 'label' => 'Engagement', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldeQGUyJifq1c0eA'=> array( 'label' => 'Année scolaire', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+	),
+);
+

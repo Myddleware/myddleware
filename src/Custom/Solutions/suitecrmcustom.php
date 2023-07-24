@@ -70,7 +70,7 @@ class suitecrmcustom extends suitecrm
 												'relate' => false
 											);
 		}
-		if ($module == 'Accounts') {
+		/* if ($module == 'Accounts') {
 			$this->moduleFields['myd_filtered'] = array(
 				'label' => 'Filtre Myddleware',
 				'type' => 'varchar(255)',
@@ -78,7 +78,7 @@ class suitecrmcustom extends suitecrm
 				'required' => 0,
 				'relate' => false
 			);
-		}
+		} */
 
 		// if module = crmc suivi
 		if ($module == 'CRMC_Suivi') {
@@ -223,7 +223,7 @@ class suitecrmcustom extends suitecrm
 			}
 		} 
 
-		if (
+		/* if (
 				!empty($param['rule']['id'])
 			AND	$param['rule']['id'] == '5ce362b962b63'
 			AND !empty($read)
@@ -246,7 +246,7 @@ class suitecrmcustom extends suitecrm
 					$read[$key]['myd_filtered'] = 0;
 				}
 			}
-		}
+		} */
 		return $read;
 	}
 	
