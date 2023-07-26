@@ -264,7 +264,7 @@ class suitecrmcustom extends suitecrm
 			$param['module'] == 'CRMC_historique_mentore'
 			and $param['call_type'] == 'read'
 			// and rule id is 64bfda610cf61
-			and $param['rule']['id'] == '64c0ec2e24293'
+			and $param['rule']['id'] == '64c1373d81bab'
 			and 1 == 1 // Disabled for now because it's not used anymore
 			
 		) {
