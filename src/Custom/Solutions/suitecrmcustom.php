@@ -90,6 +90,16 @@ class suitecrmcustom extends suitecrm
 				'relate' => false
 			);
 		}
+
+		if ($module == 'CRMC_historique_mentore') {
+			$this->moduleFields['id_historique_mentore'] = array(
+				'label' => 'Id historique mentore',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => true
+			);
+		}
 		return $this->moduleFields;
 	}
 
