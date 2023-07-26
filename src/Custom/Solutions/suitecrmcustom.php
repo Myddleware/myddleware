@@ -257,6 +257,64 @@ class suitecrmcustom extends suitecrm
 				}
 			}
 		} */
+
+
+		// Split the result of the read for the pole, so that if we have 1 document with 3 poles, 1 document with 2 poles, and 1 document with 5 poles, we end up with 10 records in the result
+		if (
+			$param['module'] == 'CRMC_historique_mentore'
+			and $param['call_type'] == 'read'
+			// and rule id is 64bfda610cf61
+			and $param['rule']['id'] == '64c0ec2e24293'
+			and 1 == 1 // Disabled for now because it's not used anymore
+			
+		) {
+			$read2 = array();
+			foreach ($read as $key => $record) {
+				// Record filtered by default
+				$read2[$key] = $record;
+				// If we have a pole, we split the record
+				if (
+					!empty($record['poles_rattaches'])
+					and strpos($record['poles_rattaches'], ',') !== false
+				) {
+					$poles = explode(',', $record['poles_rattaches']);
+					foreach ($poles as $pole) {
+						// Copy the record without the ^ aronud the pole using the trim function
+						$read2[] =  $record;
+						$read2[count($read2) - 1]['poles_rattaches'] = trim($pole, '^');
+						$read2[count($read2) - 1]['id'] = $record['id'].trim($pole, '^');
+						$read2[count($read2) - 1]['id_historique_mentore'] = $record['id'];
+
+					}
+				} else if (!empty($record['poles_rattaches'])
+				and strpos($record['poles_rattaches'], ',') == false) {
+					// Copy the record without the ^ aronud the pole using the trim function
+					$read2[$key]['poles_rattaches'] = trim($record['poles_rattaches'], '^');
+					$read2[$key]['id_historique_mentore'] = $record['id'];
+				}
+			}
+			$read = $read2;
+			unset($read[0]);
+		}
+
+		if (
+			$param['module'] == 'CRMC_historique_mentore'
+			and $param['call_type'] == 'read'
+			// and rule id is 64bfda610cf61
+			and $param['rule']['id'] == '64c10cfc529a7'
+			and 1 == 1 // Disabled for now because it's not used anymore
+			
+		) {
+			$read2 = array();
+			foreach ($read as $key => $record) {
+				$read2[] =  $record;
+				// Record filtered by default
+				$read2[$key]['id_historique_mentore'] = $record['id'];
+				// If we have a pole, we split the record
+			}
+			$read = $read2;
+		}
+
 		return $read;
 	}
 	
