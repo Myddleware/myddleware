@@ -682,6 +682,7 @@ $(function () {
 		before = $("#validation").attr('value');
 	
 		if (require() && require_params() && require_relate() && duplicate_fields_error()) {
+			console.log('toto');
 			$.ajax({
 				type: "POST",
 				url: path_validation,
@@ -1705,37 +1706,36 @@ function verifFields(field_id, show) {
 // ---- FILTRES  -------------------------------------------------------------------------
 
 // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
-
-// Récupère la liste des filtres
 function recup_filter() {
-	filter = [];
-	$('li', '#fieldsfilter').each(function () {
+    let filter = [];
+    $('#fieldsfilter li').each(function () {
+        let field_target = $.trim($(this).find(".name").text());
 
-		field_target = '';
-		$($(this)).find("span.name").each(function () {
-			field_target = $.trim($(this).text());
-		});
+        let field_filter = '';
+        let selectElement = $(this).find("input[name*='anotherFieldInput']");
+        if (selectElement.length > 0) {
+            field_filter = $.trim(selectElement.val());
+        }
 
-		field_filter = '';
-		$($(this)).find("select.filter").each(function () {
-			field_filter = $.trim($(this).val());
-		});
+        let field_value = '';
+        let inputElement = $(this).find("input[name*='textareaFieldInput']");
+        if (inputElement.length > 0) {
+            field_value = $.trim(inputElement.val());
+        }
 
-		field_value = '';
-		$($(this)).find("input").each(function () {
-			field_value = $.trim($(this).val());
-		});
-		if (field_filter != '') {
-			filter.push({
-				target: field_target,
-				filter: field_filter,
-				value: field_value
-			});
-		}
-	});
+        if (field_target || field_filter || field_value) {
+            filter.push({
+                target: field_target,
+                filter: field_filter,
+                value: field_value,
+            });
+        }
+    });
 
-	return filter;
+    return filter;
 }
+
+
 
 // Récupère tous les champs	
 function recup_champs() {

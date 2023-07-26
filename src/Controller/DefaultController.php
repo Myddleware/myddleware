@@ -2364,22 +2364,53 @@ use App\Form\Type\RelationFilterType;
                     }
                 }
 
+                // $form = $this->createForm(RelationFilterType::class);
+                // $form->handleRequest($request);
                 //------------------------------- RuleFilter ------------------------
+                // $form->handleRequest($request);
+              //------------------------------- RuleFilter ------------------------
+              $filters = $request->request->get('filter');
 
-                if (!empty($request->request->get('filter'))) {
-                    foreach ($request->request->get('filter') as $filter) {
-                        $oneRuleFilter = new RuleFilter();
-                        $oneRuleFilter->setTarget($filter['target']);
-                        $oneRuleFilter->setRule($oneRule);
-                        $oneRuleFilter->setType($filter['filter']);
-                        $oneRuleFilter->setValue($filter['value']);
-                        $this->entityManager->persist($oneRuleFilter);
-                        $this->entityManager->flush();
-                    }
-                }
+              if (!empty($filters)) {
+                  foreach ($filters as $filterData) {
+                      // $filterData est un tableau contenant les valeurs des champs pour chaque élément de liste <li>
+              
+                      // Accès aux valeurs des champs individuels
+                      $fieldInput = $filterData['field'];
+                      $anotherFieldInput = $filterData['another_field'];
+                      $textareaFieldInput = $filterData['textarea_field'];
+              
+                      // Maintenant, vous pouvez utiliser ces valeurs comme vous le souhaitez, par exemple, pour créer un objet RuleFilter
+                      $oneRuleFilter = new RuleFilter();
+                      $oneRuleFilter->setTarget($fieldInput);
+                      $oneRuleFilter->setRule($oneRule);
+              
+                      $oneRuleFilter->setType($anotherFieldInput);
+                      $oneRuleFilter->setValue($textareaFieldInput);
+              
+                      // Enregistrez votre objet RuleFilter dans la base de données
+                      $entityManager->persist($oneRuleFilter);
+                  }
+              
+                  $entityManager->flush();
+              }
+                    // $this->getDoctrine()->getManager()->flush();
+                // }
+                // if (!empty($request->request->get('filter'))) {
+                //     foreach ($request->request->get('filter') as $filter) {
+                //         $oneRuleFilter = new RuleFilter();
+                //         $oneRuleFilter->setTarget($filter['target']);
+                //         $oneRuleFilter->setRule($oneRule);
+                //         $oneRuleFilter->setType($filter['filter']);
+                //         $oneRuleFilter->setValue($filter['value']);
+                //         $this->entityManager->persist($oneRuleFilter);
+                //         $this->entityManager->flush();
+                //     }
+                // }
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
+                error_log(print_r($request->request->all(), true));
                 $this->jobManager->orderRules();
 
                 // --------------------------------------------------------------------------------------------------
