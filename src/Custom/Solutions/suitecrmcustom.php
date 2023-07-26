@@ -177,7 +177,7 @@ class suitecrmcustom extends suitecrm
 			return array();
 		}
 		$read = parent::read($param);
-		// Add a field to filter by mentor OR mentor acceuil
+		// Add a field to filter by mentor OR mentor accueil
 		if (
 					$param['module']=='Contacts'
 				AND $param['call_type'] == 'read'
