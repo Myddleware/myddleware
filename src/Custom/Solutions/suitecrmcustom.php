@@ -90,7 +90,7 @@ class suitecrmcustom extends suitecrm
 				'relate' => false
 			);
 		}
-
+		// Add the field to store the id_historique_mentore
 		if ($module == 'CRMC_historique_mentore') {
 			$this->moduleFields['id_historique_mentore'] = array(
 				'label' => 'Id historique mentore',
@@ -259,62 +259,36 @@ class suitecrmcustom extends suitecrm
 		} */
 
 
-		// Split the result of the read for the pole, so that if we have 1 document with 3 poles, 1 document with 2 poles, and 1 document with 5 poles, we end up with 10 records in the result
+		// Split the result of the read for the pole, so that if we have 1 document with 3 poles, 
+		// 1 document with 2 poles, and 1 document with 5 poles, we end up with 10 records in the result
 		if (
-			$param['module'] == 'CRMC_historique_mentore'
-			and $param['call_type'] == 'read'
-			// and rule id is 64bfda610cf61
-			and $param['rule']['id'] == '64c1373d81bab'
-			and 1 == 1 // Disabled for now because it's not used anymore
-			
+				$param['module'] == 'CRMC_historique_mentore'
+			AND $param['call_type'] == 'read'
 		) {
 			$read2 = array();
+			$i = 0;
 			foreach ($read as $key => $record) {
-				// Record filtered by default
-				$read2[$key] = $record;
-				// If we have a pole, we split the record
-				if (
-					!empty($record['poles_rattaches'])
-					and strpos($record['poles_rattaches'], ',') !== false
-				) {
-					$poles = explode(',', $record['poles_rattaches']);
-					foreach ($poles as $pole) {
-						// Copy the record without the ^ aronud the pole using the trim function
-						$read2[] =  $record;
-						$read2[count($read2) - 1]['poles_rattaches'] = trim($pole, '^');
-						$read2[count($read2) - 1]['id'] = $record['id'].trim($pole, '^');
-						$read2[count($read2) - 1]['id_historique_mentore'] = $record['id'];
-
+				if (!empty($record['poles_rattaches'])) {
+					// If we have several poles, we split the record
+					if (strpos($record['poles_rattaches'], ',') !== false) {
+						// Transform poles list string to an array
+						$poles = explode(',', str_replace('^', '', $record['poles_rattaches']));
+					// If we have only one pole, we create an array with one entry
+					} else {
+						$poles[] = trim($record['poles_rattaches'], '^');
 					}
-				} else if (!empty($record['poles_rattaches'])
-				and strpos($record['poles_rattaches'], ',') == false) {
-					// Copy the record without the ^ aronud the pole using the trim function
-					$read2[$key]['poles_rattaches'] = trim($record['poles_rattaches'], '^');
-					$read2[$key]['id_historique_mentore'] = $record['id'];
+					// Prepare the result
+					foreach ($poles as $pole) {
+						$read2[$i] = $record;
+						$read2[$i]['poles_rattaches'] = $pole
+						$read2[$i]['id'] = $record['id'].'_'.$pole;
+						$read2[$i]['id_historique_mentore'] = $record['id'];
+						$i++;
+					}
 				}
 			}
-			$read = $read2;
-			unset($read[0]);
+			return $read2;
 		}
-
-		if (
-			$param['module'] == 'CRMC_historique_mentore'
-			and $param['call_type'] == 'read'
-			// and rule id is 64bfda610cf61
-			and $param['rule']['id'] == '64bf77b331334'
-			and 1 == 1 // Disabled for now because it's not used anymore
-			
-		) {
-			$read2 = array();
-			foreach ($read as $key => $record) {
-				$read2[] =  $record;
-				// Record filtered by default
-				$read2[$key]['id_historique_mentore'] = $record['id'];
-				// If we have a pole, we split the record
-			}
-			$read = $read2;
-		}
-
 		return $read;
 	}
 	
