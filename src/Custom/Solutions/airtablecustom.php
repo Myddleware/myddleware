@@ -304,6 +304,12 @@ class airtablecustom extends airtable {
 			}
 		}
 		
+		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
+			if (empty($data['fldY9MAvfDHSHtJKT'])) {	// if referent empty we remove it from the data sent
+				unset($data['fldY9MAvfDHSHtJKT']);
+			}
+		}
+		
 		if ($param['rule']['id'] == '6493f82a6102a') { // 	Aiko - Suivi Mentorat vers Aiko
 			throw new \Exception('No possible to create a suivi in Airtable. ');
 		}
@@ -328,6 +334,11 @@ class airtablecustom extends airtable {
 			}
 		}
 
+		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
+			if (empty($data['fldY9MAvfDHSHtJKT'])) {	// if referent empty we remove it from the data sent
+				unset($data['fldY9MAvfDHSHtJKT']);
+			}
+		}
         return $data;
     }
 	    
