@@ -99,6 +99,8 @@ class suitecrmcustom extends suitecrm
 				'required' => 0,
 				'relate' => true
 			);
+			// Change a text field to a relate field
+			$this->moduleFields['poles_rattaches']['relate'] = true;
 		}
 		return $this->moduleFields;
 	}
@@ -264,6 +266,7 @@ class suitecrmcustom extends suitecrm
 		if (
 				$param['module'] == 'CRMC_historique_mentore'
 			AND $param['call_type'] == 'read'
+			AND in_array('id_historique_mentore', $param['fields']) // If field id_historique_mentore is requested
 		) {
 			$read2 = array();
 			$i = 0;
