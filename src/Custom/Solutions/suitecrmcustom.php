@@ -283,7 +283,7 @@ class suitecrmcustom extends suitecrm
 					// Prepare the result
 					foreach ($poles as $pole) {
 						$read2[$i] = $record;
-						$read2[$i]['poles_rattaches'] = $pole
+						$read2[$i]['poles_rattaches'] = $pole;
 						$read2[$i]['id'] = $record['id'].'_'.$pole;
 						$read2[$i]['id_historique_mentore'] = $record['id'];
 						$i++;
