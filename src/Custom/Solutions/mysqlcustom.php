@@ -296,6 +296,17 @@ class mysqlcustom extends mysql {
 					unset($data['composante_id']);
 			}
 		}
+		
+		// We can't send a field with id empty because of foreign key
+		if ($param['module'] == 'historique_mentore') {
+			if (
+					isset($data['composante_id'])
+				AND empty($data['composante_id'])
+			) {
+				unset($data['composante_id']);
+			}
+		}
+		
 		return $data;		
 	}
 	

@@ -260,7 +260,6 @@ class suitecrmcustom extends suitecrm
 			}
 		} */
 
-
 		// Split the result of the read for the pole, so that if we have 1 document with 3 poles, 
 		// 1 document with 2 poles, and 1 document with 5 poles, we end up with 10 records in the result
 		if (
@@ -271,6 +270,7 @@ class suitecrmcustom extends suitecrm
 			$read2 = array();
 			$i = 0;
 			foreach ($read as $key => $record) {
+				$poles = array();
 				if (!empty($record['poles_rattaches'])) {
 					// If we have several poles, we split the record
 					if (strpos($record['poles_rattaches'], ',') !== false) {
