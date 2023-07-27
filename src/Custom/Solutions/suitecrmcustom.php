@@ -453,6 +453,23 @@ class suitecrmcustom extends suitecrm
 					);
 					return array($param);
 				}
+				// Annee annee scolaire as parameter 
+				if (in_array($module, $this->moduleWithAnnee)) {
+					$param = array(
+						'id' => 'anneeScolaire',
+						'name' => 'anneeScolaire',
+						'type' => 'option',
+						'label' => 'Année scolaire',
+						'required'	=> false,
+						'option'	=> array(
+							'' => '',
+							'2022_2023' => '2022-2023',
+							'2023_2024' => '2023-2024',
+							'2024_2025' => '2024-2025',
+						)
+					);
+					return array($param);
+				}
 			}
 			return array();
 		} catch (\Exception $e) {
@@ -505,11 +522,12 @@ class suitecrmcustom extends suitecrm
 			$query .= " AND " . strtolower($param['module']) . "_cstm.coupon_type_c IN (" . $param['ruleParams']['leadType'] . ") ";
 		}
 		// filter by annee
+		// The rule parameter anneeScolaire override the genera parameter if exists
 		if (
 			in_array($param['module'], $this->moduleWithAnnee)
 			and $param['call_type'] != 'history'
 		) {
-			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".$this->anneeScolaire."%' ";
+			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".(!empty($param['ruleParams']['anneeScolaire']) ? $param['ruleParams']['anneeScolaire'] : $this->anneeScolaire)."%' ";
 		}
 		// Add a filter for contact universite 
 		if (
@@ -524,7 +542,7 @@ class suitecrmcustom extends suitecrm
 			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.espace_reperant_c <> 'non' ";
-		}	
+		}		
 		return $query;
 	}
 
