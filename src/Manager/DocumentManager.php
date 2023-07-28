@@ -1093,6 +1093,10 @@ class documentcore
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
                     if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {
+						// Null text is considered as empty for comparaison
+						if ($target[$field['target_field_name']] == 'null') {
+							$target[$field['target_field_name']] = '';
+						}
                         // We check if both are empty not depending of the type 0 = ""
                         if (
                                 empty($history[$field['target_field_name']])
