@@ -1092,9 +1092,7 @@ class documentcore
             // If one is different we stop the function
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
-                    if (
-                            trim($history[$field['target_field_name']]) != trim($target[$field['target_field_name']])
-                    ) {
+                    if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {
                         // We check if both are empty not depending of the type 0 = ""
                         if (
                                 empty($history[$field['target_field_name']])
@@ -1102,7 +1100,6 @@ class documentcore
                         ) {
                             continue;
                         }
-
                         return false;
                     }
                 }
