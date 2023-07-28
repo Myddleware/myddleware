@@ -222,6 +222,7 @@ class DocumentManagerCustom extends DocumentManager
 			!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5f20b113356e1' // Rule Composante - Contact composante
 			and $new_status == 'Relate_KO'
+			and $this->attempt > 0 // Relationship could be created after the contact, to we don't cancel teh document at the first atempt
 		) {
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact composante. Ce transfert de données est annulé. ');
