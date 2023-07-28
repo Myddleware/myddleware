@@ -369,6 +369,17 @@ class DocumentManagerCustom extends DocumentManager
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('Les contacts partenaires ne sont pas envoyés dans Airtable, la relation pôle tombe logiquement en relate_KO. Ce transfert de données est annulé. ');
 		}
+
+		// No suivi update if the suivi deosn't exist anymore
+		if (
+				!empty($this->document_data)
+			AND	$this->document_data['rule_id'] == '6493f82a6102a'	// Aiko - Suivi Mentorat vers Aiko
+			AND $new_status == 'Error_checking'
+			AND strpos($this->message, '404  returned') !== false
+		) {		
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le suivi a été supprimé dans Aiko. Ce transfert de données est annulé. ');
+		}
 		
 		// Cancel if the doc is related KO and the email linked to a user (afev.org)
 		if (
