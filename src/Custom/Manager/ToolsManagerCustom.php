@@ -22,7 +22,7 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
 			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
 			$data['lst_rule']['5ce454613bb17'] = 'REEC - Formation';
-			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
+			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact partenaire';
 			$data['lst_rule']['5f847b2242138'] = 'REEC - Etablissement sup';
 			$data['lst_rule']['62738aabafcd2'] = 'Esp Rep - Quartiers';
 			$data['lst_rule']['6273905a05cb2'] = 'Esp Rep - Contacts repérants';
@@ -73,10 +73,10 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['61a9190e40965'] = 'Aiko Référent';
 		}
 		
-		// Une règle avec le module accounts_contacts peut être liée aux module Composante et Contact - Composante
+		// Une règle avec le module accounts_contacts peut être liée aux module Composante et Contact partenaire
 		if (current(array_keys($data['source'])) == 'accounts_contacts') {
 			$data['lst_rule']['5ce362b962b63'] = 'REEC - Composante';
-			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact - Composante';
+			$data['lst_rule']['5d01a630c217c'] = 'REEC - Contact partenaire';
 			$data['lst_rule']['5ce3621156127'] = 'REEC - Engagé';
 			$data['lst_rule']['5cdf83721067d'] = 'REEC - Jeune accompagné';
 			$data['lst_rule']['6273905a05cb2'] = 'Esp Rep - Contacts repérants';

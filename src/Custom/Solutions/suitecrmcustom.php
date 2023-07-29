@@ -559,7 +559,7 @@ class suitecrmcustom extends suitecrm
 		// Add a filter for contact universite 
 		if (
 				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact - Composante
+			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact partenaire
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_universite%' ";
 		}

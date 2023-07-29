@@ -89,11 +89,11 @@ class DocumentManagerCustom extends DocumentManager
 		// On annule la relation pôle - contact (université) si le contact (université) a été filtré
 		if (
 			!empty($this->document_data['rule_id'])
-			and	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact composante - Pôle
+			and	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact partenaire - Pôle
 		) {
 			if (
 				strpos($this->message, 'No data for the field record_id.') !== false
-				and strpos($this->message, 'in the rule REEC - Contact - Composante.') !== false
+				and strpos($this->message, 'in the rule REEC - Contact partenaire.') !== false
 			) {
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type contact université. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
@@ -205,27 +205,27 @@ class DocumentManagerCustom extends DocumentManager
 
 		if (
 			!empty($this->document_data['rule_id'])
-			and	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact composante - Pôle
+			and	$this->document_data['rule_id'] == '5d163d3c1d837' // Rule Contact partenaire - Pôle
 		) {
 			if (
 				strpos($this->message, 'No data for the field record_id.') !== false
-				and strpos($this->message, 'in the rule REEC - Contact - Composante.') !== false
+				and strpos($this->message, 'in the rule REEC - Contact partenaire.') !== false
 			) {
 				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le contact composante est absent de la platforme REEC, il s\'agit probablement d\'une composante sans adresse email. Le lien Contact composante - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+				$this->message .= utf8_decode('Le contact partenaire est absent de la platforme REEC, il s\'agit probablement d\'une composante sans adresse email. Le lien Contact composante - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
 			}
 		}
 
-		// On annule tous les transferts de données en relate ko pour la règle composante - Contact composante
-		// En effet des la majorité des relations accounts_contacts ne sont pas des composante - Contact composante
+		// On annule tous les transferts de données en relate ko pour la règle composante - Contact partenaire
+		// En effet des la majorité des relations accounts_contacts ne sont pas des composante - Contact partenaire
 		if (
 			!empty($this->document_data['rule_id'])
-			and	$this->document_data['rule_id'] == '5f20b113356e1' // Rule Composante - Contact composante
+			and	$this->document_data['rule_id'] == '5f20b113356e1' // Rule Composante - Contact partenaire
 			and $new_status == 'Relate_KO'
 			and $this->attempt > 0 // Relationship could be created after the contact, to we don't cancel teh document at the first atempt
 		) {
 			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact composante. Ce transfert de données est annulé. ');
+			$this->message .= utf8_decode('La relation ne concerne probablement pas une composantecomposante et un contact partenaire. Ce transfert de données est annulé. ');
 		}
 
 		// On annule tous les transferts de données en relate ko pour la règle composante - Contact partenaire
@@ -248,7 +248,7 @@ class DocumentManagerCustom extends DocumentManager
 			and $new_status == 'Relate_KO'
 		) {
 			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact composante. Ce transfert de données est annulé. ');
+			$this->message .= utf8_decode('La relation ne concerne probablement pas une composante et un contact partenaire. Ce transfert de données est annulé. ');
 		}
 
 		// Si on est sur une suppression d'une composante, le document est souvent filtré car la composante supprimé n'a plus d'établissment supérieur lié
