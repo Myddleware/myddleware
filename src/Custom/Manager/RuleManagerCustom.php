@@ -40,7 +40,7 @@ class RuleManagerCustom extends RuleManager
 		// List of rules with custom action
 		$ruleList = array(
 							'5ce3621156127', // Engagés
-							'5d01a630c217c', // Contact composante
+							'5d01a630c217c', // Contact partenaire
 							'5ce362b962b63', // composante
 							'5f847b2242138', // Etablissement sup 
 							'5ce454613bb17', // Formation
@@ -100,14 +100,14 @@ class RuleManagerCustom extends RuleManager
 					$this->generatePoleRelationship('5f8486295b5a7', $document['source_id'], 'contact_id', true); // Composante - Engagé
 				} */
 
-				// Si un contact composante est envoyé dans REEC, on recherche également son pôle
-				// En effet un contact composante dont on  ajoute un mail ne sera plus filtré donc sera envoyé dans REEC,
+				// Si un contact partenaire est envoyé dans REEC, on recherche également son pôle
+				// En effet un contact partenaire dont on  ajoute un mail ne sera plus filtré donc sera envoyé dans REEC,
 				// Cependant, dans ce cas, on n'enverra pas son pôle et sa composante qui est une données qui a été créée dans le passé 
 				if (
-					$this->ruleId == '5d01a630c217c'	//Contact composante
+					$this->ruleId == '5d01a630c217c'	//Contact partenaire
 				) { 
 					$this->generatePoleRelationship('5d163d3c1d837', $document['source_id'], 'record_id', true);  // contact composante - pole
-					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'contact_id', true); // REEC - Composante - Contact composante
+					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'contact_id', true); // REEC - Composante - Contact partenaire
 				}
 
 				// Si une composante est envoyée dans REEC, on recherche également son pôle 
@@ -116,7 +116,7 @@ class RuleManagerCustom extends RuleManager
 						$this->ruleId == '5ce362b962b63'	// composante
 				) { 
 					$this->generatePoleRelationship('5cfaca925116f', $document['source_id'], 'record_id', true);  // composante - pole
-					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'account_id', true); // REEC - Composante - Contact composante
+					$this->generatePoleRelationship('5f20b113356e1', $document['source_id'], 'account_id', true); // REEC - Composante - Contact partenaire
 				}
 
 				// Si un établissement est envoyée dans REEC, on recherche également son pôle

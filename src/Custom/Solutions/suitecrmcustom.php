@@ -90,6 +90,18 @@ class suitecrmcustom extends suitecrm
 				'relate' => false
 			);
 		}
+		// Add the field to store the id_historique_mentore
+		if ($module == 'CRMC_historique_mentore') {
+			$this->moduleFields['id_historique_mentore'] = array(
+				'label' => 'Id historique mentore',
+				'type' => 'varchar(255)',
+				'type_bdd' => 'varchar(255)',
+				'required' => 0,
+				'relate' => true
+			);
+			// Change a text field to a relate field
+			$this->moduleFields['poles_rattaches']['relate'] = true;
+		}
 		return $this->moduleFields;
 	}
 
@@ -177,7 +189,7 @@ class suitecrmcustom extends suitecrm
 			return array();
 		}
 		$read = parent::read($param);
-		// Add a field to filter by mentor OR mentor acceuil
+		// Add a field to filter by mentor OR mentor accueil
 		if (
 					$param['module']=='Contacts'
 				AND $param['call_type'] == 'read'
@@ -247,6 +259,39 @@ class suitecrmcustom extends suitecrm
 				}
 			}
 		} */
+
+		// Split the result of the read for the pole, so that if we have 1 document with 3 poles, 
+		// 1 document with 2 poles, and 1 document with 5 poles, we end up with 10 records in the result
+		if (
+				$param['module'] == 'CRMC_historique_mentore'
+			AND $param['call_type'] == 'read'
+			AND in_array('id_historique_mentore', $param['fields']) // If field id_historique_mentore is requested
+		) {
+			$read2 = array();
+			$i = 0;
+			foreach ($read as $key => $record) {
+				$poles = array();
+				if (!empty($record['poles_rattaches'])) {
+					// If we have several poles, we split the record
+					if (strpos($record['poles_rattaches'], ',') !== false) {
+						// Transform poles list string to an array
+						$poles = explode(',', str_replace('^', '', $record['poles_rattaches']));
+					// If we have only one pole, we create an array with one entry
+					} else {
+						$poles[] = trim($record['poles_rattaches'], '^');
+					}
+					// Prepare the result
+					foreach ($poles as $pole) {
+						$read2[$i] = $record;
+						$read2[$i]['poles_rattaches'] = $pole;
+						$read2[$i]['id'] = $record['id'].'_'.$pole;
+						$read2[$i]['id_historique_mentore'] = $record['id'];
+						$i++;
+					}
+				}
+			}
+			return $read2;
+		}
 		return $read;
 	}
 	
@@ -532,7 +577,7 @@ class suitecrmcustom extends suitecrm
 		// Add a filter for contact universite 
 		if (
 				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact - Composante
+			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact partenaire
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.reec_c LIKE '%contact_universite%' ";
 		}

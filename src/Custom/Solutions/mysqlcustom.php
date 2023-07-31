@@ -99,7 +99,7 @@ class mysqlcustom extends mysql {
 				} elseif ($param['rule']['id'] == '63e1007614977') { // REEC user custom
 					// Always keep the non user role
 					$targetRoles = array_intersect($historyRoles, array_merge($engageRoles,$partenaireRoles,$reperantRoles));
-				} elseif ($param['rule']['id'] == '5d01a630c217c') { //  REEC - Contact - Composante
+				} elseif ($param['rule']['id'] == '5d01a630c217c') { //  REEC - Contact partenaire
 					// Always keep the non contact partenaire role
 					$targetRoles = array_intersect($historyRoles, array_merge($userRoles,$engageRoles,$reperantRoles));
 				} elseif ($param['rule']['id'] == '6273905a05cb2') { //  Esp Rep - Contacts repérants
@@ -185,13 +185,13 @@ class mysqlcustom extends mysql {
 					isset($data['universite_id'])
 				AND empty($data['universite_id'])
 			) {
-				unset($data['universite_id']);
+				$data['universite_id'] = 'null';
 			}
 			if (
 					isset($data['referant_id'])
 				AND empty($data['referant_id'])
 			) {
-				unset($data['referant_id']);
+				$data['referant_id'] = 'null';
 			}
 			if (
 					isset($data['date_naissance'])
@@ -217,6 +217,12 @@ class mysqlcustom extends mysql {
 			) {
 				unset($data['date_deb_mentorat']);
 			}
+			if (
+					isset($data['reperant_id'])
+				AND empty($data['reperant_id'])
+			) {
+				$data['reperant_id'] = 'null';
+			}
 		}
 		
 		// We can't send decimal empty and don't wnt to set a 0 instead
@@ -237,7 +243,7 @@ class mysqlcustom extends mysql {
 					isset($data['referant_id'])
 				AND empty($data['referant_id'])
 			) {
-				unset($data['referant_id']);
+				$data['referant_id'] = 'null';
 			}
 		}
 		
@@ -259,7 +265,7 @@ class mysqlcustom extends mysql {
 					isset($data['binome_id'])
 				AND empty($data['binome_id'])
 			) {
-				unset($data['binome_id']);
+				$data['binome_id'] = 'null';
 			}
 			if (
 					isset($data['nb_seances_annulees'])
@@ -281,21 +287,48 @@ class mysqlcustom extends mysql {
 					isset($data['date_naissance'])
 				AND empty($data['date_naissance'])
 			) {
-				unset($data['date_naissance']);
+				$data['date_naissance'] = 'null';
 			}
 			if (
 							isset($data['reperant_id'])
 					AND empty($data['reperant_id'])
 			) {
-					unset($data['reperant_id']);
+				$data['reperant_id'] = 'null';
 			}
 			if (
 							isset($data['composante_id'])
 					AND empty($data['composante_id'])
 			) {
-					unset($data['composante_id']);
+				$data['composante_id'] = 'null';
+			}
+			if (
+							isset($data['jeune_id'])
+					AND empty($data['jeune_id'])
+			) {
+				$data['jeune_id'] = 'null';
 			}
 		}
+		
+		// We can't send a field with id empty because of foreign key
+		if ($param['module'] == 'historique_mentore') {
+			if (
+					isset($data['composante_id'])
+				AND empty($data['composante_id'])
+			) {
+				$data['composante_id'] = 'null';
+			}
+		}
+		
+		// We can't send a field with id empty because of foreign key
+		if ($param['module'] == 'composante') {
+			if (
+					isset($data['etablissement_sup_id'])
+				AND empty($data['etablissement_sup_id'])
+			) {
+				$data['etablissement_sup_id'] = 'null';
+			}
+		}
+		
 		return $data;		
 	}
 	
@@ -705,7 +738,7 @@ class mysqlcustom extends mysql {
 	public function createData($param): array {	
 		// Myddleware can change the email only if compte_reec_ok = 0
 		// règle REEC - users, REEC - Composante, Esp Rep - Coupons vers Esp Rep
-		if (in_array($param['rule']['id'], array('5cf98651a17f3', '5ce362b962b63', '62739b419755f'))) {	
+		if (in_array($param['rule']['id'], array('5cf98651a17f3'))) {	
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {				
 				// compte_reec_ok always equal to 0. It can be equal to "DO NOT SEND" in case of volontaire but only for update
@@ -713,20 +746,6 @@ class mysqlcustom extends mysql {
 					if (!empty($param['data'][$idDoc]['compte_reec_ok'])) {
 						$param['data'][$idDoc]['compte_reec_ok'] = '0';				
 					}
-				}
-				// Do not send an empty etablissement on the composante
-				if (
-						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
-					AND empty($data['etablissement_sup_id'])
-				) {
-					unset($param['data'][$idDoc]['etablissement_sup_id']);
-				}
-				// Do not send an empty jeune on the coupon
-				if (
-						$param['rule']['id'] == '62739b419755f' // Esp Rep - Coupons vers Esp Rep
-					AND empty($data['jeune_id'])
-				) {
-					unset($param['data'][$idDoc]['jeune_id']);
 				}
 			}
 		}
@@ -736,7 +755,7 @@ class mysqlcustom extends mysql {
 	public function updateData($param): array {		
 		// Myddleware can change the email only if compte_reec_ok = 0
 		// règle users , engagé , REEC - Composante, Esp Rep - Coupons vers Esp Rep
-		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','5ce362b962b63','62739b419755f'))) {
+		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {
 			// For every document
 			foreach($param['data'] as $idDoc => $data) {	
 				if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {		// règle users , engagé	
@@ -777,20 +796,6 @@ class mysqlcustom extends mysql {
 						
 					// Never modify compte_reec_ok
 					unset($param['data'][$idDoc]['compte_reec_ok']);
-				}
-				// Do not send an empty etablissement on the composante
-				if (
-						$param['rule']['id'] == '5ce362b962b63' // REEC - Composante
-					AND empty($data['etablissement_sup_id'])
-				) {
-					unset($param['data'][$idDoc]['etablissement_sup_id']);
-				}
-				// Do not send an empty jeune on the coupon
-				if (
-						$param['rule']['id'] == '62739b419755f' // Esp Rep - Coupons vers Esp Rep
-					AND empty($data['jeune_id'])
-				) {
-					unset($param['data'][$idDoc]['jeune_id']);
 				}
 			}		
 		}
