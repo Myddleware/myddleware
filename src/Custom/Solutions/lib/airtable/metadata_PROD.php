@@ -909,7 +909,15 @@ $moduleFields['appgUF55WW7ApOTPQ'] = array (
 	'Contacts COMET' => array(
 		'fldmyazAW2ZwPEef2'=> array( 'label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldqJcR86flmBy6wW'=> array( 'label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldoBJpUrfBHuaL7o'=> array( 'label' => 'Engagement', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldoBJpUrfBHuaL7o'=> array( 'label' => 'Est mentor', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldmGDNlAfzfpCgZK'=> array( 'label' => 'Est kapseur ?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldukXtHvdxyRyr29'=> array( 'label' => 'Est volontaire service civique ?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldb2vW35v1nDe9jN'=> array( 'label' => 'Est volontaire SNU ?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldpVxabyLGG2sIIO'=> array( 'label' => 'Est ambassadeur ?', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldc9HIiyRAbPTG6H'=> array( 'label' => "Est mentor d'accueil ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldU6dTyAIcZxvsUH'=> array( 'label' => "Est engagé dans un projet collectif ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldNMkRb3jHZYiIsp'=> array( 'label' => "Est bénévole Democampus ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldgiDZJTe2pewWQt'=> array( 'label' => "Est stagiaire ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldeQGUyJifq1c0eA'=> array( 'label' => 'Année scolaire', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
