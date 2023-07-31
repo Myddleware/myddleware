@@ -6,7 +6,7 @@ use App\Manager\ToolsManager;
 class ToolsManagerCustom extends ToolsManager {
 
 	// Add contact type parameter in the list
-	protected array $ruleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','contactType','recordType','deletionField','deletion');
+	protected array $ruleParam = array('datereference','bidirectional','fieldId','mode','duplicate_fields','limit','delete', 'fieldDateRef', 'fieldId', 'targetFieldId','contactType','recordType','deletionField','deletion','anneeScolaire');
 
 	// Allow more relationships
 	public function beforeRuleEditViewRender($data) {
