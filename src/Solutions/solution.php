@@ -78,9 +78,9 @@ class solutioncore
     protected Connection $connection;
     protected ParameterBagInterface $parameterBagInterface;
     protected EntityManagerInterface $entityManager;
-    private DocumentRepository $documentRepository;
-    private RuleRelationShipRepository $ruleRelationshipsRepository;
-    private FormulaManager $formulaManager;
+    protected DocumentRepository $documentRepository;
+    protected RuleRelationShipRepository $ruleRelationshipsRepository;
+    protected FormulaManager $formulaManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -267,6 +267,10 @@ class solutioncore
         return $this->moduleFields;
     }
 
+    function truncate($string, $length, $dots = "...") {
+        return strlen($string) > $length ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    }
+
     // Permet d'ajouter des règles en relation si les règles de gestion standard ne le permettent pas
     // Par exemple si on veut connecter des règles de la solution SAP CRM avec la solution SAP qui sont 2 solutions différentes qui peuvent être connectées
     public function get_rule_custom_relationship($module, $type)
@@ -397,6 +401,7 @@ class solutioncore
     public function createData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -405,6 +410,10 @@ class solutioncore
 
                     // Check control before create
                     $record = $this->checkDataBeforeCreate($param, $record, $idDoc);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call create method
                     $recordId = $this->create($param, $record, $idDoc);
 
@@ -412,6 +421,7 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
@@ -480,6 +490,7 @@ class solutioncore
     public function updateData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -491,6 +502,10 @@ class solutioncore
                     }
                     // Check control before create
                     $record = $this->checkDataBeforeUpdate($param, $record, $idDoc);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call create methode
                     $recordId = $this->update($param, $record, $idDoc);
 
@@ -498,6 +513,7 @@ class solutioncore
                     if (empty($recordId)) {
                         throw new \Exception('No Id returned. ');
                     }
+
                     // Format result
                     $result[$idDoc] = [
                         'id' => $recordId,
@@ -533,6 +549,7 @@ class solutioncore
     public function deleteData($param): array
     {
         try {
+			$result = array();
             // For every document
             foreach ($param['data'] as $idDoc => $record) {
                 try {
@@ -541,6 +558,10 @@ class solutioncore
                     }
                     // Check control before delete
                     $record = $this->checkDataBeforeDelete($param, $record);
+					// No action if null is returned
+					if ($record === null) {
+						continue;
+					}
                     // Call delete methode
                     $recordId = $this->delete($param, $record);
 
@@ -802,6 +823,12 @@ class solutioncore
     {
         if (isset($record['Myddleware_element_id'])) {
             unset($record['Myddleware_element_id']);
+        }
+		if (isset($record['id_doc_myddleware'])) {
+            unset($record['id_doc_myddleware']);
+        }
+		if (isset($record['source_date_modified'])) {
+            unset($record['source_date_modified']);
         }
 
         return $record;

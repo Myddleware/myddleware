@@ -308,16 +308,19 @@ list_flux:
         filter: Filter
         filter_delete: Clear all filters
         cancel: Cancel documents
+        reloadcancel: Cancel and rerun documents
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
         mass_reload_confirm: Reload the selected documents?   
         delete: Delete documents
         mass_delete_confirm: Delete the selected documents?
+        exportcsv: Export Documents
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date
-        date_modified: Date of modification
-        rule: Rule
+        date_modified_start: Date of modification start
+        date_modified_end: Date of modification end
+        rule: Rule name
         status: Status
         global_status: Global status
         type: Type
@@ -329,6 +332,11 @@ list_flux:
         content: Document content
         source_content: Source
         target_content: Target
+        connector_target: Connector target
+        connector_source: Connector Source
+        module_target: Module target
+        module_source: Module source
+        reference: Reference
     tab:
         id: Doc Id
         name: Name
@@ -533,6 +541,8 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        user_custom_fields: User custom fields (shortname separated by coma)
+        course_custom_fields: Course custom fields (shortname separated by coma)
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)

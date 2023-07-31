@@ -276,7 +276,7 @@ class salesforcecore extends solution {
                     // Récupération des listes déroulantes
                     if ($field['type']=='picklist') {
                         foreach($field['picklistValues'] as $option) {
-                            $this->moduleFields[$field['name']]['option'][$option['value']] = $option['label'];
+                            $this->moduleFields[$field['name']]['option'][$option['value']] = parent::truncate($option['label'], 80);
                         }
                          $this->moduleFields[$field['name']]['type_bdd'] = 'varchar(255)';
                     }   
@@ -489,11 +489,7 @@ class salesforcecore extends solution {
 				$parameter = array();
 				$parameter['attributes'] = array('type' => $param['module'], 'referenceId' => 'Ref'.$i);
 			    foreach ($data as $key => $value) {		
-			        // On n'envoie jamais le champ Myddleware_element_id à Salesforce
-					if (in_array($key, array('Myddleware_element_id','id_doc_myddleware','source_date_modified'))) {
-						continue;
-					}
-			        elseif ($key == 'target_id') {
+			        if ($key == 'target_id') {
 			            continue;
 			        }
 					elseif($key == 'Birthdate') {
@@ -604,11 +600,7 @@ class salesforcecore extends solution {
 				// Instanciation de l'URL d'appel				
 				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/" . $param['module'] . '/';
 			    foreach ($data as $key => $value) {
-					// On n'envoie jamais le champ Myddleware_element_id à Salesforce
-					if (in_array($key, array('Myddleware_element_id','id_doc_myddleware','source_date_modified'))) {
-						continue;
-					}
-			        elseif ($key == 'target_id') {
+					if ($key == 'target_id') {
 			        	$target_id = $value;
 						// Ajout de l'ID à l'URL pour la modification
             			$query_url .= $value . '/';				
@@ -775,12 +767,12 @@ class salesforcecore extends solution {
      */
     public function getRefFieldName($param): string
     {
-		if(in_array($param['ruleParams']['mode'],array("0","S"))) {
+		if(in_array($param['ruleParams']['mode'],array("0","S","U"))) {
 			return "LastModifiedDate";
 		} else if ($param['ruleParams']['mode'] == "C"){
 			return "CreatedDate";
 		} else {
-			throw new \Exception ("$param[ruleParams][mode] is not a correct Rule mode.");
+			throw new \Exception ($param['ruleParams']['mode']." is not a correct Rule mode.");
 		}
 		return "";
 	}

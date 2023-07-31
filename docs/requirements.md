@@ -10,7 +10,7 @@ To use Myddleware you need the following on your web server :
 | Myddleware versions  | [PHP version](https://www.php.net/downloads.php) | [Node.js version](https://nodejs.org/de/download/) |
 |----------------------|--------------------------------------------------|----------------------------------------------------|
 | 3.2.0 and below      | 7.4 or 8.0                                       | 14, 15 and 16                                      |
-| 3.3.0                | 8.1 or 8.2                                       | 16 or above                                        |
+| 3.3.0                | 8.1 or 8.2.0                                     | 16 or above                                        |
 
 - The following PHP extensions need to be installed & enabled (they usually are by default):
   - Ctype

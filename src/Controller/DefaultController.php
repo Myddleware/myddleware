@@ -169,12 +169,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
                 $this->getInstanceBdd();
                 $compact['nb'] = 0;
-
+				$pager = $this->tools->getParamValue('ruleListPager');
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser()),
-                    'maxPerPage' => isset($this->params['pager']) ? $this->params['pager'] : 20,
+                    'maxPerPage' => isset($pager) ? $pager : 20,
                     'page' => $page,
                 ]);
+
 
                 // Si tout se passe bien dans la pagination
                 if ($compact) {
@@ -326,7 +327,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
             $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
             $this->sessionService->setFluxFilterRuleName($rule->getName());
 
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return $this->redirect($this->generateUrl('document_list_page'));
         }
 
         /**
@@ -2370,6 +2371,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $oneRuleAudit->setRule($oneRule);
                 $oneRuleAudit->setDateCreated(new \DateTime());
                 $oneRuleAudit->setData($ruledata);
+                $oneRuleAudit->setCreatedBy($this->getUser());
                 $this->entityManager->persist($oneRuleAudit);
                 $this->entityManager->flush();
 
@@ -2412,7 +2414,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     $this->sessionService->removeParamRule($ruleKey);
                 }
                 $this->entityManager->getConnection()->commit();
-                $response = 1;
+                
+                $rule_id = $oneRule->getId();
+                $response = ['status' => 1, 'id' => $rule_id];
+                //$response = 1;
             } catch (Exception $e) {
                 $this->entityManager->getConnection()->rollBack();
                 $this->logger->error('2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')'));
@@ -2935,5 +2940,47 @@ use Symfony\Contracts\Translation\TranslatorInterface;
         return $this->render('Rule/byIdForm.html.twig', [
             'formIdBatch' => $form->createView()
         ]);
+    }
+
+    /**
+     * @Route("/rule/update_description", name="update_rule_description", methods={"POST"})
+     */
+    public function updateDescription(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $description = $request->request->get('description');
+        $entityManager = $this->getDoctrine()->getManager();
+        $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $ruleId,
+            'name' => 'description'
+        ]);
+        // if $description is the same as the previous one or is equal to 0 or is empty
+        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
+        }
+
+        // Retrieve the RuleParam entity using the ruleId
+        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
+
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+        }
+
+        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
+        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule->getRule(),
+            'name' => 'description'
+        ]);
+
+        // Check if the description entity was found
+        if (!$descriptionRuleParam) {
+            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        }
+
+        // Update the value of the description
+        $descriptionRuleParam->setValue($description);
+        $entityManager->flush();
+
+        return new Response('', Response::HTTP_OK);
     }
 }

@@ -306,15 +306,18 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
         mass_reload_confirm: Relancer les documents selectionnés ?
         delete: Supprimer documents
         mass_delete_confirm: Supprimer les documents sélectionnés ?
+        exportcsv: Exporter Documents
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
-        date_modified: Date de modification
+        date_modified_start: Date de modification (début)
+        date_modified_end: Date de modification (fin)
         rule: Règle
         status: Statut
         global_status: Statut global 
@@ -326,7 +329,12 @@ list_flux:
         name: Nom
         content: Contenu du document
         source_content: Source
-        target_content: Target
+        target_content: Cible
+        connector_target: Connector cible
+        connector_source: Connector Source
+        module_target: Module cible
+        module_source: Module source
+        reference: Référence
     tab:
         id: Doc Id
         name: Nom
@@ -531,6 +539,8 @@ solution:
         applicationName: Nom de l'application
         hashkey: Clé de hachage
         authid: Id auth
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
     params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
@@ -553,7 +563,7 @@ solution:
         30_day: 30 jours
         60_day: 60 jours
         90_day: 90 jours
-        
+
 error:
     connexion: Connexion impossible
     general: Erreur inattendue
