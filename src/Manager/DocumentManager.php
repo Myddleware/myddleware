@@ -2201,8 +2201,8 @@ class documentcore
             if ('-1' == $direction) {
                 $sqlParams = "	SELECT 
 									source_id record_id,
-									document.id document_id,
-									document.type document_type
+									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -2213,13 +2213,14 @@ class documentcore
 											document.global_status = 'Close'
 										 OR document.status = 'No_send'
 									)
-								ORDER BY date_created DESC
+								GROUP BY source_id
+								HAVING types NOT LIKE '%D%'
 								LIMIT 1";
             } elseif ('1' == $direction) {
                 $sqlParams = "	SELECT 
 									target_id record_id,
-									document.id document_id,
-									document.type document_type
+									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -2230,7 +2231,8 @@ class documentcore
 											document.global_status = 'Close'
 										 OR document.status = 'No_send'
 									)
-								ORDER BY date_created DESC
+								GROUP BY source_id
+								HAVING types NOT LIKE '%D%'
 								LIMIT 1";
             } else {
                 throw new \Exception('Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ');
@@ -2278,16 +2280,18 @@ class documentcore
                 $stmt->bindValue(':record_id', $record_id);
                 $result = $stmt->executeQuery();
                 $result = $result->fetchAssociative();
+				
+				// In cas of several document found we get only the last one
+				if (
+						!empty($result['document_id'])
+					AND strpos($result['document_id'], ',')
+				) {
+					$result['document_id'] = end(explode(',',$result['document_id']));
+				}
             }
-            if (!empty($result['record_id'])) {
-                // If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
-                if ('D' == $result['document_type']) {
-                    return null;
-                }
-
+			if (!empty($result['record_id'])) {
                 return $result;
             }
-
             return null;
         } catch (\Exception $e) {
             $this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
