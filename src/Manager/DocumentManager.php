@@ -2231,7 +2231,7 @@ class documentcore
 											document.global_status = 'Close'
 										 OR document.status = 'No_send'
 									)
-								GROUP BY source_id
+								GROUP BY target_id
 								HAVING types NOT LIKE '%D%'
 								LIMIT 1";
             } else {
