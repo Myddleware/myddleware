@@ -100,8 +100,6 @@
 	position: absolute;
 	top: 0;
 	left: 31px;
-	/* border-style: solid; */
-	/* border-color: #198BCA transparent transparent #198BCA; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-inactive .onoffswitch-switch:before {
@@ -109,8 +107,6 @@
 	position: absolute;
 	top: 0;
 	right: 31px;
-	/* border-style: solid;
-	border-color: transparent #555555 #555555 transparent; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {

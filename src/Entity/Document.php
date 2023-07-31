@@ -465,7 +465,5 @@ class Document
 
         return $this;
     }
-
-    
     
 }

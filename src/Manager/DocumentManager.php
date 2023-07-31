@@ -68,6 +68,7 @@ class documentcore
     protected $jobId;
     protected $key;
     protected $docIdRefError;
+	protected $env;
     protected bool $transformError = false;
     protected ?ToolsManager $tools;
     protected $api;    // Specify if the class is called by the API
@@ -122,6 +123,7 @@ class documentcore
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
+		$this->env = $_SERVER['APP_ENV'];
     }
 
     public static function lstGblStatus(): array
@@ -361,8 +363,12 @@ class documentcore
         }
         try {
             $filterOK = true;
-            // Si des filtres sont présents
-            if (!empty($ruleFilters)) {
+            // Only if there is a least one filter
+			// No filter on delete document as they will be filter after is Myddleware never sent the data
+            if (
+					!empty($ruleFilters)
+				AND $this->documentType != 'D'
+			) {
                 // Boucle sur les filtres
                 foreach ($ruleFilters as $ruleFilter) {
                     if (!$this->checkFilter($this->sourceData[$ruleFilter['target']], $ruleFilter['type'], $ruleFilter['value'])) {
@@ -689,7 +695,7 @@ class documentcore
             return true;
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
-            $this->docIdRefError = (is_array($result) and !empty($result['id']) ? $result['id'] : '');
+            $this->docIdRefError = ((is_array($result) and !empty($result['id'])) ? $result['id'] : '');
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
@@ -1922,7 +1928,11 @@ class documentcore
 								WHERE
 									id = :id
 								';
-            if (!$this->api) {
+            // We don't send output for the API and Myddleware UI
+			if (
+					!$this->api
+				AND $this->env == 'background'
+			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
             // Suppression de la dernière virgule
@@ -1962,7 +1972,11 @@ class documentcore
 								WHERE
 									id = :id
 								';
-            if (!$this->api) {
+            // We don't send output for the API and Myddleware UI
+			if (
+					!$this->api
+				AND $this->env == 'background'
+			) {
                 echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);
             }
             $stmt = $this->connection->prepare($query);
@@ -2180,6 +2194,7 @@ class documentcore
     {
         try {
             $direction = $this->getRelationshipDirection($ruleRelationship);
+
             // En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
             // Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
             if ('-1' == $direction) {

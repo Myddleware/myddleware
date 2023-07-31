@@ -236,6 +236,9 @@
     "leafo/lessphp": {
         "version": "v0.4.0"
     },
+    "lexik/form-filter-bundle": {
+        "version": "v7.0.3"
+    },
     "lexik/jwt-authentication-bundle": {
         "version": "2.14",
         "recipe": {

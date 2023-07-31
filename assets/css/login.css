@@ -116,6 +116,10 @@ body {
 	background: url('./../images/login/logo_empty.png') no-repeat;
 	background-size: 158px; 
 }
+.logo_reset {
+	background: url('./../images/login/logo.png') no-repeat;
+	background-size: 158px; 
+}
 	
 #myd_connexion .load {
 	height: 16px;

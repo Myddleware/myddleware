@@ -653,4 +653,26 @@ class Rule
     {
         return $this->id;
     }
+
+    public static function getNameTest(): array
+    {
+
+        return ['ruleName', 'rule'];
+    }
+
+    public function isNameSet(): bool
+    {
+        // test with isset if the name property is set
+        return isset($this->name);
+    }
+
+    public function isModuleSourceSet(): bool
+    {
+        return isset($this->moduleSource);
+    }
+
+    public function isModuleTargetSet(): bool
+    {
+        return isset($this->moduleTarget);
+    }
 }

@@ -223,10 +223,21 @@ menu .caret, #myd_top .caret {
     border-color: #19ca42 !important;
 }
 
+.btn-outline-primary:hover{
+    background-color: #198BCA !important;
+    color:white !important;
+}
+
+.btn-outline-primary{
+    color: #198BCA !important;
+    border-color: #198BCA !important;
+}
+
 .btn-primary {
 	background-color: #198BCA!important;
 	border-color: #198BCA!important;
 }
+
 
 .btn-primary:hover {
 	background-color: #0F66A9!important;
