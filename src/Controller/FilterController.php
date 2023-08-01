@@ -291,7 +291,7 @@ class FilterController extends AbstractController
 
         // get the id of every document that will be return in the search results, and put them in a string where they are separated by a comma
         $csvdocumentids = '';
-
+        $nbDocuments = count($documents);
         foreach ($documents as $documentForCsv) {
             $csvdocumentids .= $documentForCsv['id'].',';
         }
@@ -308,6 +308,7 @@ class FilterController extends AbstractController
             'condition' => $conditions,
             'timezone' => $timezone,
             'csvdocumentids' => $csvdocumentids,
+            'nbDocuments' => $nbDocuments,
         ]);
     }
 
