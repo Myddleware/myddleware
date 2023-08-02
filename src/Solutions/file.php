@@ -52,7 +52,7 @@ class filecore extends solution
     private $login;
     private $password;
 
-    public function login($paramConnexion): void
+    public function login($paramConnexion)
     {
         parent::login($paramConnexion);
         try {
@@ -74,8 +74,9 @@ class filecore extends solution
             // If all check are OK so connexion is valid
             $this->connexion_valide = true;
         } catch (\Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
