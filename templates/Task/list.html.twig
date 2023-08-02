@@ -27,10 +27,13 @@
 {% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 	<div id="task" >
-<button class="btn btn-danger" href="{{ path('task_stopall') }}">
-	<i class="fa fa-ban" aria-hidden="true"></i>
-	{{'Stop all the Tasks'}}
-</button>
+<a href="{{ path('task_stopall') }}">
+    <button class="btn btn-danger">
+        <i class="fa fa-ban" aria-hidden="true"></i>
+        {{'Stop all the Tasks'}}
+    </button>
+</a>
+
 		<div>
 			{% if nb > 0 %}
 				<div id="fd-title-small" class="left">
