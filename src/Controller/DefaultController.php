@@ -2376,9 +2376,10 @@ use App\Form\Type\RelationFilterType;
                       // $filterData est un tableau contenant les valeurs des champs pour chaque élément de liste <li>
               
                       // Accès aux valeurs des champs individuels
-                      $fieldInput = $filterData['field'];
-                      $anotherFieldInput = $filterData['another_field'];
-                      $textareaFieldInput = $filterData['textarea_field'];
+                      $fieldInput = $filterData['target'];
+                      $anotherFieldInput = $filterData['filter'];
+                      $textareaFieldInput = $filterData['value'];
+
               
                       // Maintenant, vous pouvez utiliser ces valeurs comme vous le souhaitez, par exemple, pour créer un objet RuleFilter
                       $oneRuleFilter = new RuleFilter();
@@ -2389,10 +2390,10 @@ use App\Form\Type\RelationFilterType;
                       $oneRuleFilter->setValue($textareaFieldInput);
               
                       // Enregistrez votre objet RuleFilter dans la base de données
-                      $entityManager->persist($oneRuleFilter);
+                      $this->entityManager->persist($oneRuleFilter);
                   }
               
-                  $entityManager->flush();
+                  $this->entityManager->flush();
               }
                     // $this->getDoctrine()->getManager()->flush();
                 // }
