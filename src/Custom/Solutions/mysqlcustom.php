@@ -317,6 +317,12 @@ class mysqlcustom extends mysql {
 			) {
 				$data['composante_id'] = 'null';
 			}
+			if (
+					isset($data['reperant_id'])
+				AND empty($data['reperant_id'])
+			) {
+				$data['reperant_id'] = 'null';
+			}
 		}
 		
 		// We can't send a field with id empty because of foreign key
