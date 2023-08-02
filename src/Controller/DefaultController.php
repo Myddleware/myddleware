@@ -1936,9 +1936,12 @@ use App\Form\Type\RelationFilterType;
                     'another_field_choices' => $lst_filter
                 ]);
                 
+                $filters = $this->entityManager->getRepository(RuleFilter::class)
+                        ->findBy(['rule' => $ruleKey]);
 
                 //  rev 1.07 --------------------------
                 $result = [
+                    'filters' => $filters,
                     'source' => $source['table'],
                     'cible' => $cible['table'],
                     'rule_params' => $rule_params,

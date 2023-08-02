@@ -48,10 +48,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
             $('#myButton').prop('disabled', true);
             // Add click event to the remove button
-            newItem.find('.remove-button').click(function() {
-                $(this).parent().remove();
-            });
+            // newItem.find('.remove-button').click(function() {
+            //     $(this).parent().remove();
+            // });
         });
         
     });
+
+ $(document).on('click', '.remove-button', function() {
+    $(this).closest('li').remove();
+});
+
+    
 });
