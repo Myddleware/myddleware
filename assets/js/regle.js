@@ -711,7 +711,6 @@ $(function () {
 						} else {
 							alert(confirm_error);
 						}
-						console.log(data);
 						$("#validation").attr('value', before);
 					}
 				},

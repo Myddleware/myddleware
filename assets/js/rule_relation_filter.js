@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', (event) => {
     $(function() {
-        // Écouter les événements d'entrée sur les champs de formulaire
+        // Listen to input events on form fields
         $('#relation_filter_field, #relation_filter_another_field').on('change', checkInputs);
         $('#relation_filter_textarea_field').on('input', checkInputs);
 
@@ -10,13 +10,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
             var textareaFieldInput = $('#relation_filter_textarea_field').val();
         
             if (fieldInput && anotherFieldInput && textareaFieldInput) {
-                $('#myButton').prop('disabled', false);
+                $('#addFilterStep3').prop('disabled', false);
             } else {
-                $('#myButton').prop('disabled', true);
+                $('#addFilterStep3').prop('disabled', true);
             }
         }
 
-        $('#myButton').on('click', function() {
+        $('#addFilterStep3').on('click', function() {
     
             var fieldInput =$('#relation_filter_field option:selected').text();
             var textareaFieldInput = $('#relation_filter_textarea_field').val();
@@ -46,15 +46,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
             $('#relation_filter_another_field').val('');
             $('#relation_filter_textarea_field').val('');
         
-            $('#myButton').prop('disabled', true);
-            // Add click event to the remove button
-            // newItem.find('.remove-button').click(function() {
-            //     $(this).parent().remove();
-            // });
+            $('#addFilterStep3').prop('disabled', true);
         });
         
     });
-
+// Add click event to the remove button
  $(document).on('click', '.remove-button', function() {
     $(this).closest('li').remove();
 });
