@@ -146,8 +146,10 @@ class filecore extends solution
         try {
             if ('source' == $type) {
                 // Get the file with the way of this file
-                $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module, '1970-01-01 00:00:00');
-                $fileName = trim($this->paramConnexion['directory'].'/'.$module.$file);
+                $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module);
+                $fileInfo = explode(' ', $this->get_last_file($this->paramConnexion['directory'].'/'.$module, '1970-01-01 00:00:00'));
+                $fileName = trim($this->paramConnexion['directory'] . '/' . $module . ltrim(end($fileInfo), './'));
+
                 // Open the file
                 $sftp = ssh2_sftp($this->sshconnection);
                 $stream = fopen('ssh2.sftp://'.intval($sftp).$fileName, 'r');
@@ -193,8 +195,11 @@ class filecore extends solution
             } else {
                 $this->moduleFields = [];
             }
-            // Add relationship fields coming from other rules
-            $this->get_module_fields_relate($module, $param);
+            // todo make it work but disable if can't make branch
+            if (1 === 1) {
+                // Add relationship fields coming from other rules
+                $this->get_module_fields_relate($module, $param);
+            }
 
             return $this->moduleFields;
         } catch (\Exception $e) {
@@ -280,7 +285,7 @@ class filecore extends solution
         try {
             // Get the file with the way of this file. But we take the oldest file of the folder
             // If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
-            $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'], (!empty($param['query']) ? '1970-01-01 00:00:00' : $param['date_ref']));
+            $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module']);
             // If there is no file
             if (empty($file)) {
                 return;
@@ -575,9 +580,9 @@ class filecore extends solution
         return true;
     }
 
-    protected function get_last_file($directory, $date_ref): string
+    protected function get_last_file($directory): string
     {
-        $stream = ssh2_exec($this->sshconnection, 'cd '.$directory.';find . -newermt "'.$date_ref.'" -type f | sort |  head -n 1');
+        $stream = ssh2_exec($this->sshconnection, 'cd '.$directory.';find . -newermt "2023-05-04 00:00:00" -type f -printf "%T+ %p\n" | sort |  head -n 1');
         stream_set_blocking($stream, true);
         $file = stream_get_contents($stream);
         $file = ltrim($file, './'); // The filename can have ./ at the beginning
