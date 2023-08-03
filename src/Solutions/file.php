@@ -295,14 +295,23 @@ class filecore extends solution
                 $offset = $param['ruleParams'][$file];
             }
 
-            $fileName = $this->paramConnexion['directory'].'/'.$param['module'].$file;
+            // the $file is of the form "2023-08-02+14:04:13.7153093970 ./testfile.csv", we want to remove the datetime
+            $fileInfo = explode(' ', $file);
+            $file = trim($this->paramConnexion['directory'] . '/' . $param['module'] . ltrim(end($fileInfo), './'));
+
 			
             // Open the file
             $sftp = ssh2_sftp($this->sshconnection);
-            $stream = fopen('ssh2.sftp://'.intval($sftp).$fileName, 'r');
+            $stream = fopen('ssh2.sftp://'.intval($sftp).$file, 'r');
             $header = $this->getFileHeader($stream, $param);
 
             $nbCountHeader = count($header);
+
+            // set the field id to avoid error by having myddleware element id
+            if ($nbCountHeader > 0) {
+                // Set fieldId to the first field in the header
+                $param['ruleParams']['fieldId'] = $header[0];
+            }
 
             $allRuleField = $param['fields'];
             // Adding id fields "fieldId" and "fieldDateRef" of the array $param
@@ -582,7 +591,7 @@ class filecore extends solution
 
     protected function get_last_file($directory): string
     {
-        $stream = ssh2_exec($this->sshconnection, 'cd '.$directory.';find . -newermt "2023-05-04 00:00:00" -type f -printf "%T+ %p\n" | sort |  head -n 1');
+        $stream = ssh2_exec($this->sshconnection, 'cd ' . $directory . '; find . -newermt "2023-05-04 00:00:00" -type f -printf "%T+ %p\n" | sort -r | head -n 1');
         stream_set_blocking($stream, true);
         $file = stream_get_contents($stream);
         $file = ltrim($file, './'); // The filename can have ./ at the beginning
