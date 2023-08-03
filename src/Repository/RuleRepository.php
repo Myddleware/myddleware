@@ -232,6 +232,7 @@ class RuleRepository extends ServiceEntityRepository
         $results = $qb->getQuery()->getScalarResult();
 
         $curatedResults =  array_column($results, 'name');
+        sort($curatedResults);
         $finalResults = array_flip($curatedResults);
         if ($isDocSearchResult) {
             $finalResults = array_flip($finalResults);
