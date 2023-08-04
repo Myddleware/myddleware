@@ -693,6 +693,16 @@ Finally, you can create your Moodle Myddleware connector by filling in your Mood
 
 ![Finally](images/moodle/finally.png)
 
+#### Synchronize data between Prestashop and Moodle using Myddleware
+
+<video src="file/moodle_prestashop.mp4" width="800"  controls></video>
+
+#### Synchronize data between Salesforce and Moodle using Myddleware
+
+<video src="file/tuto_moodle_salesforce.mp4" width="800"  controls></video>
+
+[![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCxI0ziSiRXXTqQ-XfFJr7-w?style=social)](https://www.youtube.com/channel/UCxI0ziSiRXXTqQ-XfFJr7-w)
+
 ### RingCentral
 
 Here is the list of available modules in source (reading) and target (writing) :
