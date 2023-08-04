@@ -146,7 +146,7 @@ class filecore extends solution
         try {
             if ('source' == $type) {
                 // Get the file with the way of this file
-                $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module);
+                $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$module, '1970-01-01 00:00:00');
                 $fileInfo = explode(' ', $this->get_last_file($this->paramConnexion['directory'].'/'.$module, '1970-01-01 00:00:00'));
                 $fileName = trim($this->paramConnexion['directory'] . '/' . $module . ltrim(end($fileInfo), './'));
 
@@ -285,7 +285,10 @@ class filecore extends solution
         try {
             // Get the file with the way of this file. But we take the oldest file of the folder
             // If query is called then we don't have date_ref, we take the first file (in this case, we should have only one file in the directory because Myddleware search in only one file)
-            $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module']);
+            $file = $this->get_last_file($this->paramConnexion['directory'].'/'.$param['module'], $param['date_ref']);
+            // the $file is of the form "2023-08-02+14:04:13.7153093970 ./testfile.csv", we want to remove the datetime
+            $fileInfo = explode(' ', $file);
+            $file = trim($this->paramConnexion['directory'] . '/' . $param['module'] . ltrim(end($fileInfo), './'));
             // If there is no file
             if (empty($file)) {
                 return;
@@ -295,9 +298,6 @@ class filecore extends solution
                 $offset = $param['ruleParams'][$file];
             }
 
-            // the $file is of the form "2023-08-02+14:04:13.7153093970 ./testfile.csv", we want to remove the datetime
-            $fileInfo = explode(' ', $file);
-            $file = trim($this->paramConnexion['directory'] . '/' . $param['module'] . ltrim(end($fileInfo), './'));
 
 			
             // Open the file
@@ -589,9 +589,11 @@ class filecore extends solution
         return true;
     }
 
-    protected function get_last_file($directory): string
+    protected function get_last_file($directory, $dateRef): string
     {
-        $stream = ssh2_exec($this->sshconnection, 'cd ' . $directory . '; find . -newermt "2023-05-04 00:00:00" -type f -printf "%T+ %p\n" | sort -r | head -n 1');
+        $dateRefFormatted = escapeshellarg($dateRef); // Escape the date string for safe usage in the command
+        $command = 'cd ' . escapeshellarg($directory) . '; find . -newermt ' . $dateRefFormatted . ' -type f -printf "%T+ %p\n" | sort | head -n 1';
+        $stream = ssh2_exec($this->sshconnection, $command);
         stream_set_blocking($stream, true);
         $file = stream_get_contents($stream);
         $file = ltrim($file, './'); // The filename can have ./ at the beginning
