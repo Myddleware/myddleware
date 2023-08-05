@@ -241,6 +241,10 @@ class filecore extends solution
             // Remove the last coma
             $sql = substr($sql, 0, -1);
             $sql .= ')';
+            // If $this->conn is null then we return to avoid an error on rule creation
+            if (empty($this->conn)) {
+                return;
+            }
             $stmt = $this->conn->prepare($sql);
             $result = $stmt->executeQuery();
             $fields = $result->fetchAllAssociative();
