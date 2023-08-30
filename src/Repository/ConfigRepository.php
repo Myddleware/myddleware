@@ -47,6 +47,31 @@ class ConfigRepository extends ServiceEntityRepository
         ;
     }
 
+    public function findAlertDateRef()
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c.value')
+            ->where('c.name = :name')
+            ->setParameter('name', 'alert_date_ref')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function setAlertDateRef($newDate)
+{
+    $entityManager = $this->getEntityManager();
+
+    // Supposons que votre entité de configuration s'appelle Config
+    $config = $this->findOneBy(['name' => 'alert_date_ref']);
+
+    if ($config) {
+        $config->setValue($newDate);
+        $entityManager->persist($config);
+        $entityManager->flush();
+    }
+}
+
+
     // /**
     //  * @return Config[] Returns an array of Config objects
     //  */
