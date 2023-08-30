@@ -73,6 +73,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Form\Type\RelationFilterType;
 
     /**
      * @Route("/rule")
@@ -1939,8 +1940,37 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     }
                 }
 
+                // get the array of array $ruleFieldsSource and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
+                $listOfSourceFieldsLabels = [
+                    'Source Fields' => [],
+                    'Target Fields' => [],
+                    'Relation Fields' => [],
+                ];
+                foreach ($ruleFieldsSource as $key => $value) {
+                    $listOfSourceFieldsLabels['Source Fields'][$key] = $value['label'];
+                }
+
+                // get the array of array $ruleFieldsTarget and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
+                foreach ($ruleFieldsTarget as $key => $value) {
+                    $listOfSourceFieldsLabels['Target Fields'][$key] = $value['label'];
+                }
+
+                foreach ($lst_relation_source_alpha as $key => $value) {
+                    $listOfSourceFieldsLabels['Relation Fields'][$key] = $value['label'];
+                }
+                
+
+                $form_all_related_fields = $this->createForm(RelationFilterType::class, null, [
+                    'field_choices' => $listOfSourceFieldsLabels,
+                    'another_field_choices' => $lst_filter
+                ]);
+                
+                $filters = $this->entityManager->getRepository(RuleFilter::class)
+                        ->findBy(['rule' => $ruleKey]);
+
                 //  rev 1.07 --------------------------
                 $result = [
+                    'filters' => $filters,
                     'source' => $source['table'],
                     'cible' => $cible['table'],
                     'rule_params' => $rule_params,
@@ -1950,6 +1980,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     'lst_category' => $lstCategory,
                     'lst_functions' => $lstFunctions,
                     'lst_filter' => $lst_filter,
+                    'form_all_related_fields' => $form_all_related_fields->createView(),
                     'lst_errorMissing' => $lst_errorMissing,
                     'lst_errorEmpty' => $lst_errorEmpty,
                     'params' => $this->sessionService->getParamRule($ruleKey),
@@ -1980,8 +2011,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                 $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
                 $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
 
-                return $this->redirect($this->generateUrl('regle_stepone_animation'));
-                exit;
+                // return $this->redirect($this->generateUrl('regle_stepone_animation'));
+                // exit;
+                dd($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
             }
         }
 
@@ -2364,22 +2396,54 @@ use Symfony\Contracts\Translation\TranslatorInterface;
                     }
                 }
 
+                // $form = $this->createForm(RelationFilterType::class);
+                // $form->handleRequest($request);
                 //------------------------------- RuleFilter ------------------------
+                // $form->handleRequest($request);
+              //------------------------------- RuleFilter ------------------------
+              $filters = $request->request->get('filter');
 
-                if (!empty($request->request->get('filter'))) {
-                    foreach ($request->request->get('filter') as $filter) {
-                        $oneRuleFilter = new RuleFilter();
-                        $oneRuleFilter->setTarget($filter['target']);
-                        $oneRuleFilter->setRule($oneRule);
-                        $oneRuleFilter->setType($filter['filter']);
-                        $oneRuleFilter->setValue($filter['value']);
-                        $this->entityManager->persist($oneRuleFilter);
-                        $this->entityManager->flush();
-                    }
-                }
+              if (!empty($filters)) {
+                  foreach ($filters as $filterData) {
+                      // $filterData est un tableau contenant les valeurs des champs pour chaque élément de liste <li>
+              
+                      // Accès aux valeurs des champs individuels
+                      $fieldInput = $filterData['target'];
+                      $anotherFieldInput = $filterData['filter'];
+                      $textareaFieldInput = $filterData['value'];
+
+              
+                      // Maintenant, vous pouvez utiliser ces valeurs comme vous le souhaitez, par exemple, pour créer un objet RuleFilter
+                      $oneRuleFilter = new RuleFilter();
+                      $oneRuleFilter->setTarget($fieldInput);
+                      $oneRuleFilter->setRule($oneRule);
+              
+                      $oneRuleFilter->setType($anotherFieldInput);
+                      $oneRuleFilter->setValue($textareaFieldInput);
+              
+                      // Enregistrez votre objet RuleFilter dans la base de données
+                      $this->entityManager->persist($oneRuleFilter);
+                  }
+              
+                  $this->entityManager->flush();
+              }
+                    // $this->getDoctrine()->getManager()->flush();
+                // }
+                // if (!empty($request->request->get('filter'))) {
+                //     foreach ($request->request->get('filter') as $filter) {
+                //         $oneRuleFilter = new RuleFilter();
+                //         $oneRuleFilter->setTarget($filter['target']);
+                //         $oneRuleFilter->setRule($oneRule);
+                //         $oneRuleFilter->setType($filter['filter']);
+                //         $oneRuleFilter->setValue($filter['value']);
+                //         $this->entityManager->persist($oneRuleFilter);
+                //         $this->entityManager->flush();
+                //     }
+                // }
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
+                error_log(print_r($request->request->all(), true));
                 $this->jobManager->orderRules();
 
                 // --------------------------------------------------------------------------------------------------

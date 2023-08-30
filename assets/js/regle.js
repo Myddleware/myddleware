@@ -750,7 +750,7 @@ $(function () {
 				$.each(nameF.source, function (fieldid, fieldname) {
 					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldid + " (" + fieldname + ")" + '</li>')
 					// filter
-					addFilter(fieldid, path_info_field);
+					//addFilter(fieldid, path_info_field);
 				});
 
 				// formula
@@ -1460,7 +1460,7 @@ function prepareDrag() {
 					var formule_in = $( this ).parent().find( ".formule" );
 					$( formule_in ).css('opacity','1');	*/
 
-					addFilter(dragId, path_info_field);
+					//addFilter(dragId, path_info_field);
 
 					$('li', "#fields_duplicate_target").each(function () {
 						if ($(this).attr('data-active') == 'false') {
@@ -1706,6 +1706,7 @@ function addFilter(field, path) {
 	// ajoute un champ uniquement s'il n'existe pas
 	if (existeFilter(field) == 0) {
 		if (field != 'my_value') {
+			console.log('field', field, 'path', path);
 			$('#fieldsfilter').append('<li id="filter_' + field + '" class="mt-2 d-flex justify-content-evenly align-items-baseline"><span class="name me-2 mt-2">' + field + '</span> <a class="fancybox me-2" data-fancybox-type="iframe" href="' + path + '/source/' + field + '/"> <i class="fas fa-question-circle"></i></a> <select class="filter mt-2 me-2 form-select">' + filter_liste + '</select><input type="text" value=""  class="form-control filter-input my-3" /> </li>');
 		}
 	}
@@ -1737,37 +1738,35 @@ function removeFilter(field) {
 // ---- FILTRES  -------------------------------------------------------------------------
 
 // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
-
-// Récupère la liste des filtres
 function recup_filter() {
-	filter = [];
-	$('li', '#fieldsfilter').each(function () {
+    let filter = [];
+    $('#fieldsfilter li').each(function () {
+        let field_target = $.trim($(this).find(".name").text());
 
-		field_target = '';
-		$($(this)).find("span.name").each(function () {
-			field_target = $.trim($(this).text());
-		});
+        let field_filter = '';
+        let selectElement = $(this).find("input[name*='anotherFieldInput']");
+        if (selectElement.length > 0) {
+            field_filter = $.trim(selectElement.val());
+        }
 
-		field_filter = '';
-		$($(this)).find("select.filter").each(function () {
-			field_filter = $.trim($(this).val());
-		});
+        let field_value = '';
+        let inputElement = $(this).find("input[name*='textareaFieldInput']");
+        if (inputElement.length > 0) {
+            field_value = $.trim(inputElement.val());
+        }
 
-		field_value = '';
-		$($(this)).find("input").each(function () {
-			field_value = $.trim($(this).val());
-		});
-		if (field_filter != '') {
-			filter.push({
-				target: field_target,
-				filter: field_filter,
-				value: field_value
-			});
-		}
-	});
-
-	return filter;
+        if (field_target || field_filter || field_value) {
+            filter.push({
+                target: field_target,
+                filter: field_filter,
+                value: field_value,
+            });
+        }
+    });
+    return filter;
 }
+
+
 
 // Récupère tous les champs	
 function recup_champs() {
