@@ -100,6 +100,7 @@ class documentcore
         'Error_sending' => 'Error',
         'Not_found' => 'Error',
     ];
+    private array $notSentFields = [];
 
     // Instanciation de la classe de génération de log Symfony
     public function __construct(
@@ -1251,6 +1252,13 @@ class documentcore
                         ) {
                             continue;
                         }
+                        // foreach field of $this->notSentFields, we remove it from the data to send
+                        if (
+                                !empty($this->notSentFields)
+                            and in_array($ruleField['target_field_name'], $this->notSentFields)
+                        ) {
+                            continue;
+                        }
                         $dataInsert[$ruleField['target_field_name']] = $data[$ruleField['target_field_name']];
                     }
                 }
@@ -1317,6 +1325,10 @@ class documentcore
                         throw new \Exception('Failed to transform the field '.$ruleField['target_field_name'].'.');
                     }
                     $targetField[$ruleField['target_field_name']] = $value;
+                    if ($value === "mdw_do_not_send_field") {
+                        unset($targetField[$ruleField['target_field_name']]);
+                        $this->notSentFields[] = $ruleField['target_field_name'];
+                    }
                 }
             }
             // Loop on every relationship and calculate the value

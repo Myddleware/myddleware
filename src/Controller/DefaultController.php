@@ -1448,7 +1448,12 @@ use App\Form\Type\RelationFilterType;
                                 if ('before' == $k) {
                                     $before[] = $v;
                                 } else {
-                                    $after[] = $v;
+                                    foreach ($v as $key => $value) {
+                                        // if value does not contains the substring "mdw_do_not_send_field"
+                                        if (strpos($value, 'mdw_do_not_send_field') === false) {
+                                            $after[] = $v;
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -40,7 +40,7 @@ require('./js/animation.js')
 require('./js/task.js')
 require('./js/connector.js')
 require('./js/smtp.js')
-// require('./js/filter.js')
+require('./js/filter.js')
 require('./js/rule_relation_filter.js')
 
 

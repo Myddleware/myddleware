@@ -268,6 +268,10 @@ $(function () {
 			var position = $("#area_insert").getCursorPosition();
 			var content = $('#area_insert').val();
 			var newContent = content.substr(0, position) + $.trim($(this).text()) + '( ' + content.substr(position);
+			// If we click on the function mdw_do_not_send_field, we don't want to add the parenthesis because it is a constant
+			if (newContent == "mdw_do_not_send_field( ") {
+				newContent = "\"mdw_do_not_send_field\"";
+			}
 			$('#area_insert').val(newContent);
 			colorationSyntax();
 			theme(style_template);
@@ -749,8 +753,6 @@ $(function () {
 
 				$.each(nameF.source, function (fieldid, fieldname) {
 					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldid + " (" + fieldname + ")" + '</li>')
-					// filter
-					//addFilter(fieldid, path_info_field);
 				});
 
 				// formula

@@ -870,7 +870,6 @@ class FilterController extends AbstractController
 
         // fetches the documents from the database
         $documents = $this->entityManager->getRepository(Document::class)->findBy(['id' => $_POST['csvdocumentids']]);
-
         $rootPath = $this->getParameter('kernel.project_dir');
         $envFilePath = $rootPath . '/.env.local';
 
