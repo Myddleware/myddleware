@@ -35,6 +35,17 @@
 		{% endfor %}
 	{% endfor %}
 
+{% if nbDocuments > 0 %}
+      <div id="fd-title-small" class="left">
+            <p>{{'list_flux.total2'|trans}}</p>
+            {# <p>{{'list_flux.total2'|trans}}</p> #}
+            <p>
+                  <span class="nb">{{ nbDocuments }}</span>
+            </p>
+      </div>
+      <div class="clr"></div>
+{% endif %}
+
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
       <h2 class="text-center m-3">Filters</h2>
@@ -322,6 +333,7 @@
 {% block javascript %}
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		{{ encore_entry_script_tags('app') }}
+            {{ encore_entry_script_tags('filter') }}
 	{% endblock javascript %}
 	<script type="text/javascript">
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
