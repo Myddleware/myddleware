@@ -28,11 +28,12 @@ namespace App\Repository;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Rule|null find($id, $lockMode = null, $lockVersion = null)
@@ -62,7 +63,7 @@ class RuleRepository extends ServiceEntityRepository
     }
 
     // Retourne toutes les règles d'un user
-    public function findListRuleByUser(User $user): Query
+    public function findListRuleByUser(User $user, $ruleName = null): Query
     {
         $sql = $this->createQueryBuilder('r')
             ->join('r.connectorSource', 'cs')
@@ -86,6 +87,12 @@ class RuleRepository extends ServiceEntityRepository
                  ->setParameter('user_id', $user->getId());
         } else {
             $sql->where('r.deleted = 0');
+        }
+
+        // Add search condition
+        if ($ruleName) {
+            $sql->andWhere('r.name LIKE :name')
+            ->setParameter('name', '%' . $ruleName . '%');
         }
 
         return $sql->getQuery();
@@ -218,4 +225,84 @@ class RuleRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+
+    public static function findActiveRulesNames(EntityManagerInterface $entityManager, bool $isDocSearchResult=false)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.name')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'name');
+        sort($curatedResults);
+        $finalResults = array_flip($curatedResults);
+        if ($isDocSearchResult) {
+            $finalResults = array_flip($finalResults);
+        }
+        return $finalResults;
+    }
+
+    public static function findActiveRulesIds(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.id')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'id');
+        return $curatedResults;
+    }
+
+    public static function findModuleSource(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.moduleSource')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'moduleSource');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
+    public static function findModuleTarget(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.moduleTarget')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'moduleTarget');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
+    public static function findNameSlug(EntityManagerInterface $entityManager)
+    {
+        $qb = $entityManager->createQueryBuilder();
+
+        $qb->select('r.nameSlug')
+        ->from('App\Entity\Rule', 'r')
+        ->where('r.deleted = 0');
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        $curatedResults =  array_column($results, 'nameSlug');
+        $finalResults = array_flip($curatedResults);
+        return $finalResults;
+    }
+
 }

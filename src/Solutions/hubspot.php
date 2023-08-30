@@ -37,11 +37,6 @@ class hubspotcore extends solution
         'contacts' => array('email')
     );
 
-    // Requiered fields for each modules
-    protected array $required_fields = array(
-        'default' => ['lastmodifieddate'],
-    );
-
     public function getFieldsLogin(): array
     {
         return [
@@ -136,7 +131,6 @@ class hubspotcore extends solution
             $after = 0;
             $filter = new \HubSpot\Client\Crm\Contacts\Model\Filter();
             $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
-
             // Set the filter 
             if (!empty($param['query'])) {
                 foreach($param['query'] as $key=>$value) {
@@ -153,7 +147,6 @@ class hubspotcore extends solution
             $filterGroup->setFilters([$filter]);
             $searchRequest = new \HubSpot\Client\Crm\Contacts\Model\PublicObjectSearchRequest();
             $searchRequest->setFilterGroups([$filterGroup]);
-
             // Always sort by last modified date ascending
             $sorts = array(
                         array(
@@ -189,7 +182,9 @@ class hubspotcore extends solution
                         }
                         $recordValues = $record->getProperties();
                         $recordId = $record->getId();
+						// Always return id and lastmodifieddate
                         $result[$recordId]['id'] = $recordId;
+						$result[$recordId]['lastmodifieddate'] = $recordValues['lastmodifieddate'];
                         // Fill every rule fields
                         foreach($param['fields'] as $field) {
                             $result[$recordId][$field] = $recordValues[$field] ?? null;
@@ -216,6 +211,7 @@ class hubspotcore extends solution
         return $result;
     }
 
+	
      /**
      * @throws \Exception
      */
@@ -223,6 +219,18 @@ class hubspotcore extends solution
     {
         return 'lastmodifieddate';
     }
+	
+	// Redefine addRequiredField to remove the field lastmodifieddate from the list fields.
+	// This fields is always returned by Hubspot 
+	protected function addRequiredField($fields, $module = 'default', $mode = null)
+    {
+		$fields = parent::addRequiredField($fields, $module, $mode);
+		$key = array_search('lastmodifieddate', $fields);
+		if ($key !== false) {
+			unset($fields[$key]);
+		}
+		return $fields;
+	}
 
     // Function de conversion de datetime format solution à un datetime format Myddleware
     protected function dateTimeToMyddleware($dateTime)

@@ -184,6 +184,14 @@ class AccountController extends AbstractController
         $varPath = "\\var\log\\".$logType;
         $file = $cwdWithoutPublic . $varPath;
         $absolutePathFile = realpath($file);
+
+        // If realpath returns empty, try with Linux path
+        if (!$absolutePathFile) {
+            $cwdWithoutPublic = preg_replace('/\/public$/', '', $cwd);
+            $varPath = "/var/log/" . $logType;
+            $file = $cwdWithoutPublic . $varPath;
+            $absolutePathFile = realpath($file);
+        }
        
 
         $response = new BinaryFileResponse($absolutePathFile);
@@ -206,6 +214,14 @@ class AccountController extends AbstractController
         $varPath = "\\var\log\\".$logType;
         $file = $cwdWithoutPublic . $varPath;
         $absolutePathFile = realpath($file);
+
+        // If realpath returns empty, try with Linux path
+        if (!$absolutePathFile) {
+            $cwdWithoutPublic = preg_replace('/\/public$/', '', $cwd);
+            $varPath = "/var/log/" . $logType;
+            $file = $cwdWithoutPublic . $varPath;
+            $absolutePathFile = realpath($file);
+        }
 
         // Open the file in write mode
         $handle = fopen($absolutePathFile, 'w');

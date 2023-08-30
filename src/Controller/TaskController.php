@@ -165,7 +165,7 @@ class TaskController extends AbstractController
 
             // Add log to indicate this action
             $log = new Log();
-            $log->setDateCreated(new \DateTime());
+            $log->setCreated(new \DateTime());
             $log->setType('W');
             $log->setMessage('The task has been manually stopped. ');
             $log->setJob($taskStop);
@@ -176,6 +176,25 @@ class TaskController extends AbstractController
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('task_list'));
         }
+    }
+
+
+    /**
+     * @Route("/task/stopall", name="task_stopall")
+     */
+    public function stopAllTask(): RedirectResponse
+    {   
+        // Find all the tasks that are started
+        $tasks = $this->jobRepository->findBy(['status' => 'Start']);
+        foreach ($tasks as $task) {
+            $this->stopTask($task);
+        }
+
+        // Add a flash message of success to say that all the tasks have been stopped
+        $this->addFlash('success', 'All the tasks have been stopped');
+        
+        return $this->redirect($this->generateUrl('task_list'));
+
     }
 
     /* ******************************************************

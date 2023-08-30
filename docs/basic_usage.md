@@ -152,7 +152,7 @@ button, which will get me the following result:
 
 If you are satisfied with the current simulation, you can either directly save your rule by clicking the ````confirm```` button on the ```Confirmation``` tab,
 or you can make even further transformations to your data by adding ```Filters``` & ```Relationships``` to your rule. To find out more about these options,
-please go to the  [Advanced usage section](#advanced-usage-section) of this documentation. 
+please go to the  [Advanced usage section](advanced_usage.md?id=relationships) of this documentation. 
 
 
 #### Confirm & create the rule

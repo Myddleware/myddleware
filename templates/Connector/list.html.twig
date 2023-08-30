@@ -58,8 +58,10 @@
 										{% for connector in entities %}
 											<tr>
 												<td class="solution_block">
-													<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt=""/></p>
-													{{connector.0.getName}}
+													<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
+														<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt=""/></p>
+														{{connector.0.getName}}
+													</a>
 												</td>
 												<td class="creation-date">
 													{{connector.0.getDateCreated|date("d/m/Y") }}

@@ -353,3 +353,7 @@ td a {
 	border: 0px solid transparent !important;
 	border-top-right-radius: 194.25rem !important;
 }
+
+.ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front {
+	max-width: 645px;
+}

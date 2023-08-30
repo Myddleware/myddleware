@@ -299,7 +299,7 @@ class suitecrmcore extends solution
                             && !in_array($field->type, ['datetime', 'bool'])
                         ) {
                             foreach ($field->options as $option) {
-                                $this->moduleFields[$field->name]['option'][$option->name] = $option->value;
+                                $this->moduleFields[$field->name]['option'][$option->name] = parent::truncate($option->value, 80);
                             }
                         }
                     }
@@ -358,6 +358,8 @@ class suitecrmcore extends solution
             return false;
         }
     }
+
+    
 
     // Permet de lire les données
 

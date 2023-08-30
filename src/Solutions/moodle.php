@@ -39,6 +39,8 @@ class moodlecore extends solution
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
         'get_user_grades' => ['id', 'timemodified'],
+        'groups' => ['id', 'timemodified'],
+        'group_members' => ['id', 'timeadded'],
     ];
 
     protected array $FieldsDuplicate = [
@@ -46,6 +48,10 @@ class moodlecore extends solution
         'courses' => ['shortname', 'idnumber'],
     ];
 
+	protected array $createOnlyFields = [
+        'courses' => ['lang'],
+    ];
+	
     protected string $delaySearch = '-1 year';
 
     public function login($paramConnexion)
@@ -117,6 +123,7 @@ class moodlecore extends solution
                     'get_competency_module_completion_by_date' => 'Get compentency module completion',
                     'get_user_grades' => 'Get user grades',
                     'groups' => 'Groups',
+					'group_members' => 'Group members',
                 ];
             }
 
@@ -181,6 +188,13 @@ class moodlecore extends solution
     public function read($param): array
     {
         try {
+			// No read action in case of history on enrolment module
+			if (
+					in_array($param['module'], array('manual_enrol_users', 'manual_unenrol_users'))
+				AND $param['call_type'] == 'history'
+			) {
+				return array();
+			}
             $result = [];
             // Set parameters to call Moodle
             $parameters = $this->setParameters($param);
@@ -196,6 +210,7 @@ class moodlecore extends solution
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
+
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
             }
@@ -226,7 +241,7 @@ class moodlecore extends solution
                                 $customFieldValue = '';
                                 $customFieldName = '';
                                 foreach($customField->KEY as $customFieldValues) {
-                                    if ($customFieldValues->attributes()->__toString() == $attributeName) {
+                                    if ($customFieldValues->attributes()->__toString() == 'shortname') {
                                         $customFieldName = $customFieldValues->VALUE->__toString();
                                     } elseif ($customFieldValues->attributes()->__toString() == $attributeValue) {
                                         $customFieldValue = $customFieldValues->VALUE->__toString();
@@ -270,10 +285,6 @@ class moodlecore extends solution
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
-                    // We don't send Myddleware_element_id field to Moodle
-                    if (in_array($key, array('Myddleware_element_id', 'source_date_modified', 'id_doc_myddleware'))) {
-                        continue;
-                    }
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
@@ -333,7 +344,17 @@ class moodlecore extends solution
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
+				
+				// Check if there is a warning
+				if (
+						!empty($xml->SINGLE)
+					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
+					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])
+				) {
+					throw new \Exception('ERROR : '.$xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
+				}
 
+				
                 // Réponse standard pour les modules avec retours
                 if (
                         !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
@@ -401,10 +422,7 @@ class moodlecore extends solution
                 foreach ($data as $key => $value) {
                     if ('target_id' == $key) {
                         continue;
-                    // We don't send Myddleware_element_id field to Moodle
-                    } elseif (in_array($key, array('Myddleware_element_id','source_date_modified','id_doc_myddleware'))) {
-                        continue;
-                    }
+                    } 
                     if (!empty($value)) {
                         // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
                         if (in_array($key, $customFieldList)) {
@@ -461,15 +479,25 @@ class moodlecore extends solution
                 }
 
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                $response = $this->moodleClient->post($serverurl, $params);
+                $response = $this->moodleClient->post($serverurl, $params);			
                 $xml = simplexml_load_string($response);
+				
+				// Check if there is a warning
+				if (
+						!empty($xml)
+					AND $xml->count() != 0	// Empty xml
+					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
+					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])
+				) {
+					throw new \Exception('ERROR : '.$xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
+				}
 
                 // Réponse standard pour les modules avec retours
                 if (!empty($xml->ERRORCODE)) {
                     throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE.(!empty($xml->DEBUGINFO) ? ' Debug : '.$xml->DEBUGINFO : ''));
                 }
                 // Si pas d'erreur et module sans retour alors on génère l'id
-                elseif (in_array($param['module'], ['manual_enrol_users'])) {
+                elseif (in_array($param['module'], ['manual_enrol_users', 'manual_unenrol_users'])) {
                     $result[$idDoc] = [
                         'id' => $obj->courseid.'_'.$obj->userid.'_'.$obj->roleid,
                         'error' => false,
@@ -509,6 +537,14 @@ class moodlecore extends solution
 			AND isset($data['createpassword'])
 		) {
 			unset($data['createpassword']);
+		}
+		// Rempove create only field
+		if (!empty($this->createOnlyFields[$param['module']])) {
+			foreach($this->createOnlyFields[$param['module']] as $createOnlyField) {
+				if (isset($data[$createOnlyField])) {
+					unset($data[$createOnlyField]);
+				}
+			}
 		}
         return parent::checkDataBeforeUpdate($param, $data, $idDoc);
     }
@@ -574,7 +610,6 @@ class moodlecore extends solution
             and empty($param['query']['id'])
         ) {
             // We use the standard function to search for a user (allow Myddleware to search a user by username or email)
-            dd( $param['module']);
             if ('users' == $param['module']) {
                 return 'core_user_get_users';
             } elseif ('courses' == $param['module']) {
@@ -588,6 +623,8 @@ class moodlecore extends solution
                 return 'local_myddleware_get_courses_by_date';
             } elseif ('groups' == $param['module']) {
                 return 'local_myddleware_get_groups_by_date';
+            } elseif ('group_members' == $param['module']) {
+                return 'local_myddleware_get_group_members_by_date';
             }
         }
         // In all other cases
@@ -642,6 +679,9 @@ class moodlecore extends solution
 					return 'timemodified';
 				}
                 break;
+            case 'group_members': 
+                return 'timeadded';
+                break; 
             default:
                 return 'timemodified';
                 break;
@@ -663,7 +703,7 @@ class moodlecore extends solution
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
         } 
-        return null;
+        return array();
     }
 
 	// Function to add custom fields for course and user modules.

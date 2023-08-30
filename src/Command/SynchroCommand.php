@@ -118,27 +118,31 @@ class SynchroCommand extends Command
                                 $output->writeln('Read data for rule : <question>'.$value.'</question>');
                                 // Chargement des données de la règle
                                 if ($this->jobManager->setRule($value)) {
-                                    // Sauvegarde des données sources dans les tables de myddleware
-                                    $output->writeln($value.' : Create documents.');
-                                    $nb = $this->jobManager->createDocuments();
-                                    $output->writeln($value.' : Number of documents created : '.$nb);
-                                    // Permet de filtrer les documents
-                                    $this->jobManager->filterDocuments();
+									try {
+										// Sauvegarde des données sources dans les tables de myddleware
+										$output->writeln($value.' : Create documents.');
+										$nb = $this->jobManager->createDocuments();
+										$output->writeln($value.' : Number of documents created : '.$nb);
+										// Permet de filtrer les documents
+										$this->jobManager->filterDocuments();
 
-                                    // Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-                                    $this->jobManager->checkPredecessorDocuments();
+										// Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
+										$this->jobManager->checkPredecessorDocuments();
 
-                                    // Permet de valider qu'au moins un document parent(relation père) est existant
-                                    $this->jobManager->checkParentDocument();
+										// Permet de valider qu'au moins un document parent(relation père) est existant
+										$this->jobManager->checkParentDocuments();
 
-                                    // Permet de transformer les docuement avant d'être envoyés à la cible
-                                    $this->jobManager->transformDocuments();
+										// Permet de transformer les docuement avant d'être envoyés à la cible
+										$this->jobManager->transformDocuments();
 
-                                    // Historisation des données avant modification dans la cible
-                                    $this->jobManager->getTargetDataDocuments();
+										// Historisation des données avant modification dans la cible
+										$this->jobManager->getTargetDataDocuments();
 
-                                    // Envoi des documents à la cible
-                                    $this->jobManager->sendDocuments();
+										// Envoi des documents à la cible
+										$this->jobManager->sendDocuments();
+									} catch (\Exception $e) {
+										$this->jobManager->message .= 'Error rule '.$value.' '.$e->getMessage();
+									}
                                 }
                             }
                         }

@@ -284,12 +284,225 @@ $(function () {
 			$("#formule").dialog("close");
 		});
 
+		function checkBrackets(formula) {
+			var map = {
+				'(': ')',
+				'[': ']',
+				'{': '}'
+			}
+		
+			var pairTypes = Object.keys(map);
+		
+			for(var t=0; t<pairTypes.length; t++) {
+				var stack = [];
+				var pairs = [];
+				var currentPair = 0;
+				var errorAt = -1;
+		
+				var open = pairTypes[t];
+				var close = map[open];
+		
+				console.log('Checking pair type:', open+close);
+		
+				for (var i = 0; i < formula.length; i++) {
+					if (formula[i] === open) {
+						currentPair++;
+						stack.push({
+							'symbol': open,
+							'position': i,
+							'pairNum': currentPair
+						});
+						console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
+					}
+					else if (formula[i] === close) {
+						var last = stack.pop();
+		
+						if (!last) {
+							console.log('Found closing symbol without matching opening symbol at', i);
+							errorAt = i;
+							currentPair++;
+							break;
+						} else {
+							console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
+							if (!pairs.includes(last.pairNum)) {
+								pairs.push(last.pairNum);
+							}
+						}
+					}
+				}
+		
+				// If we still have unclosed brackets at the end of parsing, record an error
+				if (stack.length > 0) {
+					console.log('Found unbalanced pair at the end of the formula');
+					var lastUnbalanced = stack.pop();
+					errorAt = lastUnbalanced.position;
+					currentPair = lastUnbalanced.pairNum;
+				}
+		
+				var status = (stack.length === 0) && (errorAt === -1);
+				var unbalancedPair = status ? null : currentPair;
+		
+				var index = pairs.indexOf(unbalancedPair);
+				if (index > -1) {
+					pairs.splice(index, 1);
+				}
+		
+				console.log('Pair Type:', open + close);
+				console.log('Status:', status);
+				console.log('Error Position:', errorAt);
+				console.log('Unbalanced Pair:', unbalancedPair);
+				console.log('Balanced Pairs:', pairs);
+		
+				if (!status) {
+					return {
+						'status': status,
+						'error_at': errorAt,
+						'unbalanced_pair': unbalancedPair,
+						'balanced_pairs': pairs.sort((a, b) => a - b)
+					};
+				}
+			}
+		
+			return {
+				'status': true,
+				'error_at': -1,
+				'unbalanced_pair': null,
+				'balanced_pairs': []
+			};
+		}
+		
+		
+		
 		// Btn confirmation dialogue formule
 		$("#area_confirm").on("click", function () {
-
 			// Avant de confirmer la formule il faut la valider
 			var myFormula = $('#area_insert').val(); // l'id du champ
 			var zone = $(this).parent().parent().find("#formule_table").text();
+
+			var values = [];
+
+			// champs_insert is the id of the select element, add all the values of the options of the select element to the values array
+			$('#champs_insert option').each(function () {
+				values.push($(this).val());
+			});
+
+
+			console.log('these are the values', values);
+
+			var bracketError = false;
+			var emptyBracketError = false;
+			var missingFieldError = false;
+			var missingFieldList = [];
+
+			if (myFormula.includes('{') && myFormula.includes('}')) {
+				// if there is a pair of curly brackets in myFormula, then check if it contains any of the values in the values array
+				for (var i = 0; i < values.length; i++) {
+					if (myFormula.includes(values[i])) {
+						continue;
+					} else {
+						missingFieldError = true;
+						missingFieldList.push(values[i]);
+					}
+				}
+			}
+
+			// check for set of empty brackets
+			if (myFormula.includes('{}')) {
+				emptyBracketError = true;
+			}
+
+			if (emptyBracketError == true) {
+				// finds the position of the first empty bracket
+				var position = myFormula.indexOf('{}');
+				alert('Your bracket is empty at position ' + position + '.');
+				missingFieldList = [];
+				values = [];
+				// prevents from exiting the current menu
+				// return false;
+			}
+
+			if (bracketError == true && emptyBracketError == false) {
+				// finds the position of the first bracket of the pair that is wrong
+				alert('Your bracket number ' + wrongbracket + ' has a wrong field');
+				missingFieldList = [];
+				values = [];
+				// prevents from exiting the current menu
+				// return false;
+			}
+
+			if (missingFieldError == true) {
+				alert('Your formula is missing a field or more. Please add the following field(s): ' + missingFieldList);
+				missingFieldList = [];
+				values = [];
+				// return false;
+			}
+
+			// if there are one or more unbalanced [, (, {,in myFormula, then bracketError = true
+			// algorithm to take count of every bracket in the formula and then compare the number of each type of bracket
+			// if the number of each type of bracket is not equal, then bracketError = true
+			// if the number of each type of bracket is equal, then bracketError = false
+			var leftBracket = 0;
+			var rightBracket = 0;
+			var leftParenthesis = 0;
+			var rightParenthesis = 0;
+			var leftCurlyBracket = 0;
+			var rightCurlyBracket = 0;
+
+		    for (var i = 0; i < myFormula.length; i++) {
+				if (myFormula[i] == '[') {
+					leftBracket++;
+				} else if (myFormula[i] == ']') {
+					rightBracket++;
+				} else if (myFormula[i] == '(') {
+					leftParenthesis++;
+				} else if (myFormula[i] == ')') {
+					rightParenthesis++;
+				} else if (myFormula[i] == '{') {
+					leftCurlyBracket++;
+				} else if (myFormula[i] == '}') {
+					rightCurlyBracket++;
+				}
+			}
+
+			// if (leftBracket != rightBracket) {
+			// 	alert('Your formula has an unbalanced number of brackets. You have ' + leftBracket + ' left brackets and ' + rightBracket + ' right brackets. Please check your formula.');
+			// 	return false;
+
+			// } if (leftParenthesis != rightParenthesis) {
+			// 	alert('Your formula has an unbalanced number of parenthesis. You have ' + leftParenthesis + ' left parenthesis and ' + rightParenthesis + ' right parenthesis. Please check your formula.');
+			// 	return false;
+			// }
+
+			// if (leftCurlyBracket != rightCurlyBracket) {
+			// 	alert('Your formula has an unbalanced number of curly brackets.  You have ' + leftCurlyBracket + ' left curly brackets and ' + rightCurlyBracket + ' right curly brackets. Please check your formula.');
+			// 	return false;
+			// }
+
+			// If there is the substring null in the formula and it is not encased in two "" or two '', then return an error
+			if (myFormula.includes('null')) {
+				if (myFormula.includes('"null"') || myFormula.includes("'null'")) {
+					// do nothing
+				} else {
+					alert('Your formula contains the substring null. Please encase it in two "" or two \'\'');
+					missingFieldList = [];
+					values = [];
+					// return false;
+				}
+			}
+
+			var result = checkBrackets(myFormula);
+			if (!result.status) {
+				alert('Your formula has unbalanced brackets at position ' + result.error_at + '. Bracket pair number ' + result.unbalanced_pair + ' is unbalanced. Bracket pair number ' + result.balanced_pairs.join(', ') + ' are balanced. Please check your formula.');
+				missingFieldList = [];
+				values = [];
+				// return false;
+			}
+
+			// empty the values array
+			missingFieldList = [];
+			values = [];
+			console.log('these are the values', values);
+
 
 			$.ajax({
 				type: "POST",
@@ -465,9 +678,9 @@ $(function () {
 	});
 
 	// Validation et vérification de l'ensemble du formulaire			
-	$("#validation", '#rule_mapping').on("click", function () {
-		before = $("#validation").attr('value'); // rev 1.08
-
+	$("#validation").on("click", function () {
+		before = $("#validation").attr('value');
+	
 		if (require() && require_params() && require_relate() && duplicate_fields_error()) {
 			$.ajax({
 				type: "POST",
@@ -480,40 +693,43 @@ $(function () {
 					duplicate: recup_fields_relate(),
 					filter: recup_filter(),
 				},
-				beforeSend: function () {	
-					$("#validation").attr('value', save_wait); // rev 1.08
+				beforeSend: function () {    
+					$("#validation").attr('value', save_wait);
 				},
 				success: function (data) {
-					if (data == 1) {
+					if (data.status == 1) {
 						alert(confirm_success);
-						$(location).attr('href', return_success);
+	
+						var path_template = $("#validation").data('url');
+						var path_view_detail = path_template.replace('placeholder_id', data.id);
+						$(location).attr('href', path_view_detail);
+	
 					} else {
 						data = data.split(';');
 						if (data[0] == 2) {
-							alert(data[1]); // Erreur personnalisé via beforeSave
+							alert(data[1]);
 						} else {
 							alert(confirm_error);
 						}
-						$("#validation").attr('value', before); // rev 1.08
+						$("#validation").attr('value', before);
 					}
-				}, // rev 1.08
+				},
 				statusCode: {
 					500: function (e) {
 						console.log(e.responseText);
 						alert('An error occured. Please check your server logs for more detailed information.');
-						$("#validation").attr('value', before); // rev 1.08
+						$("#validation").attr('value', before);
 					}
 				}
 			});
 		} else {
-			//alert('Il existe des champs obligatoires !');
 			$("#dialog").dialog({
 				draggable: false,
 				modal: true,
 				resizable: false
 			});
-
-			$("#validation").attr('value', before); // rev 1.08				
+	
+			$("#validation").attr('value', before);
 		}
 	});
 
@@ -532,10 +748,9 @@ $(function () {
 				$('#' + nameF.target + ' .ui-droppable').empty();
 
 				$.each(nameF.source, function (fieldid, fieldname) {
-					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldname + '</li>');
-
+					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldid + " (" + fieldname + ")" + '</li>')
 					// filter
-					addFilter(fieldid, path_info_field);
+					//addFilter(fieldid, path_info_field);
 				});
 
 				// formula
@@ -595,6 +810,7 @@ $(function () {
 
 	
 
+	// Mass action on flux list 
 	$('#massselectall').on('change', function () {
 		if ($(this).is(":checked")) {
 			remove = false;
@@ -624,11 +840,11 @@ $(function () {
 	});
 
 	$('input', '.listepagerflux td').on('change', function () {
-		id = $(this).parent().parent().attr('data-id');
+		// id = $(this).parent().parent().attr('data-id');
 		if ($(this).is(":checked")) {
-			massAddFlux(id, false, massFluxTab);
+			massAddFlux($(this).attr('name'), false, massFluxTab);
 		} else {
-			massAddFlux(id, true, massFluxTab);
+			massAddFlux($(this).attr('name'), true, massFluxTab);
 		}
 
 		showBtnFlux(massFluxTab);
@@ -644,6 +860,25 @@ $(function () {
 				},
 				data: {
 					ids: massFluxTab
+				},
+				success: function (data) { // code_html contient le HTML renvoyé
+					location.reload();
+				}
+			});
+		}
+	});
+
+	$('#cancelreloadflux').on('click', function () {
+		if (confirm(confirm_cancel)) { // Clic sur OK
+			$.ajax({
+				type: "POST",
+				url: mass_cancel,
+				beforeSend: function () {
+					btn_action_fct(); // Animation
+				},
+				data: {
+					ids: massFluxTab,
+					reload: true
 				},
 				success: function (data) { // code_html contient le HTML renvoyé
 					location.reload();
@@ -728,6 +963,33 @@ $("#flux_target").on("dblclick", 'li', function () {
 
 });
 
+// ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
+
+// Function to export the flux to a csv file when clicking on the button with an id of exportfluxcsv
+$('#exportfluxcsv').on('click', function () {
+	// If the massFluxTab array is not empty
+		// Convert the massFluxTab array to CSV format
+		// const csvContent = arrayToCSV(massFluxTab);
+		// Download the CSV file
+		// downloadCSV(csvContent, 'documents.csv');
+
+		// lanches the php function flux_export_docs_csv with the massFluxTab array as a parameter
+		$.ajax({
+			type: "POST",
+			url: flux_export_docs_csv,
+			data: {
+				csvdocumentids: csvdocumentids
+			},
+			success: function (data) { // code_html contient le HTML renvoyé
+			}
+		});
+});
+
+
+
+
+
+// ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
 
 function name_file_upload() {
 	$.ajax({
@@ -1198,7 +1460,7 @@ function prepareDrag() {
 					var formule_in = $( this ).parent().find( ".formule" );
 					$( formule_in ).css('opacity','1');	*/
 
-					addFilter(dragId, path_info_field);
+					//addFilter(dragId, path_info_field);
 
 					$('li', "#fields_duplicate_target").each(function () {
 						if ($(this).attr('data-active') == 'false') {
@@ -1475,37 +1737,35 @@ function removeFilter(field) {
 // ---- FILTRES  -------------------------------------------------------------------------
 
 // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
-
-// Récupère la liste des filtres
 function recup_filter() {
-	filter = [];
-	$('li', '#fieldsfilter').each(function () {
+    let filter = [];
+    $('#fieldsfilter li').each(function () {
+        let field_target = $.trim($(this).find(".name").text());
 
-		field_target = '';
-		$($(this)).find("span.name").each(function () {
-			field_target = $.trim($(this).text());
-		});
+        let field_filter = '';
+        let selectElement = $(this).find("input[name*='anotherFieldInput']");
+        if (selectElement.length > 0) {
+            field_filter = $.trim(selectElement.val());
+        }
 
-		field_filter = '';
-		$($(this)).find("select.filter").each(function () {
-			field_filter = $.trim($(this).val());
-		});
+        let field_value = '';
+        let inputElement = $(this).find("input[name*='textareaFieldInput']");
+        if (inputElement.length > 0) {
+            field_value = $.trim(inputElement.val());
+        }
 
-		field_value = '';
-		$($(this)).find("input").each(function () {
-			field_value = $.trim($(this).val());
-		});
-		if (field_filter != '') {
-			filter.push({
-				target: field_target,
-				filter: field_filter,
-				value: field_value
-			});
-		}
-	});
-
-	return filter;
+        if (field_target || field_filter || field_value) {
+            filter.push({
+                target: field_target,
+                filter: field_filter,
+                value: field_value,
+            });
+        }
+    });
+    return filter;
 }
+
+
 
 // Récupère tous les champs	
 function recup_champs() {
@@ -1666,12 +1926,15 @@ function require_relate() {
 // test si le champ à été selectionné pour pouvoir être utilisé comme référence afin d'éviter les doublons
 function fields_exist(fields_duplicate) {
 	var exist = 0;
+	// On parcours tous les champs de la liste
 	$('#cible').find("li.ch").each(function () {
 
 		var li = $(this);
+		// On récupère le nom du champ parent du champ 
 		var fields = li.parent().parent().parent();
 		var r = $.trim($(fields).find("h1").text());
 
+		// Si le nom du champ parent est le même que celui passé en paramètre, on incrémente le compteur
 		if (fields_duplicate == r) {
 			exist++;
 		}
@@ -1680,17 +1943,24 @@ function fields_exist(fields_duplicate) {
 	return exist;
 }
 
+// Affiche ou cache les boutons de la liste des flux en fonction du nombre de flux sélectionnés
 function showBtnFlux(massFluxTab) {
 
 	if (massFluxTab.length == 0) {
 		$('#cancelflux').hide();
 		$('#reloadflux').hide();
+		$('#cancelreloadflux').hide();
 	} else {
 		$('#cancelflux').show();
 		$('#reloadflux').show();
+		$('#cancelreloadflux').show();
 	}
 }
 
+// Add or remove the id of the flux to the array
+// If the id is already in the array, it is removed
+// If the id is not in the array, it is added
+// The number of elements in the array is displayed in the button
 function massAddFlux(id, cond, massFluxTab) {
 	if (id != '') {
 		if (cond == false) {
@@ -1699,9 +1969,10 @@ function massAddFlux(id, cond, massFluxTab) {
 			massFluxTab.splice($.inArray(id, massFluxTab), 1);
 		}
 	}
-
+	// Display the number of elements in the array
 	$('#cancelflux').find('span').html(massFluxTab.length);
 	$('#reloadflux').find('span').html(massFluxTab.length);
+	$('#cancelreloadflux').find('span').html(massFluxTab.length);
 }
 
 
@@ -1712,6 +1983,7 @@ function saveInputFlux(div, link) {
 	div.attr('data-value');
 	value = $('#' + fields);
 
+	// Ajax request to save the data in the database
 	$.ajax({
 		type: "POST",
 		url: link,

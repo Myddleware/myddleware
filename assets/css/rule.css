@@ -100,8 +100,6 @@
 	position: absolute;
 	top: 0;
 	left: 31px;
-	/* border-style: solid; */
-	/* border-color: #198BCA transparent transparent #198BCA; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-inactive .onoffswitch-switch:before {
@@ -109,8 +107,6 @@
 	position: absolute;
 	top: 0;
 	right: 31px;
-	/* border-style: solid;
-	border-color: transparent #555555 #555555 transparent; */
 	border-width: 8px 7px;
 }
 #rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
@@ -507,4 +503,33 @@ color: #000000!important;
 
 .mapping-container > .mapping-card {
 	margin: 30px;
+}
+
+#rulenamesearchbar {
+	/* center the search bar horizontally */
+	margin: auto;
+	width: 20%;
+	/* put a nice border and a shadow, make it nice to look at */
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+	/* here is the cool part */
+	/* we use a linear gradient bg which will fall-back to a solid color if needed */
+	background: #f1f1f1;
+	background: linear-gradient(to bottom, #f1f1f1 0%, #e1e1e1 100%);
+	/* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1f1f1', endColorstr='#e1e1e1', GradientType=0); */
+	/* just a small styling */
+	padding: 9px 14px;
+	color: #333;
+	transition: all 0.5s;
+	/* make the search bar responsive */
+	max-width: 400px;
+	/* make sure we can see the search bar above everything else */
+	position: relative;
+	z-index: 9999;
+
+	
+
+	/* make the search bar form red */
+	/* background-color: #f44336; */
 }

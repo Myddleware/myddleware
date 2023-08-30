@@ -319,7 +319,9 @@ $moduleFields = [
     ],
 
     'group_members' => [
-        'groupid' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'groupid' => ['label' => 'Group ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
         'userid' => ['label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
+		'timeadded' => ['label' => 'Time added', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
 ];
