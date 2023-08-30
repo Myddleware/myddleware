@@ -195,11 +195,9 @@ class filecore extends solution
             } else {
                 $this->moduleFields = [];
             }
-            // todo make it work but disable if can't make branch
-            if (1 === 1) {
-                // Add relationship fields coming from other rules
-                $this->get_module_fields_relate($module, $param);
-            }
+
+        	// Add relationship fields coming from other rules
+        	$this->get_module_fields_relate($module, $param);
 
             return $this->moduleFields;
         } catch (\Exception $e) {
