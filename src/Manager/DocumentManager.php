@@ -1325,7 +1325,7 @@ class documentcore
                         throw new \Exception('Failed to transform the field '.$ruleField['target_field_name'].'.');
                     }
                     $targetField[$ruleField['target_field_name']] = $value;
-                    if ($value === "mdw_do_not_send_field") {
+                    if ($value === "mdw_no_send_field") {
                         unset($targetField[$ruleField['target_field_name']]);
                         $this->notSentFields[] = $ruleField['target_field_name'];
                     }
