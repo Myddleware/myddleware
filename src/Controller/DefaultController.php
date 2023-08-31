@@ -2414,7 +2414,7 @@ use App\Form\Type\RelationFilterType;
               
                       // Accès aux valeurs des champs individuels
                       $fieldInput = $filterData['target'];
-                      $anotherFieldInput = $filterData['filter'];
+                      $anotherFieldInput = $this->idFilterSwitch($filterData['filter']);
                       $textareaFieldInput = $filterData['value'];
 
               
@@ -2525,6 +2525,28 @@ use App\Form\Type\RelationFilterType;
             $this->entityManager->close();
 
             return new JsonResponse($response);
+        }
+
+        // function to switch the filter value to the actual one that should be used
+        public function idFilterSwitch(string $filter): string
+        {
+
+            $equivalencetable = [
+                "contains" => "content",
+                "does not contain" => "notcontent",
+                "starts with" => "begin",
+                "ends with" => "end",
+                "is greater than" => "gt",
+                "is less than" => "lt",
+                "is equal to&nbsp;" => "equal",
+                "is not equal to&nbsp;" => "different",
+                "is greater than or equal to&nbsp;" => "gteq",
+                "is less than or equal to&nbsp;" => "lteq",
+                "is included in the following table separated by semicolon" => "in",
+                "is not included in the following table separated by semicolon" => "notin",
+            ];
+
+            return $equivalencetable[$filter];
         }
 
         /**
