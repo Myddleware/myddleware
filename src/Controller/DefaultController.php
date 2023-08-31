@@ -2018,7 +2018,7 @@ use App\Form\Type\RelationFilterType;
 
                 // return $this->redirect($this->generateUrl('regle_stepone_animation'));
                 // exit;
-                dd($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
+                dump($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
             }
         }
 
@@ -2527,27 +2527,36 @@ use App\Form\Type\RelationFilterType;
             return new JsonResponse($response);
         }
 
-        // function to switch the filter value to the actual one that should be used
-        public function idFilterSwitch(string $filter): string
-        {
+    // function to switch the filter value to the actual one that should be used
+    public function idFilterSwitch(string | null $filter): string | null
+    {
 
-            $equivalencetable = [
-                "contains" => "content",
-                "does not contain" => "notcontent",
-                "starts with" => "begin",
-                "ends with" => "end",
-                "is greater than" => "gt",
-                "is less than" => "lt",
-                "is equal to&nbsp;" => "equal",
-                "is not equal to&nbsp;" => "different",
-                "is greater than or equal to&nbsp;" => "gteq",
-                "is less than or equal to&nbsp;" => "lteq",
-                "is included in the following table separated by semicolon" => "in",
-                "is not included in the following table separated by semicolon" => "notin",
-            ];
+        $equivalencetable = [
+            "contains" => "content",
+            "does not contain" => "notcontent",
+            "starts with" => "begin",
+            "ends with" => "end",
+            "is greater than" => "gt",
+            "is less than" => "lt",
+            "is equal to" => "equal",
+            "is not equal to" => "different",
+            "is greater than or equal to" => "gteq",
+            "is less than or equal to" => "lteq",
+            "is included in the following table separated by semicolon" => "in",
+            "is not included in the following table separated by semicolon" => "notin",
+        ];
 
-            return $equivalencetable[$filter];
+        $result = "";
+        if ($filter === null) {
+            $result = "";
+            // else if filter is present in the array
+        } else if (array_key_exists($filter, $equivalencetable)) {
+            $result = $equivalencetable[$filter];
+        } else {
+            $result = $filter;
         }
+        return $result;
+    }
 
         /**
          * TABLEAU DE BORD.
