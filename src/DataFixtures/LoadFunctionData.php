@@ -37,7 +37,7 @@ class LoadFunctionData implements FixtureInterface
         'mathematical' => ['round', 'ceil', 'abs'],
         'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray'],
         'date' => ['date', 'microtime', 'changeTimeZone', 'changeFormatDate'],
-        'constant' => ['mdw_do_not_send_field'],
+        'constant' => ['mdw_no_send_field'],
     ];
 
     protected $functionCats = [];
