@@ -68,7 +68,7 @@ class yousigncore extends solution
 											// In member module, fileObjects is the key that contains file_objects records
 											'key' => 'fileObjects',
 											// Additional fields to be returned as relate fields 
-											'fieldsLevel1' => array('procedure' => 'id'),
+											'fieldsLevel1' => array('procedure' => 'id', 'procedure_status' => 'status'),
 											'fieldsLevel2' => array('member' => 'id', 'user' => 'user'),
 									),
 									'members' => array(
