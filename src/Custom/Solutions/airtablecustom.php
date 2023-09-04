@@ -359,14 +359,20 @@ class airtablecustom extends airtable {
 		// Make an integromat call if call OK to Mobilisation - Contacts webservice
 		if (
 				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('6303832f0a0b7')) // Mobilisation - Contacts webservice
+			AND	in_array($param['ruleId'], array('64f5e0543cb6c')) // Mobilisation - Relations pôles Contact
 			AND $value['id'] != '-1'
 		) {
 			try {
+				$targetId = (!empty($param['data'][$idDoc]['fldWsjwPo27DVlYMy']) ? $param['data'][$idDoc]['fldWsjwPo27DVlYMy'] : $param['data'][$idDoc]['fldG1SI869ikEvg9n']);
+				if (empty($targetId)) {
+					throw new \Exception('No target id found in the parent document (rule Mobilisation - Contacts webservice ');
+				}
+					
 				// Get the COMET contact ID
-				$sqlParams = 'SELECT * FROM document where id = :doc_id';
+				$sqlParams = "SELECT * FROM document where rule_id = '6303832f0a0b7' and target_id = :targetId";
 				$stmt = $this->getConn()->prepare($sqlParams);
-				$stmt->bindValue(':doc_id', $idDoc);
+				// Check PROD field then PREPROD field
+				$stmt->bindValue(':targetId', $targetId);
 				$stmt->execute();
 				$result = $stmt->executeQuery();
                 $document = $result->fetchAssociative();

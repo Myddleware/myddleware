@@ -37,6 +37,7 @@ class ToolsManagerCustom extends ToolsManager {
 			$data['lst_rule']['6267e128b2c87'] = 'Mobilisation - Evenement RI';
 			$data['lst_rule']['6267e9c106873'] = 'Mobilisation - Composantes';
 			$data['lst_rule']['62690f697e610'] = 'Mobilisation - Pôles';
+			$data['lst_rule']['6303832f0a0b7'] = 'Mobilisation - Contacts webservice';
 		}
 
 		// Une règle avec le module fp_events_contacts_c peut être liée aux module engagé et formation
