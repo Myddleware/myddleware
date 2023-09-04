@@ -1800,19 +1800,20 @@ use App\Form\Type\RelationFilterType;
 
                 // Les filtres
                 $lst_filter = [
-                    'content' => $this->translator->trans('filter.content'),
-                    'notcontent' => $this->translator->trans('filter.notcontent'),
-                    'begin' => $this->translator->trans('filter.begin'),
-                    'end' => $this->translator->trans('filter.end'),
-                    'gt' => $this->translator->trans('filter.gt'),
-                    'lt' => $this->translator->trans('filter.lt'),
-                    'equal' => $this->translator->trans('filter.equal'),
-                    'different' => $this->translator->trans('filter.different'),
-                    'gteq' => $this->translator->trans('filter.gteq'),
-                    'lteq' => $this->translator->trans('filter.lteq'),
-                    'in' => $this->translator->trans('filter.in'),
-                    'notin' => $this->translator->trans('filter.notin'),
+                    $this->translator->trans('filter.content') => 'content',
+                    $this->translator->trans('filter.notcontent') => 'notcontent',
+                    $this->translator->trans('filter.begin') => 'begin',
+                    $this->translator->trans('filter.end') => 'end',
+                    $this->translator->trans('filter.gt') => 'gt',
+                    $this->translator->trans('filter.lt') => 'lt',
+                    $this->translator->trans('filter.equal') => 'equal',
+                    $this->translator->trans('filter.different') => 'different',
+                    $this->translator->trans('filter.gteq') => 'gteq',
+                    $this->translator->trans('filter.lteq') => 'lteq',
+                    $this->translator->trans('filter.in') => 'in',
+                    $this->translator->trans('filter.notin') => 'notin',
                 ];
+                
 
                 //Behavior filters
                 $lst_errorMissing = [
@@ -2414,7 +2415,7 @@ use App\Form\Type\RelationFilterType;
               
                       // Accès aux valeurs des champs individuels
                       $fieldInput = $filterData['target'];
-                      $anotherFieldInput = $this->idFilterSwitch($filterData['filter']);
+                      $anotherFieldInput = $filterData['filter'];
                       $textareaFieldInput = $filterData['value'];
 
               
@@ -2526,37 +2527,6 @@ use App\Form\Type\RelationFilterType;
 
             return new JsonResponse($response);
         }
-
-    // function to switch the filter value to the actual one that should be used
-    public function idFilterSwitch(string | null $filter): string | null
-    {
-
-        $equivalencetable = [
-            "contains" => "content",
-            "does not contain" => "notcontent",
-            "starts with" => "begin",
-            "ends with" => "end",
-            "is greater than" => "gt",
-            "is less than" => "lt",
-            "is equal to" => "equal",
-            "is not equal to" => "different",
-            "is greater than or equal to" => "gteq",
-            "is less than or equal to" => "lteq",
-            "is included in the following table separated by semicolon" => "in",
-            "is not included in the following table separated by semicolon" => "notin",
-        ];
-
-        $result = "";
-        if ($filter === null) {
-            $result = "";
-            // else if filter is present in the array
-        } else if (array_key_exists($filter, $equivalencetable)) {
-            $result = $equivalencetable[$filter];
-        } else {
-            $result = $filter;
-        }
-        return $result;
-    }
 
         /**
          * TABLEAU DE BORD.
