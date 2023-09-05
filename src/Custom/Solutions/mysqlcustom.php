@@ -223,6 +223,12 @@ class mysqlcustom extends mysql {
 			) {
 				$data['reperant_id'] = 'null';
 			}
+			if (
+					isset($data['partenaire_reperant_id'])
+				AND empty($data['partenaire_reperant_id'])
+			) {
+				$data['partenaire_reperant_id'] = 'null';
+			}
 		}
 		
 		// We can't send decimal empty and don't wnt to set a 0 instead
@@ -306,6 +312,12 @@ class mysqlcustom extends mysql {
 					AND empty($data['jeune_id'])
 			) {
 				$data['jeune_id'] = 'null';
+			}
+			if (
+					isset($data['partenaire_reperant_id'])
+				AND empty($data['partenaire_reperant_id'])
+			) {
+				$data['partenaire_reperant_id'] = 'null';
 			}
 		}
 		
