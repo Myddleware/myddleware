@@ -23,7 +23,7 @@ class mysqlcustom extends mysql {
 	private $suiteCRMConnexion = false;
 	
 	protected $FieldsDuplicate = array(	
-										'contact' => array('email'),
+										'contact' => array('email','id_comet'),
 										'coupon' => array('jeune_id'),
 										'record_pole' => array('pole_id','record_id','record_type'),
 								  );
@@ -748,6 +748,14 @@ class mysqlcustom extends mysql {
 		// Add record type filter for rule coupon - pole vers COMET
 		if (in_array($param['rule']['id'], array('62b30d5c4a3fe'))) { // Esp Rep - Coupon - Pôles vers COMET
 			$query['where'] .= " AND record_type = 'Leads' ";
+		}
+		// Change search Query in REEC
+		if (
+				in_array($param['rule']['id'], array('5cf98651a17f3')) // REEC - Users
+			AND $param['call_type'] == 'history' // Not for history because history call REEC database	
+		) {
+			// Change the AND condition by an OR condition between email and id_comet search
+			$query['where'] = str_replace(' AND ', ' OR ', $query['where']);
 		}
 		return parent::buildQuery($param, $query);
 	}
