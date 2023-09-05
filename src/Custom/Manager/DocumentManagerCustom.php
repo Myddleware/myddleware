@@ -307,6 +307,7 @@ class DocumentManagerCustom extends DocumentManager
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '64399ff31f587' // Sendinblue - coupon search into COMET
 			AND $new_status == 'Not_found'
+			AND $this->attempt > 0 	// The coupon couldn't be created in COMET yet
 		) {			
 			$new_status = 'Error_expected';
 			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
