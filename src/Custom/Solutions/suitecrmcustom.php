@@ -468,10 +468,11 @@ class suitecrmcustom extends suitecrm
 	// Add filter for contact module
 	public function getFieldsParamUpd($type, $module): array
 	{
+		$param = array();
 		try {
 			if ($type == 'source') {
 				if ($module == 'Contacts') {
-					$param = array(
+					$param[] = array(
 						'id' => 'contactType',
 						'name' => 'contactType',
 						'type' => 'option',
@@ -486,21 +487,19 @@ class suitecrmcustom extends suitecrm
 							'non_accompagne' => 'Pas mentoré',
 						)
 					);
-					return array($param);
 				}
 				if ($module == 'Leads') {
-					$param = array(
+					$param[] = array(
 						'id' => 'leadType',
 						'name' => 'leadType',
 						'type' => 'text',
 						'label' => 'Coupon type',
 						'required'	=> false
 					);
-					return array($param);
 				}
 				// Annee annee scolaire as parameter 
 				if (in_array($module, $this->moduleWithAnnee)) {
-					$param = array(
+					$param[] = array(
 						'id' => 'anneeScolaire',
 						'name' => 'anneeScolaire',
 						'type' => 'option',
@@ -513,10 +512,9 @@ class suitecrmcustom extends suitecrm
 							'2024_2025' => '2024-2025',
 						)
 					);
-					return array($param);
 				}
 			}
-			return array();
+			return $param;
 		} catch (\Exception $e) {
 			return array();
 		}

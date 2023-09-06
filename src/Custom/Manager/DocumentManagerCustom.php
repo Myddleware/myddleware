@@ -773,13 +773,14 @@ class DocumentManagerCustom extends DocumentManager
 			}
 			$this->ruleRelationships[$keyRelParent]['field_id'] = '620e5520c62d6';	// Sendinblue - coupon	
 			
+			// Save the email id linked to a coupon to change the parent type in function insertDataTable 
+			$this->emailCoupon[$this->sourceData['messageId']] = true;
 			$transform = parent::transformDocument();
 			if ($transform) {
-				// Save the email id linked to a coupon to change the parent type in function insertDataTable 
-				$this->emailCoupon[$this->sourceData['messageId']] = true;
 				return $transform;
 			}
-			
+			// Transformation didn't work with coupon so we set back the flag to false
+			$this->emailCoupon[$this->sourceData['messageId']] = false;
 			// Refresh the error flag
 			$this->transformError = false;
 			// Change the relationship with the rule Sendinblue - contact search into COMET
@@ -789,12 +790,12 @@ class DocumentManagerCustom extends DocumentManager
 				// Save the email id linked to a coupon to change the parent type in function insertDataTable 
 				return $transform;
 			}
-			
-			// Refresh the error flag
+
+			// We try again with Coupon so we set the flag to true
+			$this->emailCoupon[$this->sourceData['messageId']] = true;
 			$this->transformError = false;
 			// Change the relationship with the rule Sendinblue - coupon search into COMET
-			$this->ruleRelationships[$keyRelParent]['field_id'] = '64399ff31f587';	// Sendinblue - coupon search into COMET
-			$this->emailCoupon[$this->sourceData['messageId']] = true;
+			$this->ruleRelationships[$keyRelParent]['field_id'] = '64399ff31f587';	// Sendinblue - coupon search into COMET		
 				
 		}
 			
@@ -802,9 +803,12 @@ class DocumentManagerCustom extends DocumentManager
 	}
 	
 	protected function insertDataTable($data, $type): bool {
-		if ($this->ruleId == '6210fcbe4d654') { 	// Sendinblue - email delivered
+		if (
+				$this->ruleId == '6210fcbe4d654'
+			AND $type == 'T'
+		) { 	// Sendinblue - email delivered
 			// Change parent type if email linked to a coupon
-			if (!empty($this->emailCoupon[$data['sendinblue_msg_id_c']])) {
+			if (!empty($this->emailCoupon[htmlspecialchars_decode($data['sendinblue_msg_id_c'])])) {
 				$data['parent_type'] = 'Leads';
 			}
 		}
