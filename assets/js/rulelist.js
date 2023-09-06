@@ -11,6 +11,9 @@ $(function(){
         });	
     });
 });
+$("#rulenamesearchbar").on("submit", function(event) {
+    event.preventDefault();
+});
 
 // $('#rule_name').on('keyup', function() {
 //     var ruleName = $(this).val();
