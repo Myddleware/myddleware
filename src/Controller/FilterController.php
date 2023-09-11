@@ -170,13 +170,7 @@ class FilterController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
 
                 $ruleRepository = $this->entityManager->getRepository(Rule::class);
-                $rules = $ruleRepository->findAll();
-                $ruleName = [];
-                foreach ($rules as $value) {
-                    if ($value->getDeleted() == false) {
-                        $ruleName[] = $value->getName();
-                    }
-                }
+                $ruleName = $ruleRepository->findActiveRulesNames($this->entityManager, true);
                 $documentFormData = $form->get('document')->getData();
                 $ruleFormData = $form->get('rule')->getData();
                 $sourceFormData = $form->get('sourceContent')->getData();
