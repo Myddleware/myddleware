@@ -1,19 +1,17 @@
 monolog:
+    channels: ["deprecation"] # Declare the deprecation channel here
     handlers:
         main:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
-            channels: ["!event"]
-        # uncomment to get logging in your browser
-        # you may have to allow bigger header sizes in your Web server configuration
-        #firephp:
-        #    type: firephp
-        #    level: info
-        #chromephp:
-        #    type: chromephp
-        #    level: info
+            channels: ["!event", "!deprecation"]
+        deprecation: # Add this handler to log deprecation messages
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
+            max_files: 2
+            channels: [deprecation]
         console:
             type: console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine", "!console"]
+            channels: ["!event", "!doctrine", "!console", "!deprecation"]

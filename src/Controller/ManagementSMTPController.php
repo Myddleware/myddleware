@@ -334,12 +334,20 @@ class ManagementSMTPController extends AbstractController
 
             // Put the content if the mailer is not present in the .env
             if ($mailerInEnv === false) {
+                // Check if the last character(s) is/are PHP_EOL, if not, append it
+                if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
+                    file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
+                }
                 file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl . PHP_EOL, FILE_APPEND | LOCK_EX);
             }
 
             // Put the content if there is already a mailer url but it is different from the current one
             if ($mailerInEnv !== false && $mailerInEnv !== $mailerUrlWithoutTitle) {
                 $this->EmptyMailerUrlEnv();
+                // Check if the last character(s) is/are PHP_EOL, if not, append it
+                if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
+                    file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
+                }
                 file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl . PHP_EOL, FILE_APPEND | LOCK_EX);
             }
         } catch (Exception $e) {

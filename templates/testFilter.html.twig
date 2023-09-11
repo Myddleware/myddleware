@@ -35,6 +35,17 @@
 		{% endfor %}
 	{% endfor %}
 
+{% if nbDocuments > 0 %}
+      <div id="fd-title-small" class="left">
+            <p>{{'list_flux.total2'|trans}}</p>
+            {# <p>{{'list_flux.total2'|trans}}</p> #}
+            <p>
+                  <span class="nb">{{ nbDocuments }}</span>
+            </p>
+      </div>
+      <div class="clr"></div>
+{% endif %}
+
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
       <h2 class="text-center m-3">Filters</h2>
@@ -242,8 +253,8 @@
                               (<span></span>)</a>
                         <a id="reloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
                               (<span></span>)</a>
-                        <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
-                              (<span></span>)</a>
+                        {# <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
+                              (<span></span>)</a> #}
                         <a id="exportfluxcsv" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.exportcsv'|trans}}
                         </a>
                   </p>

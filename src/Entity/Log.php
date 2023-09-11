@@ -48,7 +48,7 @@ class Log
     /**
      * @ORM\Column(name="created", type="datetime", nullable=false)
      */
-    private DateTime $dateCreated;
+    private DateTime $created;
 
     /**
      * @ORM\Column(name="type", type="string", length=5, nullable=false)
@@ -88,16 +88,16 @@ class Log
         return $this->id;
     }
 
-    public function setDateCreated($dateCreated): self
+    public function setCreated($created): self
     {
-        $this->dateCreated = $dateCreated;
+        $this->created = $created;
 
         return $this;
     }
 
-    public function getDateCreated(): DateTime
+    public function getCreated(): DateTime
     {
-        return $this->dateCreated;
+        return $this->created;
     }
 
     public function setType($type): self

@@ -691,7 +691,6 @@
 							{% set custom_route_last = custom_macros.custom_route_generator_last(logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1, documentPage) %}
 							{% set custom_route_next = custom_macros.custom_route_generator_next(logPage, documentPage) %}
 							
-
 							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
 							{# Use the generated custom_route in your links or wherever needed #}
 							{% if more_than_one_page %}

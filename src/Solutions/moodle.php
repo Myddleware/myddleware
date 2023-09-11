@@ -202,8 +202,9 @@ class moodlecore extends solution
             $functionName = $this->getFunctionName($param);
             // Get the custom fields set in the connector
             $customFieldList = $this->getCustomFields($param);
-            // Init the attribute value for custom fields depending on the module
-            $attributeValue = ($param['module'] == 'courses' ? 'valueraw' : 'value');
+            // Init the attribute name and value for custom fields
+            $attributeName = ($param['module'] == 'courses' || $param['module'] == 'groups' ? 'shortname' : 'name');
+            $attributeValue = ($param['module'] == 'courses'? 'valueraw' : 'value');
 
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;

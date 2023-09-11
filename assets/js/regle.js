@@ -268,6 +268,10 @@ $(function () {
 			var position = $("#area_insert").getCursorPosition();
 			var content = $('#area_insert').val();
 			var newContent = content.substr(0, position) + $.trim($(this).text()) + '( ' + content.substr(position);
+			// If we click on the function mdw_no_send_field, we don't want to add the parenthesis because it is a constant
+			if (newContent == "mdw_no_send_field( ") {
+				newContent = "\"mdw_no_send_field\"";
+			}
 			$('#area_insert').val(newContent);
 			colorationSyntax();
 			theme(style_template);
@@ -749,8 +753,6 @@ $(function () {
 
 				$.each(nameF.source, function (fieldid, fieldname) {
 					$('#' + nameF.target + ' .ui-droppable').append('<li value="' + fieldid + '" class="ch">' + fieldid + " (" + fieldname + ")" + '</li>')
-					// filter
-					addFilter(fieldid, path_info_field);
 				});
 
 				// formula
@@ -1460,7 +1462,7 @@ function prepareDrag() {
 					var formule_in = $( this ).parent().find( ".formule" );
 					$( formule_in ).css('opacity','1');	*/
 
-					addFilter(dragId, path_info_field);
+					//addFilter(dragId, path_info_field);
 
 					$('li', "#fields_duplicate_target").each(function () {
 						if ($(this).attr('data-active') == 'false') {
@@ -1737,37 +1739,35 @@ function removeFilter(field) {
 // ---- FILTRES  -------------------------------------------------------------------------
 
 // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
-
-// Récupère la liste des filtres
 function recup_filter() {
-	filter = [];
-	$('li', '#fieldsfilter').each(function () {
+    let filter = [];
+    $('#fieldsfilter li').each(function () {
+        let field_target = $.trim($(this).find(".name").text());
 
-		field_target = '';
-		$($(this)).find("span.name").each(function () {
-			field_target = $.trim($(this).text());
-		});
+        let field_filter = '';
+        let selectElement = $(this).find("input[name*='anotherFieldInput']");
+        if (selectElement.length > 0) {
+            field_filter = $.trim(selectElement.val());
+        }
 
-		field_filter = '';
-		$($(this)).find("select.filter").each(function () {
-			field_filter = $.trim($(this).val());
-		});
+        let field_value = '';
+        let inputElement = $(this).find("input[name*='textareaFieldInput']");
+        if (inputElement.length > 0) {
+            field_value = $.trim(inputElement.val());
+        }
 
-		field_value = '';
-		$($(this)).find("input").each(function () {
-			field_value = $.trim($(this).val());
-		});
-		if (field_filter != '') {
-			filter.push({
-				target: field_target,
-				filter: field_filter,
-				value: field_value
-			});
-		}
-	});
-
-	return filter;
+        if (field_target || field_filter || field_value) {
+            filter.push({
+                target: field_target,
+                filter: field_filter,
+                value: field_value,
+            });
+        }
+    });
+    return filter;
 }
+
+
 
 // Récupère tous les champs	
 function recup_champs() {
