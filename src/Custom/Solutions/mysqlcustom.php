@@ -229,6 +229,12 @@ class mysqlcustom extends mysql {
 			) {
 				$data['partenaire_reperant_id'] = 'null';
 			}
+			if (
+					empty($data['id_comet'])
+				AND	array_key_exists('id_comet',$data)
+			) {
+				unset($data['id_comet']);
+			}
 		}
 		
 		// We can't send decimal empty and don't wnt to set a 0 instead
