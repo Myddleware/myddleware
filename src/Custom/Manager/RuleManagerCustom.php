@@ -252,6 +252,30 @@ class RuleManagerCustom extends RuleManager
 					}
 				}
 				
+				// If there is an "Unprocessable Entity" errro when we try to create/update a coupon for the first time
+				// Then we try to send the user
+				if (
+						$this->ruleId == '625fcd2ed442f' 	// 	Mobilisation - Coupons
+					AND	(
+							$documentData['attempt'] == 1 		// Only the first try
+						 OR !empty($this->manual)				// Or manual run
+					) 
+					AND	(
+							strpos($response['error'], 'Unprocessable Entity returned') !== false
+						 OR	strpos($response['error'], 'HTTP/2 422') !== false
+					)
+				) {	
+					$sourceData = $this->getDocumentData($docId, 'S');
+					if (!empty($sourceData['assigned_user_id'])) { // Mentoré
+						$this->generatePoleRelationship('6423f5d4ad07e', $sourceData['assigned_user_id'], 'id', true);  // Aiko contact
+					}
+					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
+					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
+					if ($deleteTargetData) {
+						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l\'une d\'entre elle doit être supprimee dans Airtable. ');
+					}
+				}
+				
 				// If there is an "nprocessable Entity" errro when we try to create a particpation RI for the first time
 				// Then we try to send again both Coupon and Participation RI
 				if (
