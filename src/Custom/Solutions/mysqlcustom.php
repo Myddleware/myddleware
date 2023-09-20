@@ -760,8 +760,13 @@ class mysqlcustom extends mysql {
 				in_array($param['rule']['id'], array('5cf98651a17f3')) // REEC - Users
 			AND $param['call_type'] == 'history' // Not for history because history call REEC database	
 		) {
+			// Remove search by id_comet if empty
+			if (strpos($query['where'], "AND `id_comet` = ''") !== false) {
+				$query['where'] = str_replace("AND `id_comet` = ''", "", $query['where']);
 			// Change the AND condition by an OR condition between email and id_comet search
-			$query['where'] = str_replace(' AND ', ' OR ', $query['where']);
+			} else {
+				$query['where'] = str_replace(' AND ', ' OR ', $query['where']);
+			}
 		}
 		return parent::buildQuery($param, $query);
 	}
