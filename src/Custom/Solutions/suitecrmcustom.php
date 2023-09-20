@@ -304,7 +304,7 @@ class suitecrmcustom extends suitecrm
 		// We set the document to cancel when we try to update a converted status for a coupon
 		if (
 				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('633ef1ecf11db')) // Mobilisation - relance rdv pris -> comet
+			AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
 			AND $value['id'] == '-1'
 			AND strpos($value['error'], 'Erreur code W0001') !== false		
 		) {
@@ -455,7 +455,7 @@ class suitecrmcustom extends suitecrm
 		
 		// Do not override converted status
 		if (
-				$param['rule']['id'] == '633ef1ecf11db'			// Mobilisation - relance rdv pris -> comet
+				in_array($param['rule']['id'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet
 			AND !empty($param['dataHistory'][$idDoc]['status'])
 			AND $param['dataHistory'][$idDoc]['status'] == 'Converted'
 		) { 
