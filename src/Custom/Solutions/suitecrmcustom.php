@@ -452,12 +452,20 @@ class suitecrmcustom extends suitecrm
 			}
 			return $data;
 		}
-		
 		// Do not override converted status
 		if (
-				in_array($param['rule']['id'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet
-			AND !empty($param['dataHistory'][$idDoc]['status'])
-			AND $param['dataHistory'][$idDoc]['status'] == 'Converted'
+				!empty($param['dataHistory'][$idDoc]['status'])
+			AND	
+			(
+				(
+						in_array($param['rule']['id'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet
+					AND $param['dataHistory'][$idDoc]['status'] == 'Converted'
+				)
+				OR (
+						in_array($param['rule']['id'], array('62695220e54ba'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet
+					AND $param['dataHistory'][$idDoc]['status'] == 'inscription_attente'
+				)
+			)
 		) { 
 			throw new \Exception(utf8_decode('Statut transformé ne peut pas être modifié. Le document est annulé.').' Erreur code W0001.');
 		}
