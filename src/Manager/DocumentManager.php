@@ -941,7 +941,6 @@ class documentcore
 					if (!empty($target[$duplicate_field])) {
 						$searchFields[$duplicate_field] = $target[$duplicate_field];
 					}
-                    $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
                     $history = $this->getDocumentHistory($searchFields);
