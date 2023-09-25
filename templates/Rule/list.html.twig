@@ -43,6 +43,11 @@
 			<p>{{'list_rule.total'|trans}}<p><span class="nb">{{ nb_rule }}</span>
 		</div>
 		<div class="clr"></div>
+		<form id="rulenamesearchbar" action="{{ path('regle_list') }}" method="get">
+			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search...">
+		</form>
+
+
 		<div class="row justify-content-center my-4">
 			<div class="col text-center">
 				<a id="exec_all" class="btn btn-primary" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
@@ -76,7 +81,7 @@
 							<th>{{'list_rule.th.option'|trans}}</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody id="tbody_rule_list">
 						{% for rule in entities %}
 						<tr>
 							<td class="solution_block text-center">
@@ -157,7 +162,8 @@
 		var chemin_img = "{{ asset('build/images/regle/') }}";
 		var question = "Désirez-vous supprimer cette règle ?";
 		var confirm_exec_all = "{{'view_rule.action.confirm_exec_all'|trans}}";
-		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";	
+		var confirm_exec_error = "{{'view_rule.action.confirm_exec_error'|trans}}";
+		var regle_list = "{{ path('regle_list') }}";
 	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}

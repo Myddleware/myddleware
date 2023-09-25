@@ -43,6 +43,7 @@ class LoadConfigData implements FixtureInterface
         ['name' => 'base_uri', 'value' => '', 'update' => false],
         ['name' => 'email_from', 'value' => 'no-reply@myddleware.com', 'update' => false],
         ['name' => 'cron_enabled', 'value' => true, 'update' => true],
+        ['name' => 'alert_date_ref', 'value' => '1999-01-01 00:00:00', 'update' => true],
     ];
 
     public function load(ObjectManager $manager)

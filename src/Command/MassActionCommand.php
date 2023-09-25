@@ -23,6 +23,45 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
+/*********************************************************************************
+
+// Documentation :
+Overview
+
+The myddleware:massaction command allows you to do various actions on one or multiple documents in Myddleware. This is especially useful when you need to batch process document cancellations or reload without manually intervening for each. For windows and laragon, use php bin/console.
+
+php bin/console myddleware:massaction cancel document [document_ids] [optional_arguments]
+
+Parameters
+
+    document_ids: A comma-separated list of the document IDs that you want to cancel. For example: 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176.
+
+Optional Arguments
+
+    forceAll:
+        Usage: forceAll [Y/N]
+        This argument is used when you want to cancel documents regardless of their current status.
+        By default, only documents with the status "open" or "error" can be canceled. If you want to cancel documents with other statuses, set this argument to Y.
+        Example: forceAll Y
+
+Examples
+
+    Basic Usage:
+    Cancelling specific documents based on their IDs:
+        php bin/console myddleware:massaction cancel document 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176
+    
+    this will cancel theses documents only if they are in open or error status.
+
+    Using forceAll:
+        Cancelling documents regardless of their status:
+
+    php bin/console myddleware:massaction cancel document 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176 forceAll Y
+
+
+
+
+*********************************************************************************/
+
 namespace App\Command;
 
 use App\Manager\JobManager;

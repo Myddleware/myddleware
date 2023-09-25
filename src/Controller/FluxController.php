@@ -797,7 +797,7 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
                 
                 // Add log to indicate this action
                 $log = new Log();
-                $log->setDateCreated(new \DateTime());
+                $log->setCreated(new \DateTime());
                 $log->setType('I');
                 
                 $log->setRule($rule);
@@ -1000,7 +1000,7 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
         exit;
     }
 
-    /* ******************************************************
+    /* *******************************************************
         * METHODES PRATIQUES
         ****************************************************** */
 

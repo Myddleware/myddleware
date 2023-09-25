@@ -165,7 +165,7 @@ class TaskController extends AbstractController
 
             // Add log to indicate this action
             $log = new Log();
-            $log->setDateCreated(new \DateTime());
+            $log->setCreated(new \DateTime());
             $log->setType('W');
             $log->setMessage('The task has been manually stopped. ');
             $log->setJob($taskStop);
