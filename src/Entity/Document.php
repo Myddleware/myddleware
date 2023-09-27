@@ -39,7 +39,7 @@ use Exception;
  *      @ORM\Index(name="index_parent_id", columns={"parent_id","deleted"}),
  *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted"}),
  *      @ORM\Index(name="index_rule_target", columns={"rule_id","target_id","deleted"}),
- *      @ORM\Index(name="index_rule_id", columns={"rule_id","deleted"}),
+ *      @ORM\Index(name="index_rule_date_modified", columns={"rule_id","date_modified","deleted"}),
  *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
  *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
  *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
