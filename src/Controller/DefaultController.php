@@ -2634,7 +2634,7 @@ use App\Form\Type\RelationFilterType;
         public function graphJobHisto(): Response
         {
             $countTransferRule = [];
-            $jobs = $this->jobRepository->findBy([], ['begin' => 'ASC'], 5);
+            $jobs = $this->jobRepository->findBy([], ['begin' => 'DESC'], 5);
             if (count($jobs)) {
                 $countTransferRule[] = [
                     'date',
@@ -2645,7 +2645,7 @@ use App\Form\Type\RelationFilterType;
                 ];
                 foreach ($jobs as $job) {
                     $countTransferRule[] = [
-                        $job->getBegin()->format('d/m/Y H:i:s'),
+                        $job->getBegin()->format('H:i:s'),
                         (int) $job->getOpen(),
                         (int) $job->getError(),
                         (int) $job->getCancel(),

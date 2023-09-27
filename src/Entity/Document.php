@@ -34,13 +34,16 @@ use Exception;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
  * @ORM\Table(name="document", indexes={
- *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
- *      @ORM\Index(name="index_parent_id", columns={"parent_id"}),
- *      @ORM\Index(name="global_status", columns={"global_status"}),
- *      @ORM\Index(name="source_id", columns={"source_id"}),
- *      @ORM\Index(name="target_id", columns={"target_id"}),
- *      @ORM\Index(name="rule_id", columns={"rule_id"}),
- *      @ORM\Index(name="date_modified", columns={"date_modified"})
+ *      @ORM\Index(name="index_rule_gbstatus_status", columns={"rule_id","global_status","status","deleted"}),
+ *      @ORM\Index(name="index_gbstatus", columns={"global_status","deleted"}),
+ *      @ORM\Index(name="index_parent_id", columns={"parent_id","deleted"}),
+ *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted"}),
+ *      @ORM\Index(name="index_rule_target", columns={"rule_id","target_id","deleted"}),
+ *      @ORM\Index(name="index_rule_id", columns={"rule_id","deleted"}),
+ *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
+ *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
+ *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
+ *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"})
  * })
  */
 class Document
