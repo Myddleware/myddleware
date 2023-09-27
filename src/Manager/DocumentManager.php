@@ -830,7 +830,14 @@ class documentcore
         try {
             // Transformation des données et insertion dans la table target
             $transformed = $this->updateTargetTable();
-            if ($transformed) {
+            if (!empty($transformed)) {
+				// If the value mdw_cancel_document is found in the target data of the document after transformation we cancel the document
+				if (array_search('mdw_cancel_document',$transformed) !== false) {
+					$this->message .= 'The document contains the value mdw_cancel_document. ';
+					$this->typeError = 'W';
+					$this->updateStatus('Cancel');
+					return false;
+				}
                 // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
                 // it means that the target ID is mapped in the rule field
                 // In this case, we force the document's type to Update because Myddleware will update the record into the target application
@@ -1315,7 +1322,7 @@ class documentcore
     }
 
     // Mise à jour de la table des données cibles
-    protected function updateTargetTable(): bool
+    protected function updateTargetTable()
     {
         try {
             // Loop on every target field and calculate the value
@@ -1356,14 +1363,14 @@ class documentcore
                 throw new \Exception('No target data found. Failed to create target data. ');
             }
 
-            return true;
+            return $targetField;
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
 
-        return false;
+        return null;
     }
 
     /*
