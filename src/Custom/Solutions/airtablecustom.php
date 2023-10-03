@@ -293,19 +293,28 @@ class airtablecustom extends airtable {
 		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
-			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+			if (
+					array_key_exists('fldBQBCfr1ZgVJmE3', $data)
+				AND	empty($data['fldBQBCfr1ZgVJmE3'])
+			) {	// Etbalissement sup
 				unset($data['fldBQBCfr1ZgVJmE3']);
 			}
 		}
 		
 		if ($param['rule']['id'] == '61a930273441b') { // Aiko binome
-			if (empty($data['fldqGYsTr5EylIi2f'])) {	// if referent empty we remove it from the data sent
+			if (
+					array_key_exists('fldqGYsTr5EylIi2f', $data)
+				AND	empty($data['fldqGYsTr5EylIi2f'])
+			) {	// if referent empty we remove it from the data sent
 				unset($data['fldqGYsTr5EylIi2f']);
 			}
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			if (empty($data['fldY9MAvfDHSHtJKT'])) {	// if referent empty we remove it from the data sent
+			if (
+					array_key_exists('fldY9MAvfDHSHtJKT', $data)
+				AND	empty($data['fldY9MAvfDHSHtJKT'])
+			) {	// if referent empty we remove it from the data sent
 				unset($data['fldY9MAvfDHSHtJKT']);
 			}
 		}
@@ -323,19 +332,28 @@ class airtablecustom extends airtable {
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
-			if (empty($data['fldBQBCfr1ZgVJmE3'])) {	// Etbalissement sup
+			if (
+					array_key_exists('fldBQBCfr1ZgVJmE3', $data)
+				AND	empty($data['fldBQBCfr1ZgVJmE3'])
+			) {	// Etbalissement sup
 				unset($data['fldBQBCfr1ZgVJmE3']);
 			}
 		}
 		
 		if ($param['rule']['id'] == '61a930273441b') { // Aiko binome
-			if (empty($data['fldqGYsTr5EylIi2f'])) {	// if referent empty we remove it from the data sent
+			if (
+					array_key_exists('fldqGYsTr5EylIi2f', $data)
+				AND	empty($data['fldqGYsTr5EylIi2f'])
+			) {	// if referent empty we remove it from the data sent
 				unset($data['fldqGYsTr5EylIi2f']);
 			}
 		}
 
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			if (empty($data['fldY9MAvfDHSHtJKT'])) {	// if referent empty we remove it from the data sent
+			if (
+					array_key_exists('fldY9MAvfDHSHtJKT', $data)
+				AND	empty($data['fldY9MAvfDHSHtJKT'])
+			) {	// if referent empty we remove it from the data sent
 				unset($data['fldY9MAvfDHSHtJKT']);
 			}
 		}
