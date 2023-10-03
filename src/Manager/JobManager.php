@@ -264,7 +264,7 @@ class jobcore
     }
 
     // Ecriture dans le système source et mise à jour de la table document
-    public function runError($limit, $attempt)
+	public function runError($limit, $attempt)
     {
         try {
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
@@ -276,19 +276,23 @@ class jobcore
 									global_status = 'Error'
 								AND deleted = 0 
 								AND attempt <= :attempt 
-							ORDER BY ruleorder.order ASC, source_date_modified ASC	
+							ORDER BY ruleorder.order ASC, document.rule_id, source_date_modified ASC	
 							LIMIT $limit";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('attempt', $attempt);
             $result = $stmt->executeQuery();
             $documentsError = $result->fetchAllAssociative();
             if (!empty($documentsError)) {
-                // include_once 'rule.php';
+                $ruleId = null;
+				$this->ruleManager->setJobId($this->id);
+				$this->ruleManager->setManual($this->manual);
+				$this->ruleManager->setApi($this->api);
                 foreach ($documentsError as $documentError) {
-                    $this->ruleManager->setRule($documentError['rule_id']);
-                    $this->ruleManager->setJobId($this->id);
-					$this->ruleManager->setManual($this->manual);
-                    $this->ruleManager->setApi($this->api);
+					// Set the rule only if the rule has changed	
+					if ($documentError['rule_id'] != $ruleId) {
+						$this->ruleManager->setRule($documentError['rule_id']);
+						$ruleId = $documentError['rule_id'];
+					}
                     $errorActionDocument = $this->ruleManager->actionDocument($documentError['id'], 'rerun');
                     if (!empty($errorActionDocument)) {
                         $this->message .= print_r($errorActionDocument, true);
