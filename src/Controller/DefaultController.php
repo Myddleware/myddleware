@@ -2635,6 +2635,10 @@ use App\Form\Type\RelationFilterType;
         {
             $countTransferRule = [];
             $jobs = $this->jobRepository->findBy([], ['begin' => 'ASC'], 5);
+            
+            $timeZone = $this->get('session')->get('_timezone', 'UTC'); 
+            $userTimeZone = new \DateTimeZone($timeZone);
+            
             if (count($jobs)) {
                 $countTransferRule[] = [
                     'date',
@@ -2644,8 +2648,11 @@ use App\Form\Type\RelationFilterType;
                     $this->translator->trans('flux.gbl_status.close'),
                 ];
                 foreach ($jobs as $job) {
+                    $start = clone $job->getBegin();
+                    $start->setTimezone($userTimeZone);
+            
                     $countTransferRule[] = [
-                        $job->getBegin()->format('d/m/Y H:i:s'),
+                        $start->format('d/m/Y H:i:s'),
                         (int) $job->getOpen(),
                         (int) $job->getError(),
                         (int) $job->getCancel(),
