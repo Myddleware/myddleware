@@ -177,6 +177,73 @@ class rulecore
         $this->api = $api;
     }
 
+	protected function setRuleLock($type) {
+		// Get the rule details
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		// If read lock empty, we set the lock with the job id
+		if (
+				$type == 'read'
+			AND empty($rule->readJobLock)
+		) {
+			$rule->setReadJobLock($this->jobId);
+			$this->entityManager->persist($rule);
+			$this->entityManager->flush();
+			return true;
+		}
+		
+		// If send lock empty, we set the lock with the job id
+		if (
+				$type == 'send'
+			AND empty($rule->sendJobLock)
+		) {
+			$rule->setSendJobLock($this->jobId);
+			$this->entityManager->persist($rule);
+			$this->entityManager->flush();
+			return true;
+		}
+		return false;
+	}
+	
+	protected function unsetRuleLock($type) {
+		// Get the rule details
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		// If read lock empty, we set the lock with the job id
+		if (
+				$type == 'read'
+			AND !empty($rule->readJobLock)
+		) {
+			$rule->setReadJobLock(null);
+			$this->entityManager->persist($rule);
+			$this->entityManager->flush();
+			return true;
+		}
+		
+		// If send lock empty, we set the lock with the job id
+		if (
+				$type == 'send'
+			AND !empty($rule->sendJobLock)
+		) {
+			$rule->setSendJobLock(null);
+			$this->entityManager->persist($rule);
+			$this->entityManager->flush();
+			return true;
+		}
+		return false;
+	}
+	
+	protected function getRuleLock($type) {
+		// Get the rule details
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		// Return the lock depending on the lock type
+		if ($type == 'read') {
+			return $rule->getReadJobLock();
+		}
+		if ($type == 'send') {
+			return $rule->getendJobLock();
+		}
+		return false;
+	}
+	
     /**
      * Generate a document for the current rule for a specific id in the source application. We don't use the reference for the function read.
      * If parameter readSource is false, it means that the data source are already in the parameter param, so no need to read in the source application.
@@ -329,6 +396,11 @@ class rulecore
                     )
                 )
         ) {
+			// Check the rule isn't locked
+			if (!$this->setRuleLock('read')) {
+				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to read the source application. ');
+			}
+
             // lecture des données dans la source
             $readSource = $this->readSource();
             if (empty($readSource['error'])) {
@@ -342,6 +414,10 @@ class rulecore
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
                 if ($readSource['count'] > 0) {
+					// Before creating the documents, we check the job id is the one in the rule lock
+					if ($this->getRuleLock() != $this->jobId) {
+						throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to generate the documents. ');
+					}
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
                     $param['ruleRelationships'] = $this->ruleRelationships;
@@ -379,6 +455,10 @@ class rulecore
                 }
                 // If params has been added in the output of the rule we saved it
                 $this->updateParams();
+				
+				// No error management because we don't want any rollback because of the lock. 
+				// If the losk isn't removed, the next task will generate an error
+				$this->unsetRuleLock('read')
 
                 // Rollback if the job has been manually stopped
                 if ('Start' != $this->getJobStatus()) {
