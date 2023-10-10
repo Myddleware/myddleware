@@ -159,6 +159,16 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
+	
+	/**
+     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true)
+     */
+    private string $readJobLock;
+	
+	/**
+     * @ORM\Column(name="send_job_lock", type="string", length=23, nullable=true)
+     */
+    private string $sendJobLock;
 
     public function __construct()
     {
@@ -285,6 +295,28 @@ class Rule
     public function getNameSlug(): string
     {
         return $this->nameSlug;
+    }
+	
+	public function setReadJobLock($readJobLock): self
+    {
+        $this->readJobLock = $readJobLock;
+        return $this;
+    }
+
+    public function getReadJobLock(): string
+    {
+        return $this->readJobLock;
+    }
+	
+	public function setSendJobLock($sendJobLock): self
+    {
+        $this->sendJobLock = $sendJobLock;
+        return $sendJobLock;
+    }
+
+    public function getSendJobLock(): string
+    {
+        return $this->sendJobLock;
     }
 
     public function setConnectorSource(Connector $connectorSource): self
@@ -675,4 +707,5 @@ class Rule
     {
         return isset($this->moduleTarget);
     }
+
 }
