@@ -518,8 +518,6 @@ class FluxController extends AbstractController
                     .$where.
             " ORDER BY document.date_modified DESC"
             ." LIMIT ". $limit;
-            
-        
         $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content
