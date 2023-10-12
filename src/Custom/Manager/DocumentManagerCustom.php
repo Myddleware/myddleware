@@ -60,8 +60,9 @@ class DocumentManagerCustom extends DocumentManager
 
 		// On annule la relation pôle - contact (engagé) si le contact (engagé) a été filtré
 		if (
-			!empty($this->document_data['rule_id'])
+				!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5d081bd3e1234' // Rule User - Pôle
+			and $this->attempt > 0
 		) {
 			if (
 				strpos($this->message, 'No data for the field record_id.') !== false
