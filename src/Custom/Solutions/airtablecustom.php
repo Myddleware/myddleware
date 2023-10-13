@@ -193,7 +193,7 @@ class airtablecustom extends airtable {
 		if (isset($param["rule"]) && isset($param["document"]) && isset($param["call_type"])) {
 			if (
 				!empty($param['rule'])
-				and	in_array($param['rule']['conn_id_target'], array(4, 8))
+				and	in_array($param['rule']['conn_id_target'], array(4, 8, 12))
 				and $param['document']['type'] == 'U'
 				and $param['call_type'] == 'history'
 				// Excluded rules
