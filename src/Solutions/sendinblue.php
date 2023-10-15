@@ -183,12 +183,11 @@ class sendinbluecore extends solution
         $result = [];
         // Function are differents depending on the type of record we read from Sendinblue
         switch ($param['module']) {
-               case 'transactionalEmailActivity':
+			case 'transactionalEmailActivity':
                 // event is required
                 if (empty($param['ruleParams']['event'])) {
                     throw new \Exception('No event selected. Please select an event on your rule. ');
                 }
-
                 // As we build the id (it doesn't exist in Sendinblue), we add it to the param field
                 $param['fields'][] = 'id';
 
@@ -219,50 +218,18 @@ class sendinbluecore extends solution
                     }
                     // Set call parameters when we read transactional email using reference date
                 } else {
-                    // Because offset is managed in this function, we don't need the +1 in the rule param limit
-                    if ($param['limit'] > 1) {
-                        --$param['limit'];
-                    }
-
                     $event = $param['ruleParams']['event'];
                     // if simulation, we init the date start to today - 30 days
                     if ('simulation' == $param['call_type']) {
-                        $dateStartObj = new \DateTime('NOW');
-                        $dateStartObj->sub(new \DateInterval('P30D'));
+                        $dateRefObj = new \DateTime('NOW');
+                        $dateRefObj->sub(new \DateInterval('P30D'));
                     } else {
-                        $dateStartObj = new \DateTime($param['date_ref']);
+						// TO BE CHANGED
+						$dateRefObj = date_create($param['date_ref'], new \DateTimeZone("Europe/Paris"));
                     }
                     // Only date (not datetime) are used to filter transaction email activity
-                    $dateStart = $dateStartObj->format('Y-m-d');
-                    $dateEnd = $this->getDateEnd($dateStartObj);
-
-                    // Make sure that offset exists
-                    if (empty($param['ruleParams']['offset'])) {
-                        $param['ruleParams']['offset'] = 0;
-                    } else {
-                        // Change offset if the parameter exists on the rule
-                        $offset = $param['ruleParams']['offset'];
-                    }
-
-                    // Max call limit = 100
-                    // Nb call depend on limit param
-                    if ($param['limit'] > $this->limitEmailActivity) {
-                        $nbCall = floor($param['limit'] / $this->limitEmailActivity);
-                        // Add 1 call if needid (using modulo function)
-                        if ($param['limit'] % $this->limitEmailActivity != 0) {
-                            $limitLastCall = $param['limit'] % $this->limitEmailActivity;
-                            ++$nbCall;
-                        }
-                        $limitCall = $this->limitEmailActivity;
-                    } else {
-                        // If rule limit < $limitCall , there is no need to call more records
-                        $limitCall = $param['limit'];
-                    }
-
-                    // If rule limit modulo limitcall is null then last call will be equal to limitcall
-                    if ($param['limit'] % $this->limitEmailActivity == 0) {
-                        $limitLastCall = $this->limitEmailActivity;
-                    }
+                    $dateStart = $dateRefObj->format('Y-m-d');
+					$dateEnd   = $dateRefObj->format('Y-m-d');
                 }
                 $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->config);
 
@@ -270,66 +237,47 @@ class sendinbluecore extends solution
                 if (false !== $contactRequested) {
                     $apiContactInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
                 }
+				$offset = 0;
+				$exit = false;				
+				do {
+                    $resultApi = $apiInstance->getEmailEventReport($this->limitEmailActivity, $offset, $dateStart, $dateEnd, null, null, $event, null, $messageId, null, 'desc');
 
-                for ($i = 1; $i <= $nbCall; ++$i) {
-                    // The limit can be different for the last call (in case of several call)
-                    if (
-                            $i == $nbCall
-                        and $nbCall > 1
-                    ) {
-                        $limitCall = $limitLastCall;
-                    }
-                    $resultApi = $apiInstance->getEmailEventReport($limitCall, $offset, $dateStart, $dateEnd, null, null, $event, null, $messageId, null, 'asc');
+					// Exit the loop if no result 
+                    if (empty(current($resultApi)['events'])) {
+						$exit = true;
+						break;
+					}
+					// Add records read into result array
+					$events = current($resultApi)['events'];
+					foreach ($events as $record) {
+						$offset++;
+						$record['id'] = $record['messageId'].'__'.$record['event'];
 
-                    if (!empty(current($resultApi)['events'])) {
-                        $events = current($resultApi)['events'];
+						// if the contactid is requested, we use the email to get it
+						if (false !== $contactRequested) {
+							try {
+								$resultContactApi = $apiContactInstance->getContactInfo($record['email']);
+								if (!empty(current($resultContactApi)['id'])) {
+									$record['contactId'] = current($resultContactApi)['id'];
+								}
+							} catch (\Exception $e) {
+								$record['contactId'] = '';
+							}
+						}
 
-                        // Add records read into result array
-                        foreach ($events as $record) {
-                            ++$offset;
-                            $record['id'] = $record['messageId'].'__'.$record['event'];
+						$dateRecordObj = \DateTime::createFromFormat(DATE_RFC3339_EXTENDED, $record['date']);
+						if ($dateRefObj->format('U') > $dateRecordObj->format('U')) {
+							$exit = true;
+							break;
+						}
+						$records[] = $record;
+					}
 
-                            // if the contactid is requested, we use the email to get it
-                            if (false !== $contactRequested) {
-                                try {
-                                    $resultContactApi = $apiContactInstance->getContactInfo($record['email']);
-                                    if (!empty(current($resultContactApi)['id'])) {
-                                        $record['contactId'] = current($resultContactApi)['id'];
-                                    }
-                                } catch (\Exception $e) {
-                                    $record['contactId'] = '';
-                                }
-                            }
-
-                            $records[] = $record;
-                            // IF the date change, we set the offset to 0 (because filter is only on date and not dateTime
-                            /// Date start we be changed with the date of the current record
-                            // Date ref will also be changed
-                            $dateRecordObj = new \DateTime($record['date']);
-                            if (
-                                    empty($param['query']['id'])	// No offset management if search by id
-                                and $dateRecordObj->format('Y-m-d') != $dateStartObj->format('Y-m-d')
-                            ) {
-                                $dateStartObj = $dateRecordObj;
-                                $dateStart = $dateStartObj->format('Y-m-d');
-                                $dateEnd = $this->getDateEnd($dateStartObj);
-
-                                // Offset = 1 not 0 becquse we have alredy read the first record of the day
-                                $offset = 1;
-                            }
-                        }
-
-                        // If the limit hasn't been reached, it means there is no more result to read. We stop the read action.
-                        if (count($events) < $this->limitEmailActivity) {
-                            break;
-                        }
-                    }
-                }
-                // Save the offset value on the rule
-                // No offset management if search by id
-                if (empty($param['query']['id'])) {
-                    $result['ruleParams'][] = ['name' => 'offset', 'value' => $offset];
-                }
+					// If the limit hasn't been reached, it means there is no more result to read. We stop the read action.
+					if (count($events) < $this->limitEmailActivity) {
+						$exit = true;
+					}
+                } while (!$exit);
                 break;
             case 'contacts':
                 $apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
@@ -423,11 +371,27 @@ class sendinbluecore extends solution
                 }
             }
         }
-
         return $result;
     }
 
-    protected function getDateEnd($dateObj): string
+	// Method de find the date ref after a read call
+    protected function getReferenceCall($param, $result)
+    {
+		if ($param['module'] == 'transactionalEmailActivity') {
+			$currentDate = new DateTime();
+			$dateRefObj = new \DateTime($param['date_ref']);
+			// If date ref < today then we force the referenece date to date+1 at midnight
+			if ($dateRefObj->format('Y-m-d') < $currentDate->format('Y-m-d')) {
+				$dateRefObj->modify('+1 day');
+				$dateRefObj->setTime(0, 0, 0);
+				return $dateRefObj->format('Y-m-d H:i:s');
+			}
+		}
+        // Call parent function (calsse solution
+        return parent::getReferenceCall($param, $result);
+    }
+	
+/*     protected function getDateEnd($dateObj): string
     {
         $dateEndObj = clone $dateObj;
         $dateEndObj->add(new \DateInterval('P30D'));
@@ -438,7 +402,7 @@ class sendinbluecore extends solution
         }
 
         return $dateEndObj->format('Y-m-d');
-    }
+    } */
 
     //fonction for get all your transactional email activity
     public function EmailTransactional($param): \SendinBlue\Client\Model\GetEmailEventReport
@@ -676,6 +640,21 @@ class sendinbluecore extends solution
 
         return parent::getIdName($module);
     }
+	
+	// Check if a date is today
+	protected function isToday($dareRef) {
+		// Create a DateTime object for the date you want to check
+		$dareRefObj = new DateTime($dareRef); // Replace with your datetime
+
+		// Get the current date as a DateTime object
+		$currentDate = new DateTime();
+
+		// Compare the two DateTime objects
+		if ($dareRefObj->format('Y-m-d') === $currentDate->format('Y-m-d')) {
+			return true;
+		} 
+		return false;
+	}
 
     // Returns the name of the reference date field according to the module and mode of the rule
     public function getRefFieldName($param): string
