@@ -91,7 +91,7 @@ class suitecrm8core extends solution
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'http://localhost/cometsuite8/src/public/login',
+                CURLOPT_URL => $paramConnexion['url'].'/login',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 1,  // Enable header output
             ));
@@ -150,6 +150,7 @@ class suitecrm8core extends solution
 
             $response_array = json_decode($response, true);
             $access_token = $response_array['access_token'];
+            $refresh_token = $response_array['refresh_token'];
 
             $curl = curl_init();
 
@@ -175,6 +176,16 @@ class suitecrm8core extends solution
             $result = json_decode($response);
 
             if (false != $result) {
+                // assign this session as an array containing the following key values
+                // token, refresh token, url
+                $this->session = [
+                    'token' => $access_token,
+                    'refresh_token' => $refresh_token,
+                    'url' => $paramConnexion['url'],
+                    'xsrfToken' => $xsrfToken,
+                    'phpsessid' => $phpsessid,
+                    'legacySessid' => $legacySessid,
+                ];
                 $this->connexion_valide = true;
             } else {
                 throw new \Exception('Please check url');
@@ -236,29 +247,48 @@ class suitecrm8core extends solution
     public function get_modules($type = 'source')
     {
         try {
-            $get_available_modules_parameters = [
-                'session' => $this->session,
-            ];
-            $get_available_modules = $this->call('get_available_modules', $get_available_modules_parameters);
-            if (!empty($get_available_modules->modules)) {
-                foreach ($get_available_modules->modules as $module) {
-                    // On ne renvoie que les modules autorisés
-                    if (
-                            !in_array($module->module_key, $this->exclude_module_list['default'])
-                        && !in_array($module->module_key, $this->exclude_module_list[$type])
-                    ) {
-                        $modules[$module->module_key] = $module->module_label;
-                    }
-                }
-            }
-            // Création des modules type relationship
-            if (!empty($this->module_relationship_many_to_many)) {
-                foreach ($this->module_relationship_many_to_many as $key => $value) {
-                    $modules[$key] = $value['label'];
-                }
-            }
+            
 
-            return (isset($modules)) ? $modules : false;
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $this->session['url'].'/Api/V8/meta/modules',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                  'Content-Type: application/json',
+                  'Authorization: Bearer '.$this->session['token'],
+                  'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
+                ),
+              ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+            $modules = json_decode($response);
+
+            // modules is a std class called data
+            // we need to extract the modules that are in attributes, it is an array
+            // each element of the array is a std class with 2 attributes : access and label
+            // for now we only want to have a an array of labels
+            $modules = $modules->data;
+            $modulesAttributes = $modules->attributes;
+            $modulesFinal = [];
+            foreach ($modulesAttributes as $index => $module) {
+                $modulesFinal[$index] = $module->label;
+            }
+            
+
+
+
+
+            return (isset($modulesFinal)) ? $modulesFinal : false;
         } catch (\Exception $e) {
             return false;
         }
@@ -269,145 +299,49 @@ class suitecrm8core extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            // Si le module est un module "fictif" relation créé pour Myddlewar
-            if (array_key_exists($module, $this->module_relationship_many_to_many)) {
-                foreach ($this->module_relationship_many_to_many[$module]['fields'] as $name) {
-                    $this->moduleFields[$name] = [
-                        'label' => $name,
-                        'type' => 'varchar(255)',
-                        'type_bdd' => 'varchar(255)',
-                        'required' => 0,
-                        'relate' => false,
-                    ];
-                }
-                foreach ($this->module_relationship_many_to_many[$module]['relationships'] as $relationship) {
-                    $this->moduleFields[$relationship] = [
-                        'label' => $relationship,
-                        'type' => 'varchar(36)',
-                        'type_bdd' => 'varchar(36)',
-                        'required' => 0,
-                        'required_relationship' => 0,
-                        'relate' => true,
-                    ];
-                }
-            } else {
-                $get_module_fields_parameters = [
-                    'session' => $this->session,
-                    'module_name' => $module,
-                ];
 
-                $get_module_fields = $this->call('get_module_fields', $get_module_fields_parameters);
-                foreach ($get_module_fields->module_fields as $field) {
-                    if (isset($this->exclude_field_list['default'])) {
-                        // Certains champs ne peuvent pas être modifiés
-                        if (in_array($field->name, $this->exclude_field_list['default']) && 'target' == $type) {
-                            continue;
-                        } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-                    }
+            $curl = curl_init();
 
-                    if (!in_array($field->type, $this->type_valide)) {
-                        if (isset($this->exclude_field_list[$module])) {
-                            if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
-                                continue;
-                            } // Ces champs doivent être exclus de la liste des modules pour des raisons de structure de BD SuiteCRM
-                        }
-                        $type_bdd = 'varchar(255)';
-                    } else {
-                        $type_bdd = $field->type;
-                    }
-                    if (
-                            '_id' == substr($field->name, -3)
-                        || '_ida' == substr($field->name, -4)
-                        || '_idb' == substr($field->name, -4)
-                        || '_id_c' == substr($field->name, -5)
-                        || (
-                                'id' == $field->type
-                            && 'id' != $field->name
-                        )
-                        || 'created_by' == $field->name
-                    ) {
-                        $this->moduleFields[$field->name] = [
-                            'label' => $field->label,
-                            'type' => 'varchar(36)',
-                            'type_bdd' => 'varchar(36)',
-                            'required' => $field->required,
-                            'required_relationship' => 0,
-                            'relate' => true,
-                        ];
-                    }
-                    //To enable to take out all fields where there are 'relate' in the type of the field
-                    else {
-                        // Le champ id n'est envoyé qu'en source
-                        if ('id' != $field->name || 'source' == $type) {
-                            $this->moduleFields[$field->name] = [
-                                'label' => $field->label,
-                                'type' => $field->type,
-                                'type_bdd' => $type_bdd,
-                                'required' => $field->required,
-                                'relate' => false,
-                            ];
-                        }
-                        // Récupération des listes déroulantes (sauf si datetime pour SuiteCRM)
-                        if (
-                                !empty($field->options)
-                            && !in_array($field->type, ['datetime', 'bool'])
-                        ) {
-                            foreach ($field->options as $option) {
-                                $this->moduleFields[$field->name]['option'][$option->name] = parent::truncate($option->value, 80);
-                            }
-                        }
-                    }
-                }
-                // Ajout des champ type link (custom relationship ou custom module souvent)
-                if (!empty($get_module_fields->link_fields)) {
-                    foreach ($get_module_fields->link_fields as $field) {
-                        if (isset($this->exclude_field_list['default'])) {
-                            if (in_array($field->name, $this->exclude_field_list['default']) && 'target' == $type) {
-                                continue;
-                            } // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-                        }
-                        if (!in_array($field->type, $this->type_valide)) {
-                            if (isset($this->exclude_field_list[$module])) {
-                                if (in_array($field->name, $this->exclude_field_list[$module]) && 'target' == $type) {
-                                    continue;
-                                } // Ces champs doivent être exclus en écriture de la liste des modules pour des raisons de structure de BD SuiteCRM
-                            }
-                            $type_bdd = 'varchar(255)';
-                        } else {
-                            $type_bdd = $field->type;
-                        }
-                        if (
-                                '_id' == substr($field->name, -3)
-                            || '_ida' == substr($field->name, -4)
-                            || '_idb' == substr($field->name, -4)
-                            || '_id_c' == substr($field->name, -5)
-                            || (
-                                    'id' == $field->type
-                                && 'id' != $field->name
-                            )
-                        ) {
-                            // On met un préfix pour les relation custom afin de pouvoir les détecter dans le read
-                            $this->moduleFields[$this->customRelationship.$field->name] = [
-                                'label' => $field->relationship,
-                                'type' => 'varchar(36)',
-                                'type_bdd' => 'varchar(36)',
-                                'required' => 0,
-                                'required_relationship' => 0,
-                                'relate' => true,
-                            ];
-                            // Get the name field for this relationship (already in array moduleFields but we need to flag it as a customrelationship)
-                            if (!empty($this->moduleFields[$field->relationship.'_name'])) {
-                                // Create the field with prefix
-                                $this->moduleFields[$this->customRelationship.$field->relationship.'_name'] = $this->moduleFields[$field->relationship.'_name'];
-                                // Remove the old field
-                                unset($this->moduleFields[$field->relationship.'_name']);
-                            }
-                        }
-                    }
-                }
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $this->session['url'].'/Api/V8/meta/fields/'.$module,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Authorization: Bearer '.$this->session['token'],
+                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
+                  ),
+                ));
+
+            $response = curl_exec($curl);
+
+            $responseData = json_decode($response);
+
+            $data = $responseData->data;
+
+            $attributes = $data->attributes;
+
+            $moduleFields = [];
+
+            // moduleFields should be an array of array, and for each field, ther should be an array with the following keys: label, required, type, type_bdd, relate
+            foreach ($attributes as $index => $field) {
+                $moduleFields[$index]['label'] = $field->label;
+                $moduleFields[$index]['required'] = $field->required;
+                $moduleFields[$index]['type'] = $field->type;
+                $moduleFields[$index]['type_bdd'] = $field->type_bdd;
+                $moduleFields[$index]['relate'] = $field->relate;
             }
 
-            return $this->moduleFields;
+            curl_close($curl);
+            // echo $response;
+
+
+            return $moduleFields;
         } catch (\Exception $e) {
             return false;
         }
