@@ -91,6 +91,37 @@ class suitecrm8core extends solution
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
+                CURLOPT_URL => 'http://localhost/cometsuite8/src/public/login',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER => 1,  // Enable header output
+            ));
+
+            $response = curl_exec($curl);
+
+            // Separate headers and body
+            list($headers, $body) = explode("\r\n\r\n", $response, 2);
+
+            // Match Set-Cookie headers
+            preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $headers, $matches);
+
+            $cookies = array();
+            foreach ($matches[1] as $item) {
+                parse_str($item, $cookie);
+                $cookies = array_merge($cookies, $cookie);
+            }
+
+            // Extract XSRF-TOKEN
+            $xsrfToken = $cookies['XSRF-TOKEN'];
+            $phpsessid = $cookies['PHPSESSID'];
+            $legacySessid = $cookies['LEGACYSESSID'];
+
+            curl_close($curl);
+
+
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
                 CURLOPT_URL => $paramConnexion['url'].'/Api/access_token',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
@@ -109,7 +140,7 @@ class suitecrm8core extends solution
                 CURLOPT_HTTPHEADER => array(
                     'Content-Type: application/json',
                     'Grant-Type: password-credentials',
-                    'Cookie: LEGACYSESSID=sspesjj507rknsdqbl1outslkj; PHPSESSID=c3fbhstoprnk5q47ojfm2p102b; XSRF-TOKEN=CpfqcTsFXAd2QJcMcy6H5qf2oBJCQrbPKkelZcYDzw8; sugar_user_theme=suite8'
+                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
                 ),
             ));
 
@@ -133,7 +164,7 @@ class suitecrm8core extends solution
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
                     'Authorization: Bearer ' . $access_token,
-                    'Cookie: LEGACYSESSID=sspesjj507rknsdqbl1outslkj; PHPSESSID=c3fbhstoprnk5q47ojfm2p102b; XSRF-TOKEN=CpfqcTsFXAd2QJcMcy6H5qf2oBJCQrbPKkelZcYDzw8; sugar_user_theme=suite8'
+                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
                 ),
             ));
 
