@@ -38,6 +38,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'prestashop',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'suitecrm',			'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'suitecrm8',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mailchimp',			'active' => 0, 'source' => 0, 'target' => 1],
         ['name' => 'sagecrm',			'active' => 0, 'source' => 1, 'target' => 1],
         ['name' => 'sapcrm',			'active' => 0, 'source' => 1, 'target' => 1],
