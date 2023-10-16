@@ -1,27 +1,4 @@
 <?php
-/*********************************************************************************
- * This file is part of Myddleware.
-
- * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
- * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com
-
- This file is part of Myddleware.
-
- Myddleware is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Myddleware is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/
 
 namespace App\Solutions;
 
@@ -31,7 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class suitecrm8core extends solution
 {
     protected int $limitCall = 100;
-    protected string $urlSuffix = '/service/v4_1/rest.php';
+    protected string $urlSuffix = '/Api/V8';
 
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
@@ -110,33 +87,69 @@ class suitecrm8core extends solution
     {
         parent::login($paramConnexion);
         try {
-            $login_paramaters = [
-                'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
-                    'version' => '.01',
-                ],
-                'application_name' => 'myddleware',
-            ];
-            // remove index.php in the url
-            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
-            // Add the suffix with rest parameters to the url
-            $this->paramConnexion['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $paramConnexion['url'].'/Api/access_token',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => '{
+    "grant_type": "password",
+    "username": "'.$paramConnexion['login'].'",
+    "password": "'.$paramConnexion['password'].'",
+    "client_id": "e7c35a46-9738-b555-d68c-6527ff03c34c",
+    "client_secret": "cocoronochizu"
+}',
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Grant-Type: password-credentials',
+                    'Cookie: LEGACYSESSID=sspesjj507rknsdqbl1outslkj; PHPSESSID=c3fbhstoprnk5q47ojfm2p102b; XSRF-TOKEN=CpfqcTsFXAd2QJcMcy6H5qf2oBJCQrbPKkelZcYDzw8; sugar_user_theme=suite8'
+                ),
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+            $response_array = json_decode($response, true);
+            $access_token = $response_array['access_token'];
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $paramConnexion['url'].'/login',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => array(
+                    'Authorization: Bearer ' . $access_token,
+                    'Cookie: LEGACYSESSID=sspesjj507rknsdqbl1outslkj; PHPSESSID=c3fbhstoprnk5q47ojfm2p102b; XSRF-TOKEN=CpfqcTsFXAd2QJcMcy6H5qf2oBJCQrbPKkelZcYDzw8; sugar_user_theme=suite8'
+                ),
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+            $result = json_decode($response);
 
             if (false != $result) {
-                if (empty($result->id)) {
-                    throw new \Exception($result->description);
-                }
-
-                $this->session = $result->id;
                 $this->connexion_valide = true;
             } else {
                 throw new \Exception('Please check url');
             }
         } catch (\Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -174,6 +187,16 @@ class suitecrm8core extends solution
                 'name' => 'url',
                 'type' => TextType::class,
                 'label' => 'solution.fields.url',
+            ],
+            [
+                'name' => 'client_id',
+                'type' => TextType::class,
+                'label' => 'solution.fields.client_id',
+            ],
+            [
+                'name' => 'client_secret',
+                'type' => TextType::class,
+                'label' => 'solution.fields.client_secret',
             ],
         ];
     }
@@ -991,6 +1014,6 @@ class suitecrm8core extends solution
         }
     }
 }
-class suitecrm8 extends suitecrmcore
+class suitecrm8 extends suitecrm8core
 {
 }
