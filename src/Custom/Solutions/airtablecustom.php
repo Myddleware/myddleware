@@ -17,6 +17,7 @@ class airtablecustom extends airtable {
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
 								'appuC7nsCbe7TxqwK' => 'VSC',			// USC PREPROD
 								'appgUF55WW7ApOTPQ' => 'Contacts COMET',		// discord PROD
+								'apprA5JofsBBO1Kvj' => 'COUPON',		//  1j1m PREPROD
 							);
 
 	protected $modules = array(
@@ -71,6 +72,9 @@ class airtablecustom extends airtable {
 													),
 								'appgUF55WW7ApOTPQ' => array(
 														'Contacts COMET' => 'Contacts COMET',
+													),
+								'apprA5JofsBBO1Kvj' => array(
+														'MOB 1J1M: PREPROD' => 'MOB 1J1M: PREPROD',
 													),
 							);
 
@@ -377,7 +381,7 @@ class airtablecustom extends airtable {
 		// Make an integromat call if call OK to Mobilisation - Contacts webservice
 		if (
 				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('64f5e0543cb6c')) // Mobilisation - Relations pôles Contact
+			AND	in_array($param['ruleId'], array('64f5e0543cb6c')) // Mobilisation - Relations pï¿½les Contact
 			AND $value['id'] != '-1'
 		) {
 			try {
