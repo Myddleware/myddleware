@@ -2,8 +2,9 @@
 
 namespace App\Solutions;
 
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use DateTime;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class suitecrm8core extends solution
 {
@@ -16,7 +17,8 @@ class suitecrm8core extends solution
 
     protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
 
-    protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name'],
+    protected array $FieldsDuplicate = [
+        'Contacts' => ['email1', 'last_name'],
         'Accounts' => ['email1', 'name'],
         'Users' => ['email1', 'last_name'],
         'Leads' => ['email1', 'last_name'],
@@ -88,10 +90,21 @@ class suitecrm8core extends solution
         parent::login($paramConnexion);
         try {
 
+            //    if param connexion login is a string of at least 180 characters
+            if (is_string($paramConnexion['login']) && strlen($paramConnexion['login']) > 180) {
+
+                // it means that we have to use $this->paramConnexion instead
+                $paramConnexion['login'] = $this->paramConnexion['login'];
+                $paramConnexion['password'] = $this->paramConnexion['password'];
+                $paramConnexion['url'] = $this->paramConnexion['url'];
+                $paramConnexion['client_id'] = $this->paramConnexion['client_id'];
+                $paramConnexion['client_secret'] = $this->paramConnexion['client_secret'];
+            }
+
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $paramConnexion['url'].'/login',
+                CURLOPT_URL => $paramConnexion['url'] . '/login',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 1,  // Enable header output
             ));
@@ -122,7 +135,7 @@ class suitecrm8core extends solution
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $paramConnexion['url'].'/Api/access_token',
+                CURLOPT_URL => $paramConnexion['url'] . '/Api/access_token',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -132,15 +145,15 @@ class suitecrm8core extends solution
                 CURLOPT_CUSTOMREQUEST => 'POST',
                 CURLOPT_POSTFIELDS => '{
     "grant_type": "password",
-    "username": "'.$paramConnexion['login'].'",
-    "password": "'.$paramConnexion['password'].'",
+    "username": "' . $paramConnexion['login'] . '",
+    "password": "' . $paramConnexion['password'] . '",
     "client_id": "e7c35a46-9738-b555-d68c-6527ff03c34c",
     "client_secret": "cocoronochizu"
 }',
                 CURLOPT_HTTPHEADER => array(
                     'Content-Type: application/json',
                     'Grant-Type: password-credentials',
-                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
                 ),
             ));
 
@@ -155,7 +168,7 @@ class suitecrm8core extends solution
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $paramConnexion['url'].'/login',
+                CURLOPT_URL => $paramConnexion['url'] . '/login',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -165,7 +178,7 @@ class suitecrm8core extends solution
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
                     'Authorization: Bearer ' . $access_token,
-                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
                 ),
             ));
 
@@ -186,6 +199,7 @@ class suitecrm8core extends solution
                     'phpsessid' => $phpsessid,
                     'legacySessid' => $legacySessid,
                 ];
+
                 $this->connexion_valide = true;
             } else {
                 throw new \Exception('Please check url');
@@ -206,7 +220,7 @@ class suitecrm8core extends solution
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Error logout REST '.$e->getMessage());
+            $this->logger->error('Error logout REST ' . $e->getMessage());
 
             return false;
         }
@@ -247,12 +261,12 @@ class suitecrm8core extends solution
     public function get_modules($type = 'source')
     {
         try {
-            
+
 
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $this->session['url'].'/Api/V8/meta/modules',
+                CURLOPT_URL => $this->session['url'] . '/Api/V8/meta/modules',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -261,11 +275,11 @@ class suitecrm8core extends solution
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
-                  'Content-Type: application/json',
-                  'Authorization: Bearer '.$this->session['token'],
-                  'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $this->session['token'],
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
                 ),
-              ));
+            ));
 
             $response = curl_exec($curl);
 
@@ -283,7 +297,7 @@ class suitecrm8core extends solution
             foreach ($modulesAttributes as $index => $module) {
                 $modulesFinal[$index] = $module->label;
             }
-            
+
 
 
 
@@ -303,7 +317,7 @@ class suitecrm8core extends solution
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $this->session['url'].'/Api/V8/meta/fields/'.$module,
+                CURLOPT_URL => $this->session['url'] . '/Api/V8/meta/fields/' . $module,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -313,10 +327,10 @@ class suitecrm8core extends solution
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => array(
                     'Content-Type: application/json',
-                    'Authorization: Bearer '.$this->session['token'],
-                    'Cookie: LEGACYSESSID='.$legacySessid.'; PHPSESSID='.$phpsessid.'; XSRF-TOKEN='.$xsrfToken.'; sugar_user_theme=suite8'
-                  ),
-                ));
+                    'Authorization: Bearer ' . $this->session['token'],
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
+                ),
+            ));
 
             $response = curl_exec($curl);
 
@@ -347,7 +361,7 @@ class suitecrm8core extends solution
         }
     }
 
-    
+
 
     // Permet de lire les données
 
@@ -356,155 +370,85 @@ class suitecrm8core extends solution
      */
     public function read($param)
     {
+
+        $fields = $param['fields'];
+
+        $module = $param['module'];
+
+        $recordId = $param['query']['id'];
+
         $result = [];
+        $param['truc'] = [1];
 
-        // Manage delete option to enable
-        $deleted = false;
-        if (!empty($param['ruleParams']['deletion'])) {
-            $deleted = true;
-            $param['fields'][] = 'deleted';
-        }
-        $totalCount = 0;
-        $currentCount = 0;
-        $query = '';
-
-        // On va chercher le nom du champ pour la date de référence: Création ou Modification
-        $dateRefField = $this->getRefFieldName($param);
-
-        // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            $paramSave = $param;
-            $param['fields'] = [];
-            $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
+        foreach ($param['truc'] as $truc) {
+            $result[] = $this->readOneRecord($recordId, $module, $fields);
         }
 
-        // Built the query
-        $query = $this->generateQuery($param, 'read');
-        //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
-        $link_name_to_fields_array = [];
-        foreach ($param['fields'] as $field) {
-            if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
-                // Get all custom relationships
-                if (empty($customRelationshipList)) {
-                    $customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
-                }
-                // Get the relationship name for all custom relationship field (coudb be id field or name field)
-                // Search the field in the array
-                if (!empty($customRelationshipListFields)) {
-                    foreach ($customRelationshipListFields as $key => $value) {
-                        // If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
-                        if (
-                                $value['id'] == $field
-                            or $value['name'] == $field
-                        ) {
-                            $link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
-                            break;
-                        }
-                    }
-                }
-            }
+
+        return $result;
+    }
+
+    public function readOneRecord($recordId, $module, $fields)
+    {
+        $curl = curl_init();
+
+        $fieldsFormattedParams = '';
+
+        $moduleParams = 'fields[' . $module . ']=';
+
+        $fieldnames = '';
+
+        foreach ($fields as $field) {
+            // add $field to the string, then a coma ,
+            $fieldnames .= $field . ',';
         }
 
-        // add limit to query
-        if (!empty($param['limit'])) {
-            $this->limitCall = $param['limit'];
-        }
+        // remove the last , from the string $fieldnames
+        $fieldnames = rtrim($fieldnames, ',');
 
-        // On lit les données dans le CRM
-        do {
-            $get_entry_list_parameters = [
-                'session' => $this->session,
-                'module_name' => $param['module'],
-                'query' => $query,
-                'order_by' => $dateRefField.' ASC',
-                'offset' => $param['offset'],
-                'select_fields' => $param['fields'],
-                'link_name_to_fields_array' => $link_name_to_fields_array,
-                'max_results' => $this->limitCall,
-                'deleted' => $deleted,
-                'Favorites' => '',
-            ];
-            $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
-            // Construction des données de sortie
-            if (isset($get_entry_list_result->result_count)) {
-                $currentCount = $get_entry_list_result->result_count;
-                $totalCount += $currentCount;
-                $record = [];
-                $i = 0;
-                // For each records, we add all fields requested
-                for ($i = 0; $i < $currentCount; ++$i) {
-                    $entry = $get_entry_list_result->entry_list[$i];
-                    foreach ($entry->name_value_list as $value) {
-                        $record[$value->name] = $value->value;
-                    }
-                    // Manage deletion by adding the flag Myddleware_deletion to the record
-                    if (
-                            true == $deleted
-                        and !empty($entry->name_value_list->deleted->value)
-                    ) {
-                        $record['myddleware_deletion'] = true;
-                    }
+        $fieldsFormattedParams .= $moduleParams . $fieldnames;
 
-                    // All custom relationships will be added even the ones no requested (Myddleware will ignore them later)
-                    if (!empty($customRelationshipListFields)) {
-                        // For each fields requested corresponding to a custom relationship
-                        foreach ($param['fields'] as $field) {
-                            // Check if the field is a custom relationship
-                            foreach ($customRelationshipListFields as $key => $value) {
-                                if (
-                                        $field == $value['id']
-                                    or $field == $value['name']
-                                ) {
-                                    // Init field even if the relationship is empty. Myddleware needs the field to be set
-                                    $record[$value['id']] = '';
-                                    $record[$value['name']] = '';
+        $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '/' . $recordId . '?' . $fieldsFormattedParams;
 
-                                    // Find the the right relationship into SuiteCRM result call
-                                    foreach ($get_entry_list_result->relationship_list[$i]->link_list as $relationship) {
-                                        if (
-                                                !empty($relationship->name)
-                                            and $relationship->name == $key
-                                        ) {
-                                            // Save relationship values
-                                            if (!empty($relationship->records[0]->link_value->id->value)) {
-                                                $record[$value['id']] = $relationship->records[0]->link_value->id->value;
-                                                $record[$value['name']] = $relationship->records[0]->link_value->name->value;
-                                            }
-                                            break 2; // Go to the next field
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $result[] = $record;
-                    $record = [];
-                }
-                // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
-                $param['offset'] += $this->limitCall;
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $curlUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->session['token'],
+                'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+
+        $decodedResponse = json_decode($response);
+        $responseData = $decodedResponse->data;
+        $attributes = $responseData->attributes;
+
+        $result = [];
+        $result['id'] = $responseData->id;
+        $result['type'] = $responseData->type;
+
+        foreach ($attributes as $index => $attribute) {
+            // if attribute format is like "2023-10-12T08:52:00+00:00", then we use the DateTime class to format it
+            if (preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $attribute)) {
+                $dateTimeAttribute = new DateTime($attribute);
+                // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
+                $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
+                $result[$index] = $dateTimeAttributeString;
+                
             } else {
-                if (!empty($get_entry_list_result->number)) {
-                    // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
-                    throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
-                } else {
-                    // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
-                    throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
-                }
-                break; // Stop the loop if an error happened
-            }
-        }
-        // On continue si le nombre de résultat du dernier appel est égal à la limite
-        while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
-        // Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
-        if (!empty($paramSave)) {
-            $resultRel = $this->readRelationship($paramSave, $result);
-            // Récupération des données sauf de la date de référence qui dépend des enregistrements parent
-            if (!empty($resultRel['count'])) {
-                $result = $resultRel['values'];
-            }
-            // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
-            else {
-                return;
+                $result[$index] = $attribute;
             }
         }
 
@@ -526,7 +470,7 @@ class suitecrm8core extends solution
         }
 
         // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-        return rtrim($url, '/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+        return rtrim($url, '/') . '/index.php?module=' . $module . '&action=DetailView&record=' . $recordId;
     }
 
     protected function readRelationship($param, $dataParent): array
@@ -571,13 +515,13 @@ class suitecrm8core extends solution
                         // La date de référence de chaque relation est égale à la date de référence du parent
                         $record['date_modified'] = $parent['date_modified'];
                         // L'id de la relation est généré en concatenant les 2 id
-                        $record['id'] = $record[$module_relationship_many_to_many['relationships'][0]].$record[$module_relationship_many_to_many['relationships'][1]];
+                        $record['id'] = $record[$module_relationship_many_to_many['relationships'][0]] . $record[$module_relationship_many_to_many['relationships'][1]];
                         $result['values'][$record['id']] = $record;
                         $record = [];
                         ++$i;
                     }
                 } else {
-                    $result['error'] .= $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description.'       ';
+                    $result['error'] .= $get_entry_list_result->number . ' : ' . $get_entry_list_result->name . '. ' . $get_entry_list_result->description . '       ';
                 }
             }
         }
@@ -635,17 +579,17 @@ class suitecrm8core extends solution
                         and !empty($data['filecontents'])
                     ) {
                         $this->setNoteAttachement($data, $get_entry_list_result->id);
-                    } 
+                    }
 
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
+                    throw new \Exception('error ' . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '') . ' : ' . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -700,7 +644,7 @@ class suitecrm8core extends solution
                     ];
                 }
             } catch (\Exception $e) {
-                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -774,16 +718,16 @@ class suitecrm8core extends solution
                         and !empty($data['filecontents'])
                     ) {
                         $this->setNoteAttachement($data, $get_entry_list_result->id);
-                    } 
+                    }
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
                     ];
                 } else {
-                    throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
+                    throw new \Exception('error ' . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '') . ' : ' . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
-                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
@@ -797,29 +741,29 @@ class suitecrm8core extends solution
     }
 
     // Function to send a note
-	protected function setNoteAttachement($data, $noteId) {					
-		$setNoteAttachementParameters = array(
-			'session' => $this->session,
-			'note' => array(
-				'id' => $noteId,
-				'filename' => $data['filename'],
-				'file' => $data['filecontents'],
-			),
-		);
+    protected function setNoteAttachement($data, $noteId)
+    {
+        $setNoteAttachementParameters = array(
+            'session' => $this->session,
+            'note' => array(
+                'id' => $noteId,
+                'filename' => $data['filename'],
+                'file' => $data['filecontents'],
+            ),
+        );
 
-		$set_not_attachement_result = $this->call('set_note_attachment', $setNoteAttachementParameters);
-		if (
-				empty($set_not_attachement_result->id)
-			 OR (
-					!empty($set_not_attachement_result->id)
-				AND $set_not_attachement_result->id == '-1'
-			)
-		) {
-			 throw new \Exception('Failed to create the attachement on the note. ');
-		}				
-	}
+        $set_not_attachement_result = $this->call('set_note_attachment', $setNoteAttachementParameters);
+        if (
+            empty($set_not_attachement_result->id)
+            or (!empty($set_not_attachement_result->id)
+                and $set_not_attachement_result->id == '-1'
+            )
+        ) {
+            throw new \Exception('Failed to create the attachement on the note. ');
+        }
+    }
 
-    
+
     // Function to delete a record
     public function deleteData($param): array
     {
@@ -836,7 +780,7 @@ class suitecrm8core extends solution
         return $this->updateData($param);
     }
 
-	
+
     // Build the query for read data to SuiteCRM
     /**
      * @throws \Exception
@@ -851,15 +795,15 @@ class suitecrm8core extends solution
                     $query .= ' AND ';
                 }
                 if ('email1' == $key) {
-                    $query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+                    $query .= strtolower($param['module']) . ".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '" . $value . "') ";
                 } else {
                     // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
                     if ('ProspectLists' == $param['module']) {
-                        $query .= 'prospect_lists.'.$key." = '".$value."' ";
+                        $query .= 'prospect_lists.' . $key . " = '" . $value . "' ";
                     } elseif ('Employees' == $param['module']) {
-                        $query .= 'users.'.$key." = '".$value."' ";
+                        $query .= 'users.' . $key . " = '" . $value . "' ";
                     } else {
-                        $query .= strtolower($param['module']).'.'.$key." = '".$value."' ";
+                        $query .= strtolower($param['module']) . '.' . $key . " = '" . $value . "' ";
                     }
                 }
             }
@@ -868,11 +812,11 @@ class suitecrm8core extends solution
             $dateRefField = $this->getRefFieldName($param);
             // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
             if ('ProspectLists' == $param['module']) {
-                $query = 'prospect_lists.'.$dateRefField." > '".$param['date_ref']."'";
+                $query = 'prospect_lists.' . $dateRefField . " > '" . $param['date_ref'] . "'";
             } elseif ('Employees' == $param['module']) {
-                $query = 'users.'.$dateRefField." > '".$param['date_ref']."'";
+                $query = 'users.' . $dateRefField . " > '" . $param['date_ref'] . "'";
             } else {
-                $query = strtolower($param['module']).'.'.$dateRefField." > '".$param['date_ref']."'";
+                $query = strtolower($param['module']) . '.' . $dateRefField . " > '" . $param['date_ref'] . "'";
             }
         }
 
@@ -884,16 +828,16 @@ class suitecrm8core extends solution
     // Si la règle n'est qu'en création, pas en modicication alors le mode est C
     // public function getRuleMode($module, $type): array
     // {
-        // if (
-                // 'target' == $type
-            // && array_key_exists($module, $this->module_relationship_many_to_many)
-        // ) {
-            // return [
-                // 'C' => 'create_only',
-            // ];
-        // }
+    // if (
+    // 'target' == $type
+    // && array_key_exists($module, $this->module_relationship_many_to_many)
+    // ) {
+    // return [
+    // 'C' => 'create_only',
+    // ];
+    // }
 
-        // return parent::getRuleMode($module, $type);
+    // return parent::getRuleMode($module, $type);
     // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
@@ -923,17 +867,16 @@ class suitecrm8core extends solution
         if (!empty($get_module_fields->link_fields)) {
             foreach ($get_module_fields->link_fields as $field) {
                 if (
-                        '_id' == substr($field->name, -3)
+                    '_id' == substr($field->name, -3)
                     || '_ida' == substr($field->name, -4)
                     || '_idb' == substr($field->name, -4)
-                    || (
-                            'id' == $field->type
+                    || ('id' == $field->type
                         && 'id' != $field->name
                     )
                 ) {
                     // Build the result array to get the relationship name for all field name
-                    $result[$field->name]['id'] = $this->customRelationship.$field->name;
-                    $result[$field->name]['name'] = $this->customRelationship.$field->relationship.'_name';
+                    $result[$field->name]['id'] = $this->customRelationship . $field->name;
+                    $result[$field->name]['name'] = $this->customRelationship . $field->relationship . '_name';
                 }
             }
         }
