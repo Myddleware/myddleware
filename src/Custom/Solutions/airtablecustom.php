@@ -74,7 +74,9 @@ class airtablecustom extends airtable {
 														'Contacts COMET' => 'Contacts COMET',
 													),
 								'apprA5JofsBBO1Kvj' => array(
-														'MOB 1J1M: PREPROD' => 'MOB 1J1M: PREPROD',
+														'COUPON' => 'COUPON',
+														'CONTACT' => 'CONTACT',
+														'BINOME' => 'BINOME',
 													),
 							);
 
