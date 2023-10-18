@@ -920,7 +920,7 @@ $moduleFields['apprA5JofsBBO1Kvj'] = array(
 		'fld5cxaTXNiLcHPI5'=> array( 'label' => 'RAISON DU REFUS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldhkUV1nypexJWcI'=> array( 'label' => 'LABEL', 'STATUS' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldl9nRBoeNa8BTnh'=> array( 'label' => 'LABEL', 'TYPE' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldud2ugr5y0xlKHe'=> array( 'label' => 'LABEL', 'CONTACT' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldud2ugr5y0xlKHe'=> array( 'label' => 'LABEL', 'CONTACT' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 		'fldOJcPMgadtHi72K'=> array( 'label' => 'LABEL', 'ID COMET' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );

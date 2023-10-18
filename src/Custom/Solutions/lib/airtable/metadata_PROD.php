@@ -924,16 +924,17 @@ $moduleFields['appgUF55WW7ApOTPQ'] = array (
 
 // Mobilisation 1j1m PROD
 $moduleFields['applAYRbr1Af2uJSC'] = array(
-	'COUPON' => array(
-		'fldv908Sh2XRVLAth'=> array( 'label' => 'LABEL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldFAvKNXB33gIs3d'=> array( 'label' => 'NOM', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldV4RWgx8mH1chtq'=> array( 'label' => 'PRENOM', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldvQcbgjzOSreRk4'=> array( 'label' => 'EMAIL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fld5jYpKXyAS3k6Y0'=> array( 'label' => 'TELEPHONE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fld5cxaTXNiLcHPI5'=> array( 'label' => 'RAISON DU REFUS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldhkUV1nypexJWcI'=> array( 'label' => 'LABEL', 'STATUS' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldl9nRBoeNa8BTnh'=> array( 'label' => 'LABEL', 'TYPE' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldud2ugr5y0xlKHe'=> array( 'label' => 'LABEL', 'CONTACT' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
-		'fldOJcPMgadtHi72K'=> array( 'label' => 'LABEL', 'ID COMET' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-	),
+    'COUPON' => array(
+        'fldp9TgFtBWv9ezQA' => array( 'label' => 'LABEL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldzAoSA9a2Hubrqw' => array( 'label' => 'NOM', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldP4K43JHllfFgQJ' => array( 'label' => 'PRENOM', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldpQ5j3v8NwFHQHn' => array( 'label' => 'EMAIL', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldZjRxx97zwhN5lj' => array( 'label' => 'TELEPHONE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldZcqiG9mhpqaO5o' => array( 'label' => 'RAISON DU REFUS', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldbkN3Oz7oSLcVz1' => array( 'label' => 'LABEL', 'STATUS' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldf9gZoANMOm4SKA' => array( 'label' => 'LABEL', 'TYPE' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'fldodVC3DExELOJ4x' => array( 'label' => 'LABEL', 'CONTACT' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+        'fld7JjjZJow2shBiM' => array( 'label' => 'LABEL', 'ID COMET' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+    ),
 );
+
