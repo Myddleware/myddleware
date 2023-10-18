@@ -566,7 +566,8 @@ $moduleFields['appP31F11PgaT1f6H'] = array (
 		'fldy29Ee5H4SNoXYu'=> array( 'label' => 'Ville de candidature', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldclx0ew7t0eBbJ1'=> array( 'label' => 'Handicap', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldyOeSBGfhtIHz8J'=> array( 'label' => 'Pole: Comet ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false), 
-		'fldMmoym1i2nC6oJJ'=> array( 'label' => 'Référent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true), 
+		'fldMmoym1i2nC6oJJ'=> array( 'label' => 'Référent', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldEJ7Zb3J7Dt0NpY'=> array( 'label' => 'ID 1J1M', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 	'Relation_POLE' => array(
         
