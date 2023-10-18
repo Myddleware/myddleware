@@ -18,6 +18,7 @@ class airtablecustom extends airtable {
 								'appuC7nsCbe7TxqwK' => 'VSC',			// USC PREPROD
 								'appgUF55WW7ApOTPQ' => 'Contacts COMET',		// discord PROD
 								'apprA5JofsBBO1Kvj' => 'COUPON',		//  1j1m PREPROD
+								'applAYRbr1Af2uJSC' => 'COUPON',		//  1j1m PROD
 							);
 
 	protected $modules = array(
@@ -73,7 +74,14 @@ class airtablecustom extends airtable {
 								'appgUF55WW7ApOTPQ' => array(
 														'Contacts COMET' => 'Contacts COMET',
 													),
+													// 1j1m PREPROD
 								'apprA5JofsBBO1Kvj' => array(
+														'COUPON' => 'COUPON',
+														'CONTACT' => 'CONTACT',
+														'BINOME' => 'BINOME',
+													),
+													// 1j1m PROD
+								'applAYRbr1Af2uJSC' => array(
 														'COUPON' => 'COUPON',
 														'CONTACT' => 'CONTACT',
 														'BINOME' => 'BINOME',
