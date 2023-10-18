@@ -378,7 +378,6 @@ class suitecrm8core extends solution
         $recordId = $param['query']['id'];
 
         $result = [];
-        $param['truc'] = [1];
 
         if (!empty($recordId)) {
             $result[] = $this->readOneRecord($recordId, $module, $fields);
@@ -392,21 +391,77 @@ class suitecrm8core extends solution
         return $result;
     }
 
+    public function encodeUrlApiRequest($url)
+    {
+
+        // Parsing the URL into components
+        $components = parse_url($url);
+
+        // Parsing the query string into an associative array
+        parse_str($components['query'], $params);
+
+        // Modifying the 'fields[Accounts]' parameter to remove 'id' and 'date_entered'
+        $params['fields[Accounts]'] = 'name,email1,date_modified';
+
+        // Building the modified query string
+        $modified_query = http_build_query($params);
+
+        // Encoding the spaces and colons
+        $encoded_query = str_replace(array(' ', ':'), array('%20', '%3A'), $modified_query);
+
+        // Building the modified URL
+        $modified_url = $components['scheme'] . '://' . $components['host'] . $components['path'] . '?' . $encoded_query;
+
+        // Output the modified URL
+        return $modified_url;
+    }
+
     public function readSeveralRecords($param)
     {
         $fields = $param['fields'];
 
         $module = $param['module'];
 
-        $recordIds = $param['query']['ids'];
+        // We look for the name of the field for the reference date: Creation or Modification
+        $dateRefField = $this->getRefFieldName($param);
+
+        $daterefFilter = '';
+        // add a & to the filter with the datereffield
+        $daterefFilter .= '&filter[' . $dateRefField . '][GT]=' . $param['date_ref'];
 
         $result = [];
 
+        $fieldsFormattedParams = '';
+
+        $moduleParams = 'fields[' . $module . ']=';
+
+        $fieldnames = '';
+
+        foreach ($fields as $field) {
+            // add $field to the string, then a coma ,
+            $fieldnames .= $field . ',';
+        }
+
+        // remove the last , from the string $fieldnames
+        $fieldnames = rtrim($fieldnames, ',');
+
+        $fieldsFormattedParams .= $moduleParams . $fieldnames;
+        
+
+        $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
+
+        $encodedCurlUrl = $this->encodeUrlApiRequest($curlUrl);
 
         $curl = curl_init();
 
+        // text to follow
+        $textToFollowold = 'http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name%2Cdate_modified%2Cemail1&filter[date_modified][GT]=2023-10-18%2007%3A50%3A20';
+
+
+        $textToFollownew = "http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name,email1,id,date_modified,date_entered&filter[date_modified][GT]=2023-10-18 07:50:20";
+
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name%2Cdate_modified%2Cemail1&filter[date_modified][GT]=2023-10-18%2007%3A50%3A20',
+            CURLOPT_URL => $encodedCurlUrl,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -414,7 +469,11 @@ class suitecrm8core extends solution
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
-            
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->session['token'],
+                'Cookie: sugar_user_theme=suite8'
+            ),
         ));
 
         $response = curl_exec($curl);
