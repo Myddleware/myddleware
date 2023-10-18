@@ -380,10 +380,68 @@ class suitecrm8core extends solution
         $result = [];
         $param['truc'] = [1];
 
-        foreach ($param['truc'] as $truc) {
+        if (!empty($recordId)) {
             $result[] = $this->readOneRecord($recordId, $module, $fields);
         }
 
+        if (empty($param['query']['id'])) {
+            $result = $this->readSeveralRecords($param);
+        }
+
+
+        return $result;
+    }
+
+    public function readSeveralRecords($param)
+    {
+        $fields = $param['fields'];
+
+        $module = $param['module'];
+
+        $recordIds = $param['query']['ids'];
+
+        $result = [];
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name%2Cdate_modified%2Cemail1&filter[date_modified][GT]=2023-10-18%2007%3A50%3A20',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $decodedResponse = json_decode($response);
+
+        $data = $decodedResponse->data;
+
+        // transform every stdClass in $data into arrays 
+        $dataArray = array_map(function ($object) {
+            return (array) $object;
+        }, $data);
+
+        // for every element of $dataArray, we extract the attributes stdClass elements and put them on the same scope as attributes itself, then we unset the stdClass attributes
+        foreach ($dataArray as $index => $data) {
+            $attributes = $data['attributes'];
+            foreach ($attributes as $attributeIndex => $attribute) {
+                $dataArray[$index][$attributeIndex] = $attribute;
+            }
+            unset($dataArray[$index]['attributes']);
+            // we unset the relationships
+            unset($dataArray[$index]['relationships']);
+        }
+
+        $result = $dataArray;
 
         return $result;
     }
