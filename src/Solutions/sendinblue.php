@@ -640,21 +640,6 @@ class sendinbluecore extends solution
 
         return parent::getIdName($module);
     }
-	
-	// Check if a date is today
-	protected function isToday($dareRef) {
-		// Create a DateTime object for the date you want to check
-		$dareRefObj = new DateTime($dareRef); // Replace with your datetime
-
-		// Get the current date as a DateTime object
-		$currentDate = new DateTime();
-
-		// Compare the two DateTime objects
-		if ($dareRefObj->format('Y-m-d') === $currentDate->format('Y-m-d')) {
-			return true;
-		} 
-		return false;
-	}
 
     // Returns the name of the reference date field according to the module and mode of the rule
     public function getRefFieldName($param): string
