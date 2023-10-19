@@ -415,38 +415,37 @@ class suitecrm8core extends solution
 
     public function readSeveralRecords($param)
     {
-        $fields = $param['fields'];
+        $fieldsFormattedParams = $this->formatFieldsParams($param);
+        $daterefFilter = $this->createDateRefFilter($param);
 
+        $curlUrl = $this->createCurlUrl($fieldsFormattedParams, $daterefFilter, $param['module']);
+        $response = $this->getCurlResponse($curlUrl);
+
+        return $this->processResponseData($response);
+    }
+
+    private function formatFieldsParams($param)
+    {
+        $fields = $param['fields'];
         $module = $param['module'];
 
-        // We look for the name of the field for the reference date: Creation or Modification
+        $fieldnames = implode(',', $fields);
+        return 'fields[' . $module . ']=' . $fieldnames;
+    }
+
+    private function createDateRefFilter($param)
+    {
         $dateRefField = $this->getRefFieldName($param);
+        return '&filter[' . $dateRefField . '][GT]=' . $param['date_ref'];
+    }
 
-        $daterefFilter = '';
-        // add a & to the filter with the datereffield
-        $daterefFilter .= '&filter[' . $dateRefField . '][GT]=' . $param['date_ref'];
+    private function createCurlUrl($fieldsFormattedParams, $daterefFilter, $module)
+    {
+        return $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
+    }
 
-        $result = [];
-
-        $fieldsFormattedParams = '';
-
-        $moduleParams = 'fields[' . $module . ']=';
-
-        $fieldnames = '';
-
-        foreach ($fields as $field) {
-            // add $field to the string, then a coma ,
-            $fieldnames .= $field . ',';
-        }
-
-        // remove the last , from the string $fieldnames
-        $fieldnames = rtrim($fieldnames, ',');
-
-        $fieldsFormattedParams .= $moduleParams . $fieldnames;
-        
-
-        $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
-
+    private function getCurlResponse($curlUrl)
+    {
         $encodedCurlUrl = $this->encodeUrlApiRequest($curlUrl);
 
         $curl = curl_init();
@@ -468,41 +467,41 @@ class suitecrm8core extends solution
         ));
 
         $response = curl_exec($curl);
-
         curl_close($curl);
 
-        $decodedResponse = json_decode($response);
+        return $response;
+    }
 
+    private function processResponseData($response)
+    {
+        $decodedResponse = json_decode($response);
         $data = $decodedResponse->data;
 
-        // transform every stdClass in $data into arrays 
-        $dataArray = array_map(function ($object) {
-            return (array) $object;
+        return array_map(function ($object) {
+            $item = (array) $object;
+            $attributes = $item['attributes'];
+
+            foreach ($attributes as $key => $value) {
+                $item[$key] = $value;
+            }
+
+            unset($item['attributes'], $item['relationships']);
+
+            if (isset($item['date_modified']) && preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $item['date_modified'])) {
+                $dateTimeAttribute = new DateTime($item['date_modified']);
+                $item['date_modified'] = $dateTimeAttribute->format('Y-m-d H:i:s');
+            }
+
+            // do the same for date_entered
+            if (isset($item['date_entered']) && preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $item['date_entered'])) {
+                $dateTimeAttribute = new DateTime($item['date_entered']);
+                $item['date_entered'] = $dateTimeAttribute->format('Y-m-d H:i:s');
+            }
+
+            return $item;
         }, $data);
-
-        // for every element of $dataArray, we extract the attributes stdClass elements and put them on the same scope as attributes itself, then we unset the stdClass attributes
-        foreach ($dataArray as $index => $data) {
-            $attributes = $data['attributes'];
-            foreach ($attributes as $attributeIndex => $attribute) {
-                $dataArray[$index][$attributeIndex] = $attribute;
-            }
-            unset($dataArray[$index]['attributes']);
-            // we unset the relationships
-            unset($dataArray[$index]['relationships']);
-
-            // if date_modified qualify for the preg match, then we modify it
-            if (preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $dataArray[$index]['date_modified'])) {
-                $dateTimeAttribute = new DateTime($dataArray[$index]['date_modified']);
-                // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
-                $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
-                $dataArray[$index]['date_modified'] = $dateTimeAttributeString;
-            }
-        }
-
-        $result = $dataArray;
-
-        return $result;
     }
+
 
     public function readOneRecord($recordId, $module, $fields)
     {
