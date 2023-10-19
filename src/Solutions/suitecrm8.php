@@ -383,7 +383,7 @@ class suitecrm8core extends solution
             $result[] = $this->readOneRecord($recordId, $module, $fields);
         }
 
-        if (empty($param['query']['id'])) {
+        if (empty($recordId)) {
             $result = $this->readSeveralRecords($param);
         }
 
@@ -454,12 +454,6 @@ class suitecrm8core extends solution
 
         $curl = curl_init();
 
-        // text to follow
-        $textToFollowold = 'http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name%2Cdate_modified%2Cemail1&filter[date_modified][GT]=2023-10-18%2007%3A50%3A20';
-
-
-        $textToFollownew = "http://localhost/cometsuite8/src/public/Api/V8/module/Accounts?fields[Accounts]=name,email1,id,date_modified,date_entered&filter[date_modified][GT]=2023-10-18 07:50:20";
-
         curl_setopt_array($curl, array(
             CURLOPT_URL => $encodedCurlUrl,
             CURLOPT_RETURNTRANSFER => true,
@@ -498,6 +492,14 @@ class suitecrm8core extends solution
             unset($dataArray[$index]['attributes']);
             // we unset the relationships
             unset($dataArray[$index]['relationships']);
+
+            // if date_modified qualify for the preg match, then we modify it
+            if (preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $dataArray[$index]['date_modified'])) {
+                $dateTimeAttribute = new DateTime($dataArray[$index]['date_modified']);
+                // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
+                $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
+                $dataArray[$index]['date_modified'] = $dateTimeAttributeString;
+            }
         }
 
         $result = $dataArray;
