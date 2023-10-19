@@ -379,10 +379,12 @@ class suitecrm8core extends solution
 
         $result = [];
 
+        // if there is a record id in the query, then we are running the rule by id
         if (!empty($recordId)) {
             $result[] = $this->readOneRecord($recordId, $module, $fields);
         }
 
+        // if there is no record id in the query, then we are running the rule normally, with the reference date
         if (empty($recordId)) {
             $result = $this->readSeveralRecords($param);
         }
@@ -391,9 +393,9 @@ class suitecrm8core extends solution
         return $result;
     }
 
+    // Function to set the url to a format that will be suitable for curl, as the date format is not suitable for curl
     public function encodeUrlApiRequest($url)
     {
-
         // Parsing the URL into components
         $components = parse_url($url);
 
@@ -413,17 +415,21 @@ class suitecrm8core extends solution
         return $modified_url;
     }
 
+    // Function to read several records using the reference date
     public function readSeveralRecords($param)
     {
         $fieldsFormattedParams = $this->formatFieldsParams($param);
+
         $daterefFilter = $this->createDateRefFilter($param);
 
         $curlUrl = $this->createCurlUrl($fieldsFormattedParams, $daterefFilter, $param['module']);
+
         $response = $this->getCurlResponse($curlUrl);
 
         return $this->processResponseData($response);
     }
 
+    // Function to get the fields to put in the curl request url
     private function formatFieldsParams($param)
     {
         $fields = $param['fields'];
@@ -433,17 +439,20 @@ class suitecrm8core extends solution
         return 'fields[' . $module . ']=' . $fieldnames;
     }
 
+    // Function get and format the reference date to put in the curl request url
     private function createDateRefFilter($param)
     {
         $dateRefField = $this->getRefFieldName($param);
         return '&filter[' . $dateRefField . '][GT]=' . $param['date_ref'];
     }
 
+    // Function combine the params, the fields and the date reference to create the curl url
     private function createCurlUrl($fieldsFormattedParams, $daterefFilter, $module)
     {
         return $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
     }
 
+    // Function to encode and launch the curl request
     private function getCurlResponse($curlUrl)
     {
         $encodedCurlUrl = $this->encodeUrlApiRequest($curlUrl);
@@ -472,11 +481,13 @@ class suitecrm8core extends solution
         return $response;
     }
 
+    // Function to process the response data
     private function processResponseData($response)
     {
         $decodedResponse = json_decode($response);
         $data = $decodedResponse->data;
 
+        // use the array_map function to apply the following processing to each element of the array $data
         return array_map(function ($object) {
             $item = (array) $object;
             $attributes = $item['attributes'];
@@ -485,8 +496,10 @@ class suitecrm8core extends solution
                 $item[$key] = $value;
             }
 
+            // unset the attributes and relationships keys because they are not value, but just links to other data provided by the auto-discoverability of the api
             unset($item['attributes'], $item['relationships']);
 
+            // Convert the date_modified to a string of the following format "2023-09-07 06:57:19"
             if (isset($item['date_modified']) && preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $item['date_modified'])) {
                 $dateTimeAttribute = new DateTime($item['date_modified']);
                 $item['date_modified'] = $dateTimeAttribute->format('Y-m-d H:i:s');
