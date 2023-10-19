@@ -400,9 +400,6 @@ class suitecrm8core extends solution
         // Parsing the query string into an associative array
         parse_str($components['query'], $params);
 
-        // Modifying the 'fields[Accounts]' parameter to remove 'id' and 'date_entered'
-        $params['fields[Accounts]'] = 'name,email1,date_modified';
-
         // Building the modified query string
         $modified_query = http_build_query($params);
 
