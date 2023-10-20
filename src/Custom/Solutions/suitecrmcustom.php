@@ -593,6 +593,14 @@ class suitecrmcustom extends suitecrm
 			AND $param['rule']['id'] == '6273905a05cb2' // Esp Rep - Contacts repérants
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.espace_reperant_c <> 'non' ";
+		}
+		
+		// Add a filter on field id_1j1m_c non-empty for coupon and contact 
+		if (
+				!empty($param['rule']['id'])
+			AND in_array($param['rule']['id'], array('6530c97bdce08', '6530d3766b3da')) // 1j1m - Coupon / 	1j1m - Contact
+		){
+			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
 		}		
 		return $query;
 	}

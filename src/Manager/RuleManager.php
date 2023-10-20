@@ -1225,6 +1225,10 @@ class rulecore
      */
     protected function rerun($id_document): array
     {
+		// No rerun if no document
+		if (empty($id_document)) {
+			exit;
+		}
         $session = new Session();
         $msg_error = [];
         $msg_success = [];
