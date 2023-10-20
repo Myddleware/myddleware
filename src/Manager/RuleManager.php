@@ -1227,7 +1227,7 @@ class rulecore
     {
 		// No rerun if no document
 		if (empty($id_document)) {
-			exit;
+			return array();
 		}
         $session = new Session();
         $msg_error = [];
