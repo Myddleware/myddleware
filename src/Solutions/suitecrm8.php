@@ -698,19 +698,59 @@ class suitecrm8core extends solution
                     'module_name' => $param['module'],
                     'name_value_lists' => $dataSugar,
                 ];
-                $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
 
-                if (!empty($get_entry_list_result->id)) {
+                // Create a new array to hold the desired structure
+                $newData = [
+                    "data" => [
+                        "type" => $param['module'],
+                        "attributes" => []
+                    ]
+                ];
+
+                // Loop through the original data and populate the new structure
+                foreach ($dataSugar as $field) {
+                    $newData['data']['attributes'][$field['name']] = $field['value'];
+                }
+
+                // Convert the new structure back to JSON
+                $newDataJson = json_encode($newData);
+
+                $curl = curl_init();
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => $this->session['url'] . '/Api/V8/module',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => $newDataJson,
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: application/json',
+                        'Authorization: Bearer ' . $this->session['token'],
+                        'Cookie: sugar_user_theme=suite8'
+                    ),
+                ));
+
+                $response = curl_exec($curl);
+                $get_entry_list_result = json_decode($response);
+
+                curl_close($curl);
+
+
+                if (!empty($get_entry_list_result->data->id)) {
                     // In case of module note with attachement, we generate a second call to add the file
                     if (
                         $param['module'] == 'Notes'
                         and !empty($data['filecontents'])
                     ) {
-                        $this->setNoteAttachement($data, $get_entry_list_result->id);
+                        $this->setNoteAttachement($data, $get_entry_list_result->data->id);
                     }
 
                     $result[$idDoc] = [
-                        'id' => $get_entry_list_result->id,
+                        'id' => $get_entry_list_result->data->id,
                         'error' => false,
                     ];
                 } else {
