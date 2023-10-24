@@ -179,7 +179,7 @@ class rulecore
 
 	protected function setRuleLock($type) {
 		// Get the rule details
-		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 		// If read lock empty, we set the lock with the job id
 		if (
 				$type == 'read'
@@ -206,7 +206,7 @@ class rulecore
 	
 	protected function unsetRuleLock($type) {
 		// Get the rule details
-		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 		// If read lock empty, we set the lock with the job id
 		if (
 				$type == 'read'
@@ -233,7 +233,7 @@ class rulecore
 	
 	protected function getRuleLock($type) {
 		// Get the rule details
-		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $ruleId, 'deleted' => false]);
+		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 		// Return the lock depending on the lock type
 		if ($type == 'read') {
 			return $rule->getReadJobLock();
@@ -415,7 +415,7 @@ class rulecore
             try {
                 if ($readSource['count'] > 0) {
 					// Before creating the documents, we check the job id is the one in the rule lock
-					if ($this->getRuleLock() != $this->jobId) {
+					if ($this->getRuleLock('read') != $this->jobId) {
 						throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to generate the documents. ');
 					}
                     $param['rule'] = $this->rule;
@@ -1638,6 +1638,11 @@ class rulecore
     protected function sendTarget($type, $documentId = null): array
     {
         try {
+			// Check the rule isn't locked
+			if (!$this->setRuleLock('send')) {
+				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
+			}
+			
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
             $response['error'] = '';
@@ -1662,6 +1667,11 @@ class rulecore
             $send['jobId'] = $this->jobId;
             // Si des données sont prêtes à être créées
             if (!empty($send['data'])) {
+				// Before sending the documents, we check the job id is the one in the rule lock
+				if ($this->getRuleLock('send') != $this->jobId) {
+					throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send the documents. ');
+				}
+					
                 // If the rule is a child rule, no document is sent. They will be sent with the parent rule.
                 if ($this->isChild()) {
                     foreach ($send['data'] as $key => $data) {
@@ -1711,6 +1721,10 @@ class rulecore
                     $response[$documentId] = false;
                     $response['error'] = $connect['error'];
                 }
+				
+				// No error management because we don't want any rollback because of the lock. 
+				// If the losk isn't removed, the next task will generate an error
+				$this->unsetRuleLock('send');
             }
         
         } catch (\Exception $e) {
