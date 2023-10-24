@@ -740,6 +740,9 @@ class suitecrm8core extends solution
                     $newData['data']['attributes'][$field['name']] = $field['value'];
                 }
 
+                // unset newdata attributes id to avoid confusing the api
+                unset($newData['data']['attributes']['id']);
+
                 // Convert the new structure back to JSON
                 $newDataJson = json_encode($newData);
 
@@ -763,9 +766,12 @@ class suitecrm8core extends solution
                 ));
 
                 $response = curl_exec($curl);
-                $get_entry_list_result = json_decode($response);
 
                 curl_close($curl);
+
+                
+                $get_entry_list_result = json_decode($response);
+
 
 
                 if (!empty($get_entry_list_result->data->id)) {
