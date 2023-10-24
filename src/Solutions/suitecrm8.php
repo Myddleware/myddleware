@@ -910,7 +910,7 @@ class suitecrm8core extends solution
                 $newData = [
                     "data" => [
                         "type" => $param['module'],
-                        "id" => $data['id'],
+                        "id" => $data['target_id'],
                         "attributes" => []
                     ]
                 ];
