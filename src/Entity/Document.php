@@ -138,6 +138,12 @@ class Document
      * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
      */
     private $logs;
+	
+	/**
+     * @ORM\Column(name="job_lock", type="string", length=23, nullable=true)
+     */
+    private string $jobLock;
+	
 
     public function __construct()
     {
@@ -464,6 +470,17 @@ class Document
         $this->modifiedBy = $modifiedBy;
 
         return $this;
+    }
+	
+	public function setJobLock($jobLock): self
+    {
+        $this->jobLock = $jobLock;
+        return $this;
+    }
+
+    public function getJobLock(): string
+    {
+        return $this->jobLock;
     }
     
 }
