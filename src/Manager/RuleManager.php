@@ -458,7 +458,7 @@ class rulecore
 				
 				// No error management because we don't want any rollback because of the lock. 
 				// If the losk isn't removed, the next task will generate an error
-				$this->unsetRuleLock('read')
+				$this->unsetRuleLock('read');
 
                 // Rollback if the job has been manually stopped
                 if ('Start' != $this->getJobStatus()) {
