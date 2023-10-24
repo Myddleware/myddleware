@@ -215,10 +215,43 @@ class suitecrm8core extends solution
     public function logout(): bool
     {
         try {
-            $logout_parameters = ['session' => $this->session];
-            $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
+            // $logout_parameters = ['session' => $this->session];
+            // $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
 
-            return true;
+            $curl = curl_init();
+
+            $curlUrl = $this->session['url'] . '/Api/V8/logout';
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $curlUrl,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $this->session['token'],
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
+                ),
+            ));
+
+            $response = curl_exec($curl);
+    
+            curl_close($curl);
+    
+    
+            $decodedResponse = json_decode($response);
+
+            if($decodedResponse->meta->message === "You have been successfully logged out")
+            {
+                return true;
+            }
+
+
+
         } catch (\Exception $e) {
             $this->logger->error('Error logout REST ' . $e->getMessage());
 
@@ -969,6 +1002,33 @@ class suitecrm8core extends solution
         // We set the flag deleted to 1 and we call the update function
         foreach ($param['data'] as $idDoc => $data) {
             $param['data'][$idDoc]['deleted'] = 1;
+
+            $curl = curl_init();
+
+            $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '/' . $data['id'];
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $curlUrl,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'DELETE',
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $this->session['token'],
+                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
+                ),
+            ));
+    
+            $response = curl_exec($curl);
+    
+            curl_close($curl);
+    
+    
+            $decodedResponse = json_decode($response);
         }
 
         // In case of many to many relationship, the delettion is done by using createRelationship function
