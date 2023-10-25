@@ -206,12 +206,13 @@ class documentcore
                 $this->attempt = $this->document_data['attempt'];
                 $this->jobLock = $this->document_data['job_lock'];
 				// A document can be loaded only if there is no lock or if the lock is on the current job.
-				if (
+                if (
 						!empty($this->jobLock)
-					AND $this->jobLock != $this->jobId)
+					AND $this->jobLock != $this->jobId
 				) {
-					throw new \Exception('This document is locked by the task '.$this->jobLock'. ');
+					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
 				}
+                $this->setLock();
 
                 // Get source data and create data attribut
                 $this->sourceData = $this->getDocumentData('S');
@@ -227,10 +228,12 @@ class documentcore
                 $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
-            $this->message .= 'Failed to retrieve document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->message .= 'Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
+            // Stop the process
+            throw new \Exception($this->message);
         }
     }
 
@@ -277,6 +280,7 @@ class documentcore
             $this->userId = $param['rule']['created_by'];
             $this->status = 'New';
             $this->attempt = 0;
+            $this->jobLock = $this->jobId;
             // Set the deletion type if myddleware deletion flag is true
             if (!empty($this->data['myddleware_deletion'])) {
                 $this->documentType = 'D';
@@ -344,11 +348,11 @@ class documentcore
                 return false;
             }
             // Création du header de la requête
-            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id) VALUES';
+            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock) VALUES';
             // Création de la requête d'entête
             $date_modified = $this->data['date_modified'];
             // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId')";
+            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId','$this->jobLock')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
             $this->updateStatus('New');
@@ -455,6 +459,16 @@ class documentcore
     public function setDocIdRefError($docIdRefError)
     {
         $this->docIdRefError = $docIdRefError;
+    }
+
+    // Set the document lock
+    protected function setLock() {
+        // Get the rule details
+        $rule = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
+        $rule->setJobLock($this->jobId);
+        $this->entityManager->persist($rule);
+        $this->entityManager->flush();
+        return true;
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas

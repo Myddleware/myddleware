@@ -1342,6 +1342,17 @@ class jobcore
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();
+			
+			// Unlock every document locked by this job (they should already by unlocked)
+            $this->documentRepository->removeLock($this->id);
+			// $queryDocument = "UPDATE document 
+			// 				SET 
+			// 					job_lock = null
+			// 				WHERE job_lock = :jobLock";
+            // $stmt = $this->connection->prepare($queryDocument);
+            // $stmt->bindValue('jobLock', $this->id);
+            // $result = $stmt->executeQuery();
+			
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION

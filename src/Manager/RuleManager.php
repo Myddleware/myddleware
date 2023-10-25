@@ -239,7 +239,7 @@ class rulecore
 			return $rule->getReadJobLock();
 		}
 		if ($type == 'send') {
-			return $rule->getendJobLock();
+			return $rule->getSendJobLock();
 		}
 		return false;
 	}

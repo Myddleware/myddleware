@@ -311,7 +311,7 @@ class Rule
 	public function setSendJobLock($sendJobLock): self
     {
         $this->sendJobLock = $sendJobLock;
-        return $sendJobLock;
+        return $this;
     }
 
     public function getSendJobLock(): string
