@@ -696,7 +696,64 @@ class suitecrm8core extends solution
     }
 
 
+
+
+    // Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
+
     /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function createRelationship($param)
+    {
+        foreach ($param['data'] as $idDoc => $data) {
+            try {
+                // Check control before create
+                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+                $dataSugar = [];
+                if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
+                    foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
+                        if (isset($data[$field])) {
+                            $dataSugar[] = ['name' => $field, 'value' => $data[$field]];
+                        }
+                    }
+                }
+                $set_relationship_params = [
+                    'session' => $this->session,
+                    'module_name' => $this->module_relationship_many_to_many[$param['module']]['module_name'],
+                    'module_id' => $data[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]],
+                    'link_field_name' => $this->module_relationship_many_to_many[$param['module']]['link_field_name'],
+                    'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
+                    'name_value_list' => $dataSugar,
+                    'delete' => (!empty($data['deleted']) ? 1 : 0),
+                ];
+                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
+
+                if (!empty($set_relationship_result->created)) {
+                    $result[$idDoc] = [
+                        'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
+                        'error' => false,
+                    ];
+                } else {
+                    $result[$idDoc] = [
+                        'id' => '-1',
+                        'error' => '01',
+                    ];
+                }
+            } catch (\Exception $e) {
+                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
+                $result[$idDoc] = [
+                    'id' => '-1',
+                    'error' => $error,
+                ];
+            }
+            // Modification du statut du flux
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+        }
+
+        return $result;
+    }
+
+        /**
      * @throws \Doctrine\DBAL\Exception
      */
     public function createData($param): array
@@ -793,61 +850,6 @@ class suitecrm8core extends solution
                     ];
                 } else {
                     throw new \Exception('error ' . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '') . ' : ' . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
-                }
-            } catch (\Exception $e) {
-                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-                $result[$idDoc] = [
-                    'id' => '-1',
-                    'error' => $error,
-                ];
-            }
-            // Modification du statut du flux
-            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-        }
-
-        return $result;
-    }
-
-    // Permet de créer les relation many-to-many (considéré comme un module avec 2 relation 1-n dans Myddleware)
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    protected function createRelationship($param)
-    {
-        foreach ($param['data'] as $idDoc => $data) {
-            try {
-                // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-                $dataSugar = [];
-                if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
-                    foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
-                        if (isset($data[$field])) {
-                            $dataSugar[] = ['name' => $field, 'value' => $data[$field]];
-                        }
-                    }
-                }
-                $set_relationship_params = [
-                    'session' => $this->session,
-                    'module_name' => $this->module_relationship_many_to_many[$param['module']]['module_name'],
-                    'module_id' => $data[$this->module_relationship_many_to_many[$param['module']]['relationships'][0]],
-                    'link_field_name' => $this->module_relationship_many_to_many[$param['module']]['link_field_name'],
-                    'related_ids' => [$data[$this->module_relationship_many_to_many[$param['module']]['relationships'][1]]],
-                    'name_value_list' => $dataSugar,
-                    'delete' => (!empty($data['deleted']) ? 1 : 0),
-                ];
-                $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
-
-                if (!empty($set_relationship_result->created)) {
-                    $result[$idDoc] = [
-                        'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
-                        'error' => false,
-                    ];
-                } else {
-                    $result[$idDoc] = [
-                        'id' => '-1',
-                        'error' => '01',
-                    ];
                 }
             } catch (\Exception $e) {
                 $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
