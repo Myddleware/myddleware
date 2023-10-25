@@ -60,6 +60,7 @@ class documentcore
     protected $documentType;
     protected bool $jobActive = true;
     protected $attempt;
+    protected $jobLock;
     protected $userId;
     protected $status;
     protected $document_data;
@@ -203,6 +204,14 @@ class documentcore
                 $this->ruleMode = $this->document_data['mode'];
                 $this->documentType = $this->document_data['type'];
                 $this->attempt = $this->document_data['attempt'];
+                $this->jobLock = $this->document_data['job_lock'];
+				// A document can be loaded only if there is no lock or if the lock is on the current job.
+				if (
+						!empty($this->jobLock)
+					AND $this->jobLock != $this->jobId)
+				) {
+					throw new \Exception('This document is locked by the task '.$this->jobLock'. ');
+				}
 
                 // Get source data and create data attribut
                 $this->sourceData = $this->getDocumentData('S');
@@ -1958,6 +1967,8 @@ class documentcore
             $this->message .= 'Status : '.$new_status;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
+			// Remove the lock on the document
+            $this->jobLock = null;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
         } catch (\Exception $e) {
