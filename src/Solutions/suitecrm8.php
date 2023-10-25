@@ -239,10 +239,10 @@ class suitecrm8core extends solution
             ));
 
             $response = curl_exec($curl);
-    
+
             curl_close($curl);
-    
-    
+
+
             $decodedResponse = json_decode($response);
 
             if($decodedResponse->meta->message === "You have been successfully logged out")
@@ -600,17 +600,21 @@ class suitecrm8core extends solution
         $result['id'] = $responseData->id;
         $result['type'] = $responseData->type;
 
-        foreach ($attributes as $index => $attribute) {
-            // if attribute format is like "2023-10-12T08:52:00+00:00", then we use the DateTime class to format it
-            if (preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $attribute)) {
-                $dateTimeAttribute = new DateTime($attribute);
-                // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
-                $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
-                $result[$index] = $dateTimeAttributeString;
-                
-            } else {
-                $result[$index] = $attribute;
+        try {
+            foreach ($attributes as $index => $attribute) {
+                // if attribute format is like "2023-10-12T08:52:00+00:00", then we use the DateTime class to format it
+                if ($index !== "member_of" && $index !== "campaign_accounts" && preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $attribute)) {
+                    $dateTimeAttribute = new DateTime($attribute);
+                    // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
+                    $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
+                    $result[$index] = $dateTimeAttributeString;
+
+                } else {
+                    $result[$index] = $attribute;
+                }
             }
+        } catch (\Exception $e) {
+            $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
         }
 
         return $result;
@@ -717,7 +721,7 @@ class suitecrm8core extends solution
                         $key = substr($key, strlen($this->customRelationship));
                     }
 
-                    // Note are sent using setNoteAttachement function 
+                    // Note are sent using setNoteAttachement function
                     if (
                         $param['module'] == 'Notes'
                         and $key == 'filecontents'
@@ -769,7 +773,7 @@ class suitecrm8core extends solution
 
                 curl_close($curl);
 
-                
+
                 $get_entry_list_result = json_decode($response);
 
 
@@ -887,7 +891,7 @@ class suitecrm8core extends solution
 
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
                         continue;
-                        // Note are sent using setNoteAttachement function 
+                        // Note are sent using setNoteAttachement function
                         if (
                             $param['module'] == 'Notes'
                             and $key == 'filecontents'
@@ -896,7 +900,7 @@ class suitecrm8core extends solution
                         }
                     }
 
-                    // Note are sent using setNoteAttachement function 
+                    // Note are sent using setNoteAttachement function
                     if (
                         $param['module'] == 'Notes'
                         and $key == 'filecontents'
@@ -1005,13 +1009,14 @@ class suitecrm8core extends solution
     // Function to delete a record
     public function deleteData($param): array
     {
+        $result = [];
         // We set the flag deleted to 1 and we call the update function
         foreach ($param['data'] as $idDoc => $data) {
             $param['data'][$idDoc]['deleted'] = 1;
 
             $curl = curl_init();
 
-            $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '/' . $data['id'];
+            $curlUrl = $this->session['url'] . '/Api/V8/module/' . $param['module'] . '/' . $data['target_id'];
 
             curl_setopt_array($curl, array(
                 CURLOPT_URL => $curlUrl,
@@ -1028,13 +1033,22 @@ class suitecrm8core extends solution
                     'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
                 ),
             ));
-    
+
             $response = curl_exec($curl);
-    
+
             curl_close($curl);
-    
-    
+
             $decodedResponse = json_decode($response);
+
+            // get the id from the api response
+            $deletedId = substr($decodedResponse->meta->message, 15, 36);
+
+            $result[$idDoc] = [
+                'id' => $deletedId,
+                // 'error' => false,
+                // todo: should we add the error ? Doc was successfully sent and record was deleted in target
+            ];
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         // In case of many to many relationship, the delettion is done by using createRelationship function
@@ -1042,7 +1056,7 @@ class suitecrm8core extends solution
             return $this->createRelationship($param);
         }
 
-        return $this->updateData($param);
+        return $result;
     }
 
 
