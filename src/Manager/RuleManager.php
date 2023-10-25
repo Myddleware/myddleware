@@ -183,7 +183,7 @@ class rulecore
 		// If read lock empty, we set the lock with the job id
 		if (
 				$type == 'read'
-			AND empty($rule->readJobLock)
+			AND empty($rule->getReadJobLock())
 		) {
 			$rule->setReadJobLock($this->jobId);
 			$this->entityManager->persist($rule);
@@ -194,7 +194,7 @@ class rulecore
 		// If send lock empty, we set the lock with the job id
 		if (
 				$type == 'send'
-			AND empty($rule->sendJobLock)
+			AND empty($rule->getSendJobLock())
 		) {
 			$rule->setSendJobLock($this->jobId);
 			$this->entityManager->persist($rule);
@@ -208,25 +208,32 @@ class rulecore
 		// Get the rule details
 		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 		// If read lock empty, we set the lock with the job id
-		if (
-				$type == 'read'
-			AND !empty($rule->readJobLock)
-		) {
-			$rule->setReadJobLock(null);
-			$this->entityManager->persist($rule);
-			$this->entityManager->flush();
-			return true;
+		if ($type == 'read') {
+            $readJobLock = $rule->getReadJobLock();
+            if (
+                    !empty($readJobLock)
+                AND $readJobLock == $this->jobId
+            ) {
+                $rule->setReadJobLock('');
+                $this->entityManager->persist($rule);
+                $this->entityManager->flush();
+                return true;
+            }
 		}
 		
 		// If send lock empty, we set the lock with the job id
-		if (
-				$type == 'send'
-			AND !empty($rule->sendJobLock)
-		) {
-			$rule->setSendJobLock(null);
-			$this->entityManager->persist($rule);
-			$this->entityManager->flush();
-			return true;
+		if ($type == 'send') {
+            $sendJobLock = $rule->getSendJobLock();
+            if (
+                    !empty($sendJobLock)
+                AND $sendJobLock == $this->jobId
+            ) {
+                $rule->setSendJobLock('');
+                $this->entityManager->persist($rule);
+                $this->entityManager->flush();
+                return true;
+            }
+
 		}
 		return false;
 	}
@@ -400,7 +407,6 @@ class rulecore
 			if (!$this->setRuleLock('read')) {
 				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to read the source application. ');
 			}
-
             // lecture des données dans la source
             $readSource = $this->readSource();
             if (empty($readSource['error'])) {
@@ -951,6 +957,11 @@ class rulecore
 
     public function sendDocuments(): array
     {
+        // Check the rule isn't locked
+        if (!$this->setRuleLock('send')) {
+            return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
+        }
+
         // creation into the target application
         $sendTarget = $this->sendTarget('C');
         // Update into the target application
@@ -968,6 +979,10 @@ class rulecore
                 $sendTarget['error'] .= 'Failed to logout from the target solution';
             }
         }
+			
+        // No error management because we don't want any rollback because of the lock. 
+        // If the losk isn't removed, the next task will generate an error
+        $this->unsetRuleLock('send');
 
         return $sendTarget;
     }
@@ -1637,12 +1652,7 @@ class rulecore
 
     protected function sendTarget($type, $documentId = null): array
     {
-        try {
-			// Check the rule isn't locked
-			if (!$this->setRuleLock('send')) {
-				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
-			}
-			
+        try {	
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
             $response['error'] = '';
@@ -1721,10 +1731,6 @@ class rulecore
                     $response[$documentId] = false;
                     $response['error'] = $connect['error'];
                 }
-				
-				// No error management because we don't want any rollback because of the lock. 
-				// If the losk isn't removed, the next task will generate an error
-				$this->unsetRuleLock('send');
             }
         
         } catch (\Exception $e) {
