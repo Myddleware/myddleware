@@ -1341,17 +1341,11 @@ class jobcore
             $stmt->bindValue('error', $error);
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
-            $result = $stmt->executeQuery();
-			
+            $result = $stmt->executeQuery();	
 			// Unlock every document locked by this job (they should already by unlocked)
             $this->documentRepository->removeLock($this->id);
-			// $queryDocument = "UPDATE document 
-			// 				SET 
-			// 					job_lock = null
-			// 				WHERE job_lock = :jobLock";
-            // $stmt = $this->connection->prepare($queryDocument);
-            // $stmt->bindValue('jobLock', $this->id);
-            // $result = $stmt->executeQuery();
+            // Unlock every rule locked by this job (they should already by unlocked)
+            $this->ruleRepository->removeLock($this->id);
 			
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {

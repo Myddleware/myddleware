@@ -161,12 +161,12 @@ class Rule
     private $documents;
 	
 	/**
-     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true)
+     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
      */
     private string $readJobLock;
 	
 	/**
-     * @ORM\Column(name="send_job_lock", type="string", length=23, nullable=true)
+     * @ORM\Column(name="send_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
      */
     private string $sendJobLock;
 
@@ -305,6 +305,9 @@ class Rule
 
     public function getReadJobLock(): string
     {
+        if (empty($this->readJobLock)) {
+            return '';
+        }
         return $this->readJobLock;
     }
 	
@@ -316,6 +319,9 @@ class Rule
 
     public function getSendJobLock(): string
     {
+        if (empty($this->sendJobLock)) {
+            return '';
+        }
         return $this->sendJobLock;
     }
 

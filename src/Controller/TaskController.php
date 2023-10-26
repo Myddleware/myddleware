@@ -29,6 +29,7 @@ use App\Entity\Config;
 use App\Entity\Job;
 use App\Entity\Log;
 use App\Entity\Document;
+use App\Entity\Rule;
 use App\Manager\JobManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
@@ -177,6 +178,10 @@ class TaskController extends AbstractController
 
 			// Remove lock on document locked by this job
 			$this->documentRepository->removeLock($taskStop->getId());
+
+            // Remove lock (send and read) on rule locked by this job
+            $ruleRepository = $this->entityManager->getRepository(Rule::class);
+            $ruleRepository->removeLock($taskStop->getId());
 	
             $em->flush();
 

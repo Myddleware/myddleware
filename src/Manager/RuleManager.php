@@ -204,6 +204,7 @@ class rulecore
 		return false;
 	}
 	
+    // Unset the lock on the rule depending on the type read or send
 	protected function unsetRuleLock($type) {
 		// Get the rule details
 		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
