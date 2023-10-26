@@ -304,24 +304,12 @@ class jobcore
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function initJob(string $paramJob, bool $force = false): array
+    public function initJob(string $paramJob): array
     {
         $this->paramJob = $paramJob;
         $this->id = uniqid('', true);
         $this->start = microtime(true);
-        // Check if a job is already running except if force = true (api call or manuel call)
-        if (!$force) {
-            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-            $stmt = $this->connection->prepare($sqlJobOpen);
-            $result = $stmt->executeQuery();
-            $job = $result->fetchAssociative(); // 1 row
-            // Error if one job is still running
-            if (!empty($job)) {
-                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-                return ['success' => false, 'message' => $this->message];
-            }
-        }
         // Create Job
         $insertJob = $this->insertJob();
         if ($insertJob) {
@@ -356,7 +344,6 @@ class jobcore
             $paramJob[] = $event;
             $paramJob[] = $datatype;
             $paramJob[] = implode(',', $param);
-            $paramJob[] = 1; // Force run even if another task is running
 
             return $this->runBackgroundJob('massaction', $paramJob);
         } else {
@@ -398,7 +385,7 @@ class jobcore
             } catch (IOException $e) {
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' 1 --env='.$this->env.'  > '.$fileTmp.' &');
+            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {

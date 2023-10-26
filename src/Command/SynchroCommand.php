@@ -71,7 +71,7 @@ class SynchroCommand extends Command
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
             ->addArgument('rule', InputArgument::REQUIRED, 'Rule id, you can put several rule id separated by coma')
-            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if the rule is inactive.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -93,7 +93,7 @@ class SynchroCommand extends Command
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
             $this->jobManager->message = '';
             $this->jobManager->setApi($api);
-            $data = $this->jobManager->initJob('Synchro : '.$rule, $force);
+            $data = $this->jobManager->initJob('Synchro : '.$rule);
             if (true === $data['success']) {
                 $output->writeln('1;'.$this->jobManager->getId());  // Not removed, user for manual job and webservices
 
