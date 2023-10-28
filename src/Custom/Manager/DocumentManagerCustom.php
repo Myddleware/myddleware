@@ -43,18 +43,25 @@ class DocumentManagerCustom extends DocumentManager
 
 	protected function beforeStatusChange($new_status) {	
 		// On annule la relation pôle - contact (user) si le contact (user) a été filtré
-		// On tente 2 fois l'envoi (attempt > 0) car la relation pourrait être lues avant le user et être annulé par erreur
 		if (
 			!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5cfa78d49c536' // Rule User - Pôle
 		) {
+			// On tente 2 fois l'envoi (attempt > 0) car la relation pourrait être lues avant le user et être annulé par erreur
 			if (
 					strpos($this->message, 'No data for the field user_id.') !== false
 				and strpos($this->message, 'in the rule REEC - Users.') !== false
-				AND $this->attempt > 0
 			) {
-				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+				if($this->attempt > 0) {
+					$new_status = 'Error_expected';
+					$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+				// Keep the document open until the second try
+				} else {
+					$new_status = 'Predecessor_OK';
+					$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. En attente d un second essai. ');
+					// Add a try as the standard increment attemp only for error or close document
+					$this->attempt++;
+				}
 			}
 		}
 
@@ -62,14 +69,21 @@ class DocumentManagerCustom extends DocumentManager
 		if (
 				!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5d081bd3e1234' // Rule User - Pôle
-			and $this->attempt > 0
 		) {
 			if (
 				strpos($this->message, 'No data for the field record_id.') !== false
 				and strpos($this->message, 'in the rule REEC - Engagé.') !== false
 			) {
-				$new_status = 'Error_expected';
-				$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+				if ($this->attempt > 0) {
+					$new_status = 'Error_expected';
+					$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
+				// Keep the document open until the second try
+				} else {
+					$new_status = 'Predecessor_OK';
+					$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. En attente d un second essai. ');
+					// Add a try as the standard increment attemp only for error or close document
+					$this->attempt++;
+				}
 			}
 		}
 		
@@ -223,10 +237,18 @@ class DocumentManagerCustom extends DocumentManager
 			!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5f20b113356e1' // Rule Composante - Contact partenaire
 			and $new_status == 'Relate_KO'
-			and $this->attempt > 0 // Relationship could be created after the contact, to we don't cancel teh document at the first atempt
 		) {
-			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('La relation ne concerne probablement pas une composantecomposante et un contact partenaire. Ce transfert de données est annulé. ');
+			// Relationship could be created after the contact, to we don't cancel teh document at the first atempt
+			if($this->attempt > 0 ) {
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('La relation ne concerne probablement pas une composante composante et un contact partenaire. Ce transfert de données est annulé. ');
+			// Keep the document open until the second try
+			} else {
+				$new_status = 'Predecessor_OK';
+				$this->message .= utf8_decode('La relation ne concerne probablement pas une composante composante et un contact partenaire. En attente d un second essai. ');
+				// Add a try as the standard increment attemp only for error or close document
+				$this->attempt++;
+			}
 		}
 
 		// On annule tous les transferts de données en relate ko pour la règle composante - Contact partenaire
@@ -298,10 +320,18 @@ class DocumentManagerCustom extends DocumentManager
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '64397bd8c4749' // Sendinblue - contact search into COMET
 			AND $new_status == 'Not_found'
-			AND $this->attempt > 0 	// The contact couldn't be created in COMET yet
 		) {			
-			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+			// The contact couldn't be created in COMET yet
+			if ($this->attempt > 0) {
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+			// Keep the document open until the second try
+			} else {
+				$new_status = 'Transformed';
+				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. En attente d un second essai. ');
+				// Add a try as the standard increment attemp only for error or close document
+				$this->attempt++;
+			}
 		}
 		
 		// We cancel the document (Sendinblue - coupon search into COMET) if we don't find the coupon
@@ -309,10 +339,18 @@ class DocumentManagerCustom extends DocumentManager
 				!empty($this->document_data['rule_id'])
 			AND	$this->document_data['rule_id'] == '64399ff31f587' // Sendinblue - coupon search into COMET
 			AND $new_status == 'Not_found'
-			AND $this->attempt > 0 	// The coupon couldn't be created in COMET yet
-		) {			
-			$new_status = 'Error_expected';
-			$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+		) {
+			// The coupon couldn't be created in COMET yet
+			if ($this->attempt > 0)	{
+				$new_status = 'Error_expected';
+				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
+			// Keep the document open until the second try
+			} else {
+				$new_status = 'Transformed';
+				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. En attente d un second essai. ');
+				// Add a try as the standard increment attemp only for error or close document
+				$this->attempt++;
+			}
 		}
 		
 		// No update from REEC to COMET if the contact hasn't been create from COMET

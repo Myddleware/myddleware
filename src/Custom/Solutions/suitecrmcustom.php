@@ -13,9 +13,10 @@ class suitecrmcustom extends suitecrm
 
 	protected int $limitCall = 100;
 	public $anneeScolaire = '2023_2024';
-	//public $anneeScolaire2 = '2022'; // used to select 2 years
+	public $anneeScolaire2 = '2023'; // used to select 2 years
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
-	protected $moduleWithAnnee = array('Contacts', 'FP_events', 'CRMC_binome', 'CRMC_Suivi', 'Leads');
+	protected $moduleWithAnnee = array('FP_events', 'CRMC_Suivi', 'Leads');
+	protected $moduleWithAnnee2 = array('Contacts', 'CRMC_binome');
 	protected string $urlSuffix = '/custom/service/v4_1_custom/rest.php';
 	protected $currentRule;
 	protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
@@ -580,6 +581,13 @@ class suitecrmcustom extends suitecrm
 		) {
 			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".(!empty($param['ruleParams']['anneeScolaire']) ? $param['ruleParams']['anneeScolaire'] : $this->anneeScolaire)."%' ";
 		}
+		// The rule parameter anneeScolaire2 override the genera parameter if exists
+		if (
+			in_array($param['module'], $this->moduleWithAnnee2)
+			and $param['call_type'] != 'history'
+		) {
+			$query .= ' AND '.strtolower($param['module'])."_cstm.annee_scolaire_c LIKE '%".(!empty($param['ruleParams']['anneeScolaire']) ? $param['ruleParams']['anneeScolaire'] : $this->anneeScolaire2)."%' ";
+		}
 		// Add a filter for contact universite 
 		if (
 				!empty($param['rule']['id'])
@@ -601,7 +609,7 @@ class suitecrmcustom extends suitecrm
 			AND in_array($param['rule']['id'], array('6530c97bdce08', '6530d3766b3da')) // 1j1m - Coupon / 	1j1m - Contact
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
-		}		
+		}
 		return $query;
 	}
 
