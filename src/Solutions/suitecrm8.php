@@ -753,61 +753,34 @@ class suitecrm8core extends solution
         return $result;
     }
 
-        /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function createData($param): array
+    // Create method :
+    // - input : array with the record's data
+    // - output : the id of the new record
+    // An exception has to be generated when an error happends during the creation.
+    // this exception will be catched by the method createData
+    protected function create($param, $record, $idDoc = null)
     {
-        // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            return $this->createRelationship($param);
+
+        $newData = [
+            "data" => [
+                "type" => $param['module'],
+                "attributes" => []
+            ]
+        ];
+
+        // loop through record to populate the attributes in the new structure, except for the id
+        foreach ($record as $key => $value) {
+            // Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
+            if ('id' == $key) {
+                continue;
+            }
+
+            $newData['data']['attributes'][$key] = $value;
         }
 
-        // Transformation du tableau d'entrée pour être compatible webservice Sugar
-        foreach ($param['data'] as $idDoc => $data) {
-            try {
-                // Check control before create
-                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-                $dataSugar = [];
-                foreach ($data as $key => $value) {
-                    if ('Birthdate' == $key && '0000-00-00' == $value) {
-                        continue;
-                    }
-                    // Si un champ est une relation custom alors on enlève le prefix
-                    if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
-                        $key = substr($key, strlen($this->customRelationship));
-                    }
+        $newDataJson = json_encode($newData);
 
-                    // Note are sent using setNoteAttachement function
-                    if (
-                        $param['module'] == 'Notes'
-                        and $key == 'filecontents'
-                    ) {
-                        continue;
-                    }
-                    $dataSugar[] = ['name' => $key, 'value' => $value];
-                }
-
-                // Create a new array to hold the desired structure
-                $newData = [
-                    "data" => [
-                        "type" => $param['module'],
-                        "attributes" => []
-                    ]
-                ];
-
-                // Loop through the original data and populate the new structure
-                foreach ($dataSugar as $field) {
-                    $newData['data']['attributes'][$field['name']] = $field['value'];
-                }
-
-                // unset newdata attributes id to avoid confusing the api
-                unset($newData['data']['attributes']['id']);
-
-                // Convert the new structure back to JSON
-                $newDataJson = json_encode($newData);
-
-                $curl = curl_init();
+        $curl = curl_init();
 
                 curl_setopt_array($curl, array(
                     CURLOPT_URL => $this->session['url'] . '/Api/V8/module',
@@ -830,39 +803,18 @@ class suitecrm8core extends solution
 
                 curl_close($curl);
 
+                // decode the response
+                $decodedResponse = json_decode($response);
 
-                $get_entry_list_result = json_decode($response);
+                // the response is a std class with a data attribute and in that data there is the id of the new record
+                $newRecordId = $decodedResponse->data->id;
 
-
-
-                if (!empty($get_entry_list_result->data->id)) {
-                    // In case of module note with attachement, we generate a second call to add the file
-                    if (
-                        $param['module'] == 'Notes'
-                        and !empty($data['filecontents'])
-                    ) {
-                        $this->setNoteAttachement($data, $get_entry_list_result->data->id);
-                    }
-
-                    $result[$idDoc] = [
-                        'id' => $get_entry_list_result->data->id,
-                        'error' => false,
-                    ];
-                } else {
-                    throw new \Exception('error ' . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '') . ' : ' . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
+                if (isset($decodedResponse->errors)) {
+                    throw new \Exception($decodedResponse->errors->detail);
                 }
-            } catch (\Exception $e) {
-                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-                $result[$idDoc] = [
-                    'id' => '-1',
-                    'error' => $error,
-                ];
-            }
-            // Modification du statut du flux
-            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-        }
 
-        return $result;
+                // if the response does not contain errors
+                return $newRecordId;
     }
 
     /**
