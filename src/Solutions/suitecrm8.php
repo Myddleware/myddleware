@@ -1008,59 +1008,43 @@ class suitecrm8core extends solution
     }
 
 
-    // Function to delete a record
-    public function deleteData($param): array
+    protected function delete($param, $data)
     {
-        $result = [];
-        // We set the flag deleted to 1 and we call the update function
-        foreach ($param['data'] as $idDoc => $data) {
-            $param['data'][$idDoc]['deleted'] = 1;
+        $idDoc = $data['id_doc_myddleware'];
 
-            $curl = curl_init();
+        $param['data'][$idDoc]['deleted'] = 1;
 
-            $curlUrl = $this->session['url'] . '/Api/V8/module/' . $param['module'] . '/' . $data['target_id'];
+        $curl = curl_init();
 
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => $curlUrl,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'DELETE',
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $this->session['token'],
-                    'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
-                ),
-            ));
+        $curlUrl = $this->session['url'] . '/Api/V8/module/' . $param['module'] . '/' . $data['target_id'];
 
-            $response = curl_exec($curl);
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $curlUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'DELETE',
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->session['token'],
+                'Cookie: LEGACYSESSID=' . $legacySessid . '; PHPSESSID=' . $phpsessid . '; XSRF-TOKEN=' . $xsrfToken . '; sugar_user_theme=suite8'
+            ),
+        ));
 
-            curl_close($curl);
+        $response = curl_exec($curl);
 
-            $decodedResponse = json_decode($response);
+        curl_close($curl);
 
-            // get the id from the api response
-            $deletedId = substr($decodedResponse->meta->message, 15, 36);
+        $decodedResponse = json_decode($response);
 
-            $result[$idDoc] = [
-                'id' => $deletedId,
-                // 'error' => false,
-                // todo: should we add the error ? Doc was successfully sent and record was deleted in target
-            ];
-            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-        }
+        // get the id from the api response
+        $deletedId = substr($decodedResponse->meta->message, 15, 36);
 
-        // In case of many to many relationship, the delettion is done by using createRelationship function
-        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
-            return $this->createRelationship($param);
-        }
-
-        return $result;
+        return $deletedId;
     }
-
 
     // Build the query for read data to SuiteCRM
     /**
