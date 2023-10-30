@@ -1040,6 +1040,11 @@ class suitecrm8core extends solution
 
         $decodedResponse = json_decode($response);
 
+        // if the response contains the following "Accounts module with id a5430019-afa7-b33d-f2ca-653f6fce7676 is not found" then we consider that the record has been deleted and we throw an error
+        if (strpos($decodedResponse->errors->detail, 'is not found')) {
+            throw new \Exception('Failed to delete the record. ' . $decodedResponse->meta->message);
+        }
+
         // get the id from the api response
         $deletedId = substr($decodedResponse->meta->message, 15, 36);
 
