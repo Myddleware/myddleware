@@ -558,22 +558,6 @@ class suitecrm8core extends solution
 
         $curl = curl_init();
 
-        $fieldsFormattedParams = '';
-
-        $moduleParams = 'fields[' . $param['module'] . ']=';
-
-        $fieldnames = '';
-
-        foreach ($param['fields'] as $field) {
-            // add $field to the string, then a coma ,
-            $fieldnames .= $field . ',';
-        }
-
-        // remove the last , from the string $fieldnames
-        $fieldnames = rtrim($fieldnames, ',');
-
-        $fieldsFormattedParams .= $moduleParams . $fieldnames;
-
         $curlUrl = $this->createCurlUrl($fieldsFormattedParams, $daterefFilter, $param['module'], $param['query']['id']);
 
         curl_setopt_array($curl, array(
