@@ -819,7 +819,59 @@ class suitecrm8core extends solution
 
     protected function update($param, $data, $idDoc = null)
     {
-        
+        $newData = [
+            "data" => [
+                "type" => $param['module'],
+                "id" => $data['target_id'],
+                "attributes" => []
+            ]
+        ];
+
+        // loop through record to populate the attributes in the new structure, except for the id
+        foreach ($data as $key => $value) {
+            // Remove the id from the data, because it is not a field that can be updated
+            if ('id' == $key || 'target_id' == $key) {
+                continue;
+            }
+
+            $newData['data']['attributes'][$key] = $value;
+        }
+
+        $newDataJson = json_encode($newData);
+
+        $curl = curl_init();
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => $this->session['url'] . '/Api/V8/module',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'PATCH',
+                    CURLOPT_POSTFIELDS => $newDataJson,
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: application/json',
+                        'Authorization: Bearer ' . $this->session['token'],
+                        'Cookie: sugar_user_theme=suite8'
+                    ),
+                ));
+
+                $response = curl_exec($curl);
+
+                curl_close($curl);
+
+                // decode the response
+                $decodedResponse = json_decode($response);
+
+                if (isset($decodedResponse->errors)) {
+                    throw new \Exception($decodedResponse->errors->detail);
+                }
+                $newRecordId = $decodedResponse->data->id;
+
+
+                return $newRecordId;
     }
 
     // Function to send a note
