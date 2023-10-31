@@ -590,6 +590,8 @@ class suitecrm8core extends solution
         $result['type'] = $responseData->type;
         
         try {
+            //! Warning ! the following fields result in a std class, so we avoid them:
+            // member_of, campaign_accounts
             foreach ($attributes as $index => $attribute) {
                 // if attribute format is like "2023-10-12T08:52:00+00:00", then we use the DateTime class to format it
                 if ($index !== "member_of" && $index !== "campaign_accounts" && preg_match('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $attribute)) {
