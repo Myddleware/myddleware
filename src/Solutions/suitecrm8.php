@@ -417,7 +417,7 @@ class suitecrm8core extends solution
             $result[] = $this->readOneRecord($recordId, $module, $fields);
         }
 
-        // if there is no record id in the query, then we are running the rule normally, with the reference date
+        // if there is no record id in the query, then we are running the rule normally or running a simulation inside the source connector, with the reference date
         if (empty($recordId)) {
             $result = $this->readSeveralRecords($param);
         }
