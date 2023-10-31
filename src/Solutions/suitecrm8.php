@@ -582,6 +582,11 @@ class suitecrm8core extends solution
         
         $decodedResponse = json_decode($response);
 
+        // if there is an error in the response, we return the error
+        if (!empty($decodedResponse->errors->detail)) {
+            throw new \Exception($decodedResponse->errors->detail);
+        }
+
         $responseData = $decodedResponse->data;
         $attributes = $responseData->attributes;
         
@@ -797,13 +802,13 @@ class suitecrm8core extends solution
 
                 // decode the response
                 $decodedResponse = json_decode($response);
+                if (!empty($decodedResponse->errors)) {
+                    throw new \Exception($decodedResponse->errors->detail);
+                }
 
                 // the response is a std class with a data attribute and in that data there is the id of the new record
                 $newRecordId = $decodedResponse->data->id;
 
-                if (isset($decodedResponse->errors)) {
-                    throw new \Exception($decodedResponse->errors->detail);
-                }
 
                 // if the response does not contain errors
                 return $newRecordId;
