@@ -404,24 +404,17 @@ class suitecrm8core extends solution
     public function read($param)
     {
 
-        $fields = $param['fields'];
-
-        $module = $param['module'];
-
-        $recordId = $param['query']['id'];
-
         $result = [];
 
         // if there is a record id in the query, then we are running the rule by id
-        if (!empty($recordId)) {
-            $result[] = $this->readOneRecord($recordId, $module, $fields);
+        if (!empty($param['query']['id'])) {
+            $result[] = $this->readOneRecord($param);
         }
 
         // if there is no record id in the query, then we are running the rule normally or running a simulation inside the source connector, with the reference date
-        if (empty($recordId)) {
+        if (empty($param['query']['id'])) {
             $result = $this->readSeveralRecords($param);
         }
-
 
         return $result;
     }
@@ -480,9 +473,19 @@ class suitecrm8core extends solution
     }
 
     // Function combine the params, the fields and the date reference to create the curl url
-    private function createCurlUrl($fieldsFormattedParams, $daterefFilter, $module)
+    private function createCurlUrl($fieldsFormattedParams, $daterefFilter=null, $module, $recordId=null)
     {
-        return $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
+        $url = '';
+        // if record id is not null
+        if($recordId !== null)
+        {
+            $url = $this->session['url'] . '/Api/V8/module/' . $module . '/' . $recordId . '?' . $fieldsFormattedParams . $daterefFilter;
+        }
+        else
+        {
+            $url = $this->session['url'] . '/Api/V8/module/' . $module . '?' . $fieldsFormattedParams . $daterefFilter;
+        }
+        return $url;
     }
 
     // Function to encode and launch the curl request
@@ -549,17 +552,19 @@ class suitecrm8core extends solution
     }
 
 
-    public function readOneRecord($recordId, $module, $fields)
+    public function readOneRecord($param)
     {
+        $fieldsFormattedParams = $this->formatFieldsParams($param);
+
         $curl = curl_init();
 
         $fieldsFormattedParams = '';
 
-        $moduleParams = 'fields[' . $module . ']=';
+        $moduleParams = 'fields[' . $param['module'] . ']=';
 
         $fieldnames = '';
 
-        foreach ($fields as $field) {
+        foreach ($param['fields'] as $field) {
             // add $field to the string, then a coma ,
             $fieldnames .= $field . ',';
         }
@@ -569,7 +574,7 @@ class suitecrm8core extends solution
 
         $fieldsFormattedParams .= $moduleParams . $fieldnames;
 
-        $curlUrl = $this->session['url'] . '/Api/V8/module/' . $module . '/' . $recordId . '?' . $fieldsFormattedParams;
+        $curlUrl = $this->createCurlUrl($fieldsFormattedParams, $daterefFilter, $param['module'], $param['query']['id']);
 
         curl_setopt_array($curl, array(
             CURLOPT_URL => $curlUrl,
@@ -588,18 +593,18 @@ class suitecrm8core extends solution
         ));
 
         $response = curl_exec($curl);
-
+        
         curl_close($curl);
-
-
+        
         $decodedResponse = json_decode($response);
+
         $responseData = $decodedResponse->data;
         $attributes = $responseData->attributes;
-
+        
         $result = [];
         $result['id'] = $responseData->id;
         $result['type'] = $responseData->type;
-
+        
         try {
             foreach ($attributes as $index => $attribute) {
                 // if attribute format is like "2023-10-12T08:52:00+00:00", then we use the DateTime class to format it
@@ -608,7 +613,7 @@ class suitecrm8core extends solution
                     // then we convert data attribute to a string of the following format "2023-09-07 06:57:19"
                     $dateTimeAttributeString = $dateTimeAttribute->format('Y-m-d H:i:s');
                     $result[$index] = $dateTimeAttributeString;
-
+                    
                 } else {
                     $result[$index] = $attribute;
                 }
@@ -616,7 +621,8 @@ class suitecrm8core extends solution
         } catch (\Exception $e) {
             $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
         }
-
+        
+        throw new \Exception('test exception');
         return $result;
     }
 
