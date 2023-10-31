@@ -606,7 +606,6 @@ class suitecrm8core extends solution
             $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
         }
         
-        throw new \Exception('test exception');
         return $result;
     }
 
