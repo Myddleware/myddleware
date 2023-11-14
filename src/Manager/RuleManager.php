@@ -414,10 +414,12 @@ class rulecore
                 $readSource['error'] = '';
             }
 
-            // Si erreur
+            // If error we unlock the rule and we return the result
             if (!isset($readSource['count'])) {
+				$this->unsetRuleLock('read');
                 return $readSource;
             }
+			
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
                 if ($readSource['count'] > 0) {
