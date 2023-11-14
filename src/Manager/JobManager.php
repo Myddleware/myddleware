@@ -1329,10 +1329,6 @@ class jobcore
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();	
-			// Unlock every document locked by this job (they should already by unlocked)
-            $this->documentRepository->removeLock($this->id);
-            // Unlock every rule locked by this job (they should already by unlocked)
-            $this->ruleRepository->removeLock($this->id);
 			
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
