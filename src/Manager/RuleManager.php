@@ -1419,6 +1419,9 @@ class rulecore
                 )
             )
         ) {
+			if (!$this->setRuleLock('send')) {
+				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
+			}
             $response = $this->sendTarget('', $id_document);
             if (
                     !empty($response[$id_document]['id'])
@@ -1429,6 +1432,7 @@ class rulecore
             } else {
                 $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
             }
+			$this->unsetRuleLock('send');
         }
         // If the job is manual, we display error in the UI
         if ($this->manual) {

@@ -213,7 +213,6 @@ class documentcore
 					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
 				}
                 $this->setLock();
-
                 // Get source data and create data attribut
                 $this->sourceData = $this->getDocumentData('S');
                 $this->data = $this->sourceData;
@@ -228,12 +227,13 @@ class documentcore
                 $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
-            $this->message .= 'Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$error = 'Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->message .= $error;
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
             // Stop the process
-            throw new \Exception($this->message);
+            throw new \Exception($error);
         }
     }
 
@@ -463,12 +463,16 @@ class documentcore
 
     // Set the document lock
     protected function setLock() {
-        // Get the rule details
-        $rule = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
-        $rule->setJobLock($this->jobId);
-        $this->entityManager->persist($rule);
-        $this->entityManager->flush();
-        return true;
+        try {
+			// Set the job lock on the document
+			$document = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
+			$document->setJobLock($this->jobId);
+			$this->entityManager->persist($document);
+			$this->entityManager->flush();
+			return true;
+        } catch (\Exception $e) {
+			return false;
+		}
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas
@@ -1959,7 +1963,8 @@ class documentcore
 									date_modified = :now,
 									global_status = :globalStatus,
 									attempt = :attempt,
-									status = :new_status
+									status = :new_status,
+									job_lock = :jobLock
 								WHERE
 									id = :id
 								';
@@ -1977,12 +1982,13 @@ class documentcore
             $stmt->bindValue(':attempt', $this->attempt);
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
+			// Remove the lock on the document in the class and in the database
+            $this->jobLock = null;
+            $stmt->bindValue(':jobLock', $this->jobLock, \PDO::PARAM_NULL);
             $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
             $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
-			// Remove the lock on the document
-            $this->jobLock = null;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
         } catch (\Exception $e) {
