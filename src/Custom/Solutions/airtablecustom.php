@@ -340,9 +340,16 @@ class airtablecustom extends airtable {
         return $data;
     }
 
-    // Check data before update
-    protected function checkDataBeforeUpdate($param, $data, $idDoc)
-    {
+	   // Check data before update
+	protected function checkDataBeforeUpdate($param, $data, $idDoc)
+	{
+		// Affichage des variables pour le débogage
+		echo 'ID Document: ' . $idDoc . PHP_EOL;
+		echo 'Paramètres reçus:' . PHP_EOL;
+		print_r($param);
+		echo 'Données reçues avant la modification:' . PHP_EOL;
+		print_r($data);
+	
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -353,7 +360,7 @@ class airtablecustom extends airtable {
 				unset($data['fldBQBCfr1ZgVJmE3']);
 			}
 		}
-		
+	
 		if ($param['rule']['id'] == '61a930273441b') { // Aiko binome
 			if (
 					array_key_exists('fldqGYsTr5EylIi2f', $data)
@@ -362,17 +369,30 @@ class airtablecustom extends airtable {
 				unset($data['fldqGYsTr5EylIi2f']);
 			}
 		}
-
-		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			if (
-					array_key_exists('fldY9MAvfDHSHtJKT', $data)
-				AND	empty($data['fldY9MAvfDHSHtJKT'])
-			) {	// if referent empty we remove it from the data sent
+	
+		if ($param['rule']['id'] == '625fcd2ed442f') { // Mobilisation - Coupons
+			// $emailModified = isset($data['fldaG35rEvmO9rm3m']) && $data['fldaG35rEvmO9rm3m'] != $data['email_field_old'];
+			// $validStatus = in_array($data['fldEI7AEhSDfynvFz'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+	
+			// // Affichage pour le débogage
+			echo 'Email :' . $data['fldaG35rEvmO9rm3m'] . PHP_EOL;
+	
+			// if ($emailModified && $validStatus) {
+			// 	// Logique de mise à jour ici
+			// }
+	
+			if (array_key_exists('fldY9MAvfDHSHtJKT', $data) && empty($data['fldY9MAvfDHSHtJKT'])) {
 				unset($data['fldY9MAvfDHSHtJKT']);
 			}
 		}
-        return $data;
-    }
+	
+		// Affichage des données après modification
+		echo 'Données après la modification:' . PHP_EOL;
+		print_r($data);
+	
+		return $data;
+	}
+	
 	    
 	function getFieldsDuplicate($module)
     {
