@@ -1323,130 +1323,136 @@ class rulecore
      */
     protected function rerun($id_document): array
     {
-        $session = new Session();
-        $msg_error = [];
-        $msg_success = [];
-        $msg_info = [];
-        // Récupération du statut du document
-        $param['id_doc_myddleware'] = $id_document;
-        $param['jobId'] = $this->jobId;
-        $param['api'] = $this->api;
-        // Set the param values and clear all document attributes
-        $this->documentManager->setParam($param, true);
-        $status = $this->documentManager->getStatus();
-        // Si la règle n'est pas chargée alors on l'initialise.
-        if (empty($this->ruleId)) {
-            $this->ruleId = $this->documentManager->getRuleId();
-            $this->setRule($this->ruleId);
-            $this->setRuleRelationships();
-            $this->setRuleParam();
-            $this->setRuleField();
-        }
-
-        $response[$id_document] = false;
-        // On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
-        if (in_array($status, ['New', 'Filter_KO'])) {
-            $response = $this->filterDocuments([['id' => $id_document]]);
-            if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
-            } elseif (-1 == $response[$id_document]) {
-                $msg_info[] = 'Transfer id '.$id_document.' : Status change => Filter';
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
-            }
-            // Update status if an action has been executed
-            $status = $this->documentManager->getStatus();
-        }
-        if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
-            $response = $this->checkPredecessorDocuments([['id' => $id_document]]);
-            if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
-            }
-            // Update status if an action has been executed
-            $status = $this->documentManager->getStatus();
-        }
-        if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-            $response = $this->checkParentDocuments([['id' => $id_document]]);
-            if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
-            }
-            // Update status if an action has been executed
-            $status = $this->documentManager->getStatus();
-        }
-        if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
-            $response = $this->transformDocuments([['id' => $id_document]]);
-            if (true === $response[$id_document]) {
-                $msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
-            }
-            // Update status if an action has been executed
-            $status = $this->documentManager->getStatus();
-        }
-        if (in_array($status, ['Transformed', 'Error_checking', 'Not_found'])) {
-            $response = $this->getTargetDataDocuments([['id' => $id_document]]);
-            if (true === $response[$id_document]) {
-                if ('S' == $this->rule['mode']) {
-                    $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
-                } else {
-                    $msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
-                }
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
-            }
-            // Update status if an action has been executed
-            $status = $this->documentManager->getStatus();
-        }
-        // Si la règle est en mode recherche alors on n'envoie pas de données
-        // Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
-        if (
-                'S' != $this->rule['mode']
-            && (
-                    in_array($status, ['Ready_to_send', 'Error_sending'])
-                || (
-                        true === $response[$id_document]
-                    && (
-                            empty($response['doc_status'])
-                        || (
-                                !empty($response['doc_status'])
-                            && 'No_send' != $response['doc_status']
-                        )
-                    )
-                )
-            )
-        ) {
-			if (!$this->setRuleLock('send')) {
-				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
+		try {
+			$session = new Session();
+			$msg_error = [];
+			$msg_success = [];
+			$msg_info = [];
+			// Récupération du statut du document
+			$param['id_doc_myddleware'] = $id_document;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+			// Set the param values and clear all document attributes
+			$this->documentManager->setParam($param, true);
+			$status = $this->documentManager->getStatus();
+			// Si la règle n'est pas chargée alors on l'initialise.
+			if (empty($this->ruleId)) {
+				$this->ruleId = $this->documentManager->getRuleId();
+				$this->setRule($this->ruleId);
+				$this->setRuleRelationships();
+				$this->setRuleParam();
+				$this->setRuleField();
 			}
-            $response = $this->sendTarget('', $id_document);
-            if (
-                    !empty($response[$id_document]['id'])
-                && empty($response[$id_document]['error'])
-                && empty($response['error']) // Error can be on the document or can be a general error too
-            ) {
-                $msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
-            } else {
-                $msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
-            }
-			$this->unsetRuleLock('send');
-        }
-        // If the job is manual, we display error in the UI
-        if ($this->manual) {
-            if (!empty($msg_error)) {
-                $session->set('error', $msg_error);
-            }
-            if (!empty($msg_success)) {
-                $session->set('success', $msg_success);
-            }
-            if (!empty($msg_info)) {
-                $session->set('info', $msg_info);
-            }
-        }
 
+			$response[$id_document] = false;
+			// On lance des méthodes différentes en fonction du statut en cours du document et en fonction de la réussite ou non de la fonction précédente
+			if (in_array($status, ['New', 'Filter_KO'])) {
+				$response = $this->filterDocuments([['id' => $id_document]]);
+				if (true === $response[$id_document]) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Filter_OK';
+				} elseif (-1 == $response[$id_document]) {
+					$msg_info[] = 'Transfer id '.$id_document.' : Status change => Filter';
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Filter_KO';
+				}
+				// Update status if an action has been executed
+				$status = $this->documentManager->getStatus();
+			}
+			if (in_array($status, ['Filter_OK', 'Predecessor_KO'])) {
+				$response = $this->checkPredecessorDocuments([['id' => $id_document]]);
+				if (true === $response[$id_document]) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Predecessor_OK';
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Predecessor_KO';
+				}
+				// Update status if an action has been executed
+				$status = $this->documentManager->getStatus();
+			}
+			if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
+				$response = $this->checkParentDocuments([['id' => $id_document]]);
+				if (true === $response[$id_document]) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
+				}
+				// Update status if an action has been executed
+				$status = $this->documentManager->getStatus();
+			}
+			if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
+				$response = $this->transformDocuments([['id' => $id_document]]);
+				if (true === $response[$id_document]) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_transformed';
+				}
+				// Update status if an action has been executed
+				$status = $this->documentManager->getStatus();
+			}
+			if (in_array($status, ['Transformed', 'Error_checking', 'Not_found'])) {
+				$response = $this->getTargetDataDocuments([['id' => $id_document]]);
+				if (true === $response[$id_document]) {
+					if ('S' == $this->rule['mode']) {
+						$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
+					} else {
+						$msg_success[] = 'Transfer id '.$id_document.' : Status change : '.$response['doc_status'];
+					}
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : '.$response['doc_status'];
+				}
+				// Update status if an action has been executed
+				$status = $this->documentManager->getStatus();
+			}
+			// Si la règle est en mode recherche alors on n'envoie pas de données
+			// Si on a un statut compatible ou si le doc vient de passer dans l'étape précédente et qu'il n'est pas no_send alors on envoie les données
+			if (
+					'S' != $this->rule['mode']
+				&& (
+						in_array($status, ['Ready_to_send', 'Error_sending'])
+					|| (
+							true === $response[$id_document]
+						&& (
+								empty($response['doc_status'])
+							|| (
+									!empty($response['doc_status'])
+								&& 'No_send' != $response['doc_status']
+							)
+						)
+					)
+				)
+			) {
+				if (!$this->setRuleLock('send')) {
+					// Remove lock on the document
+					$this->documentManager->unsetLock();
+					return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
+				}
+				$response = $this->sendTarget('', $id_document);
+				if (
+						!empty($response[$id_document]['id'])
+					&& empty($response[$id_document]['error'])
+					&& empty($response['error']) // Error can be on the document or can be a general error too
+				) {
+					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
+				} else {
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
+				}
+				$this->unsetRuleLock('send');
+			}
+			// If the job is manual, we display error in the UI
+			if ($this->manual) {
+				if (!empty($msg_error)) {
+					$session->set('error', $msg_error);
+				}
+				if (!empty($msg_success)) {
+					$session->set('success', $msg_success);
+				}
+				if (!empty($msg_info)) {
+					$session->set('info', $msg_info);
+				}
+			}
+		} catch (Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $msg_error[] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+        }
         return $msg_error;
     }
 

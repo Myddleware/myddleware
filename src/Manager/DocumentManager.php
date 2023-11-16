@@ -474,6 +474,22 @@ class documentcore
 			return false;
 		}
     }
+	
+	// Set the document lock
+    public function unsetLock() {
+        try {
+			// Set the job lock on the document
+			$document = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
+			if ($document->getJobLock() == $this->jobId) {
+				$document->setJobLock('');
+				$this->entityManager->persist($document);
+				$this->entityManager->flush();
+				return true;
+			}
+        } catch (\Exception $e) {
+		}
+		return false;
+    }
 
     // Permet d'indiquer si le filtreest rempli ou pas
     protected function checkFilter($fieldValue, $operator, $filterValue): bool

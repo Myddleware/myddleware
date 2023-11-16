@@ -267,6 +267,7 @@ class jobcore
     public function runError($limit, $attempt)
     {
         try {
+			$ruleId = '';
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
             $sqlParams = "	SELECT * 
 							FROM document
@@ -285,14 +286,18 @@ class jobcore
             if (!empty($documentsError)) {
                 // include_once 'rule.php';
                 foreach ($documentsError as $documentError) {
-                    $this->ruleManager->setRule($documentError['rule_id']);
-                    $this->ruleManager->setJobId($this->id);
-					$this->ruleManager->setManual($this->manual);
-                    $this->ruleManager->setApi($this->api);
+					// Load the rule only if it has changed
+					if ($ruleId != $documentError['rule_id']) {
+						$this->ruleManager->setRule($documentError['rule_id']);
+						$this->ruleManager->setJobId($this->id);
+						$this->ruleManager->setManual($this->manual);
+						$this->ruleManager->setApi($this->api);
+					}
                     $errorActionDocument = $this->ruleManager->actionDocument($documentError['id'], 'rerun');
                     if (!empty($errorActionDocument)) {
                         $this->message .= print_r($errorActionDocument, true);
                     }
+					$ruleId = $documentError['rule_id'];
                 }
             }
         } catch (Exception $e) {
