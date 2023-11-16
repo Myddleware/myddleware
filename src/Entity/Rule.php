@@ -35,7 +35,11 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Entity(repositoryClass="App\Repository\RuleRepository")
  * @ORM\HasLifecycleCallbacks()
  *
- * @ORM\Table(name="rule", indexes={@ORM\Index(name="Krule_name", columns={"name"})})
+ * @ORM\Table(name="rule", indexes={
+ *	 @ORM\Index(name="Krule_name", columns={"name"}),
+ *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"}),
+ *	 @ORM\Index(name="index_send_job_lock", columns={"send_job_lock"})
+ * })
  */
 class Rule
 {
