@@ -113,6 +113,7 @@ class airtablecustom extends airtable {
 
 	// Redefine read function
 	public function readData($param): array {
+		echo "toto1";
 		$result = parent::readData($param);
 
 		// if the rule id is 6491a6a34b732, we handle the conversion of the emoji to a format that will be fully compatible with the database encoding which is utf8_general_ci
@@ -304,6 +305,7 @@ class airtablecustom extends airtable {
 	// Check data before create
     protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
+		echo "toto2";
 		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -325,7 +327,7 @@ class airtablecustom extends airtable {
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			$validStatus = in_array($data['status'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
 			if ($validStatus) {
 				$value['error'] = 'Document status is not valid for processing';
 				return parent::updateDocumentStatus($idDoc, $value, $param, 'filter'); 
@@ -348,7 +350,7 @@ class airtablecustom extends airtable {
 	   // Check data before update
 	protected function checkDataBeforeUpdate($param, $data, $idDoc)
 	{
-	
+		echo "toto3";
 		$documentManager = new DocumentManager(
 			$this->logger, 
 			$this->connection, 
@@ -402,6 +404,7 @@ class airtablecustom extends airtable {
 	    
 	function getFieldsDuplicate($module)
     {
+		echo "toto4";
 		if ($_ENV['AFEV_ENV'] == 'PREPROD') {
 			if (isset($this->fieldsDuplicatePreprod[$module])) {
 				return $this->fieldsDuplicatePreprod[$module];
@@ -414,6 +417,7 @@ class airtablecustom extends airtable {
 
 	// Redefine updateDocumentStatus standard function
 	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array {
+		echo "toto5";
 		// Make an integromat call if call OK to Mobilisation - Contacts webservice
 		if (
 				!empty($param['ruleId'])
