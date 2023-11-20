@@ -325,7 +325,7 @@ class airtablecustom extends airtable {
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			$validStatus = in_array($data['status'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
 			if ($validStatus) {
 				$value['error'] = 'Document status is not valid for processing';
 				return parent::updateDocumentStatus($idDoc, $value, $param, 'filter'); 
@@ -382,13 +382,12 @@ class airtablecustom extends airtable {
 
 			$oldEmail = $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb'] ?? null;
 			$emailModified = isset($data['fldUfChKmCxvSBEqb']) && $data['fldUfChKmCxvSBEqb'] != $oldEmail;
-			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			$validStatus = in_array($data['status'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
 
 			if ($emailModified && $validStatus) {
 				$data = array('fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb']);
 			} 
 			else {
-				//...
 				$value['error'] = 'The email has not been modified';
 				return parent::updateDocumentStatus($idDoc, $value, $param, 'filter'); 
 			}
