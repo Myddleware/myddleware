@@ -325,6 +325,11 @@ class airtablecustom extends airtable {
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
+			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			if ($validStatus) {
+				$value['error'] = 'Document status is not valid for processing';
+				return parent::updateDocumentStatus($idDoc, $value, $param, 'filter'); 
+			}
 			if (
 					array_key_exists('fldY9MAvfDHSHtJKT', $data)
 				AND	empty($data['fldY9MAvfDHSHtJKT'])
