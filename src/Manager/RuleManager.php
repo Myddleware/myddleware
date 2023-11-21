@@ -412,19 +412,19 @@ class rulecore
 				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to read the source application. ');
 			}
 
-            // lecture des données dans la source
-            $readSource = $this->readSource();
-            if (empty($readSource['error'])) {
-                $readSource['error'] = '';
-            }
-            // If error we unlock the rule and we return the result
-            if (!isset($readSource['count'])) {
-				$this->unsetRuleLock('read');
-                return $readSource;
-            }
-			
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
+				// lecture des données dans la source
+				$readSource = $this->readSource();
+				if (empty($readSource['error'])) {
+					$readSource['error'] = '';
+				}
+				// If error we unlock the rule and we return the result
+				if (!isset($readSource['count'])) {
+					$this->unsetRuleLock('read');
+					return $readSource;
+				}
+			
                 if ($readSource['count'] > 0) {
 					// Before creating the documents, we check the job id is the one in the rule lock
 					if ($this->getRuleLock('read') != $this->jobId) {
