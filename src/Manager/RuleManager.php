@@ -466,7 +466,7 @@ class rulecore
                 $this->updateParams();
 				
 				// No error management because we don't want any rollback because of the lock. 
-				// If the losk isn't removed, the next task will generate an error
+				// If the lock isn't removed, the next task will generate an error
 				$this->unsetRuleLock('read');
 
                 // Rollback if the job has been manually stopped
@@ -478,6 +478,8 @@ class rulecore
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				// The process is finished even if there is an exception so we unlock the rule
+				$this->unsetRuleLock('read');
             }
         }
         // On affiche pas d'erreur si la lecture est désactivée

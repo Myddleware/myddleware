@@ -232,6 +232,8 @@ class documentcore
             $this->typeError = 'E';
             $this->logger->error($this->message);
             $this->createDocLog();
+			// Remove the lock because there is not status changed (lock is usually remove when we change the status)
+			$this->unsetLock();
             // Stop the process
             throw new \Exception($error);
         }
@@ -361,7 +363,6 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
-
             return false;
         }
     }
