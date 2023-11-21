@@ -205,7 +205,7 @@ class rulecore
 	}
 	
     // Unset the lock on the rule depending on the type read or send
-	protected function unsetRuleLock($type) {
+	public function unsetRuleLock($type) {
 		// Get the rule details
 		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 		// If read lock empty, we set the lock with the job id
@@ -219,9 +219,11 @@ class rulecore
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
                 return true;
-            }
+            }  elseif (!empty($readJobLock)) {
+				return false;
+			}
 		}
-		
+
 		// If send lock empty, we set the lock with the job id
 		if ($type == 'send') {
             $sendJobLock = $rule->getSendJobLock();
@@ -233,10 +235,11 @@ class rulecore
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
                 return true;
-            }
-
+             }  elseif (!empty($sendJobLock)) {
+				return false;
+			}
 		}
-		return false;
+		return true;
 	}
 	
 	protected function getRuleLock($type) {
@@ -408,12 +411,12 @@ class rulecore
 			if (!$this->setRuleLock('read')) {
 				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to read the source application. ');
 			}
+
             // lecture des données dans la source
             $readSource = $this->readSource();
             if (empty($readSource['error'])) {
                 $readSource['error'] = '';
             }
-
             // If error we unlock the rule and we return the result
             if (!isset($readSource['count'])) {
 				$this->unsetRuleLock('read');
@@ -479,7 +482,7 @@ class rulecore
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				// The process is finished even if there is an exception so we unlock the rule
-				$this->unsetRuleLock('read');
+				// $this->unsetRuleLock('read');
             }
         }
         // On affiche pas d'erreur si la lecture est désactivée
