@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
+use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -428,11 +429,11 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        /** @var UserRepository $userRepository */
-        $userRepository = $this->entityManager->getRepository(User::class);
+        $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(['cronJob' => $id]);
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
+            'entityResult' => $entityResult,
         ]);
     }
     
