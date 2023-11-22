@@ -82,6 +82,7 @@
                 <h4 class="mt-5">{{ 'Crontab Results'|trans }}</h4>
 					<thead>
 						<tr>
+                            <th>{{ 'jobscheduler.id'|trans }}</th>
 							<th>{{ 'jobscheduler.date_created'|trans }}</th>
 							<th>{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th>{{ 'jobscheduler.output'|trans }}</th>
@@ -90,6 +91,7 @@
 					<tbody>
 						{% for result in entityResult %}
 							<tr>
+                                <td>{{ result.id }}</td>
 								<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
 								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
 								<td>{{ result.output|raw }}</td>
