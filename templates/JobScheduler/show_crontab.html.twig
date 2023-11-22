@@ -81,7 +81,7 @@
 				<table class="table table-light table-hover" id="myTable">
                 
                 <h4 class="mt-5">{{ 'Crontab Results'|trans }}</h4>
-                <h5 class="mt-5" id="crontab-order-info">{{ "ASC" }}</h5>
+                <h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
 
                 
 					<thead>
@@ -116,6 +116,10 @@ function sortTable(n) {
   table = document.getElementById("myTable");
   switching = true;
   dir = "asc"; 
+
+  // Update the h5 content to show the current sorting direction
+  var orderInfo = document.getElementById("crontab-order-info");
+  orderInfo.innerText = "Sorting: " + (dir === "asc" ? "Ascending" : "Descending");
 
   while (switching) {
     switching = false;
@@ -170,10 +174,18 @@ function sortTable(n) {
       if (switchcount == 0 && dir == "asc") {
         dir = "desc";
         switching = true;
+        // Update the h5 content when the direction changes
+        orderInfo.innerText = "Sorting: Descending";
       }
     }
   }
+
+  // Final update in case no switching was done and the direction is already descending
+  if (!switching && dir === "desc") {
+    orderInfo.innerText = "Sorting: Descending";
+  }
 }
+
 
 
 </script>
