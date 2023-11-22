@@ -303,6 +303,7 @@ class airtablecustom extends airtable {
 	// Check data before create
     protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
+		print_r($data);
 		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -334,11 +335,15 @@ class airtablecustom extends airtable {
 					$this->ruleRelationshipsRepository,
 					$this->formulaManager
 				);
-				$paramDoc['id_doc_myddleware'] = $param['document']['id'];
+				$value = 'error';
+				$paramDoc['id_doc_myddleware'] =  $idDoc;
 				$documentManager->setParam($paramDoc);
-				$documentManager->generateDocLog('W', 'status refus_non_eligible....');
-				$documentManager->updateStatus('filter');
+				$documentManager->setMessage('status refus_non_eligible....');
+				$forceStatus = $documentManager->updateStatus('Filter');
+
+				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 			}
+
 			if (
 					array_key_exists('fldY9MAvfDHSHtJKT', $data)
 				AND	empty($data['fldY9MAvfDHSHtJKT'])
@@ -358,7 +363,7 @@ class airtablecustom extends airtable {
 	   // Check data before update
 	protected function checkDataBeforeUpdate($param, $data, $idDoc)
 	{
-	
+		print_r($param);
 		$documentManager = new DocumentManager(
 			$this->logger, 
 			$this->connection, 
@@ -393,15 +398,23 @@ class airtablecustom extends airtable {
 			$oldEmail = $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb'] ?? null;
 			$emailModified = isset($data['fldUfChKmCxvSBEqb']) && $data['fldUfChKmCxvSBEqb'] != $oldEmail;
 			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			$newEmail =  $data['fldUfChKmCxvSBEqb'];
 
 			if ($emailModified && $validStatus) {
-				$data = array('fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb']);
+				//$data = array('fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb']);
+				$data = $param['dataHistory'][$idDoc];
+				$data['fldUfChKmCxvSBEqb'] = $newEmail;
+				
+				print_r('data : '. $data);
 			} 
-			else {
-				$paramDoc['id_doc_myddleware'] = $param['document']['id'];
+			else if($validStatus){
+				$value = 'error';
+				$paramDoc['id_doc_myddleware'] =  $idDoc;
 				$documentManager->setParam($paramDoc);
-				$documentManager->generateDocLog('W', 'The email has not been modified');
-				$documentManager->updateStatus('filter');
+				$documentManager->setMessage('status refus_non_eligible....');
+				$forceStatus = $documentManager->updateStatus('Filter');
+
+				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 			}
 	
 			if (array_key_exists('fldY9MAvfDHSHtJKT', $data) && empty($data['fldY9MAvfDHSHtJKT'])) {
