@@ -109,8 +109,6 @@
 
 <script>
 function sortTable(n) {
-    console.log("sortTable");
-    console.log('n: ' + n);
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("myTable");
   switching = true;
@@ -125,19 +123,38 @@ function sortTable(n) {
       x = rows[i].getElementsByTagName("TD")[n];
       y = rows[i + 1].getElementsByTagName("TD")[n];
 
-      // Convert to numbers if sorting by the column with numerical data
-      var xContent = isNaN(parseInt(x.innerHTML)) ? x.innerHTML.toLowerCase() : parseInt(x.innerHTML);
-      var yContent = isNaN(parseInt(y.innerHTML)) ? y.innerHTML.toLowerCase() : parseInt(y.innerHTML);
+      // Check if we are dealing with dates
+      if (n === 1 || n === 2) { // assuming date columns are 1 (Date created) and 2 (Date update)
+        var xDate = new Date(x.innerHTML);
+        var yDate = new Date(y.innerHTML);
+      } else {
+        var xContent = isNaN(parseInt(x.innerHTML)) ? x.innerHTML.toLowerCase() : parseInt(x.innerHTML);
+        var yContent = isNaN(parseInt(y.innerHTML)) ? y.innerHTML.toLowerCase() : parseInt(y.innerHTML);
+      }
 
-      if (dir == "asc") {
-        if (xContent > yContent) {
-          shouldSwitch = true;
-          break;
+      if (n === 1 || n === 2) { // date columns
+        if (dir == "asc") {
+          if (xDate > yDate) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (xDate < yDate) {
+            shouldSwitch = true;
+            break;
+          }
         }
-      } else if (dir == "desc") {
-        if (xContent < yContent) {
-          shouldSwitch = true;
-          break;
+      } else { // other columns
+        if (dir == "asc") {
+          if (xContent > yContent) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (xContent < yContent) {
+            shouldSwitch = true;
+            break;
+          }
         }
       }
     }
@@ -154,6 +171,7 @@ function sortTable(n) {
     }
   }
 }
+
 
 </script>
 	{% endblock %}
