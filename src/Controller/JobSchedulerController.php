@@ -432,7 +432,6 @@ class JobSchedulerController extends AbstractController
         // Fetch the CronJobResults and sort them by 'id' in ascending order
         $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(
             ['cronJob' => $id],
-            ['id' => 'ASC']  // Sorting by 'id' in ascending order
         );
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
