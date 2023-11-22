@@ -78,12 +78,14 @@
 				</table>
 			</div>
 			<div id="jobschedulerresulttable">
-				<table class="table table-light table-hover">
+				<table class="table table-light table-hover" id="myTable">
                 <h4 class="mt-5">{{ 'Crontab Results'|trans }}</h4>
+
+                
 					<thead>
 						<tr>
-                            <th>{{ 'jobscheduler.id'|trans }}</th>
-							<th>{{ 'jobscheduler.date_created'|trans }}</th>
+                            <th onclick="sortTable(0)" >{{ 'jobscheduler.id'|trans }}</th>
+							<th onclick="sortTable(1)" >{{ 'jobscheduler.date_created'|trans }}</th>
 							<th>{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th>{{ 'jobscheduler.output'|trans }}</th>
 						</tr>
@@ -102,4 +104,56 @@
 			</div>
 
 		</div>
+
+        
+
+<script>
+function sortTable(n) {
+    console.log("sortTable");
+    console.log('n: ' + n);
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  dir = "asc"; 
+
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+
+      // Convert to numbers if sorting by the column with numerical data
+      var xContent = isNaN(parseInt(x.innerHTML)) ? x.innerHTML.toLowerCase() : parseInt(x.innerHTML);
+      var yContent = isNaN(parseInt(y.innerHTML)) ? y.innerHTML.toLowerCase() : parseInt(y.innerHTML);
+
+      if (dir == "asc") {
+        if (xContent > yContent) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (xContent < yContent) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;      
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+</script>
 	{% endblock %}
