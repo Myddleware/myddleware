@@ -178,29 +178,38 @@ class rulecore
     }
 
 	protected function setRuleLock($type) {
-		// Get the rule details
-		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
-		// If read lock empty, we set the lock with the job id
-		if (
-				$type == 'read'
-			AND empty($rule->getReadJobLock())
-		) {
-			$rule->setReadJobLock($this->jobId);
-			$this->entityManager->persist($rule);
-			$this->entityManager->flush();
-			return true;
-		}
-		
-		// If send lock empty, we set the lock with the job id
-		if (
-				$type == 'send'
-			AND empty($rule->getSendJobLock())
-		) {
-			$rule->setSendJobLock($this->jobId);
-			$this->entityManager->persist($rule);
-			$this->entityManager->flush();
-			return true;
-		}
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+			// Get the rule details
+			$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
+			// If read lock empty, we set the lock with the job id
+			if (
+					$type == 'read'
+				AND empty($rule->getReadJobLock())
+			) {
+				$rule->setReadJobLock($this->jobId);
+				$this->entityManager->persist($rule);
+				$this->entityManager->flush();
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return true;
+			}	
+			// If send lock empty, we set the lock with the job id
+			if (
+					$type == 'send'
+				AND empty($rule->getSendJobLock())
+			) {
+				$rule->setSendJobLock($this->jobId);
+				$this->entityManager->persist($rule);
+				$this->entityManager->flush();
+				$this->connection->commit(); // -- COMMIT TRANSACTION
+				return true;
+			}
+
+        } catch (Exception $e) {
+            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $this->message .= 'Failed set the '.$type.' lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);
+        }
 		return false;
 	}
 	
@@ -223,10 +232,9 @@ class rulecore
 				return false;
 			}
 		}
-
 		// If send lock empty, we set the lock with the job id
 		if ($type == 'send') {
-            $sendJobLock = $rule->getSendJobLock();
+            $sendJobLock = $rule->getSendJobLock();	
             if (
                     !empty($sendJobLock)
                 AND $sendJobLock == $this->jobId
@@ -263,7 +271,6 @@ class rulecore
      */
     public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id')
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
         try {
             $documents = [];
             if ($readSource) {
@@ -319,11 +326,8 @@ class rulecore
                     $documents[] = $childDocument;
                 }
             }
-            $this->commit(false); // -- COMMIT TRANSACTION
-
             return $documents;
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             $errorObj = new \stdClass();
@@ -419,9 +423,11 @@ class rulecore
 				if (empty($readSource['error'])) {
 					$readSource['error'] = '';
 				}
+
 				// If error we unlock the rule and we return the result
 				if (!isset($readSource['count'])) {
 					$this->unsetRuleLock('read');
+					$this->commit(false); // -- COMMIT TRANSACTION
 					return $readSource;
 				}
 			
@@ -436,7 +442,6 @@ class rulecore
                     // Set the param of the rule one time for all
                     $this->documentManager->setRuleId($this->ruleId);
                     $this->documentManager->setRuleParam();
-                    $i = 0;
                     if ($this->dataSource['values']) {
                         // Set all config parameters
                         $this->setConfigParam();
@@ -446,11 +451,6 @@ class rulecore
                         }
                         // Boucle sur chaque document
                         foreach ($this->dataSource['values'] as $row) {
-                            if ($i >= $this->limitReadCommit) {
-                                $this->commit(true); // -- COMMIT TRANSACTION
-                                $i = 0;
-                            }
-                            ++$i;
                             $param['data'] = $row;
                             $param['jobId'] = $this->jobId;
                             $param['api'] = $this->api;
@@ -482,7 +482,7 @@ class rulecore
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				// The process is finished even if there is an exception so we unlock the rule
-				// $this->unsetRuleLock('read');
+				$this->unsetRuleLock('read');
             }
         }
         // On affiche pas d'erreur si la lecture est désactivée
@@ -713,16 +713,12 @@ class rulecore
 
         // Pour tous les docuements sélectionnés on vérifie les prédécesseurs
         if (!empty($documents)) {
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
+				if ('Start' != $this->getJobStatus()) {
+					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+				}
                 $this->setRuleFilter();
-                $i = 0;
                 foreach ($documents as $document) {
-                    if ($i >= $this->limitReadCommit) {
-                        $this->commit(true); // -- COMMIT TRANSACTION
-                        $i = 0;
-                    }
-                    ++$i;
                     $param['id_doc_myddleware'] = $document['id'];
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
@@ -730,9 +726,7 @@ class rulecore
                     $this->documentManager->setParam($param, true);
                     $response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
-                $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
@@ -758,15 +752,11 @@ class rulecore
         }
         // Pour tous les docuements sélectionnés on vérifie les prédécesseurs
         if (!empty($documents)) {
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
-                $i = 0;
+				if ('Start' != $this->getJobStatus()) {
+					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+				}
                 foreach ($documents as $document) {
-                    if ($i >= $this->limitReadCommit) {
-                        $this->commit(true); // -- COMMIT TRANSACTION
-                        $i = 0;
-                    }
-                    ++$i;
                     $param['id_doc_myddleware'] = $document['id'];
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
@@ -775,9 +765,7 @@ class rulecore
                     $this->documentManager->setParam($param, true);
                     $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
-                $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
@@ -819,16 +807,12 @@ class rulecore
                     }
                 }
             }
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
-                $i = 0;
+				if ('Start' != $this->getJobStatus()) {
+					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+				}
                 // Pour tous les docuements sélectionnés on vérifie les parents
                 foreach ($documents as $document) {
-                    if ($i >= $this->limitReadCommit) {
-                        $this->commit(true); // -- COMMIT TRANSACTION
-                        $i = 0;
-                    }
-                    ++$i;
                     $param['id_doc_myddleware'] = $document['id'];
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
@@ -837,9 +821,7 @@ class rulecore
                     $this->documentManager->setParam($param, true);
                     $response[$document['id']] = $this->documentManager->checkParentDocument();
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
-                $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
@@ -882,24 +864,19 @@ class rulecore
                     }
                 }
             }
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
+
             try {
-                $i = 0;
+				if ('Start' != $this->getJobStatus()) {
+					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+				}
                 // Transformation de tous les docuements sélectionnés
                 foreach ($documents as $document) {
-                    if ($i >= $this->limitReadCommit) {
-                        $this->commit(true); // -- COMMIT TRANSACTION
-                        $i = 0;
-                    }
-                    ++$i;
                     $param['id_doc_myddleware'] = $document['id'];
                     // Set the param values and clear all document attributes
                     $this->documentManager->setParam($param, true);
                     $response[$document['id']] = $this->documentManager->transformDocument();
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
-                $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
@@ -931,16 +908,12 @@ class rulecore
         if (!empty($documents)) {
             // Connexion à la solution cible pour rechercher les données
             $this->connexionSolution('target');
-            $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
-                $i = 0;
+				if ('Start' != $this->getJobStatus()) {
+					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+				}
                 // Récupération de toutes les données dans la cible pour chaque document
                 foreach ($documents as $document) {
-                    if ($i >= $this->limitReadCommit) {
-                        $this->commit(true); // -- COMMIT TRANSACTION
-                        $i = 0;
-                    }
-                    ++$i;
                     $param['id_doc_myddleware'] = $document['id'];
                     $param['solutionTarget'] = $this->solutionTarget;
                     $param['ruleFields'] = $this->ruleFields;
@@ -952,9 +925,7 @@ class rulecore
                     $response[$document['id']] = $this->documentManager->getTargetDataDocument();
                     $response['doc_status'] = $this->documentManager->getStatus();
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
-                $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }

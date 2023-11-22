@@ -506,7 +506,7 @@ class jobcore
                     $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
 					// Save the error if exists
 					if (!empty($error)) {
-						$errors[] = $error[0];
+						$errors[] = current($error);
 					}
                 }
             } else {
@@ -1309,7 +1309,7 @@ class jobcore
      */
     protected function updateJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+        // $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -1340,9 +1340,9 @@ class jobcore
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();	
 			
-            $this->connection->commit(); // -- COMMIT TRANSACTION
+            // $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 

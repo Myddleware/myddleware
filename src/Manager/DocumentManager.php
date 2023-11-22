@@ -1963,7 +1963,6 @@ class documentcore
      */
     public function updateStatus($new_status)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             // On ajoute un contôle dans le cas on voudrait changer le statut
             $new_status = $this->beforeStatusChange($new_status);
@@ -2004,12 +2003,10 @@ class documentcore
             $stmt->bindValue(':jobLock', $this->jobLock, \PDO::PARAM_NULL);
             $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2022,7 +2019,6 @@ class documentcore
      */
     public function updateDeleteFlag($deleted)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -2045,10 +2041,8 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2093,7 +2087,6 @@ class documentcore
      */
     public function updateType($new_type)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -2110,12 +2103,10 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= 'Type  : '.$new_type;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
             // Change the document type for the current process
             $this->documentType = $new_type;
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2128,7 +2119,6 @@ class documentcore
      */
     public function updateTargetId($target_id): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -2146,14 +2136,12 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= 'Target id : '.$target_id;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
             // Change the target id for the current process
             $this->targetId = $target_id;
 
             return true;
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2415,7 +2403,6 @@ class documentcore
      */
     protected function createDocLog()
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
@@ -2429,9 +2416,7 @@ class documentcore
             $stmt->bindValue(':job_id', $this->jobId);
             $result = $stmt->executeQuery();
             $this->message = '';
-            $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
