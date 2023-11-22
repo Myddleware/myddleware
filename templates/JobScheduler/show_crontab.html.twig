@@ -79,13 +79,16 @@
 			</div>
 			<div id="jobschedulerresulttable">
 				<table class="table table-light table-hover" id="myTable">
+                
                 <h4 class="mt-5">{{ 'Crontab Results'|trans }}</h4>
+                <h5 class="mt-5" id="crontab-order-info">{{ "ASC" }}</h5>
 
                 
 					<thead>
 						<tr>
                             <th onclick="sortTable(0)" >{{ 'jobscheduler.id'|trans }}</th>
 							<th onclick="sortTable(1)" >{{ 'jobscheduler.date_created'|trans }}</th>
+							<th onclick="sortTable(2)" >{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th>{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th>{{ 'jobscheduler.output'|trans }}</th>
 						</tr>
