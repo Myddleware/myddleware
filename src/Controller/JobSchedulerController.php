@@ -429,7 +429,11 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(['cronJob' => $id]);
+        // Fetch the CronJobResults and sort them by 'id' in ascending order
+        $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(
+            ['cronJob' => $id],
+            ['id' => 'ASC']  // Sorting by 'id' in ascending order
+        );
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
