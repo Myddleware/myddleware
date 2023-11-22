@@ -888,6 +888,8 @@ crontab:
     disableAllCrons: Your crontabs have been disabled
     enableAllCrons: Your crontabs have been enable
     create: Create crontab
+    running_instances: Running instances
+    max_instances: Max instances
     massdisable: Disable all tasks
     massenable: Enable all tasks
     enableCron: On
