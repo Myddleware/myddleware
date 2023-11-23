@@ -758,7 +758,12 @@ email_alert:
 
         Kind regards,
 jobscheduler:
+    id: Id
     command: Command
+    output: Output
+    run_at: Run at
+    run_time: Run time
+    status_code: Status code
     date_created: Date created
     active: Active
     list: List
@@ -890,6 +895,7 @@ crontab:
     create: Create crontab
     running_instances: Running instances
     max_instances: Max instances
+    results: Results
     massdisable: Disable all tasks
     massenable: Enable all tasks
     enableCron: On
