@@ -90,6 +90,7 @@
 							<th onclick="sortTable(1)" >{{ 'jobscheduler.date_created'|trans }}</th>
 							<th onclick="sortTable(2)" >{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th onclick="sortTable(3)" >{{ 'jobscheduler.output'|trans }}</th>
+							<th onclick="sortTable(4)" >{{ 'jobscheduler.run_at'|trans }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -99,6 +100,7 @@
 								<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
 								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
 								<td>{{ result.output|raw }}</td>
+								<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
 							</tr>
 						{% endfor %}
 					</tbody>
@@ -116,6 +118,8 @@ function sortTable(n) {
   switching = true;
   dir = "asc"; 
 
+  console.log(n)
+
   // Update the h5 content to show the current sorting direction
   var orderInfo = document.getElementById("crontab-order-info");
   orderInfo.innerText = "Sorting: " + (dir === "asc" ? "Ascending" : "Descending");
@@ -130,7 +134,7 @@ function sortTable(n) {
       y = rows[i + 1].getElementsByTagName("TD")[n];
 
       // Check if we are dealing with dates
-      if (n === 1 || n === 2) { // assuming date columns are 1 (Date created) and 2 (Date update)
+      if (n === 1 || n === 2 || n === 4) { // assuming date columns are 1 (Date created) and 2 (Date update)
         var xDate = new Date(x.innerHTML);
         var yDate = new Date(y.innerHTML);
       } else {
@@ -138,7 +142,7 @@ function sortTable(n) {
         var yContent = isNaN(parseInt(y.innerHTML)) ? y.innerHTML.toLowerCase() : parseInt(y.innerHTML);
       }
 
-      if (n === 1 || n === 2) { // date columns
+      if (n === 1 || n === 2 || n === 4) { // date columns
         if (dir == "asc") {
           if (xDate > yDate) {
             shouldSwitch = true;
