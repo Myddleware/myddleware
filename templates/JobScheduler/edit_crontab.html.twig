@@ -19,6 +19,20 @@
                     </div>
                 </div>
                 <div class="input-group row">
+                <div class="input-group row">
+                    <label for="runningInstances" class="col-sm-2 col-form-label"> {{ form_label( edit_form.runningInstances) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.runningInstances) }}
+                    </div>
+                </div>
+                <div class="input-group row">
+                <div class="input-group row">
+                    <label for="maxInstances" class="col-sm-2 col-form-label"> {{ form_label( edit_form.maxInstances) }}</label>
+                    <div class="col-sm-10">
+                        {{ form_widget( edit_form.maxInstances) }}
+                    </div>
+                </div>
+                <div class="input-group row">
                     <label for="period" class="col-sm-2 col-form-label"> {{ form_label( edit_form.period) }}</label>
                     <div class="col-sm-10">
                         {{ form_widget( edit_form.period) }}
