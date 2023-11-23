@@ -345,9 +345,9 @@ class airtablecustom extends airtable {
 				$forceStatus = $documentManager->updateStatus('Filter');
 				$value['id'] = $data['target_id'];
 				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected';
+				$this->updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 
-
-				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
+				return null;
 			}
 
 			if (
@@ -425,10 +425,13 @@ class airtablecustom extends airtable {
 				$paramDoc['id_doc_myddleware'] =  $idDoc;
 				$this->documentManager->setParam($paramDoc);
 				$forceStatus = $this->documentManager->updateStatus('Filter');
+
 				$value['id'] = $data['target_id'];
 				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected, and the email has not been modified';
 
-				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
+				$this->updateDocumentStatus($idDoc, $value, $param, $forceStatus);
+				
+				return null; 
 			}
 	
 			if (array_key_exists('fldY9MAvfDHSHtJKT', $data) && empty($data['fldY9MAvfDHSHtJKT'])) {
