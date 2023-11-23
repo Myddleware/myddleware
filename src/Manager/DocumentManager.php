@@ -2203,7 +2203,9 @@ class documentcore
 						}
 					}
 				}
-            }
+            } else {
+				$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed by '.print_r($newValues,true).'. ';
+			}
             $this->typeError = 'I';
             $this->createDocLog();
             // Update the data of the right type
