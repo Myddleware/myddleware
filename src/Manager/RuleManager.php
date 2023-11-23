@@ -455,8 +455,9 @@ class rulecore
                             $param['jobId'] = $this->jobId;
                             $param['api'] = $this->api;
                             // Set the param values and clear all document attributes but not rule attributes
-                            $this->documentManager->setParam($param, true, false);
-                            $createDocument = $this->documentManager->createDocument();
+                            if($this->documentManager->setParam($param, true)) {
+								$createDocument = $this->documentManager->createDocument();
+							}
                             if (!$createDocument) {
                                 $readSource['error'] .= $this->documentManager->getMessage();
                             }
@@ -474,7 +475,7 @@ class rulecore
 
                 // Rollback if the job has been manually stopped
                 if ('Start' != $this->getJobStatus()) {
-                    throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+                    throw new \Exception('The task has been stopped manually. No document generated. ');
                 }
                 $this->commit(false); // -- COMMIT TRANSACTION
             } catch (\Exception $e) {
@@ -715,7 +716,7 @@ class rulecore
         if (!empty($documents)) {
             try {
 				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+					throw new \Exception('The task has been stopped manually. No document generated. ');
 				}
                 $this->setRuleFilter();
                 foreach ($documents as $document) {
@@ -723,8 +724,9 @@ class rulecore
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
                     // Set the param values and clear all document attributes
-                    $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
+                    if($this->documentManager->setParam($param, true)) {
+						$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
+					}
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -754,7 +756,7 @@ class rulecore
         if (!empty($documents)) {
             try {
 				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+					throw new \Exception('The task has been stopped manually. No document generated. ');
 				}
                 foreach ($documents as $document) {
                     $param['id_doc_myddleware'] = $document['id'];
@@ -762,8 +764,9 @@ class rulecore
                     $param['api'] = $this->api;
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
-                    $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
+                    if($this->documentManager->setParam($param, true)) {
+						$response[$document['id']] = $this->documentManager->checkPredecessorDocument();
+					}
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to check predecessors : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -809,7 +812,7 @@ class rulecore
             }
             try {
 				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+					throw new \Exception('The task has been stopped manually. No document generated. ');
 				}
                 // Pour tous les docuements sélectionnés on vérifie les parents
                 foreach ($documents as $document) {
@@ -818,8 +821,9 @@ class rulecore
                     $param['api'] = $this->api;
                     $param['ruleRelationships'] = $this->ruleRelationships;
                     // Set the param values and clear all document attributes
-                    $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->checkParentDocument();
+                    if($this->documentManager->setParam($param, true)) {
+						$response[$document['id']] = $this->documentManager->checkParentDocument();
+					}
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -867,18 +871,19 @@ class rulecore
 
             try {
 				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+					throw new \Exception('The task has been stopped manually. No document generated. ');
 				}
                 // Transformation de tous les docuements sélectionnés
                 foreach ($documents as $document) {
                     $param['id_doc_myddleware'] = $document['id'];
                     // Set the param values and clear all document attributes
-                    $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->transformDocument();
+                    if($this->documentManager->setParam($param, true)) {
+						$response[$document['id']] = $this->documentManager->transformDocument();
+					}
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-                $readSource['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $response['error'] = 'Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             }
         }
 
@@ -910,7 +915,7 @@ class rulecore
             $this->connexionSolution('target');
             try {
 				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+					throw new \Exception('The task has been stopped manually. No document generated. ');
 				}
                 // Récupération de toutes les données dans la cible pour chaque document
                 foreach ($documents as $document) {
@@ -921,9 +926,10 @@ class rulecore
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
                     // Set the param values and clear all document attributes
-                    $this->documentManager->setParam($param, true);
-                    $response[$document['id']] = $this->documentManager->getTargetDataDocument();
-                    $response['doc_status'] = $this->documentManager->getStatus();
+                    if($this->documentManager->setParam($param, true)) {
+						$response[$document['id']] = $this->documentManager->getTargetDataDocument();
+						$response['doc_status'] = $this->documentManager->getStatus();
+					}
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -2318,7 +2324,7 @@ class rulecore
     {
         // Rollback if the job has been manually stopped
         if ('Start' != $this->getJobStatus()) {
-            throw new \Exception('The task has been stopped manually during the document creation. No document generated. ');
+            throw new \Exception('The task has been stopped manually. No document generated. ');
         }
         $this->connection->commit(); // -- COMMIT TRANSACTION
         $this->entityManager->flush();

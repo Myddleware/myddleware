@@ -227,15 +227,10 @@ class documentcore
                 $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
-			$error = 'Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->message .= $error;
-            $this->typeError = 'E';
-            $this->logger->error($this->message);
-            $this->createDocLog();
 			// Remove the lock because there is not status changed (lock is usually remove when we change the status)
 			$this->unsetLock();
             // Stop the process
-            throw new \Exception($error);
+            throw new \Exception('Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -243,64 +238,73 @@ class documentcore
     // Clear parameter is used when we call the same instance of the Document to manage several documents (from RuleManager class)
     public function setParam($param, $clear = false, $clearRule = true)
     {
-        if ($clear) {
-            $this->clearAttributes($clearRule);
-        }
-        // Chargement des solution si elles sont présentent dans les paramètres de construction
-        if (!empty($param['solutionTarget'])) {
-            $this->solutionTarget = $param['solutionTarget'];
-        }
-        if (!empty($param['solutionSource'])) {
-            $this->solutionSource = $param['solutionSource'];
-        }
-        if (!empty($param['jobId'])) {
-            $this->jobId = $param['jobId'];
-        }
-        if (!empty($param['api'])) {
-            $this->api = $param['api'];
-        }
-        if (!empty($param['parentId'])) {
-            $this->parentId = $param['parentId'];
-        }
-        if (!empty($param['ruleDocuments'])) {
-            $this->ruleDocuments = $param['ruleDocuments'];
-        }
+		try {
+			if ($clear) {
+				$this->clearAttributes($clearRule);
+			}
+			// Chargement des solution si elles sont présentent dans les paramètres de construction
+			if (!empty($param['solutionTarget'])) {
+				$this->solutionTarget = $param['solutionTarget'];
+			}
+			if (!empty($param['solutionSource'])) {
+				$this->solutionSource = $param['solutionSource'];
+			}
+			if (!empty($param['jobId'])) {
+				$this->jobId = $param['jobId'];
+			}
+			if (!empty($param['api'])) {
+				$this->api = $param['api'];
+			}
+			if (!empty($param['parentId'])) {
+				$this->parentId = $param['parentId'];
+			}
+			if (!empty($param['ruleDocuments'])) {
+				$this->ruleDocuments = $param['ruleDocuments'];
+			}
 
-        // Init attribut of the class Document
-        if (!empty($param['id_doc_myddleware'])) {
-            // Instanciate attribut sourceData
-            $this->setDocument($param['id_doc_myddleware']);
-        } else {
-            $this->id = uniqid('', true);
-            $this->dateCreated = gmdate('Y-m-d H:i:s');
-            $this->ruleName = $param['rule']['name_slug'];
-            $this->ruleMode = $param['rule']['mode'];
-            $this->ruleId = $param['rule']['id'];
-            $this->ruleFields = $param['ruleFields'];
-            $this->data = $param['data'];
-            $this->sourceId = $this->data['id'];
-            $this->userId = $param['rule']['created_by'];
-            $this->status = 'New';
-            $this->attempt = 0;
-            $this->jobLock = $this->jobId;
-            // Set the deletion type if myddleware deletion flag is true
-            if (!empty($this->data['myddleware_deletion'])) {
-                $this->documentType = 'D';
-            }
+			// Init attribut of the class Document
+			if (!empty($param['id_doc_myddleware'])) {
+				// Instanciate attribut sourceData
+				$this->setDocument($param['id_doc_myddleware']);
+			} else {
+				$this->id = uniqid('', true);
+				$this->dateCreated = gmdate('Y-m-d H:i:s');
+				$this->ruleName = $param['rule']['name_slug'];
+				$this->ruleMode = $param['rule']['mode'];
+				$this->ruleId = $param['rule']['id'];
+				$this->ruleFields = $param['ruleFields'];
+				$this->data = $param['data'];
+				$this->sourceId = $this->data['id'];
+				$this->userId = $param['rule']['created_by'];
+				$this->status = 'New';
+				$this->attempt = 0;
+				$this->jobLock = $this->jobId;
+				// Set the deletion type if myddleware deletion flag is true
+				if (!empty($this->data['myddleware_deletion'])) {
+					$this->documentType = 'D';
+				}
+			}
+			// Ajout des paramètre de la règle
+			if (empty($this->ruleParams)) {
+				$this->setRuleParam();
+			}
+			// Mise à jour des tableaux s'ils existent.
+			if (!empty($param['ruleFields'])) {
+				$this->ruleFields = $param['ruleFields'];
+			}
+			if (!empty($param['ruleRelationships'])) {
+				$this->ruleRelationships = $param['ruleRelationships'];
+			}
+			// Init type error for each new document
+			$this->typeError = 'S';
+		} catch (\Exception $e) {
+            $this->message .= $e->getMessage();
+            $this->typeError = 'E';
+            $this->logger->error($this->message);
+            $this->createDocLog();
+			return false;
         }
-        // Ajout des paramètre de la règle
-        if (empty($this->ruleParams)) {
-            $this->setRuleParam();
-        }
-        // Mise à jour des tableaux s'ils existent.
-        if (!empty($param['ruleFields'])) {
-            $this->ruleFields = $param['ruleFields'];
-        }
-        if (!empty($param['ruleRelationships'])) {
-            $this->ruleRelationships = $param['ruleRelationships'];
-        }
-        // Init type error for each new document
-        $this->typeError = 'S';
+		return true;
     }
 
     // Clear all class attributes
