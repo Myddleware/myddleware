@@ -91,6 +91,7 @@
 							<th onclick="sortTable(2)" >{{ 'jobscheduler.date_modified'|trans }}</th>
 							<th onclick="sortTable(3)" >{{ 'jobscheduler.output'|trans }}</th>
 							<th onclick="sortTable(4)" >{{ 'jobscheduler.run_at'|trans }}</th>
+							<th onclick="sortTable(5)" >{{ 'jobscheduler.run_time'|trans }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -101,6 +102,7 @@
 								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
 								<td>{{ result.output|raw }}</td>
 								<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.runTime }}</td>
 							</tr>
 						{% endfor %}
 					</tbody>
@@ -134,7 +136,7 @@ function sortTable(n) {
       y = rows[i + 1].getElementsByTagName("TD")[n];
 
       // Check if we are dealing with dates
-      if (n === 1 || n === 2 || n === 4) { // assuming date columns are 1 (Date created) and 2 (Date update)
+      if (n === 1 || n === 2 || n === 4) { // assuming date columns are 1 (Date created) and 2 (Date update) and 4 (Run at)
         var xDate = new Date(x.innerHTML);
         var yDate = new Date(y.innerHTML);
       } else {
