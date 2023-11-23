@@ -326,7 +326,9 @@ class airtablecustom extends airtable {
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
+			// Check if the current status is one of the specified values
 			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
+			// Execute this block if the status is valid
 			if ($validStatus) {
 				$documentManager = new DocumentManager(
 					$this->logger, 
@@ -336,11 +338,14 @@ class airtablecustom extends airtable {
 					$this->ruleRelationshipsRepository,
 					$this->formulaManager
 				);
+				// Update the document status to 'Filter'
 				$value = 'error';
 				$paramDoc['id_doc_myddleware'] =  $idDoc;
 				$documentManager->setParam($paramDoc);
-				$documentManager->setMessage('status refus_non_eligible....');
 				$forceStatus = $documentManager->updateStatus('Filter');
+				$value['id'] = $data['target_id'];
+				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected';
+
 
 				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 			}
@@ -386,12 +391,11 @@ class airtablecustom extends airtable {
 		}
 	
 		if ($param['rule']['id'] == '625fcd2ed442f') { // Mobilisation - Coupons
-// Change the document data 		
+			// Change the document data 		
 			$oldEmail = $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb'] ?? null;
 			$emailModified = isset($data['fldUfChKmCxvSBEqb']) && $data['fldUfChKmCxvSBEqb'] != $oldEmail;
 			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
-			$newEmail =  $data['fldUfChKmCxvSBEqb'];
-echo '01'.chr(10);
+			 // Execute this block if the email is modified and the status is valid
 			if ($emailModified && $validStatus) {
 				if (!isset($this->documentManager)) {
 					$this->documentManager = new DocumentManager(
@@ -403,28 +407,26 @@ echo '01'.chr(10);
 						$this->formulaManager
 					);
 				}
-echo '02'.chr(10);
-print_r($data);
+				// Update the data array with only the target ID and the new email
 				$data = array(
 					'target_id' => $data['target_id'],
 					'fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb'],
 				);
-				// $data = $param['dataHistory'][$idDoc];
-				// $data['fldUfChKmCxvSBEqb'] = $newEmail;
 				$paramDoc['id_doc_myddleware'] = $idDoc;
 				$paramDoc['jobId'] = $param['jobId'];
 				$this->documentManager->setParam($paramDoc);
 				$this->documentManager->updateDocumentData($idDoc, $data, 'T', true);
-echo '03'.chr(10);
-print_r($data);
 				
 			} 
+			// Execute this block if the status is valid, but the email has not been modified
 			else if($validStatus){
+				// Update the document status to 'Filter'
 				$value = 'error';
 				$paramDoc['id_doc_myddleware'] =  $idDoc;
-				$documentManager->setParam($paramDoc);
-				$documentManager->setMessage('status refus_non_eligible....');
-				$forceStatus = $documentManager->updateStatus('Filter');
+				$this->documentManager->setParam($paramDoc);
+				$forceStatus = $this->documentManager->updateStatus('Filter');
+				$value['id'] = $data['target_id'];
+				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected, and the email has not been modified';
 
 				return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 			}
