@@ -304,7 +304,6 @@ class airtablecustom extends airtable {
 	// Check data before create
     protected function checkDataBeforeCreate($param, $data, $idDoc)
     {
-		print_r($data);
 		$data = parent::checkDataBeforeCreate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -326,27 +325,36 @@ class airtablecustom extends airtable {
 		}
 		
 		if ($param['rule']['id'] == '625fcd2ed442f') { 	// Mobilisation - Coupons
-			// Check if the current status is one of the specified values
-			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
-			// Execute this block if the status is valid
-			if ($validStatus) {
-				$documentManager = new DocumentManager(
-					$this->logger, 
-					$this->connection, 
-					$this->entityManager,
-					$this->documentRepository,
-					$this->ruleRelationshipsRepository,
-					$this->formulaManager
-				);
+			// Execute this block if the status has to be filtered,
+			if (
+				// PREPROD
+				(
+						isset($data['fldohGMXZZOWhxN2o'])
+					AND	 in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation'])
+				)
+				// PROD
+				OR (
+						isset($data['fldEI7AEhSDfynvFz'])
+					AND	$data['fldEI7AEhSDfynvFz'] != $param['dataHistory'][$idDoc]['fldEI7AEhSDfynvFz']
+				)
+			) {
+				if (!isset($this->documentManager)) {
+					$this->documentManager = new DocumentManager(
+						$this->logger, 
+						$this->connection, 
+						$this->entityManager,
+						$this->documentRepository,
+						$this->ruleRelationshipsRepository,
+						$this->formulaManager
+					);
+				}
 				// Update the document status to 'Filter'
-				$value = 'error';
 				$paramDoc['id_doc_myddleware'] =  $idDoc;
-				$documentManager->setParam($paramDoc);
-				$forceStatus = $documentManager->updateStatus('Filter');
+				$paramDoc['jobId'] = $param['jobId'];
+				$this->documentManager->setParam($paramDoc);
 				$value['id'] = $data['target_id'];
-				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected';
-				$this->updateDocumentStatus($idDoc, $value, $param, $forceStatus);
-
+				$value['error'] = 'Le document est filtré car le statut du coupon est '.(isset($data['fldohGMXZZOWhxN2o']) ? $data['fldohGMXZZOWhxN2o'] : $data['fldEI7AEhSDfynvFz']).'. ';		
+				$this->updateDocumentStatus($idDoc, $value, $param, 'Filter');
 				return null;
 			}
 
@@ -369,7 +377,6 @@ class airtablecustom extends airtable {
 	   // Check data before update
 	protected function checkDataBeforeUpdate($param, $data, $idDoc)
 	{
-// print_r($param);
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -391,51 +398,69 @@ class airtablecustom extends airtable {
 		}
 	
 		if ($param['rule']['id'] == '625fcd2ed442f') { // Mobilisation - Coupons
-			// Change the document data 		
-			$oldEmail = $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb'] ?? null;
-			$emailModified = isset($data['fldUfChKmCxvSBEqb']) && $data['fldUfChKmCxvSBEqb'] != $oldEmail;
-			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
-			 // Execute this block if the email is modified and the status is valid
-			if ($emailModified && $validStatus) {
-				if (!isset($this->documentManager)) {
-					$this->documentManager = new DocumentManager(
-						$this->logger, 
-						$this->connection, 
-						$this->entityManager,
-						$this->documentRepository,
-						$this->ruleRelationshipsRepository,
-						$this->formulaManager
+			if (!isset($this->documentManager)) {
+				$this->documentManager = new DocumentManager(
+					$this->logger, 
+					$this->connection, 
+					$this->entityManager,
+					$this->documentRepository,
+					$this->ruleRelationshipsRepository,
+					$this->formulaManager
+				);
+			}
+			 // Update the email if the email is modified even if teh status should be filtered
+			if (
+				// PREPROD
+				(
+						isset($data['fldUfChKmCxvSBEqb'])
+					AND	$data['fldUfChKmCxvSBEqb'] != $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb']
+				)
+				// PROD
+				OR (
+						isset($data['fldaG35rEvmO9rm3m'])
+					AND	$data['fldaG35rEvmO9rm3m'] != $param['dataHistory'][$idDoc]['fldaG35rEvmO9rm3m']
+				)
+			) {
+				// Update the data array with only the target ID and the new email
+				// PREPROD 
+				if (isset($data['fldUfChKmCxvSBEqb'])) {
+					$data = array(
+						'target_id' => $data['target_id'],
+						'fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb'],
+					);
+				// PROD
+				} else {
+					$data = array(
+						'target_id' => $data['target_id'],
+						'fldaG35rEvmO9rm3m' => $data['fldaG35rEvmO9rm3m'],
 					);
 				}
-				// Update the data array with only the target ID and the new email
-				$data = array(
-					'target_id' => $data['target_id'],
-					'fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb'],
-				);
 				$paramDoc['id_doc_myddleware'] = $idDoc;
 				$paramDoc['jobId'] = $param['jobId'];
 				$this->documentManager->setParam($paramDoc);
 				$this->documentManager->updateDocumentData($idDoc, $data, 'T', true);
-				
 			} 
-			// Execute this block if the status is valid, but the email has not been modified
-			else if($validStatus){
+			// Execute this block if the status has to be filtered, but the email has not been modified
+			else if (
+				// PREPROD
+				(
+						isset($data['fldohGMXZZOWhxN2o'])
+					AND	 in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation'])
+				)
+				// PROD
+				OR (
+						isset($data['fldEI7AEhSDfynvFz'])
+					AND	$data['fldEI7AEhSDfynvFz'] != $param['dataHistory'][$idDoc]['fldEI7AEhSDfynvFz']
+				)
+			) {
 				// Update the document status to 'Filter'
-				$value = 'error';
 				$paramDoc['id_doc_myddleware'] =  $idDoc;
+				$paramDoc['jobId'] = $param['jobId'];
 				$this->documentManager->setParam($paramDoc);
-				$forceStatus = $this->documentManager->updateStatus('Filter');
-
 				$value['id'] = $data['target_id'];
-				$value['error'] = 'Non-compliant status, refus_non_eligible, inscription_attente, contrat_attente_validation detected, and the email has not been modified';
-
-				$this->updateDocumentStatus($idDoc, $value, $param, $forceStatus);
-				
+				$value['error'] = 'Le document est filtré car le statut du coupon est '.(isset($data['fldohGMXZZOWhxN2o']) ? $data['fldohGMXZZOWhxN2o'] : $data['fldEI7AEhSDfynvFz']).'. ';		
+				$this->updateDocumentStatus($idDoc, $value, $param, 'Filter');
 				return null; 
-			}
-	
-			if (array_key_exists('fldY9MAvfDHSHtJKT', $data) && empty($data['fldY9MAvfDHSHtJKT'])) {
-				unset($data['fldY9MAvfDHSHtJKT']);
 			}
 		}	
 		return $data;
