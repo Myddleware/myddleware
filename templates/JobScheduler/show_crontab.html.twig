@@ -86,13 +86,13 @@
                 
 					<thead>
 						<tr>
-                            <th onclick="sortTable(0)" >{{ 'jobscheduler.id'|trans }}</th>
-							<th onclick="sortTable(1)" >{{ 'jobscheduler.date_created'|trans }}</th>
-							<th onclick="sortTable(2)" >{{ 'jobscheduler.date_modified'|trans }}</th>
-							<th onclick="sortTable(3)" >{{ 'jobscheduler.output'|trans }}</th>
-							<th onclick="sortTable(4)" >{{ 'jobscheduler.run_at'|trans }}</th>
-							<th onclick="sortTable(5)" >{{ 'jobscheduler.run_time'|trans }}</th>
-							<th onclick="sortTable(6)" >{{ 'jobscheduler.status_code'|trans }}</th>
+                            <th class="table-head-result" id="0" >{{ 'jobscheduler.id'|trans }}</th>
+							<th class="table-head-result" id="1" >{{ 'jobscheduler.date_created'|trans }}</th>
+							<th class="table-head-result" id="2" >{{ 'jobscheduler.date_modified'|trans }}</th>
+							<th class="table-head-result" id="3" >{{ 'jobscheduler.output'|trans }}</th>
+							<th class="table-head-result" id="4" >{{ 'jobscheduler.run_at'|trans }}</th>
+							<th class="table-head-result" id="5" >{{ 'jobscheduler.run_time'|trans }}</th>
+							<th class="table-head-result" id="6" >{{ 'jobscheduler.status_code'|trans }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -115,85 +115,4 @@
 
         
 
-<script>
-function sortTable(n) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("myTable");
-  switching = true;
-  dir = "asc"; 
-
-  console.log(n)
-
-  // Update the h5 content to show the current sorting direction
-  var orderInfo = document.getElementById("crontab-order-info");
-  orderInfo.innerText = "Sorting: " + (dir === "asc" ? "Ascending" : "Descending");
-
-  while (switching) {
-    switching = false;
-    rows = table.rows;
-
-    for (i = 1; i < (rows.length - 1); i++) {
-      shouldSwitch = false;
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-
-      // Check if we are dealing with dates
-      if (n === 1 || n === 2 || n === 4) { // assuming date columns are 1 (Date created) and 2 (Date update) and 4 (Run at)
-        var xDate = new Date(x.innerHTML);
-        var yDate = new Date(y.innerHTML);
-      } else {
-        var xContent = isNaN(parseInt(x.innerHTML)) ? x.innerHTML.toLowerCase() : parseInt(x.innerHTML);
-        var yContent = isNaN(parseInt(y.innerHTML)) ? y.innerHTML.toLowerCase() : parseInt(y.innerHTML);
-      }
-
-      if (n === 1 || n === 2 || n === 4) { // date columns
-        if (dir == "asc") {
-          if (xDate > yDate) {
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (xDate < yDate) {
-            shouldSwitch = true;
-            break;
-          }
-        }
-      } else { // other columns
-        if (dir == "asc") {
-          if (xContent > yContent) {
-            shouldSwitch = true;
-            break;
-          }
-        } else if (dir == "desc") {
-          if (xContent < yContent) {
-            shouldSwitch = true;
-            break;
-          }
-        }
-      }
-    }
-
-    if (shouldSwitch) {
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      switchcount++;      
-    } else {
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-        // Update the h5 content when the direction changes
-        orderInfo.innerText = "Sorting: Descending";
-      }
-    }
-  }
-
-  // Final update in case no switching was done and the direction is already descending
-  if (!switching && dir === "desc") {
-    orderInfo.innerText = "Sorting: Descending";
-  }
-}
-
-
-
-</script>
 	{% endblock %}
