@@ -110,7 +110,8 @@ class airtablecustom extends airtable {
 		'VSC' => array('fldAeyp1OXzWdrn9i')
         );
 
-
+	private $documentManager;
+	
 	// Redefine read function
 	public function readData($param): array {
 		$result = parent::readData($param);
@@ -363,16 +364,7 @@ class airtablecustom extends airtable {
 	   // Check data before update
 	protected function checkDataBeforeUpdate($param, $data, $idDoc)
 	{
-		print_r($param);
-		$documentManager = new DocumentManager(
-			$this->logger, 
-			$this->connection, 
-			$this->entityManager,
-			$this->documentRepository,
-			$this->ruleRelationshipsRepository,
-			$this->formulaManager
-		);
-
+// print_r($param);
 		$data = parent::checkDataBeforeUpdate($param, $data, $idDoc);
 		// If the etab sup is missing then we remove the field from the call
 		if ($param['rule']['id'] == '6267e9c106873') { // Mobilisation - Composantes
@@ -394,18 +386,38 @@ class airtablecustom extends airtable {
 		}
 	
 		if ($param['rule']['id'] == '625fcd2ed442f') { // Mobilisation - Coupons
-
+// Change the document data 		
 			$oldEmail = $param['dataHistory'][$idDoc]['fldUfChKmCxvSBEqb'] ?? null;
 			$emailModified = isset($data['fldUfChKmCxvSBEqb']) && $data['fldUfChKmCxvSBEqb'] != $oldEmail;
 			$validStatus = in_array($data['fldohGMXZZOWhxN2o'], ['refus_non_eligible', 'inscription_attente', 'contrat_attente_validation']);
 			$newEmail =  $data['fldUfChKmCxvSBEqb'];
-
+echo '01'.chr(10);
 			if ($emailModified && $validStatus) {
-				//$data = array('fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb']);
-				$data = $param['dataHistory'][$idDoc];
-				$data['fldUfChKmCxvSBEqb'] = $newEmail;
+				if (!isset($this->documentManager)) {
+					$this->documentManager = new DocumentManager(
+						$this->logger, 
+						$this->connection, 
+						$this->entityManager,
+						$this->documentRepository,
+						$this->ruleRelationshipsRepository,
+						$this->formulaManager
+					);
+				}
+echo '02'.chr(10);
+print_r($data);
+				$data = array(
+					'target_id' => $data['target_id'],
+					'fldUfChKmCxvSBEqb' => $data['fldUfChKmCxvSBEqb'],
+				);
+				// $data = $param['dataHistory'][$idDoc];
+				// $data['fldUfChKmCxvSBEqb'] = $newEmail;
+				$paramDoc['id_doc_myddleware'] = $idDoc;
+				$paramDoc['jobId'] = $param['jobId'];
+				$this->documentManager->setParam($paramDoc);
+				$this->documentManager->updateDocumentData($idDoc, $data, 'T', true);
+echo '03'.chr(10);
+print_r($data);
 				
-				print_r('data : '. $data);
 			} 
 			else if($validStatus){
 				$value = 'error';
