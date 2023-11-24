@@ -37,8 +37,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *
  * @ORM\Table(name="rule", indexes={
  *	 @ORM\Index(name="Krule_name", columns={"name"}),
- *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"}),
- *	 @ORM\Index(name="index_send_job_lock", columns={"send_job_lock"})
+ *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"})
  * })
  */
 class Rule
@@ -168,11 +167,6 @@ class Rule
      * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
      */
     private string $readJobLock;
-	
-	/**
-     * @ORM\Column(name="send_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
-     */
-    private string $sendJobLock;
 
     public function __construct()
     {
@@ -313,20 +307,6 @@ class Rule
             return '';
         }
         return $this->readJobLock;
-    }
-	
-	public function setSendJobLock($sendJobLock): self
-    {
-        $this->sendJobLock = $sendJobLock;
-        return $this;
-    }
-
-    public function getSendJobLock(): string
-    {
-        if (empty($this->sendJobLock)) {
-            return '';
-        }
-        return $this->sendJobLock;
     }
 
     public function setConnectorSource(Connector $connectorSource): self

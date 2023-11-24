@@ -27,6 +27,7 @@ namespace App\Manager;
 
 use App\Entity\Config;
 use App\Entity\DocumentData;
+use App\Entity\Document;
 use App\Entity\Rule;
 use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit as RuleParamAudit;
@@ -177,48 +178,35 @@ class rulecore
         $this->api = $api;
     }
 
-	protected function setRuleLock($type) {
+    // Unset the lock on the rule
+	protected function setRuleLock() {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Get the rule details
 			$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
 			// If read lock empty, we set the lock with the job id
-			if (
-					$type == 'read'
-				AND empty($rule->getReadJobLock())
-			) {
+			if (empty($rule->getReadJobLock())) {
 				$rule->setReadJobLock($this->jobId);
 				$this->entityManager->persist($rule);
 				$this->entityManager->flush();
 				$this->connection->commit(); // -- COMMIT TRANSACTION
 				return true;
 			}	
-			// If send lock empty, we set the lock with the job id
-			if (
-					$type == 'send'
-				AND empty($rule->getSendJobLock())
-			) {
-				$rule->setSendJobLock($this->jobId);
-				$this->entityManager->persist($rule);
-				$this->entityManager->flush();
-				$this->connection->commit(); // -- COMMIT TRANSACTION
-				return true;
-			}
-
         } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Failed set the '.$type.' lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->message .= 'Failed set the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
 		return false;
 	}
 	
-    // Unset the lock on the rule depending on the type read or send
-	public function unsetRuleLock($type) {
-		// Get the rule details
-		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
-		// If read lock empty, we set the lock with the job id
-		if ($type == 'read') {
+    // Unset the lock on the rule 
+	public function unsetRuleLock() {
+        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+		try {
+            // Get the rule details
+            $rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
+            // If read lock empty, we set the lock with the job id
             $readJobLock = $rule->getReadJobLock();
             if (
                     !empty($readJobLock)
@@ -227,40 +215,23 @@ class rulecore
                 $rule->setReadJobLock('');
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
-                return true;
+                $this->connection->commit(); // -- COMMIT TRANSACTION
             }  elseif (!empty($readJobLock)) {
-				return false;
-			}
-		}
-		// If send lock empty, we set the lock with the job id
-		if ($type == 'send') {
-            $sendJobLock = $rule->getSendJobLock();	
-            if (
-                    !empty($sendJobLock)
-                AND $sendJobLock == $this->jobId
-            ) {
-                $rule->setSendJobLock('');
-                $this->entityManager->persist($rule);
-                $this->entityManager->flush();
-                return true;
-             }  elseif (!empty($sendJobLock)) {
-				return false;
-			}
-		}
+                return false;
+            }
+        } catch (Exception $e) {
+            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            $this->message .= 'Failed unset the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->message);
+            return false;
+        }
 		return true;
 	}
 	
-	protected function getRuleLock($type) {
+	protected function getRuleLock() {
 		// Get the rule details
 		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
-		// Return the lock depending on the lock type
-		if ($type == 'read') {
-			return $rule->getReadJobLock();
-		}
-		if ($type == 'send') {
-			return $rule->getSendJobLock();
-		}
-		return false;
+		return $rule->getReadJobLock();
 	}
 	
     /**
@@ -412,8 +383,8 @@ class rulecore
                 )
         ) {
 			// Check the rule isn't locked
-			if (!$this->setRuleLock('read')) {
-				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to read the source application. ');
+			if (!$this->setRuleLock()) {
+				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock().'. Failed to read the source application. ');
 			}
 
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
@@ -426,15 +397,15 @@ class rulecore
 
 				// If error we unlock the rule and we return the result
 				if (!isset($readSource['count'])) {
-					$this->unsetRuleLock('read');
+					$this->unsetRuleLock();
 					$this->commit(false); // -- COMMIT TRANSACTION
 					return $readSource;
 				}
 			
                 if ($readSource['count'] > 0) {
 					// Before creating the documents, we check the job id is the one in the rule lock
-					if ($this->getRuleLock('read') != $this->jobId) {
-						throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('read').'. Failed to generate the documents. ');
+					if ($this->getRuleLock() != $this->jobId) {
+						throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock().'. Failed to generate the documents. ');
 					}
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
@@ -471,7 +442,7 @@ class rulecore
 				
 				// No error management because we don't want any rollback because of the lock. 
 				// If the lock isn't removed, the next task will generate an error
-				$this->unsetRuleLock('read');
+				$this->unsetRuleLock();
 
                 // Rollback if the job has been manually stopped
                 if ('Start' != $this->getJobStatus()) {
@@ -483,7 +454,7 @@ class rulecore
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
                 $readSource['error'] = 'Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				// The process is finished even if there is an exception so we unlock the rule
-				$this->unsetRuleLock('read');
+				$this->unsetRuleLock();
             }
         }
         // On affiche pas d'erreur si la lecture est désactivée
@@ -942,11 +913,6 @@ class rulecore
 
     public function sendDocuments(): array
     {
-        // Check the rule isn't locked
-        if (!$this->setRuleLock('send')) {
-            return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
-        }
-
         // creation into the target application
         $sendTarget = $this->sendTarget('C');
         // Update into the target application
@@ -964,11 +930,6 @@ class rulecore
                 $sendTarget['error'] .= 'Failed to logout from the target solution';
             }
         }
-			
-        // No error management because we don't want any rollback because of the lock. 
-        // If the losk isn't removed, the next task will generate an error
-        $this->unsetRuleLock('send');
-
         return $sendTarget;
     }
 
@@ -1402,11 +1363,6 @@ class rulecore
 					)
 				)
 			) {
-				if (!$this->setRuleLock('send')) {
-					// Remove lock on the document
-					$this->documentManager->unsetLock();
-					return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send documents. ');
-				}
 				$response = $this->sendTarget('', $id_document);
 				if (
 						!empty($response[$id_document]['id'])
@@ -1415,9 +1371,8 @@ class rulecore
 				) {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Send';
 				} else {
-					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response['error']) ? $response['error'] : $response[$id_document]['error']);
+					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer : Error_sending. '.(!empty($response[$id_document]['error']) ? $response[$id_document]['error'] : $response['error'] );
 				}
-				$this->unsetRuleLock('send');
 			}
 			// If the job is manual, we display error in the UI
 			if ($this->manual) {
@@ -1659,7 +1614,6 @@ class rulecore
                     $type = $documentData['type'];
                 }
             }
-
             
             // Récupération du contenu de la table target pour tous les documents à envoyer à la cible
             $send['data'] = $this->getSendDocuments($type, $documentId);
@@ -1671,12 +1625,7 @@ class rulecore
             $send['ruleRelationships'] = $this->ruleRelationships;
             $send['jobId'] = $this->jobId;
             // Si des données sont prêtes à être créées
-            if (!empty($send['data'])) {
-				// Before sending the documents, we check the job id is the one in the rule lock
-				if ($this->getRuleLock('send') != $this->jobId) {
-					throw new \Exception('The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock('send').'. Failed to send the documents. ');
-				}
-					
+            if (!empty($send['data'])) {				
                 // If the rule is a child rule, no document is sent. They will be sent with the parent rule.
                 if ($this->isChild()) {
                     foreach ($send['data'] as $key => $data) {
@@ -2103,19 +2052,80 @@ class rulecore
                     }
                 }
             }
-            $data = $this->getDocumentData($document['id_doc_myddleware'], strtoupper(substr($table, 0, 1)));
-            if (!empty($data)) {
-                $return[$document['id_doc_myddleware']] = array_merge($document, $data);
-            } else {
-                $return['error'] = 'No data found in the document';
-            }
-        }
 
+            // Lock the document 
+            $documentLock = $this->setDocumentLock($document['id_doc_myddleware']);
+            if($documentLock['success']) {
+                // Get document data
+                $data = $this->getDocumentData($document['id_doc_myddleware'], strtoupper(substr($table, 0, 1)));
+                if (!empty($data)) {
+                    // Document is added to the result to be sent
+                    $return[$document['id_doc_myddleware']] = array_merge($document, $data);
+                } else {
+                    $error = 'No data found in the document';
+                }
+            } else {
+                $error = $documentLock['error'];
+            }
+            // If error we create a log on the document but we keep the status ready to send
+            if (!empty($error)) {
+                $param['id_doc_myddleware'] = $document['id_doc_myddleware'];
+                $param['jobId'] = $this->jobId;
+                $param['api'] = $this->api;
+                // Set the param values and clear all document attributes
+                if($this->documentManager->setParam($param, true)) {
+                    $this->documentManager->generateDocLog('W', $error);
+                } else {
+                    $this->logger->error('Job '.$this->jobId.' : Failed to create log for the document '.$document['id_doc_myddleware'].'. ');
+                }
+            } 
+        }
         if (!empty($return)) {
             return $return;
         }
 
         return null;
+    }
+
+    // Set the document lock
+    protected function setDocumentLock($docId) {
+        try {
+			// Get the job lock on the document
+            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $stmt = $this->connection->prepare($documentQuery);
+            $stmt->bindValue(':doc_id', $docId);
+            $documentResult = $stmt->executeQuery();
+            $documentData = $documentResult->fetchAssociative(); // 1 row
+
+            // If document already lock by the current job (rerun action for example), we return true;
+            if ($documentData['job_lock'] == $this->jobId) {
+                return array('success' => true);
+            // If document not locked, we lock it.
+            } elseif (empty($documentData['job_lock'])) {
+                $now = gmdate('Y-m-d H:i:s');
+                $query = '	UPDATE document 
+                                SET 
+                                    date_modified = :now,
+                                    job_lock = :job_id
+                                WHERE
+                                    id = :id
+                                ';
+                // Suppression de la dernière virgule
+                $stmt = $this->connection->prepare($query);
+                $stmt->bindValue(':now', $now);
+                // Target id could contain accent
+                $stmt->bindValue(':job_id', $this->jobId);
+                $stmt->bindValue(':id', $docId);
+                $result = $stmt->executeQuery();
+                return array('success' => true);
+            // Error for all other cases
+            } else {
+                return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
+            }
+        } catch (\Exception $e) {
+            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+		}
     }
 
     // Permet de charger tous les champs de la règle
