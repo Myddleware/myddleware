@@ -2003,19 +2003,22 @@ class rulecore
         // Si un document est en paramètre alors on filtre la requête sur le document
         if (!empty($documentId)) {
             $documentFilter = " 	document.id = '$documentId'
-								AND document.deleted = 0 ";
+								AND document.deleted = 0 
+                                AND document.job_lock = '' ";
         } elseif (!empty($parentDocId)) {
             $documentFilter = " 	document.parent_id = '$parentDocId' 
 								AND document.rule_id = '$parentRuleId'
-								AND document.deleted = 0 ";
+								AND document.deleted = 0 
+                                AND document.job_lock = '' ";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
         }
         // Sinon on récupère tous les documents élligible pour l'envoi
         else {
-            $documentFilter = "	document.rule_id = '$this->ruleId'
+            $documentFilter = "	    document.rule_id = '$this->ruleId'
 								AND document.status = 'Ready_to_send'
 								AND document.deleted = 0 
+                                AND document.job_lock = '' 
 								AND document.type = '$type' ";
         }
         // Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
@@ -2110,10 +2113,8 @@ class rulecore
                                 WHERE
                                     id = :id
                                 ';
-                // Suppression de la dernière virgule
                 $stmt = $this->connection->prepare($query);
                 $stmt->bindValue(':now', $now);
-                // Target id could contain accent
                 $stmt->bindValue(':job_id', $this->jobId);
                 $stmt->bindValue(':id', $docId);
                 $result = $stmt->executeQuery();

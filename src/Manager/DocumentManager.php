@@ -358,7 +358,7 @@ class documentcore
             // Création de la requête d'entête
             $date_modified = $this->data['date_modified'];
             // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId','$this->jobLock')";
+            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
             $this->updateStatus('New');
@@ -469,31 +469,71 @@ class documentcore
     // Set the document lock
     protected function setLock() {
         try {
-			// Set the job lock on the document
-			$document = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
-			$document->setJobLock($this->jobId);
-			$this->entityManager->persist($document);
-			$this->entityManager->flush();
-			return true;
+			// Get the job lock on the document
+            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $stmt = $this->connection->prepare($documentQuery);
+            $stmt->bindValue(':doc_id', $this->id);
+            $documentResult = $stmt->executeQuery();
+            $documentData = $documentResult->fetchAssociative(); // 1 row
+
+            // If document already lock by the current job, we return true;
+            if ($documentData['job_lock'] == $this->jobId) {
+                return array('success' => true);
+            // If document not locked, we lock it.
+            } elseif (empty($documentData['job_lock'])) {
+                $now = gmdate('Y-m-d H:i:s');
+                $query = '	UPDATE document 
+                                SET 
+                                    date_modified = :now,
+                                    job_lock = :job_id
+                                WHERE
+                                    id = :id
+                                ';
+                $stmt = $this->connection->prepare($query);
+                $stmt->bindValue(':now', $now);
+                $stmt->bindValue(':job_id', $this->jobId);
+                $stmt->bindValue(':id', $this->id);
+                $result = $stmt->executeQuery();
+                return array('success' => true);
+            // Error for all other cases
+            } else {
+                return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
+            }
         } catch (\Exception $e) {
-			return false;
+            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
     }
 	
 	// Set the document lock
     public function unsetLock() {
         try {
-			// Set the job lock on the document
-			$document = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $this->id, 'deleted' => false]);
-			if ($document->getJobLock() == $this->jobId) {
-				$document->setJobLock('');
-				$this->entityManager->persist($document);
-				$this->entityManager->flush();
-				return true;
-			}
+			// Get the job lock on the document
+            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $stmt = $this->connection->prepare($documentQuery);
+            $stmt->bindValue(':doc_id', $this->id);
+            $documentResult = $stmt->executeQuery();
+            $documentData = $documentResult->fetchAssociative(); // 1 row
+
+            // If document already lock by the current job, we return true;
+            if ($documentData['job_lock'] == $this->jobId) {
+                $now = gmdate('Y-m-d H:i:s');
+                $query = "	UPDATE document 
+                                SET 
+                                    date_modified = :now,
+                                    job_lock = ''
+                                WHERE
+                                    id = :id
+                                ";
+                $stmt = $this->connection->prepare($query);
+                $stmt->bindValue(':now', $now);
+                $stmt->bindValue(':id', $this->id);
+                $result = $stmt->executeQuery();
+                return true;
+            }
         } catch (\Exception $e) {
+            return false;
 		}
-		return false;
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas
@@ -1311,6 +1351,7 @@ class documentcore
                     }
                 }
             }
+
             // We save the relationship field too
             if (!empty($this->ruleRelationships)) {
                 foreach ($this->ruleRelationships as $ruleRelationship) {
@@ -1330,6 +1371,7 @@ class documentcore
             $documentData->setType($type); // Source
             $documentData->setData(json_encode($dataInsert)); // Encode in JSON
             $this->entityManager->persist($documentData);
+            $this->entityManager->flush();
         } catch (\Exception $e) {
             $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -1995,7 +2037,6 @@ class documentcore
 			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
-            // Suppression de la dernière virgule
             $stmt = $this->connection->prepare($query);
             $stmt->bindValue(':now', $now);
             $stmt->bindValue(':globalStatus', $globalStatus);
@@ -2003,8 +2044,8 @@ class documentcore
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
 			// Remove the lock on the document in the class and in the database
-            $this->jobLock = null;
-            $stmt->bindValue(':jobLock', $this->jobLock, \PDO::PARAM_NULL);
+            $this->jobLock = '';
+            $stmt->bindValue(':jobLock', $this->jobLock);
             $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
             $this->status = $new_status;

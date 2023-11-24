@@ -144,7 +144,7 @@ class Document
     private $logs;
 	
 	/**
-     * @ORM\Column(name="job_lock", type="string", length=23, nullable=true, options={"default":NULL})
+     * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
      */
     private string $jobLock;
 	
