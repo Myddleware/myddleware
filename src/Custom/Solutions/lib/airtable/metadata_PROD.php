@@ -920,6 +920,7 @@ $moduleFields['appgUF55WW7ApOTPQ'] = array (
 		'fldNMkRb3jHZYiIsp'=> array( 'label' => "Est bénévole Democampus ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldgiDZJTe2pewWQt'=> array( 'label' => "Est stagiaire ?", 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldeQGUyJifq1c0eA'=> array( 'label' => 'Année scolaire', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldG4xFb8biy5vtGh'=> array( 'label' => 'URL to Discord', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
 
