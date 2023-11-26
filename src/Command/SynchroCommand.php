@@ -150,11 +150,8 @@ class SynchroCommand extends Command
 											$this->entityManager = $this->registry->resetManager();
 										}
 										// Unset all the read and send locks of the rule in case of fatal error (if the losk correspond to the current job)
-										if (!$this->jobManager->unsetRuleLock('read')) {
-											$this->jobManager->message .= 'Failed to unset the read lock for the rule '.$value.'. ';
-										}
-										if (!$this->jobManager->unsetRuleLock('send')) {
-											$this->jobManager->message .= 'Failed to unset the send lock for the rule '.$value.'. ';
+										if (!$this->jobManager->unsetRuleLock()) {
+											$this->jobManager->message .= 'Failed to unset the lock for the rule '.$value.'. ';
 										}
 									}
                                 }

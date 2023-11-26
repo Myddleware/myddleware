@@ -207,9 +207,9 @@ class jobcore
         }
     }
 	
-	// Unset the lock on the rule depending on the type read or send
-	public function unsetRuleLock($type) {
-		return $this->ruleManager->unsetRuleLock($type);
+	// Unset the lock on the rule 
+	public function unsetRuleLock() {
+		return $this->ruleManager->unsetRuleLock();
 	}
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
