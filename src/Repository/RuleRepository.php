@@ -316,15 +316,6 @@ class RuleRepository extends ServiceEntityRepository
             ->setParameter('empty', $empty)
 			->getQuery();
         $qr->execute();
-
-        $qs = $this->createQueryBuilder('r')
-			->update()
-			->set('r.sendJobLock', ':empty')
-			->where('r.sendJobLock = :sendJobLock')
-			->setParameter('sendJobLock', $jobId)
-            ->setParameter('empty', $empty)
-			->getQuery();
-        $qs->execute();
 	}
 
 }
