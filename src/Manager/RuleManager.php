@@ -1625,7 +1625,7 @@ class rulecore
             $send['ruleRelationships'] = $this->ruleRelationships;
             $send['jobId'] = $this->jobId;
             // Si des données sont prêtes à être créées
-            if (!empty($send['data'])) {				
+            if (!empty($send['data'])) {
                 // If the rule is a child rule, no document is sent. They will be sent with the parent rule.
                 if ($this->isChild()) {
                     foreach ($send['data'] as $key => $data) {
@@ -1673,7 +1673,7 @@ class rulecore
                     }
                 } else {
                     $response[$documentId] = false;
-                    $response['error'] = $connect['error'];
+                    throw new \Exception('Failed to connect to the target application.');
                 }
             }
         
@@ -1734,7 +1734,6 @@ class rulecore
             }
 
             foreach($arrayDocumentsIds as $documentId){
-                // $send['data'][$documentId] = $this->getSendDocuments($type, $documentId);
                 $sendDataDocumentArrayElement = $this->getSendDocuments($type, $documentId);
                 $send['data'] = (object) [$documentId => $sendDataDocumentArrayElement[$documentId]];
             }
@@ -1958,13 +1957,18 @@ class rulecore
 									WHERE 
 											rule_id = :ruleId
 										AND status = :status
-										AND document.deleted = 0 
+										AND document.deleted = 0
+										AND (
+												document.job_lock = '' 
+											 OR document.job_lock = :jobId
+										)
 									ORDER BY document.source_date_modified ASC	
 									LIMIT $this->limit
 								";
             $stmt = $this->connection->prepare($query_documents);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':jobId', $this->jobId);
             $result = $stmt->executeQuery();
 
             return $result->fetchAllAssociative();
@@ -2004,12 +2008,20 @@ class rulecore
         if (!empty($documentId)) {
             $documentFilter = " 	document.id = '$documentId'
 								AND document.deleted = 0 
-                                AND document.job_lock = '' ";
+                                AND (
+										document.job_lock = '' 
+									 OR document.job_lock = '$this->jobId'
+								)
+							";
         } elseif (!empty($parentDocId)) {
             $documentFilter = " 	document.parent_id = '$parentDocId' 
 								AND document.rule_id = '$parentRuleId'
 								AND document.deleted = 0 
-                                AND document.job_lock = '' ";
+                                AND (
+										document.job_lock = '' 
+									 OR document.job_lock = '$this->jobId'
+								)
+							";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
         }
@@ -2017,9 +2029,13 @@ class rulecore
         else {
             $documentFilter = "	    document.rule_id = '$this->ruleId'
 								AND document.status = 'Ready_to_send'
-								AND document.deleted = 0 
-                                AND document.job_lock = '' 
-								AND document.type = '$type' ";
+								AND document.deleted = 0
+								AND document.type = '$type' 
+                                AND (
+										document.job_lock = '' 
+									 OR document.job_lock = '$this->jobId'
+								)
+							";
         }
         // Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
         $sql = "SELECT document.id id_doc_myddleware, document.target_id, document.source_date_modified
@@ -2030,7 +2046,6 @@ class rulecore
         $stmt = $this->connection->prepare($sql);
         $result = $stmt->executeQuery();
         $documents = $result->fetchAllAssociative();
-
         foreach ($documents as $document) {
             // If the rule is a parent, we have to get the data of all rules child
             $childRules = $this->getChildRules();
