@@ -768,18 +768,20 @@ class documentcore
             // Set the status Predecessor_OK
             $this->updateStatus('Predecessor_OK');
 
-            // Check compatibility between rule mode et document tupe
-            // A rule in create mode can't update data excpt for a child rule
-            if (
-					'C' == $this->ruleMode
-				and	'U' == $this->documentType
-                and !$this->isChild()
-            ) {
-                $this->message .= 'Rule mode only allows to create data. Filter because this document updates or deletes data.';
-                $this->updateStatus('Filter');
-                // In case we flter the document, we return false to stop the process when this method is called in the rerun process
-                return false;
-            }
+            // Check compatibility between rule mode et document type
+			// A rule in create mode can't update data except for a child rule
+			if (
+					$this->ruleMode == 'C'
+				and	$this->documentType == 'U'
+			) {
+				// Check child in a second time to avoid to run a query each time
+				if (!$this->isChild()) {
+					$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+					$this->updateStatus('Filter');
+					// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+					return false;
+				}
+			}
 
             return true;
         } catch (\Exception $e) {
@@ -891,10 +893,23 @@ class documentcore
                 if ('U' == $this->documentType) {
                     $this->updateTargetId($this->targetId);
                     $this->updateType('U');
+					// Check compatibility between rule mode et document type
+					// A rule in create mode can't update data except for a child rule
+					if (
+							$this->ruleMode == 'C'
+						and	$this->documentType == 'U'
+					) {
+						// Check child in a second time to avoid to run a query each time
+						if (!$this->isChild()) {
+							$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+							$this->updateStatus('Filter');
+							// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+							return false;
+						}
+					}
                 }
             }
             $this->updateStatus('Relate_OK');
-
             return true;
         } catch (\Exception $e) {
             $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -929,6 +944,20 @@ class documentcore
                         $this->targetId = $target['Myddleware_element_id'];
                         if ($this->updateTargetId($this->targetId)) {
                             $this->updateType('U');
+							// Check compatibility between rule mode et document type
+							// A rule in create mode can't update data except for a child rule
+							if (
+									$this->ruleMode == 'C'
+								and	$this->documentType == 'U'
+							) {
+								// Check child in a second time to avoid to run a query each time
+								if (!$this->isChild()) {
+									$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+									$this->updateStatus('Filter');
+									// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+									return false;
+								}
+							}
                         } else {
                             throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
                         }
@@ -1064,6 +1093,20 @@ class documentcore
                     } else {
                         $this->updateStatus('Ready_to_send');
                         $this->updateType('U');
+						// Check compatibility between rule mode et document type
+						// A rule in create mode can't update data except for a child rule
+						if (
+								$this->ruleMode == 'C'
+							and	$this->documentType == 'U'
+						) {
+							// Check child in a second time to avoid to run a query each time
+							if (!$this->isChild()) {
+								$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+								$this->updateStatus('Filter');
+								// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+								return false;
+							}
+						}
                     }
                     $this->updateTargetId($history['id']);
                 }
