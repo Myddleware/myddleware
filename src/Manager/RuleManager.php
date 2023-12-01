@@ -180,7 +180,6 @@ class rulecore
 
     // Unset the lock on the rule
 	protected function setRuleLock() {
-		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
 			// Get the rule details
 			$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
@@ -189,11 +188,9 @@ class rulecore
 				$rule->setReadJobLock($this->jobId);
 				$this->entityManager->persist($rule);
 				$this->entityManager->flush();
-				$this->connection->commit(); // -- COMMIT TRANSACTION
 				return true;
 			}	
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed set the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 		return false;
@@ -201,7 +198,6 @@ class rulecore
 	
     // Unset the lock on the rule 
 	public function unsetRuleLock() {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
 		try {
             // Get the rule details
             $rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
@@ -214,12 +210,10 @@ class rulecore
                 $rule->setReadJobLock('');
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
-                $this->connection->commit(); // -- COMMIT TRANSACTION
             }  elseif (!empty($readJobLock)) {
                 return false;
             }
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed unset the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
@@ -384,7 +378,7 @@ class rulecore
 			if (!$this->setRuleLock()) {
 				return array('error' => 'The rule '.$this->ruleId.' is locked by the task '.$this->getRuleLock().'. Failed to read the source application. ');
 			}
-
+			
             $this->connection->beginTransaction(); // -- BEGIN TRANSACTION suspend auto-commit
             try {
 				// lecture des données dans la source
@@ -392,11 +386,10 @@ class rulecore
 				if (empty($readSource['error'])) {
 					$readSource['error'] = '';
 				}
-
 				// If error we unlock the rule and we return the result
 				if (!isset($readSource['count'])) {
 					$this->unsetRuleLock();
-					$this->commit(false); // -- COMMIT TRANSACTION
+					$this->connection->commit();
 					return $readSource;
 				}
 			
@@ -446,7 +439,7 @@ class rulecore
                 if ('Start' != $this->getJobStatus()) {
                     throw new \Exception('The task has been stopped manually. No document generated. ');
                 }
-                $this->commit(false); // -- COMMIT TRANSACTION
+                $this->connection->commit();
             } catch (\Exception $e) {
                 $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
                 $this->logger->error('Failed to create documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -2365,23 +2358,6 @@ class rulecore
         }
     }
 
-    /**
-     * Checks whether a job is still active then commits the transaction.
-     *
-     * @throws \Doctrine\DBAL\Exception
-     */
-    protected function commit($newTransaction)
-    {
-        // Rollback if the job has been manually stopped
-        if ('Start' != $this->getJobStatus()) {
-            throw new \Exception('The task has been stopped manually. No document generated. ');
-        }
-        $this->connection->commit(); // -- COMMIT TRANSACTION
-        $this->entityManager->flush();
-        if ($newTransaction) {
-            $this->connection->beginTransaction();
-        }
-    }
 
     /**
      *  Parameter de la règle choix utilisateur.
