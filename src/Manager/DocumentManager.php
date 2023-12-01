@@ -211,8 +211,11 @@ class documentcore
 					AND $this->jobLock != $this->jobId
 				) {
 					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
+				// No setlock if $this->jobLock == $this->jobId
+				} elseif (!empty($this->jobLock)) {
+					$this->setLock();
 				}
-                $this->setLock();
+				
                 // Get source data and create data attribut
                 $this->sourceData = $this->getDocumentData('S');
                 $this->data = $this->sourceData;

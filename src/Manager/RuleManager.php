@@ -1949,28 +1949,43 @@ class rulecore
 
     protected function selectDocuments($status, $type = '')
     {
+		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
-            $query_documents = "	SELECT * 
-									FROM document 
+			// Select documents depending of the status
+            $queryDocuments = "	SELECT d
+									FROM App\Entity\Document d
 									WHERE 
-											rule_id = :ruleId
-										AND status = :status
-										AND document.deleted = 0
+											d.rule = :ruleId
+										AND d.status = :status
+										AND d.deleted = 0
 										AND (
-												document.job_lock = '' 
-											 OR document.job_lock = :jobId
+												d.jobLock = '' 
+											 OR d.jobLock = :jobId
 										)
-									ORDER BY document.source_date_modified ASC	
-									LIMIT $this->limit
+									ORDER BY d.sourceDateModified ASC	
 								";
-            $stmt = $this->connection->prepare($query_documents);
-            $stmt->bindValue(':ruleId', $this->ruleId);
-            $stmt->bindValue(':status', $status);
-            $stmt->bindValue(':jobId', $this->jobId);
-            $result = $stmt->executeQuery();
-
-            return $result->fetchAllAssociative();
+								
+			$query = $this->entityManager->createQuery($queryDocuments);
+			$query->setParameters([
+				'ruleId' => $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]),
+				'status' => $status,
+				'jobId' => $this->jobId,
+			]);
+			$query->setMaxResults($this->limit);
+			// Lock the table during the query until all documents are locked
+			$query->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+			$documents = $query->getArrayResult(); // array of ForumUser objects getArrayResult	
+			// Lock all the document
+			if (!empty($documents)) {
+				foreach ($documents as $document) {
+					// Lock focument without checking bacause we have selected only document with no lock
+                    $this->setDocumentLock($document['id'], false);
+                }
+			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION - release documents
+            return $documents;
         } catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION - release documents
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
@@ -2104,20 +2119,31 @@ class rulecore
     }
 
     // Set the document lock
-    protected function setDocumentLock($docId) {
+    protected function setDocumentLock($docId, $check = true) {
         try {
 			// Get the job lock on the document
-            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
-            $stmt = $this->connection->prepare($documentQuery);
-            $stmt->bindValue(':doc_id', $docId);
-            $documentResult = $stmt->executeQuery();
-            $documentData = $documentResult->fetchAssociative(); // 1 row
-
+			if ($check) {
+				$documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+				$stmt = $this->connection->prepare($documentQuery);
+				$stmt->bindValue(':doc_id', $docId);
+				$documentResult = $stmt->executeQuery();
+				$documentData = $documentResult->fetchAssociative(); // 1 row
+			}
+			
             // If document already lock by the current job (rerun action for example), we return true;
-            if ($documentData['job_lock'] == $this->jobId) {
+            if (
+					$check
+				AND $documentData['job_lock'] == $this->jobId
+			) {
                 return array('success' => true);
             // If document not locked, we lock it.
-            } elseif (empty($documentData['job_lock'])) {
+            } elseif (
+					!$check
+				 OR	(
+						$check
+					AND empty($documentData['job_lock'])
+				)
+			) {
                 $now = gmdate('Y-m-d H:i:s');
                 $query = '	UPDATE document 
                                 SET 
