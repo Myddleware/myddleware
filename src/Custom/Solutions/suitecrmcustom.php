@@ -25,6 +25,7 @@ class suitecrmcustom extends suitecrm
         'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Prospects' => ['email1', 'name'],
         'default' => ['name'],
+		'CRMC_Evaluation' => ['type_c', 'annee_scolaire_c', 'crmc_evaluation_contactscontacts_ida'],
     ];
 	
 	// Redefine get_modules method
