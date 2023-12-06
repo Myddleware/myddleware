@@ -12,6 +12,7 @@ class airtablecustom extends airtable {
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
 								'apppq0nb5WI815V57' => 'CONTACTS',		// Aiko PREPROD Reponse
+								'apppq0nb5WI815V57' => 'BILAN',			// Aiko PREPROD Bilan
 								'app5ustIjI5taRXJS' => 'CONTACTS',		// Mobilisation PROD
 								'appP31F11PgaT1f6H' => 'CONTACTS',		// Mobilisation PREPROD
 								'appALljzTMc2wjLV1' => 'VSC',			// USC PROD
@@ -28,6 +29,7 @@ class airtablecustom extends airtable {
 														'POLE' => 		'POLES',
 														'REFERENTS' => 	'REFERENTS',
 														'REPONSE' => 	'REPONSE',
+														'BILAN' => 	'BILAN',
 													),
 								'appdKFUpk2X2Ok8Dc' => array(
 														'CONTACTS' =>	'CONTACTS',
