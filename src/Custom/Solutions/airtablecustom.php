@@ -10,6 +10,7 @@ class airtablecustom extends airtable {
 
 	protected array $tableName = array(
 								'appdKFUpk2X2Ok8Dc' => 'Contacts',
+								'appdKFUpk2X2Ok8Dc' => 'BILAN',         // Aiko PROD Bilan
 								'appX0PhUGIkBTcWBE' => 'Aiko Auto Supr',
 								'apppq0nb5WI815V57' => 'CONTACTS',		// Aiko PREPROD Reponse
 								'apppq0nb5WI815V57' => 'BILAN',			// Aiko PREPROD Bilan
@@ -37,6 +38,7 @@ class airtablecustom extends airtable {
 														'POLE' => 		'POLES',
 														'REFERENTS' => 	'REFERENTS',
 														'REPONSE' => 	'REPONSE',
+														'BILAN' => 	'BILAN',
 													),
 								'appX0PhUGIkBTcWBE' =>  array(
 														'Aiko Auto Supr' => 'Aiko Auto Supr'
