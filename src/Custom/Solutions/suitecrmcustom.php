@@ -17,7 +17,7 @@ class suitecrmcustom extends suitecrm
 	// protected $moduleWithAnnee = array('Contacts', 'CRMC_binome', 'CRMC_Suivi','FP_events');
 	protected $moduleWithAnnee = array('FP_events', 'CRMC_Suivi', 'Leads');
 	protected $moduleWithAnnee2 = array('Contacts', 'CRMC_binome');
-	protected string $urlSuffix = '/custom/service/v4_1_custom/rest.php';
+	protected string $urlSuffix = '/service/v4_1/rest.php';
 	protected $currentRule;
 	protected array $FieldsDuplicate = ['Contacts' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Accounts' => ['email1', 'name'],
@@ -25,7 +25,7 @@ class suitecrmcustom extends suitecrm
         'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Prospects' => ['email1', 'name'],
         'default' => ['name'],
-		'CRMC_Evaluation' => ['type_c', 'annee_scolaire_c', 'crmc_evaluation_contactscontacts_ida'],
+		'CRMC_Evaluation' => ['type_c', 'annee_scolaire_c', 'MydCustRelSugarcrmc_evaluation_contactscontacts_ida'],
     ];
 	
 	// Redefine get_modules method
