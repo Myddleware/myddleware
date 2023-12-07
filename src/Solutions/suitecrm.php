@@ -881,11 +881,13 @@ class suitecrmcore extends solution
                 } else {
                     // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
                     if ('ProspectLists' == $param['module']) {
-                        $query .= 'prospect_lists.'.$key." = '".$value."' ";
+                        $query .= 'prospect_lists.' . $key . " = '" . $value . "' ";
                     } elseif ('Employees' == $param['module']) {
-                        $query .= 'users.'.$key." = '".$value."' ";
+                        $query .= 'users.' . $key . " = '" . $value . "' ";
+                    } elseif (substr($key, -2) == '_c') {
+                        $query .= strtolower($param['module'] . '_cstm') . '.' . $key . " = '" . $value . "' ";
                     } else {
-                        $query .= strtolower($param['module']).'.'.$key." = '".$value."' ";
+                        $query .= strtolower($param['module']) . '.' . $key . " = '" . $value . "' ";
                     }
                 }
             }
@@ -901,7 +903,6 @@ class suitecrmcore extends solution
                 $query = strtolower($param['module']).'.'.$dateRefField." > '".$param['date_ref']."'";
             }
         }
-
         return $query;
     }
 
