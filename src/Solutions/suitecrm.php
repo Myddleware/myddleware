@@ -400,6 +400,12 @@ class suitecrmcore extends solution
 
         // Built the query
         $query = $this->generateQuery($param, 'read');
+
+        // Remove custom field
+        if ($param['rule']['id'] == '65708a7e59eae') {
+            $query = str_replace('MydCustRelSugar', '', $query);
+        }
+        
         //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
         $link_name_to_fields_array = [];
         foreach ($param['fields'] as $field) {
