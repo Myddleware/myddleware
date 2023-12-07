@@ -877,7 +877,9 @@ class suitecrmcore extends solution
                     $query .= ' AND ';
                 }
                 if ('email1' == $key) {
-                    $query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
+                    $query .= strtolower($param['module']) . ".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '" . $value . "') ";
+                } elseif ($key == 'MydCustRelSugarcrmc_evaluation_contactscontacts_ida') {
+                    $query .= strtolower($param['module']) . ".id in (SELECT crmc_evaluation_contactscrmc_evaluation_idb FROM crmc_evaluation_contacts_c WHERE deleted=0 AND crmc_evaluation_contactscontacts_ida LIKE '" . $value . "') ";
                 } else {
                     // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
                     if ('ProspectLists' == $param['module']) {
