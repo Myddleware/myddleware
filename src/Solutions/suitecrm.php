@@ -398,15 +398,8 @@ class suitecrmcore extends solution
             $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
         }
 
-        // Built the query  
+        // Built the query
         $query = $this->generateQuery($param, 'read');
-
-        // Remove custom field
-        if ($param['rule']['id'] == '65708a7e59eae') {
-            $query = str_replace('MydCustRelSugar', '', $query);
-        }
-
-
         //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
         $link_name_to_fields_array = [];
         foreach ($param['fields'] as $field) {
@@ -871,9 +864,6 @@ class suitecrmcore extends solution
     protected function generateQuery($param, $method): string
     {
         $query = '';
-        // echo "this is the query params";
-        // echo '\n';
-        // print_r($param);
         // if a specific query is requeted we don't use date_ref
         if (!empty($param['query'])) {
             foreach ($param['query'] as $key => $value) {
@@ -881,19 +871,15 @@ class suitecrmcore extends solution
                     $query .= ' AND ';
                 }
                 if ('email1' == $key) {
-                    $query .= strtolower($param['module']) . ".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '" . $value . "') ";
-                } elseif ($key == 'MydCustRelSugarcrmc_evaluation_contactscontacts_ida') {
-                    $query .= strtolower($param['module']) . ".id in (SELECT crmc_evaluation_contactscrmc_evaluation_idb FROM crmc_evaluation_contacts_c WHERE deleted=0 AND crmc_evaluation_contactscontacts_ida LIKE '" . $value . "') ";
+                    $query .= strtolower($param['module']).".id in (SELECT eabr.bean_id FROM email_addr_bean_rel eabr JOIN email_addresses ea ON (ea.id = eabr.email_address_id) WHERE eabr.deleted=0 and ea.email_address LIKE '".$value."') ";
                 } else {
                     // Pour ProspectLists le nom de la table et le nom de l'objet sont différents
                     if ('ProspectLists' == $param['module']) {
-                        $query .= 'prospect_lists.' . $key . " = '" . $value . "' ";
+                        $query .= 'prospect_lists.'.$key." = '".$value."' ";
                     } elseif ('Employees' == $param['module']) {
-                        $query .= 'users.' . $key . " = '" . $value . "' ";
-                    } elseif (substr($key, -2) == '_c') {
-                        $query .= strtolower($param['module'] . '_cstm') . '.' . $key . " = '" . $value . "' ";
+                        $query .= 'users.'.$key." = '".$value."' ";
                     } else {
-                        $query .= strtolower($param['module']) . '.' . $key . " = '" . $value . "' ";
+                        $query .= strtolower($param['module']).'.'.$key." = '".$value."' ";
                     }
                 }
             }
@@ -909,9 +895,7 @@ class suitecrmcore extends solution
                 $query = strtolower($param['module']).'.'.$dateRefField." > '".$param['date_ref']."'";
             }
         }
-        // echo 'this is the final query';
-        // echo '\n';
-        // echo $query;
+
         return $query;
     }
 
@@ -990,11 +974,6 @@ class suitecrmcore extends solution
             curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
-
-             // if $parameters["query"] contains the string " AND leads_cstm.annee_scolaire_c LIKE '%2023_2024%' " then remove it
-             if (isset($parameters['query'])) {
-                $parameters['query'] = str_replace(" AND leads_cstm.annee_scolaire_c LIKE '%2023_2024%' ", '', $parameters['query']);
-            }
 
             $jsonEncodedData = json_encode($parameters);
             $post = [

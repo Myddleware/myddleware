@@ -109,7 +109,7 @@ $moduleFields['apppq0nb5WI815V57'] = array ( //! the id was appdKFUpk2X2Ok8Dc an
 	'BILAN' => array(
 		'fldPYphZlPg5fSKNi' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldc8Iqk5iMaizaeD' => array('label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
-		'fldtsUHoz3T0qNDQ7' => array('label' => 'BENEFICIAIRE: ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
+		'fldtsUHoz3T0qNDQ7' => array('label' => 'BENEFICIAIRE: ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldeLCuBqztpiZHWN' => array('label' => 'VOIR DANS COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fld1QFEc3q1GmNsWv' => array('label' => 'Created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldZ1zES3gkrDxidf' => array('label' => 'ID Trouver', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
