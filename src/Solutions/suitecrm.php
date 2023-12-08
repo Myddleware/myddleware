@@ -537,6 +537,247 @@ class suitecrmcore extends solution
         return $result;
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function readFicheEvaluation($param)
+    {
+
+        echo " ";
+        echo "this is the param";
+        echo " ";
+        print_r($param);
+        echo " ";
+        echo "this was the param";
+        echo " ";
+
+        $result = [];
+
+        // Manage delete option to enable
+        $deleted = false;
+        if (!empty($param['ruleParams']['deletion'])) {
+            $deleted = true;
+            $param['fields'][] = 'deleted';
+        }
+        $totalCount = 0;
+        $currentCount = 0;
+        $query = '';
+
+        // On va chercher le nom du champ pour la date de référence: Création ou Modification
+        $dateRefField = $this->getRefFieldName($param);
+
+        // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
+        if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $paramSave = $param;
+            $param['fields'] = [];
+            $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
+        }
+
+        // Built the query
+        $query = $this->generateQuery($param, 'read');
+
+        // Remove custom field
+        if ($param['rule']['id'] == '65708a7e59eae') {
+            $query = str_replace('MydCustRelSugar', '', $query);
+        }
+
+        //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
+        $link_name_to_fields_array = [];
+        foreach ($param['fields'] as $field) {
+            if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                // Get all custom relationships
+                if (empty($customRelationshipList)) {
+                    $customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
+                }
+                // Get the relationship name for all custom relationship field (coudb be id field or name field)
+                // Search the field in the array
+                if (!empty($customRelationshipListFields)) {
+                    foreach ($customRelationshipListFields as $key => $value) {
+                        // If a request field (name or id) is a custom relationship then we add the entry in array link_name_to_fields_array
+                        if (
+                            $value['id'] == $field
+                            or $value['name'] == $field
+                        ) {
+                            $link_name_to_fields_array[] = ['name' => $key, 'value' => ['id', 'name']];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // add limit to query
+        if (!empty($param['limit'])) {
+            $this->limitCall = $param['limit'];
+        }
+
+        $type_c = $param['query']['type_c'];
+        $anneeScolaireC = $param['query']['annee_scolaire_c'];
+        $contactsId = $param['query']['MydCustRelSugarcrmc_evaluation_contactscontacts_ida'];
+
+        $query = 
+        "SELECT * 
+        FROM crmc_evaluation
+            INNER JOIN crmc_evaluation_cstm 
+                ON crmc_evaluation.id = crmc_evaluation_cstm.id_c
+            INNER JOIN crmc_evaluation_contacts_c 
+                ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
+        WHERE 
+            crmc_evaluation_cstm.type_c = '{$type_c}' 
+            AND crmc_evaluation_cstm.annee_scolaire_c = '{$anneeScolaireC}' 
+            AND crmc_evaluation_contacts_c.deleted = 0 
+            AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '{$contactsId}'
+        LIMIT 1;";
+
+        echo " ";
+        echo "this is the query";
+        echo " ";
+        echo $query;
+        echo " ";
+        echo "this was the query";
+        echo " ";
+
+
+        echo " ";
+        echo "about to start the query run";
+        echo " ";
+
+        // On lit les données dans le CRM
+        do {
+            $get_entry_list_parameters = [
+                'session' => $this->session,
+                'query' => $query,
+            ];
+            $get_entry_list_result = $this->call('send_special_query', $get_entry_list_parameters);
+
+            echo " ";
+            echo "call done";
+            echo " ";
+
+            print_r($get_entry_list_result);
+
+            // Since get entry list result is an encoded string  {"status":"success","message":""} we need to decode it
+            $get_entry_list_result = json_decode($get_entry_list_result);
+
+            // If we have at least one result, then 
+
+            // If status sucess and message empty string then we retun
+            if ($get_entry_list_result->status == 'success' && $get_entry_list_result->message == '') {
+                echo " ";
+                echo "return success";
+                echo " ";
+
+                // if values not empty
+                if(!empty($get_entry_list_result->values)){
+                    echo " ";
+                    echo "this is the values";
+                    echo " ";
+                    print_r($get_entry_list_result->values);
+                    echo " ";
+                    echo "this was the values";
+                    // there will only be one value so return it as an array
+                    // put that as the 1st element of an array (array)$get_entry_list_result->values[0];
+                    $result = [(array)$get_entry_list_result->values[0]];
+                    return $result;
+                }
+                return;
+            }
+
+            echo " ";
+
+
+            // Construction des données de sortie
+            if (isset($get_entry_list_result->result_count)) {
+                $currentCount = $get_entry_list_result->result_count;
+                $totalCount += $currentCount;
+                $record = [];
+                $i = 0;
+                // For each records, we add all fields requested
+                for ($i = 0; $i < $currentCount; ++$i) {
+                    $entry = $get_entry_list_result->entry_list[$i];
+                    foreach ($entry->name_value_list as $value) {
+                        $record[$value->name] = $value->value;
+                    }
+                    // Manage deletion by adding the flag Myddleware_deletion to the record
+                    if (
+                        true == $deleted
+                        and !empty($entry->name_value_list->deleted->value)
+                    ) {
+                        $record['myddleware_deletion'] = true;
+                    }
+
+                    // All custom relationships will be added even the ones no requested (Myddleware will ignore them later)
+                    if (!empty($customRelationshipListFields)) {
+                        // For each fields requested corresponding to a custom relationship
+                        foreach ($param['fields'] as $field) {
+                            // Check if the field is a custom relationship
+                            foreach ($customRelationshipListFields as $key => $value) {
+                                if (
+                                    $field == $value['id']
+                                    or $field == $value['name']
+                                ) {
+                                    // Init field even if the relationship is empty. Myddleware needs the field to be set
+                                    $record[$value['id']] = '';
+                                    $record[$value['name']] = '';
+
+                                    // Find the the right relationship into SuiteCRM result call
+                                    foreach ($get_entry_list_result->relationship_list[$i]->link_list as $relationship) {
+                                        if (
+                                            !empty($relationship->name)
+                                            and $relationship->name == $key
+                                        ) {
+                                            // Save relationship values
+                                            if (!empty($relationship->records[0]->link_value->id->value)) {
+                                                $record[$value['id']] = $relationship->records[0]->link_value->id->value;
+                                                $record[$value['name']] = $relationship->records[0]->link_value->name->value;
+                                            }
+                                            break 2; // Go to the next field
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $result[] = $record;
+                    $record = [];
+                }
+                // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
+                $param['offset'] += $this->limitCall;
+            } else {
+                if (!empty($get_entry_list_result->number)) {
+                    // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
+                    throw new \Exception($get_entry_list_result->number . ' : ' . $get_entry_list_result->name . '. ' . $get_entry_list_result->description);
+                } else {
+                    // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
+                    throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
+                }
+                break; // Stop the loop if an error happened
+            }
+        }
+        // On continue si le nombre de résultat du dernier appel est égal à la limite
+        while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
+        // Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
+        if (!empty($paramSave)) {
+            $resultRel = $this->readRelationship($paramSave, $result);
+            // Récupération des données sauf de la date de référence qui dépend des enregistrements parent
+            if (!empty($resultRel['count'])) {
+                $result = $resultRel['values'];
+            }
+            // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
+            else {
+                return;
+            }
+        }
+
+        // $file_result = print_r($result, true);
+
+        // $filePath = __DIR__ . '/output.txt';
+
+        // file_put_contents($filePath, $file_result);
+
+        return $result;
+    }
+
     // Build the direct link to the record (used in data transfer view)
     public function getDirectLink($rule, $document, $type): string
     {

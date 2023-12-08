@@ -190,6 +190,14 @@ class suitecrmcustom extends suitecrm
 		) {
 			return array();
 		}
+
+		if (
+			$param['call_type'] == 'history'
+			and $param['module'] == 'CRMC_Evaluation'
+		) {
+			return parent::readFicheEvaluation($param);
+		}
+
 		$read = parent::read($param);
 		// Add a field to filter by mentor OR mentor accueil
 		if (
