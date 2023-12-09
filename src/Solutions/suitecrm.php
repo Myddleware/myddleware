@@ -625,7 +625,8 @@ class suitecrmcore extends solution
         WHERE 
             crmc_evaluation_cstm.type_c = '{$type_c}' 
             AND crmc_evaluation_cstm.annee_scolaire_c = '{$anneeScolaireC}' 
-            AND crmc_evaluation_contacts_c.deleted = 0 
+            AND crmc_evaluation_contacts_c.deleted = 0
+            AND crmc_evaluation.deleted = 0
             AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '{$contactsId}'
         LIMIT 1;";
 
