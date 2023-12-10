@@ -543,14 +543,6 @@ class suitecrmcore extends solution
     public function readFicheEvaluation($param)
     {
 
-        echo " ";
-        echo "this is the param";
-        echo " ";
-        print_r($param);
-        echo " ";
-        echo "this was the param";
-        echo " ";
-
         $result = [];
 
         // Manage delete option to enable
@@ -630,19 +622,6 @@ class suitecrmcore extends solution
             AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '{$contactsId}'
         LIMIT 1;";
 
-        echo " ";
-        echo "this is the query";
-        echo " ";
-        echo $query;
-        echo " ";
-        echo "this was the query";
-        echo " ";
-
-
-        echo " ";
-        echo "about to start the query run";
-        echo " ";
-
         // On lit les données dans le CRM
         do {
             $get_entry_list_parameters = [
@@ -651,12 +630,6 @@ class suitecrmcore extends solution
             ];
             $get_entry_list_result = $this->call('send_special_query', $get_entry_list_parameters);
 
-            echo " ";
-            echo "call done";
-            echo " ";
-
-            print_r($get_entry_list_result);
-
             // Since get entry list result is an encoded string  {"status":"success","message":""} we need to decode it
             $get_entry_list_result = json_decode($get_entry_list_result);
 
@@ -664,18 +637,9 @@ class suitecrmcore extends solution
 
             // If status sucess and message empty string then we retun
             if ($get_entry_list_result->status == 'success' && $get_entry_list_result->message == '') {
-                echo " ";
-                echo "return success";
-                echo " ";
 
                 // if values not empty
                 if(!empty($get_entry_list_result->values)){
-                    echo " ";
-                    echo "this is the values";
-                    echo " ";
-                    print_r($get_entry_list_result->values);
-                    echo " ";
-                    echo "this was the values";
                     // there will only be one value so return it as an array
                     // put that as the 1st element of an array (array)$get_entry_list_result->values[0];
                     $result = [(array)$get_entry_list_result->values[0]];
@@ -683,9 +647,6 @@ class suitecrmcore extends solution
                 }
                 return;
             }
-
-            echo " ";
-
 
             // Construction des données de sortie
             if (isset($get_entry_list_result->result_count)) {
@@ -769,12 +730,6 @@ class suitecrmcore extends solution
                 return;
             }
         }
-
-        // $file_result = print_r($result, true);
-
-        // $filePath = __DIR__ . '/output.txt';
-
-        // file_put_contents($filePath, $file_result);
 
         return $result;
     }
