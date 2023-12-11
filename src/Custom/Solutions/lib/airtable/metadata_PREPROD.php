@@ -123,6 +123,7 @@ $moduleFields['apppq0nb5WI815V57'] = array ( //! the id was appdKFUpk2X2Ok8Dc an
 		'fldQ8kJqIcqcYwNy9' => array('label' => 'BOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldwDMCInP8KqRysG' => array('label' => 'VOIR DANS COMET copy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldgaoAamUPe0TyOg' => array('label' => 'Date rattrapage', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldI4qbijgl3PRO3R' => array('label' => 'Myddleware: Last modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
 
