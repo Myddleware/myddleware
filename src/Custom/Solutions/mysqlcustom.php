@@ -808,36 +808,19 @@ class mysqlcustom extends mysql {
 					$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
 					unset($param['data'][$idDoc]); // Do not send this document
 				}
-				// Update email if 
-					// 		Email has been changed
-					// AND 		volontaire = 1 
-					// 		 OR type = “User COMET” + compte_reec_ok = 1 
-					// 		 OR reperant + compte_reec_ok = 0 + compte_reperant_ok = 0  
+
+				// Set email_updated = 1 if email modified AND ( compte_reec_ok = 1 OR compte_reperant_ok = 1 )
 				if (
 						!empty($param['data'][$idDoc]['email'])
 					AND !empty($param['dataHistory'][$idDoc])	
 					AND $param['data'][$idDoc]['email'] != $param['dataHistory'][$idDoc]['email']
 					AND (
-							!empty($param['data'][$idDoc]['volontaire'])
-						 OR (
-								!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
-							AND $param['dataHistory'][$idDoc]['type'] == 'User Comet'
-						)
-						OR (
-								!empty($param['data'][$idDoc]['reperant'])
-							AND	empty($param['dataHistory'][$idDoc]['compte_reperant_ok'])
-							AND	empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
-						)
+							!empty($param['dataHistory'][$idDoc]['compte_reperant_ok'])
+						 OR	!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
 					)
 				) {
 					$param['data'][$idDoc]['email_updated'] = 1;
-				// No email update if an account has been created
-				} elseif (
-						!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
-					 OR	!empty($param['dataHistory'][$idDoc]['compte_reperant_ok'])
-				) {
-					unset($param['data'][$idDoc]['email']);
-				}
+				} 
 
 				// Never modify compte_reec_ok
 				unset($param['data'][$idDoc]['compte_reec_ok']);
