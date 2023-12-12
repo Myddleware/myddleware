@@ -128,6 +128,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
 		'fldEsZgEXiF6LL06e' => array('label' => 'BOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldkXr9WCVnEd6L0L' => array('label' => 'VOIR DANS COMET copy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fld4u37oB048N8Lml' => array('label' => 'Date rattrapage', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldJViCsbfpAcsoAv' => array('label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
 
