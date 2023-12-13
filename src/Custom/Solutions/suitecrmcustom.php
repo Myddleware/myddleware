@@ -619,6 +619,14 @@ class suitecrmcustom extends suitecrm
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
 		}
+
+		// Add a filter on field MydCustRelSugarcrmc_evaluation_contactscontacts_ida
+		if (
+				!empty($param['rule']['id'])
+			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact partenaire
+		){
+			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
+		}
 		return $query;
 	}
 
