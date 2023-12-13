@@ -191,13 +191,6 @@ class suitecrmcustom extends suitecrm
 			return array();
 		}
 
-		if (
-			$param['call_type'] == 'history'
-			and $param['module'] == 'CRMC_Evaluation'
-		) {
-			return parent::readFicheEvaluation($param);
-		}
-
 		$read = parent::read($param);
 		// Add a field to filter by mentor OR mentor accueil
 		if (
@@ -623,9 +616,14 @@ class suitecrmcustom extends suitecrm
 		// Add a filter on field MydCustRelSugarcrmc_evaluation_contactscontacts_ida
 		if (
 				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '5d01a630c217c' //  REEC - Contact partenaire
+			AND $param['rule']['id'] == '65708a7e59eae' //  Aiko - Bilan vers Comet
 		){
-			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
+			$query .= strtolower($param['module']) . ".id in (SELECT crmc_evaluation_contactscrmc_evaluation_idb FROM crmc_evaluation_contacts_c WHERE deleted=0 AND crmc_evaluation_contactscontacts_ida LIKE '" . $value . "') ";
+			echo 'this is the query';
+			echo ' ';
+			echo $query;
+			echo ' ';
+			echo 'this was the query';
 		}
 		return $query;
 	}
