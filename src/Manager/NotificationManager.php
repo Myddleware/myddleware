@@ -169,7 +169,7 @@ class NotificationManager
 
             // we're going to check whether there was no job started since an hour
             $timeOneHourAgo = new DateTime('now', new \DateTimeZone('GMT'));
-            $timeOneHourAgo->modify('-60 minutes');
+            $timeOneHourAgo->modify('-'.$this->configParams['alert_time_limit'].' minutes');
 
             // Search if a job is lasting more time that the limit authorized
             $anyJob = $this->jobRepository->findIfAnyJobStartedSince($timeOneHourAgo);
@@ -177,7 +177,7 @@ class NotificationManager
             // if no job was started since an hour, we send the alert
             if (empty($anyJob)) {
                 // Create textmail that says 'Alert: the crontab is stopped since more than one hour. Please check the crontab.'
-            $textMail = 'Alert: the crontab is stopped since more than one hour. Please check the crontab.';
+            $textMail = 'Alert: the crontab is stopped since more than '.$this->configParams['alert_time_limit'].' minutes'. 'Please check the crontab.';
             
                 return $this->send($textMail, $this->translator->trans('email_alert.subject'));
             }
