@@ -166,21 +166,39 @@ class suitecrmcustom extends suitecrm
 		 && $isRuleBilan
 		 && $ruleactive
 		 ) {
+			
 			$parameters['module_name'] = $module_name;
 			$parameters['session'] = $session;
-			// echo ' ';
-			// echo 'this is the result line 156';
-			// print_r($result);
-			// echo ' ';
+			echo ' ';
+			echo 'this is the result line 156';
+			print_r($result);
+			echo ' ';
 			// result is an empty array
 			// echo 'this was the result line 159';
 			$decodedResult = json_decode($result);
+
+			// if decoded result status is success and decoded result message is empty string then return
+			if ($decodedResult->status == 'success' && $decodedResult->message == '') {
+
+				// $result is an empty stdClass object
+				$result = new \stdClass();
+				$result->result_count = 0;
+				$result->total_count = 0;
+				$result->entry_list = [];
+				$result->relationship_list = [];
+				return $result;
+				$noresult = true;
+			}
 			// $result = (array)$decodedResult->values[0];
 			// $result = [];
 			// $result[0] = $arrrayResult;
 			
 			$arrayResult = (array)$decodedResult->values[0];
 			$result = new \stdClass();
+			if (!($noresult)) {
+				$result->result_count = 1;
+				$result->total_count = 1;
+			}
 			
 			// ------------------------------------test
 			$result->entry_list = [];
@@ -212,7 +230,6 @@ class suitecrmcustom extends suitecrm
 			// $result->entry_list[0]['crmc_evaluation_contactscontacts_ida'] = $result->entry_list[0]->name_value_list->MydCustRelSugarcrmc_evaluation_contactscontacts_ida;
 
 			$result->relationship_list = [];
-			$result->result_count = 1;
 			$isRuleBilan = false;
 		}
 
