@@ -113,8 +113,108 @@ class suitecrmcustom extends suitecrm
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts', 'value' => array('id', 'statut_c', 'chatbot_c'));
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts_1', 'value' => array('id', 'statut_c', 'chatbot_c'));
 		}
+		$isRuleBilan = false;
+		$ruleactive = true;
+		// echo ' ';
+		// echo 'this is the parameters line 118';
+		// echo ' ';
+		// print_r($parameters);
+		// echo ' ';
+		// echo 'this was the parameters line 122';
+		// echo ' ';
+		if (
+				$this->currentRule == '65708a7e59eae'
+			AND $method == 'get_entry_list'
+			AND !empty($parameters['module_name']
+			AND $ruleactive)
+
+		) {
+			$isRuleBilan = true;
+			$method = 'send_special_query';
+			// empty the parameters
+			$session = $this->session;
+			$module_name = $parameters['module_name'];
+			$parameters = array();
+			$parameters['session'] = $this->session;
+			$parameters['query'] = "SELECT
+				crmc_evaluation.id,
+				crmc_evaluation.date_modified,
+				crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida as MydCustRelSugarcrmc_evaluation_contactscontacts_ida,
+				crmc_evaluation.name,
+				crmc_evaluation_cstm.type_c,
+				crmc_evaluation_cstm.annee_scolaire_c,
+				crmc_evaluation_cstm.implication_famille_c,
+				crmc_evaluation_cstm.travail_personnel_c
+			FROM crmc_evaluation
+				INNER JOIN crmc_evaluation_cstm 
+					ON crmc_evaluation.id = crmc_evaluation_cstm.id_c
+				INNER JOIN crmc_evaluation_contacts_c 
+					ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
+			WHERE 
+				crmc_evaluation_cstm.type_c = 'debut'
+				AND crmc_evaluation_cstm.annee_scolaire_c = '2023_2024' 
+				AND crmc_evaluation_contacts_c.deleted = 0
+				AND crmc_evaluation.deleted = 0
+				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '1811e41f-2a34-ec3a-e070-65717763e53f'
+			LIMIT 1;";
+		}
 
 		$result = parent::call($method, $parameters);
+
+		
+		if ($this->currentRule == '65708a7e59eae'
+		 && $isRuleBilan
+		 && $ruleactive
+		 ) {
+			$parameters['module_name'] = $module_name;
+			$parameters['session'] = $session;
+			// echo ' ';
+			// echo 'this is the result line 156';
+			// print_r($result);
+			// echo ' ';
+			// result is an empty array
+			// echo 'this was the result line 159';
+			$decodedResult = json_decode($result);
+			// $result = (array)$decodedResult->values[0];
+			// $result = [];
+			// $result[0] = $arrrayResult;
+			
+			$arrayResult = (array)$decodedResult->values[0];
+			$result = new \stdClass();
+			
+			// ------------------------------------test
+			$result->entry_list = [];
+			// foreach ($arrayResult as $key => $value) {
+			// 	$entry = new \stdClass();
+			// 	$entry->name_value_list = new \stdClass();
+
+			// 	// Assuming each $value here is a simple value and not an array/object
+			// 	$entry->name_value_list->$key = new \stdClass();
+			// 	$entry->name_value_list->$key->name = $key;
+			// 	$entry->name_value_list->$key->value = $value;
+
+			// 	$result->entry_list[] = $entry;
+			// }
+			$entry = new \stdClass();
+			$entry->name_value_list = new \stdClass();
+
+			foreach ($arrayResult as $key => $value) {
+				$entry->name_value_list->$key = new \stdClass();
+				$entry->name_value_list->$key->name = $key;
+				$entry->name_value_list->$key->value = $value;
+			}
+
+			// Add the constructed entry to the entry_list
+			$result->entry_list[] = $entry;
+
+			// ------------------------------------test end
+
+			// $result->entry_list[0]['crmc_evaluation_contactscontacts_ida'] = $result->entry_list[0]->name_value_list->MydCustRelSugarcrmc_evaluation_contactscontacts_ida;
+
+			$result->relationship_list = [];
+			$result->result_count = 1;
+			$isRuleBilan = false;
+		}
 
 		if ($this->currentRule == '61a920fae25c5') {
 			if (!empty($result->relationship_list)) {
@@ -168,6 +268,13 @@ class suitecrmcustom extends suitecrm
 				}
 			}
 		}
+		// echo ' ';
+		// 	echo 'this is the result line 209';
+		// 	echo ' ';
+		// 	print_r($result);
+		// 	echo ' ';
+		// 	echo 'this was the result line 213';
+		// 	echo ' ';
 		return $result;
 	}
 
@@ -613,18 +720,6 @@ class suitecrmcustom extends suitecrm
 			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
 		}
 
-		// Add a filter on field MydCustRelSugarcrmc_evaluation_contactscontacts_ida
-		if (
-				!empty($param['rule']['id'])
-			AND $param['rule']['id'] == '65708a7e59eae' //  Aiko - Bilan vers Comet
-		){
-			$query .= strtolower($param['module']) . ".id in (SELECT crmc_evaluation_contactscrmc_evaluation_idb FROM crmc_evaluation_contacts_c WHERE deleted=0 AND crmc_evaluation_contactscontacts_ida LIKE '" . $value . "') ";
-			echo 'this is the query';
-			echo ' ';
-			echo $query;
-			echo ' ';
-			echo 'this was the query';
-		}
 		return $query;
 	}
 
