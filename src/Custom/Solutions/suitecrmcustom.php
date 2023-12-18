@@ -139,7 +139,21 @@ class suitecrmcustom extends suitecrm
 			echo 'this was the query in our custom call';
 			echo chr(10);
 			$paramQuery = $parameters['query'];
-			$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 5);
+			// if param query contains the word debut, do x, else if param query contains the word fin, do y
+			if (strpos($paramQuery, 'debut') !== false) {
+				// do x
+				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 5);
+				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+				echo(chr(10));
+				echo 'debut !!!!!!!!!';
+			} else if (strpos($paramQuery, 'fin') !== false) {
+				// do y
+				echo 'fin !!!!!!!!!';
+				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 3);
+				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			}
 			echo chr(10);
 			echo 'this is the type in our custom call';
 			echo chr(10);
@@ -154,7 +168,7 @@ class suitecrmcustom extends suitecrm
 			// echo chr(10);
 			// echo 'this was the parameters in our custom call';
 			// echo chr(10);
-			$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+			
 			echo chr(10);
 			echo 'this is the school year in our custom call';
 			echo chr(10);
@@ -163,7 +177,7 @@ class suitecrmcustom extends suitecrm
 			echo 'this was the school year in our custom call';
 			echo chr(10);
 
-			$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			
 			echo chr(10);
 			echo 'this is the contact id in our custom call';
 			echo chr(10);
@@ -361,6 +375,7 @@ class suitecrmcustom extends suitecrm
 	// Redifine read function
 	public function read($param)
 	{
+		echo 'in read custom';
 		// No history read action for every the rules => no need of history for the migration
 		if (
 			$param['call_type'] == 'history'
