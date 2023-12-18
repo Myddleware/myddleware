@@ -115,20 +115,64 @@ class suitecrmcustom extends suitecrm
 		}
 		$isRuleBilan = false;
 		$ruleactive = true;
-		// echo ' ';
-		// echo 'this is the parameters line 118';
-		// echo ' ';
-		// print_r($parameters);
-		// echo ' ';
-		// echo 'this was the parameters line 122';
-		// echo ' ';
 		if (
 				$this->currentRule == '65708a7e59eae'
 			AND $method == 'get_entry_list'
 			AND !empty($parameters['module_name']
-			AND $ruleactive)
+			AND $ruleactive
+			// and parameters query contains the substring crmc
+			AND strpos($parameters['query'], 'crmc_evaluation_cstm.type_c =') !== false
+			)
 
 		) {
+			// this is the typical query
+			//"crmc_evaluation_cstm.type_c = 'debut'  AND crmc_evaluation_cstm.annee_scolaire_c = '2022_2023'  AND crmc_evaluation.crmc_evaluation_contactscontacts_ida = '1811e41f-2a34-ec3a-e070-65717763e53f'"
+			// get the type from counting the characters from the beginning of the query
+			// get the query from the params
+			
+			//echo the query
+			echo chr(10);
+			echo 'this is the query in our custom call';
+			echo chr(10);
+			print_r($parameters);
+			echo chr(10);
+			echo 'this was the query in our custom call';
+			echo chr(10);
+			$paramQuery = $parameters['query'];
+			$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 5);
+			echo chr(10);
+			echo 'this is the type in our custom call';
+			echo chr(10);
+			print_r($type);
+			echo chr(10);
+			echo 'this was the type in our custom call';
+			echo chr(10);
+			// echo chr(10);
+			// echo 'this is the parameters in our custom call';
+			// echo chr(10);
+			// print_r($parameters);
+			// echo chr(10);
+			// echo 'this was the parameters in our custom call';
+			// echo chr(10);
+			$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+			echo chr(10);
+			echo 'this is the school year in our custom call';
+			echo chr(10);
+			print_r($schoolYear);
+			echo chr(10);
+			echo 'this was the school year in our custom call';
+			echo chr(10);
+
+			$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			echo chr(10);
+			echo 'this is the contact id in our custom call';
+			echo chr(10);
+			print_r($contactId);
+			echo chr(10);
+			echo 'this was the contact id in our custom call';
+			echo chr(10);
+
+
 			$isRuleBilan = true;
 			$method = 'send_special_query';
 			// empty the parameters
@@ -151,13 +195,23 @@ class suitecrmcustom extends suitecrm
 				INNER JOIN crmc_evaluation_contacts_c 
 					ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
 			WHERE 
-				crmc_evaluation_cstm.type_c = 'debut'
-				AND crmc_evaluation_cstm.annee_scolaire_c = '2023_2024' 
+				-- get the type from the variable $type
+				crmc_evaluation_cstm.type_c = '$type'
+				AND crmc_evaluation_cstm.annee_scolaire_c = '$schoolYear'
 				AND crmc_evaluation_contacts_c.deleted = 0
 				AND crmc_evaluation.deleted = 0
-				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '1811e41f-2a34-ec3a-e070-65717763e53f'
+				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '$contactId'
 			LIMIT 1;";
 		}
+
+		echo chr(10);
+		echo "this is the query new";
+		echo chr(10);
+		print_r($parameters['query']);
+		echo chr(10);
+		echo "this was the query new";
+		echo chr(10);
+
 
 		$result = parent::call($method, $parameters);
 
@@ -169,16 +223,16 @@ class suitecrmcustom extends suitecrm
 			
 			$parameters['module_name'] = $module_name;
 			$parameters['session'] = $session;
-			echo ' ';
-			echo 'this is the result line 156';
-			print_r($result);
-			echo ' ';
+			// echo chr(10);
+			// echo 'this is the result line 156';
+			// print_r($result);
+			// echo chr(10);
 			// result is an empty array
 			// echo 'this was the result line 159';
 			$decodedResult = json_decode($result);
 
-			// if decoded result status is success and decoded result message is empty string then return
-			if ($decodedResult->status == 'success' && $decodedResult->message == '') {
+			// if decoded result status is success and decoded result message is empty string and decoded result values is not set then return
+			if ($decodedResult->status == 'success' && $decodedResult->message == '' && !isset($decodedResult->values)) {
 
 				// $result is an empty stdClass object
 				$result = new \stdClass();
@@ -285,13 +339,13 @@ class suitecrmcustom extends suitecrm
 				}
 			}
 		}
-		// echo ' ';
+		// echo chr(10);
 		// 	echo 'this is the result line 209';
-		// 	echo ' ';
+		// 	echo chr(10);
 		// 	print_r($result);
-		// 	echo ' ';
+		// 	echo chr(10);
 		// 	echo 'this was the result line 213';
-		// 	echo ' ';
+		// 	echo chr(10);
 		return $result;
 	}
 
