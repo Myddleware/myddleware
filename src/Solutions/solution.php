@@ -107,8 +107,6 @@ class solutioncore
     // $this->connexion_valide (true si la connexion estréussie, false sinon)
     public function login($paramConnexion)
     {
-        echo 'in login solution';
-        echo chr(10);
         // Instanciate object to decrypte data
         $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->parameterBagInterface->get('secret'), -16));
         // Decrypt connexion parameters
@@ -305,31 +303,11 @@ class solutioncore
             if (!empty($readResult)) {
                 // Get the name of the field used for the reference
                 $dateRefField = $this->getRefFieldName($param);
-                echo ' ';
-                echo 'this is the dateRefField line 307';
-                echo ' ';
-                print_r($dateRefField);
-                echo ' ';
-                echo 'this was the dateRefField line 311';
                 // Get the name of the field used as id
                 $idField = $this->getIdName($param['module']);
 
                 // Sort data with the reference field
                 $modified = array_column($readResult, $dateRefField);
-                echo ' ';
-                echo 'this is the modified line 312';
-                echo ' ';
-                print_r($modified);
-                echo ' ';
-                echo 'this was the modified line 316';
-                echo ' ';
-                echo ' ';
-                echo 'this is the result line 319';
-                echo ' ';
-                print_r($readResult);
-                echo ' ';
-                echo 'this was the result line 323';
-                echo ' ';
                 array_multisort($modified, SORT_ASC, $readResult);
 
                 // Add id and date_modified values into the read call result

@@ -108,7 +108,6 @@ class suitecrmcore extends solution
 
     public function login($paramConnexion)
     {
-        echo 'in login suitecrmcore';
         parent::login($paramConnexion);
         try {
             $login_paramaters = [
@@ -379,10 +378,6 @@ class suitecrmcore extends solution
     {
         $result = [];
 
-        echo chr(10);
-        echo 'this is the param line 382 in suitecrm';
-        print_r($param);
-
         // Manage delete option to enable
         $deleted = false;
         if (!empty($param['ruleParams']['deletion'])) {
@@ -417,19 +412,7 @@ class suitecrmcore extends solution
             if (substr($field, 0, strlen($this->customRelationship)) == $this->customRelationship) {
                 // Get all custom relationships
                 if (empty($customRelationshipList)) {
-                    // echo ' ';
-                    // echo 'this is the param module line 416';
-                    // print_r($param['module']);
-                    // echo ' ';
-                    // echo 'this was the param module line 416';
-                    // echo ' ';
                     $customRelationshipListFields = $this->getCustomRelationshipListFields($param['module']);
-                    // echo ' ';
-                    // echo 'this is the customrelationshipfield line 423';
-                    // print_r($customRelationshipListFields);
-                    // echo ' ';
-                    // echo 'this was the customrelationshipfield line 426';
-                    // echo ' ';
                 }
                 // Get the relationship name for all custom relationship field (coudb be id field or name field)
                 // Search the field in the array
@@ -468,31 +451,16 @@ class suitecrmcore extends solution
                 'Favorites' => '',
             ];
             $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
-            // echo ' ';
-            // echo 'this is the get_entry_list_result line 466';
-            // echo ' ';
-            // print_r($get_entry_list_result);
-            // echo ' ';
-            // echo 'this was the get_entry_list_result line 466';
-            // echo ' ';
             // Construction des données de sortie
             if (isset($get_entry_list_result->result_count)) {
-                // echo chr(10);
-                // echo 'this is the inside count 001';
-                // echo chr(10);
                 $currentCount = $get_entry_list_result->result_count;
                 $totalCount += $currentCount;
                 $record = [];
                 $i = 0;
                 // For each records, we add all fields requested
                 for ($i = 0; $i < $currentCount; ++$i) {
-                    // echo chr(10);
-                    // echo 'this is the for line 002';
-                    // echo chr(10);
                     $entry = $get_entry_list_result->entry_list[$i];
                     foreach ($entry->name_value_list as $value) {
-                        // echo chr(10);
-                    // echo 'this is the inside foreach line 003' . $value->name . ' ' . $value->value;
                         $record[$value->name] = $value->value;
                     }
                     // Manage deletion by adding the flag Myddleware_deletion to the record
@@ -536,13 +504,6 @@ class suitecrmcore extends solution
                         }
                     }
                     $result[] = $record;
-                    // echo chr(10);
-                    // echo 'this is the record line 527';
-                    // echo chr(10);
-                    // print_r($record);
-                    // echo chr(10);
-                    // echo 'this was the record line 531';
-                    // echo chr(10);
                     $record = [];
                 }
                 // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
@@ -980,12 +941,6 @@ class suitecrmcore extends solution
     // Get the list of field (name and id) for each custom relationship
     protected function getCustomRelationshipListFields($module): array
     {
-        // echo ' ';
-        // echo 'this is the module line 957';
-        // print_r($module);
-        // echo ' ';
-        // echo 'this was the module line 960';
-        // echo ' ';
         $get_module_fields_parameters = [
             'session' => $this->session,
             'module_name' => $module,
