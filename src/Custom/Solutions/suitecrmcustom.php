@@ -133,8 +133,9 @@ class suitecrmcustom extends suitecrm
 								and $binome->link_value->statut_c->value <> 'termine'
 								and $binome->link_value->statut_c->value <> 'annule'
 								and $binome->link_value->statut_c->value <> 'accompagnement_termine'
-								and !empty($binome->link_value->chatbot_c->value)
-								and $binome->link_value->chatbot_c->value <> 'non'
+								// Send all binome even if chatbot = non
+								// and !empty($binome->link_value->chatbot_c->value)
+								// and $binome->link_value->chatbot_c->value <> 'non'
 							) {
 								// $result->entry_list[$key]->name_value_list->aiko->name = 'aiko';
 								$result->entry_list[$key]->name_value_list->aiko->value = '1';
