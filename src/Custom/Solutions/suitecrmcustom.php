@@ -108,14 +108,14 @@ class suitecrmcustom extends suitecrm
 
 	protected function call($method, $parameters)
 	{
-		if ($this->currentRule == '61a920fae25c5') {
+		if ($this->currentRule == '61a920fae25c5') {	// Aiko - Contact
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts', 'value' => array('id', 'statut_c', 'chatbot_c'));
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts_1', 'value' => array('id', 'statut_c', 'chatbot_c'));
 		}
 
 		$result = parent::call($method, $parameters);
 
-		if ($this->currentRule == '61a920fae25c5') {
+		if ($this->currentRule == '61a920fae25c5') { // Aiko - Contact
 			if (!empty($result->relationship_list)) {
 				foreach ($result->relationship_list as $key => $relationship) {
 					$aiko = new \stdClass();
@@ -156,8 +156,9 @@ class suitecrmcustom extends suitecrm
 								and $binome->link_value->statut_c->value <> 'termine'
 								and $binome->link_value->statut_c->value <> 'annule'
 								and $binome->link_value->statut_c->value <> 'accompagnement_termine'
-								and !empty($binome->link_value->chatbot_c->value)
-								and $binome->link_value->chatbot_c->value <> 'non'
+								// Send all binome even if chatbot = non
+								// and !empty($binome->link_value->chatbot_c->value)
+								// and $binome->link_value->chatbot_c->value <> 'non'
 							) {
 								// $result->entry_list[$key]->name_value_list->aiko->name = 'aiko';
 								$result->entry_list[$key]->name_value_list->aiko->value = '1';
