@@ -61,7 +61,7 @@ class JobRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('j')
             ->select('j')
             ->where('j.status = :status')
-            ->andWhere('j.begin > :timeLimit')
+            ->andWhere('j.begin < :timeLimit')
             ->setParameter('status', 'Start')
             ->setParameter('timeLimit', $begin)
             ->getQuery()
