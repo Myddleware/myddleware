@@ -326,7 +326,7 @@ class suitecrmcustom extends suitecrm
 				$documentManager->setParam($param);
 				$documentManager->setMessage($value['error']);
 				$documentManager->setTypeError('W');
-				$documentManager->updateStatus('Cancel');
+				$documentManager->updateStatus('No_send');
 				$this->logger->error($value['error']);
 				$response[$idDoc] = false;	
 				$this->connection->commit(); // -- COMMIT TRANSACTION
