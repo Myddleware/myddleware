@@ -1158,7 +1158,7 @@ class rulecore
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null)
+    protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null, $typeError = null)
     {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
@@ -1167,6 +1167,9 @@ class rulecore
         $this->documentManager->setParam($param, true);
         if (!empty($message)) {
             $this->documentManager->setMessage($message);
+        }
+        if (!empty($typeError)) {
+            $this->documentManager->setTypeError($typeError);
         }
         if (!empty($docIdRefError)) {
             $this->documentManager->setDocIdRefError($docIdRefError);
@@ -1663,7 +1666,11 @@ class rulecore
                         $response['error'] = 'Type transfer '.$type.' unknown. ';
                     }
                 } else {
-                    $response[$documentId] = false;
+                    $response[$documentId] = false;					
+					// If we couldn't connect the target application, we set the status error_sending to all documents not sent
+					foreach ($send['data'] as $idDoc => $data) {
+						$this->changeStatus($idDoc, 'Error_sending', 'Failed to connect to the target application.', null, 'E');
+					}
                     throw new \Exception('Failed to connect to the target application.');
                 }
             }

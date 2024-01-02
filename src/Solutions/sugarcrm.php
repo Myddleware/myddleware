@@ -380,6 +380,7 @@ class sugarcrmcore extends solution
             $bodyError = $response->getBody();
             throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
         }
+
         // Format records to result format
         if (!empty($records)) {			
 			// Manage deletion by adding the flag Myddleware_deletion to the record
@@ -393,8 +394,7 @@ class sugarcrmcore extends solution
 					// At least one non deleted record read
 					$onlyDeletion = false;
 				}
-			}
-			
+			}			
 			// Error if only deletion records read
 			if ($onlyDeletion) {
 				if (count($result) >= $param['limit']) {
@@ -405,10 +405,10 @@ class sugarcrmcore extends solution
 					return array();
 				}
 			}	
-			
+					
 			// Build the results
-			foreach ($records as $record) {
-                foreach ($param['fields'] as $field) {
+			foreach ($records as $record) {		
+                foreach ($param['fields'] as $field) {			
                     // Sugar returns multilist value as array
                     if (
                             !empty($record->$field)
@@ -416,7 +416,12 @@ class sugarcrmcore extends solution
                     ) {
                         // Some fields can be an object like teamname field
                         if (is_object($record->$field[0])) {
-                            $record->$field = $record->$field[0]->name;
+							$fieldObjectList = array();
+							// Get all ids of the object list
+							foreach($record->$field as $fieldObject) {
+								$fieldObjectList[] = $fieldObject->id;
+							}
+							$record->$field = implode(',', $fieldObjectList);
                         } else {
                             $record->$field = implode(',', $record->$field);
                         }
