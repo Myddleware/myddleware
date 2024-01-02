@@ -35,7 +35,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Entity(repositoryClass="App\Repository\RuleRepository")
  * @ORM\HasLifecycleCallbacks()
  *
- * @ORM\Table(name="rule", indexes={@ORM\Index(name="Krule_name", columns={"name"})})
+ * @ORM\Table(name="rule", indexes={
+ *	 @ORM\Index(name="Krule_name", columns={"name"}),
+ *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"})
+ * })
  */
 class Rule
 {
@@ -159,6 +162,11 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
+	
+	/**
+     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
+     */
+    private string $readJobLock;
 
     public function __construct()
     {
@@ -285,6 +293,20 @@ class Rule
     public function getNameSlug(): string
     {
         return $this->nameSlug;
+    }
+	
+	public function setReadJobLock($readJobLock): self
+    {
+        $this->readJobLock = $readJobLock;
+        return $this;
+    }
+
+    public function getReadJobLock(): string
+    {
+        if (empty($this->readJobLock)) {
+            return '';
+        }
+        return $this->readJobLock;
     }
 
     public function setConnectorSource(Connector $connectorSource): self
@@ -675,4 +697,5 @@ class Rule
     {
         return isset($this->moduleTarget);
     }
+
 }

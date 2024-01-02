@@ -56,10 +56,10 @@ final class CronRunCommand extends BaseCommand
         if (!($entity)) {
             throw new Exception("Couldn't fetch Cronjobs");
         }
-            $valueCron = $entity->getValue();
+		$valueCron = $entity->getValue();
         if (
                 $valueCron == 1 
-                 && !empty($valueCron))
+			 && !empty($valueCron))
         {
             $jobsToRun = $jobRepo->findAll();
     
@@ -109,16 +109,25 @@ final class CronRunCommand extends BaseCommand
                 } else {
                     $style->success('cronjob started successfully and is running in background');
                 }
-    
-                $style->info($job->getFullCommand().' : Begin '.date('Y-m-d h:i:s'));
-                $this->waitProcesses($processes);
-                $style->info($job->getFullCommand().' : End '.date('Y-m-d h:i:s'));
-                $processes = [];
             }
 			
-			$style->success('All jobs are finished.');
+			sleep(1);
+
+			$style->section('Summary');
+
+			if (count($processes) > 0) {
+				$style->text('waiting for all running jobs ...');
+
+				// wait for all processes
+				$this->waitProcesses($processes);
+
+				$style->success('All jobs are finished.');
+			} else {
+				$style->info('No jobs were executed. See reasons below.');
+			}
 			return CronJobResult::EXIT_CODE_SUCCEEDED;
-        }else{
+			
+        } else {
             $style->error('Your crontabs are disabled');
             return CronJobResult::EXIT_CODE_FAILED;
         }  
@@ -138,7 +147,7 @@ final class CronRunCommand extends BaseCommand
                 try {
                     $process->checkTimeout();
 
-                    if (true === $process->isRunning()) {
+                    if ($process->isRunning() === true) {
                         break;
                     }
                 } catch (ProcessTimedOutException $e) {
@@ -170,8 +179,7 @@ final class CronRunCommand extends BaseCommand
         $process->disableOutput();
 
         $timeout = $this->commandHelper->getTimeout();
-
-        if (null !== $timeout && $timeout > 0) {
+        if ($timeout !== null && $timeout > 0) {
             $process->setTimeout($timeout);
         }
 

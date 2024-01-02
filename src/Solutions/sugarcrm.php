@@ -153,7 +153,7 @@ class sugarcrmcore extends solution
     /**
      * @throws \Exception
      */
-    protected function isManyToManyRel($module): bool
+    protected function isManyToManyRel($module)
     {
         if (
                 !empty($module)
@@ -274,14 +274,62 @@ class sugarcrmcore extends solution
         }
     }
 
-    // public function readData($param)
-
+    // public function readRelationship($param)
     /**
      * @throws \Exception
      */
+    public function readRelationship($param, $rel) {
+		// Set the parameters for relationship reading
+		$filterArgs = [
+            'max_num' => $param['limit'],
+            'offset' => 0,
+            'fields' => implode(',',$param['fields']),
+            'order_by' => 'date_modified',
+            'deleted' => $param['ruleParams']['deletion'],
+        ];
+		// The call for relationship required the id of the root record
+		if (empty($param['query'])) {
+			throw new \Exception('No query parameter, failed to read relationship');
+		}
+		// The query parameter must be the reference id. 
+		// For example if we try to read the users from a team, query must contains the team id
+		$refereceId = current($param['query']);
+
+		// Get the record using the input parameters
+		$getRecords = $this->sugarAPI->filterRelated(key($param['query']), $refereceId, $rel->rhs_table)->execute($filterArgs);
+		$response = $getRecords->getResponse();
+        // Format response if http return = 200
+        if ('200' == $response->getStatus()) {
+            $body = $getRecords->getResponse()->getBody(false);
+            if (!empty($body->records)) {
+                $records = $body->records;
+            }
+        } else {
+            $bodyError = $response->getBody();
+            throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
+        }
+		// Format records to result format
+        if (!empty($records)) {
+            foreach ($records as $record) {
+				// The record id is build with both ids from the relationship
+				$recordId = $refereceId.'_'.$record->id;
+                $result[$recordId]['id'] = $recordId;
+                $result[$recordId]['date_modified'] = $record->date_modified;
+				//  Get both ids
+                $result[$recordId][$rel->join_key_lhs] = $refereceId;
+                $result[$recordId][$rel->join_key_rhs] = $record->id;
+            }
+        }
+        return $result;
+	}
+	
     public function read($param)
     {
         $result = [];
+		$rel = $this->isManyToManyRel($param['module']);
+		if ($rel !== false) {
+			return $this->readRelationship($param, $rel);
+		}
 
         // Manage delete option to enable
         $deleted = false;
@@ -332,10 +380,11 @@ class sugarcrmcore extends solution
             $bodyError = $response->getBody();
             throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
         }
+
         // Format records to result format
-        if (!empty($records)) {
+        if (!empty($records)) {			
+			// Manage deletion by adding the flag Myddleware_deletion to the record
             foreach ($records as $record) {
-                // Manage deletion by adding the flag Myddleware_deletion to the record
                 if (
                         true == $deleted
                     and !empty($record->deleted)
@@ -345,8 +394,21 @@ class sugarcrmcore extends solution
 					// At least one non deleted record read
 					$onlyDeletion = false;
 				}
-				
-                foreach ($param['fields'] as $field) {
+			}			
+			// Error if only deletion records read
+			if ($onlyDeletion) {
+				if (count($result) >= $param['limit']) {
+					throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Please increase the rule limit to include non deletion records.');
+				} else {
+					// If only deletion without new or modified record, we send no result. We wait for new or modified record. 
+					// Otherwise we will read the deleted record until a new or modified record is read because Sugar doesn't return modified date for deleted record.
+					return array();
+				}
+			}	
+					
+			// Build the results
+			foreach ($records as $record) {		
+                foreach ($param['fields'] as $field) {			
                     // Sugar returns multilist value as array
                     if (
                             !empty($record->$field)
@@ -354,7 +416,12 @@ class sugarcrmcore extends solution
                     ) {
                         // Some fields can be an object like teamname field
                         if (is_object($record->$field[0])) {
-                            $record->$field = $record->$field[0]->name;
+							$fieldObjectList = array();
+							// Get all ids of the object list
+							foreach($record->$field as $fieldObject) {
+								$fieldObjectList[] = $fieldObject->id;
+							}
+							$record->$field = implode(',', $fieldObjectList);
                         } else {
                             $record->$field = implode(',', $record->$field);
                         }
@@ -366,17 +433,6 @@ class sugarcrmcore extends solution
                     $result[$record->id]['date_modified'] = end($records)->date_modified;
                 }	
             }
-
-			// Error if only deletion records read
-			if ($onlyDeletion) {
-				if (count($result) >= $param['limit']) {
-					throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Please increase the rule limit to include non deletion records.');
-				} else {
-					// If only deletion without new or modified record, we send no result. We wait for new or modified record. 
-					// Otherwise we will read the deleted record until a new or modified record is read because Sugar doesn't return modified date for deleted record.
-					return array();
-				}
-			}
         }
         return $result;
     }

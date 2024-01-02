@@ -207,7 +207,6 @@ class databasecore extends solution
     public function readData($param)
     {
         $result = [];
-        $result['date_ref'] = $param['date_ref'];
         // Decode field name (converted in method get_module_fields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
         try {
@@ -215,6 +214,8 @@ class databasecore extends solution
             if (empty($param['date_ref'])) {
                 $param['date_ref'] = 0;
             }
+			$result['date_ref'] = $param['date_ref'];
+
             if (empty($param['limit'])) {
                 $param['limit'] = 100;
             }

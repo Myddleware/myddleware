@@ -35,6 +35,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 class SynchroCommand extends Command
 {
@@ -54,7 +55,8 @@ class SynchroCommand extends Command
         DocumentManager $documentManager,
         RuleManager $ruleManager,
         EntityManagerInterface $entityManager,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+		ManagerRegistry $registry
     ) {
         parent::__construct();
         $this->logger = $logger;
@@ -63,6 +65,7 @@ class SynchroCommand extends Command
         $this->ruleManager = $ruleManager;
         $this->documentManager = $documentManager;
         $this->documentRepository = $documentRepository;
+		$this->registry = $registry;
     }
 
     protected function configure()
@@ -71,7 +74,7 @@ class SynchroCommand extends Command
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
             ->addArgument('rule', InputArgument::REQUIRED, 'Rule id, you can put several rule id separated by coma')
-            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
+            ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if the rule is inactive.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
     }
@@ -93,7 +96,7 @@ class SynchroCommand extends Command
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
             $this->jobManager->message = '';
             $this->jobManager->setApi($api);
-            $data = $this->jobManager->initJob('Synchro : '.$rule, $force);
+            $data = $this->jobManager->initJob('Synchro : '.$rule);
             if (true === $data['success']) {
                 $output->writeln('1;'.$this->jobManager->getId());  // Not removed, user for manual job and webservices
 
@@ -142,6 +145,14 @@ class SynchroCommand extends Command
 										$this->jobManager->sendDocuments();
 									} catch (\Exception $e) {
 										$this->jobManager->message .= 'Error rule '.$value.' '.$e->getMessage();
+										// Reset entity manager in case it has been closed by the exception
+										if (!$this->entityManager->isOpen()) {
+											$this->entityManager = $this->registry->resetManager();
+										}
+										// Unset all the read and send locks of the rule in case of fatal error (if the losk correspond to the current job)
+										if (!$this->jobManager->unsetRuleLock()) {
+											$this->jobManager->message .= 'Failed to unset the lock for the rule '.$value.'. ';
+										}
 									}
                                 }
                             }
@@ -152,6 +163,7 @@ class SynchroCommand extends Command
         } catch (\Exception $e) {
             $this->jobManager->message .= $e->getMessage();
         }
+
         // Close job if it has been created
         if (true === $this->jobManager->createdJob) {
             $this->jobManager->closeJob();
