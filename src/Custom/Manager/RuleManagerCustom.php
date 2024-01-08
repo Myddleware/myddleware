@@ -282,11 +282,8 @@ class RuleManagerCustom extends RuleManager
 					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
-					if (!empty($sourceData['MydCustRelSugarcrmc_binome_contacts_1contacts_ida'])) { // Mentoré
-						$this->generatePoleRelationship('61a920fae25c5', $sourceData['MydCustRelSugarcrmc_binome_contacts_1contacts_ida'], 'id', false);  // Aiko contact
-					}
-					if (!empty($sourceData['MydCustRelSugarcrmc_binome_contactscontacts_ida'])) { // Mentor
-						$this->generatePoleRelationship('61a920fae25c5', $sourceData['MydCustRelSugarcrmc_binome_contactscontacts_ida'], 'id', false);  // Aiko contact
+					if (!empty($sourceData['MydCustRelSugarlead_id'])) { // Coupon
+						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['MydCustRelSugarlead_id'], 'id', false);  // Mobilisation - Coupons
 					}
 					if (!empty($sourceData['assigned_user_id'])) { // Referent
 						$this->generatePoleRelationship('61a9190e40965', $sourceData['assigned_user_id'], 'id', false);  // Aiko Référent
