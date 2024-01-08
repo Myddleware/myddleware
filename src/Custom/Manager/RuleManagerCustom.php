@@ -291,7 +291,7 @@ class RuleManagerCustom extends RuleManager
 					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
 					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
 					if ($deleteTargetData) {
-						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l\'une d\'entre elle doit être supprimee dans Airtable. ');
+						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l’une d’entre elle doit être supprimee dans Airtable. ');
 					}
 				}
 				
