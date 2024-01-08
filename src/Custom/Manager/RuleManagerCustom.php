@@ -286,7 +286,7 @@ class RuleManagerCustom extends RuleManager
 						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['MydCustRelSugarlead_id'], 'id', false);  // Mobilisation - Coupons
 					}
 					if (!empty($sourceData['assigned_user_id'])) { // Referent
-						$this->generatePoleRelationship('61a9190e40965', $sourceData['assigned_user_id'], 'id', false);  // Aiko Référent
+						$this->generatePoleRelationship('6423f5d4ad07e', $sourceData['assigned_user_id'], 'id', false);  // Mobilisation - Utilisateur
 					}
 					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
 					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
