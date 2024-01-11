@@ -176,15 +176,10 @@ class DocumentRepository extends ServiceEntityRepository
             ->select('COUNT(d) as nb, rule.name')
             ->join('d.rule', 'rule')
             ->andWhere('d.deleted = 0')
-            ->andWhere('d.globalStatus = :close')
-            ->setParameter('close', 'Close')
+            ->andWhere('d.status = :send')
+            ->setParameter('send', 'Send')
             ->groupBy('rule.name')
             ->orderBy('nb', 'DESC');
-
-        if ($user && !$user->isAdmin()) {
-            $qb->andWhere('d.createdBy = :user')
-                ->setParameter('user', $user);
-        }
 
         return $qb->getQuery()->getResult();
     }

@@ -269,7 +269,7 @@ class jobcore
     }
 
     // Ecriture dans le système source et mise à jour de la table document
-    public function runError($limit, $attempt)
+	public function runError($limit, $attempt)
     {
         try {
 			$ruleId = '';
@@ -282,14 +282,17 @@ class jobcore
 									global_status = 'Error'
 								AND deleted = 0 
 								AND attempt <= :attempt 
-							ORDER BY ruleorder.order ASC, source_date_modified ASC	
+							ORDER BY ruleorder.order ASC, document.rule_id, source_date_modified ASC	
 							LIMIT $limit";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('attempt', $attempt);
             $result = $stmt->executeQuery();
             $documentsError = $result->fetchAllAssociative();
             if (!empty($documentsError)) {
-                // include_once 'rule.php';
+                $ruleId = null;
+				$this->ruleManager->setJobId($this->id);
+				$this->ruleManager->setManual($this->manual);
+				$this->ruleManager->setApi($this->api);
                 foreach ($documentsError as $documentError) {
 					// Load the rule only if it has changed
 					if ($ruleId != $documentError['rule_id']) {

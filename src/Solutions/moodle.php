@@ -484,7 +484,7 @@ class moodlecore extends solution
 				
 				// Check if there is a warning
 				if (
-						!empty($xml)
+						!empty($xml->SINGLE->KEY)
 					AND $xml->count() != 0	// Empty xml
 					AND $xml->SINGLE->KEY->attributes()->__toString() == 'warnings'
 					AND !empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3])

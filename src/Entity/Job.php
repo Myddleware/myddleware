@@ -33,7 +33,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
  * @ORM\Table(name="job", indexes={
- *  @ORM\Index(name="index_status", columns={"status"})
+ *  @ORM\Index(name="index_status_begin", columns={"status","begin"})
  *})
  */
 class Job

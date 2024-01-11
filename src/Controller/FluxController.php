@@ -504,22 +504,17 @@ class FluxController extends AbstractController
                 document.type, 
                 document.attempt, 
                 document.global_status, 
-                users.username, 
                 rule.name as rule_name, 
                 rule.id as rule_id 
             FROM document 
                 INNER JOIN rule	
-                    ON document.rule_id = rule.id
-                INNER JOIN users
-                    ON document.created_by = users.id "
+                    ON document.rule_id = rule.id "
                 .$join. 
             " WHERE 
                     document.deleted = 0 "
                     .$where.
             " ORDER BY document.date_modified DESC"
             ." LIMIT ". $limit;
-            
-        
         $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content

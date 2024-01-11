@@ -936,7 +936,14 @@ class documentcore
         try {
             // Transformation des données et insertion dans la table target
             $transformed = $this->updateTargetTable();
-            if ($transformed) {
+            if (!empty($transformed)) {
+				// If the value mdw_cancel_document is found in the target data of the document after transformation we cancel the document
+				if (array_search('mdw_cancel_document',$transformed) !== false) {
+					$this->message .= 'The document contains the value mdw_cancel_document. ';
+					$this->typeError = 'W';
+					$this->updateStatus('Cancel');
+					return false;
+				}
                 // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
                 // it means that the target ID is mapped in the rule field
                 // In this case, we force the document's type to Update because Myddleware will update the record into the target application
@@ -1062,7 +1069,6 @@ class documentcore
 					if (!empty($target[$duplicate_field])) {
 						$searchFields[$duplicate_field] = $target[$duplicate_field];
 					}
-                    $searchFields[$duplicate_field] = $target[$duplicate_field];
                 }
                 if (!empty($searchFields)) {
                     $history = $this->getDocumentHistory($searchFields);
@@ -1227,10 +1233,12 @@ class documentcore
             // If one is different we stop the function
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
-                    if (
-                            trim($history[$field['target_field_name']]) != trim($target[$field['target_field_name']])
-                    ) {
-                        // We check if both are empty not depending of the type 0 = ""
+                    if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {
+                        // Null text is considered as empty for comparaison
+						if ($target[$field['target_field_name']] == 'null') {
+							$target[$field['target_field_name']] = '';
+						}
+						// We check if both are empty not depending of the type 0 = ""
                         if (
                                 empty($history[$field['target_field_name']])
                             and empty($target[$field['target_field_name']])
@@ -1450,7 +1458,7 @@ class documentcore
     }
 
     // Mise à jour de la table des données cibles
-    protected function updateTargetTable(): bool
+    protected function updateTargetTable()
     {
         try {
             // Loop on every target field and calculate the value
@@ -1491,14 +1499,14 @@ class documentcore
                 throw new \Exception('No target data found. Failed to create target data. ');
             }
 
-            return true;
+            return $targetField;
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
         }
 
-        return false;
+        return null;
     }
 
     /*
@@ -2343,8 +2351,8 @@ class documentcore
             if ('-1' == $direction) {
                 $sqlParams = "	SELECT 
 									source_id record_id,
-									document.id document_id,
-									document.type document_type
+									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -2355,13 +2363,14 @@ class documentcore
 											document.global_status = 'Close'
 										 OR document.status = 'No_send'
 									)
-								ORDER BY date_created DESC
+								GROUP BY source_id
+								HAVING types NOT LIKE '%D%'
 								LIMIT 1";
             } elseif ('1' == $direction) {
                 $sqlParams = "	SELECT 
 									target_id record_id,
-									document.id document_id,
-									document.type document_type
+									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -2372,7 +2381,8 @@ class documentcore
 											document.global_status = 'Close'
 										 OR document.status = 'No_send'
 									)
-								ORDER BY date_created DESC
+								GROUP BY target_id
+								HAVING types NOT LIKE '%D%'
 								LIMIT 1";
             } else {
                 throw new \Exception('Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ');
@@ -2420,16 +2430,18 @@ class documentcore
                 $stmt->bindValue(':record_id', $record_id);
                 $result = $stmt->executeQuery();
                 $result = $result->fetchAssociative();
-            }
-            if (!empty($result['record_id'])) {
-                // If the latest valid document sent is a deleted one, then the target id can't be use as the record has been deleted from the target solution
-                if ('D' == $result['document_type']) {
-                    return null;
-                }
 
+				// In cas of several document found we get only the last one
+				if (
+						!empty($result['document_id'])
+					AND strpos($result['document_id'], ',')
+				) {
+					$result['document_id'] = end(explode(',',$result['document_id']));
+				}
+            }
+			if (!empty($result['record_id'])) {
                 return $result;
             }
-
             return null;
         } catch (\Exception $e) {
             $this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

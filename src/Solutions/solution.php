@@ -341,17 +341,15 @@ class solutioncore
                         break;
                     }
                 }
-
-                // Calculate the reference call
-                $result['date_ref'] = $this->getReferenceCall($param, $result);
-                if (empty($result['date_ref'])) {
-                    throw new \Exception('Failed to get the reference call.');
-                }
             } else {
                 // Init values if no result
                 $result['count'] = 0;
-                $result['date_ref'] = $param['date_ref'];
             }
+			// Calculate the reference call
+			$result['date_ref'] = $this->getReferenceCall($param, $result);
+			if (empty($result['date_ref'])) {
+				throw new \Exception('Failed to get the reference call.');
+			}
         } catch (\Exception $e) {
             $result['error'] = (!empty($param['rule']['id']) ? 'Error in rule '.$param['rule']['id'].' : ' : 'Error : ').$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
@@ -1037,6 +1035,10 @@ class solutioncore
     // Method de find the date ref after a read call
     protected function getReferenceCall($param, $result)
     {
+		// Keep the same date ref if no result
+		if (empty($result['count'])) {
+			return $param['date_ref'];
+		}
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
