@@ -60,6 +60,7 @@ class documentcore
     protected $documentType;
     protected bool $jobActive = true;
     protected $attempt;
+    protected $jobLock;
     protected $userId;
     protected $status;
     protected $document_data;
@@ -203,7 +204,18 @@ class documentcore
                 $this->ruleMode = $this->document_data['mode'];
                 $this->documentType = $this->document_data['type'];
                 $this->attempt = $this->document_data['attempt'];
-
+                $this->jobLock = $this->document_data['job_lock'];
+				// A document can be loaded only if there is no lock or if the lock is on the current job.
+                if (
+						!empty($this->jobLock)
+					AND $this->jobLock != $this->jobId
+				) {
+					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
+				// No setlock if $this->jobLock == $this->jobId
+				} elseif (!empty($this->jobLock)) {
+					$this->setLock();
+				}
+				
                 // Get source data and create data attribut
                 $this->sourceData = $this->getDocumentData('S');
                 $this->data = $this->sourceData;
@@ -218,10 +230,10 @@ class documentcore
                 $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
-            $this->message .= 'Failed to retrieve document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->logger->error($this->message);
-            $this->createDocLog();
+			// Remove the lock because there is not status changed (lock is usually remove when we change the status)
+			$this->unsetLock();
+            // Stop the process
+            throw new \Exception('Failed to load the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -229,63 +241,73 @@ class documentcore
     // Clear parameter is used when we call the same instance of the Document to manage several documents (from RuleManager class)
     public function setParam($param, $clear = false, $clearRule = true)
     {
-        if ($clear) {
-            $this->clearAttributes($clearRule);
-        }
-        // Chargement des solution si elles sont présentent dans les paramètres de construction
-        if (!empty($param['solutionTarget'])) {
-            $this->solutionTarget = $param['solutionTarget'];
-        }
-        if (!empty($param['solutionSource'])) {
-            $this->solutionSource = $param['solutionSource'];
-        }
-        if (!empty($param['jobId'])) {
-            $this->jobId = $param['jobId'];
-        }
-        if (!empty($param['api'])) {
-            $this->api = $param['api'];
-        }
-        if (!empty($param['parentId'])) {
-            $this->parentId = $param['parentId'];
-        }
-        if (!empty($param['ruleDocuments'])) {
-            $this->ruleDocuments = $param['ruleDocuments'];
-        }
+		try {
+			if ($clear) {
+				$this->clearAttributes($clearRule);
+			}
+			// Chargement des solution si elles sont présentent dans les paramètres de construction
+			if (!empty($param['solutionTarget'])) {
+				$this->solutionTarget = $param['solutionTarget'];
+			}
+			if (!empty($param['solutionSource'])) {
+				$this->solutionSource = $param['solutionSource'];
+			}
+			if (!empty($param['jobId'])) {
+				$this->jobId = $param['jobId'];
+			}
+			if (!empty($param['api'])) {
+				$this->api = $param['api'];
+			}
+			if (!empty($param['parentId'])) {
+				$this->parentId = $param['parentId'];
+			}
+			if (!empty($param['ruleDocuments'])) {
+				$this->ruleDocuments = $param['ruleDocuments'];
+			}
 
-        // Init attribut of the class Document
-        if (!empty($param['id_doc_myddleware'])) {
-            // Instanciate attribut sourceData
-            $this->setDocument($param['id_doc_myddleware']);
-        } else {
-            $this->id = uniqid('', true);
-            $this->dateCreated = gmdate('Y-m-d H:i:s');
-            $this->ruleName = $param['rule']['name_slug'];
-            $this->ruleMode = $param['rule']['mode'];
-            $this->ruleId = $param['rule']['id'];
-            $this->ruleFields = $param['ruleFields'];
-            $this->data = $param['data'];
-            $this->sourceId = $this->data['id'];
-            $this->userId = $param['rule']['created_by'];
-            $this->status = 'New';
-            $this->attempt = 0;
-            // Set the deletion type if myddleware deletion flag is true
-            if (!empty($this->data['myddleware_deletion'])) {
-                $this->documentType = 'D';
-            }
+			// Init attribut of the class Document
+			if (!empty($param['id_doc_myddleware'])) {
+				// Instanciate attribut sourceData
+				$this->setDocument($param['id_doc_myddleware']);
+			} else {
+				$this->id = uniqid('', true);
+				$this->dateCreated = gmdate('Y-m-d H:i:s');
+				$this->ruleName = $param['rule']['name_slug'];
+				$this->ruleMode = $param['rule']['mode'];
+				$this->ruleId = $param['rule']['id'];
+				$this->ruleFields = $param['ruleFields'];
+				$this->data = $param['data'];
+				$this->sourceId = $this->data['id'];
+				$this->userId = $param['rule']['created_by'];
+				$this->status = 'New';
+				$this->attempt = 0;
+				$this->jobLock = $this->jobId;
+				// Set the deletion type if myddleware deletion flag is true
+				if (!empty($this->data['myddleware_deletion'])) {
+					$this->documentType = 'D';
+				}
+			}
+			// Ajout des paramètre de la règle
+			if (empty($this->ruleParams)) {
+				$this->setRuleParam();
+			}
+			// Mise à jour des tableaux s'ils existent.
+			if (!empty($param['ruleFields'])) {
+				$this->ruleFields = $param['ruleFields'];
+			}
+			if (!empty($param['ruleRelationships'])) {
+				$this->ruleRelationships = $param['ruleRelationships'];
+			}
+			// Init type error for each new document
+			$this->typeError = 'S';
+		} catch (\Exception $e) {
+            $this->message .= $e->getMessage();
+            $this->typeError = 'E';
+            $this->logger->error($this->message);
+            $this->createDocLog();
+			return false;
         }
-        // Ajout des paramètre de la règle
-        if (empty($this->ruleParams)) {
-            $this->setRuleParam();
-        }
-        // Mise à jour des tableaux s'ils existent.
-        if (!empty($param['ruleFields'])) {
-            $this->ruleFields = $param['ruleFields'];
-        }
-        if (!empty($param['ruleRelationships'])) {
-            $this->ruleRelationships = $param['ruleRelationships'];
-        }
-        // Init type error for each new document
-        $this->typeError = 'S';
+		return true;
     }
 
     // Clear all class attributes
@@ -335,11 +357,11 @@ class documentcore
                 return false;
             }
             // Création du header de la requête
-            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id) VALUES';
+            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock) VALUES';
             // Création de la requête d'entête
             $date_modified = $this->data['date_modified'];
             // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId')";
+            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
             $this->updateStatus('New');
@@ -348,7 +370,6 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
-
             return false;
         }
     }
@@ -446,6 +467,76 @@ class documentcore
     public function setDocIdRefError($docIdRefError)
     {
         $this->docIdRefError = $docIdRefError;
+    }
+
+    // Set the document lock
+    protected function setLock() {
+        try {
+			// Get the job lock on the document
+            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $stmt = $this->connection->prepare($documentQuery);
+            $stmt->bindValue(':doc_id', $this->id);
+            $documentResult = $stmt->executeQuery();
+            $documentData = $documentResult->fetchAssociative(); // 1 row
+
+            // If document already lock by the current job, we return true;
+            if ($documentData['job_lock'] == $this->jobId) {
+                return array('success' => true);
+            // If document not locked, we lock it.
+            } elseif (empty($documentData['job_lock'])) {
+                $now = gmdate('Y-m-d H:i:s');
+                $query = '	UPDATE document 
+                                SET 
+                                    date_modified = :now,
+                                    job_lock = :job_id
+                                WHERE
+                                    id = :id
+                                ';
+                $stmt = $this->connection->prepare($query);
+                $stmt->bindValue(':now', $now);
+                $stmt->bindValue(':job_id', $this->jobId);
+                $stmt->bindValue(':id', $this->id);
+                $result = $stmt->executeQuery();
+                return array('success' => true);
+            // Error for all other cases
+            } else {
+                return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
+            }
+        } catch (\Exception $e) {
+            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+		}
+    }
+	
+	// Set the document lock
+    public function unsetLock() {
+        try {
+			// Get the job lock on the document
+            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $stmt = $this->connection->prepare($documentQuery);
+            $stmt->bindValue(':doc_id', $this->id);
+            $documentResult = $stmt->executeQuery();
+            $documentData = $documentResult->fetchAssociative(); // 1 row
+
+            // If document already lock by the current job, we return true;
+            if ($documentData['job_lock'] == $this->jobId) {
+                $now = gmdate('Y-m-d H:i:s');
+                $query = "	UPDATE document 
+                                SET 
+                                    date_modified = :now,
+                                    job_lock = ''
+                                WHERE
+                                    id = :id
+                                ";
+                $stmt = $this->connection->prepare($query);
+                $stmt->bindValue(':now', $now);
+                $stmt->bindValue(':id', $this->id);
+                $result = $stmt->executeQuery();
+                return true;
+            }
+        } catch (\Exception $e) {
+            return false;
+		}
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas
@@ -680,18 +771,20 @@ class documentcore
             // Set the status Predecessor_OK
             $this->updateStatus('Predecessor_OK');
 
-            // Check compatibility between rule mode et document tupe
-            // A rule in create mode can't update data excpt for a child rule
-            if (
-					'C' == $this->ruleMode
-				and	'U' == $this->documentType
-                and !$this->isChild()
-            ) {
-                $this->message .= 'Rule mode only allows to create data. Filter because this document updates or deletes data.';
-                $this->updateStatus('Filter');
-                // In case we flter the document, we return false to stop the process when this method is called in the rerun process
-                return false;
-            }
+            // Check compatibility between rule mode et document type
+			// A rule in create mode can't update data except for a child rule
+			if (
+					$this->ruleMode == 'C'
+				and	$this->documentType == 'U'
+			) {
+				// Check child in a second time to avoid to run a query each time
+				if (!$this->isChild()) {
+					$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+					$this->updateStatus('Filter');
+					// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+					return false;
+				}
+			}
 
             return true;
         } catch (\Exception $e) {
@@ -803,10 +896,23 @@ class documentcore
                 if ('U' == $this->documentType) {
                     $this->updateTargetId($this->targetId);
                     $this->updateType('U');
+					// Check compatibility between rule mode et document type
+					// A rule in create mode can't update data except for a child rule
+					if (
+							$this->ruleMode == 'C'
+						and	$this->documentType == 'U'
+					) {
+						// Check child in a second time to avoid to run a query each time
+						if (!$this->isChild()) {
+							$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+							$this->updateStatus('Filter');
+							// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+							return false;
+						}
+					}
                 }
             }
             $this->updateStatus('Relate_OK');
-
             return true;
         } catch (\Exception $e) {
             $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -841,6 +947,20 @@ class documentcore
                         $this->targetId = $target['Myddleware_element_id'];
                         if ($this->updateTargetId($this->targetId)) {
                             $this->updateType('U');
+							// Check compatibility between rule mode et document type
+							// A rule in create mode can't update data except for a child rule
+							if (
+									$this->ruleMode == 'C'
+								and	$this->documentType == 'U'
+							) {
+								// Check child in a second time to avoid to run a query each time
+								if (!$this->isChild()) {
+									$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+									$this->updateStatus('Filter');
+									// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+									return false;
+								}
+							}
                         } else {
                             throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
                         }
@@ -976,6 +1096,20 @@ class documentcore
                     } else {
                         $this->updateStatus('Ready_to_send');
                         $this->updateType('U');
+						// Check compatibility between rule mode et document type
+						// A rule in create mode can't update data except for a child rule
+						if (
+								$this->ruleMode == 'C'
+							and	$this->documentType == 'U'
+						) {
+							// Check child in a second time to avoid to run a query each time
+							if (!$this->isChild()) {
+								$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
+								$this->updateStatus('Filter');
+								// In case we flter the document, we return false to stop the process when this method is called in the rerun process
+								return false;
+							}
+						}
                     }
                     $this->updateTargetId($history['id']);
                 }
@@ -1263,6 +1397,7 @@ class documentcore
                     }
                 }
             }
+
             // We save the relationship field too
             if (!empty($this->ruleRelationships)) {
                 foreach ($this->ruleRelationships as $ruleRelationship) {
@@ -1282,6 +1417,7 @@ class documentcore
             $documentData->setType($type); // Source
             $documentData->setData(json_encode($dataInsert)); // Encode in JSON
             $this->entityManager->persist($documentData);
+            $this->entityManager->flush();
         } catch (\Exception $e) {
             $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -1919,7 +2055,6 @@ class documentcore
      */
     public function updateStatus($new_status)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             // On ajoute un contôle dans le cas on voudrait changer le statut
             $new_status = $this->beforeStatusChange($new_status);
@@ -1936,7 +2071,8 @@ class documentcore
 									date_modified = :now,
 									global_status = :globalStatus,
 									attempt = :attempt,
-									status = :new_status
+									status = :new_status,
+									job_lock = :jobLock
 								WHERE
 									id = :id
 								';
@@ -1947,21 +2083,21 @@ class documentcore
 			) {
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
-            // Suppression de la dernière virgule
             $stmt = $this->connection->prepare($query);
             $stmt->bindValue(':now', $now);
             $stmt->bindValue(':globalStatus', $globalStatus);
             $stmt->bindValue(':attempt', $this->attempt);
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
+			// Remove the lock on the document in the class and in the database
+            $this->jobLock = '';
+            $stmt->bindValue(':jobLock', $this->jobLock);
             $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -1974,7 +2110,6 @@ class documentcore
      */
     public function updateDeleteFlag($deleted)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -1997,10 +2132,8 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2045,7 +2178,6 @@ class documentcore
      */
     public function updateType($new_type)
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -2062,12 +2194,10 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= 'Type  : '.$new_type;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
             // Change the document type for the current process
             $this->documentType = $new_type;
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2080,7 +2210,6 @@ class documentcore
      */
     public function updateTargetId($target_id): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
@@ -2098,14 +2227,12 @@ class documentcore
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= 'Target id : '.$target_id;
-            $this->connection->commit(); // -- COMMIT TRANSACTION
             $this->createDocLog();
             // Change the target id for the current process
             $this->targetId = $target_id;
 
             return true;
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->message);
@@ -2116,7 +2243,7 @@ class documentcore
     }
 
     // Function to manually edit the data inside a Myddleware Document
-    public function updateDocumentData(string $docId, array $newValues, string $dataType)
+    public function updateDocumentData(string $docId, array $newValues, string $dataType, bool $refreshData = false)
     {
         // check if data of that type with this docid and this data fields
         if (empty($docId)) {
@@ -2150,18 +2277,22 @@ class documentcore
         // Compare data                        
         $oldData = json_decode($documentDataEntity->getData());
         if(!empty($oldData)){
-            foreach ($newValues as $key => $Value) {
-                foreach ($oldData as $oldKey => $oldValue) {
-                    if ($oldKey === $key) {
-                        if ($oldValue !== $Value) {
-                            $newValues[$oldKey] = $Value;
-                            $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
-                        }
-                    } else {
-                        $newValues[$oldKey] = $oldValue;
-                    }
-                }
-            }
+			if (!$refreshData) {
+				foreach ($newValues as $key => $Value) {
+					foreach ($oldData as $oldKey => $oldValue) {
+						if ($oldKey === $key) {
+							if ($oldValue !== $Value) {
+								$newValues[$oldKey] = $Value;
+								$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
+							}
+						} else {
+							$newValues[$oldKey] = $oldValue;
+						}
+					}
+				}
+            } else {
+				$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed by '.print_r($newValues,true).'. ';
+			}
             $this->typeError = 'I';
             $this->createDocLog();
             // Update the data of the right type
@@ -2367,7 +2498,6 @@ class documentcore
      */
     protected function createDocLog()
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
@@ -2381,9 +2511,7 @@ class documentcore
             $stmt->bindValue(':job_id', $this->jobId);
             $result = $stmt->executeQuery();
             $this->message = '';
-            $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }

@@ -67,7 +67,6 @@ class ApiController extends AbstractController
 
             // Get input data
             $data = json_decode($request->getContent(), true);
-            $force = !(('ALL' === $data['rule']));
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -79,7 +78,7 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:synchro',
-                'force' => $force,
+                'force' => (empty($data['force']) ? false : true),
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -148,7 +147,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:readrecord',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -331,7 +329,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:massaction',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -401,7 +398,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:rerunerror',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];

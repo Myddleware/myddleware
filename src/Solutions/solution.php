@@ -353,7 +353,7 @@ class solutioncore
                 $result['date_ref'] = $param['date_ref'];
             }
         } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $result['error'] = (!empty($param['rule']['id']) ? 'Error in rule '.$param['rule']['id'].' : ' : 'Error : ').$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
