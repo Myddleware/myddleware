@@ -304,15 +304,13 @@ class suitecrmcustom extends suitecrm
 			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
 		}
 		
-		// We set the document to cancel when we try to update a converted status for a coupon
-		if (
-				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
-			AND $value['id'] == '-1'
-			AND strpos($value['error'], 'Erreur code W0001') !== false		
-		) {
+		// Mobilisation - relance rdv pris -> comet 
+		// Mobilisation - Coupons vers Comet
+		// Mobilisation - Reconduction
+		if (in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28'))) {			
 			try {
 				$this->connection->beginTransaction();
+				// Create document object
 				$documentManager = new DocumentManager(
 										$this->logger, 
 										$this->connection, 
@@ -325,11 +323,32 @@ class suitecrmcustom extends suitecrm
 				$param['api'] = $this->api;
 				$documentManager->setParam($param);
 				$documentManager->setMessage($value['error']);
-				$documentManager->setTypeError('W');
-				$documentManager->updateStatus('No_send');
-				$this->logger->error($value['error']);
-				$response[$idDoc] = false;	
-				$this->connection->commit(); // -- COMMIT TRANSACTION
+				// We set the document to cancel when we try to update a converted status for a coupon
+				if (
+						!empty($param['ruleId'])
+					AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
+					AND $value['id'] == '-1'
+					AND strpos($value['error'], 'Erreur code W0001') !== false		
+				) {
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('No_send');
+					$this->logger->error($value['error']);
+					$response[$idDoc] = false;	
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				}
+				// We set the document to cancel when a reconduction is already done in COMET
+				if (
+						!empty($param['ruleId'])
+					AND	in_array($param['ruleId'], array('62d9d41a59b28'))	// Mobilisation - Reconduction		
+					AND $value['id'] == '-1'
+					AND strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
+				) {
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('No_send');
+					$this->logger->error($value['error']);
+					$response[$idDoc] = false;	
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				}	
 			} catch (\Exception $e) {
 				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
