@@ -43,7 +43,8 @@ use Exception;
  *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
  *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
  *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
- *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"})
+ *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"}),
+ *      @ORM\Index(name="index_job_lock", columns={"job_lock"})
  * })
  */
 class Document
@@ -141,6 +142,12 @@ class Document
      * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
      */
     private $logs;
+	
+	/**
+     * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
+     */
+    private string $jobLock;
+	
 
     public function __construct()
     {
@@ -467,6 +474,17 @@ class Document
         $this->modifiedBy = $modifiedBy;
 
         return $this;
+    }
+	
+	public function setJobLock($jobLock): self
+    {
+        $this->jobLock = $jobLock;
+        return $this;
+    }
+
+    public function getJobLock(): string
+    {
+        return $this->jobLock;
     }
     
 }

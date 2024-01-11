@@ -340,7 +340,7 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									<th>{{'list_flux.tab.dateref'|trans}}</th>
+									<th>{{'llist_flux.tab.date_modified'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
 								</tr>
@@ -646,7 +646,7 @@
 													<a href="{{ path('task_view', {'id':log.getJob.id}) }}">{{ log.getJob.id }}</a>
 												{% endif %}
 											</td>
-											<td>{{ log.getDateCreated|date("d/m/Y H:i:s", timezone) }}</td>
+											<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
 											<td class="ctr">
 												<div class="log_{{ log.getType|lower }}">{{ log.getType }}
 													{% if log.getType|lower == 's' %}

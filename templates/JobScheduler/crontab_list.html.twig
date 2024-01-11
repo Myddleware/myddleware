@@ -44,6 +44,8 @@
                     <th scope="col" class="title"><label>{{ 'crontab.command'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.period'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.description'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.running_instances'|trans }}</label></th>
+                    <th scope="col" class="title"><label>{{ 'crontab.max_instances'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.lastUse'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.nextRun'|trans }}</label></th>
                     <th scope="col" class="title"><label>{{ 'crontab.enable'|trans }}</label></th>
@@ -54,7 +56,9 @@
                 <tr>                    
                     <td class="value">{{ value.command }}</td>
                     <td class="value">{{ value.period }}</td>
-                    <td class="value">{{ value.description  }}</td>
+                    <td class="value col-2">{{ value.description  }}</td>
+                    <td class="value">{{ value.runningInstances  }}</td>
+                    <td class="value">{{ value.maxInstances  }}</td>
 					<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
 					<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
                     <td class="value">{{ value.enable }}</td>

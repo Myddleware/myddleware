@@ -206,6 +206,11 @@ class jobcore
             return false;
         }
     }
+	
+	// Unset the lock on the rule 
+	public function unsetRuleLock() {
+		return $this->ruleManager->unsetRuleLock();
+	}
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     public function createDocuments()
@@ -267,6 +272,7 @@ class jobcore
 	public function runError($limit, $attempt)
     {
         try {
+			$ruleId = '';
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
             $sqlParams = "	SELECT * 
 							FROM document
@@ -288,44 +294,35 @@ class jobcore
 				$this->ruleManager->setManual($this->manual);
 				$this->ruleManager->setApi($this->api);
                 foreach ($documentsError as $documentError) {
-					// Set the rule only if the rule has changed	
-					if ($documentError['rule_id'] != $ruleId) {
+					// Load the rule only if it has changed
+					if ($ruleId != $documentError['rule_id']) {
 						$this->ruleManager->setRule($documentError['rule_id']);
-						$ruleId = $documentError['rule_id'];
+						$this->ruleManager->setJobId($this->id);
+						$this->ruleManager->setManual($this->manual);
+						$this->ruleManager->setApi($this->api);
 					}
                     $errorActionDocument = $this->ruleManager->actionDocument($documentError['id'], 'rerun');
                     if (!empty($errorActionDocument)) {
                         $this->message .= print_r($errorActionDocument, true);
                     }
+					$ruleId = $documentError['rule_id'];
                 }
             }
         } catch (Exception $e) {
-            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error('Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->message .= 'Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
     }
 
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function initJob(string $paramJob, bool $force = false): array
+    public function initJob(string $paramJob): array
     {
         $this->paramJob = $paramJob;
         $this->id = uniqid('', true);
         $this->start = microtime(true);
-        // Check if a job is already running except if force = true (api call or manuel call)
-        if (!$force) {
-            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-            $stmt = $this->connection->prepare($sqlJobOpen);
-            $result = $stmt->executeQuery();
-            $job = $result->fetchAssociative(); // 1 row
-            // Error if one job is still running
-            if (!empty($job)) {
-                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 
-                return ['success' => false, 'message' => $this->message];
-            }
-        }
         // Create Job
         $insertJob = $this->insertJob();
         if ($insertJob) {
@@ -360,7 +357,6 @@ class jobcore
             $paramJob[] = $event;
             $paramJob[] = $datatype;
             $paramJob[] = implode(',', $param);
-            $paramJob[] = 1; // Force run even if another task is running
 
             return $this->runBackgroundJob('massaction', $paramJob);
         } else {
@@ -402,7 +398,7 @@ class jobcore
             } catch (IOException $e) {
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' 1 --env='.$this->env.'  > '.$fileTmp.' &');
+            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {
@@ -513,7 +509,7 @@ class jobcore
                     $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
 					// Save the error if exists
 					if (!empty($error)) {
-						$errors[] = $error[0];
+						$errors[] = current($error);
 					}
                 }
             } else {
@@ -1316,7 +1312,7 @@ class jobcore
      */
     protected function updateJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
+        // $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -1345,10 +1341,11 @@ class jobcore
             $stmt->bindValue('error', $error);
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
-            $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
+            $result = $stmt->executeQuery();	
+			
+            // $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 
