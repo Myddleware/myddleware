@@ -15,6 +15,7 @@ $moduleFields['apppq0nb5WI815V57'] = array ( //! the id was appdKFUpk2X2Ok8Dc an
         'fld5hZrIQkIdTQ6Lt'=> array( 'label' => 'Pôle', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 		'fld3FYkkm37DTyfny'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
         'fldE1Rakjfl8X9kzV'=> array( 'label' => 'Deleted', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+        'flds8ebvaYhhXYuRr'=> array( 'label' => 'Discord ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
     ),
     'BINOMES' => array(
         'fldBTw0xZ3m7UN5uE'=> array( 'label' => 'Id Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
