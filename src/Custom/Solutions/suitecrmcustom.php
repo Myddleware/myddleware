@@ -307,7 +307,15 @@ class suitecrmcustom extends suitecrm
 		// Mobilisation - relance rdv pris -> comet 
 		// Mobilisation - Coupons vers Comet
 		// Mobilisation - Reconduction
-		if (in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28'))) {			
+		if (
+				in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28'))
+				AND $value['id'] == '-1'
+				AND (
+						strpos($value['error'], 'Erreur code W0001') !== false
+					 OR strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
+				)
+		) {
+			$response = array();
 			try {
 				$this->connection->beginTransaction();
 				// Create document object
@@ -357,7 +365,7 @@ class suitecrmcustom extends suitecrm
 				$documentManager->updateStatus('Error_sending');
 				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 				$response[$idDoc] = false;
-			}			
+			}		
 			return $response;
 		}
 		
