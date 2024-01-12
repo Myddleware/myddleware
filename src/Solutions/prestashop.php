@@ -593,7 +593,10 @@ class prestashopcore extends solution
      */
     protected function getReferenceCall($param, $result)
     {
-        // IF the reference is a date
+        // Keep the same date ref if no result
+		if (empty($result['count'])) {
+			return $param['date_ref'];
+		}
         if ($this->referenceIsDate($param['module'])) {
             // Add 1 second to the date ref because the read function is a >= not a >
             $date = new \DateTime(end($result['values'])['date_modified']);
