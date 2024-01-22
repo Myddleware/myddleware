@@ -57,7 +57,7 @@ class airtablecore extends solution
      * This is initialised to 'Contacts' by default as I've assumed that would be the most common possible value.
      * However, this can of course be changed to any table value already present in your Airtable base.
      */
-    protected array $tableName = [];
+    protected array $tableName;
 
     /**
      * Can't be greater than 100.
@@ -106,7 +106,11 @@ class airtablecore extends solution
             $this->token = $this->paramConnexion['apikey'];
             // We test the connection to the API with a request on Module/Table (change the value of tableName to fit your needs)
             $client = HttpClient::create();
-            $options = ['auth_bearer' => $this->token];
+            $options = [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                ],
+            ];
             $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
             $contentType = $response->getHeaders()['content-type'][0];
@@ -274,9 +278,16 @@ class airtablecore extends solution
                         ++$currentCount;
 						foreach ($param['fields'] as $field) {
 							if (!empty($record['fields'][$field])) {
-								// If teh value is an array (relation), we take the first entry
+								// If the value is an array (relation), we take the first entry
 								if (is_array($record['fields'][$field])) {
-									$result['values'][$record['id']][$field] = $record['fields'][$field][0];
+                                    // if the array has a length of 1, we take the first entry
+                                    if (count($record['fields'][$field]) === 1) {
+                                        $result['values'][$record['id']][$field] = $record['fields'][$field][0];
+                                    } else {
+                                        // if the array has a larger length than 1 we convert the array into a string separated by comma and space
+                                        $result['values'][$record['id']][$field] = implode(',', $record['fields'][$field]);
+                                    }
+									
 								} else {
 									$result['values'][$record['id']][$field] = $record['fields'][$field];
 								}
@@ -403,12 +414,6 @@ class airtablecore extends solution
                         ++$i;
                         continue;
                     }
-				
-					// If no data we skip this record
-					if (empty($data)) {
-						unset($records[$idDoc]);
-						continue;
-					}
 
                     $body['records'][$i]['fields'] = $data;
 
@@ -441,7 +446,7 @@ class airtablecore extends solution
                     ++$i;
                 }
 
-                // Airtable field can contains space which is not compatible in Myddleware.
+                // Airtable fiueld can contains space which is not compatible in Myddleware.
                 // Because we replace space by ___ in Myddleware, we change ___ to space before sending data to Airtable
                 if (!empty($body['records'])) {
                     foreach ($body['records'] as $keyRecord => $record) {
@@ -479,25 +484,23 @@ class airtablecore extends solution
                 $content = $response->toArray();
                 if (!empty($content)) {
                     $i = 0;
-					if (!empty($records)) {
-						foreach ($records as $idDoc => $data) {
-							$record = $content['records'][$i];
-							if (!empty($record['id'])) {
-								$result[$idDoc] = [
-														'id' => $record['id'],
-														'error' => false,
-												];
-							} else {
-								$result[$idDoc] = [
-									'id' => '-1',
-									'error' => 'Failed to send data. Message from Airtable : '.print_r($content['records'][$i], true),
-								];
-							}
-							++$i;
-							// Modification du statut du flux
-							$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-						}
-					}
+                    foreach ($records as $idDoc => $data) {
+                        $record = $content['records'][$i];
+                        if (!empty($record['id'])) {
+                            $result[$idDoc] = [
+                                                    'id' => $record['id'],
+                                                    'error' => false,
+                                            ];
+                        } else {
+                            $result[$idDoc] = [
+                                'id' => '-1',
+                                'error' => 'Failed to send data. Message from Airtable : '.print_r($content['records'][$i], true),
+                            ];
+                        }
+                        ++$i;
+                        // Modification du statut du flux
+                        $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+                    }
                 } else {
                     throw new Exception('Failed to send the record but no error returned by Airtable. ');
                 }
