@@ -506,7 +506,7 @@ solution:
         useraccesstoken: User access token
         consumerkey: Consumer key
         consumersecret: Consumer secret 
-        apikey: Api key
+        apikey: Personal Access Token
         projectid: Project id
         apiuser: Api user
         apikeysecret: Api secret key

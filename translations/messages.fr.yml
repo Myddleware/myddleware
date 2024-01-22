@@ -504,7 +504,7 @@ solution:
         tokensecret: Secret jeton
         consumerkey: Clé consommateur
         consumersecret: Secret consommateur 
-        apikey: Clé api
+        apikey: Jetons d’accès personnels
         projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
