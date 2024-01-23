@@ -262,7 +262,7 @@ class RuleManagerCustom extends RuleManager
 					) 
 					AND	(
 							strpos($response['error'], 'Unprocessable Entity returned') !== false
-						 OR	strpos($response['error'], 'HTTP/2 403') !== false
+						 OR	strpos($response['error'], 'HTTP/2 422') !== false
 					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
