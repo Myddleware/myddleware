@@ -30,22 +30,6 @@ class RuleManagerCustom extends RuleManager
 			}
 		}
 
-		// Specific code 
-		// If relate_ko and rule RDV Volontaire then we try to generate the missing contacts
-		if ($this->ruleId == '63f8e9f1c9d70') {	//	Mobilisation - RDV Volontaires PROD & PREPROD
-			foreach ($responses as $docId => $value) {
-				// Empty if relate KO
-				if (empty($value)) {
-					$documentData = $this->getDocumentData($docId, 'S');
-					if (
-						!empty($documentData['MydCustRelSugarlead_id'])
-					) {
-						// Generate Pole relationhip with rule id 625fcd2ed442f which is 	Mobilisation - Coupons
-						$this->generatePoleRelationship('625fcd2ed442f', $documentData['MydCustRelSugarlead_id'], 'id'); // Coupon
-					}
-				}
-			}
-		}
 		return $responses;
 	}
 
