@@ -109,7 +109,7 @@ class suitecrmcustom extends suitecrm
 
 	protected function call($method, $parameters)
 	{
-		if ($this->currentRule == '61a920fae25c5') {
+		if ($this->currentRule == '61a920fae25c5') {	// Aiko - Contact
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts', 'value' => array('id', 'statut_c', 'chatbot_c'));
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts_1', 'value' => array('id', 'statut_c', 'chatbot_c'));
 		}
@@ -176,7 +176,6 @@ class suitecrmcustom extends suitecrm
 		}
 
 		$result = parent::call($method, $parameters);
-
 		
 		if ($this->currentRule == '65708a7e59eae'
 		 && $isRuleBilan
@@ -243,7 +242,7 @@ class suitecrmcustom extends suitecrm
 			$isRuleBilan = false;
 		}
 
-		if ($this->currentRule == '61a920fae25c5') {
+		if ($this->currentRule == '61a920fae25c5') { // Aiko - Contact
 			if (!empty($result->relationship_list)) {
 				foreach ($result->relationship_list as $key => $relationship) {
 					$aiko = new \stdClass();
@@ -261,8 +260,9 @@ class suitecrmcustom extends suitecrm
 								and $binome->link_value->statut_c->value <> 'termine'
 								and $binome->link_value->statut_c->value <> 'annule'
 								and $binome->link_value->statut_c->value <> 'accompagnement_termine'
-								and !empty($binome->link_value->chatbot_c->value)
-								and $binome->link_value->chatbot_c->value <> 'non'
+								// Send all binome even if chatbot = non
+								// and !empty($binome->link_value->chatbot_c->value)
+								// and $binome->link_value->chatbot_c->value <> 'non'
 							) {
 								// $result->entry_list[$key]->name_value_list->aiko->name = 'aiko';
 								$result->entry_list[$key]->name_value_list->aiko->value = '1';
@@ -283,8 +283,9 @@ class suitecrmcustom extends suitecrm
 								and $binome->link_value->statut_c->value <> 'termine'
 								and $binome->link_value->statut_c->value <> 'annule'
 								and $binome->link_value->statut_c->value <> 'accompagnement_termine'
-								and !empty($binome->link_value->chatbot_c->value)
-								and $binome->link_value->chatbot_c->value <> 'non'
+								// Send all binome even if chatbot = non
+								// and !empty($binome->link_value->chatbot_c->value)
+								// and $binome->link_value->chatbot_c->value <> 'non'
 							) {
 								// $result->entry_list[$key]->name_value_list->aiko->name = 'aiko';
 								$result->entry_list[$key]->name_value_list->aiko->value = '1';
@@ -431,15 +432,21 @@ class suitecrmcustom extends suitecrm
 			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
 		}
 		
-		// We set the document to cancel when we try to update a converted status for a coupon
+		// Mobilisation - relance rdv pris -> comet 
+		// Mobilisation - Coupons vers Comet
+		// Mobilisation - Reconduction
 		if (
-				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
-			AND $value['id'] == '-1'
-			AND strpos($value['error'], 'Erreur code W0001') !== false		
+				in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28'))
+				AND $value['id'] == '-1'
+				AND (
+						strpos($value['error'], 'Erreur code W0001') !== false
+					 OR strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
+				)
 		) {
+			$response = array();
 			try {
 				$this->connection->beginTransaction();
+				// Create document object
 				$documentManager = new DocumentManager(
 										$this->logger, 
 										$this->connection, 
@@ -452,11 +459,32 @@ class suitecrmcustom extends suitecrm
 				$param['api'] = $this->api;
 				$documentManager->setParam($param);
 				$documentManager->setMessage($value['error']);
-				$documentManager->setTypeError('W');
-				$documentManager->updateStatus('Cancel');
-				$this->logger->error($value['error']);
-				$response[$idDoc] = false;	
-				$this->connection->commit(); // -- COMMIT TRANSACTION
+				// We set the document to cancel when we try to update a converted status for a coupon
+				if (
+						!empty($param['ruleId'])
+					AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
+					AND $value['id'] == '-1'
+					AND strpos($value['error'], 'Erreur code W0001') !== false		
+				) {
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('No_send');
+					$this->logger->error($value['error']);
+					$response[$idDoc] = false;	
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				}
+				// We set the document to cancel when a reconduction is already done in COMET
+				if (
+						!empty($param['ruleId'])
+					AND	in_array($param['ruleId'], array('62d9d41a59b28'))	// Mobilisation - Reconduction		
+					AND $value['id'] == '-1'
+					AND strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
+				) {
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('No_send');
+					$this->logger->error($value['error']);
+					$response[$idDoc] = false;	
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				}	
 			} catch (\Exception $e) {
 				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -465,7 +493,7 @@ class suitecrmcustom extends suitecrm
 				$documentManager->updateStatus('Error_sending');
 				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 				$response[$idDoc] = false;
-			}			
+			}		
 			return $response;
 		}
 		

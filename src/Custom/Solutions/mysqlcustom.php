@@ -791,50 +791,41 @@ class mysqlcustom extends mysql {
 	
 	public function updateData($param): array {		
 		// Myddleware can change the email only if compte_reec_ok = 0
-		// règle users , engagé , REEC - Composante, Esp Rep - Coupons vers Esp Rep
-		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {
+		// règle REEC - Users , REEC - Engagé , Esp Rep - Contacts repérants
+		if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127','6273905a05cb2'))) {
 			// For every document
-			foreach($param['data'] as $idDoc => $data) {	
-				if (in_array($param['rule']['id'], array('5cf98651a17f3','5ce3621156127'))) {		// règle users , engagé	
-					// If rule user and title = Volontaire, we never update the contact into REEC.
-					// Updates will be managed by the corresponding contact				
-					if (
-							$param['rule']['id'] == '5cf98651a17f3'	
-						AND $param['data'][$idDoc]['compte_reec_ok'] == 'DO NOT SEND IF UPDATE, 0 IF CREATE'
-					) {
-						$value = array(
-										'id' => $param['data'][$idDoc]['target_id'],
-										'error' => 'No update using rule user for volontaire, only rule engage can update contact volontaire'
-									);
-						$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
-						unset($param['data'][$idDoc]); // Do not send this document
-					}
-					
-					// Update email if 
-						// 		Email has been changed
-						// AND 	volontaire = 1 OR type = “User COMET” + compte_reec_ok = 1 
-					if (
-							!empty($param['data'][$idDoc]['email'])
-						AND !empty($param['dataHistory'][$idDoc])	
-						AND $param['data'][$idDoc]['email'] != $param['dataHistory'][$idDoc]['email']
-						AND (
-								!empty($param['data'][$idDoc]['volontaire'])
-							 OR (
-									!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
-								AND $param['dataHistory'][$idDoc]['type'] == 'User Comet'
-							)
-						)
-					) {
-						$param['data'][$idDoc]['email_updated'] = 1;					
-					// Email can always be updated if compet REEC isn't created
-					} elseif (!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])) {
-						unset($param['data'][$idDoc]['email']);				
-					}					
-						
-					// Never modify compte_reec_ok
-					unset($param['data'][$idDoc]['compte_reec_ok']);
+			foreach($param['data'] as $idDoc => $data) {
+				// If rule user and title = Volontaire, we never update the contact into REEC.
+				// Updates will be managed by the corresponding contact	
+				if (
+						$param['rule']['id'] == '5cf98651a17f3'	 // REEC - Users
+					AND $param['data'][$idDoc]['compte_reec_ok'] == 'DO NOT SEND IF UPDATE, 0 IF CREATE'
+				) {
+					$value = array(
+									'id' => $param['data'][$idDoc]['target_id'],
+									'error' => 'No update using rule user for volontaire, only rule engage can update contact volontaire'
+								);
+					$this->updateDocumentStatus($idDoc,$value,$param, 'No_send');
+					unset($param['data'][$idDoc]); // Do not send this document
 				}
-			}		
+
+				// Set email_updated = 1 if email modified AND ( compte_reec_ok = 1 OR compte_reperant_ok = 1 )
+				if (
+						!empty($param['data'][$idDoc]['email'])
+					AND !empty($param['dataHistory'][$idDoc])	
+					AND $param['data'][$idDoc]['email'] != $param['dataHistory'][$idDoc]['email']
+					AND (
+							!empty($param['dataHistory'][$idDoc]['compte_reperant_ok'])
+						 OR	!empty($param['dataHistory'][$idDoc]['compte_reec_ok'])
+					)
+				) {
+					$param['data'][$idDoc]['email_updated'] = 1;
+				} 
+
+				// Never modify compte_reec_ok
+				unset($param['data'][$idDoc]['compte_reec_ok']);
+				unset($param['data'][$idDoc]['compte_reperant_ok']);
+			}
 		}
 	
 		// We send nouveau = 1 only in creation otherwise we don't send the field

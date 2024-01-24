@@ -55,6 +55,20 @@ class JobRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    // public function findIfAnyJobStartedSince($begin)
+    public function findIfAnyJobStartedSince(DateTime $begin): ?Job
+    {
+        return $this->createQueryBuilder('j')
+            ->select('j')
+            ->where('j.status = :status')
+            ->andWhere('j.begin < :timeLimit')
+            ->setParameter('status', 'Start')
+            ->setParameter('timeLimit', $begin)
+            ->getQuery()
+            ->setMaxResults(1)
+            ->getOneOrNullResult();
+    }
+
     /**
      * @return Job[]
      */

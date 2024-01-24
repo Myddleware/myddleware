@@ -15,7 +15,7 @@ class DocumentManagerCustom extends DocumentManager
 	protected $quartierComet;
 	protected $emailCoupon = array();
 	protected $toBeCancel = array();
-	protected $doNotOverrideStatus = false;
+	// protected $doNotOverrideStatus = false;
 	
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
@@ -486,11 +486,11 @@ class DocumentManagerCustom extends DocumentManager
 
 	public function updateStatus($new_status)
 	{
-		// If the status has been forced during a standard process, we stop the next status change (done by the standard)
+		/* // If the status has been forced during a standard process, we stop the next status change (done by the standard)
 		if ($this->doNotOverrideStatus) {
 			$this->doNotOverrideStatus = false;
 			return null;
-		}
+		} */
 		
 		// Add error expected status
 		$this->globalStatus['Error_expected'] = 'Cancel';
@@ -941,7 +941,7 @@ class DocumentManagerCustom extends DocumentManager
         }
     }
 
-    public function updateType($new_type) {
+    /* public function updateType($new_type) {
 		// Call standard
 		parent::updateType($new_type);
 		
@@ -955,7 +955,7 @@ class DocumentManagerCustom extends DocumentManager
 			$this->updateStatus('Cancel');
 			$this->doNotOverrideStatus = true;
 		}
-	}
+	} */
 
 	// Set the quartier parameters
 	public function setQuartierDocumentParams()
