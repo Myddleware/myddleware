@@ -115,33 +115,33 @@ class suitecrmcustom extends suitecrm
 		}
 		$isRuleBilan = false;
 		$ruleactive = true;
+		
 		if (
-				$this->currentRule == '65708a7e59eae'
+				in_array($this->currentRule, array('65b11699a6edc','65708a7e59eae')) // 65708a7e59eae a supprimer après prochain refresh
 			AND $method == 'get_entry_list'
-			AND !empty($parameters['module_name']
+			AND !empty($parameters['module_name'])
 			AND $ruleactive
 			// and parameters query contains the substring crmc
 			AND strpos($parameters['query'], 'crmc_evaluation_cstm.type_c =') !== false
-			)
-
 		) {
-			// this is the typical query
-			//"crmc_evaluation_cstm.type_c = 'debut'  AND crmc_evaluation_cstm.annee_scolaire_c = '2022_2023'  AND crmc_evaluation.crmc_evaluation_contactscontacts_ida = '1811e41f-2a34-ec3a-e070-65717763e53f'"
-			// get the type from counting the characters from the beginning of the query
-			// get the query from the params
-			
-			$paramQuery = $parameters['query'];
-			// if param query contains the word debut, do x, else if param query contains the word fin, do y
-			if (strpos($paramQuery, 'debut') !== false) {
-				// do x
-				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 5);
-				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
-				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
-			} else if (strpos($paramQuery, 'fin') !== false) {
-				// do y
-				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 3);
-				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
-				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			// Extract filters from query string
+			$filters = explode('AND', str_replace(' ','', $parameters['query']));
+			if (!empty($filters)) {
+				foreach($filters as $key => $filter){
+					$temp = explode('=', $filter);
+					$filtersFinal[$temp[0]] = $temp[1];
+				}
+			}
+
+			// Check filters
+			if (empty($filtersFinal['crmc_evaluation_cstm.type_c'])) {
+				throw new \Exception('Type is empty. Failed to search the fiche evaluation into COMET. ');
+			}
+			if (empty($filtersFinal['crmc_evaluation_cstm.annee_scolaire_c'])) {
+				throw new \Exception('Annee scolaire is empty. Failed to search the fiche evaluation into COMET. ');
+			}
+			if (empty($filtersFinal['crmc_evaluation.MydCustRelSugarcrmc_evaluation_contactscontacts_ida'])) {
+				throw new \Exception('Contact ID is empty. Failed to search the fiche evaluation into COMET. ');
 			}
 
 			$isRuleBilan = true;
@@ -167,17 +167,18 @@ class suitecrmcustom extends suitecrm
 					ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
 			WHERE 
 				-- get the type from the variable $type
-				crmc_evaluation_cstm.type_c = '$type'
-				AND crmc_evaluation_cstm.annee_scolaire_c = '$schoolYear'
+				crmc_evaluation_cstm.type_c = ".$filtersFinal['crmc_evaluation_cstm.type_c']."
+				AND crmc_evaluation_cstm.annee_scolaire_c = ".$filtersFinal['crmc_evaluation_cstm.annee_scolaire_c']."
 				AND crmc_evaluation_contacts_c.deleted = 0
 				AND crmc_evaluation.deleted = 0
-				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '$contactId'
+				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = ".$filtersFinal['crmc_evaluation.MydCustRelSugarcrmc_evaluation_contactscontacts_ida']."
 			LIMIT 1;";
 		}
-
+	
+		// Call standard
 		$result = parent::call($method, $parameters);
 		
-		if ($this->currentRule == '65708a7e59eae'
+		if (in_array($this->currentRule, array('65b11699a6edc','65708a7e59eae')) // 65708a7e59eae a supprimer après prochain refresh
 		 && $isRuleBilan
 		 && $ruleactive
 		 ) {
@@ -198,10 +199,7 @@ class suitecrmcustom extends suitecrm
 				return $result;
 				$noresult = true;
 			}
-			// $result = (array)$decodedResult->values[0];
-			// $result = [];
-			// $result[0] = $arrrayResult;
-			
+
 			$arrayResult = (array)$decodedResult->values[0];
 			$result = new \stdClass();
 			if (!($noresult)) {
@@ -211,17 +209,6 @@ class suitecrmcustom extends suitecrm
 			
 			// ------------------------------------test
 			$result->entry_list = [];
-			// foreach ($arrayResult as $key => $value) {
-			// 	$entry = new \stdClass();
-			// 	$entry->name_value_list = new \stdClass();
-
-			// 	// Assuming each $value here is a simple value and not an array/object
-			// 	$entry->name_value_list->$key = new \stdClass();
-			// 	$entry->name_value_list->$key->name = $key;
-			// 	$entry->name_value_list->$key->value = $value;
-
-			// 	$result->entry_list[] = $entry;
-			// }
 			$entry = new \stdClass();
 			$entry->name_value_list = new \stdClass();
 
@@ -233,10 +220,6 @@ class suitecrmcustom extends suitecrm
 
 			// Add the constructed entry to the entry_list
 			$result->entry_list[] = $entry;
-
-			// ------------------------------------test end
-
-			// $result->entry_list[0]['crmc_evaluation_contactscontacts_ida'] = $result->entry_list[0]->name_value_list->MydCustRelSugarcrmc_evaluation_contactscontacts_ida;
 
 			$result->relationship_list = [];
 			$isRuleBilan = false;
@@ -320,6 +303,7 @@ class suitecrmcustom extends suitecrm
 		}
 
 		$read = parent::read($param);
+
 		// Add a field to filter by mentor OR mentor accueil
 		if (
 					$param['module']=='Contacts'
