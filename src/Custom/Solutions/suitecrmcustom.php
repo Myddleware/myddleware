@@ -368,6 +368,44 @@ class suitecrmcustom extends suitecrm
 			}		
 			return $response;
 		}
+
+		// Vérifier si la règle est "Aiko - Binome vers COMET"
+		if ($param['rule']['id'] == '62cb3f449e55f') {
+			if (strpos($value['error'], 'Erreur code W0002') !== false) {
+				$response = array();
+				try {
+					$this->connection->beginTransaction();
+					$documentManager = new DocumentManager(
+											$this->logger, 
+											$this->connection, 
+											$this->entityManager,
+											$this->documentRepository,
+											$this->ruleRelationshipsRepository,
+											$this->formulaManager
+										);
+					$param['id_doc_myddleware'] = $idDoc;
+					$param['api'] = $this->api;
+					$documentManager->setParam($param);
+					$documentManager->setMessage($value['error']);
+	
+					// statut "cancel"
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('Cancel');
+					$this->logger->error($value['error']);
+					$response[$idDoc] = false;
+					$this->connection->commit(); // -- COMMIT TRANSACTION
+				} catch (\Exception $e) {
+					echo 'Échec de l\'annulation du document : '.$e->getMessage().' '.$e->getFile().' Ligne : ( '.$e->getLine().' )';
+					$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+					$documentManager->setMessage('Échec de l\'annulation du document : '.$e->getMessage().' '.$e->getFile().' Ligne : ( '.$e->getLine().' )');
+					$documentManager->setTypeError('E');
+					$documentManager->updateStatus('Error_sending');
+					$this->logger->error('Échec de l\'annulation du document : '.$e->getMessage().' '.$e->getFile().' Ligne : ( '.$e->getLine().' )');
+					$response[$idDoc] = false;
+				}
+				return $response;
+			}
+		}
 		
 		
 		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
@@ -498,6 +536,14 @@ class suitecrmcustom extends suitecrm
 			)
 		) { 
 			throw new \Exception(utf8_decode('Statut transformé ne peut pas être modifié. Le document est annulé.').' Erreur code W0001.');
+		}
+
+		// "Aiko - Binome vers COMET"
+		if ($param['rule']['id'] == '62cb3f449e55f') { 
+			// Check if history is available
+			if (empty($param['dataHistory'][$idDoc])) {
+				throw new \Exception(utf8_decode('Historique non disponible, le binôme n\'existe plus dans la COMET').'Erreur code W0002');
+			}
 		}
 		
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
