@@ -25,6 +25,7 @@ class suitecrmcustom extends suitecrm
         'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Prospects' => ['email1', 'name'],
         'default' => ['name'],
+		'CRMC_Evaluation' => ['type_c', 'annee_scolaire_c', 'MydCustRelSugarcrmc_evaluation_contactscontacts_ida'],
     ];
 	
 	// Redefine get_modules method
@@ -112,8 +113,134 @@ class suitecrmcustom extends suitecrm
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts', 'value' => array('id', 'statut_c', 'chatbot_c'));
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts_1', 'value' => array('id', 'statut_c', 'chatbot_c'));
 		}
+		$isRuleBilan = false;
+		$ruleactive = true;
+		if (
+				$this->currentRule == '65708a7e59eae'
+			AND $method == 'get_entry_list'
+			AND !empty($parameters['module_name']
+			AND $ruleactive
+			// and parameters query contains the substring crmc
+			AND strpos($parameters['query'], 'crmc_evaluation_cstm.type_c =') !== false
+			)
+
+		) {
+			// this is the typical query
+			//"crmc_evaluation_cstm.type_c = 'debut'  AND crmc_evaluation_cstm.annee_scolaire_c = '2022_2023'  AND crmc_evaluation.crmc_evaluation_contactscontacts_ida = '1811e41f-2a34-ec3a-e070-65717763e53f'"
+			// get the type from counting the characters from the beginning of the query
+			// get the query from the params
+			
+			$paramQuery = $parameters['query'];
+			// if param query contains the word debut, do x, else if param query contains the word fin, do y
+			if (strpos($paramQuery, 'debut') !== false) {
+				// do x
+				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 5);
+				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			} else if (strpos($paramQuery, 'fin') !== false) {
+				// do y
+				$type = substr($paramQuery, strpos($paramQuery, 'crmc_evaluation_cstm.type_c =') + 31, 3);
+				$schoolYear = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation_cstm.annee_scolaire_c =') + 41, 9);
+				$contactId = substr($parameters['query'], strpos($parameters['query'], 'crmc_evaluation.crmc_evaluation_contactscontacts_ida =') + 56, 36);
+			}
+
+			$isRuleBilan = true;
+			$method = 'send_special_query';
+			// empty the parameters
+			$session = $this->session;
+			$module_name = $parameters['module_name'];
+			$parameters = array();
+			$parameters['session'] = $this->session;
+			$parameters['query'] = "SELECT
+				crmc_evaluation.id,
+				crmc_evaluation.date_modified,
+				crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida as MydCustRelSugarcrmc_evaluation_contactscontacts_ida,
+				crmc_evaluation.name,
+				crmc_evaluation_cstm.type_c,
+				crmc_evaluation_cstm.annee_scolaire_c,
+				crmc_evaluation_cstm.implication_famille_c,
+				crmc_evaluation_cstm.travail_personnel_c
+			FROM crmc_evaluation
+				INNER JOIN crmc_evaluation_cstm 
+					ON crmc_evaluation.id = crmc_evaluation_cstm.id_c
+				INNER JOIN crmc_evaluation_contacts_c 
+					ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
+			WHERE 
+				-- get the type from the variable $type
+				crmc_evaluation_cstm.type_c = '$type'
+				AND crmc_evaluation_cstm.annee_scolaire_c = '$schoolYear'
+				AND crmc_evaluation_contacts_c.deleted = 0
+				AND crmc_evaluation.deleted = 0
+				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = '$contactId'
+			LIMIT 1;";
+		}
 
 		$result = parent::call($method, $parameters);
+		
+		if ($this->currentRule == '65708a7e59eae'
+		 && $isRuleBilan
+		 && $ruleactive
+		 ) {
+			
+			$parameters['module_name'] = $module_name;
+			$parameters['session'] = $session;
+			$decodedResult = json_decode($result);
+
+			// if decoded result status is success and decoded result message is empty string and decoded result values is not set then return
+			if ($decodedResult->status == 'success' && $decodedResult->message == '' && !isset($decodedResult->values)) {
+
+				// $result is an empty stdClass object
+				$result = new \stdClass();
+				$result->result_count = 0;
+				$result->total_count = 0;
+				$result->entry_list = [];
+				$result->relationship_list = [];
+				return $result;
+				$noresult = true;
+			}
+			// $result = (array)$decodedResult->values[0];
+			// $result = [];
+			// $result[0] = $arrrayResult;
+			
+			$arrayResult = (array)$decodedResult->values[0];
+			$result = new \stdClass();
+			if (!($noresult)) {
+				$result->result_count = 1;
+				$result->total_count = 1;
+			}
+			
+			// ------------------------------------test
+			$result->entry_list = [];
+			// foreach ($arrayResult as $key => $value) {
+			// 	$entry = new \stdClass();
+			// 	$entry->name_value_list = new \stdClass();
+
+			// 	// Assuming each $value here is a simple value and not an array/object
+			// 	$entry->name_value_list->$key = new \stdClass();
+			// 	$entry->name_value_list->$key->name = $key;
+			// 	$entry->name_value_list->$key->value = $value;
+
+			// 	$result->entry_list[] = $entry;
+			// }
+			$entry = new \stdClass();
+			$entry->name_value_list = new \stdClass();
+
+			foreach ($arrayResult as $key => $value) {
+				$entry->name_value_list->$key = new \stdClass();
+				$entry->name_value_list->$key->name = $key;
+				$entry->name_value_list->$key->value = $value;
+			}
+
+			// Add the constructed entry to the entry_list
+			$result->entry_list[] = $entry;
+
+			// ------------------------------------test end
+
+			// $result->entry_list[0]['crmc_evaluation_contactscontacts_ida'] = $result->entry_list[0]->name_value_list->MydCustRelSugarcrmc_evaluation_contactscontacts_ida;
+
+			$result->relationship_list = [];
+			$isRuleBilan = false;
+		}
 
 		if ($this->currentRule == '61a920fae25c5') { // Aiko - Contact
 			if (!empty($result->relationship_list)) {
@@ -191,6 +318,7 @@ class suitecrmcustom extends suitecrm
 		) {
 			return array();
 		}
+
 		$read = parent::read($param);
 		// Add a field to filter by mentor OR mentor accueil
 		if (
@@ -639,6 +767,7 @@ class suitecrmcustom extends suitecrm
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
 		}
+
 		return $query;
 	}
 
