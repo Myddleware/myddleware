@@ -29,6 +29,7 @@ class RuleManagerCustom extends RuleManager
 				}
 			}
 		}
+
 		return $responses;
 	}
 
@@ -53,7 +54,8 @@ class RuleManagerCustom extends RuleManager
 							'6273905a05cb2', // Esp Rep - Contacts repérants
 							'633d94b3ce61e', // Mobilisation - Participation RI -> comet relance
 							'627153382dc34', // Mobilisation - Participations RI
-							'625fcd2ed442f'  // Mobilisation - Coupons
+							'625fcd2ed442f', // Mobilisation - Coupons
+							'63f8e9f1c9d70'  // Mobilisation - RDV Volontaires
 					);
 		// If no response or another rule, we don't do any custom action
 		if (
@@ -249,6 +251,32 @@ class RuleManagerCustom extends RuleManager
 					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
 					if ($deleteTargetData) {
 						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l\'une d\'entre elle doit être supprimee dans Airtable. ');
+					}
+				}
+				// If there is an "Unprocessable Entity" errro when we try to create/update a binome for the first time
+				// Then we try to send again both contacts and referent
+				if (
+						$this->ruleId == '63f8e9f1c9d70' 	// 	Mobilisation - RDV Volontaires PREPROD & PROD
+					AND	(
+							$documentData['attempt'] == 1 		// Only the first try
+						 OR !empty($this->manual)				// Or manual run
+					) 
+					AND	(
+							strpos($response['error'], 'Unprocessable Entity returned') !== false
+						 OR	strpos($response['error'], 'HTTP/2 422') !== false
+					)
+				) {	
+					$sourceData = $this->getDocumentData($docId, 'S');
+					if (!empty($sourceData['parent_id'])) { // Coupon
+						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['parent_id'], 'id', false);  // Mobilisation - Coupons
+					}
+					if (!empty($sourceData['assigned_user_id'])) { // Referent
+						$this->generatePoleRelationship('6423f5d4ad07e', $sourceData['assigned_user_id'], 'id', false);  // Mobilisation - Utilisateur
+					}
+					// Set back the status to predecessor OK and remove target data to allow Myddleware to recalcultae thetarget data with the new records sent
+					$deleteTargetData = $this->deleteDocumentData($docId, 'T');
+					if ($deleteTargetData) {
+						$this->changeStatus($docId, 'Predecessor_OK', 'Les données liees ont ete relancees car l’une d’entre elle doit être supprimee dans Airtable. ');
 					}
 				}
 				

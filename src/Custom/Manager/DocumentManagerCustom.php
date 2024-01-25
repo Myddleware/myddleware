@@ -15,7 +15,7 @@ class DocumentManagerCustom extends DocumentManager
 	protected $quartierComet;
 	protected $emailCoupon = array();
 	protected $toBeCancel = array();
-	protected $doNotOverrideStatus = false;
+	// protected $doNotOverrideStatus = false;
 	
 	/* // No history for Aiko rules to not surcharge the API
 	protected function getDocumentHistory($searchFields) {
@@ -481,16 +481,30 @@ class DocumentManagerCustom extends DocumentManager
 			$this->typeError = 'W';
 			$this->message = 'Change status from No_send to Ready_to_send to force the call to Make.';
 		}
+
+		// Manage 403 error with Airtable
+		// It means that the record doesn't exist anymore in Airtable. We can't update it so we create it again.
+		if (
+				!empty($this->document_data)
+			AND $new_status == 'Error_checking'
+			AND	$this->documentType == 'U'
+			AND strpos($this->message, 'HTTP/2 403') !== false
+		) {
+			$new_status = 'Transformed';
+			$this->typeError = 'W';
+			$this->message = 'The record doesn\'t exist in AIrtable anymore. Not possible to update it. We create the record again in Airtable. ';
+			$this->updateType('C');
+		}
 		return $new_status;
 	}
 
 	public function updateStatus($new_status)
 	{
-		// If the status has been forced during a standard process, we stop the next status change (done by the standard)
+		/* // If the status has been forced during a standard process, we stop the next status change (done by the standard)
 		if ($this->doNotOverrideStatus) {
 			$this->doNotOverrideStatus = false;
 			return null;
-		}
+		} */
 		
 		// Add error expected status
 		$this->globalStatus['Error_expected'] = 'Cancel';
@@ -941,7 +955,7 @@ class DocumentManagerCustom extends DocumentManager
         }
     }
 
-    public function updateType($new_type) {
+    /* public function updateType($new_type) {
 		// Call standard
 		parent::updateType($new_type);
 		
@@ -955,7 +969,7 @@ class DocumentManagerCustom extends DocumentManager
 			$this->updateStatus('Cancel');
 			$this->doNotOverrideStatus = true;
 		}
-	}
+	} */
 
 	// Set the quartier parameters
 	public function setQuartierDocumentParams()

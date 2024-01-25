@@ -91,12 +91,33 @@ class NotificationManager
         $this->twig = $twig;
     }
 
+        /**
+     * Send alert
+     *
+     * @throws Exception
+     */
+    public function sendAlert(): bool
+    {
+        try {
+
+            $this->sendAlertTaskTooLong();
+            $this->sendAlertCrontabDisabled();
+
+            return true;
+
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            throw new Exception($error);
+        }
+    }
+
     /**
      * Send alert if a job is running too long.
      *
      * @throws Exception
      */
-    public function sendAlert(): bool
+    public function sendAlertTaskTooLong(): bool
     {
         try {
             
@@ -123,6 +144,44 @@ class NotificationManager
 
                 return $this->send($textMail, $this->translator->trans('email_alert.subject'));
             }
+
+            return true;
+        } catch (Exception $e) {
+            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            throw new Exception($error);
+        }
+    }
+    /**
+     * Send alert if a job is running too long.
+     *
+     * @throws Exception
+     */
+    public function sendAlertCrontabDisabled(): bool
+    {
+        try {
+            
+            // Set all config parameters
+            $this->setConfigParam();
+            if (empty($this->configParams['alert_time_limit'])) {
+				throw new Exception('No alert time set in the parameters file. Please set the parameter alert_limit_minute in the file config/parameters.yml.');
+			}
+
+            // we're going to check whether there was no job started since an hour
+            $timeOneHourAgo = new DateTime('now', new \DateTimeZone('GMT'));
+            $timeOneHourAgo->modify('-'.$this->configParams['alert_time_limit'].' minutes');
+
+            // Search if a job is lasting more time that the limit authorized
+            $anyJob = $this->jobRepository->findIfAnyJobStartedSince($timeOneHourAgo);
+
+            // if no job was started since an hour, we send the alert
+            if (empty($anyJob)) {
+                // Create textmail that says 'Alert: the crontab is stopped since more than one hour. Please check the crontab.'
+				$textMail = 'Alert: the crontab is stopped since more than '.$this->configParams['alert_time_limit'].' minutes .'. 'Please check the crontab. ';
+				$textMail .= (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/list/' : '');
+                return $this->send($textMail, $this->translator->trans('email_alert.subject'));
+            }
+
 
             return true;
         } catch (Exception $e) {
