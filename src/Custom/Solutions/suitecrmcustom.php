@@ -411,79 +411,61 @@ class suitecrmcustom extends suitecrm
 	}
 	
 	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array {
-		if ($param['rule']['id'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
-			// Change id and use event_id and lead_id
-			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
-		}
-		
-		// Mobilisation - relance rdv pris -> comet 
-		// Mobilisation - Coupons vers Comet
-		// Mobilisation - Reconduction
-		if (
-				in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28'))
-				AND $value['id'] == '-1'
-				AND (
-						strpos($value['error'], 'Erreur code W0001') !== false
-					 OR strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
-				)
-		) {
-			$response = array();
-			try {
-				$this->connection->beginTransaction();
-				// Create document object
-				$documentManager = new DocumentManager(
-										$this->logger, 
-										$this->connection, 
-										$this->entityManager,
-										$this->documentRepository,
-										$this->ruleRelationshipsRepository,
-										$this->formulaManager
-									);
-				$param['id_doc_myddleware'] = $idDoc;
-				$param['api'] = $this->api;
-				$documentManager->setParam($param);
-				$documentManager->setMessage($value['error']);
-				// We set the document to cancel when we try to update a converted status for a coupon
-				if (
-						!empty($param['ruleId'])
-					AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
-					AND $value['id'] == '-1'
-					AND strpos($value['error'], 'Erreur code W0001') !== false		
-				) {
+		$response = array();
+		try {
+			$this->connection->beginTransaction();
+			$documentManager = new DocumentManager(
+				$this->logger, 
+				$this->connection, 
+				$this->entityManager,
+				$this->documentRepository,
+				$this->ruleRelationshipsRepository,
+				$this->formulaManager
+			);
+			$param['id_doc_myddleware'] = $idDoc;
+			$param['api'] = $this->api;
+			$documentManager->setParam($param);
+	
+			// Specific logic for 'Mobilisation - Participation RI -> comet' rule
+			if ($param['rule']['id'] == '6281633dcddf1') { 
+				$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];
+			}
+	
+			// Additional checks for specific errors and rules
+			if (!empty($param['ruleId']) && $value['id'] == '-1') {
+				if (in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28')) && strpos($value['error'], 'Erreur code W0001') !== false) {
+					// Handling 'Erreur code W0001' error
+					$documentManager->setMessage($value['error']);
 					$documentManager->setTypeError('W');
 					$documentManager->updateStatus('No_send');
-					$this->logger->error($value['error']);
-					$response[$idDoc] = false;	
-					$this->connection->commit(); // -- COMMIT TRANSACTION
+					$response[$idDoc] = false; 
+					$this->connection->commit();
+					return $response;
+				} elseif ($param['ruleId'] == '62cb3f449e55f' && strpos($value['error'], 'Erreur code W0002') !== false) {
+					// Handling 'Erreur code W0002' error
+					$documentManager->setMessage($value['error']);
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('Cancel');
+					$response[$idDoc] = false;
+					$this->connection->commit();
+					return $response;
 				}
-				// We set the document to cancel when a reconduction is already done in COMET
-				if (
-						!empty($param['ruleId'])
-					AND	in_array($param['ruleId'], array('62d9d41a59b28'))	// Mobilisation - Reconduction		
-					AND $value['id'] == '-1'
-					AND strpos($value['error'], 'Failed to execute the reconduction. The contact is already active on the current year') !== false		
-				) {
-					$documentManager->setTypeError('W');
-					$documentManager->updateStatus('No_send');
-					$this->logger->error($value['error']);
-					$response[$idDoc] = false;	
-					$this->connection->commit(); // -- COMMIT TRANSACTION
-				}	
-			} catch (\Exception $e) {
-				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-				$documentManager->setTypeError('E');
-				$documentManager->updateStatus('Error_sending');
-				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-				$response[$idDoc] = false;
-			}		
-			return $response;
+			}
+	
+			$this->connection->commit();
+		} catch (\Exception $e) {
+			echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->connection->rollBack();
+			$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$documentManager->setTypeError('E');
+			$documentManager->updateStatus('Error_sending');
+			$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$response[$idDoc] = false;
 		}
-		
-		
-		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
+	
+		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 	}
+	
 	
 	// Permet de mettre à jour un enregistrement
     public function createData($param): array
@@ -610,6 +592,14 @@ class suitecrmcustom extends suitecrm
 			)
 		) { 
 			throw new \Exception(utf8_decode('Statut transformé ne peut pas être modifié. Le document est annulé.').' Erreur code W0001.');
+		}
+
+		// "Aiko - Binome vers COMET"
+		if ($param['rule']['id'] == '62cb3f449e55f') { 
+			// Check if history is available
+			if (empty($param['dataHistory'][$idDoc])) {
+				throw new \Exception(utf8_decode('History not available, the pair no longer exists in the COMET').'Error code W0002');
+			}
 		}
 		
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
