@@ -15,6 +15,7 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'fldTBEYW5qX7G5jjy'=> array( 'label' => 'Pôle', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
 		'fldRZDRyB9mxGNsVD'=> array( 'label' => 'POLES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => true),
         'fldslwHyylA2Kox70'=> array( 'label' => 'Deleted', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldBpzhAbvaCYwXu9'=> array( 'label' => 'Discord ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
     ),
     'BINOMES' => array(
         'fldpdbxLe9B1H2i2J'=> array( 'label' => 'Id Comet', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
@@ -110,6 +111,26 @@ $moduleFields['appdKFUpk2X2Ok8Dc'] = array (
         'flduaPHukFT92TyIm' => array( 'label' => 'DEV RATRAPAGE', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1, 'relate' => false),
 
     ),
+
+	'BILAN' => array(
+		'fldDi4OdAVvZ27Xln' => array('label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld0snXyko145OnMI' => array('label' => 'ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldhMzeCO98Ud2Qoc' => array('label' => 'BENEFICIAIRE: ID COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld25h1PFFIj5eUuS' => array('label' => 'VOIR DANS COMET', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldPakbqiwgA92FuA' => array('label' => 'Created', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldNleb6imzlqMvLk' => array('label' => 'ID Trouver', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'flddDtrTZE5CppzYL' => array('label' => 'LAst Mod ID C', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld60IvZ2d1PMWSGz' => array('label' => 'Type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldje7mWjIopK6ofJ' => array('label' => 'BINOMES', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldWvBH5RT3VUZD74' => array('label' => 'Anne Scolaire', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldrxcBWFrbb0BUaC' => array('label' => 'Implication Famille', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldvxZl9TJ10NVwJC' => array('label' => 'Travail Personnel', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldJcC6WcQwYpHtk6' => array('label' => 'AGE BILAN', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldEsZgEXiF6LL06e' => array('label' => 'BOT', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldkXr9WCVnEd6L0L' => array('label' => 'VOIR DANS COMET copy', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fld4u37oB048N8Lml' => array('label' => 'Date rattrapage', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldJViCsbfpAcsoAv' => array('label' => 'Last Modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+	),
 );
 
 // Aiko supp
@@ -901,6 +922,7 @@ $moduleFields['appALljzTMc2wjLV1'] = array (
 		'fldTpnnN8XfbLHADM'=> array( 'label' => 'COMET ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldbQwWAFkDkEo6nZ'=> array( 'label' => 'Nom de naissance', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 		'fldkLnubCfLFnhrLi'=> array( 'label' => 'Refus Elisa', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
+		'fldUQle0M9lY5Q3Ft'=> array( 'label' => 'DEV Suspendre Synchro', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'relate' => false),
 	),
 );
 

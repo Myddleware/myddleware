@@ -25,6 +25,7 @@ class suitecrmcustom extends suitecrm
         'Leads' => ['email1', 'last_name', 'Myddleware_element_id'],
         'Prospects' => ['email1', 'name'],
         'default' => ['name'],
+		'CRMC_Evaluation' => ['type_c', 'annee_scolaire_c', 'MydCustRelSugarcrmc_evaluation_contactscontacts_ida'],
     ];
 	
 	// Redefine get_modules method
@@ -112,8 +113,117 @@ class suitecrmcustom extends suitecrm
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts', 'value' => array('id', 'statut_c', 'chatbot_c'));
 			$parameters['link_name_to_fields_array'][] = array('name' => 'crmc_binome_contacts_1', 'value' => array('id', 'statut_c', 'chatbot_c'));
 		}
+		$isRuleBilan = false;
+		$ruleactive = true;
+		
+		if (
+				in_array($this->currentRule, array('65b11699a6edc','65708a7e59eae')) // 65708a7e59eae a supprimer après prochain refresh
+			AND $method == 'get_entry_list'
+			AND !empty($parameters['module_name'])
+			AND $ruleactive
+			// and parameters query contains the substring crmc
+			AND strpos($parameters['query'], 'crmc_evaluation_cstm.type_c =') !== false
+		) {
+			// Extract filters from query string
+			$filters = explode('AND', str_replace(' ','', $parameters['query']));
+			if (!empty($filters)) {
+				foreach($filters as $key => $filter){
+					$temp = explode('=', $filter);
+					$filtersFinal[$temp[0]] = $temp[1];
+				}
+			}
 
+			// Check filters
+			if (empty($filtersFinal['crmc_evaluation_cstm.type_c'])) {
+				throw new \Exception('Type is empty. Failed to search the fiche evaluation into COMET. ');
+			}
+			if (empty($filtersFinal['crmc_evaluation_cstm.annee_scolaire_c'])) {
+				throw new \Exception('Annee scolaire is empty. Failed to search the fiche evaluation into COMET. ');
+			}
+			if (empty($filtersFinal['crmc_evaluation.MydCustRelSugarcrmc_evaluation_contactscontacts_ida'])) {
+				throw new \Exception('Contact ID is empty. Failed to search the fiche evaluation into COMET. ');
+			}
+
+			$isRuleBilan = true;
+			$method = 'send_special_query';
+			// empty the parameters
+			$session = $this->session;
+			$module_name = $parameters['module_name'];
+			$parameters = array();
+			$parameters['session'] = $this->session;
+			$parameters['query'] = "SELECT
+				crmc_evaluation.id,
+				crmc_evaluation.date_modified,
+				crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida as MydCustRelSugarcrmc_evaluation_contactscontacts_ida,
+				crmc_evaluation.name,
+				crmc_evaluation_cstm.type_c,
+				crmc_evaluation_cstm.annee_scolaire_c,
+				crmc_evaluation_cstm.implication_famille_c,
+				crmc_evaluation_cstm.travail_personnel_c
+			FROM crmc_evaluation
+				INNER JOIN crmc_evaluation_cstm 
+					ON crmc_evaluation.id = crmc_evaluation_cstm.id_c
+				INNER JOIN crmc_evaluation_contacts_c 
+					ON crmc_evaluation.id = crmc_evaluation_contacts_c.crmc_evaluation_contactscrmc_evaluation_idb
+			WHERE 
+				-- get the type from the variable $type
+				crmc_evaluation_cstm.type_c = ".$filtersFinal['crmc_evaluation_cstm.type_c']."
+				AND crmc_evaluation_cstm.annee_scolaire_c = ".$filtersFinal['crmc_evaluation_cstm.annee_scolaire_c']."
+				AND crmc_evaluation_contacts_c.deleted = 0
+				AND crmc_evaluation.deleted = 0
+				AND crmc_evaluation_contacts_c.crmc_evaluation_contactscontacts_ida = ".$filtersFinal['crmc_evaluation.MydCustRelSugarcrmc_evaluation_contactscontacts_ida']."
+			LIMIT 1;";
+		}
+	
+		// Call standard
 		$result = parent::call($method, $parameters);
+		
+		if (in_array($this->currentRule, array('65b11699a6edc','65708a7e59eae')) // 65708a7e59eae a supprimer après prochain refresh
+		 && $isRuleBilan
+		 && $ruleactive
+		 ) {
+			
+			$parameters['module_name'] = $module_name;
+			$parameters['session'] = $session;
+			$decodedResult = json_decode($result);
+
+			// if decoded result status is success and decoded result message is empty string and decoded result values is not set then return
+			if ($decodedResult->status == 'success' && $decodedResult->message == '' && !isset($decodedResult->values)) {
+
+				// $result is an empty stdClass object
+				$result = new \stdClass();
+				$result->result_count = 0;
+				$result->total_count = 0;
+				$result->entry_list = [];
+				$result->relationship_list = [];
+				return $result;
+				$noresult = true;
+			}
+
+			$arrayResult = (array)$decodedResult->values[0];
+			$result = new \stdClass();
+			if (!($noresult)) {
+				$result->result_count = 1;
+				$result->total_count = 1;
+			}
+			
+			// ------------------------------------test
+			$result->entry_list = [];
+			$entry = new \stdClass();
+			$entry->name_value_list = new \stdClass();
+
+			foreach ($arrayResult as $key => $value) {
+				$entry->name_value_list->$key = new \stdClass();
+				$entry->name_value_list->$key->name = $key;
+				$entry->name_value_list->$key->value = $value;
+			}
+
+			// Add the constructed entry to the entry_list
+			$result->entry_list[] = $entry;
+
+			$result->relationship_list = [];
+			$isRuleBilan = false;
+		}
 
 		if ($this->currentRule == '61a920fae25c5') { // Aiko - Contact
 			if (!empty($result->relationship_list)) {
@@ -191,7 +301,9 @@ class suitecrmcustom extends suitecrm
 		) {
 			return array();
 		}
+
 		$read = parent::read($param);
+
 		// Add a field to filter by mentor OR mentor accueil
 		if (
 					$param['module']=='Contacts'
@@ -299,52 +411,61 @@ class suitecrmcustom extends suitecrm
 	}
 	
 	protected function updateDocumentStatus($idDoc, $value, $param, $forceStatus = null): array {
-		if ($param['rule']['id'] == '6281633dcddf1') { // Mobilisation - Participation RI -> comet
-			// Change id and use event_id and lead_id
-			$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];			
+		$response = array();
+		try {
+			$this->connection->beginTransaction();
+			$documentManager = new DocumentManager(
+				$this->logger, 
+				$this->connection, 
+				$this->entityManager,
+				$this->documentRepository,
+				$this->ruleRelationshipsRepository,
+				$this->formulaManager
+			);
+			$param['id_doc_myddleware'] = $idDoc;
+			$param['api'] = $this->api;
+			$documentManager->setParam($param);
+	
+			// Specific logic for 'Mobilisation - Participation RI -> comet' rule
+			if ($param['rule']['id'] == '6281633dcddf1') { 
+				$value['id'] = $param['data'][$idDoc]['fp_events_leads_1fp_events_ida'].$param['data'][$idDoc]['fp_events_leads_1leads_idb'];
+			}
+	
+			// Additional checks for specific errors and rules
+			if (!empty($param['ruleId']) && $value['id'] == '-1') {
+				if (in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28')) && strpos($value['error'], 'Erreur code W0001') !== false) {
+					// Handling 'Erreur code W0001' error
+					$documentManager->setMessage($value['error']);
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('No_send');
+					$response[$idDoc] = false; 
+					$this->connection->commit();
+					return $response;
+				} elseif ($param['ruleId'] == '62cb3f449e55f' && strpos($value['error'], 'Erreur code W0002') !== false) {
+					// Handling 'Erreur code W0002' error
+					$documentManager->setMessage($value['error']);
+					$documentManager->setTypeError('W');
+					$documentManager->updateStatus('Cancel');
+					$response[$idDoc] = false;
+					$this->connection->commit();
+					return $response;
+				}
+			}
+	
+			$this->connection->commit();
+		} catch (\Exception $e) {
+			echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->connection->rollBack();
+			$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$documentManager->setTypeError('E');
+			$documentManager->updateStatus('Error_sending');
+			$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$response[$idDoc] = false;
 		}
-		
-		// We set the document to cancel when we try to update a converted status for a coupon
-		if (
-				!empty($param['ruleId'])
-			AND	in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db'))	// Mobilisation - relance rdv pris -> comet // 	Mobilisation - Coupons vers Comet		
-			AND $value['id'] == '-1'
-			AND strpos($value['error'], 'Erreur code W0001') !== false		
-		) {
-			try {
-				$this->connection->beginTransaction();
-				$documentManager = new DocumentManager(
-										$this->logger, 
-										$this->connection, 
-										$this->entityManager,
-										$this->documentRepository,
-										$this->ruleRelationshipsRepository,
-										$this->formulaManager
-									);
-				$param['id_doc_myddleware'] = $idDoc;
-				$param['api'] = $this->api;
-				$documentManager->setParam($param);
-				$documentManager->setMessage($value['error']);
-				$documentManager->setTypeError('W');
-				$documentManager->updateStatus('No_send');
-				$this->logger->error($value['error']);
-				$response[$idDoc] = false;	
-				$this->connection->commit(); // -- COMMIT TRANSACTION
-			} catch (\Exception $e) {
-				echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-				$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-				$documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-				$documentManager->setTypeError('E');
-				$documentManager->updateStatus('Error_sending');
-				$this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-				$response[$idDoc] = false;
-			}			
-			return $response;
-		}
-		
-		
-		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);                               
+	
+		return parent::updateDocumentStatus($idDoc, $value, $param, $forceStatus);
 	}
+	
 	
 	// Permet de mettre à jour un enregistrement
     public function createData($param): array
@@ -471,6 +592,14 @@ class suitecrmcustom extends suitecrm
 			)
 		) { 
 			throw new \Exception(utf8_decode('Statut transformé ne peut pas être modifié. Le document est annulé.').' Erreur code W0001.');
+		}
+
+		// "Aiko - Binome vers COMET"
+		if ($param['rule']['id'] == '62cb3f449e55f') { 
+			// Check if history is available
+			if (empty($param['dataHistory'][$idDoc])) {
+				throw new \Exception(utf8_decode('History not available, the pair no longer exists in the COMET').'Error code W0002');
+			}
 		}
 		
 		return parent::checkDataBeforeUpdate($param, $data, $idDoc);
@@ -612,6 +741,7 @@ class suitecrmcustom extends suitecrm
 		){
 			$query .= ' AND '.strtolower($param['module'])."_cstm.id_1j1m_c <> '' ";
 		}
+
 		return $query;
 	}
 
