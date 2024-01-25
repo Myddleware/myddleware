@@ -442,7 +442,6 @@ class suitecrmcustom extends suitecrm
 				$documentManager->setMessage($value['error']);
 				$documentManager->setTypeError('W');
 		
-		
 				// Additional checks for specific errors and rules
 				if (
 						in_array($param['ruleId'], array('62695220e54ba','633ef1ecf11db', '62d9d41a59b28')) 
@@ -607,7 +606,7 @@ class suitecrmcustom extends suitecrm
 		if ($param['rule']['id'] == '62cb3f449e55f') { 
 			// Check if history is available
 			if (empty($param['dataHistory'][$idDoc])) {
-				throw new \Exception(utf8_decode('History not available, the pair no longer exists in the COMET').'Error code W0002');
+				throw new \Exception(utf8_decode('History not available, the pair no longer exists in the COMET').'. Erreur code W0002.');
 			}
 		}
 		

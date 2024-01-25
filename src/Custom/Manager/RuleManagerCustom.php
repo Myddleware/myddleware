@@ -54,7 +54,8 @@ class RuleManagerCustom extends RuleManager
 							'6273905a05cb2', // Esp Rep - Contacts repérants
 							'633d94b3ce61e', // Mobilisation - Participation RI -> comet relance
 							'627153382dc34', // Mobilisation - Participations RI
-							'625fcd2ed442f'  // Mobilisation - Coupons
+							'625fcd2ed442f', // Mobilisation - Coupons
+							'63f8e9f1c9d70'  // Mobilisation - RDV Volontaires
 					);
 		// If no response or another rule, we don't do any custom action
 		if (
@@ -266,8 +267,8 @@ class RuleManagerCustom extends RuleManager
 					)
 				) {	
 					$sourceData = $this->getDocumentData($docId, 'S');
-					if (!empty($sourceData['MydCustRelSugarlead_id'])) { // Coupon
-						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['MydCustRelSugarlead_id'], 'id', false);  // Mobilisation - Coupons
+					if (!empty($sourceData['parent_id'])) { // Coupon
+						$this->generatePoleRelationship('625fcd2ed442f', $sourceData['parent_id'], 'id', false);  // Mobilisation - Coupons
 					}
 					if (!empty($sourceData['assigned_user_id'])) { // Referent
 						$this->generatePoleRelationship('6423f5d4ad07e', $sourceData['assigned_user_id'], 'id', false);  // Mobilisation - Utilisateur
