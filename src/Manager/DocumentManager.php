@@ -2104,7 +2104,7 @@ class documentcore
     }
 
     // Function to manually edit the data inside a Myddleware Document
-    public function updateDocumentData(string $docId, array $newValues, string $dataType)
+    public function updateDocumentData(string $docId, array $newValues, string $dataType, bool $refreshData = false)
     {
         // check if data of that type with this docid and this data fields
         if (empty($docId)) {
@@ -2138,18 +2138,22 @@ class documentcore
         // Compare data                        
         $oldData = json_decode($documentDataEntity->getData());
         if(!empty($oldData)){
-            foreach ($newValues as $key => $Value) {
-                foreach ($oldData as $oldKey => $oldValue) {
-                    if ($oldKey === $key) {
-                        if ($oldValue !== $Value) {
-                            $newValues[$oldKey] = $Value;
-                            $this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
-                        }
-                    } else {
-                        $newValues[$oldKey] = $oldValue;
-                    }
-                }
-            }
+			if (!$refreshData) {
+				foreach ($newValues as $key => $Value) {
+					foreach ($oldData as $oldKey => $oldValue) {
+						if ($oldKey === $key) {
+							if ($oldValue !== $Value) {
+								$newValues[$oldKey] = $Value;
+								$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
+							}
+						} else {
+							$newValues[$oldKey] = $oldValue;
+						}
+					}
+				}
+            } else {
+				$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed by '.print_r($newValues,true).'. ';
+			}
             $this->typeError = 'I';
             $this->createDocLog();
             // Update the data of the right type
