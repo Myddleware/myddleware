@@ -59,7 +59,7 @@ class MassActionCommand extends Command
             ->setDescription('Action massive sur les flux')
             ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore or changeStatus)')
             ->addArgument('dataType', InputArgument::REQUIRED, 'Data type (rule or document)')
-            ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ";"
+            ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ","
             ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if another task is running.')
             ->addArgument('forceAll', InputArgument::OPTIONAL, 'Set Y to process action on all documents (not only open and error ones)')
             ->addArgument('fromStatus', InputArgument::OPTIONAL, 'Get all document with this status(Only with changeStatus action)')
