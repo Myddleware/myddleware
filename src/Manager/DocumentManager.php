@@ -905,7 +905,7 @@ class documentcore
 						// Check child in a second time to avoid to run a query each time
 						if (!$this->isChild()) {
 							$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-							$this->updateStatus('No_send');
+							$this->updateStatus('Filter');
 							// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 							return false;
 						}
@@ -1111,7 +1111,8 @@ class documentcore
 							// Check child in a second time to avoid to run a query each time
 							if (!$this->isChild()) {
 								$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-								$this->updateStatus('Filter');
+								$this->updateStatus('No_send');
+								$this->updateTargetId($history['id']);
 								// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 								return false;
 							}
