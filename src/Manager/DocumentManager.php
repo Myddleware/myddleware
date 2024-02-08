@@ -1136,12 +1136,14 @@ class documentcore
             ) {
                 $this->checkNoChange($history);
             }
-            // Error if rule mode is update only and the document is a creation
+            // Cancel if rule mode is update only and the document is a creation
             if (
                     'C' == $this->documentType
                 and 'U' == $this->ruleMode
             ) {
-                throw new \Exception('The document is a creation but the rule mode is UPDATE ONLY. ');
+				$this->message .= 'The document is a creation but the rule mode is UPDATE ONLY.';
+				$this->updateStatus('Filter');
+				return false;
             }
         } catch (\Exception $e) {
             $this->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1152,10 +1154,8 @@ class documentcore
                 $this->updateStatus('Error_checking');
             }
             $this->logger->error($this->message);
-
             return false;
         }
-
         return true;
     }
 
