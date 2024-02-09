@@ -495,6 +495,16 @@ class DocumentManagerCustom extends DocumentManager
 			$this->message = 'The record doesn\'t exist in AIrtable anymore. Not possible to update it. We create the record again in Airtable. ';
 			$this->updateType('C');
 		}
+		
+		// If relate_ko on rule Aiko contact - pole then we cancel the data transfer
+		if (
+			!empty($this->document_data['rule_id'])
+			and	$this->document_data['rule_id'] == '65b11d4176f7d' // Aiko - Bilan vers Airtable
+			and $new_status == 'Relate_KO'
+		) {
+			$new_status = 'Error_expected';
+			$this->message .= utf8_decode('Le bilan n\'a pas été créé dans le COMET par Airtable. Impossible de le mettre à jour dans Airtable. Ce transfert de données est annulé. ');
+		}
 		return $new_status;
 	}
 
