@@ -528,13 +528,18 @@ class jobcore
         return true;
     }
 
-    // Fonction permettant d'annuler massivement des documents
-
-    // In order to add extra components to the function without disturbing its regular use, we added a flag argument.
-    // This $usesDocumentIds flag is either null or 1
-    public function readRecord($ruleId, $filterQuery, $filterValues, $usesDocumentIds = null): bool
+    // Function to create one of several document using a query 
+    public function readRecord($ruleId, $filterQuery, $filterValues): bool
     {
         try {
+            $responseFilter = [];
+            $responseCheckPredecessor = [];
+            $responseCheckParent = [];
+            $responseTransform = [];
+            $responseGetTargetData = [];
+            $responseSend = [];
+            $documentIds = [];
+
             // Get the filter values
             $filterValuesArray = explode(',', $filterValues);
             if (empty($filterValuesArray)) {
@@ -557,11 +562,6 @@ class jobcore
 			$this->ruleManager->setManual($this->manual);
             $this->ruleManager->setApi($this->api);
 
-            // We create an array that will match the initial structure of the function
-            if ($usesDocumentIds === 1) {
-                $arrayOfDocumentIds = [];
-            }
-
             // Try to read data for each values
             foreach ($filterValuesArray as $value) {
                 // Generate documents
@@ -569,36 +569,65 @@ class jobcore
                 if (!empty($documents->error)) {
                     throw new Exception($documents->error);
                 }
-
                 // We assign the id to an id section of the array
-                if ($usesDocumentIds === 1 && !empty($documents)) {
-                    $arrayOfDocumentIds[] = $documents[0]->id;
-                    continue;
-                } elseif (!empty($documents)) {
-                    // Run documents
-                    foreach ($documents as $doc) {
-                        $errors = $this->ruleManager->actionDocument($doc->id, 'rerun');
-                        // Check errors
-                        if (!empty($errors)) {
-                            $this->message .= 'Document '.$doc->id.' in error (rule '.$ruleId.')  : '.$errors[0].'. ';
-                        }
-                    }
+                if (!empty($documents[0]->id)) {
+                    $documentIds[]['id'] = $documents[0]->id;
                 }
             }
 
-            // Since the actionDocument takes a string and not an array of ids, we recompose the ids into a string separated by commas
-            if ($usesDocumentIds === 1) {
-                $stringOfDocumentIds = implode(',', $arrayOfDocumentIds);
-                $errors = $this->ruleManager->actionDocument($stringOfDocumentIds, 'rerun');
+            // Filter documents
+            if (!empty($documentIds)) {
+                $responseFilter = $this->ruleManager->filterDocuments($documentIds);
+            }
+
+            // Check predecessor
+            $documentIds = $this->refreshDocumentList($documentIds, $responseFilter);
+            if (!empty($documentIds)) {
+                $responseCheckPredecessor = $this->ruleManager->checkPredecessorDocuments($documentIds);
+            }
+
+            // Check parent
+            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckPredecessor);
+            if (!empty($documentIds)) {
+                $responseCheckParent = $this->ruleManager->checkParentDocuments($documentIds);
+            }
+
+            // Transform document
+            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckParent);
+            if (!empty($documentIds)) {
+                $responseTransform = $this->ruleManager->transformDocuments($documentIds);
+            }
+
+            // Get history
+            $documentIds = $this->refreshDocumentList($documentIds, $responseTransform);
+            if (!empty($documentIds)) {
+                $responseGetTargetData = $this->ruleManager->getTargetDataDocuments($documentIds);
+            }
+
+            // Send document
+            $documentIds = $this->refreshDocumentList($documentIds, $responseGetTargetData);
+            if (!empty($documentIds)) {
+                $responseSend = $this->ruleManager->sendDocuments($documentIds);
             }
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
             return false;
         }
-
         return true;
+    }
+
+    // Remove the document from the list if the retrun value is not true
+    public function refreshDocumentList($documentIds, $response) {
+        $documentListRefresh = [];
+        if (!empty($response)) {
+            foreach($response as $docId => $return) {
+                if ($return) {
+                    $documentListRefresh[]['id'] = $docId;
+                }
+            }
+        }
+        return $documentListRefresh;
     }
 
     // Remove all data flagged deleted in the database
