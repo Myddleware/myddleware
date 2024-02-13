@@ -47,12 +47,12 @@ class DocumentManagerCustom extends DocumentManager
 			!empty($this->document_data['rule_id'])
 			and	$this->document_data['rule_id'] == '5cfa78d49c536' // Rule User - Pôle
 		) {
-			// On tente 2 fois l'envoi (attempt > 0) car la relation pourrait être lues avant le user et être annulé par erreur
+			// On tente 3 fois l'envoi (attempt > 1) car la relation pourrait être lues avant le user et être annulé par erreur
 			if (
 					strpos($this->message, 'No data for the field user_id.') !== false
 				and strpos($this->message, 'in the rule REEC - Users.') !== false
 			) {
-				if($this->attempt > 0) {
+				if($this->attempt > 1) {
 					$new_status = 'Error_expected';
 					$this->message .= utf8_decode('Le contact (user) lié à ce pôle est absent de la platforme REEC, probablement filtré car inactif. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
 				// Keep the document open until the second try
@@ -74,7 +74,7 @@ class DocumentManagerCustom extends DocumentManager
 				strpos($this->message, 'No data for the field record_id.') !== false
 				and strpos($this->message, 'in the rule REEC - Engagé.') !== false
 			) {
-				if ($this->attempt > 0) {
+				if ($this->attempt > 1) {
 					$new_status = 'Error_expected';
 					$this->message .= utf8_decode('Le contact lié à ce pôle est absent de la platforme REEC ou n\'est pas un contact de type engagé. Le lien contact - pôle ne sera donc pas créé dans REEC. Ce transfert de données est annulé. ');
 				// Keep the document open until the second try
@@ -239,7 +239,7 @@ class DocumentManagerCustom extends DocumentManager
 			and $new_status == 'Relate_KO'
 		) {
 			// Relationship could be created after the contact, to we don't cancel teh document at the first atempt
-			if($this->attempt > 0 ) {
+			if($this->attempt > 1 ) {
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('La relation ne concerne probablement pas une composante composante et un contact partenaire. Ce transfert de données est annulé. ');
 			// Keep the document open until the second try
@@ -322,7 +322,7 @@ class DocumentManagerCustom extends DocumentManager
 			AND $new_status == 'Not_found'
 		) {			
 			// The contact couldn't be created in COMET yet
-			if ($this->attempt > 0) {
+			if ($this->attempt > 1) {
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
 			// Keep the document open until the second try
@@ -341,7 +341,7 @@ class DocumentManagerCustom extends DocumentManager
 			AND $new_status == 'Not_found'
 		) {
 			// The coupon couldn't be created in COMET yet
-			if ($this->attempt > 0)	{
+			if ($this->attempt > 1)	{
 				$new_status = 'Error_expected';
 				$this->message .= utf8_decode('Adresse email introuvable dans la COMET. Ce transfert de données est annulé.'); 
 			// Keep the document open until the second try
