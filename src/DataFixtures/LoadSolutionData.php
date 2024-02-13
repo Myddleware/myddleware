@@ -62,6 +62,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'airtable',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'yousign',           'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'suitecrm8',         'active' => 1, 'source' => 1, 'target' => 1],
     ];
 
     public function load(ObjectManager $manager)
