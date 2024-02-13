@@ -326,6 +326,7 @@ class sugarcrmcore extends solution
     public function read($param)
     {
         $result = [];
+		$maxDateModified = '';
 		$rel = $this->isManyToManyRel($param['module']);
 		if ($rel !== false) {
 			return $this->readRelationship($param, $rel);
@@ -394,6 +395,10 @@ class sugarcrmcore extends solution
 					// At least one non deleted record read
 					$onlyDeletion = false;
 				}
+				// Keep the date modified max (date modified is empty for deletion record)
+				if (!empty($record->date_modified)) {
+					$maxDateModified = $record->date_modified;
+				}
 			}			
 			// Error if only deletion records read
 			if ($onlyDeletion) {
@@ -430,7 +435,7 @@ class sugarcrmcore extends solution
                 }
                 // No date modified returned if record deleted, we set a default date (the last reference date read)
                 if (!empty($result[$record->id]['myddleware_deletion'])) {
-                    $result[$record->id]['date_modified'] = end($records)->date_modified;
+                    $result[$record->id]['date_modified'] = $maxDateModified;
                 }	
             }
         }
