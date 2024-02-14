@@ -444,7 +444,6 @@ class suitecrmcore extends solution
                 'link_name_to_fields_array' => $link_name_to_fields_array,
                 'max_results' => $this->limitCall,
                 'deleted' => $deleted,
-                'Favorites' => '',
             ];
             $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
             // Construction des données de sortie
