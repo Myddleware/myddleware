@@ -1049,9 +1049,13 @@ class rulecore
     // Permet de récupérer les règles potentiellement biderectionnelle.
     // Cette fonction renvoie les règles qui utilisent les même connecteurs et modules que la règle en cours mais en sens inverse (source et target inversées)
     // On est sur une méthode statique c'est pour cela que l'on récupère la connexion e paramètre et non dans les attributs de la règle
-    public static function getBidirectionalRules($connection, $params): ?array
+    public static function getBidirectionalRules($connection, $params, $solutionSource, $solutionTarget): ?array
     {
         try {
+			// Call solutions in cas target ans source modules hasn't the same name (ex Moodle manual_enrol_users and get_enrolments_by_date)
+			$params = $solutionSource->beforeGetBidirectionalRules($params, 'source');
+			$params = $solutionTarget->beforeGetBidirectionalRules($params, 'target');
+
             // Récupération des règles opposées à la règle en cours de création
             $queryBidirectionalRules = 'SELECT 
 											id, 
@@ -1094,7 +1098,6 @@ class rulecore
         } catch (\Exception $e) {
             return null;
         }
-
         return null;
     }
 

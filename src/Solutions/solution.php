@@ -976,6 +976,14 @@ class solutioncore
     }
 
     /**
+     * @throws \Exception
+     */
+    public function beforeGetBidirectionalRules($param, $type)
+    {
+        return $param;
+    }
+
+    /**
      * @throws \Doctrine\DBAL\Exception
      * @throws \Exception
      */

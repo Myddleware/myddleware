@@ -1917,7 +1917,7 @@ use App\Form\Type\RelationFilterType;
                 $bidirectional_params['module']['source'] = $module['source'];
                 $bidirectional_params['module']['cible'] = $module['cible'];
 
-                $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params);
+                $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params, $solution_source, $solution_cible);
                 if ($bidirectional) {
                     $rule_params = array_merge($rule_params, $bidirectional);
                 }
