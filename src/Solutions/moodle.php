@@ -46,8 +46,9 @@ class moodlecore extends solution
     protected array $FieldsDuplicate = [
         'users' => ['email', 'username'],
         'courses' => ['shortname', 'idnumber'],
+        'manual_enrol_users' => ['userid', 'courseid'],
+        'manual_unenrol_users' => ['userid', 'courseid'],
     ];
-
 	protected array $createOnlyFields = [
         'courses' => ['lang'],
     ];
@@ -604,6 +605,12 @@ class moodlecore extends solution
     // Get the function name
     protected function getFunctionName($param): string
     {
+		if (
+				$param['call_type'] == 'history'
+			AND in_array($param['module'], array('manual_enrol_users', 'manual_unenrol_users'))
+		) {
+			return 'local_myddleware_search_enrolment';
+		}
         // In case of duplicate search (search with a criteria)
         if (
                 !empty($param['query'])
@@ -615,7 +622,7 @@ class moodlecore extends solution
             } elseif ('courses' == $param['module']) {
                 return 'core_course_get_courses_by_field';
             }
-            // In case of read by date or search a specific record with an id for specific modules user or course
+		// In case of read by date or search a specific record with an id for specific modules user or course
         } else {
             if ('users' == $param['module']) {
                 return 'local_myddleware_get_users_by_date';
@@ -638,9 +645,23 @@ class moodlecore extends solution
      */
     protected function setParameters($param): array
     {
+		// Get the function name
         $functionName = $this->getFunctionName($param);
-        $parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);
+		// Specific parameters for function local_myddleware_search_enrolment
+		if ($functionName == 'local_myddleware_search_enrolment') {
+			if (
+					empty($param['query']['userid'])
+				 OR	empty($param['query']['courseid'])
+			) {
+				throw new \Exception('CourseId and UserId are both requiered to check if an enrolment exists. One of them is empty here. ');
+			}
+            $parameters['userid'] = $param['query']['userid'];
+            $parameters['courseid'] = $param['query']['courseid'];
+			return $parameters;
+        }
+		
         // If standard function called to search by criteria
+        $parameters['time_modified'] = $this->dateTimeFromMyddleware($param['date_ref']);
         if (in_array($functionName, ['core_user_get_users', 'core_course_get_courses_by_field'])) {
             if (!empty($param['query'])) {
                 foreach ($param['query'] as $key => $value) {
@@ -654,7 +675,8 @@ class moodlecore extends solution
             } else {
                 throw new \Exception('Filter criteria empty. Not allowed to run function '.$functionName.' without filter criteria.');
             }
-        } elseif (!empty($param['query']['id'])) {
+        } 
+		elseif (!empty($param['query']['id'])) {
             $parameters['id'] = $param['query']['id'];
         }
 
