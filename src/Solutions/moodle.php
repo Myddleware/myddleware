@@ -213,7 +213,7 @@ class moodlecore extends solution
             $xml = $this->formatResponse('read', $response, $param);
 
             if (!empty($xml->ERRORCODE)) {
-                throw new \Exception("Error $xml->ERRORCODE : $xml->MESSAGE");
+                throw new \Exception("Error code $xml->ERRORCODE : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
             }
             // Transform the data to Myddleware format
             if (!empty($xml->MULTIPLE->SINGLE)) {
