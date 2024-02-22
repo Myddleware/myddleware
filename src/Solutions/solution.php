@@ -296,6 +296,13 @@ class solutioncore
 
             // Read data
             $readResult = $this->read($param);
+			// In case of error in an history call, we return directly the error
+			if (
+					$param['call_type'] == 'history'
+				AND !empty($readResult['error'])
+			) {
+				return $readResult;
+			}
 
             // Save the new rule params into attribut dataSource
             if (!empty($readResult['ruleParams'])) {
