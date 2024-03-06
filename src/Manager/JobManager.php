@@ -622,7 +622,7 @@ class jobcore
         $documentListRefresh = [];
         if (!empty($response)) {
             foreach($response as $docId => $return) {
-                if ($return) {
+                if ($return == true) {
                     $documentListRefresh[]['id'] = $docId;
                 }
             }

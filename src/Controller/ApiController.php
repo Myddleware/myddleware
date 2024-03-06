@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Manager\JobManager;
+use App\Manager\FormulaManager;
 use App\Manager\RuleManager;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
@@ -32,6 +35,9 @@ class ApiController extends AbstractController
     private KernelInterface $kernel;
     private LoggerInterface $logger;
     private JobManager $jobManager;
+    private SolutionManager $solutionManager;
+    private DocumentManager $documentManager;
+    private FormulaManager $formulaManager;
     private ParameterBagInterface $parameterBag;
     private EntityManagerInterface $entityManager;
 
@@ -43,12 +49,18 @@ class ApiController extends AbstractController
         JobRepository $jobRepository,
         DocumentRepository $documentRepository,
         ParameterBagInterface $parameterBag,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FormulaManager $formulaManager,
+        DocumentManager $documentManager,
+        SolutionManager $solutionManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
         $this->jobManager = $jobManager;
+        $this->solutionManager = $solutionManager;
+        $this->formulaManager = $formulaManager;
+        $this->documentManager = $documentManager;
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -103,7 +115,7 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 2, 23);
             $job = $this->jobRepository->find($return['jobId']);
             // Get the job statistics
-            $this->jobManager->setId($job->getId());
+            $this->jobManager->setId($this->jobManager->getId());
             $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
@@ -174,7 +186,7 @@ class ApiController extends AbstractController
 
             // Get the job statistics
             $job = $this->jobRepository->find($return['jobId']);
-            $this->jobManager->setId($job->getId());
+            $this->jobManager->setId($this->jobManager->getId());
             $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
@@ -193,15 +205,19 @@ class ApiController extends AbstractController
      */
     public function deleteRecordAction(Request $request): JsonResponse
     {
-        try {
-            $connection = $this->container->get('database_connection');
-            $connection->beginTransaction(); // -- BEGIN TRANSACTION
+// $this->logger->error('test SF01 ');
 
+        try {
+			$connection = $this->entityManager->getConnection();
+            // $connection = $this->container->get('database_connection');
+            // $connection->beginTransaction(); // -- BEGIN TRANSACTION
             $return = [];
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
+// $return['error'] = 'test SF01 '.print_r($data,true);
+// return $this->json($return);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -210,6 +226,9 @@ class ApiController extends AbstractController
             if (empty($data['recordId'])) {
                 throw new Exception('recordId is missing. recordId is the id of the record you want to delete. ');
             }
+// $return['error'] = 'test SF02';
+// $return['error'] = 'test SF02 '.print_r($data,true);
+// return $this->json($return);
 
             // Set the document values
             foreach ($data as $key => $value) {
@@ -227,35 +246,43 @@ class ApiController extends AbstractController
                 }
             }
             $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
+			
+			 // $this->logger->error('test');
+// $return['error'] = 'test SF03 '.print_r($docParam,true);
+// return $this->json($return);
 
             // Create job instance
-            $job = $this->container->get('myddleware_job.job');
-            $job->setApi(1);
-            $job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
+            $this->jobManager->setApi(1);
+            $this->jobManager->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
+// $return['error'] = 'test SF04 '.print_r($docParam,true);
+// return $this->json($return);
 
             // Instantiate the rule
             $ruleParam['ruleId'] = $data['rule'];
-            $ruleParam['jobId'] = $job->id;
+            $ruleParam['jobId'] = $this->jobManager->getId();
             $ruleParam['api'] = 1;
+
+			
             $rule = new RuleManager(
-                $this->container->get('logger'),
+                $this->logger,
                 $connection,
                 $this->entityManager,
                 $this->parameterBag,
-                // $ruleParam,
                 $this->formulaManager,
                 $this->solutionManager,
                 $this->documentManager
             );
-
+// $return['error'] = 'test SF05 '.print_r($ruleParam,true);
+// return $this->json($return);
+			$rule->setRule($data['rule']);
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
             if (!empty($document->error)) {
                 throw new Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
             }
-            $connection->commit(); // -- COMMIT TRANSACTION
+            // $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $connection->rollBack(); // -- ROLLBACK TRANSACTION
+            // $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
             // Stop the process if document hasn't been created
@@ -278,22 +305,22 @@ class ApiController extends AbstractController
 
         // Close job if it has been created
         try {
-            $connection->beginTransaction(); // -- BEGIN TRANSACTION
-            if (true === $job->createdJob) {
-                $job->closeJob();
+            // $connection->beginTransaction(); // -- BEGIN TRANSACTION
+            if (true === $this->jobManager->createdJob) {
+                $this->jobManager->closeJob();
             }
             // Get the job statistics even if the job has failed
-            if (!empty($job->id)) {
-                $return['jobId'] = $job->id;
-                $jobData = $job->getLogData();
+            if (!empty($this->jobManager->id)) {
+                $return['jobId'] = $this->jobManager->id;
+                $jobData = $this->jobManager->getLogData();
                 if (!empty($jobData['jobError'])) {
                     $return['error'] .= $jobData['jobError'];
                 }
                 $return['jobData'] = $jobData;
             }
-            $connection->commit(); // -- COMMIT TRANSACTION
+            // $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $connection->rollBack(); // -- ROLLBACK TRANSACTION
+            // $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to get the job statistics. '.$e->getMessage());
             $return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
         }
@@ -311,7 +338,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+			$data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['action'])) {
@@ -358,9 +385,8 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 0, 23);
 
             // Get the job statistics
-            $job = $this->container->get('myddleware_job.job');
-            $job->id = $return['jobId'];
-            $jobData = $job->getLogData();
+            $this->jobManager->id = $return['jobId'];
+            $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
             }
@@ -383,7 +409,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['limit'])) {
@@ -423,9 +449,8 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 0, 23);
 
             // Get the job statistics
-            $job = $this->container->get('myddleware_job.job');
-            $job->id = $return['jobId'];
-            $jobData = $job->getLogData();
+            $this->jobManager->id = $return['jobId'];
+            $jobData = $this->jobManager->getLogData();
             $return['jobData'] = $jobData;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
