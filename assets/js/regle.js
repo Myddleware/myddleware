@@ -813,33 +813,30 @@ $(function () {
 	
 
 	// Mass action on flux list 
-	$('#massselectall').on('change', function () {
-		if ($(this).is(":checked")) {
-			remove = false;
-		} else {
-			remove = true;
-		}
+	$("#massselectall").on("change", function () {
+    var isChecked = $(this).is(":checked");
+    remove = !isChecked;
 
-		$('input', '.listepagerflux td').each(function () {
-			if ($(this).attr('disabled') != 'disabled') {
-				if ($(this).is(":checked")) {
-					if (remove) {
-						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, true, massFluxTab);
-						$(this).prop("checked", false);
-					}
-				} else {
-					if (remove == false) {
-						id = $(this).parent().parent().attr('data-id');
-						massAddFlux(id, false, massFluxTab);
-						$(this).prop("checked", true);
-					}
-				}
-			}
-		});
+    $("input", ".listepagerflux td").each(function () {
+      if ($(this).attr("disabled") != "disabled") {
+        $(this).prop("checked", isChecked);
+        // Déclenche explicitement l'événement change pour chaque case à cocher
+        $(this).trigger("change");
 
-		showBtnFlux(massFluxTab);
-	});
+        var id = $(this).parent().parent().attr("data-id");
+        if (isChecked) {
+          // La logique pour cocher la case
+          massAddFlux(id, false, massFluxTab);
+        } else {
+          // La logique pour décocher la case
+          massAddFlux(id, true, massFluxTab);
+        }
+      }
+    });
+
+    showBtnFlux(massFluxTab);
+  });
+	
 
 	$('input', '.listepagerflux td').on('change', function () {
 		// id = $(this).parent().parent().attr('data-id');

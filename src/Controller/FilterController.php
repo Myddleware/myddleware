@@ -137,7 +137,9 @@ class FilterController extends AbstractController
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
 
-        $toto = 'toto';
+        // get the rule id from the request if there is one
+        $ruleNameRequest = $request->query->get('ruleNameRequest');
+        
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
@@ -157,6 +159,8 @@ class FilterController extends AbstractController
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             }
+
+            
     
             // Get the limit parameter
             $configRepository = $this->entityManager->getRepository(Config::class);
@@ -224,6 +228,10 @@ class FilterController extends AbstractController
                 } // end if page === 1
             } else { // if form is not valid
                     $data = $this->getFluxFilterData();
+
+                if (!empty($ruleNameRequest)) {
+                    $data['rule'] = $ruleNameRequest;
+                }
 
                 if (
                     count(array_filter($data)) === 0

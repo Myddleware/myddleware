@@ -354,10 +354,7 @@ use App\Form\Type\RelationFilterType;
                 ]
                 );
 
-            $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
-            $this->sessionService->setFluxFilterRuleName($rule->getName());
-
-            return $this->redirect($this->generateUrl('document_list_page'));
+            return $this->redirect($this->generateUrl('document_list_page', ['ruleNameRequest' => $rule->getName()]));
         }
 
         /**
