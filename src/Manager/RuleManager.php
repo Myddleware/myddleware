@@ -940,6 +940,8 @@ class rulecore
                 return $this->changeDeleteFlag($id_document, false);
             case 'changeStatus':
                 return $this->changeStatus($id_document, $param1);
+			case 'unlock':
+                return $this->unlockDocument($id_document);
             default:
                 return 'Action '.$event.' unknown. Failed to run this action. ';
         }
@@ -1120,6 +1122,31 @@ class rulecore
         if (empty($this->jobId)) {
             if (empty($message)) {
                 $session->set('success', ['Data transfer has been successfully cancelled.']);
+            } else {
+                $session->set('error', [$this->documentManager->getMessage()]);
+            }
+        }
+    }
+	
+	/**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function unlockDocument($id_document)
+    {
+        $param['id_doc_myddleware'] = $id_document;
+        $param['jobId'] = $this->jobId;
+        $param['api'] = $this->api;
+        // Set the param values and clear all document attributes
+        $this->documentManager->setParam($param, true);
+        $this->documentManager->unsetLock(true);
+        $session = new Session();
+        $message = $this->documentManager->getMessage();
+
+        // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
+        // On affiche alors le message directement dans Myddleware
+        if (empty($this->jobId)) {
+            if (empty($message)) {
+                $session->set('success', ['Data transfer has been successfully unlocked.']);
             } else {
                 $session->set('error', [$this->documentManager->getMessage()]);
             }

@@ -481,6 +481,10 @@ class jobcore
             if ('changeStatus' == $action) {
                 $where .= " AND document.status = '$fromStatus' ";
             }
+			// Filter on document locked
+            if ('unlock' == $action) {
+                $where .= " AND document.job_lock != '' AND document.job_lock IS NOT NULL ";
+            }
 
             // Build the query
             $sqlParams = '	SELECT 

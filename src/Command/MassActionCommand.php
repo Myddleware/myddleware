@@ -27,38 +27,24 @@
 
 // Documentation :
 Overview
-
 The myddleware:massaction command allows you to do various actions on one or multiple documents in Myddleware. This is especially useful when you need to batch process document cancellations or reload without manually intervening for each. For windows and laragon, use php bin/console.
-
 php bin/console myddleware:massaction cancel document [document_ids] [optional_arguments]
-
 Parameters
-
     document_ids: A comma-separated list of the document IDs that you want to cancel. For example: 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176.
-
 Optional Arguments
-
     forceAll:
         Usage: forceAll [Y/N]
         This argument is used when you want to cancel documents regardless of their current status.
         By default, only documents with the status "open" or "error" can be canceled. If you want to cancel documents with other statuses, set this argument to Y.
         Example: forceAll Y
-
 Examples
-
     Basic Usage:
     Cancelling specific documents based on their IDs:
-        php bin/console myddleware:massaction cancel document 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176
-    
+        php bin/console myddleware:massaction cancel document 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176  
     this will cancel theses documents only if they are in open or error status.
-
     Using forceAll:
         Cancelling documents regardless of their status:
-
     php bin/console myddleware:massaction cancel document 64f8847a69b2a2.66477108,64f8841bbd8cd9.89905176 forceAll Y
-
-
-
 
 *********************************************************************************/
 
@@ -96,7 +82,7 @@ class MassActionCommand extends Command
         $this
             ->setName('myddleware:massaction')
             ->setDescription('Action massive sur les flux')
-            ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore or changeStatus)')
+            ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore, changeStatus, unlock)')
             ->addArgument('dataType', InputArgument::REQUIRED, 'Data type (rule or document)')
             ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ","
             ->addArgument('forceAll', InputArgument::OPTIONAL, 'Set Y to process action on all documents (not only open and error ones)')
@@ -144,7 +130,7 @@ class MassActionCommand extends Command
         $output->writeln('1;'.$this->jobManager->getId());  // Do not remove, used for manual job and webservices (display logs)
 
         // Récupération des paramètres
-        if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus'])) {
+        if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus', 'unlock'])) {
             throw new Exception('Action '.$action.' unknown. Please use action rerun, cancel or remove.');
         }
         if (!in_array($dataType, ['document', 'rule'])) {

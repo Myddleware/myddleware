@@ -509,7 +509,7 @@ class documentcore
     }
 	
 	// Set the document lock
-    public function unsetLock() {
+    public function unsetLock($force = false) {
         try {
 			// Get the job lock on the document
             $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
@@ -517,9 +517,11 @@ class documentcore
             $stmt->bindValue(':doc_id', $this->id);
             $documentResult = $stmt->executeQuery();
             $documentData = $documentResult->fetchAssociative(); // 1 row
-
             // If document already lock by the current job, we return true;
-            if ($documentData['job_lock'] == $this->jobId) {
+            if (
+					$documentData['job_lock'] == $this->jobId
+				 OR $force === true
+			) {
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
                                 SET 
