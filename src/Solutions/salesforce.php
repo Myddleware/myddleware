@@ -400,19 +400,40 @@ class salesforcecore extends solution {
 					// Traitement des informations reçues
 					// foreach($query_request_data['records'] as $record){
 					for ($i = 0; $i < $currentCount; $i++) {
-						$record = $query_request_data['records'][$i];			
-						foreach (array_keys($record) as $key) {
+						$record = $query_request_data['records'][$i];							
+						foreach (array_keys($record) as $key) {					
 							if($key == $DateRefField){
 								$record[$key] = $this->dateTimeToMyddleware($record[$key]);
 								$row['date_modified'] = $record[$key];
 							}
+							// Manage relationship fields stored in a sub array
+							elseif(substr($key,-3) == '__r') {
+								foreach($record[$key] as $fieldKey => $fieldValue) {
+									// Don't save attributes
+									if($fieldKey != 'attributes'){
+										// In case there are 2 levels of relationship (think about a recursive function here) 
+										if(substr($fieldKey,-3) == '__r') {
+											foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
+												if($fieldKeyLevel2 != 'attributes'){
+													$row[mb_strtolower($fieldKeyLevel2)] = $fieldValueLevel2;
+													$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
+												}
+											}
+										}
+										else {
+											$row[$param['module'].'.'.$key.'.'.$fieldKey] = $fieldValue;
+										}
+									}
+								}
+							}
 							// On enlève le tableau "attributes" ajouté par Salesforce afin d'extraire les éléments souhaités
-							else if(!($key == 'attributes')){
+							elseif(!($key == 'attributes')){
 								if($key == 'Id')
 									$row[mb_strtolower($key)] = $record[$key];
 								else {
-									if($key == 'CreatedDate')
+									if($key == 'CreatedDate') {
 										$record[$key] = $this->dateTimeToMyddleware($record[$key]);
+									}
 									$row[$key] = $record[$key];
 								}
 							}
@@ -427,6 +448,7 @@ class salesforcecore extends solution {
 									$row[$key] = $MailinAddress;
 								}
 							}
+							
 						}
 						$result['date_ref'] = $record[$DateRefField];
 						$result['values'][$record['Id']] = $row;
@@ -453,14 +475,13 @@ class salesforcecore extends solution {
 					&& !empty($previousRefDate)
 					&& $previousRefDate == $result['date_ref']	
 			);
-			return $result;
 		}
 		catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             $result['error'] = $error;
-            return $result;
 		}
+		return $result;
 	}
 
     /**
