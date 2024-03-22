@@ -127,6 +127,43 @@ class FilterController extends AbstractController
         }
     }
 
+    /**
+ * @Route("/document/list/empty-search", name="document_empty_search")
+ */
+public function emptySearchAction(Request $request): Response
+{
+    $formFilter = $this->createForm(FilterType::class, null);
+    $form = $this->createForm(CombinedFilterType::class, null, [
+        'entityManager' => $this->entityManager,
+    ]);
+
+    // set the timezone
+    $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+
+    // Return an empty array so that there will be no documents to display
+    $documents = array();
+
+    // default pagination
+    $compact = $this->nav_pagination([
+        'adapter_em_repository' => $documents,
+        'maxPerPage' => 25,
+        'page' => 1,
+    ], false);
+
+    return $this->render('testFilter.html.twig', [
+        'form' => $form->createView(),
+        'formFilter'=> $formFilter->createView(),
+        'documents' => $documents,
+        'nb' => $compact['nb'],
+        'entities' => $compact['entities'],
+        'pager' => $compact['pager'],
+        'condition' => 0,
+        'timezone' => $timezone,
+        'csvdocumentids' => '',
+        'nbDocuments' => 0,
+    ]);
+}
+
 
     // Function to disylay the documents with filters
 
