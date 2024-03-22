@@ -407,7 +407,7 @@ class sugarcrmcore extends solution
 				} else {
 					// If only deletion without new or modified record, we send no result. We wait for new or modified record. 
 					// Otherwise we will read the deleted record until a new or modified record is read because Sugar doesn't return modified date for deleted record.
-					return array();
+					throw new \Exception('Only deletion records read. It is not possible to determine the reference date with only deletion. Waiting for a new record to be created in the source application for this rule.');
 				}
 			}	
 					

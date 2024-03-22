@@ -189,10 +189,14 @@ class moodlecore extends solution
     public function read($param): array
     {
         try {
-			// No read action in case of history on enrolment module
+			// No read action in case of history on enrolment module (except if user_id and course_id are duplicate search parameters)
 			if (
 					in_array($param['module'], array('manual_enrol_users', 'manual_unenrol_users'))
 				AND $param['call_type'] == 'history'
+				AND (
+						empty($param['query']['userid'])
+					 OR empty($param['query']['courseid'])
+				)
 			) {
 				return array();
 			}
@@ -645,18 +649,17 @@ class moodlecore extends solution
      */
     protected function setParameters($param): array
     {
-		// Get the function name
-        $functionName = $this->getFunctionName($param);
+		$functionName = $this->getFunctionName($param);
 		// Specific parameters for function local_myddleware_search_enrolment
 		if ($functionName == 'local_myddleware_search_enrolment') {
 			if (
 					empty($param['query']['userid'])
-				 OR	empty($param['query']['courseid'])
+				 OR empty($param['query']['courseid'])
 			) {
-				throw new \Exception('CourseId and UserId are both requiered to check if an enrolment exists. One of them is empty here. ');
+				throw new \Exception('CourseId and UserId are both requiered to check if an enrolment exists. One of them is empty here or is not added as duplicate serach parameter in the rule. ');
 			}
-            $parameters['userid'] = $param['query']['userid'];
-            $parameters['courseid'] = $param['query']['courseid'];
+			$parameters['userid'] = $param['query']['userid'];
+			$parameters['courseid'] = $param['query']['courseid'];
 			return $parameters;
         }
 		

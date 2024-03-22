@@ -380,7 +380,7 @@ class salesforcecore extends solution {
 			$queryWhere = $this->getWhere($param);		
 			// Gestion du ORDER
 			$queryOrder = $this->getOrder($param);	
-		
+
 			// Gstion du LIMIT
 			$queryLimit .= "+LIMIT+" . $param['limit']; // Ajout de la limite souhaitée
 			// On lit les données dans Salesforce
@@ -392,7 +392,7 @@ class salesforcecore extends solution {
 				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
-			
+
 				// Affectation du nombre de résultat à $result['count']
 				if (isset($query_request_data['totalSize'])){
 					$currentCount = $query_request_data['totalSize'];
@@ -447,8 +447,7 @@ class salesforcecore extends solution {
 									$MailinAddress = rtrim($MailinAddress,' ');
 									$row[$key] = $MailinAddress;
 								}
-							}
-							
+							}	
 						}
 						$result['date_ref'] = $record[$DateRefField];
 						$result['values'][$record['Id']] = $row;
@@ -465,7 +464,7 @@ class salesforcecore extends solution {
 				}
 				else {
 					$result['error'] = $query_request_data;
-				}					
+				}
 			}
 			// On continue si : 
 			// 1.	Le nombre de résultat du dernier appel est égal à la limite
