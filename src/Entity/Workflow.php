@@ -74,10 +74,25 @@ class Workflow
     private string $name;
 
     /**
-     * @ORM\Column(name="description", type="text", nullable=false)
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private string $description;
+	
+	/**
+     * @ORM\Column(name="condition", type="text", nullable=false)
+     */
+    private string $condition;
 
+	/**
+     * @ORM\Column(name="action", type="text", nullable=false)
+     */
+    private string $action;
+	
+	/**
+     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+     */
+    private int $deleted;
+	
 	 /**
      * @var WorkflowCondition[]
      *
@@ -190,6 +205,40 @@ class Workflow
         return $this->description;
     }
 	
+	public function getCondition(): array
+    {
+        return $this->condition;
+    }
+
+    public function setCondition($condition): self
+    {
+        $this->condition = $condition;
+        return $this;
+    }
+	
+	public function getAction(): array
+    {
+        return $this->action;
+    }
+
+    public function setAction($action): self
+    {
+        $this->action = $action;
+        return $this;
+    }
+	
+    public function setDeleted($deleted): self
+    {
+        $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getDeleted(): int
+    {
+        return $this->deleted;
+    }
+	
 	/**
      * @return Collection|WorkflowCondition[]
      */
@@ -254,7 +303,7 @@ class Workflow
         return $this->workflowLogs;
     }
 
-    public function addWorkflowLogs(WorkflowLogs $workflowLog): self
+    public function addWorkflowLogs(WorkflowLog $workflowLog): self
     {
         if (!$this->workflowLogs->contains($workflowLog)) {
             $this->workflowLogs[] = $workflowLog;

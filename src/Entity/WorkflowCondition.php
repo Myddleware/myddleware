@@ -35,9 +35,8 @@ use Doctrine\ORM\Mapping as ORM;
 class WorkflowCondition
 {
     /**
-     * @ORM\Column(name="id", type="integer")
+     * @ORM\Column(name="id", type="string")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private int $id;
 
@@ -80,7 +79,7 @@ class WorkflowCondition
     private string $condition;
 
     /**
-     * @ORM\Column(name="description", type="text", nullable=false)
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private string $description;
 

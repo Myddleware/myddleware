@@ -61,6 +61,7 @@ class rulecore
     protected $sourceFields;
     protected $targetFields;
     protected $ruleRelationships;
+    protected $ruleWorkflows;
     protected $ruleFilters;
     protected $solutionSource;
     protected $solutionTarget;
@@ -153,6 +154,7 @@ class rulecore
             $this->setRuleParam();
             $this->setLimit();
             $this->setRuleRelationships();
+			$this->setRuleWorkflows();
             // Set the rule fields (we use the name_slug in $this->rule)
             $this->setRuleField();
         }
@@ -270,6 +272,7 @@ class rulecore
                     $docParam['rule'] = $this->rule;
                     $docParam['ruleFields'] = $this->ruleFields;
                     $docParam['ruleRelationships'] = $this->ruleRelationships;
+					$docParam['ruleWorkflows'] = $this->ruleWorkflows;
                     $docParam['data'] = $docData;
                     $docParam['jobId'] = $this->jobId;
                     $docParam['api'] = $this->api;
@@ -401,6 +404,7 @@ class rulecore
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
                     $param['ruleRelationships'] = $this->ruleRelationships;
+					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param of the rule one time for all
                     $this->documentManager->setRuleId($this->ruleId);
                     $this->documentManager->setRuleParam();
@@ -725,6 +729,7 @@ class rulecore
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
                     $param['ruleRelationships'] = $this->ruleRelationships;
+					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
 						$response[$document['id']] = $this->documentManager->checkPredecessorDocument();
@@ -758,6 +763,7 @@ class rulecore
         if (!empty($documents)) {
             $param['jobId'] = $this->jobId;
             $param['ruleRelationships'] = $this->ruleRelationships;
+			$param['ruleWorkflows'] = $this->ruleWorkflows;
             // Set all config parameters
             $this->setConfigParam();
             // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
@@ -782,6 +788,7 @@ class rulecore
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
                     $param['ruleRelationships'] = $this->ruleRelationships;
+					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
 						$response[$document['id']] = $this->documentManager->checkParentDocument();
@@ -814,6 +821,7 @@ class rulecore
         if (!empty($documents)) {
             $param['ruleFields'] = $this->ruleFields;
             $param['ruleRelationships'] = $this->ruleRelationships;
+			$param['ruleWorkflows'] = $this->ruleWorkflows;
             $param['jobId'] = $this->jobId;
             $param['api'] = $this->api;
             // Set all config parameters
@@ -885,6 +893,7 @@ class rulecore
                     $param['solutionTarget'] = $this->solutionTarget;
                     $param['ruleFields'] = $this->ruleFields;
                     $param['ruleRelationships'] = $this->ruleRelationships;
+					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
                     // Set the param values and clear all document attributes
@@ -1484,6 +1493,7 @@ class rulecore
             $send['ruleFields'] = $this->ruleFields;
             $send['ruleParams'] = $this->ruleParams;
             $send['ruleRelationships'] = $this->ruleRelationships;
+			$send['ruleWorkflows'] = $this->ruleWorkflows;
             $send['jobId'] = $this->jobId;
             // Si des données sont prêtes à être créées
             if (!empty($send['data'])) {
@@ -1609,6 +1619,7 @@ class rulecore
             $send['ruleFields'] = $this->ruleFields;
             $send['ruleParams'] = $this->ruleParams;
             $send['ruleRelationships'] = $this->ruleRelationships;
+			$send['ruleWorkflows'] = $this->ruleWorkflows;
             $send['jobId'] = $this->jobId;
             // Si des données sont prêtes à être créées
             if (!empty($send['data'])) {
@@ -2114,6 +2125,20 @@ class rulecore
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
             $this->ruleRelationships = $result->fetchAllAssociative();
+        } catch (\Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+    }
+
+	// Permet de charger toutes les relations de la règle
+    protected function setRuleWorkflows()
+    {
+        try {
+            $sqlWorkflows = 'SELECT * FROM workflow WHERE rule_id = :ruleId';
+            $stmt = $this->connection->prepare($sqlWorkflows);
+            $stmt->bindValue(':ruleId', $this->ruleId);
+            $result = $stmt->executeQuery();
+            $this->ruleWorkflows = $result->fetchAllAssociative();
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }

@@ -302,7 +302,7 @@ class Job
         return $this->workflowLogs;
     }
 
-    public function addWorkflowLogs(WorkflowLogs $workflowLog): self
+    public function addWorkflowLogs(WorkflowLog $workflowLog): self
     {
         if (!$this->workflowLogs->contains($workflowLog)) {
             $this->workflowLogs[] = $workflowLog;

@@ -560,7 +560,7 @@ class Rule
         return $this->workflows;
     }
 
-    public function addWorkflows(Workflows $workflow): self
+    public function addWorkflows(Workflow $workflow): self
     {
         if (!$this->workflows->contains($workflow)) {
             $this->workflows[] = $workflow;

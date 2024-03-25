@@ -51,6 +51,7 @@ class documentcore
     protected $ruleId;
     protected $ruleFields;
     protected $ruleRelationships;
+    protected $ruleWorkflows;
     protected $ruleParams;
     protected $sourceId;
     protected $targetId;
@@ -298,6 +299,9 @@ class documentcore
 			if (!empty($param['ruleRelationships'])) {
 				$this->ruleRelationships = $param['ruleRelationships'];
 			}
+			if (!empty($param['ruleWorkflows'])) {
+				$this->ruleWorkflows = $param['ruleWorkflows'];
+			}
 			// Init type error for each new document
 			$this->typeError = 'S';
 		} catch (\Exception $e) {
@@ -320,6 +324,7 @@ class documentcore
             $this->ruleId = '';
             $this->ruleFields = [];
             $this->ruleRelationships = [];
+            $this->ruleWorkflows = [];
             $this->ruleParams = [];
         }
         $this->id = '';
@@ -2109,6 +2114,7 @@ class documentcore
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
+			$this->runWorkflow();
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2503,6 +2509,29 @@ class documentcore
     {
         return $this->status;
     }
+	
+	protected function runWorkflow() {
+		try {
+			// Check if at least on workflow exist for the rule
+			if (!empty($this->ruleWorkflows)) {
+				foreach ($this->ruleWorkflows as $ruleWorkflow) {
+					$status = $this->status;
+					// Check the condition 
+					$this->formulaManager->init($ruleWorkflow['condition']); // mise en place de la règle dans la classe
+					$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
+					$f = $this->formulaManager->execFormule();
+					eval('$condition = '.$f.';'); // exec
+					// Execute the action if the condition is met
+					if ($condition == 1) {
+	echo "Action".chr(10);					
+					}
+				}
+			}
+		} catch (\Exception $e) {
+            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+echo 'Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'.chr(10);
+        }
+	}
 
     /**
      * @throws \Doctrine\DBAL\Exception
