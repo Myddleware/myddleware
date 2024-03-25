@@ -144,6 +144,11 @@ class Document
     private $logs;
 	
 	/**
+     * @ORM\OneToMany(targetEntity="WorkflowLog", mappedBy="document")
+     */
+    private $triggerDocuments;
+	
+	/**
      * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
      */
     private string $jobLock;
@@ -153,6 +158,7 @@ class Document
     {
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
+        $this->triggerDocuments = new ArrayCollection();
     }
 
     public function setId($id): self
@@ -449,6 +455,34 @@ class Document
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection|triggerDocument[]
+     */
+    public function getTriggerDocuments(): Collection
+    {
+        return $this->triggerDocuments;
+    }
+
+    public function addTriggerDocument(Workflowlog $triggerDocuments): self
+    {
+        if (!$this->triggerDocuments->contains($triggerDocument)) {
+            $this->triggerDocuments[] = $triggerDocument;
+            $triggerDocument->setDocument($this);
+        }
+        return $this;
+    }
+
+    public function removeTriggerDocument(Workflowlog $triggerDocument): self
+    {
+        if ($this->triggerDocuments->removeElement($triggerDocument)) {
+            // set the owning side to null (unless already changed)
+            if ($triggerDocument->getDocument() === $this) {
+                $triggerDocument->setDocument(null);
+            }
+        }
         return $this;
     }
 
