@@ -2523,7 +2523,26 @@ class documentcore
 					eval('$condition = '.$f.';'); // exec
 					// Execute the action if the condition is met
 					if ($condition == 1) {
-	echo "Action".chr(10);					
+// echo serialize(array(array('generateDocument' => array('ruleId' => '63b49ff0508ae','searchValue' => 'userid','searchField' => 'id','rerun' => true))));
+						// Get all actions in the workflow
+						$actions = unserialize($ruleWorkflow['action']);
+						if (!empty($actions)) {
+							// Call each actions
+							foreach($actions as $action) {
+								switch (key($action)) {
+									// Check if the action has already been successfully executed
+									case 'generateDocument':
+										$args = current($action);
+// print_r($args);
+// print_r($this->sourceData);
+					// On peut avoir sourceData et document_data
+										$this->generateDocument($args['ruleId'],$this->sourceData[$args['searchValue']],$args['searchField'],$args['rerun']);
+										break;
+									default:
+									   throw new \Exception('Function '.key($action).' unknown.');
+								}
+							}
+						}
 					}
 				}
 			}

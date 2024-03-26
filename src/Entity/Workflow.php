@@ -84,7 +84,7 @@ class Workflow
     private string $condition;
 
 	/**
-     * @ORM\Column(name="action", type="text", nullable=false)
+     * @ORM\Column(name="action", type="array", nullable=false)
      */
     private string $action;
 	
