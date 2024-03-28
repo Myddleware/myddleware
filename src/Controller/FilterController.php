@@ -50,6 +50,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -162,6 +163,21 @@ public function emptySearchAction(Request $request): Response
         'csvdocumentids' => '',
         'nbDocuments' => 0,
     ]);
+}
+
+/**
+ * @Route("/remove-filter", name="remove_filter", methods={"POST"})
+ */
+public function removeFilter(Request $request): JsonResponse
+{
+    $filterName = $request->request->get('filterName');
+
+    if ($filterName) {
+        $this->sessionService->{'remove'.$filterName}();
+        return new JsonResponse(['status' => 'success']);
+    }
+
+    return new JsonResponse(['status' => 'error', 'message' => 'No filter name provided']);
 }
 
 
