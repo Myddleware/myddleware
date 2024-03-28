@@ -1976,6 +1976,58 @@ function massAddFlux(id, cond, massFluxTab) {
 	$('#cancelreloadflux').find('span').html(massFluxTab.length);
 }
 
+$(document).ready(function() {
+	$('.removeFilters').click(function() {
+		// Get the class list of the clicked element
+		var classList = $(this).attr('class').split(/\s+/);
+		console.log(classList);
+
+		// Find the filter class (it's the last class in the list)
+		var filterClass = classList[classList.length - 1];
+		console.log(filterClass);
+
+		// Get the stored filters from local storage
+		var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
+		console.log(storedFilters);
+
+		// Remove the filter from the stored filters
+		delete storedFilters[filterClass];
+		console.log(storedFilters);
+
+		// Save the updated filters back to local storage
+		localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
+		console.log(localStorage.getItem('storedFilters'));
+
+		    // Make an AJAX request to the server to remove the filter from the session
+			$.ajax({
+				url: path_remove_filter,
+				method: 'POST',
+				data: { filterName: 'FluxFilter' + toCamelCase(filterClass) },
+				success: function(response) {
+					if (response.status === 'success') {
+						console.log('Filter successfully removed Argonien');
+						
+						// Clear the form field
+						var formFieldName = 'combined_filter[document][' + filterClass + ']';
+						$('input[name="' + formFieldName + '"]').val('');
+						console.log('Filter input cleared');
+					} else {
+						console.log('Error removing filter: ' + response.message);
+					}
+				}
+			});
+	});
+});
+
+function toCamelCase(str) {
+    // Split the string into words
+    var words = str.split('_');
+
+    // Convert each word to title case (except for the first one), and join them back together
+    return words[0] + words.slice(1).map(function(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join('');
+}
 
 // Save the modified field data by using an ajax request
 function saveInputFlux(div, link) {
