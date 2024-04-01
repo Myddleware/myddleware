@@ -2139,6 +2139,15 @@ class rulecore
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
             $this->ruleWorkflows = $result->fetchAllAssociative();
+			if (!empty($this->ruleWorkflows)) {
+				foreach($this->ruleWorkflows as $key => $workflow) {
+					$sqlActions = 'SELECT * FROM workflowaction WHERE workflow_id = :workflowid ORDER BY `order` ASC';
+					$stmt = $this->connection->prepare($sqlActions);
+					$stmt->bindValue(':workflowid', $workflow['id']);
+					$result = $stmt->executeQuery();
+					$this->ruleWorkflows[$key]['actions'] = $result->fetchAllAssociative();
+				}
+			}
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }

@@ -74,16 +74,26 @@ class WorkflowAction
     private string $name;
 	
 	/**
-     * @ORM\Column(name="action", type="array", nullable=false)
+     * @ORM\Column(name="action", type="text", nullable=false)
      */
     private string $action;
+
+    /**
+     * @ORM\Column(name="arguments", type="array", nullable=false)
+     */
+    private string $arguments;
 
     /**
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private string $description;
 
-
+    /**
+     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
+     */
+    private string $order;
+	
+	
     public function getId(): int
     {
         return $this->id;
@@ -168,6 +178,17 @@ class WorkflowAction
         return $this;
     }
 	
+	public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
+    public function setArguments($arguments): self
+    {
+        $this->arguments = $arguments;
+        return $this;
+    }
+	
 	public function setDescription($description): self
     {
         $this->description = $description;
@@ -177,5 +198,17 @@ class WorkflowAction
     public function getDescription(): string
     {
         return $this->description;
+    }
+	
+	public function setOrder($order): self
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    public function getOrder(): string
+    {
+        return $this->order;
     }
 }

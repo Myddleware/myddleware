@@ -2524,19 +2524,19 @@ class documentcore
 					// Execute the action if the condition is met
 					if ($condition == 1) {
 // echo serialize(array(array('generateDocument' => array('ruleId' => '63b49ff0508ae','searchValue' => 'userid','searchField' => 'id','rerun' => true))));
-						// Get all actions in the workflow
-						$actions = unserialize($ruleWorkflow['action']);
-						if (!empty($actions)) {
+						// Execute all actions 
+						if (!empty($ruleWorkflow['actions'])) {
 							// Call each actions
-							foreach($actions as $action) {
-								switch (key($action)) {
+							foreach($ruleWorkflow['actions'] as $action) {
+								switch ($action['action']) {
 									// Check if the action has already been successfully executed
 									case 'generateDocument':
-										$args = current($action);
-// print_r($args);
+										// $args = current($action);
+										$arguments = unserialize($action['arguments']);
+print_r($arguments);
 // print_r($this->sourceData);
 					// On peut avoir sourceData et document_data
-										$this->generateDocument($args['ruleId'],$this->sourceData[$args['searchValue']],$args['searchField'],$args['rerun']);
+										$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun']);
 										break;
 									default:
 									   throw new \Exception('Function '.key($action).' unknown.');
