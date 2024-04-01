@@ -25,6 +25,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -38,7 +39,7 @@ class WorkflowAction
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
-    private int $id;
+    private string $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Workflow", inversedBy="workflowActions")
@@ -81,7 +82,7 @@ class WorkflowAction
     /**
      * @ORM\Column(name="arguments", type="array", nullable=false)
      */
-    private string $arguments;
+    private $arguments;
 
     /**
      * @ORM\Column(name="description", type="text", nullable=true)
@@ -91,10 +92,10 @@ class WorkflowAction
     /**
      * @ORM\Column(name="order", type="integer", length=3, nullable=false)
      */
-    private string $order;
+    private int $order;
 	
 	
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

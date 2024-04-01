@@ -25,7 +25,9 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Table()
@@ -67,21 +69,27 @@ class WorkflowLog
     private Document $generateDocument;
 
 	/**
+     * @ORM\ManyToOne(targetEntity="WorkflowAction")
+     * @ORM\JoinColumn(name="actionId", referencedColumnName="id", nullable=true)
+     */
+    private WorkflowAction $actionId;
+	
+	/**
+     * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
+     */
+    private ?string $status;
+	
+	/**
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
     private DateTime $dateCreated;
 	
 	/**
      * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=true)
      */
     private User $createdBy;
 	
-    /**
-     * @ORM\Column(name="action", type="array", nullable=false)
-     */
-    private string $action;
-
     /**
      * @ORM\Column(name="message", type="text", nullable=false)
      */
@@ -137,6 +145,17 @@ class WorkflowLog
         return $this;
     }
 	
+	public function setStatus($status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+	
 	public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
@@ -161,14 +180,14 @@ class WorkflowLog
         return $this;
     }
 	
-	public function getAction(): array
+	public function getActionId(): array
     {
-        return $this->action;
+        return $this->actionId;
     }
 
-    public function setAction($action): self
+    public function setActionId($actionId): self
     {
-        $this->action = $action;
+        $this->actionId = $actionId;
         return $this;
     }
 	

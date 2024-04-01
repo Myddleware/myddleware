@@ -25,7 +25,11 @@
 
 namespace App\Entity;
 
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Table()
@@ -38,7 +42,7 @@ class Workflow
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
      */
-    private int $id;
+    private string $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="workflows")
@@ -82,23 +86,11 @@ class Workflow
      * @ORM\Column(name="condition", type="text", nullable=false)
      */
     private string $condition;
-
-	/**
-     * @ORM\Column(name="action", type="array", nullable=false)
-     */
-    private string $action;
 	
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private int $deleted;
-	
-	 /**
-     * @var WorkflowCondition[]
-     *
-     * @ORM\OneToMany(targetEntity="WorkflowCondition", mappedBy="workflow")
-     */
-    private $workflowConditions;
 	
 	/**
      * @var WorkflowAction[]
@@ -116,7 +108,6 @@ class Workflow
 	
 	public function __construct()
     {
-        $this->workflowConditions = new ArrayCollection();
         $this->workflowActions = new ArrayCollection();
         $this->workflowLogs = new ArrayCollection();
     }
@@ -140,7 +131,6 @@ class Workflow
 	public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
-
         return $this;
     }
 
@@ -152,7 +142,6 @@ class Workflow
     public function setDateModified($dateModified): self
     {
         $this->dateModified = $dateModified;
-
         return $this;
     }
 
@@ -215,18 +204,7 @@ class Workflow
         $this->condition = $condition;
         return $this;
     }
-	
-	public function getAction(): array
-    {
-        return $this->action;
-    }
 
-    public function setAction($action): self
-    {
-        $this->action = $action;
-        return $this;
-    }
-	
     public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
@@ -240,34 +218,6 @@ class Workflow
     }
 	
 	/**
-     * @return Collection|WorkflowCondition[]
-     */
-    public function getWorkflowConditions(): Collection
-    {
-        return $this->workflowConditions;
-    }
-
-    public function addWorkflowConditions(WorkflowConditions $workflowCondition): self
-    {
-        if (!$this->workflowConditions->contains($workflowCondition)) {
-            $this->workflowConditions[] = $workflowCondition;
-            $workflow->setWorkflow($this);
-        }
-        return $this;
-    }
-
-    public function removeWorkflowCondition(WorkflowCondition $workflowCondition): self
-    {
-        if ($this->workflowConditions->removeElement($workflowCondition)) {
-            // set the owning side to null (unless already changed)
-            if ($workflowCondition->getWorkflow() === $this) {
-                $workflowCondition->setWorkflow(null);
-            }
-        }
-        return $this;
-    }
-	
-	/**
      * @return Collection|WorkflowAction[]
      */
     public function getWorkflowActions(): Collection
@@ -275,7 +225,7 @@ class Workflow
         return $this->workflowActions;
     }
 
-    public function addWorkflowActions(WorkflowActions $workflowAction): self
+    public function addWorkflowActions(WorkflowAction $workflowAction): self
     {
         if (!$this->workflowActions->contains($workflowAction)) {
             $this->workflowActions[] = $workflowAction;
