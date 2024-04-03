@@ -1,0 +1,3 @@
+<?php 
+$status = $this->status;
+

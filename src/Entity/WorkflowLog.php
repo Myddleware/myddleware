@@ -64,15 +64,15 @@ class WorkflowLog
 
 	/**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="generateDocuments")
-     * @ORM\JoinColumn(name="generate_document_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="generate_document_id", referencedColumnName="id", nullable=true)
      */
-    private Document $generateDocument;
+    private ?Document $generateDocument= null;
 
 	/**
      * @ORM\ManyToOne(targetEntity="WorkflowAction")
-     * @ORM\JoinColumn(name="actionId", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="action_id", referencedColumnName="id", nullable=true)
      */
-    private WorkflowAction $actionId;
+    private WorkflowAction $action;
 	
 	/**
      * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
@@ -91,7 +91,7 @@ class WorkflowLog
     private User $createdBy;
 	
     /**
-     * @ORM\Column(name="message", type="text", nullable=false)
+     * @ORM\Column(name="message", type="text", nullable=true)
      */
     private string $message;
 
@@ -180,14 +180,14 @@ class WorkflowLog
         return $this;
     }
 	
-	public function getActionId(): array
+	public function getAction(): array
     {
-        return $this->actionId;
+        return $this->action;
     }
 
-    public function setActionId($actionId): self
+    public function setAction($action): self
     {
-        $this->actionId = $actionId;
+        $this->action = $action;
         return $this;
     }
 	

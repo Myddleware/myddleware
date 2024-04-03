@@ -40,6 +40,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Swift_Mailer;
+use Swift_Message;
 
 class documentcore
 {
@@ -2518,8 +2520,13 @@ class documentcore
 		try {
 			// Check if at least on workflow exist for the rule
 			if (!empty($this->ruleWorkflows)) {
+				// includ variables used in the formula
+				include __DIR__.'/../Utils/workflowVariables.php';
+				if (file_exists( __DIR__.'/../Custom/Utils/workflowVariables.php')) {
+					include  __DIR__.'/../Custom/Utils/workflowVariables.php';
+				}
+				// Execute every workflow of the rule
 				foreach ($this->ruleWorkflows as $ruleWorkflow) {
-					$status = $this->status;
 					// Check the condition 
 					$this->formulaManager->init($ruleWorkflow['condition']); // mise en place de la règle dans la classe
 					$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
@@ -2527,20 +2534,53 @@ class documentcore
 					eval('$condition = '.$f.';'); // exec
 					// Execute the action if the condition is met
 					if ($condition == 1) {
-// echo serialize(array(array('generateDocument' => array('ruleId' => '63b49ff0508ae','searchValue' => 'userid','searchField' => 'id','rerun' => true))));
 						// Execute all actions 
 						if (!empty($ruleWorkflow['actions'])) {
 							// Call each actions
 							foreach($ruleWorkflow['actions'] as $action) {
+								// Check if the action has already been executed for the current document 
+								// Only if attempt > 0, if it is the first attempt then the action has never been executed
+								if ($this->attempt > 0) {
+									// Search action for the current document
+									$workflowLogEntity = $this->entityManager->getRepository(WorkflowLog::class)
+															->findOneBy([
+																		'triggerDocument' => $this->id,
+																		'action' => $action['id'],
+																		]
+																	);
+									// If the current action has been found for the current document, we don't execute the current action
+									if (
+											!empty($workflowLogEntity)
+										AND $workflowLogEntity->getStatus() == 'Success'
+									) {
+										// GenerateDocument can be empty depending the action 
+										if (!empty($workflowLogEntity->getGenerateDocument())) {
+											$this->docIdRefError = $workflowLogEntity->getGenerateDocument()->getId();
+										}
+										$this->generateDocLog('W','Action ' . $action['id'] . ' already executed for this document. ');
+										continue;
+									}
+								}
+
+								// Execute action depending of the function in the workflow
+								$arguments = unserialize($action['arguments']);
 								switch ($action['action']) {
-									// Check if the action has already been successfully executed
 									case 'generateDocument':
-										// $args = current($action);
-										$arguments = unserialize($action['arguments']);
-print_r($arguments);
-// print_r($this->sourceData);
-					// On peut avoir sourceData et document_data
 										$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
+										break;
+									case 'sendNotification':
+										try	{
+											$workflowStatus = 'Success';
+											$error = '';
+											// Method sendMessage throws an exception if it fails
+											$this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
+										} catch (\Exception $e) {
+											$workflowStatus = 'Error';
+											$error = 'Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+											$this->logger->error($error);
+											$this->generateDocLog('E',$error);
+										}
+										$this->createWorkflowLog($action, $workflowStatus, $error);
 										break;
 									default:
 									   throw new \Exception('Function '.key($action).' unknown.');
@@ -2551,49 +2591,11 @@ print_r($arguments);
 				}
 			}
 		} catch (\Exception $e) {
-            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-echo 'Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'.chr(10);
+            $this->logger->error('Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$this->generateDocLog('E','Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 	}
 
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     *                                  Les id de la soluton, de la règle et du document
-     *                                  $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
-     *                                  $code contient le code de l'erreur
-     *                                  $message contient le message de l'erreur avec potentiellement des variable &1, &2...
-     *                                  $data contient les varables du message de type array('id_contact', 'nom_contact')
-     */
-    protected function createDocLog()
-    {
-        try {
-            $now = gmdate('Y-m-d H:i:s');
-            $query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
-            $stmt = $this->connection->prepare($query_header);
-            $stmt->bindValue(':created', $now);
-            $stmt->bindValue(':typeError', $this->typeError);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
-            $stmt->bindValue(':rule_id', $this->ruleId);
-            $stmt->bindValue(':doc_id', $this->id);
-            $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
-            $stmt->bindValue(':job_id', $this->jobId);
-            $result = $stmt->executeQuery();
-            $this->message = '';
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-        }
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function generateDocLog($errorType, $message)
-    {
-        $this->typeError = $errorType;
-        $this->message = $message;
-        $this->createDocLog();
-    }
-	
 	// Generate a document using the rule id and search parameters
 	protected function generateDocument($ruleId, $searchValue = null, $searchField = 'id', $rerun = true, $action = null)
 	{
@@ -2625,44 +2627,103 @@ echo 'Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$
 					}
 					// Generate the workflow log for each document if it has been generated by a workflow
 					if (!empty($action['id'])) {
-print_r($action);
-						$triggerDocumentEntity  = $this->entityManager->getRepository(Document::class)->find($this->id);
-						$generateDocumentEntity = $this->entityManager->getRepository(Document::class)->find($doc->id);
-						$workflowActionEntity = $this->entityManager->getRepository(WorkflowAction::class)->find($action['id']);
-echo 'actionId : '.$workflowActionEntity->getId();
-						// Set $workflowEntity and jobEntity only the first time
-						if (empty($workflowEntity)) {
-							$workflowEntity = $this->entityManager->getRepository(Workflow::class)->find($action['workflow_id']);
-						}
-						if (empty($jobEntity)) {
-							$jobEntity = $this->entityManager->getRepository(Job::class)->find($this->jobId);
-						}
-						$workflowLog = new WorkflowLog();
-						$workflowLog->setWorkflow($workflowEntity);
-						$workflowLog->setJob($jobEntity);
-						$workflowLog->setTriggerDocument($triggerDocumentEntity);
-						$workflowLog->setGenerateDocument($generateDocumentEntity);
-						$workflowLog->setDateCreated(new \DateTime());
-						$workflowLog->setActionId($workflowActionEntity); 
+						$error = '';
 						if (!empty($errors)) {
-							$workflowLog->setMessage($this->message); 
-							$workflowLog->setStatus('Error');
-echo 'ERROR'.chr(10);
+							$error = $this->message; 
+							$status = 'Error';
 						} else {
-							$workflowLog->setStatus('Success');
-echo 'SUCCESS'.chr(10);
+							$status = 'Success';
 						}
-						$this->entityManager->persist($workflowLog);
-						$this->entityManager->flush();
+						$this->createWorkflowLog($action, $status, $error, $doc->id);
 					}
 				}
 			}
 		} catch (\Exception $e) {
-			$this->message .= 'Error : ' . $e->getMessage();
 			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
-echo $this->message.chr(10);
+			$this->generateDocLog('E',$this->message);
 		}
 	}
+	
+	// Create a workflow log
+	protected function createWorkflowLog($action, $status, $error=null, $generateDocumentId=null) {
+		try {
+			// Generate the workflow log
+			$workflowLog = new WorkflowLog();
+			// Set the current document
+			$triggerDocumentEntity = $this->entityManager->getRepository(Document::class)->find($this->id);
+			$workflowLog->setTriggerDocument($triggerDocumentEntity);
+			// Set the current action
+			$workflowActionEntity = $this->entityManager->getRepository(WorkflowAction::class)->find($action['id']);
+			$workflowLog->setAction($workflowActionEntity); 
+			// Set the generated document if the action has generated a document
+			if (!empty($generateDocumentId)) {
+				$generateDocumentEntity = $this->entityManager->getRepository(Document::class)->find($generateDocumentId);
+				$this->docIdRefError = $generateDocumentId;
+				$workflowLog->setGenerateDocument($generateDocumentEntity);
+			}
+			// Set the workflow
+			$workflowEntity = $this->entityManager->getRepository(Workflow::class)->find($action['workflow_id']);
+			$workflowLog->setWorkflow($workflowEntity);
+			// Set the job
+			$jobEntity = $this->entityManager->getRepository(Job::class)->find($this->jobId);
+			$workflowLog->setJob($jobEntity);
+			// Set the creation date
+			$workflowLog->setDateCreated(new \DateTime());
+			// Set the status depending on the error message
+			if (!empty($errors)) {
+				$workflowLog->setMessage($error); 
+				$workflowLog->setStatus($status);
+			} else {
+				$workflowLog->setStatus('Success');;
+			}
+			$this->entityManager->persist($workflowLog);
+			$this->entityManager->flush();
+			// Generate a document log.
+			$this->generateDocLog('S','Action '.$action['id'].' executed. '.(!empty($generateDocumentId) ? 'The document '.$generateDocumentId.' has been generated. ' : ''));
+		} catch (\Exception $e) {
+			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+			$this->generateDocLog('E','Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+		}
+	}
+	/**
+     * @throws \Doctrine\DBAL\Exception
+     *                                  Les id de la soluton, de la règle et du document
+     *                                  $type peut contenir : I (info;), W(warning), E(erreur), S(succès)
+     *                                  $code contient le code de l'erreur
+     *                                  $message contient le message de l'erreur avec potentiellement des variable &1, &2...
+     *                                  $data contient les varables du message de type array('id_contact', 'nom_contact')
+     */
+    protected function createDocLog()
+    {
+        try {
+            $now = gmdate('Y-m-d H:i:s');
+            $query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
+            $stmt = $this->connection->prepare($query_header);
+            $stmt->bindValue(':created', $now);
+            $stmt->bindValue(':typeError', $this->typeError);
+            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
+            $stmt->bindValue(':rule_id', $this->ruleId);
+            $stmt->bindValue(':doc_id', $this->id);
+            $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
+            $stmt->bindValue(':job_id', $this->jobId);
+            $result = $stmt->executeQuery();
+            $this->message = '';
+			$this->docIdRefError = '';
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function generateDocLog($errorType, $message)
+    {
+        $this->typeError = $errorType;
+        $this->message = $message;
+        $this->createDocLog();
+    }
+	
 }
 
 class DocumentManager extends documentcore
