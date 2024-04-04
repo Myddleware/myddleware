@@ -1259,7 +1259,14 @@ class documentcore
                         ) {
                             continue;
                         }
-
+						// In case of date with different format (2024-03-14T11:04:16+00:00 == 2024-03-14T12:04:16+01:00)
+						if (
+								!empty(strtotime($history[$field['target_field_name']]))
+							AND !empty(strtotime($target[$field['target_field_name']]))
+							AND strtotime($history[$field['target_field_name']]) == strtotime($target[$field['target_field_name']])
+						) {
+							continue;
+						}
                         return false;
                     }
                 }
