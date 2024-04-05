@@ -1329,7 +1329,11 @@ class documentcore
         }
         // If read method returns a result
         else {
-            // Select the first result
+            // Error il multiple duplicate records found
+			if (count($dataTarget['values']) > 1) {
+				$this->message .= count($dataTarget['values']).' duplicates found. Only one duplicate maximum can be found.';
+                return -1;
+			}
             $record = current($dataTarget['values']);
             $updateHistory = $this->updateHistoryTable($record);
             if (true === $updateHistory) {
@@ -1338,7 +1342,6 @@ class documentcore
             // Erreur dans la mise à jour de la table historique
             else {
                 $this->message .= $dataTarget['error'];
-
                 return -1;
             }
         }

@@ -73,6 +73,8 @@ class salesforcecore extends solution {
 									);
 									
 	protected string $versionApi = 'v38.0';
+	
+	protected bool $sendDeletion = true;
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
@@ -656,14 +658,64 @@ class salesforcecore extends solution {
 				) {
 					$parameters['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
 				}				
-				
+				if (empty($target_id)) {
+					throw new \Exception ('The target id is requiered for an update.');
+				}
 				$parameters = json_encode($parameters);
 				// Appel de la requête				
-                $query_request_data = $this->call($query_url, $parameters, true);             				
+                $query_request_data = $this->call($query_url, $parameters, 'PATCH');             				
 				
 				if ($query_request_data === true) {
 					$result[$idDoc] = array(
 											'id' => $target_id,
+											'error' => false
+									);
+				}
+				else  {
+					$result[$idDoc] = array(
+											'id' => '-1',
+											'error' => 'Failed to update Data in Salesforce : '.print_r($query_request_data['errors'],true),
+									);
+				}
+			}
+			catch (\Exception $e) {
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}			
+		return $result;
+	}
+
+	/**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
+    public function deleteData($param): array
+    {
+		if(!(isset($param['data']))) {
+			throw new \Exception ('Data missing for update');
+		}	
+		foreach($param['data'] as $idDoc => $data) {
+			try{
+				// Check control before update
+				$data = $this->checkDataBeforeDelete($param, $data, $idDoc);
+				// Instanciation de l'URL d'appel	
+				if (empty($data['target_id'])) {
+					throw new \Exception ('The target id is requiered for a deletion.');
+				}			
+				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/".$param['module'].'/'.$data['target_id'];
+			    
+				// Appel de la requête				
+                $query_request_data = $this->call($query_url, true, 'DELETE');             				
+				
+				if ($query_request_data === true) {
+					$result[$idDoc] = array(
+											'id' => $data['target_id'],
 											'error' => false
 									);
 				}
@@ -718,8 +770,13 @@ class salesforcecore extends solution {
     protected function getWhere($param): string
     {
 		if (!empty($param['query'])) {
+			$queryWhere = "+WHERE+";
 			foreach ($param['query'] as $key => $value) {
-				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
+					$queryWhere .= $key."+=+'".$value."'";
+					// Add the AND if not the last entry of the array
+					if ($key !== array_key_last($param['query'])) {
+							$queryWhere .= "+AND+";
+					}
 			}
 		} else {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -796,44 +853,37 @@ class salesforcecore extends solution {
 		}
 		return "";
 	}
-	
-	// Fonction permettant de faire l'appel REST
 
     /**
      * @throws \Exception
      */
-    protected function call($url, $parameters, $update = false){
+    protected function call($url, $parameters, $method = null){
 		ob_start();
 		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
 		if($parameters === false){ // Si l'appel ne possède pas de paramètres, on exécute un GET en curl
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: OAuth '.$this->access_token));
-		} 
-		elseif ($update === false) { // Si l'appel en revanche possède des paramètres dans $parameters, on exécute un POST en curl
-		    curl_setopt($ch, CURLOPT_URL, $url);
-		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-			if(!isset($parameters['grant_type'])) // A ne pas ajouter pour la connexion
-		    	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
-		    curl_setopt($ch, CURLOPT_POST, TRUE);
-		    curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-		}
-		else {
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		} else {
+			// No Authorization in case of login action
+			if(!isset($parameters['grant_type'])) {
+				curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
+			}
+			// PATCH or DELETE
+			if (!empty($method)) { 
+				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			// POST
+			} else {	
+				curl_setopt($ch, CURLOPT_POST, TRUE);
+			}
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
 		}
 		
 		$query_request_body = curl_exec($ch);	 
 		// Si on est sur un update et que l'on a un retour 204 on renvoie true
-		if ($update === true) {		
+		if (!empty($method)) {		
 			if(curl_getinfo($ch, CURLINFO_HTTP_CODE) == '204') {
 				return true;
 			}
