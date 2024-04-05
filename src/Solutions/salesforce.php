@@ -699,7 +699,7 @@ class salesforcecore extends solution {
     {
 		if(!(isset($param['data']))) {
 			throw new \Exception ('Data missing for update');
-		}	
+		}
 		foreach($param['data'] as $idDoc => $data) {
 			try{
 				// Check control before update
