@@ -215,7 +215,7 @@ class databasecore extends solution
                 $param['date_ref'] = 0;
             }
 			$result['date_ref'] = $param['date_ref'];
-
+			
             if (empty($param['limit'])) {
                 $param['limit'] = 100;
             }
@@ -347,7 +347,10 @@ class databasecore extends solution
                                 // If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
                                 if ((bool) strtotime($value)) {
                                     $row['date_modified'] = $value;
-                                } else {
+								// If the ref field is a numeric (increment), we transform it to a date (timestamp) to be able to save the corresponding date to the document
+                                } elseif (is_numeric($value)) {
+									$row['date_modified'] = date('Y-m-d H:i:s', $value);
+								} else {
                                     $row['date_modified'] = date('Y-m-d H:i:s');
                                 }
                                 $result['date_ref'] = $row['date_modified'];
@@ -379,7 +382,6 @@ class databasecore extends solution
         } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-
         return $result;
     }
 
