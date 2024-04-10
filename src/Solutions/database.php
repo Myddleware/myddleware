@@ -344,7 +344,7 @@ class databasecore extends solution
                                 $row['id'] = $value;
                             }
                             if ($key === $param['ruleParams']['fieldDateRef']) {
-                                // If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
+                                // If the reference is a valid date, we save it
                                 if ((bool) strtotime($value)) {
                                     $row['date_modified'] = $value;
 									$result['date_ref'] = $row['date_modified'];
@@ -352,6 +352,7 @@ class databasecore extends solution
                                 } elseif (is_numeric($value)) {
 									$row['date_modified'] = date('Y-m-d H:i:s', $value);
 									$result['date_ref'] = $value;
+								// In all other cases, we set the current date
 								} else {
                                     $row['date_modified'] = date('Y-m-d H:i:s');
 									$result['date_ref'] = $row['date_modified'];
