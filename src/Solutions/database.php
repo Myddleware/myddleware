@@ -347,13 +347,15 @@ class databasecore extends solution
                                 // If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
                                 if ((bool) strtotime($value)) {
                                     $row['date_modified'] = $value;
+									$result['date_ref'] = $row['date_modified'];
 								// If the ref field is a numeric (increment), we transform it to a date (timestamp) to be able to save the corresponding date to the document
                                 } elseif (is_numeric($value)) {
 									$row['date_modified'] = date('Y-m-d H:i:s', $value);
+									$result['date_ref'] = $value;
 								} else {
                                     $row['date_modified'] = date('Y-m-d H:i:s');
+									$result['date_ref'] = $row['date_modified'];
                                 }
-                                $result['date_ref'] = $row['date_modified'];
                             }
                         } elseif ('history' == $param['call_type']) { // Id is fieldId for a history action
                             if ($key === $param['ruleParams']['targetFieldId']) {
