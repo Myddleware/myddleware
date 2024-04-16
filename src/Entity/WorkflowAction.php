@@ -94,7 +94,16 @@ class WorkflowAction
      */
     private int $order;
 	
-	
+	/**
+     * @ORM\Column(name="active", type="boolean", options={"default":1})
+     */
+    private int $active;
+
+	/**
+     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
+     */
+    private int $deleted;
+
     public function getId(): string
     {
         return $this->id;
@@ -211,5 +220,27 @@ class WorkflowAction
     public function getOrder(): string
     {
         return $this->order;
+    }
+
+	public function setActive($active): self
+    {
+        $this->active = $active;
+        return $this;
+    }
+
+    public function getActive(): int
+    {
+        return $this->active;
+    }
+
+    public function setDeleted($deleted): self
+    {
+        $this->deleted = $deleted;
+        return $this;
+    }
+
+    public function getDeleted(): int
+    {
+        return $this->deleted;
     }
 }

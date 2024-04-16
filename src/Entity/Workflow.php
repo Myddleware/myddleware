@@ -86,6 +86,11 @@ class Workflow
      * @ORM\Column(name="condition", type="text", nullable=false)
      */
     private string $condition;
+
+	/**
+     * @ORM\Column(name="active", type="boolean", options={"default":1})
+     */
+    private int $active;
 	
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
@@ -208,13 +213,23 @@ class Workflow
     public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
-
         return $this;
     }
 
     public function getDeleted(): int
     {
         return $this->deleted;
+    }
+	
+	public function setActive($active): self
+    {
+        $this->active = $active;
+        return $this;
+    }
+
+    public function getActive(): int
+    {
+        return $this->active;
     }
 	
 	/**

@@ -2148,14 +2148,14 @@ class rulecore
     protected function setRuleWorkflows()
     {
         try {
-            $sqlWorkflows = 'SELECT * FROM workflow WHERE rule_id = :ruleId';
+            $sqlWorkflows = 'SELECT * FROM workflow WHERE rule_id = :ruleId AND deleted = 0 AND active = 1';
             $stmt = $this->connection->prepare($sqlWorkflows);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();
             $this->ruleWorkflows = $result->fetchAllAssociative();
 			if (!empty($this->ruleWorkflows)) {
 				foreach($this->ruleWorkflows as $key => $workflow) {
-					$sqlActions = 'SELECT * FROM workflowaction WHERE workflow_id = :workflowid ORDER BY `order` ASC';
+					$sqlActions = 'SELECT * FROM workflowaction WHERE workflow_id = :workflowid AND deleted = 0 ORDER BY `order` ASC';
 					$stmt = $this->connection->prepare($sqlActions);
 					$stmt->bindValue(':workflowid', $workflow['id']);
 					$result = $stmt->executeQuery();
