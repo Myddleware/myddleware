@@ -2155,7 +2155,7 @@ class rulecore
             $this->ruleWorkflows = $result->fetchAllAssociative();
 			if (!empty($this->ruleWorkflows)) {
 				foreach($this->ruleWorkflows as $key => $workflow) {
-					$sqlActions = 'SELECT * FROM workflowaction WHERE workflow_id = :workflowid AND deleted = 0 ORDER BY `order` ASC';
+					$sqlActions = 'SELECT * FROM workflowaction WHERE workflow_id = :workflowid AND deleted = 0 AND active = 1 ORDER BY `order` ASC';
 					$stmt = $this->connection->prepare($sqlActions);
 					$stmt->bindValue(':workflowid', $workflow['id']);
 					$result = $stmt->executeQuery();
