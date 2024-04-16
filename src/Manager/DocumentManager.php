@@ -2130,7 +2130,10 @@ class documentcore
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
             $this->createDocLog();
-			$this->runWorkflow();
+			// runWorkflow can't be executed if updateStatus is called from the solution class
+			if ($new_status!='Send') {
+				$this->runWorkflow();
+			}
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2462,7 +2465,8 @@ class documentcore
 						!empty($result['document_id'])
 					AND strpos($result['document_id'], ',')
 				) {
-					$result['document_id'] = end(explode(',',$result['document_id']));
+					$documentList = explode(',',$result['document_id']);
+					$result['document_id'] = end($documentList);
 				}
             }
 			if (!empty($result['record_id'])) {
@@ -2526,7 +2530,7 @@ class documentcore
         return $this->status;
     }
 	
-	protected function runWorkflow() {
+	public function runWorkflow() {
 		try {
 			// Check if at least on workflow exist for the rule
 			if (!empty($this->ruleWorkflows)) {

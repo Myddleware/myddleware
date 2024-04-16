@@ -1551,7 +1551,22 @@ class rulecore
                     throw new \Exception('Failed to connect to the target application.');
                 }
             }
-        
+			// Run workflow after send
+			if (
+					!empty($response)
+				AND empty($response['error'])
+				AND !empty($this->ruleWorkflows)
+			) {
+				foreach($response as $docId => $value) {
+					$param['id_doc_myddleware'] = $docId;
+                    $param['jobId'] = $this->jobId;
+                    $param['api'] = $this->api;
+					$param['ruleWorkflows'] = $this->ruleWorkflows;
+                    // Set the param values and clear all document attributes
+                    $this->documentManager->setParam($param, true);
+					$this->documentManager->runWorkflow();
+				}
+			}
         } catch (\Exception $e) {
             $response['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             if (!$this->api) {
@@ -1559,7 +1574,6 @@ class rulecore
             }
             $this->logger->error($response['error']);
         }
-
         return $response;
     }
 	
