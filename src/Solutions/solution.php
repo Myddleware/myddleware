@@ -153,7 +153,7 @@ class solutioncore
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
+            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager, null, $this->parameterBagInterface);
             $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
