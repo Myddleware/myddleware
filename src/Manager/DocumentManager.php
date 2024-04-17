@@ -1589,25 +1589,30 @@ class documentcore
                 $this->formulaManager->init($ruleField['formula']); // mise en place de la règle dans la classe
                 $this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
 
-                // Exécute la règle si pas d'erreur de syntaxe
-                if (
-                        $f = $this->formulaManager->execFormule()
-                ) {
-                    // Try the formula first
+                // Execute formula
+                if ($f = $this->formulaManager->execFormule()) {
+					// Manage lookup formula by adding the current rule as the first parameter
+					if (strpos($f, 'lookup') !== false ) {
+						$currentRule = $this->ruleId;
+						$connection = $this->connection;
+						$entityManager = $this->entityManager;
+						$myddlewareUserId = $this->userId;
+						$sourceFieldName = $ruleField['source_field_name'];
+						$docId = $this->id;
+						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
+					}
                     try {
                         // Trigger to redefine formula
                         $f = $this->changeFormula($f);
-                        eval($f.';'); // exec
+						eval('$rFormula = '.$f.';'); // exec
+						if (isset($rFormula)) {
+							// Return result
+							return $rFormula;
+						} else {
+							throw new \Exception('Invalid formula (failed to retrieve formula) : '.$ruleField['formula']);
+						}
                     } catch (\Throwable $e) {
-                        throw new \Exception('FATAL error because of Invalid formula "'.$ruleField['formula'].';" : '.$e->getMessage());
-                    }
-                    // Execute eval only if formula is valid
-                    eval('$rFormula = '.$f.';'); // exec
-                    if (isset($rFormula)) {
-                        // affectation du résultat
-                        return $rFormula;
-                    } else {
-                        throw new \Exception('Invalid formula (failed to retrieve formula) : '.$ruleField['formula']);
+                        throw new \Exception('Failed to execute the formula "'.$ruleField['formula'].';" : '.$e->getMessage());
                     }
                 } else {
                     throw new \Exception('Invalid formula (failed to execute) : '.$ruleField['formula']);

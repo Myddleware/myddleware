@@ -1408,8 +1408,10 @@ use App\Form\Type\RelationFilterType;
                                     'related_rule' => '',
                                 ];
 
+								// Add rule id for simulation purpose when using lookup function
+								$this->documentManager->setRuleId($ruleKey);
                                 // Transformation
-                                $response = $this->documentManager->getTransformValue($record, $target_fields);
+								$response = $this->documentManager->getTransformValue($record, $target_fields);
                                 if (!isset($response['message'])) {
                                     $r['after'][$name_fields_target] = $this->documentManager->getTransformValue($record, $target_fields);
                                 }

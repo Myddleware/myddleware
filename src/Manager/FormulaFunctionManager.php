@@ -25,11 +25,13 @@
 
 namespace App\Manager;
 
+use App\Entity\DocumentRelationship as DocumentRelationship;
+
 class formulafunctioncore
 {
-    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray'];
+    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup'];
     protected string $path = "App\Manager\FormulaFunctionManager::";
-
+	
     public function getNamesFunctions(): array
     {
         return $this->names;
@@ -118,6 +120,124 @@ class formulafunctioncore
         if (!empty($array[$key])) {
             return $array[$key];
         }
+    }
+	
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $fieldValue, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
+	{
+		// Manage error if empty
+		if (empty($fieldValue)) {
+			if ($errorIfEmpty) {
+				throw new \Exception('The field '.$sourceFieldName.' is empty. Failed to find the relate value. ');
+			} else {
+				return '';
+			}
+		}
+		// In case of simulation during rule creation (not edition), we don't have the current rule id.
+		// We set direction = 1 by default
+		if ($currentRule === 0) {
+			$direction = 1;
+		} else {
+			// Get rules detail
+			$ruleQuery = "SELECT * FROM rule WHERE id = :ruleId";
+			$stmt = $connection->prepare($ruleQuery);
+			$stmt->bindValue(':ruleId', $currentRule);
+			$result = $stmt->executeQuery();
+			$ruleRef = $result->fetchAssociative();
+			$stmt->bindValue(':ruleId', $rule);
+			$result = $stmt->executeQuery();
+			$ruleLink = $result->fetchAssociative();
+		}
+
+		// Query to search the relate record id is different depending on the direction of the relationship
+		if (
+			(
+					!empty($ruleRef)
+				AND	$ruleRef['conn_id_source'] == $ruleLink['conn_id_source']
+				AND	$ruleRef['conn_id_target'] == $ruleLink['conn_id_target']
+			) 
+			OR (!empty($direction)) // Manage simulation
+		){
+			$sqlParams = "	SELECT 
+									target_id record_id,
+									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.type) types
+								FROM document 
+								WHERE  
+										document.rule_id = :ruleRelateId
+									AND document.source_id = :record_id
+									AND document.deleted = 0
+									AND document.target_id != ''
+									AND (
+											document.global_status = 'Close'
+										 OR document.status = 'No_send'
+									)
+								GROUP BY target_id
+								HAVING types NOT LIKE '%D%'
+								LIMIT 1";
+			$direction = 1;
+		} elseif (
+				$ruleRef['conn_id_source'] == $ruleLink['conn_id_target']
+			AND	$ruleRef['conn_id_target'] == $ruleLink['conn_id_source']
+		){
+			$sqlParams = "	SELECT 
+								source_id record_id,
+								GROUP_CONCAT(DISTINCT document.id) document_id,
+								GROUP_CONCAT(DISTINCT document.type) types
+							FROM document
+							WHERE  
+									document.rule_id = :ruleRelateId
+								AND document.source_id != ''
+								AND document.deleted = 0
+								AND document.target_id = :record_id
+								AND (
+										document.global_status = 'Close'
+									 OR document.status = 'No_send'
+								)
+							GROUP BY source_id
+							HAVING types NOT LIKE '%D%'
+							LIMIT 1";
+			$direction = -1;
+		} else {
+			throw new \Exception('The connectors do not match between rule '.$currentRule.' and rule '.$rule.'. ');
+		}
+		// Get the record id
+		$stmt = $connection->prepare($sqlParams);
+		$stmt->bindValue(':ruleRelateId', $rule);
+		$stmt->bindValue(':record_id', $fieldValue);
+		$result = $stmt->executeQuery();
+		$result = $result->fetchAssociative();
+		// Manage error if no result found
+		if (empty($result['record_id'])) {
+			if ($errodIfNoFound) {
+				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$fieldValue.' in the rule '.$ruleLink['name'].'. This document is queued. ');
+			} else {
+				return '';
+			}
+		}
+		// In cas of several document found we get only the last one
+		if (
+				!empty($result['document_id'])
+			AND strpos($result['document_id'], ',')
+		) {
+			$documentList = explode(',',$result['document_id']);
+			$result['document_id'] = end($documentList);
+		}
+		// No doc id in case of simulation
+		if (!empty($docId)) {
+			// Add the relationship in the table document Relationship
+			try {
+				$documentRelationship = new DocumentRelationship();
+				$documentRelationship->setDocId($docId);
+				$documentRelationship->setDocRelId($result['document_id']);
+				$documentRelationship->setDateCreated(new \DateTime());
+				$documentRelationship->setCreatedBy((int) $myddlewareUserId);
+				$documentRelationship->setSourceField($sourceFieldName);
+				$entityManager->persist($documentRelationship);
+			} catch (\Exception $e) {
+				throw new \Exception('Failed to save the document relationship for the field '.$sourceFieldName.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			}
+		}
+		return $result['record_id'];
     }
 }
 
