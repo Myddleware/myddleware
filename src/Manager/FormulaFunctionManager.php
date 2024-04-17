@@ -122,10 +122,10 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $fieldValue, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
 	{
 		// Manage error if empty
-		if (empty($fieldValue)) {
+		if (empty($field)) {
 			if ($errorIfEmpty) {
 				throw new \Exception('The field '.$sourceFieldName.' is empty. Failed to find the relate value. ');
 			} else {
@@ -203,7 +203,7 @@ class formulafunctioncore
 		// Get the record id
 		$stmt = $connection->prepare($sqlParams);
 		$stmt->bindValue(':ruleRelateId', $rule);
-		$stmt->bindValue(':record_id', $fieldValue);
+		$stmt->bindValue(':record_id', $field);
 		$result = $stmt->executeQuery();
 		$result = $result->fetchAssociative();
 		// Manage error if no result found

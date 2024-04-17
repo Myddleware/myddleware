@@ -35,7 +35,7 @@ class LoadFunctionData implements FixtureInterface
     private $manager;
     protected $functionData = [
         'mathematical' => ['round', 'ceil', 'abs'],
-        'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray'],
+        'text' => ['trim', 'ltrim', 'rtrim', 'lower', 'upper', 'substr', 'striptags', 'changeValue', 'htmlEntityDecode', 'replace', 'utf8encode', 'utf8decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'chr', 'json_decode', 'json_encode', 'getValueFromArray','lookup'],
         'date' => ['date', 'microtime', 'changeTimeZone', 'changeFormatDate'],
         'constant' => ['mdw_no_send_field'],
     ];
