@@ -43,10 +43,17 @@ class postgresqlcore extends database
     // Generate query
     protected function get_query_show_tables(): string
     {
-        return "SELECT *
+		// Read tables and views
+        return "SELECT schemaname, tablename
 				FROM pg_catalog.pg_tables
 				WHERE 	schemaname != 'pg_catalog'
-					AND schemaname != 'information_schema'";
+					AND schemaname != 'information_schema'
+			UNION
+				SELECT schemaname, viewname tablename
+				FROM pg_catalog.pg_views
+				WHERE 	schemaname != 'pg_catalog'
+					AND schemaname != 'information_schema'
+			";
     }
 
     // Get all tables from the database
