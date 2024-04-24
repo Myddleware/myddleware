@@ -122,7 +122,7 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $createDocRelationship=true)
 	{
 		// Manage error if empty
 		if (empty($field)) {
@@ -223,7 +223,10 @@ class formulafunctioncore
 			$result['document_id'] = end($documentList);
 		}
 		// No doc id in case of simulation
-		if (!empty($docId)) {
+		if (
+				!empty($docId)
+			AND $createDocRelationship
+		) {
 			// Add the relationship in the table document Relationship
 			try {
 				$documentRelationship = new DocumentRelationship();
