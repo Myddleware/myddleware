@@ -2134,11 +2134,14 @@ class documentcore
             $this->message .= 'Status : '.$new_status;
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
-            $this->createDocLog();
+            // We don't clear the message because we could need it in the workflow, we clear it after the workflow execution
+			$this->createDocLog(false);
 			// runWorkflow can't be executed if updateStatus is called from the solution class
 			if ($new_status!='Send') {
 				$this->runWorkflow();
 			}
+			$this->message = '';
+			$this->docIdRefError = '';
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2595,7 +2598,22 @@ class documentcore
 											$this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
 										} catch (\Exception $e) {
 											$workflowStatus = 'Error';
-											$error = 'Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+											$error = 'Failed to send notification : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+											$this->logger->error($error);
+											$this->generateDocLog('E',$error);
+										}
+										$this->createWorkflowLog($action, $workflowStatus, $error);
+										break;
+									case 'updateStatus':
+										try	{
+											$workflowStatus = 'Success';
+											$error = '';
+											$this->typeError = 'W';
+											$this->message = 'Status change using workflow. ';
+											$this->updateStatus($arguments['status']);
+										} catch (\Exception $e) {
+											$workflowStatus = 'Error';
+											$error = 'Failed change status : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 											$this->logger->error($error);
 											$this->generateDocLog('E',$error);
 										}
@@ -2712,7 +2730,7 @@ class documentcore
      *                                  $message contient le message de l'erreur avec potentiellement des variable &1, &2...
      *                                  $data contient les varables du message de type array('id_contact', 'nom_contact')
      */
-    protected function createDocLog()
+    protected function createDocLog($clearMessage=true)
     {
         try {
             $now = gmdate('Y-m-d H:i:s');
@@ -2726,8 +2744,10 @@ class documentcore
             $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
             $stmt->bindValue(':job_id', $this->jobId);
             $result = $stmt->executeQuery();
-            $this->message = '';
-			$this->docIdRefError = '';
+			if ($clearMessage) {
+				$this->message = '';
+				$this->docIdRefError = '';
+			}
         } catch (\Exception $e) {
             $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
