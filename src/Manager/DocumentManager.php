@@ -1582,6 +1582,11 @@ class documentcore
                     // We skip my_value because it is a constante
                     if ('my_value' != $ruleField['source_field_name']) {
                         $fieldNameDyn = $ruleField['source_field_name']; // value : variable name
+						// Replace dot by a string because dot can't be into a variable in php, the formula can't work
+						if (strpos($ruleField['source_field_name'], '.') !== false) {
+							$fieldNameDyn = str_replace('.', '___dot___', $ruleField['source_field_name']);
+							$ruleField['formula'] = str_replace($ruleField['source_field_name'], $fieldNameDyn, $ruleField['formula']);
+						}
                         $$fieldNameDyn = $source[$ruleField['source_field_name']]; // Dynamic variable (e.g $name = name)
                     }
                 }
