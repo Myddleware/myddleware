@@ -377,6 +377,7 @@ flux:
         error_checking: Checking error
         error_sending: Sending error
         not_found: Not found
+        Error_workflow: Workflow error
     type:
         update: Update
         create: Create

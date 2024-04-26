@@ -107,6 +107,7 @@ class documentcore
         'Error_checking' => 'Error',
         'Error_sending' => 'Error',
         'Not_found' => 'Error',
+        'Error_workflow' => 'Error',
     ];
     private array $notSentFields = [];
 
@@ -164,6 +165,7 @@ class documentcore
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
+            'Error_workflow' => 'flux.status.Error_workflow',
         ];
     }
 
@@ -2547,7 +2549,12 @@ class documentcore
 		try {
 			// Check if at least on workflow exist for the rule
 			if (!empty($this->ruleWorkflows)) {
-				// includ variables used in the formula
+				// Add all source data in variables
+				foreach($this->sourceData as $key => $value) {
+					$fieldName = 'source_'.$key;
+					$$fieldName = $value;
+				}			
+				// include variables used in the formula
 				include __DIR__.'/../Utils/workflowVariables.php';
 				if (file_exists( __DIR__.'/../Custom/Utils/workflowVariables.php')) {
 					include  __DIR__.'/../Custom/Utils/workflowVariables.php';
@@ -2561,80 +2568,86 @@ class documentcore
 					eval('$condition = '.$f.';'); // exec
 					// Execute the action if the condition is met
 					if ($condition == 1) {
-						// Execute all actions 
-						if (!empty($ruleWorkflow['actions'])) {
-							// Call each actions
-							foreach($ruleWorkflow['actions'] as $action) {
-								// Check if the action has already been executed for the current document 
-								// Only if attempt > 0, if it is the first attempt then the action has never been executed
-								if ($this->attempt > 0) {
-									// Search action for the current document
-									$workflowLogEntity = $this->entityManager->getRepository(WorkflowLog::class)
-															->findOneBy([
-																		'triggerDocument' => $this->id,
-																		'action' => $action['id'],
-																		]
-																	);
-									// If the current action has been found for the current document, we don't execute the current action
-									if (
-											!empty($workflowLogEntity)
-										AND $workflowLogEntity->getStatus() == 'Success'
-									) {
-										// GenerateDocument can be empty depending the action 
-										if (!empty($workflowLogEntity->getGenerateDocument())) {
-											$this->docIdRefError = $workflowLogEntity->getGenerateDocument()->getId();
+						try {
+							// Execute all actions 
+							if (!empty($ruleWorkflow['actions'])) {
+								// Call each actions
+								foreach($ruleWorkflow['actions'] as $action) {
+									// Check if the action has already been executed for the current document 
+									// Only if attempt > 0, if it is the first attempt then the action has never been executed
+									if ($this->attempt > 0) {
+										// Search action for the current document
+										$workflowLogEntity = $this->entityManager->getRepository(WorkflowLog::class)
+																->findOneBy([
+																			'triggerDocument' => $this->id,
+																			'action' => $action['id'],
+																			]
+																		);
+										// If the current action has been found for the current document, we don't execute the current action
+										if (
+												!empty($workflowLogEntity)
+											AND $workflowLogEntity->getStatus() == 'Success'
+										) {
+											// GenerateDocument can be empty depending the action 
+											if (!empty($workflowLogEntity->getGenerateDocument())) {
+												$this->docIdRefError = $workflowLogEntity->getGenerateDocument()->getId();
+											}
+											$this->generateDocLog('W','Action ' . $action['id'] . ' already executed for this document. ');
+											continue;
 										}
-										$this->generateDocLog('W','Action ' . $action['id'] . ' already executed for this document. ');
-										continue;
+									}
+
+									// Execute action depending of the function in the workflow
+									$arguments = unserialize($action['arguments']);
+									switch ($action['action']) {
+										case 'generateDocument':
+											$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
+											break;
+										case 'sendNotification':
+											try	{
+												$workflowStatus = 'Success';
+												$error = '';
+												// Method sendMessage throws an exception if it fails
+												$this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
+											} catch (\Exception $e) {
+												$workflowStatus = 'Error';
+												$error = 'Failed to send notification : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+												$this->logger->error($error);
+												$this->generateDocLog('E',$error);
+											}
+											$this->createWorkflowLog($action, $workflowStatus, $error);
+											break;
+										case 'updateStatus':
+											try	{
+												$workflowStatus = 'Success';
+												$error = '';
+												$this->typeError = 'W';
+												$this->message = 'Status change using workflow. ';
+												$this->updateStatus($arguments['status']);
+											} catch (\Exception $e) {
+												$workflowStatus = 'Error';
+												$error = 'Failed change status : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+												$this->logger->error($error);
+												$this->generateDocLog('E',$error);
+											}
+											$this->createWorkflowLog($action, $workflowStatus, $error);
+											break;
+										default:
+										   throw new \Exception('Function '.key($action).' unknown.');
 									}
 								}
-
-								// Execute action depending of the function in the workflow
-								$arguments = unserialize($action['arguments']);
-								switch ($action['action']) {
-									case 'generateDocument':
-										$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
-										break;
-									case 'sendNotification':
-										try	{
-											$workflowStatus = 'Success';
-											$error = '';
-											// Method sendMessage throws an exception if it fails
-											$this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
-										} catch (\Exception $e) {
-											$workflowStatus = 'Error';
-											$error = 'Failed to send notification : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-											$this->logger->error($error);
-											$this->generateDocLog('E',$error);
-										}
-										$this->createWorkflowLog($action, $workflowStatus, $error);
-										break;
-									case 'updateStatus':
-										try	{
-											$workflowStatus = 'Success';
-											$error = '';
-											$this->typeError = 'W';
-											$this->message = 'Status change using workflow. ';
-											$this->updateStatus($arguments['status']);
-										} catch (\Exception $e) {
-											$workflowStatus = 'Error';
-											$error = 'Failed change status : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-											$this->logger->error($error);
-											$this->generateDocLog('E',$error);
-										}
-										$this->createWorkflowLog($action, $workflowStatus, $error);
-										break;
-									default:
-									   throw new \Exception('Function '.key($action).' unknown.');
-								}
 							}
+						} catch (\Exception $e) {
+							$this->logger->error('Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+							$this->generateDocLog('E','Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+							$this->updateStatus('Error_workflow');
 						}
 					}
 				}
 			}
 		} catch (\Exception $e) {
-            $this->logger->error('Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-			$this->generateDocLog('E','Failed to create workflow log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->logger->error('Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$this->generateDocLog('E','Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 	}
 

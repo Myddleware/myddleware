@@ -375,6 +375,7 @@ flux:
         error_checking: Vérification en erreur
         error_sending: Envoi en erreur
         Not_found: Non trouvée
+        Error_workflow: Workflow en erreur
     type:
         update: Update
         create: Create
