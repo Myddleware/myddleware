@@ -2549,6 +2549,8 @@ class documentcore
 		try {
 			// Check if at least on workflow exist for the rule
 			if (!empty($this->ruleWorkflows)) {
+				$targetFields = false;
+				$historyFields = false;
 				// Add all source data in variables
 				foreach($this->sourceData as $key => $value) {
 					$fieldName = 'source_'.$key;
@@ -2561,6 +2563,37 @@ class documentcore
 				}
 				// Execute every workflow of the rule
 				foreach ($this->ruleWorkflows as $ruleWorkflow) {
+					// Add target fields if requested and if not already calculated
+					if (
+							strpos($ruleWorkflow['condition'], 'target_') !== false
+						AND !$targetFields
+					) {
+						$targetFields = true;
+						$target = $this->getDocumentData('T');
+						// Add all source data in variables
+						if (!empty($target)) {
+							foreach($target as $key => $value) {
+								$fieldName = 'target_'.$key;
+								$$fieldName = $value;
+							}
+						}
+					}
+					// Add history fields if requested and if not already calculated
+					if (
+							strpos($ruleWorkflow['condition'], 'history_') !== false
+						AND !$historyFields
+					) {
+						$historyFields = true;
+						$history = $this->getDocumentData('H');
+						// Add all source data in variables
+						if (!empty($history)) {
+							foreach($history as $key => $value) {
+								$fieldName = 'history_'.$key;
+								$$fieldName = $value;
+							}
+						}
+					}
+					
 					// Check the condition 
 					$this->formulaManager->init($ruleWorkflow['condition']); // mise en place de la règle dans la classe
 					$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
