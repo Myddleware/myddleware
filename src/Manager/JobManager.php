@@ -865,8 +865,11 @@ class jobcore
             // Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
             $sql = "SELECT
 						rule.id,
-						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id
+						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id,
+						GROUP_CONCAT(rulefield.formula SEPARATOR ';') formula
 					FROM rule
+						LEFT OUTER JOIN rulefield
+							ON rule.id = rulefield.rule_id
 						LEFT OUTER JOIN rulerelationship
 							ON rule.id = rulerelationship.rule_id
 					WHERE
@@ -877,6 +880,15 @@ class jobcore
             $rules = $result->fetchAllAssociative();
 
             if (!empty($rules)) {
+				// Add the rule in formula to the list of rules in relationship
+				foreach ($rules as $key => $rule) {
+					$matches = array();
+					// Get the second parameters (rule id) of the lookup functions
+					preg_match_all('/lookup\(\{[^}]+\},"([^"]+)"/', $rule['formula'], $matches);
+					// Transform result and add it to the other rules (old relationships)
+					$rules[$key]['field_id'] .= ';'.implode(';', array_unique($matches[1]));
+					$rules[$key]['field_id'] = trim($rules[$key]['field_id'],';');
+				}
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
                 $ruleKeyValue = [];
                 foreach ($rules as $key => $rule) {
@@ -922,7 +934,6 @@ class jobcore
                     }
                     $rules = $rulesRef;
                 }
-
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
                 $stmt = $this->connection->prepare($sql);
@@ -943,7 +954,6 @@ class jobcore
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
-
             return false;
         }
 
