@@ -2551,6 +2551,10 @@ class documentcore
 			if (!empty($this->ruleWorkflows)) {
 				$targetFields = false;
 				$historyFields = false;
+				// Can be empty depending on the context of the workflow call
+				if (empty($this->sourceData)) {
+					$this->sourceData = $this->getDocumentData('S');
+				}
 				// Add all source data in variables
 				foreach($this->sourceData as $key => $value) {
 					$fieldName = 'source_'.$key;
