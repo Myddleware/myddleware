@@ -2637,32 +2637,18 @@ class documentcore
 											$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
 											break;
 										case 'sendNotification':
-											try	{
-												$workflowStatus = 'Success';
-												$error = '';
-												// Method sendMessage throws an exception if it fails
-												$this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
-											} catch (\Exception $e) {
-												$workflowStatus = 'Error';
-												$error = 'Failed to send notification : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-												$this->logger->error($error);
-												$this->generateDocLog('E',$error);
-											}
+                                            $workflowStatus = 'Success';
+                                            $error = '';
+                                            // Method sendMessage throws an exception if it fails
+                                            $this->tools->sendMessage($arguments['to'],$arguments['subject'],$arguments['message']);
 											$this->createWorkflowLog($action, $workflowStatus, $error);
 											break;
 										case 'updateStatus':
-											try	{
-												$workflowStatus = 'Success';
-												$error = '';
-												$this->typeError = 'W';
-												$this->message = 'Status change using workflow. ';
-												$this->updateStatus($arguments['status']);
-											} catch (\Exception $e) {
-												$workflowStatus = 'Error';
-												$error = 'Failed change status : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-												$this->logger->error($error);
-												$this->generateDocLog('E',$error);
-											}
+                                            $workflowStatus = 'Success';
+                                            $error = '';
+                                            $this->typeError = 'W';
+                                            $this->message = 'Status change using workflow. ';
+                                            $this->updateStatus($arguments['status']);
 											$this->createWorkflowLog($action, $workflowStatus, $error);
 											break;
 										default:
