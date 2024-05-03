@@ -270,7 +270,6 @@ class FormulaManager
 
         // ----------- secure
         $string = trim($string);
-        $string = strip_tags($string);
 
         // ----- remove control characters -----
         $string = str_replace("\r", '', $string);    // --- replace with empty space
