@@ -953,7 +953,7 @@ class documentcore
             $transformed = $this->updateTargetTable();
             if (!empty($transformed)) {
 				// If the value mdw_cancel_document is found in the target data of the document after transformation we cancel the document
-				if (array_search('mdw_cancel_document',$transformed) !== false) {
+				if (array_search('mdw_cancel_document',$transformed, true) !== false) {
 					$this->message .= 'The document contains the value mdw_cancel_document. ';
 					$this->typeError = 'W';
 					$this->updateStatus('Cancel');
