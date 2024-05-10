@@ -2395,7 +2395,7 @@ class documentcore
             if ('-1' == $direction) {
                 $sqlParams = "	SELECT 
 									source_id record_id,
-									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document
 								WHERE  
@@ -2413,7 +2413,7 @@ class documentcore
             } elseif ('1' == $direction) {
                 $sqlParams = "	SELECT 
 									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
@@ -2475,13 +2475,13 @@ class documentcore
                 $result = $stmt->executeQuery();
                 $result = $result->fetchAssociative();
 
-				// In cas of several document found we get only the last one
+				// In cas of several document found we get only the first one (which is the most recent one)
 				if (
 						!empty($result['document_id'])
 					AND strpos($result['document_id'], ',')
 				) {
 					$documentList = explode(',',$result['document_id']);
-					$result['document_id'] = end($documentList);
+					$result['document_id'] = $documentList[0];
 				}
             }
 			if (!empty($result['record_id'])) {
