@@ -322,10 +322,14 @@ class JobSchedulerController extends AbstractController
 
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
 
+        // Fetch the cron_job_result data
+        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findAll();
+
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
-            'entitiesCron' => $entitiesCron
+            'entitiesCron' => $entitiesCron,
+            'cronJobResults' => $cronJobResults,
         ]);
     }
 
