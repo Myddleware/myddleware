@@ -95,6 +95,49 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="container-fluid p-3">
+    <div id="cronjobresult_table">
+        <h6 class="display-6">{{ 'crontab.title_cronjobresult'|trans }}</h6>
+        <table class="table table-sm table-striped mt-5">
+            <thead>
+                <th scope="col" class="title"><label>{{ 'Id'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'CronjobId'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'runAt'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'runTime'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'statusCode'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'output'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'createdAt'|trans }}</label></th>
+                <th scope="col" class="title"><label>{{ 'updatedAt'|trans }}</label></th>
+            </thead>
+            <tbody>
+            {% for result in cronJobResults %}
+            <tr>                    
+                <td class="value">{{ result.id }}</td>
+                <td class="value">{{ result.cronJob.id }}</td>
+                <td class="value">{{ result.runAt|date("d/m/Y H:i:s", timezone) }}</td>
+                <td class="value">{{ result.runTime }}</td>
+                <td class="value">{{ result.statusCode }}</td>
+                <td class="value">
+        <div id="output-short-{{ loop.index }}">
+            {{ result.output|slice(0, 100) ~ '...' }}
+            <button onclick="document.getElementById('output-short-{{ loop.index }}').style.display='none';document.getElementById('output-full-{{ loop.index }}').style.display='block';">Show more</button>
+        </div>
+        <div id="output-full-{{ loop.index }}" style="display: none;">
+            {{ result.output }}
+            <button onclick="document.getElementById('output-full-{{ loop.index }}').style.display='none';document.getElementById('output-short-{{ loop.index }}').style.display='block';">Show less</button>
+        </div>
+    </td>
+                <td class="value">{{ result.output|slice(0, 300) ~ '...' }}</td>
+                <td class="value">{{ result.createdAt|date("d/m/Y H:i:s", timezone) }}</td>
+                <td class="value">{{ result.updatedAt|date("d/m/Y H:i:s", timezone) }}</td>
+            </tr> 
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
         <div id="help-content-info" class="help-content">
         <h2>
             {{'help.title'|trans}} 
