@@ -394,7 +394,6 @@ class salesforcecore extends solution {
 				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
-
 				// Affectation du nombre de résultat à $result['count']
 				if (isset($query_request_data['totalSize'])){
 					$currentCount = $query_request_data['totalSize'];
@@ -414,7 +413,10 @@ class salesforcecore extends solution {
 									// Don't save attributes
 									if($fieldKey != 'attributes'){
 										// In case there are 2 levels of relationship (think about a recursive function here) 
-										if(substr($fieldKey,-3) == '__r') {
+										if(
+												substr($fieldKey,-3) == '__r'
+											AND !empty($fieldValue)
+										) {
 											foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
 												if($fieldKeyLevel2 != 'attributes'){
 													$row[mb_strtolower($fieldKeyLevel2)] = $fieldValueLevel2;
