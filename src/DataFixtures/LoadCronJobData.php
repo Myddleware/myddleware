@@ -64,6 +64,15 @@ class LoadCronJobData implements FixtureInterface
                 }
             }
 
+            if (!$foundCronJob) {
+                $sql = "SELECT * FROM cron_job LIMIT 1";
+                $stmt = $this->manager->getConnection()->executeQuery($sql);
+                $result = $stmt->fetchAllAssociative();
+                if (!empty($result)) {
+                    $foundCronJob = true;
+                }
+            }
+
             // If we didn't found the solution we create a new one, otherwise we update it
             if (!$foundCronJob) {
                 $crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);
