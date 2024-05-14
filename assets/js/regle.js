@@ -306,7 +306,7 @@ $(function () {
 				var open = pairTypes[t];
 				var close = map[open];
 		
-				console.log('Checking pair type:', open+close);
+				// console.log('Checking pair type:', open+close);
 		
 				for (var i = 0; i < formula.length; i++) {
 					if (formula[i] === open) {
@@ -316,18 +316,18 @@ $(function () {
 							'position': i,
 							'pairNum': currentPair
 						});
-						console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
+						// console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
 					}
 					else if (formula[i] === close) {
 						var last = stack.pop();
 		
 						if (!last) {
-							console.log('Found closing symbol without matching opening symbol at', i);
+							// console.log('Found closing symbol without matching opening symbol at', i);
 							errorAt = i;
 							currentPair++;
 							break;
 						} else {
-							console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
+							// console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
 							if (!pairs.includes(last.pairNum)) {
 								pairs.push(last.pairNum);
 							}
@@ -337,7 +337,7 @@ $(function () {
 		
 				// If we still have unclosed brackets at the end of parsing, record an error
 				if (stack.length > 0) {
-					console.log('Found unbalanced pair at the end of the formula');
+					// console.log('Found unbalanced pair at the end of the formula');
 					var lastUnbalanced = stack.pop();
 					errorAt = lastUnbalanced.position;
 					currentPair = lastUnbalanced.pairNum;
@@ -351,11 +351,11 @@ $(function () {
 					pairs.splice(index, 1);
 				}
 		
-				console.log('Pair Type:', open + close);
-				console.log('Status:', status);
-				console.log('Error Position:', errorAt);
-				console.log('Unbalanced Pair:', unbalancedPair);
-				console.log('Balanced Pairs:', pairs);
+				// console.log('Pair Type:', open + close);
+				// console.log('Status:', status);
+				// console.log('Error Position:', errorAt);
+				// console.log('Unbalanced Pair:', unbalancedPair);
+				// console.log('Balanced Pairs:', pairs);
 		
 				if (!status) {
 					return {
@@ -391,7 +391,7 @@ $(function () {
 			});
 
 
-			console.log('these are the values', values);
+			// console.log('these are the values', values);
 
 			var bracketError = false;
 			var emptyBracketError = false;
@@ -505,7 +505,7 @@ $(function () {
 			// empty the values array
 			missingFieldList = [];
 			values = [];
-			console.log('these are the values', values);
+			// console.log('these are the values', values);
 
 
 			$.ajax({
@@ -824,13 +824,13 @@ $(function () {
 			if ($(this).attr('disabled') != 'disabled') {
 				if ($(this).is(":checked")) {
 					if (remove) {
-						id = $(this).parent().parent().attr('data-id');
+						id = $(this).attr('name');
 						massAddFlux(id, true, massFluxTab);
 						$(this).prop("checked", false);
 					}
 				} else {
 					if (remove == false) {
-						id = $(this).parent().parent().attr('data-id');
+						id = $(this).attr('name');
 						massAddFlux(id, false, massFluxTab);
 						$(this).prop("checked", true);
 					}
@@ -842,7 +842,6 @@ $(function () {
 	});
 
 	$('input', '.listepagerflux td').on('change', function () {
-		// id = $(this).parent().parent().attr('data-id');
 		if ($(this).is(":checked")) {
 			massAddFlux($(this).attr('name'), false, massFluxTab);
 		} else {
@@ -1977,6 +1976,58 @@ function massAddFlux(id, cond, massFluxTab) {
 	$('#cancelreloadflux').find('span').html(massFluxTab.length);
 }
 
+$(document).ready(function() {
+	$('.removeFilters').click(function() {
+		// Get the class list of the clicked element
+		var classList = $(this).attr('class').split(/\s+/);
+		// console.log(classList);
+
+		// Find the filter class (it's the last class in the list)
+		var filterClass = classList[classList.length - 1];
+		// console.log(filterClass);
+
+		// Get the stored filters from local storage
+		var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
+		// console.log(storedFilters);
+
+		// Remove the filter from the stored filters
+		delete storedFilters[filterClass];
+		// console.log(storedFilters);
+
+		// Save the updated filters back to local storage
+		localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
+		// console.log(localStorage.getItem('storedFilters'));
+
+		    // Make an AJAX request to the server to remove the filter from the session
+			$.ajax({
+				url: path_remove_filter,
+				method: 'POST',
+				data: { filterName: 'FluxFilter' + toCamelCase(filterClass) },
+				success: function(response) {
+					if (response.status === 'success') {
+						// console.log('Filter successfully removed Argonien');
+						
+						// Clear the form field
+						var formFieldName = 'combined_filter[document][' + filterClass + ']';
+						$('input[name="' + formFieldName + '"]').val('');
+						// console.log('Filter input cleared');
+					} else {
+						// console.log('Error removing filter: ' + response.message);
+					}
+				}
+			});
+	});
+});
+
+function toCamelCase(str) {
+    // Split the string into words
+    var words = str.split('_');
+
+    // Convert each word to title case (except for the first one), and join them back together
+    return words[0] + words.slice(1).map(function(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join('');
+}
 
 // Save the modified field data by using an ajax request
 function saveInputFlux(div, link) {

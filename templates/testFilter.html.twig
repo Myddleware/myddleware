@@ -336,6 +336,7 @@
             {{ encore_entry_script_tags('filter') }}
 	{% endblock javascript %}
 	<script type="text/javascript">
+            var path_remove_filter = "{{ path('remove_filter') }}";
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
 		var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
 		var path_img = "{{ asset('build/images/regle/') }}";
