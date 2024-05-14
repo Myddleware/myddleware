@@ -396,6 +396,7 @@ view_flux:
     nbHistoryDocuments: Documents history
     nbPostDocuments: Post documents    
     direct_link: Direct link    
+    comment: Add log
     btn:
         reload: Reload the document
         cancel: Cancel the document 

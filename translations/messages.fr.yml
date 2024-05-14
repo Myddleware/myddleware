@@ -389,6 +389,7 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
+    comment: Ajouter un journal
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
