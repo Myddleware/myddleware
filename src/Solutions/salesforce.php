@@ -413,14 +413,39 @@ class salesforcecore extends solution {
 									// Don't save attributes
 									if($fieldKey != 'attributes'){
 										// In case there are 2 levels of relationship (think about a recursive function here) 
-										if(
-												substr($fieldKey,-3) == '__r'
-											AND !empty($fieldValue)
-										) {
-											foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
-												if($fieldKeyLevel2 != 'attributes'){
-													$row[mb_strtolower($fieldKeyLevel2)] = $fieldValueLevel2;
-													$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
+										if(substr($fieldKey,-3) == '__r') {
+											if (!empty($fieldValue)) {
+												foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
+													if($fieldKeyLevel2 != 'attributes'){
+														// In case there are 3 levels of relationship (think about a recursive function here) 
+														if(substr($fieldKeyLevel2,-3) == '__r') {
+															if(!empty($fieldValueLevel2)) {
+																foreach($fieldValueLevel2 as $fieldKeyLevel3 => $fieldValueLevel3) {
+																	if($fieldKeyLevel3 != 'attributes'){
+																		$row[mb_strtolower($fieldKeyLevel3)] = $fieldValueLevel3;
+																		$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2.'.'.$fieldKeyLevel3] = $fieldValueLevel3;
+																	}
+																}
+															// If a relationship is empty, we set all field under this relationship to empty
+															} else {
+																foreach($param['fields'] as $field) {
+																	if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2)) {
+																		$row[$field] = '';
+																	}
+																}
+															}
+														}
+														else {
+															$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
+														}
+													}
+												}
+											// If a relationship is empty, we set all field under this relationship to empty
+											} else {
+												foreach($param['fields'] as $field) {
+													if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey)) {
+														$row[$field] = '';
+													}
 												}
 											}
 										}
@@ -434,6 +459,10 @@ class salesforcecore extends solution {
 							elseif(!($key == 'attributes')){
 								if($key == 'Id')
 									$row[mb_strtolower($key)] = $record[$key];
+									// If Id is requested in the field mapping
+									if (!empty($param['fields']['Id'])) {
+										$row[$key] = $record[$key];
+									}
 								else {
 									if($key == 'CreatedDate') {
 										$record[$key] = $this->dateTimeToMyddleware($record[$key]);
