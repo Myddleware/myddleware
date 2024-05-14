@@ -17,6 +17,20 @@ For instance, if you're running Myddleware on localhost, you can access the API 
 The Myddleware API is protected via JWT authentication, which means that in order to execute a Myddleware API action,
 you will first need to authenticate using your Myddleware credentials by sending a POST request to the ````/api/login_check```` endpoint.
 
+### Generating RSA Keys
+
+To ensure secure communication with the Myddleware API, you may need to generate RSA key pairs. You can use OpenSSL . Here's how you can generate a pair of RSA keys:
+
+Before generating the keys, make sure to create the directory `/config/jwt/` where you want to store the keys.
+
+```bash
+openssl genrsa -out private.pem 2048
+```
+```bash
+openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+```
+The first command generates a private RSA key stores it in a file named private.pem. The second command extracts the corresponding public key from the private key and stores it in a file named public.pem.
+
 ### /api/login_check
 
 > POST http://localhost:8000/api/login_check
