@@ -592,7 +592,7 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
     {
         try {
 
-            $documentPage = $request->query->get('page', 1);
+            $documentPage = $request->attributes->get('page', 1);
             $logPage = $request->attributes->get('logPage', 1);
 
             $session = $request->getSession();
