@@ -404,9 +404,11 @@
 							<div class="d-flex justify-content-center">
 
 							{# ------------- HISTORY DOCUMENTS ------------- #}
+							<div class="pagination-flux-history">
     						{% if pager.haveToPaginate %}
     						    {{ pagerfanta(documentPagination.pager, 'default', { (documentPagination.pageParameterName): documentPagination.pager.currentPage }) }}
     						{% endif %}
+							</div>
 							</div>
 						{% endif %}
 					</div>
@@ -593,7 +595,7 @@
 							<div id="fd-title-small" class="left">
 								<p>{{'view_flux.nblogs'|trans}}</p>
 								<p>
-									<span class="nb">{{ nb }}</span>
+									<span class="nb">{{ nb_logs }}</span>
 								</p>
 							</div>
 							<div class="clr"></div>
@@ -694,11 +696,11 @@
 							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
 							{# Use the generated custom_route in your links or wherever needed #}
 							{% if more_than_one_page %}
-							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{logPagination.pager.nbResults // logPagination.pager.maxPerPage}}</p>
+							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{ (logPagination.pager.nbResults / logPagination.pager.maxPerPage)|round(0, 'ceil') }}</p>
 
-							<a class='m-1' href="{{ custom_route_first }}">First</a>
+							<a class='m-1' href="{{ custom_route_first }}"> First </a>
 							{% if logPagination.pager.currentPage > 1 %}
-								<a class='m-1' href="{{ custom_route_previous }}">Previous</a>
+								<a class='m-1' href="{{ custom_route_previous }}"> Previous </a>
 							{% endif %}
 							{% endif %}
 
@@ -728,10 +730,10 @@
 								
 
 							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_next }}">Next</a>
+								<a class='m-1' href="{{ custom_route_next }}"> Next </a>
 							{% endif %}
 							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_last }}">Last</a>
+								<a class='m-1' href="{{ custom_route_last }}"> Last </a>
 							{% endif %}
 
 							
