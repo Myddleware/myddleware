@@ -130,7 +130,7 @@
 						</td>	
 						<td>
 							{% if log.getDocument is not empty %}
-								<a href="{{ path('flux_info', {'id': log.getDocument.id}) }}">{{ log.getDocument.id }}</a>
+								<a href="{{ path('flux_info_page', {'id': log.getDocument.id, 'page' : 1, 'logPage' : 1}) }}">{{ log.getDocument.id }}</a>
 							{% endif %}
 						</td>					     					     			     			     	
 						<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>

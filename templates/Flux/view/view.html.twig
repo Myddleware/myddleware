@@ -525,7 +525,7 @@
 									{% for flux in child_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
 												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a>
