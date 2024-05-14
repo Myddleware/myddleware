@@ -1572,6 +1572,11 @@ class documentcore
                         // We skip my_value because it is a constant
                         if ('my_value' != $listFields) {
                             $fieldNameDyn = $listFields; // value : variable name
+							// Replace dot by a string because dot can't be into a variable in php, the formula can't work
+							if (strpos($ruleField['source_field_name'], '.') !== false) {
+								$fieldNameDyn = str_replace('.', '___dot___', $listFields);
+								$ruleField['formula'] = str_replace($listFields, $fieldNameDyn, $ruleField['formula']);
+							}
                             if (array_key_exists($listFields, $source)) {
                                 $$fieldNameDyn = (!empty($source[$listFields]) ? $source[$listFields] : ''); // Dynamic variable (e.g $name = name)
                             } else {
