@@ -121,7 +121,7 @@
 						</td>
 						<td>				     		
 							{% if log.getRef is not empty %}	
-									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
+									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
 									    {{ log.getRef }}
 									</a>
 							{% else %}
