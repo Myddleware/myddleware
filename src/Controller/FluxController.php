@@ -592,8 +592,8 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
     {
         try {
 
-            $documentPage = (int)$page;
-            $logPage = (int)$logPage;
+            $documentPage = $request->query->get('page', 1);
+            $logPage = $request->attributes->get('logPage', 1);
 
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
