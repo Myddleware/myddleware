@@ -17,3 +17,22 @@
     color: red;
 }
 
+.bg-danger {
+    background-color: #f2dedf !important; 
+}
+
+.bg-warning {
+    background-color:#FFECCC !important;
+}
+
+.bg-none {
+    background-color: none; 
+}
+
+.icon-danger {
+    color: #dc3545;
+}
+
+.icon-warning {
+    color: #ffc107;
+}
