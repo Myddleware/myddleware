@@ -2,7 +2,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
     $(function() {
         // Listen to input events on form fields
         $('#relation_filter_field, #relation_filter_another_field').on('change', checkInputs);
-        $('#relation_filter_textarea_field').on('input', checkInputs);
+        $('#relation_filter_textarea_field').on('blur', function() {
+            checkInputs();
+            if ($('#relation_filter_textarea_field').val()) {
+                saveFilter();
+            }
+        });
 
         function checkInputs() {
             var fieldInput = $('#relation_filter_field').val();
@@ -16,8 +21,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         }
 
-        $('#addFilterStep3').on('click', function() {
-    
+        function saveFilter() {
             var fieldInput =$('#relation_filter_field option:selected').text();
             var textareaFieldInput = $('#relation_filter_textarea_field').val();
             
@@ -25,7 +29,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             var anotherFieldInputVal = $('#relation_filter_another_field').val();
             var anotherFieldInputText = $('#relation_filter_another_field option:selected').text();
         
-            // Create new list item
             // Create new list item
             let newItem = $(`
             <li class="mt-2 d-flex justify-content-evenly align-items-baseline">
@@ -50,7 +53,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             $('#relation_filter_textarea_field').val('');
         
             $('#addFilterStep3').prop('disabled', true);
-        });
+        }
+
         
     });
 // Add click event to the remove button
