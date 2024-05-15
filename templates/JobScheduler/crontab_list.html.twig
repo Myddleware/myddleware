@@ -53,8 +53,19 @@
                 </thead>
                 <tbody>
                 {% for value in entity %}
-                <tr>                    
-                    <td class="value">{{ value.command }}</td>
+                    <tr>
+                        <td class="value">
+                            <div id="command-short-{{ loop.index }}">
+                                {{ value.command|slice(0, 20) ~ '...' }}
+                                <button style="color: black; background-color: #ccc;" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">Show more</button>
+                            </div>
+                            <div id="command-full-{{ loop.index }}" style="display: none;">
+                                {{ value.command }}
+                                <button style="color: black; background-color: #ccc;" onclick="document.getElementById('command-full-{{ loop.index }}').style.display='none';document.getElementById('command-short-{{ loop.index }}').style.display='block';">Show less</button>
+                            </div>
+                        </td>
+                    </tr>
+
                     <td class="value">{{ value.period }}</td>
                     <td class="value col-2">{{ value.description  }}</td>
                     <td class="value">{{ value.runningInstances  }}</td>
