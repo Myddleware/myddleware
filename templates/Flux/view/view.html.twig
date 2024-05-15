@@ -132,7 +132,7 @@
 						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 						{% if doc.getParentId %}
 							<td>
-								<a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a>
+								<a href="{{ path('flux_info_page',{'id' : doc.getParentId, 'page' : 1, 'logPage' : 1 }) }}" title="">{{ doc.getParentId }}</a>
 							</td>
 						{% endif %}
 					</tr>
@@ -263,7 +263,7 @@
 								{% for flux in post_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a>
@@ -340,7 +340,7 @@
 									<th>{{'list_flux.tab.name'|trans}}</th>
 									<th>{{'list_flux.tab.source_id'|trans}}</th>
 									<th>{{'list_flux.tab.target_id'|trans}}</th>
-									<th>{{'llist_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
 									<th>{{'list_flux.tab.type'|trans}}</th>
 									<th>{{'list_flux.tab.statut'|trans}}</th>
 								</tr>
@@ -356,7 +356,7 @@
 												<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
 												</svg>
 											{% endif %}
-													<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+													<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 												</td>
 												<td class="ctr">
 													<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
@@ -404,9 +404,11 @@
 							<div class="d-flex justify-content-center">
 
 							{# ------------- HISTORY DOCUMENTS ------------- #}
+							<div class="pagination-flux-history">
     						{% if pager.haveToPaginate %}
     						    {{ pagerfanta(documentPagination.pager, 'default', { (documentPagination.pageParameterName): documentPagination.pager.currentPage }) }}
     						{% endif %}
+							</div>
 							</div>
 						{% endif %}
 					</div>
@@ -439,7 +441,7 @@
 									{% for flux in parent_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
 												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
@@ -523,7 +525,7 @@
 									{% for flux in child_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
 												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a>
@@ -593,7 +595,7 @@
 							<div id="fd-title-small" class="left">
 								<p>{{'view_flux.nblogs'|trans}}</p>
 								<p>
-									<span class="nb">{{ nb }}</span>
+									<span class="nb">{{ nb_logs }}</span>
 								</p>
 							</div>
 							<div class="clr"></div>
@@ -602,10 +604,10 @@
 						<div class="l-5 flux-comment-container">
 
 						
-						{{ form_start(formComment) }}
+						{# {{ form_start(formComment) }}
 							{{ form_widget(formComment) }}
-							<button type="submit" class="btn btn-primary m-2 document-comment-submit">Comment</button>
-						{{ form_end(formComment) }}
+							<button type="submit" class="btn btn-primary m-2 document-comment-submit">{{'view_flux.comment'|trans}}</button>
+						{{ form_end(formComment) }} #}
 
 						</div>
 					</div>
@@ -634,7 +636,7 @@
 											<td>
 
 												{% if log.getRef is not empty %}
-													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
+													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
 														{{ log.getRef }}
 													</a>
 												{% else %}
@@ -694,11 +696,11 @@
 							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
 							{# Use the generated custom_route in your links or wherever needed #}
 							{% if more_than_one_page %}
-							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{logPagination.pager.nbResults // logPagination.pager.maxPerPage}}</p>
+							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{ (logPagination.pager.nbResults / logPagination.pager.maxPerPage)|round(0, 'ceil') }}</p>
 
-							<a class='m-1' href="{{ custom_route_first }}">First</a>
+							<a class='m-1' href="{{ custom_route_first }}"> First </a>
 							{% if logPagination.pager.currentPage > 1 %}
-								<a class='m-1' href="{{ custom_route_previous }}">Previous</a>
+								<a class='m-1' href="{{ custom_route_previous }}"> Previous </a>
 							{% endif %}
 							{% endif %}
 
@@ -728,10 +730,10 @@
 								
 
 							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_next }}">Next</a>
+								<a class='m-1' href="{{ custom_route_next }}"> Next </a>
 							{% endif %}
 							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_last }}">Last</a>
+								<a class='m-1' href="{{ custom_route_last }}"> Last </a>
 							{% endif %}
 
 							

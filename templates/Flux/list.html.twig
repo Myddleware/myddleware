@@ -151,7 +151,7 @@
 									{% endif %}
 								</td>
 								<td>
-									<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+									<a href="{{ path('flux_info_page', {'id' : flux.id, 'page' : 1, 'logPage' : 1}) }}">{{ flux.id }}</a>
 								</td>
 								<td>
 									<a href="{{ path('regle_open',{'id' : flux.rule_id }) }}" title="">{{ flux.rule_name }}</a>
