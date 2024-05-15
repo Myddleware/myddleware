@@ -27,35 +27,37 @@
 namespace App\Controller;
 
 			   
-use App\Entity\Job;					
-use App\Entity\Config;
-use App\Entity\Document;
-use App\Form\Type\DocumentCommentType;							
-use App\Entity\DocumentAudit;
-use App\Entity\DocumentData;
-use App\Entity\DocumentRelationship;
+use Exception;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\DocumentManager;
-use App\Manager\JobManager;
-use App\Manager\SolutionManager;
-use App\Repository\DocumentRepository;
-use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Exception\NotValidCurrentPageException;
+use App\Entity\Config;
+use App\Entity\Document;
+use App\Entity\Job;					
 use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Manager\JobManager;
+use App\Entity\DocumentData;
+use App\Entity\DocumentAudit;
+use App\Service\SessionService;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
+use App\Entity\DocumentRelationship;
+use Pagerfanta\Adapter\ArrayAdapter;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use App\Form\Type\DocumentCommentType;							
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/rule")
@@ -974,13 +976,7 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
         }
-																			   
-																	
-														   
-											
-												 
-			 
-		 
+
         exit;
     }
 
@@ -1145,7 +1141,7 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
         }
     }
 
-        /**
+    /**
      * @Route("/document/unlock/{id}", name="document_view")
      */
     public function unlockDocument($id) {
@@ -1161,4 +1157,28 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
     }
+
+    /**
+     * @Route("/flux/unlock", name="flux_mass_unlock")
+     */
+    public function unlockDocuments(Request $request) {
+        try {
+            $ids = $request->request->get('ids', []);
+            if (empty($ids)) {
+                return new JsonResponse(['error' => 'No documents selected'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $result = $this->jobManager->massAction('unlock', 'document', $ids, false, null, null);
+            if (!$result) {
+                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, "Unable to unlock documents.");
+            }
+
+            return new JsonResponse(['success' => true]);
+
+        } catch (\Exception $e) {
+            throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+  
 }
