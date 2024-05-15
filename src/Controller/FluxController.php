@@ -767,48 +767,50 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
 $documentPagination = $this->nav_pagination_documents($docParams, false);
 $logPagination = $this->nav_pagination_logs($logParams, false);
 
-$formComment = $this->createForm(DocumentCommentType::class, null);
+// $formComment = $this->createForm(DocumentCommentType::class, null);
 
 
-            $formComment->handleRequest($request);
-            if ($formComment->isSubmitted() && $formComment->isValid()) {
-                $comment = $formComment->getData()['comment'];
+//             $formComment->handleRequest($request);
+//             if ($formComment->isSubmitted() && $formComment->isValid()) {
+//                 $comment = $formComment->getData()['comment'];
 				
-                // create new job
-                $job = new Job();
-                $job->setBegin(new \DateTime());
-                $job->setEnd(new \DateTime());
-                $job->setParam('notification');
-                $job->setMessage('Comment log created. Comment: '.$comment);
-                $job->setOpen(0);
-                $job->setClose(0);
-                $job->setCancel(0);
-                $job->setManual(1);
-                $job->setApi(0);
-                $job->setError(0);
-                $job->setStatus('End');
-                $job->setId(uniqid(mt_rand(), true));
+//                 // create new job
+//                 $job = new Job();
+//                 $job->setBegin(new \DateTime());
+//                 $job->setEnd(new \DateTime());
+//                 $job->setParam('notification');
+//                 $job->setMessage('Comment log created. Comment: '.$comment);
+//                 $job->setOpen(0);
+//                 $job->setClose(0);
+//                 $job->setCancel(0);
+//                 $job->setManual(1);
+//                 $job->setApi(0);
+//                 $job->setError(0);
+//                 $job->setStatus('End');
+//                 $job->setId(uniqid(mt_rand(), true));
                 
-                $em->persist($job);
-                $em->flush();
+//                 $em->persist($job);
+//                 $em->flush();
                 
-                // Add log to indicate this action
-                $log = new Log();
-                $log->setCreated(new \DateTime());
-                $log->setType('I');
+//                 // Add log to indicate this action
+//                 $log = new Log();
+//                 $log->setCreated(new \DateTime());
+//                 $log->setType('I');
                 
-                $log->setRule($rule);
-                $log->setJob($job);
-                $log->setMessage($comment);
-                $log->setDocument($doc[0]);
-                $em->persist($log);
-                $em->flush();
+//                 $log->setRule($rule);
+//                 $log->setJob($job);
+//                 $log->setMessage($comment);
+//                 $log->setDocument($doc[0]);
+//                 $em->persist($log);
+//                 $em->flush();
                 
-                $this->addFlash('success', 'Comment successfully added !');
+//                 $this->addFlash('success', 'Comment successfully added !');
 
-                // Redirect the route to avoid resubmitting the form according to the PRG pattern
-                return $this->redirectToRoute('flux_info', ['id' => $id]);
-            }
+//                 // Redirect the route to avoid resubmitting the form according to the PRG pattern
+//                 return $this->redirectToRoute('flux_info', ['id' => $id]);
+            // }
+
+
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
@@ -837,7 +839,7 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
                     'ctm_btn' => $list_btn,
                     'read_record_btn' => $solution_source->getReadRecord(),
                     'timezone' => $timezone,
-					'formComment' => $formComment->createView(),
+					// 'formComment' => $formComment->createView(),
                     'logs' => $logs,
                     'documentPagination' => $documentPagination,
                     'logPagination' => $logPagination,

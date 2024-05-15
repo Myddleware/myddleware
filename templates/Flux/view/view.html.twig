@@ -144,7 +144,7 @@
 						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 						{% if doc.getParentId %}
 							<td>
-								<a href="{{ path('flux_info',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a>
+								<a href="{{ path('flux_info_page',{'id' : doc.getParentId, 'page' : 1, 'logPage' : 1 }) }}" title="">{{ doc.getParentId }}</a>
 							</td>
 						{% endif %}
 					</tr>
@@ -275,7 +275,7 @@
 								{% for flux in post_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a>
@@ -368,7 +368,7 @@
 												<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
 												</svg>
 											{% endif %}
-													<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+													<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 												</td>
 												<td class="ctr">
 													<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
@@ -453,7 +453,7 @@
 									{% for flux in parent_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info',{'id' : flux.id }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
 												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
@@ -537,7 +537,7 @@
 									{% for flux in child_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
 												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a>
@@ -616,10 +616,10 @@
 						<div class="l-5 flux-comment-container">
 
 						
-						{{ form_start(formComment) }}
+						{# {{ form_start(formComment) }}
 							{{ form_widget(formComment) }}
 							<button type="submit" class="btn btn-primary m-2 document-comment-submit">{{'view_flux.comment'|trans}}</button>
-						{{ form_end(formComment) }}
+						{{ form_end(formComment) }} #}
 
 						</div>
 					</div>
@@ -648,7 +648,7 @@
 											<td>
 
 												{% if log.getRef is not empty %}
-													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
+													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
 														{{ log.getRef }}
 													</a>
 												{% else %}
