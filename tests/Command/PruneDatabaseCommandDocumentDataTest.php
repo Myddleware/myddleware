@@ -6,7 +6,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class PruneDatabaseCommandDocumentTest extends KernelTestCase
+class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
 {
     /**
      * @var EntityManagerInterface
@@ -38,16 +38,16 @@ class PruneDatabaseCommandDocumentTest extends KernelTestCase
             // assert: the document is there at the beginning
             }
 
-            $sqlAfterInsert = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
-            $countAfterInsert = $this->entityManager->getConnection()->fetchOne($sqlAfterInsert, ['id' => $documentId]);
-            $this->assertEquals(1, $countAfterInsert);
+            $sqlAfterInsertDocument = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
+            $countAfterInsertDocument = $this->entityManager->getConnection()->fetchOne($sqlAfterInsertDocument, ['id' => $documentId]);
+            $this->assertEquals(1, $countAfterInsertDocument);
 
             // Check if a document with the given ID already exists
-            $sqlCountDocumentData = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
+            $sqlCountDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `doc_id` = :id";
             $countDocumentData = $this->entityManager->getConnection()->fetchOne($sqlCountDocumentData, ['id' => $documentId]);
 
+            $documentDataId = 8;
             if ($countDocumentData == 0) {
-                $documentDataId = 8;
                 $documentId = '6644a219422800.86915394';
                 $type = 'T';
                 $data = serialize([
@@ -58,23 +58,26 @@ class PruneDatabaseCommandDocumentTest extends KernelTestCase
                     "createpassword" => "1"
                 ]);
 
-                $sqlDocumentData = "INSERT INTO `documentdata` VALUES (:documentDataId, :documentId, :type, :data)";
+                $sqlDocumentData = "INSERT INTO `documentdata` (`id`, `doc_id`, `type`, `data`) VALUES (:id, :doc_id, :type, :data)";
                 $this->entityManager->getConnection()->executeStatement($sqlDocumentData, [
-                    'documentDataId' => $documentDataId,
-                    'documentId' => $documentId,
+                    'id' => $documentDataId,
+                    'doc_id' => $documentId,
                     'type' => $type,
                     'data' => $data
                 ]);
 
-                $this->entityManager->getConnection()->executeStatement($sqlDocumentData);
-
                 // flush the changes to the database
                 $this->entityManager->flush();
             }
+
+            $sqlAfterInsertDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `id` = :id";
+            $countAfterInsertDocumentData = $this->entityManager->getConnection()->fetchOne($sqlAfterInsertDocumentData, ['id' => $documentDataId]);
+            $this->assertEquals(1, $countAfterInsertDocumentData);
     }
 
     public function testExecute()
     {
+        $documentDataId = 8;
         $command = ['php', 'bin/console', 'myddleware:prunedatabase'];
 
         $process = new Process($command);
@@ -92,13 +95,18 @@ class PruneDatabaseCommandDocumentTest extends KernelTestCase
 
 
         // assert: the document is deleted
-        $documentId = '66435b3019bad4.47813999';
+        $documentId = '6644a219422800.86915394';
 
         // Check if a document with the given ID already exists
-        $sql = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
-        $count = $this->entityManager->getConnection()->fetchOne($sql, ['id' => $documentId]);
+        $sqlDocument = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
+        $countDocument = $this->entityManager->getConnection()->fetchOne($sqlDocument, ['id' => $documentId]);
         
 
-        $this->assertEquals(0, $count);
+        $this->assertEquals(0, $countDocument);
+
+        // assert: the document data is deleted
+        // Check if a document with the given ID already exists
+        $sqlDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `id` = :id";
+        $countDocument = $this->entityManager->getConnection()->fetchOne($sqlDocumentData, ['id' => $documentDataId]);
     }
 }
