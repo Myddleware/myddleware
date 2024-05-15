@@ -3,7 +3,7 @@
  * This file is part of Myddleware.
 
  * @package Myddleware
- * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EUR
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  * @link http://www.myddleware.com
 
