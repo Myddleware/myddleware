@@ -99,6 +99,8 @@ class jobcore
 
     private SessionInterface $session;
 
+    private int $nbDays;
+
     public function __construct(
         LoggerInterface $logger,
         DriverConnection $dbalConnection,
@@ -699,11 +701,17 @@ class jobcore
 
     public function getListOfSqlDocumentParams(): array
     {
+
+        $date = new DateTime();
+        $date->modify('-' . $this->nbDays . ' days');
+        $formattedDate = $date->format('Y-m-d H:i:s');
+
+
         $listOfSqlDocumentParams = [
             "SELECT log.id
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND log.created < '$formattedDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
 
         "SELECT documentdata.id
