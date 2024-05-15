@@ -1144,4 +1144,19 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
             return false;
         }
     }
+
+        /**
+     * @Route("/document/unlock/{id}", name="document_view")
+     */
+    public function unlockDocument($id) {
+        try{
+            $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
+
+            $this->addFlash('success_unlock', 'Document déverrouillé avec succès.');
+            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+        } catch (Exception $e) {
+            $this->addFlash('error', 'Erreur lors du déverrouillage du document.');
+            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    }
 }
