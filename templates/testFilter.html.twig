@@ -257,6 +257,9 @@
                               (<span></span>)</a> #}
                         <a id="exportfluxcsv" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.exportcsv'|trans}}
                         </a>
+                        <a id="unlockAllFlux" class="btn btn-outline-danger" role="button" href="javascript:void(0);" title="">
+                              {{ 'list_flux.btn.unlockall'|trans }} (<span id="countSelected"></span>)
+                        </a>
                   </p>
             </div>
 		</div>
@@ -339,9 +342,11 @@
             var path_remove_filter = "{{ path('remove_filter') }}";
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
 		var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
+		var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
 		var path_img = "{{ asset('build/images/regle/') }}";
 		var lang = "{{ app.request.locale }}";
 		var mass_cancel = "{{ path('flux_mass_cancel') }}";
+		var mass_unlock = "{{ path('flux_mass_unlock') }}";
 		var mass_run = "{{ path('flux_mass_run') }}";
             var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
 		var csvdocumentids = "{{ csvdocumentids }}";

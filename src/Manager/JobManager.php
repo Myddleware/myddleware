@@ -481,11 +481,11 @@ class jobcore
             if ('changeStatus' == $action) {
                 $where .= " AND document.status = '$fromStatus' ";
             }
+            
 			// Filter on document locked
             if ('unlock' == $action) {
                 $where .= " AND document.job_lock != '' AND document.job_lock IS NOT NULL ";
             }
-
             // Build the query
             $sqlParams = '	SELECT 
 								document.id,
@@ -499,10 +499,10 @@ class jobcore
             $result = $stmt->executeQuery();
             $documents = $result->fetchAllAssociative();
 
+            // include_once 'rule.php';
             if (!empty($documents)) {
-                // include_once 'rule.php';
                 $param['ruleId'] = '';
-                foreach ($documents as $document) {
+                foreach ($documents as $document) {  
                     // If new rule, we create a new instance of RuleManager
                     if ($param['ruleId'] != $document['rule_id']) {
                         $this->ruleManager->setApi($this->api);
@@ -510,6 +510,18 @@ class jobcore
 						$this->ruleManager->setManual($this->manual);
                         $this->ruleManager->setRule($document['rule_id']);
                     }
+                    
+                    // If the action is 'unlock', clear the job_lock field for this document
+                   
+                    if ('unlock' == $action) {
+                     
+                        $sqlUnlock = "UPDATE document SET job_lock = '' WHERE id = :id";
+                        $stmtUnlock = $this->connection->prepare($sqlUnlock);
+                        $stmtUnlock->bindValue('id', $document['id'], PDO::PARAM_STR);
+                        dump($stmtUnlock);
+                        $result = $stmtUnlock->executeQuery();
+                    }
+
                     $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
 					// Save the error if exists
 					if (!empty($error)) {

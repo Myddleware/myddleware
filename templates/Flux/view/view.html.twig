@@ -39,6 +39,11 @@
 	<div id="flux" class="pt-4">
 		{# ------------- FLUX ------------- #}
 		<div>
+			{# {% for message in app.flashes('success_unlock') %}
+				<div class="alert alert-success">
+					{{ message }}
+				</div>
+			{% endfor %} #}
 			<div class="block-btn-infos d-flex justify-content-around">
 				{% if ctm_btn %}
 					{% for btn in ctm_btn %}
@@ -69,6 +74,13 @@
 						<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
 							<button type="button" class="btn btn-primary">
 								{{'view_flux.btn.readrecord'|trans}}
+							</button>
+						</a>
+					{% endif %}
+					{% if doc.jobLock %}
+						<a class="btn_action_loading" href="{{ path('document_view', {'id': doc.getId}) }}" title="{{ 'view_flux.btn.unlock'|trans }}">
+							<button type="button" class="btn btn-danger">
+								{{ 'view_flux.btn.unlock'|trans }}
 							</button>
 						</a>
 					{% endif %}
