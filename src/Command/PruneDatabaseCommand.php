@@ -73,16 +73,22 @@ class PruneDatabaseCommand extends Command
 
         $responseCloseJob = $this->jobManager->closeJob();
 
-        if (!empty($responseCloseJob['message'])) {
-            if ($responseCloseJob['success']) {
-                $output->writeln('<info>'.$responseCloseJob['message'].'</info>');
-                $this->logger->info($responseCloseJob['message']);
+        if ($responseCloseJob) {
+            $this->jobManager->setMessage('The database has been pruned successfully');
+        } else {
+            $this->jobManager->setMessage('An error occurred while pruning the database');
+        }
+
+        if (!empty($this->jobManager->getMessage())) {
+            if ($responseCloseJob) {
+                $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
+                $this->logger->info($this->jobManager->getMessage());
             } else {
-                $output->writeln('<error>'.$responseCloseJob['message'].'</error>');
-                $this->logger->error($responseCloseJob['message']);
+                $output->writeln('<error>'.$this->jobManager->getMessage().'</error>');
+                $this->logger->error($this->jobManager->getMessage());
             }
         }
 
-        return 1;
+        return 0;
     }
 }
