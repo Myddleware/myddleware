@@ -34,7 +34,13 @@ class PruneDatabaseCommandTest extends KernelTestCase
 
                 // flush the changes to the database
                 $this->entityManager->flush();
+
+            // assert: the document is there at the beginning
             }
+
+            $sqlAfterInsert = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
+            $countAfterInsert = $this->entityManager->getConnection()->fetchOne($sqlAfterInsert, ['id' => $documentId]);
+            $this->assertEquals(1, $countAfterInsert);
     }
 
     public function testExecute()
