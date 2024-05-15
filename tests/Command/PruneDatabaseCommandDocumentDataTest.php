@@ -12,9 +12,13 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
      * @var EntityManagerInterface
      */
     private $entityManager;
+    private int $documentDataId;
 
     protected function setUp(): void
     {
+
+        $this->documentDataId = 8;
+
         $kernel = self::bootKernel();
 
         $this->entityManager = $kernel->getContainer()
@@ -46,7 +50,6 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
             $sqlCountDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `doc_id` = :id";
             $countDocumentData = $this->entityManager->getConnection()->fetchOne($sqlCountDocumentData, ['id' => $documentId]);
 
-            $documentDataId = 8;
             if ($countDocumentData == 0) {
                 $documentId = '6644a219422800.86915394';
                 $type = 'T';
@@ -60,7 +63,7 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
 
                 $sqlDocumentData = "INSERT INTO `documentdata` (`id`, `doc_id`, `type`, `data`) VALUES (:id, :doc_id, :type, :data)";
                 $this->entityManager->getConnection()->executeStatement($sqlDocumentData, [
-                    'id' => $documentDataId,
+                    'id' => $this->documentDataId,
                     'doc_id' => $documentId,
                     'type' => $type,
                     'data' => $data
@@ -71,13 +74,12 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
             }
 
             $sqlAfterInsertDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `id` = :id";
-            $countAfterInsertDocumentData = $this->entityManager->getConnection()->fetchOne($sqlAfterInsertDocumentData, ['id' => $documentDataId]);
+            $countAfterInsertDocumentData = $this->entityManager->getConnection()->fetchOne($sqlAfterInsertDocumentData, ['id' => $this->documentDataId]);
             $this->assertEquals(1, $countAfterInsertDocumentData);
     }
 
     public function testExecute()
     {
-        $documentDataId = 8;
         $command = ['php', 'bin/console', 'myddleware:prunedatabase'];
 
         $process = new Process($command);
@@ -107,6 +109,6 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
         // assert: the document data is deleted
         // Check if a document with the given ID already exists
         $sqlDocumentData = "SELECT COUNT(*) FROM `documentdata` WHERE `id` = :id";
-        $countDocument = $this->entityManager->getConnection()->fetchOne($sqlDocumentData, ['id' => $documentDataId]);
+        $countDocument = $this->entityManager->getConnection()->fetchOne($sqlDocumentData, ['id' => $this->documentDataId]);
     }
 }
