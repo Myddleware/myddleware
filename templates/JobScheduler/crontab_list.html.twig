@@ -56,11 +56,11 @@
                     <td class="value">
                         <div id="command-short-{{ loop.index }}">
                             {{ value.command|slice(0, 20) ~ '...' }}
-                            <button style="color: black; background-color: #ccc;" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">Show more</button>
+                            <button class="button_plus_message" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">+</button>
                         </div>
                         <div id="command-full-{{ loop.index }}" style="display: none;">
                             {{ value.command }}
-                            <button style="color: black; background-color: #ccc;" onclick="document.getElementById('command-full-{{ loop.index }}').style.display='none';document.getElementById('command-short-{{ loop.index }}').style.display='block';">Show less</button>
+                            <button class="button_minus_message" onclick="document.getElementById('command-full-{{ loop.index }}').style.display='none';document.getElementById('command-short-{{ loop.index }}').style.display='block';">-</button>
                         </div>
                     </td>
                     <td class="value">{{ value.period }}</td>
