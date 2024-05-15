@@ -6,7 +6,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class PruneDatabaseCommandTest extends KernelTestCase
+class PruneDatabaseCommandDocumentTest extends KernelTestCase
 {
     /**
      * @var EntityManagerInterface
