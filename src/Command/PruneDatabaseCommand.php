@@ -31,6 +31,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputArgument;
 
 class PruneDatabaseCommand extends Command
 {
@@ -52,6 +53,7 @@ class PruneDatabaseCommand extends Command
         $this
             ->setName('myddleware:prunedatabase')
             ->setDescription('Remove all data flagged as deleted in Myddleware')
+            ->addArgument('nbDays', InputArgument::REQUIRED, 'Number of days to prune data for');
         ;
     }
 
@@ -60,6 +62,7 @@ class PruneDatabaseCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $nbDays = $input->getArgument('nbDays');
         $data = $this->jobManager->initJob('Prune database');
 
         if (false === $data['success']) {
@@ -69,7 +72,7 @@ class PruneDatabaseCommand extends Command
             return 0;
         }
 
-        $this->jobManager->pruneDatabase();
+        $this->jobManager->pruneDatabase($nbDays);
 
         $responseCloseJob = $this->jobManager->closeJob();
 
