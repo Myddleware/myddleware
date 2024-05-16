@@ -152,6 +152,10 @@
 	width: 40%;
 }
 
+.pagination-flux-history .pagination__item {
+	margin-right: 5px;
+}
+
 /* NEW FILTER */
 
 

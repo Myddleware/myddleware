@@ -291,7 +291,7 @@
                                                       <input type="checkbox" name="{{ document.id }}"/>
                                                 {% endif %}
                                           </td>
-                                          <td><a href="{{ path('flux_info',{'id' : document.id }) }}">{{ document.id }}</a></td>                                          
+                                          <td><a href="{{ path('flux_info_page', {'id' : document.id, 'page' : 1, 'logPage' : 1}) }}">{{ document.id }}</a></td>                                          
                                           <td><a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="">{{ document.rule_name }}</a></td>
                                           <td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
                                           <td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
@@ -336,6 +336,7 @@
             {{ encore_entry_script_tags('filter') }}
 	{% endblock javascript %}
 	<script type="text/javascript">
+            var path_remove_filter = "{{ path('remove_filter') }}";
 		var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
 		var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
 		var path_img = "{{ asset('build/images/regle/') }}";
