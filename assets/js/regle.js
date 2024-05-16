@@ -1863,7 +1863,7 @@ function addFilter(field, path) {
       $("#fieldsfilter").append(
         '<li id="filter_' +
           field +
-          '" class="mt-2 d-flex justify-content-evenly align-items-baseline"><span class="name me-2 mt-2">' +
+          '" class="row align-items-center mb-2"><span class="name me-2 mt-2">' +
           field +
           '</span> <a class="fancybox me-2" data-fancybox-type="iframe" href="' +
           path +
