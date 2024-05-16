@@ -33,7 +33,7 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
             
             if ($count == 0) {
                 // If the document does not exist, insert it
-                $sql = "INSERT INTO `document` VALUES ('6644a219422800.86915394', '64807163f1b23', 10, 10, '2024-05-14 12:38:08', '2024-05-14 12:38:08', 'Error_sending', '8', '67', '2023-06-22 06:35:16', '0', 'U', 1, 'Error', '', 1, '')";
+                $sql = "INSERT INTO `document` VALUES ('6644a219422800.86915394', '64807163f1b23', 10, 10, '2024-05-14 12:38:08', '2022-05-14 12:38:08', 'Error_sending', '8', '67', '2023-06-22 06:35:16', '0', 'U', 1, 'Error', '', 1, '')";
                 $this->entityManager->getConnection()->executeStatement($sql);
 
                 // flush the changes to the database
@@ -80,7 +80,7 @@ class PruneDatabaseCommandDocumentDataTest extends KernelTestCase
 
     public function testExecute()
     {
-        $command = ['php', 'bin/console', 'myddleware:prunedatabase'];
+        $command = ['php', 'bin/console', 'myddleware:prunedatabase', '8'];
 
         $process = new Process($command);
 
