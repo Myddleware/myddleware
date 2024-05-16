@@ -2784,7 +2784,7 @@ class documentcore
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $this->typeError);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
+            $stmt->bindValue(':message', $this->id.' - '.str_replace("'", '', utf8_encode($this->message)));
             $stmt->bindValue(':rule_id', $this->ruleId);
             $stmt->bindValue(':doc_id', $this->id);
             $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
