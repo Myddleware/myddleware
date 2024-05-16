@@ -180,7 +180,9 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
-        read_job_lock: Débloquer
+        read_job_lock: DébloquerDébloqué
+        read_job_lock_success: La régle a bien été débloqué
+        read_job_lock_error: Impossible de débloquer la règle
     connector:
         title: Connecteur
         solution: Solution

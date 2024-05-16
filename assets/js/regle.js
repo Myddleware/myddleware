@@ -2219,7 +2219,7 @@ $(document).ready(function () {
       url: ajaxUrl,
       type: "POST",
       success: function (response) {
-        alert("Verrouillage effacé avec succès.");
+        alert(read_job_lock_success);
         console.log(jobId);
         if (response.read_job_lock === "") {
           $(".job_lock_" + jobId).show();
@@ -2228,7 +2228,7 @@ $(document).ready(function () {
         }
       },
       error: function () {
-        alert("Erreur lors de la suppression du verrouillage.");
+        alert(read_job_lock_error);
       },
     });
   });

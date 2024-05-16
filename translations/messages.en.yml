@@ -183,6 +183,8 @@ view_rule:
         bidirectional: Bidirectional
         duplicate_fields: Fields to avoid duplicates
         read_job_lock: Unlock job
+        read_job_lock_success: The job has been unlocked
+        read_job_lock_error: An error occurred while unlocking the job
     connector:
         title: Connector
         solution: Solution
