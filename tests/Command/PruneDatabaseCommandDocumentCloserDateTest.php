@@ -12,6 +12,7 @@ class PruneDatabaseCommandDocumentCloserDateTest extends KernelTestCase
      * @var EntityManagerInterface
      */
     private $entityManager;
+    private string $testNbDays = '8';
 
     protected function setUp(): void
     {
@@ -23,14 +24,22 @@ class PruneDatabaseCommandDocumentCloserDateTest extends KernelTestCase
 
             $documentId = '66435b3019bad4.47813997';
 
+            //selected date = today - random number of days between 0 and testNbDays
+            $date = new \DateTime();
+            $randomDays = rand(0, intval($this->testNbDays));
+            $date->sub(new \DateInterval('P' . $randomDays . 'D'));
+            $closerDate = $date->format('Y-m-d H:i:s');
+
+
             // Check if a document with the given ID already exists
             $sql = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
             $count = $this->entityManager->getConnection()->fetchOne($sql, ['id' => $documentId]);
             
             if ($count == 0) {
                 // If the document does not exist, insert it
-                $sql = "INSERT INTO `document` VALUES ('66435b3019bad4.47813997', '64807163f1b23', 10, 10, '2024-05-14 12:38:08', '2024-05-14 12:38:08', 'Error_sending', '8', '67', '2024-05-14 06:35:16', '0', 'U', 1, 'Error', '', 1, '')";
-                $this->entityManager->getConnection()->executeStatement($sql);
+                $sql = "INSERT INTO `document` VALUES (?, ?, 10, 10, ?, ?, 'Error_sending', '8', '67', ?, '0', 'U', 1, 'Error', '', 1, '')";
+                $params = ['66435b3019bad4.47813997', '64807163f1b23', $closerDate, $closerDate, $closerDate];
+                $this->entityManager->getConnection()->executeStatement($sql, $params);
 
                 // flush the changes to the database
                 $this->entityManager->flush();
@@ -45,7 +54,7 @@ class PruneDatabaseCommandDocumentCloserDateTest extends KernelTestCase
 
     public function testExecute()
     {
-        $command = ['php', 'bin/console', 'myddleware:prunedatabase', '8'];
+        $command = ['php', 'bin/console', 'myddleware:prunedatabase', $this->testNbDays];
 
         $process = new Process($command);
 
