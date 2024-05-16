@@ -54,11 +54,12 @@ $(function() {
       { name: 'targetContent', selector: '#combined_filter_sourceContent_targetContent' }
     ];
     
-    // Function to show a filter if its value is not empty
     function showFilter(filter) {
-      var filterValue = $(filter.selector).val();
-      if (filterValue !== null && filterValue !== '' && filterValue.length > 0) {
-        $('#' + filter.name).removeAttr('hidden');
+      if (filter && filter.selector) {
+        var filterValue = $(filter.selector).val();
+        if (filterValue !== undefined && filterValue !== null && filterValue !== '' && filterValue.length > 0) {
+          $('#' + filter.name).removeAttr('hidden');
+        }
       }
     }
     
