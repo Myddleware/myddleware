@@ -303,23 +303,39 @@ $(function () {
       theme(style_template);
     });
 
-    // Ajouter une fonction dans la zone de formule
-    $("#functions").on("dblclick", "li", function () {
-      var position = $("#area_insert").getCursorPosition();
-      var content = $("#area_insert").val();
-      var newContent =
-        content.substr(0, position) +
-        $.trim($(this).text()) +
-        "( " +
-        content.substr(position);
-      // If we click on the function mdw_no_send_field, we don't want to add the parenthesis because it is a constant
-      if (newContent == "mdw_no_send_field( ") {
-        newContent = '"mdw_no_send_field"';
-      }
-      $("#area_insert").val(newContent);
-      colorationSyntax();
-      theme(style_template);
-    });
+$("#functions").on("dblclick", "li", function () {
+  var position = $("#area_insert").getCursorPosition();
+  var content = $("#area_insert").val();
+  var newContent =
+    content.substr(0, position) +
+    $.trim($(this).text()) +
+    "( " +
+    content.substr(position);
+  // If we click on the function mdw_no_send_field, we don't want to add the parenthesis because it is a constant
+  if (newContent.includes("mdw_no_send_field( ")) {
+    newContent = newContent.replace("mdw_no_send_field( ", '"mdw_no_send_field"');
+}
+  $("#area_insert").val(newContent);
+  // Set the cursor position to the end of the new content
+  $("#area_insert").setCursorPosition(newContent.length);
+  colorationSyntax();
+  theme(style_template);
+});
+
+$.fn.setCursorPosition = function(pos) {
+  this.each(function(index, elem) {
+    if (elem.setSelectionRange) {
+      elem.setSelectionRange(pos, pos);
+    } else if (elem.createTextRange) {
+      var range = elem.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', pos);
+      range.moveStart('character', pos);
+      range.select();
+    }
+  });
+  return this;
+};
 
     // Btn clear dialogue formule
     $("#area_eff").on("click", function () {
