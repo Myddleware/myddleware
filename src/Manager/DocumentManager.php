@@ -236,7 +236,7 @@ class documentcore
                 $this->data['id'] = $documentEntity->getSource();
                 $this->data['source_date_modified'] = $documentEntity->getSourceDateModified()->format('Y-m-d H:i:s');
             } else {
-                $this->logger->error('Failed to retrieve Document '.$id_doc.'.');
+                $this->logger->error($this->id.' - Failed to retrieve Document '.$id_doc.'.');
             }
         } catch (\Exception $e) {
 			// Remove the lock because there is not status changed (lock is usually remove when we change the status)
@@ -315,7 +315,7 @@ class documentcore
 		} catch (\Exception $e) {
             $this->message .= $e->getMessage();
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error((!empty($this->id) ? $this->id.' - ' : '').$this->message);
             $this->createDocLog();
 			return false;
         }
@@ -382,7 +382,7 @@ class documentcore
             return $this->insertDataTable($this->data, 'S');
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
     }
@@ -424,8 +424,7 @@ class documentcore
             $this->message .= 'Failed to filter document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Filter_KO');
-            $this->logger->error($this->message);
-
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
     }
@@ -808,8 +807,7 @@ class documentcore
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
-            $this->logger->error($this->message);
-
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
     }
@@ -933,8 +931,7 @@ class documentcore
             $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Relate_KO');
-            $this->logger->error($this->message);
-
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
     }
@@ -1014,8 +1011,7 @@ class documentcore
             $this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Error_transformed');
-            $this->logger->error($this->message);
-
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
     }
@@ -1168,7 +1164,7 @@ class documentcore
             } else {
                 $this->updateStatus('Error_checking');
             }
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
         return true;
@@ -1369,7 +1365,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
         return false;
     }
@@ -1455,8 +1451,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
-
+            $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
 
@@ -1476,7 +1471,7 @@ class documentcore
             } catch (Exception $e) {
                 $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                 $this->typeError = 'E';
-                $this->logger->error($this->message);
+                $this->logger->error($this->id.' - '.$this->message);
             }
         }
 
@@ -1530,7 +1525,7 @@ class documentcore
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
 
         return null;
@@ -1672,7 +1667,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             // Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
             $this->transformError = true;
 
@@ -1711,7 +1706,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error getRule  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
 
         return null;
@@ -1756,7 +1751,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
     }
 
@@ -1838,7 +1833,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error getTargetFields  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
     }
 
@@ -1859,7 +1854,7 @@ class documentcore
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->logger->error($this->id.' - Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -2063,7 +2058,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->typeError = 'E';
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
 
             return null;
         }
@@ -2157,7 +2152,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
         }
     }
@@ -2193,7 +2188,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
         }
     }
@@ -2213,7 +2208,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed to save the document relationship for the field '.$ruleRelationship['field_name_source'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'W';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
 
             return false;
         }
@@ -2257,7 +2252,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
         }
     }
@@ -2292,7 +2287,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
 
             return false;
@@ -2496,7 +2491,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
     }
 
@@ -2539,7 +2534,7 @@ class documentcore
             }
         } catch (\Exception $e) {
             $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->message);
+            $this->logger->error($this->id.' - '.$this->message);
         }
 
         return null;
@@ -2666,7 +2661,7 @@ class documentcore
 								}
 							}
 						} catch (\Exception $e) {
-							$this->logger->error('Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+							$this->logger->error($this->id.' - Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 							$this->generateDocLog('E','Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 							$this->updateStatus('Error_workflow');
 						}
@@ -2674,7 +2669,7 @@ class documentcore
 				}
 			}
 		} catch (\Exception $e) {
-            $this->logger->error('Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->logger->error($this->id.' - Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->generateDocLog('E','Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 	}
@@ -2722,7 +2717,7 @@ class documentcore
 				}
 			}
 		} catch (\Exception $e) {
-			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+			$this->logger->error($this->id.' - Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
 			$this->generateDocLog('E',$this->message);
 		}
 	}
@@ -2764,7 +2759,7 @@ class documentcore
 			// Generate a document log.
 			$this->generateDocLog('S','Action '.$action['id'].' executed. '.(!empty($generateDocumentId) ? 'The document '.$generateDocumentId.' has been generated. ' : ''));
 		} catch (\Exception $e) {
-			$this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+			$this->logger->error($this->id.' - Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
 			$this->generateDocLog('E','Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
 		}
 	}
@@ -2784,7 +2779,7 @@ class documentcore
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $this->typeError);
-            $stmt->bindValue(':message', $this->id.' - '.str_replace("'", '', utf8_encode($this->message)));
+            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
             $stmt->bindValue(':rule_id', $this->ruleId);
             $stmt->bindValue(':doc_id', $this->id);
             $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
@@ -2795,7 +2790,7 @@ class documentcore
 				$this->docIdRefError = '';
 			}
         } catch (\Exception $e) {
-            $this->logger->error('Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->logger->error($this->id.' - Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
