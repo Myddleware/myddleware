@@ -2183,6 +2183,41 @@ $(document).ready(function() {
 	});
 });
 
+$(document).ready(function () {
+  $(".edit-button").hover(
+    function () {
+      $(this).find(".fa-lock").hide();
+      $(this).find(".fa-unlock").show();
+    },
+    function () {
+      $(this).find(".fa-lock").show();
+      $(this).find(".fa-unlock").hide();
+    }
+  );
+
+  $(".edit-button").click(function () {
+    var jobId = $(this).data("job-id");
+    var ajaxUrl = clearReadJobLockUrl.replace("PLACEHOLDER_ID", jobId);
+
+    $.ajax({
+      url: ajaxUrl,
+      type: "POST",
+      success: function (response) {
+        alert("Verrouillage effacé avec succès.");
+        console.log(jobId);
+        if (response.read_job_lock === "") {
+          $(".job_lock_" + jobId).show();
+        } else {
+          $(".job_lock_" + jobId).hide();
+        }
+      },
+      error: function () {
+        alert("Erreur lors de la suppression du verrouillage.");
+      },
+    });
+  });
+});
+
 function toCamelCase(str) {
     // Split the string into words
     var words = str.split('_');

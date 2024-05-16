@@ -1182,5 +1182,17 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-  
+
+    /**
+     * @Route("/read_job_lock/clear/{id}", name="clear_read_job_lock", methods={"POST"})
+     */
+    public function clearReadJobLock($id) {
+        try {
+            $this->jobManager->clearLock('rule', [$id]);
+
+            return new JsonResponse(['status' => 'success', 'message' => 'Verrouillage effacé avec succès.']);
+        } catch (Exception $e) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
+        }
+    }
 }

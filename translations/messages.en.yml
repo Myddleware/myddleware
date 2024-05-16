@@ -182,6 +182,7 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectional
         duplicate_fields: Fields to avoid duplicates
+        read_job_lock: Unlock job
     connector:
         title: Connector
         solution: Solution

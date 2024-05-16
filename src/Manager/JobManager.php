@@ -511,14 +511,11 @@ class jobcore
                         $this->ruleManager->setRule($document['rule_id']);
                     }
                     
-                    // If the action is 'unlock', clear the job_lock field for this document
-                   
+                    // If the action is 'unlock', clear the job_lock field for this document                 
                     if ('unlock' == $action) {
-                     
                         $sqlUnlock = "UPDATE document SET job_lock = '' WHERE id = :id";
                         $stmtUnlock = $this->connection->prepare($sqlUnlock);
                         $stmtUnlock->bindValue('id', $document['id'], PDO::PARAM_STR);
-                        dump($stmtUnlock);
                         $result = $stmtUnlock->executeQuery();
                     }
 
@@ -541,6 +538,32 @@ class jobcore
             return false;
         }
 
+        return true;
+    }
+
+    // Function to clear the unlock on rule
+    public function clearLock($dataType, $ids): bool
+    {
+        try {
+            if (empty($ids)) {
+                throw new Exception('No ids in the input parameter of the function clearLock.');
+            }
+    
+            $queryIn = '(' . implode(',', array_map(function($id) { return "'" . $id . "'"; }, $ids)) . ')';
+            $where = ' WHERE id IN ' . $queryIn;
+    
+            if ('rule' == $dataType) {
+                $sqlClear = "UPDATE rule SET read_job_lock = '' " . $where;
+                $stmtClear = $this->connection->prepare($sqlClear);
+                $result = $stmtClear->executeQuery();
+            } else {
+                throw new Exception('Unsupported data type for clearLock function.');
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error in clearLock: ' . $e->getMessage());
+            return false;
+        }
+    
         return true;
     }
 
