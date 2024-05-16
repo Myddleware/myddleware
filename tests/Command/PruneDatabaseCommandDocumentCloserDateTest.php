@@ -70,5 +70,17 @@ class PruneDatabaseCommandDocumentCloserDateTest extends KernelTestCase
         
 
         $this->assertEquals(1, $count);
+
+        // then delete the document
+        $sql = "DELETE FROM `document` WHERE `id` = :id";
+        $this->entityManager->getConnection()->executeStatement($sql, ['id' => $documentId]);
+
+        // flush the changes to the database
+        $this->entityManager->flush();
+
+        // assert: the document is deleted
+        $sqlAfterDelete = "SELECT COUNT(*) FROM `document` WHERE `id` = :id";
+        $countAfterDelete = $this->entityManager->getConnection()->fetchOne($sqlAfterDelete, ['id' => $documentId]);
+        $this->assertEquals(0, $countAfterDelete);
     }
 }
