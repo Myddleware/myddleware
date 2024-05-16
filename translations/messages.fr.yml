@@ -180,6 +180,7 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
+        read_job_lock: Débloquer
     connector:
         title: Connecteur
         solution: Solution
