@@ -100,6 +100,8 @@ class jobcore
     private SessionInterface $session;
 
     private int $nbDays;
+    private string $pruneDatabaseMaxDate;
+
 
     public function __construct(
         LoggerInterface $logger,
@@ -649,10 +651,15 @@ class jobcore
     }
 
     // Remove all data flagged deleted in the database
-    public function pruneDatabase(): void
+    public function pruneDatabase($nbDays): void
     {
         $this->noDocumentsTablesToEmptyCounter = 0;
         $this->noRulesTablesToEmptyCounter = 0;
+
+        $date = new DateTime();
+        $date->modify('-' . (int) $nbDays . ' days');
+        $this->pruneDatabaseMaxDate = $date->format('Y-m-d H:i:s');
+
         try {
             $this->processDeletableItems($this->getListOfSqlDocumentParams(), 'document');
             // Start deleteing rules when there is no more documents to delete
@@ -702,34 +709,30 @@ class jobcore
     public function getListOfSqlDocumentParams(): array
     {
 
-        $date = new DateTime();
-        $date->modify('-' . $this->nbDays . ' days');
-        $formattedDate = $date->format('Y-m-d H:i:s');
-
 
         $listOfSqlDocumentParams = [
             "SELECT log.id
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1 AND log.created < '$formattedDate'
+        WHERE document.deleted = 1 AND log.created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
 
         "SELECT documentdata.id
         FROM documentdata
         LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)",
 
         "SELECT documentaudit.id
         FROM documentaudit
         LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentaudit WHERE id IN (%s)",
 
         "SELECT documentrelationship.id
         FROM documentrelationship
         LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
         ];
 
@@ -738,10 +741,11 @@ class jobcore
 
     public function documentSqlParams()
     {
+
         $listOfSqlDocumentParams = [
             "SELECT document.id
         FROM document
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
         ];
         return $listOfSqlDocumentParams;
@@ -753,44 +757,44 @@ class jobcore
         "SELECT ruleaudit.id
         FROM ruleaudit
         LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleaudit WHERE id IN (%s)",
 
         "SELECT rulefield.id
         FROM rulefield
         LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefield WHERE id IN (%s)",
 
         "SELECT rulefilter.id
         FROM rulefilter
         LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefilter WHERE id IN (%s)",
 
         "SELECT ruleorder.rule_id
         FROM ruleorder
         LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE rule_id IN (%s)",
 
         "SELECT rulerelationship.id
         FROM rulerelationship
         LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
 
         "SELECT ruleparamaudit.id
         FROM ruleparamaudit
         LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
             LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparamaudit WHERE id IN (%s)",
 
         "SELECT ruleparam.id
         FROM ruleparam
         LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
         ];
 
@@ -799,10 +803,11 @@ class jobcore
 
     public function ruleSqlParams()
     {
+
         $listOfSqlRuleParams = [
         "SELECT rule.id
         FROM rule
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
         ];
 
