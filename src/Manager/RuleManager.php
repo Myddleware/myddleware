@@ -689,10 +689,14 @@ class rulecore
                     $param['id_doc_myddleware'] = $document['id'];
                     $param['jobId'] = $this->jobId;
                     $param['api'] = $this->api;
+                    $param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
-						$response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
-					}
+                        // Check the document is in the right status
+                        if ($this->documentManager->getStatus() == 'New') {
+						    $response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
+                        }
+                    }
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to filter documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -732,7 +736,10 @@ class rulecore
 					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
-						$response[$document['id']] = $this->documentManager->checkPredecessorDocument();
+                        // Check the document is in the right status
+                        if ($this->documentManager->getStatus() == 'Filter_OK') {
+						    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
+                        }
 					}
                 }
             } catch (\Exception $e) {
@@ -791,7 +798,10 @@ class rulecore
 					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
-						$response[$document['id']] = $this->documentManager->checkParentDocument();
+                        // Check the document is in the right status
+                        if ($this->documentManager->getStatus() == 'Predecessor_OK') {
+						    $response[$document['id']] = $this->documentManager->checkParentDocument();
+                        }
 					}
                 }
             } catch (\Exception $e) {
@@ -848,8 +858,11 @@ class rulecore
                     $param['id_doc_myddleware'] = $document['id'];
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
-						$response[$document['id']] = $this->documentManager->transformDocument();
-					}
+                        // Check the document is in the right status
+                        if ($this->documentManager->getStatus() == 'Relate_OK') {
+						    $response[$document['id']] = $this->documentManager->transformDocument();
+                        }
+                    }
                 }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to transform documents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -898,8 +911,11 @@ class rulecore
                     $param['api'] = $this->api;
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
-						$response[$document['id']] = $this->documentManager->getTargetDataDocument();
-						$response['doc_status'] = $this->documentManager->getStatus();
+                        // Check the document is in the right status
+                        if ($this->documentManager->getStatus() == 'Transformed') {
+                            $response[$document['id']] = $this->documentManager->getTargetDataDocument();
+                            $response['doc_status'] = $this->documentManager->getStatus();
+                        }
 					}
                 }
             } catch (\Exception $e) {
@@ -1916,6 +1932,7 @@ class rulecore
         if (!empty($documentId)) {
             $documentFilter = " 	document.id = '$documentId'
 								AND document.deleted = 0 
+                                AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
 									 OR document.job_lock = '$this->jobId'
@@ -1925,6 +1942,7 @@ class rulecore
             $documentFilter = " 	document.parent_id = '$parentDocId' 
 								AND document.rule_id = '$parentRuleId'
 								AND document.deleted = 0 
+                                AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
 									 OR document.job_lock = '$this->jobId'
