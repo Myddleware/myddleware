@@ -2103,7 +2103,7 @@ class documentcore
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function updateStatus($new_status)
+    public function updateStatus($new_status, $workflow = false)
     {
         try {
             // On ajoute un contôle dans le cas on voudrait changer le statut
@@ -2149,7 +2149,10 @@ class documentcore
             // We don't clear the message because we could need it in the workflow, we clear it after the workflow execution
 			$this->createDocLog(false);
 			// runWorkflow can't be executed if updateStatus is called from the solution class
-			if ($new_status!='Send') {
+			if (
+                    $new_status!='Send'
+                AND !$workflow          // Do not run wroklow if the change comes from a workflow
+            ) {
 				$this->runWorkflow();
 			}
 			$this->message = '';
@@ -2657,7 +2660,7 @@ class documentcore
                                             $error = '';
                                             $this->typeError = 'W';
                                             $this->message = 'Status change using workflow. ';
-                                            $this->updateStatus($arguments['status']);
+                                            $this->updateStatus($arguments['status'], true);
 											$this->createWorkflowLog($action, $workflowStatus, $error);
 											break;
 										default:
