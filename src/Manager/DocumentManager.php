@@ -100,6 +100,7 @@ class documentcore
         'Filter' => 'Cancel',
         'No_send' => 'Cancel',
         'Cancel' => 'Cancel',
+        'Create_KO' => 'Error',
         'Filter_KO' => 'Error',
         'Predecessor_KO' => 'Error',
         'Relate_KO' => 'Error',
@@ -159,6 +160,7 @@ class documentcore
             'Filter' => 'flux.status.filter',
             'No_send' => 'flux.status.no_send',
             'Cancel' => 'flux.status.cancel',
+            'Create_KO' => 'flux.status.create_ko',
             'Filter_KO' => 'flux.status.filter_ko',
             'Predecessor_KO' => 'flux.status.predecessor_ko',
             'Relate_KO' => 'flux.status.relate_ko',
@@ -383,6 +385,7 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->id.' - '.$this->message);
+			$this->updateStatus('Create_KO');
             return false;
         }
     }
@@ -1405,7 +1408,11 @@ class documentcore
                             if ('Myddleware_element_id' == $sourceField) {
                                 $sourceField = 'id';
                             }
-                            $dataInsert[$sourceField] = $data[$sourceField];
+							if (array_key_exists($sourceField,$data)) {
+								$dataInsert[$sourceField] = $data[$sourceField];
+							} else {
+								throw new \Exception('The field '.$sourceField.' is missing in the source values. ');
+							}
                         }
                     } else {
                         // Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
@@ -1450,8 +1457,8 @@ class documentcore
         } catch (\Exception $e) {
             $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
+            $this->updateStatus('Create_KO');
             $this->logger->error($this->id.' - '.$this->message);
-            return false;
         }
 
         return true;

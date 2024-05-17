@@ -408,17 +408,20 @@ class salesforcecore extends solution {
 								$row['date_modified'] = $record[$key];
 							}
 							// Manage relationship fields stored in a sub array
-							elseif(substr($key,-3) == '__r') {
+							elseif(
+									$key != 'attributes'
+								AND	is_array($record[$key])
+							) {
 								foreach($record[$key] as $fieldKey => $fieldValue) {
 									// Don't save attributes
 									if($fieldKey != 'attributes'){
 										// In case there are 2 levels of relationship (think about a recursive function here) 
-										if(substr($fieldKey,-3) == '__r') {
+										if(is_array($fieldValue)) {
 											if (!empty($fieldValue)) {
 												foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
 													if($fieldKeyLevel2 != 'attributes'){
 														// In case there are 3 levels of relationship (think about a recursive function here) 
-														if(substr($fieldKeyLevel2,-3) == '__r') {
+														if(is_array($fieldValueLevel2)) {
 															if(!empty($fieldValueLevel2)) {
 																foreach($fieldValueLevel2 as $fieldKeyLevel3 => $fieldValueLevel3) {
 																	if($fieldKeyLevel3 != 'attributes'){
@@ -456,7 +459,7 @@ class salesforcecore extends solution {
 								}
 							}
 							// On enlève le tableau "attributes" ajouté par Salesforce afin d'extraire les éléments souhaités
-							elseif(!($key == 'attributes')){
+							elseif($key != 'attributes'){
 								if($key == 'Id')
 									$row[mb_strtolower($key)] = $record[$key];
 									// If Id is requested in the field mapping
