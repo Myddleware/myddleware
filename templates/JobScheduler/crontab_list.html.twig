@@ -53,6 +53,15 @@
                 </thead>
                 <tbody>
                 {% for value in entity %}
+                <tr class="
+                    {% if value.runningInstances == value.maxInstances %}
+                        bg-danger
+                    {% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}
+                        bg-warning
+                    {% else %}
+                        bg-none
+                    {% endif %}
+                "> 
                     <td class="value">
                         <div id="command-short-{{ loop.index }}">
                             {{ value.command|slice(0, 20) ~ '...' }}
@@ -73,17 +82,17 @@
                     <td class="CRUD-icons">
                         <a href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
                             <span class="btn-opt">
-                                <i class="fa fa-pen" aria-hidden="true"></i>
+                                <i class="fa fa-pen  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %} " aria-hidden="true"></i>
                             </span>
                         </a>
                         <a class="delete" href="{{ path('crontab_delete',{'id' : value.id }) }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
                             <span class="btn-opt">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                <i class="fa fa-trash  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
                             </span>
                         </a>
                         <a href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
                             <span class="btn-opt">
-                                <i class="fa fa-file" aria-hidden="true"></i>
+                                <i class="fa fa-file  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
                             </span>
                         </a>
                     </td>

@@ -108,6 +108,17 @@
 					<td class="title">{{'view_rule.infos.mode'|trans}}</td>
 					<td class="value"><span class="label label-default">{{ params_suite.mode }}</span></td>
 				</tr>
+				{% if rule.getReadJobLock is not empty %}
+				<tr class="job_lock_{{rule.id}}">
+					<td class="title">{{ 'view_rule.infos.read_job_lock' | trans }}</td>
+					<td class="value" style="text-align: center !important;">
+						<button class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+							<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+						</button>
+					</td>
+				</tr>
+				{% endif %}
 				{% if params_suite.bidirectional is defined and params_suite.bidirectional is not empty %}	
 				<tr>
 					<td class="title">{{'view_rule.infos.bidirectional'|trans}}</td>
@@ -190,4 +201,9 @@
 	{% block javascripts %}
 		{{ encore_entry_script_tags('fiche') }}
 	{% endblock %}
+    <script type="text/javascript">
+		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success'|trans }}";
+		var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error'|trans }}";
+        var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
+    </script>
 {% endblock %}

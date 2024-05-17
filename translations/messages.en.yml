@@ -182,6 +182,9 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectional
         duplicate_fields: Fields to avoid duplicates
+        read_job_lock: Unlock job
+        read_job_lock_success: The job has been unlocked
+        read_job_lock_error: An error occurred while unlocking the job
     connector:
         title: Connector
         solution: Solution
@@ -309,6 +312,8 @@ list_flux:
         filter_delete: Clear all filters
         cancel: Cancel documents
         reloadcancel: Cancel and rerun documents
+        unlockall: Unlock all documents
+        mass_unlock_confirm: Unlock the selected documents?
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
         mass_reload_confirm: Reload the selected documents?   
@@ -402,6 +407,7 @@ view_flux:
         reload: Reload the document
         cancel: Cancel the document 
         readrecord: Run the same record
+        unlock: Unlock the document
     header:
         rule: Rule
         statut: Status

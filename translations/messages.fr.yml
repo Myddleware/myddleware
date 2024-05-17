@@ -180,6 +180,9 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
+        read_job_lock: DébloquerDébloqué
+        read_job_lock_success: La régle a bien été débloqué
+        read_job_lock_error: Impossible de débloquer la règle
     connector:
         title: Connecteur
         solution: Solution
@@ -306,6 +309,8 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        unlockall: Débloquer les documents
+        mass_unlock_confirm: Débloquer les documents sélectionnés ?
         reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
@@ -400,6 +405,7 @@ view_flux:
         reload: Relancer le document
         cancel: Annuler le document 
         readrecord: Lancer la même donnée 
+        unlock: Débloquer le document
     header:
         rule: Règle
         statut: Status

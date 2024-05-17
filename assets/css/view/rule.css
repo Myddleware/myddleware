@@ -179,7 +179,14 @@
 	text-align: left;
 }
 
-
 #simuleRuleFluxError, #simuleRuleFluxLoading_img {
 	display: none;
+}
+
+.edit-button:hover .fa-lock {
+    display: none;
+}
+
+.edit-button:hover .fa-unlock {
+    display: inline-block;
 }
