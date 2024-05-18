@@ -693,7 +693,7 @@ class rulecore
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if ($this->documentManager->getStatus() == 'New') {
+						if (in_array($this->documentManager->getStatus(), array('New', 'Filter_KO'))) {
 						    $response[$document['id']] = $this->documentManager->filterDocument($this->ruleFilters);
                         }
                     }
@@ -737,7 +737,7 @@ class rulecore
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if ($this->documentManager->getStatus() == 'Filter_OK') {
+						if (in_array($this->documentManager->getStatus(), array('Filter_OK', 'Predecessor_KO'))) {
 						    $response[$document['id']] = $this->documentManager->checkPredecessorDocument();
                         }
 					}
@@ -799,7 +799,7 @@ class rulecore
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if ($this->documentManager->getStatus() == 'Predecessor_OK') {
+						if (in_array($this->documentManager->getStatus(), array('Predecessor_OK', 'Relate_KO'))) {
 						    $response[$document['id']] = $this->documentManager->checkParentDocument();
                         }
 					}
@@ -859,7 +859,7 @@ class rulecore
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if ($this->documentManager->getStatus() == 'Relate_OK') {
+                        if (in_array($this->documentManager->getStatus(), array('Relate_OK', 'Error_transformed'))) {
 						    $response[$document['id']] = $this->documentManager->transformDocument();
                         }
                     }
@@ -912,7 +912,7 @@ class rulecore
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if ($this->documentManager->getStatus() == 'Transformed') {
+						if (in_array($this->documentManager->getStatus(), array('Transformed', 'Error_checking'))) {
                             $response[$document['id']] = $this->documentManager->getTargetDataDocument();
                             $response['doc_status'] = $this->documentManager->getStatus();
                         }

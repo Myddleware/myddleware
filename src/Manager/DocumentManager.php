@@ -58,6 +58,7 @@ class documentcore
     protected $ruleFields;
     protected $ruleRelationships;
     protected $ruleWorkflows;
+    protected bool $workflowAction = false;
     protected $ruleParams;
     protected $sourceId;
     protected $targetId;
@@ -955,7 +956,7 @@ class documentcore
 				if (array_search('mdw_cancel_document',$transformed, true) !== false) {
 					$this->message .= 'The document contains the value mdw_cancel_document. ';
 					$this->typeError = 'W';
-					$this->updateStatus('Cancel');
+					$this->updateStatus('Cancel',$this->workflowAction);
 					return false;
 				}
                 // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
@@ -977,7 +978,7 @@ class documentcore
 								// Check child in a second time to avoid to run a query each time
 								if (!$this->isChild()) {
 									$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-									$this->updateStatus('Filter');
+									$this->updateStatus('Filter',$this->workflowAction);
 									// In case we flter the document, we return false to stop the process when this method is called in the rerun process
 									return false;
 								}
@@ -1006,13 +1007,13 @@ class documentcore
             } else {
                 throw new \Exception('Failed to transformed data. This document is queued. ');
             }
-            $this->updateStatus('Transformed');
+            $this->updateStatus('Transformed',$this->workflowAction);
 
             return true;
         } catch (\Exception $e) {
             $this->message .= 'Failed to transform document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->updateStatus('Error_transformed');
+            $this->updateStatus('Error_transformed',$this->workflowAction);
             $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
@@ -2665,6 +2666,18 @@ class documentcore
                                             $this->updateStatus($arguments['status'], true);
 											$this->createWorkflowLog($action, $workflowStatus, $error);
 											break;
+                                        case 'transformDocument':
+                                            $workflowStatus = 'Success';
+                                            $error = '';
+                                            $this->typeError = 'W';
+                                            $this->workflowAction = true;
+                                            // Set back the parameter $this->transformError to false 
+                                            // because it could have been set to true by the current action
+                                            $this->transformError = false;
+                                            $this->transformDocument();
+                                            $this->message = 'Document transformed using workflow. ';
+                                            $this->createWorkflowLog($action, $workflowStatus, $error);
+                                            break;
 										default:
 										   throw new \Exception('Function '.key($action).' unknown.');
 									}
@@ -2767,7 +2780,7 @@ class documentcore
 			$this->entityManager->persist($workflowLog);
 			$this->entityManager->flush();
 			// Generate a document log.
-			$this->generateDocLog('S','Action '.$action['id'].' executed. '.(!empty($generateDocumentId) ? 'The document '.$generateDocumentId.' has been generated. ' : ''));
+			$this->generateDocLog('S','Action '.$action['action'].' : '.$action['name'].' executed. '.(!empty($generateDocumentId) ? 'The document '.$generateDocumentId.' has been generated. ' : ''));
 		} catch (\Exception $e) {
 			$this->logger->error($this->id.' - Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
 			$this->generateDocLog('E','Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
