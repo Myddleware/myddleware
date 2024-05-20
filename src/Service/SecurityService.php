@@ -4,14 +4,18 @@ namespace App\Service;
 
 use Exception;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-
+use Doctrine\ORM\EntityManagerInterface; 
+use App\Entity\User;
 class SecurityService
 {
     private RoleHierarchyInterface $roleHierarchy;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(RoleHierarchyInterface $roleHierarchy)
     {
         $this->roleHierarchy = $roleHierarchy;
+        // entity manager is injected in the constructor
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -62,5 +66,10 @@ class SecurityService
         }
 
         return $roles;
+    }
+
+    public function getUserIdentifierByApiToken($apiToken): ?string
+    {
+        return $this->entityManager->getRepository(User::class)->findOneBy(['confirmation_token' => $apiToken]);
     }
 }
