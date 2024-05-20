@@ -176,7 +176,7 @@ class AddUserCommand extends Command
         $user->setTimezone('UTC');
 
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
-        $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
+        $encodedPassword = $this->passwordEncoder->hashPassword($user, $plainPassword);
         $user->setPassword($encodedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)
