@@ -1,8 +1,0 @@
-swiftmailer:
-    transport: smtp
-    host: null
-    port: null
-    auth_mode: null
-    encryption: null
-    username: null
-    password: null
