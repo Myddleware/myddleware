@@ -2,22 +2,23 @@
 
 namespace App\Command;
 
-use App\Entity\Config;
 use App\Entity\User;
-use App\Repository\ConfigRepository;
-use App\Repository\UserRepository;
+use App\Entity\Config;
 use App\Utils\Validator;
+use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use function Symfony\Component\String\u;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Stopwatch\Stopwatch;
-use function Symfony\Component\String\u;
 
 /**
  * A console command that creates users and stores them in the database.
@@ -52,8 +53,9 @@ class AddUserCommand extends Command
     private $validator;
     private $users;
     private $configRepository;
+    private $encoder;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
+    public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
     {
         parent::__construct();
 
