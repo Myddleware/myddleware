@@ -518,4 +518,10 @@ class User implements UserInterface
     {
         return (string) $this->getUsername();
     }
+
+    public function getUserIdentifier(): string
+    {
+        // return the user identifier. For example, it could be the username or email.
+        return $this->username;
+    }
 }
