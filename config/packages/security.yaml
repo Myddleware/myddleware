@@ -52,3 +52,4 @@ security:
         - { path: ^/rule/, roles: ROLE_USER }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/doc, roles: ROLE_SUPER_ADMIN }
