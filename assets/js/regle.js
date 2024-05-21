@@ -1037,6 +1037,9 @@ $.fn.setCursorPosition = function(pos) {
 
   // If I double click on the element li inside the element (an ul) with the id flux_target
   $("#flux_target").on("dblclick", "li", function () {
+    if ($("#db_click_target").length) {
+      return;
+    }
     // If the attribute data-gbl (for global) is error or open
     if (
       $("#gblstatus").attr("data-gbl") == "error" ||
@@ -1065,7 +1068,7 @@ $.fn.setCursorPosition = function(pos) {
             classe +
             '" type="text" value="' +
             value +
-            '" /><button type="submit" data-value="' +
+            '" /><button id="db_click_target" type="submit" data-value="' +
             classe +
             '" class="btn-group btn-group-xs load"><i class="fa fa-check-circle"></i ></button> '
         );
