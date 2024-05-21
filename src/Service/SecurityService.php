@@ -11,7 +11,7 @@ class SecurityService
     private RoleHierarchyInterface $roleHierarchy;
     private EntityManagerInterface $entityManager;
 
-    public function __construct(RoleHierarchyInterface $roleHierarchy)
+    public function __construct(RoleHierarchyInterface $roleHierarchy, EntityManagerInterface $entityManager)
     {
         $this->roleHierarchy = $roleHierarchy;
         // entity manager is injected in the constructor
