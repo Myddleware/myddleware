@@ -28,8 +28,7 @@ namespace App\Manager;
 
 use DateTime;
 use Exception;
-use Swift_Mailer;
-use Swift_Message;
+use Symfony\Component\Mailer\Mailer;
 use App\Entity\User;
 
 use Twig\Environment;
@@ -59,7 +58,7 @@ class NotificationManager
     private LoggerInterface $logger;
     private ParameterBagInterface $params;
     private Connection $connection;
-    private Swift_Mailer $mailer;
+    private Mailer $mailer;
     private UserRepository $userRepository;
     private TranslatorInterface $translator;
     private JobRepository $jobRepository;
@@ -77,7 +76,7 @@ class NotificationManager
         UserRepository $userRepository,
         JobRepository $jobRepository,
         RuleRepository $ruleRepository,
-        Swift_Mailer $mailer,
+        Mailer $mailer,
         ToolsManager $tools,
         ParameterBagInterface $params,
         Environment $twig,
@@ -216,7 +215,7 @@ class NotificationManager
             }
         } else {
             $message =
-                    (new Swift_Message($subject))
+                    (new Mailer($subject))
                     ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
                     ->setBody($textMail);
             // Send the message to all admins
