@@ -1114,8 +1114,8 @@ class documentcore
                     if ('S' == $this->documentType) {
                         $this->updateStatus('Found');
                     } else {
-                        $this->updateStatus('Ready_to_send');
                         $this->updateType('U');
+                        $this->updateStatus('Ready_to_send');
 						// Check compatibility between rule mode et document type
 						// A rule in create mode can't update data except for a child rule
 						if (
