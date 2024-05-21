@@ -1,2 +1,22 @@
 api_login_check:
     path: /api/login_check
+
+rule_panel:
+    path: /rule/panel
+    controller: App\Controller\DefaultController::panel
+
+api_doc:
+        path: /api/docs
+        controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+        defaults:
+            path: /
+            permanent: false
+            code: 404
+
+swagger_ui:
+    path: /docs
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /
+        permanent: false
+        code: 404
