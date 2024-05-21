@@ -28,7 +28,7 @@ namespace App\Manager;
 
 use DateTime;
 use Exception;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use App\Entity\User;
 
 use Twig\Environment;
@@ -58,7 +58,7 @@ class NotificationManager
     private LoggerInterface $logger;
     private ParameterBagInterface $params;
     private Connection $connection;
-    private Mailer $mailer;
+    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private TranslatorInterface $translator;
     private JobRepository $jobRepository;
@@ -76,7 +76,7 @@ class NotificationManager
         UserRepository $userRepository,
         JobRepository $jobRepository,
         RuleRepository $ruleRepository,
-        Mailer $mailer,
+        MailerInterface $mailer,
         ToolsManager $tools,
         ParameterBagInterface $params,
         Environment $twig,
