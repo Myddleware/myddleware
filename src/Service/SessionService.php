@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Manages Myddleware Session ( Refactoring since the Controllers ).
@@ -12,13 +12,15 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class SessionService
 {
     const MYDDLEWARE_SESSION_INDEX = 'myddlewareSession';
-    private SessionInterface $_session;
+    private RequestStack $requestStack;
+    private $_session;
 
     const ERROR_CREATE_RULE_INDEX = 'create_rule';
 
-    public function __construct(SessionInterface $session)
+    public function __construct(RequestStack $requestStack)
     {
-        $this->_session = $session;
+        $this->requestStack = $requestStack;
+        $this->_session = $this->requestStack->getCurrentRequest()->getSession();
     }
 
     public function getMyddlewareSession()
