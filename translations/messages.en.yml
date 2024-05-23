@@ -649,6 +649,8 @@ menu:
         title: Tasks
         list: List
     support: Support
+    workflow:
+        list: List of Workflows
 
 breadcrumb:
     rule_list: Rules list

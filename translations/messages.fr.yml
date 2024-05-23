@@ -648,6 +648,8 @@ menu:
         list: Liste
     support: Support
         
+    workflow:
+        list: Liste des workflows
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents
