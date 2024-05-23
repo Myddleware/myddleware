@@ -93,7 +93,7 @@ class WorkflowLog
     /**
      * @ORM\Column(name="message", type="text", nullable=true)
      */
-    private string $message;
+    private string $message = '';
 
 
     public function getId(): int
