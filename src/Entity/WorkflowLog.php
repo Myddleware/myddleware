@@ -180,7 +180,7 @@ class WorkflowLog
         return $this;
     }
 	
-	public function getAction(): array
+	public function getAction(): WorkflowAction
     {
         return $this->action;
     }
