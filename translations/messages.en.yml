@@ -400,6 +400,7 @@ view_flux:
     nbChildDocuments: Child documents
     nbParentDocuments: Parent documents
     nbHistoryDocuments: Documents history
+    nbnbWorflowLogs: Workflow logs
     nbPostDocuments: Post documents    
     direct_link: Direct link    
     comment: Add log

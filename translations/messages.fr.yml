@@ -399,6 +399,7 @@ view_flux:
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
+    nbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct  
     btn:
