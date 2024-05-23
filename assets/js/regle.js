@@ -2224,8 +2224,10 @@ $(document).ready(function () {
       type: "POST",
       success: function (response) {
         alert(read_job_lock_success);
-        if (buttonId === "unlock_list_rules") {
-          $("#" + buttonId).hide();
+        if (buttonId.startsWith("unlock_list_rules")) {
+          $("#row_" + jobId).removeClass("bg-danger"); // Retire la classe de la ligne
+          $("#row_" + jobId + " .btn-opt").removeClass("icon-danger"); // Retire la classe des icônes
+          $("#" + buttonId).hide(); // Cache le bouton
         } else {
           if (response.read_job_lock === "") {
             $(".job_lock_" + jobId).show();
