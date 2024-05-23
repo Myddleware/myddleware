@@ -758,11 +758,18 @@
 					{# ------------- LOGS ------------- #}
 				</div>
 
-			{# we make a new table that shows the related workflows for this document, using the variable workflowLogs #}
-			{# for now we only display the id of the wokflowlog for each log that we got from the workflowLogs #}
-			<div id="message">
+			<div id="message" class="d-grid">
 				{% if workflowLogs is not empty %}
-					<table>
+					{% if nb_workflow_logs > 0 %}
+					<div id="fd-title-small" class="left">
+						<p>{{'view_flux.nbWorflowLogs'|trans}}</p>
+						<p>
+							<span class="nb">{{ nb_workflow_logs }}</span>
+						</p>
+					</div>
+					<div class="clr"></div>
+					{% endif %}
+					<table class="listepager table">
 						<thead>
 							<tr>
 								<th>ID</th>
@@ -779,17 +786,18 @@
 						</thead>
 						<tbody>
 							{% for log in workflowLogs %}
-								<tr>
-									<td>{{ log.id }}</td>
-									{# <td>{{ log.workflow.id|e }}</td> #}
-									<td>{{ log.job.id }}</td>
-									<td>{{ log.triggerDocument.id }}</td>
-									<td>{{ log.generateDocument.id|default('N/A') }}</td>
-									<td>{{ log.action.name }}</td>
-									<td>{{ log.status }}</td>
-									{# <td>{{ log.date_created|date('Y-m-d H:i:s') }}</td>
-									<td>{{ log.message }}</td>
-									<td>{{ log.action_id }}</td> #}
+								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+									{# <td class="ctr">{{ log.workflow.id|e }}</td> #}
+									<td class="ctr">{{ log.job.id }}</td>
+									<td class="ctr">{{ log.triggerDocument.id }}</td>
+									<td class="ctr">{{ log.generateDocument.id|default('N/A') }}</td>
+									<td class="ctr">{{ log.action.name }}</td>
+									<td class="ctr">
+										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+									</td>
+									{# <td class="ctr">{{ log.date_created|date('Y-m-d H:i:s') }}</td> #}
+									<td class="ctr">{{ log.getMessage }}</td>
+									{# <td class="ctr">{{ log.action_id }}</td> #}
 								</tr>
 							{% endfor %}
 						</tbody>
@@ -797,6 +805,7 @@
 				{% else %}
 					<p>{{'view_flux.empty_log'|trans}}</p>
 				{% endif %}
+			</div>
 
 			
 
