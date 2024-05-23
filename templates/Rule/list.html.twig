@@ -92,6 +92,7 @@
 							<th>{{'list_rule.th.active'|trans}}</th>
 							<th>{{'list_rule.th.date_created'|trans}}</th>
 							<th>{{'list_rule.th.option'|trans}}</th>
+							<th>{{'list_rule.th.lock_rule'|trans}}</th>
 						</tr>
 					</thead>
 					<tbody id="tbody_rule_list">
@@ -142,6 +143,14 @@
 									</span>
 								</a>
 							</td>
+							<td class="value" style="text-align: center !important;">
+								{% if rule.0.readJobLock is not empty %}
+									<button id="unlock_list_rules" class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+										<i class="fa fa-lock" aria-hidden="true"></i>
+										<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+									</button>
+								{% endif %}
+							</td>
 						</tr>			
 						{% endfor %}
 						<tr>
@@ -151,6 +160,7 @@
 							<th>{{'list_rule.th.active'|trans}}</th>
 							<th>{{'list_rule.th.date_created'|trans}}</th>
 							<th>{{'list_rule.th.option'|trans}}</th>
+							<th>{{'list_rule.th.lock_rule'|trans}}</th>
 						</tr>	
 					</tbody>		
 				{% endif %}
@@ -181,6 +191,11 @@
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}
 	{% endblock %}
+    <script type="text/javascript">
+		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success'|trans }}";
+		var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error'|trans }}";
+        var clearReadJobLockUrl = "{{ path('flux_unlock_rule', {'id': 'PLACEHOLDER_ID'}) }}";
+    </script>
 {% endblock %}
 
 

@@ -2216,6 +2216,7 @@ $(document).ready(function () {
 
   $(".edit-button").click(function () {
     var jobId = $(this).data("job-id");
+    var buttonId = $(this).attr("id");
     var ajaxUrl = clearReadJobLockUrl.replace("PLACEHOLDER_ID", jobId);
 
     $.ajax({
@@ -2223,11 +2224,14 @@ $(document).ready(function () {
       type: "POST",
       success: function (response) {
         alert(read_job_lock_success);
-        console.log(jobId);
-        if (response.read_job_lock === "") {
-          $(".job_lock_" + jobId).show();
+        if (buttonId === "unlock_list_rules") {
+          $("#" + buttonId).hide();
         } else {
-          $(".job_lock_" + jobId).hide();
+          if (response.read_job_lock === "") {
+            $(".job_lock_" + jobId).show();
+          } else {
+            $(".job_lock_" + jobId).hide();
+          }
         }
       },
       error: function () {

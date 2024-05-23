@@ -234,6 +234,7 @@ list_rule:
         active: Activation
         date_created: Creation date
         option: Options
+        lock_rule: Lock
     btn:
         delete: Delete
         edit: Edit

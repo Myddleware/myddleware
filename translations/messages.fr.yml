@@ -233,6 +233,7 @@ list_rule:
         active: Activation
         date_created: Date de création
         option: Options
+        lock_rule: Verrouiller
     btn:
         delete: Supprimer
         edit: Editer
