@@ -945,26 +945,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
-    }
-
- 
-    //        /**
-    //  * @Route("/flux/unlock/{id}", name="flux_unlock_rule")
-    //  */
-    // public function unlockRule($id): RedirectResponse
-    // {
-    //     try {
-    //         if (!empty($id)) {
-    //             $this->jobManager->actionMassTransfer('unlock', 'rule', [$id]);
-    //         }
-
-    //         return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
-    //     } catch (Exception $e) {
-    //         return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
-    //     }
-    // }
-
-    
+    }  
 
     /**
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")

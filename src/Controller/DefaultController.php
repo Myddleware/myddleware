@@ -3091,4 +3091,17 @@ use App\Form\Type\RelationFilterType;
 
         return new Response('', Response::HTTP_OK);
     }
+
+    /**
+     * @Route("/rule/unlock/{id}", name="flux_unlock_rule", methods={"POST"})
+     */
+    public function fluxUnlockRule($id) {
+        try {
+            $this->ruleManager->unlockRule('rule', [$id]);
+
+            return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('view_rule.action.unlock_rule_success')]);
+        } catch (Exception $e) {
+            return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('view_rule.action.unlock_rule_error')], 500);
+        }
+    }
 }
