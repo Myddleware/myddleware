@@ -853,6 +853,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
                     'documentPage' => $documentPage,
                     'logPage' => $logPage,
                     'workflowLogs' => $workflowLogs,
+                    'nb_workflow_logs' => count($workflowLogs),
                 ]
             );
         } catch (Exception $e) {
