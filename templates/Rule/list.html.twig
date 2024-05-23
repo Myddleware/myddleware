@@ -29,13 +29,22 @@
 	{# success message if the rule has been duplicated  #}
 	{% for label, flashes in app.session.flashbag.all %}
 		{% for flash in flashes %}
-			{% if ( label == 'success' ) %}
+			{% if label == 'success' %}
 				<div class="alert alert-success alert-dismissible fade show">
+					{{ flash }}
+				</div>
+			{% elseif ( label == 'success_unlock_rule' ) %}
+				<div class="alert alert-success alert-dismissible fade show">
+					{{ flash }}
+				</div>
+			{% elseif label == 'error_unlock_rule' %}
+				<div class="alert alert-danger alert-dismissible fade show">
 					{{ flash }}
 				</div>
 			{% endif %}
 		{% endfor %}
 	{% endfor %}
+
 	
     <div id="rule">
 		{% if nb_rule > 0 %}
@@ -47,7 +56,6 @@
 			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search...">
 		</form>
 
-
 		<div class="row justify-content-center my-4">
 			<div class="col text-center">
 				<a id="exec_all" class="btn btn-primary" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
@@ -58,6 +66,11 @@
 			<div class="col text-center">
 				<a id="exec_error" class="btn btn-warning" href="{{ path('regle_exec',{'id' : 'ERROR' }) }}" title="" role="button">
 						{{'view_rule.action.exec_error'|trans}}
+				</a>
+			</div>
+			<div class="col text-center">
+				<a id="unlock_rule" class="btn btn-outline-danger" href="{{ path('flux_mass_unlock_rule') }}" title="" role="button">
+					{{'view_rule.action.unlock_rules'|trans}}
 				</a>
 			</div>
 			<div class="col text-center">

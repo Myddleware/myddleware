@@ -1009,8 +1009,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 
         exit;
     }
-
-        /**
+     /**
      * @Route("/flux/massunlock", name="flux_mass_unlock")
      */
     public function fluxMassUnlockAction()
@@ -1021,19 +1020,6 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 
         exit;
     }
-
-    /**
-     * @Route("/flux/massunlock", name="flux_mass_unlock_rule")
-     */
-    public function fluxMassUnlockActionRule()
-    {
-        if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
-            $this->jobManager->actionMassTransfer('unlock', 'rule', $_POST['ids']);
-        }
-
-        exit;
-    }
-    
     /* *******************************************************
         * METHODES PRATIQUES
         ****************************************************** */

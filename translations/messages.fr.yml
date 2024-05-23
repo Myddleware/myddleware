@@ -159,8 +159,11 @@ view_rule:
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
         displayflux: Voir les documents
         new_rule: Créer une règle
+        unlock_rules: Débloquer les règles
         unlock_rule_success : La règle a bien été débloquée
         unlock_rule_error : Impossible de débloquer la règle
+        mass_unlock_rule_success : Les règles ont bien été débloquées
+        mass_unlock_rule_error : Impossible de débloquer les règles
     tabs:
         info: Informations
         mapping: Mapping des champs
