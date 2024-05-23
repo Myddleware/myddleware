@@ -931,6 +931,41 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         }
     }
 
+       /**
+     * @Route("/flux/unlock/{id}", name="flux_unlock")
+     */
+    public function fluxUnlockDocument($id): RedirectResponse
+    {
+        try {
+            if (!empty($id)) {
+                $this->jobManager->actionMassTransfer('unlock', 'document', [$id]);
+            }
+
+            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+        } catch (Exception $e) {
+            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    }
+
+ 
+    //        /**
+    //  * @Route("/flux/unlock/{id}", name="flux_unlock_rule")
+    //  */
+    // public function unlockRule($id): RedirectResponse
+    // {
+    //     try {
+    //         if (!empty($id)) {
+    //             $this->jobManager->actionMassTransfer('unlock', 'rule', [$id]);
+    //         }
+
+    //         return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+    //     } catch (Exception $e) {
+    //         return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+    //     }
+    // }
+
+    
+
     /**
      * @Route("/flux/readrecord/{id}", name="flux_readrecord")
      */
@@ -994,6 +1029,30 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         exit;
     }
 
+        /**
+     * @Route("/flux/massunlock", name="flux_mass_unlock")
+     */
+    public function fluxMassUnlockAction()
+    {
+        if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
+            $this->jobManager->actionMassTransfer('unlock', 'document', $_POST['ids']);
+        }
+
+        exit;
+    }
+
+    /**
+     * @Route("/flux/massunlock", name="flux_mass_unlock_rule")
+     */
+    public function fluxMassUnlockActionRule()
+    {
+        if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
+            $this->jobManager->actionMassTransfer('unlock', 'rule', $_POST['ids']);
+        }
+
+        exit;
+    }
+    
     /* *******************************************************
         * METHODES PRATIQUES
         ****************************************************** */
@@ -1143,56 +1202,5 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         }
     }
 
-    /**
-     * @Route("/document/unlock/{id}", name="document_view")
-     */
-    public function unlockDocument($id) {
-        try{
-            $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
 
-            // add traduction
-            $this->addFlash('success_unlock', 'Document déverrouillé avec succès.');
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
-        } catch (Exception $e) {
-            // add traduction
-            $this->addFlash('error_unlock', 'Erreur lors du déverrouillage du document.');
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
-        }
-    }
-
-    /**
-     * @Route("/flux/unlock", name="flux_mass_unlock")
-     */
-    public function unlockDocuments(Request $request) {
-        try {
-            $ids = $request->request->get('ids', []);
-            if (empty($ids)) {
-                return new JsonResponse(['error' => 'No documents selected'], Response::HTTP_BAD_REQUEST);
-            }
-
-            $result = $this->jobManager->massAction('unlock', 'document', $ids, false, null, null);
-            if (!$result) {
-                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, "Unable to unlock documents.");
-            }
-
-            return new JsonResponse(['success' => true]);
-
-        } catch (\Exception $e) {
-            throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * @Route("/read_job_lock/clear/{id}", name="clear_read_job_lock", methods={"POST"})
-     */
-    public function clearReadJobLock($id) {
-        try {
-            $this->jobManager->clearLock('rule', [$id]);
-
-            return new JsonResponse(['status' => 'success', 'message' => 'Verrouillage effacé avec succès.']);
-        } catch (Exception $e) {
-            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
-        }
-    }
 }
