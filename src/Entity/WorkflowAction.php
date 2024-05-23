@@ -177,7 +177,7 @@ class WorkflowAction
         return $this->name;
     }
 	
-	public function getAction(): array
+	public function getAction(): string
     {
         return $this->action;
     }
