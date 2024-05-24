@@ -84,16 +84,16 @@ class WorkflowLog
      */
     private DateTime $dateCreated;
 	
-	/**
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=true)
      */
-    private User $createdBy;
+    private ?User $createdBy = null;
 	
     /**
      * @ORM\Column(name="message", type="text", nullable=true)
      */
-    private string $message = '';
+    private ?string $message = null;
 
 
     public function getId(): int
@@ -197,7 +197,7 @@ class WorkflowLog
         return $this;
     }
 
-    public function getMessage(): string
+    public function getMessage(): ?string
     {
         return $this->message;
     }
