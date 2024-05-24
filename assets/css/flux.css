@@ -156,6 +156,12 @@
 	margin-right: 5px;
 }
 
+/* any li with a span inside, the span will have  white-space: normal;*/
+li span {
+	/* white-space: normal; */
+	overflow-wrap: break-word;
+}
+
 /* NEW FILTER */
 
 
