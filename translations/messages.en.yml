@@ -447,7 +447,8 @@ list_task:
         error: Error
 
 view_task:
-    empty_log: No log  
+    empty_log: No log
+    empty_workflow: No workflow  
     task_stop: STOP TASK
     refresh: REFRESH
     nblogs: Number of logs  
