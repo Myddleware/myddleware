@@ -109,7 +109,7 @@
 						<td class="title">Workflows</td>
 						<td class="value">
 							{% if hasWorkflows %}
-								<a class="dropdown-item" href="{{ path('workflow_list') }}">
+								<a class="dropdown-item" href="{{ path('workflow_list_by_rule', {'ruleId': rule.GetId}) }}">
 									{{'menu.workflow.list'|trans}}
 								</a>
 							{% else %}
