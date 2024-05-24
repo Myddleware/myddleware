@@ -472,6 +472,7 @@ list_workflow:
         RuleName: Nom de la règle
         name: Nom
         description: Description
+        condition: Condition
 
 view_account:
     title: Mon compte

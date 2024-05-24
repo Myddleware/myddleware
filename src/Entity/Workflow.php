@@ -199,7 +199,7 @@ class Workflow
         return $this->description;
     }
 	
-	public function getCondition(): array
+	public function getCondition(): string
     {
         return $this->condition;
     }

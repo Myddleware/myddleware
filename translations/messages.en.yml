@@ -475,6 +475,7 @@ list_workflow:
         ruleName: Rule name
         name: Name
         description: Description
+        condition: Condition
 
 view_account:
     title: My account
