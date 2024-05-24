@@ -198,6 +198,39 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+    /**
+     * @Route("/list/workflow/{ruleId}", name="workflow_list_by_rule", defaults={"page"=1})
+     * @Route("/list/workflow/{ruleId}/page-{page}", name="workflow_list_by_rule_page", requirements={"page"="\d+"})
+     */
+    public function WorkflowListByRuleAction(string $ruleId, int $page = 1, Request $request)
+    {
+        try {
+            $session = $request->getSession();
+            $em = $this->getDoctrine()->getManager();
+
+            // Get workflows filtered by rule id
+            $entities = $em->getRepository(Workflow::class)->findBy(['rule' => $ruleId]);
+
+            // List of task limited to 1000 and order by status (start first) and date begin
+            $compact = $this->nav_pagination([
+                'adapter_em_repository' => $entities,
+                'maxPerPage' => $this->params['pager'] ?? 25,
+                'page' => $page,
+            ], false);
+
+            return $this->render(
+                'Workflow/list.html.twig',
+                [
+                    'entities' => $entities,
+                    'nb_workflow' => count($entities),
+                    'pager' => $compact['pager'],
+                ]
+            );
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
             // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
             private function nav_pagination($params, $orm = true)
             {
