@@ -636,7 +636,10 @@ title:
         view: Achats de crédits
     support:
         view: Achats d'interventions
-           
+    workflow:
+        list: Liste des workflows
+
+
 menu:
     index: Accueil
     rule:

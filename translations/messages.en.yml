@@ -639,6 +639,8 @@ title:
         view: Credits purchases
     support:
         view: Interventions purchases
+    workflow:
+        list: Workflows
 
 menu:
     index: Homepage
