@@ -1008,6 +1008,9 @@ use App\Form\Type\RelationFilterType;
                 }
             }
 
+            // get the workflows of the rule, if there are none then set hasWorkflows to false. If there is at least one then set it to true. to get the workflows we use the entity manager and filter by the rule id
+            $hasWorkflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId()]) ? true : false;
+
             return $this->render('Rule/edit/fiche.html.twig', [
                 'rule' => $rule,
                 'connector' => $connector[0],
@@ -1018,6 +1021,7 @@ use App\Form\Type\RelationFilterType;
                 'filters' => $Filters,
                 'params_suite' => $params_suite,
                 'id' => $id,
+                'hasWorkflows' => $hasWorkflows,
             ]
             );
         }
