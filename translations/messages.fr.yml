@@ -462,7 +462,13 @@ view_task:
         transfer: Document
         date_created: Date de création
         type: Type
-        msg: Message         
+        msg: Message     
+
+list_workflow:
+    total: Total of workflows
+    empty: No workflows
+    th:
+        id: Id   
 
 view_account:
     title: Mon compte

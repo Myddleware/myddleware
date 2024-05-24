@@ -446,6 +446,7 @@ list_task:
         api: Api
         error: Error
 
+
 view_task:
     empty_log: No log
     empty_workflow: No workflow  
@@ -465,6 +466,12 @@ view_task:
         date_created: Creation date
         type: Type
         msg: Message         
+
+list_workflow:
+    total: Total of workflows
+    empty: No workflows
+    th:
+        id: Id
 
 view_account:
     title: My account
