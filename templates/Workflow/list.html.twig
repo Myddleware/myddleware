@@ -99,8 +99,8 @@
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
 										{% if action.arguments is iterable %}
-											{% for argument in action.arguments %}
-												<p>{{ argument }}</p>
+											{% for key, argument in action.arguments %}
+												<p>{{ key }}: {{ argument }}</p>
 											{% endfor %}
 										{% else %}
 											<p>{{ action.arguments }}</p>
