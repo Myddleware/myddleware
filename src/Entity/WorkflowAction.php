@@ -188,10 +188,10 @@ class WorkflowAction
         return $this;
     }
 	
-	public function getArguments(): array
-    {
-        return $this->arguments;
-    }
+public function getArguments(): array
+{
+    return isset($this->arguments) && $this->arguments ? $this->arguments : [];
+}
 
     public function setArguments($arguments): self
     {

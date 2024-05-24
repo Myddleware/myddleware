@@ -95,12 +95,18 @@
 										<p>{{ action.order }}</p>										
 									{% endfor %}
 								</td>
-								{# <td colspan="1">
+								<td colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.arguments }}</p>										
+										{% if action.arguments is iterable %}
+											{% for argument in action.arguments %}
+												<p>{{ argument }}</p>
+											{% endfor %}
+										{% else %}
+											<p>{{ action.arguments }}</p>
+										{% endif %}
 									{% endfor %}
-								</td> #}
+								</td>
 							</tr>
 						{% endfor %}        
 					{% endif %}
