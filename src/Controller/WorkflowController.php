@@ -209,7 +209,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $em = $this->getDoctrine()->getManager();
 
             // Get workflows filtered by rule id
-            $entities = $em->getRepository(Workflow::class)->findBy(['rule' => $ruleId]);
+            $entities = $em->getRepository(Workflow::class)->findBy(['rule' => $ruleId, 'deleted' => 0]);
 
             // List of task limited to 1000 and order by status (start first) and date begin
             $compact = $this->nav_pagination([
