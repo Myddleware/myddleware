@@ -27,12 +27,6 @@
 {% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
 	<div id="task" >
-<a href="{{ path('task_stopall') }}">
-    <button class="btn btn-danger">
-        <i class="fa fa-ban" aria-hidden="true"></i>
-        {{'Stop all the Tasks'}}
-    </button>
-</a>
 
 <div>
 	{% for message in app.flashes('success') %}
