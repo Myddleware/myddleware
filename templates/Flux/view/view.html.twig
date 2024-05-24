@@ -773,15 +773,15 @@
 						<thead>
 							<tr>
 								<th>ID</th>
-								<th>Workflow ID</th>
-								<th>Job ID</th>
-								<th>Trigger Document ID</th>
-								<th>Generate Document ID</th>
+								<th>Workflow</th>
+								<th>Job</th>
+								<th>Trigger Document</th>
+								<th>Generate Document</th>
 								<th>Created By</th>
 								<th>Status</th>
 								<th>Date Created</th>
 								<th>Message</th>
-								<th>Action ID</th>
+								<th>Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -790,7 +790,11 @@
 									<td class="ctr">{{ log.id }}</td>
 									<td class="ctr">{{ log.workflow.id }}</td>
 									<td class="ctr">{{ log.job.id }}</td>
-									<td class="ctr">{{ log.triggerDocument.id }}</td>
+									<td class="ctr">    {% if log.triggerDocument is not null %}
+										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
+									{% else %}
+										<span>No Document</span>
+									{% endif %}</td>
 									<td class="ctr">    {% if log.generateDocument is not null %}
 										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
 									{% else %}
