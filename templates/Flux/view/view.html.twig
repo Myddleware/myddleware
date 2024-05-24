@@ -791,7 +791,12 @@
 									<td class="ctr">{{ log.workflow.id }}</td>
 									<td class="ctr">{{ log.job.id }}</td>
 									<td class="ctr">{{ log.triggerDocument.id }}</td>
-									<td class="ctr">{{ log.generateDocument.id|default('N/A') }}</td>
+									<td class="ctr">    {% if log.generateDocument is not null %}
+										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
+									{% else %}
+										<span>No Document</span>
+									{% endif %}</td>
+									{# <td class="ctr">{{ log.generateDocument.id|default('N/A') }}</td> #}
 									<td class="ctr">{{ log.createdBy }}</td>
 									<td class="ctr">
 										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
