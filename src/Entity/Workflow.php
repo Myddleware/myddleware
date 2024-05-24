@@ -232,13 +232,15 @@ private $workflowActions;
         return $this->active;
     }
 	
-	/**
-     * @return Collection|WorkflowAction[]
-     */
-    public function getWorkflowActions(): Collection
-    {
-        return $this->workflowActions;
-    }
+/**
+ * @return Collection|WorkflowAction[]
+ */
+public function getWorkflowActions(): Collection
+{
+    return $this->workflowActions->filter(function(WorkflowAction $workflowAction) {
+        return $workflowAction->getDeleted() !== 1;
+    });
+}
 
     public function addWorkflowActions(WorkflowAction $workflowAction): self
     {
