@@ -59,7 +59,7 @@ class microsoftsqlcore extends database
     }
 
     // Query to get all the tables of the database
-    protected function get_query_show_tables(): string
+    protected function get_query_show_tables($type): string
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
     }
