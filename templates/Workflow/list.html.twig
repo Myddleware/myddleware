@@ -49,6 +49,7 @@
 							<th>{{'list_workflow.th.id'|trans}}</th>
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.name'|trans}}</th>
+							<th>{{'list_workflow.th.description'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
@@ -57,12 +58,15 @@
 							<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}
 								</a></td>
 							<td>{{ workflow.name }}</td>
+							<td>{{ workflow.description }}</td>
 						</tr>            
 						{% endfor %}		
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.name'|trans}}</th>
+							<th>{{'list_workflow.th.description'|trans}}</th>
+
 						</tr>			
 					{% endif %}
 				</table>

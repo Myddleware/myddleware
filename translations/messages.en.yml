@@ -474,6 +474,7 @@ list_workflow:
         id: Id
         ruleName: Rule name
         name: Name
+        description: Description
 
 view_account:
     title: My account
