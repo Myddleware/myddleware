@@ -26,6 +26,12 @@
 {% block title %}{{parent()}} | {{'title.workflow.list'|trans}}{% endblock %}
 {% block titlesm %}{{'title.workflow.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
+{% block js %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+{% endblock js %}
 	<div id="task" >
 
 <div>
@@ -44,7 +50,7 @@
 
 				<div class="clr"></div>
 				<table class="listepager table container">
-					{% if entities is not empty %}	
+					{% if entities is not empty %}    
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
@@ -52,30 +58,38 @@
 							<th>{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.condition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
+							<th>{{'list_workflow.th.actions'|trans}}</th> <!-- New column for actions -->
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
-							{# <td><a href="{{ path('workflow_view',{'id' : workflow.id }) }}">{{ workflow.param }}</a></td> #}
-							<td>{{ workflow.id }}</td>
-							<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}
-								</a></td>
-							<td>{{ workflow.name }}</td>
-							<td>{{ workflow.description }}</td>
-							<td>{{ workflow.condition }}</td>
-							<td>{{ workflow.active }}</td>
-						</tr>            
-						{% endfor %}		
-						<tr>
-							<th>{{'list_workflow.th.id'|trans}}</th>
-							<th>{{'list_workflow.th.ruleName'|trans}}</th>
-							<th>{{'list_workflow.th.name'|trans}}</th>
-							<th>{{'list_workflow.th.description'|trans}}</th>
-							<th>{{'list_workflow.th.condition'|trans}}</th>
-							<th>{{'list_workflow.th.active'|trans}}</th>
-
-						</tr>			
+								<td>{{ workflow.id }}</td>
+								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
+								<td>{{ workflow.name }}</td>
+								<td>{{ workflow.description }}</td>
+								<td>{{ workflow.condition }}</td>
+								<td>{{ workflow.active }}</td>
+								<td><button class="toggle-actions" data-id="{{ workflow.id }}">Show Actions</button></td> <!-- Button to toggle actions -->
+							</tr>
+							<tr class="actions-row" id="actions-{{ workflow.id }}" style="display: none;"> <!-- Row for actions, hidden by default -->
+								<td colspan="7">
+									<!-- Here you can list the actions for the workflow -->
+									{% for action in workflow.getWorkflowActions %}
+										<p>{{ action.name }}</p>
+									{% endfor %}
+								</td>
+							</tr>
+						{% endfor %}        
 					{% endif %}
 				</table>
+				
+				<script>
+					$(document).ready(function() {
+						$('.toggle-actions').click(function() {
+							var id = $(this).data('id');
+							$('#actions-' + id).toggle();
+						});
+					});
+				</script>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
@@ -97,5 +111,3 @@
 
 {% block cssin %}{% endblock cssin %}
 
-{% block js %}
-{% endblock js %}
