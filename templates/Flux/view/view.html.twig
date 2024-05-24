@@ -787,17 +787,18 @@
 						<tbody>
 							{% for log in workflowLogs %}
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-									{# <td class="ctr">{{ log.workflow.id|e }}</td> #}
+									<td class="ctr">{{ log.id }}</td>
+									<td class="ctr">{{ log.workflow.id }}</td>
 									<td class="ctr">{{ log.job.id }}</td>
 									<td class="ctr">{{ log.triggerDocument.id }}</td>
 									<td class="ctr">{{ log.generateDocument.id|default('N/A') }}</td>
-									<td class="ctr">{{ log.action.name }}</td>
+									<td class="ctr">{{ log.createdBy }}</td>
 									<td class="ctr">
 										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
 									</td>
-									{# <td class="ctr">{{ log.date_created|date('Y-m-d H:i:s') }}</td> #}
+									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
 									<td class="ctr">{{ log.getMessage }}</td>
-									{# <td class="ctr">{{ log.action_id }}</td> #}
+									<td class="ctr">{{ log.action.name }}</td>
 								</tr>
 							{% endfor %}
 						</tbody>
