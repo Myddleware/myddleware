@@ -102,7 +102,6 @@
 }
 
 .listepager td {
-	white-space: nowrap;
 	padding: 5px;
 	color: black; 
 	min-width: 155px;
