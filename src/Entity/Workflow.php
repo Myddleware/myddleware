@@ -97,12 +97,12 @@ class Workflow
      */
     private int $deleted;
 	
-	/**
-     * @var WorkflowAction[]
-     *
-     * @ORM\OneToMany(targetEntity="WorkflowAction", mappedBy="workflow")
-     */
-    private $workflowActions;
+/**
+ * @var Collection|WorkflowAction[]
+ *
+ * @ORM\OneToMany(targetEntity="WorkflowAction", mappedBy="workflow")
+ */
+private $workflowActions;
 	
 	/**
      * @var WorkflowLog[]
