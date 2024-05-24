@@ -323,7 +323,7 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -501,7 +501,7 @@
 								{% if pager.haveToPaginate %}
 									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
 									</div>
 								{% endif %}
@@ -585,7 +585,7 @@
 								{% if pager.haveToPaginate %}
 									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
 									</div>
 								{% endif %}
@@ -803,7 +803,7 @@
 						</tbody>
 					</table>
 				{% else %}
-					<p>{{'view_flux.empty_log'|trans}}</p>
+					<p>{{'view_flux.empty_workflow'|trans}}</p>
 				{% endif %}
 			</div>
 
