@@ -47,11 +47,14 @@
 					{% if entities is not empty %}	
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
+							<th>{{'list_workflow.th.id'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
 							{# <td><a href="{{ path('workflow_view',{'id' : workflow.id }) }}">{{ workflow.param }}</a></td> #}
 							<td>{{ workflow.id }}</td>
+							<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}
+								</a></td>
 							{# <td class="ctr">             
 								{% if workflow.status|lower == 'end' %}
 								<span class="label label-default">{{ workflow.status }}</span>
