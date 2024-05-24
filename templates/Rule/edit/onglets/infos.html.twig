@@ -105,6 +105,12 @@
 					<td class="value">{{ rule.GetDateModified|date("d-m-Y H:i:s") }}</td>
 				</tr>
 				<tr>
+					<td class="title">Workflows</td>
+					<td class="value"><a class="dropdown-item" href="{{ path('workflow_list') }}">
+                                                {{'menu.workflow.list'|trans}}
+                                            </a></td>
+				</tr>
+				<tr>
 					<td class="title">{{'view_rule.infos.mode'|trans}}</td>
 					<td class="value"><span class="label label-default">{{ params_suite.mode }}</span></td>
 				</tr>
