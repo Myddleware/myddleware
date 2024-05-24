@@ -473,6 +473,7 @@ list_workflow:
     th:
         id: Id
         ruleName: Rule name
+        name: Name
 
 view_account:
     title: My account

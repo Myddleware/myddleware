@@ -469,7 +469,8 @@ list_workflow:
     empty: Pas workflows
     th:
         id: Id
-        RuleName: Nom de la règle  
+        RuleName: Nom de la règle
+        name: Nom
 
 view_account:
     title: Mon compte
