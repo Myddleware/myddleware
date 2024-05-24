@@ -473,6 +473,7 @@ list_workflow:
         name: Nom
         description: Description
         condition: Condition
+        active: Actif
 
 view_account:
     title: Mon compte

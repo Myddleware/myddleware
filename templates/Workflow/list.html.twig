@@ -51,6 +51,7 @@
 							<th>{{'list_workflow.th.name'|trans}}</th>
 							<th>{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.condition'|trans}}</th>
+							<th>{{'list_workflow.th.active'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
@@ -61,6 +62,7 @@
 							<td>{{ workflow.name }}</td>
 							<td>{{ workflow.description }}</td>
 							<td>{{ workflow.condition }}</td>
+							<td>{{ workflow.active }}</td>
 						</tr>            
 						{% endfor %}		
 						<tr>
@@ -69,6 +71,7 @@
 							<th>{{'list_workflow.th.name'|trans}}</th>
 							<th>{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.condition'|trans}}</th>
+							<th>{{'list_workflow.th.active'|trans}}</th>
 
 						</tr>			
 					{% endif %}

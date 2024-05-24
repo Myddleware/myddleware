@@ -476,6 +476,7 @@ list_workflow:
         name: Name
         description: Description
         condition: Condition
+        active: Active
 
 view_account:
     title: My account
