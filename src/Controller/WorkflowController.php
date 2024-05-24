@@ -24,56 +24,57 @@
 
 namespace App\Controller;
 
-use App\Entity\Connector;
-use App\Entity\ConnectorParam;
-use App\Entity\Document;
-use App\Entity\FuncCat;
-use App\Entity\Functions;
+use Exception;
 use App\Entity\Rule;
+use App\Entity\User;
+use App\Entity\FuncCat;
+use App\Entity\Document;
+use App\Entity\Solution;
+use App\Entity\Workflow;
+use App\Entity\Connector;
+use App\Entity\Functions;
 use App\Entity\RuleAudit;
 use App\Entity\RuleField;
-use App\Entity\RuleFilter;
 use App\Entity\RuleParam;
-use App\Entity\RuleParamAudit;
-use App\Entity\RuleRelationShip;
-use App\Entity\Solution;
-use App\Entity\User;
+use App\Entity\RuleFilter;
+use Pagerfanta\Pagerfanta;
 use App\Form\ConnectorType;
-use App\Form\DuplicateRuleFormType;
-use App\Manager\DocumentManager;
-use App\Manager\FormulaManager;
-use App\Manager\HomeManager;
 use App\Manager\JobManager;
+use App\Manager\HomeManager;
 use App\Manager\RuleManager;
+use Doctrine\ORM\Mapping\Id;
+use Psr\Log\LoggerInterface;
+use App\Manager\ToolsManager;
+use Doctrine\DBAL\Connection;
+use App\Entity\ConnectorParam;
+use App\Entity\RuleParamAudit;
+use App\Manager\FormulaManager;
+use App\Service\SessionService;
+use App\Entity\RuleRelationShip;
+use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
-use App\Manager\ToolsManager;
-use App\Repository\ConfigRepository;
-use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use App\Service\SessionService;
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Id;
-use Exception;
+use App\Form\DuplicateRuleFormType;
+use App\Repository\ConfigRepository;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
+use App\Form\Type\RelationFilterType;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Pagerfanta;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Form\Type\RelationFilterType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     /**
      * @Route("/workflow")
@@ -145,6 +146,7 @@ use App\Form\Type\RelationFilterType;
         {
         }
 
+
     /* ******************************************************
          * RULE
          ****************************************************** */
@@ -163,14 +165,30 @@ use App\Form\Type\RelationFilterType;
 
             
 
-                
+            // $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+            //     ['triggerDocument' => $id],
+            //     ['id' => 'DESC']
+            // );
+
+            $session = $request->getSession();
+            $em = $this->getDoctrine()->getManager();
+
+            $entities = $em->getRepository(Workflow::class)->findAll();
+
+            // List of task limited to 1000 and rder by status (start first) and date begin
+            $compact = $this->nav_pagination([
+                'adapter_em_repository' => $entities,
+                'maxPerPage' => $this->params['pager'] ?? 25,
+                'page' => $page,
+            ], false);
 
 
                     return $this->render(
                         'Workflow/list.html.twig',
                         [
-                            'nb_rule' => 2,
-                            'entities' => [],
+                            'entities' => $entities,
+                            'nb_workflow' => count($entities),
+                            'pager' => $compact['pager'],
                         ]
                     );
                 throw $this->createNotFoundException('Error');
