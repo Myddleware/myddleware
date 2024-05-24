@@ -31,6 +31,7 @@ use App\Entity\FuncCat;
 use App\Entity\Document;
 use App\Entity\Solution;
 use App\Entity\Workflow;
+use App\Entity\WorkflowAction;
 use App\Entity\Connector;
 use App\Entity\Functions;
 use App\Entity\RuleAudit;
@@ -173,11 +174,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
 
-            $entities = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
+            $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
 
             // List of task limited to 1000 and rder by status (start first) and date begin
             $compact = $this->nav_pagination([
-                'adapter_em_repository' => $entities,
+                'adapter_em_repository' => $workflows,
                 'maxPerPage' => $this->params['pager'] ?? 25,
                 'page' => $page,
             ], false);
@@ -186,8 +187,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     return $this->render(
                         'Workflow/list.html.twig',
                         [
-                            'entities' => $entities,
-                            'nb_workflow' => count($entities),
+                            'entities' => $workflows,
+                            'nb_workflow' => count($workflows),
                             'pager' => $compact['pager'],
                         ]
                     );
