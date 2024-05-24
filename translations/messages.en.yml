@@ -472,6 +472,7 @@ list_workflow:
     empty: No workflows
     th:
         id: Id
+        ruleName: Rule name
 
 view_account:
     title: My account

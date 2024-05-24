@@ -465,10 +465,11 @@ view_task:
         msg: Message     
 
 list_workflow:
-    total: Total of workflows
-    empty: No workflows
+    total: Total des workflows
+    empty: Pas workflows
     th:
-        id: Id   
+        id: Id
+        RuleName: Nom de la règle  
 
 view_account:
     title: Mon compte
