@@ -207,7 +207,7 @@ class WorkflowAction
 
     public function getDescription(): string
     {
-        return $this->description;
+        return isset($this->description) ? $this->description : '';
     }
 	
 	public function setOrder($order): self
