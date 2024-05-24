@@ -47,7 +47,7 @@
 					{% if entities is not empty %}	
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
-							<th>{{'list_workflow.th.id'|trans}}</th>
+							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
@@ -82,6 +82,7 @@
 						{% endfor %}		
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
+							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 						</tr>			
 					{% endif %}
 				</table>
