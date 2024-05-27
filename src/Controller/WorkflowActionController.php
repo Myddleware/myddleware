@@ -204,6 +204,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     /**
      * @Route("/active_show/{id}", name="workflow_action_active_show")
+     * function activate or deactivate an action in the show view
      */
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
@@ -216,7 +217,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             } else {
                 $this->addFlash('error', 'Workflow Action not found');
             }
-
+            
+            
             return $this->redirectToRoute('workflow_show', ['id' => $id]);
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
@@ -227,7 +229,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     /**
      * @Route("/new", name="workflow_action_create")
      */
-    public function WorkflowCreateAction(Request $request)
+    public function WorkflowActionCreateAction(Request $request)
     {
         try {
 
@@ -246,13 +248,55 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $workflow->setModifiedBy($this->getUser());
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow created successfully');
+                $this->addFlash('success', 'Action created successfully');
 
                 return $this->redirectToRoute('workflow_list');
             }
 
             return $this->render(
                 'Workflow/new.html.twig',
+                [
+                    'form' => $form->createView(),
+                ]
+            );
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    /**
+     * @Route("/new/{workflowId}", name="workflow_action_create_with_workflow")
+     */
+    public function WorkflowCreateActionWithWorkflow(string $workflowId, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflow = $em->getRepository(Workflow::class)->find($workflowId);
+            $workflow->setId(uniqid());
+
+            if (!$workflow) {
+                throw $this->createNotFoundException('No workflow found for id '.$workflowId);
+            }
+
+            $workflowAction = new WorkflowAction();
+            $workflowAction->setWorkflow($workflow);
+            $form = $this->createForm(WorkflowActionType::class, $workflowAction, [
+                'entityManager' => $em,
+            ]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $workflowAction->setCreatedBy($this->getUser());
+                $workflowAction->setModifiedBy($this->getUser());
+                $em->persist($workflowAction);
+                $em->flush();
+                $this->addFlash('success', 'Workflow action created successfully');
+
+                return $this->redirectToRoute('workflow_show', ['id' => $workflowId]);
+            }
+
+            return $this->render(
+                'WorkflowAction/new.html.twig',
                 [
                     'form' => $form->createView(),
                 ]
