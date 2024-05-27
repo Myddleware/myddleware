@@ -67,7 +67,11 @@
 								<td>{{ workflow.name }}</td>
 								<td>{{ workflow.description }}</td>
 								<td>{{ workflow.condition }}</td>
-								<td>{{ workflow.active }}</td>
+								<td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
+									<a href="{{ path('workflow_active', {'id': workflow.id}) }}">
+										{{ workflow.active ? 'Active' : 'Inactive' }}
+									</a>
+								</td>
 								<td><button class="toggle-actions" data-id="{{ workflow.id }}">Show Actions</button></td> <!-- Button to toggle actions -->
 							</tr>
 							<tr class="actions-row" id="actions-{{ workflow.id }}" style="display: none;"> <!-- Row for actions, hidden by default -->
