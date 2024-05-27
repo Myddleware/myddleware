@@ -354,6 +354,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 if ($form->isSubmitted() && $form->isValid()) {
                     $workflowAction[0]->setModifiedBy($this->getUser());
+                    // get the to, the subject, and the message using getdata
+                    $to = $form->get('to')->getData();
+                    $subject = $form->get('subject')->getData();
+                    $message = $form->get('message')->getData();
+                    // then merge the 3 as a serialized array
+                    $workflowAction[0]->setArguments(serialize(['to' => $to, 'subject' => $subject, 'message' => $message]));
                     $em->persist($workflowAction[0]);
                     $em->flush();
                     $this->addFlash('success', 'Action updated successfully');
