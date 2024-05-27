@@ -26,9 +26,9 @@ class WorkflowActionType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Action Name',
                 'required' => true,
-            ]);
-            $builder->add('description', TextType::class, ['label' => 'Description']);
-            $builder->add('Workflow', EntityType::class, [
+            ])
+            ->add('description', TextType::class, ['label' => 'Description'])
+            ->add('Workflow', EntityType::class, [
                 'class' => Workflow::class,
                 'choices' => $options['entityManager']->getRepository(Workflow::class)->findBy(['active' => true]),
                 'choice_label' => 'name',
@@ -36,8 +36,8 @@ class WorkflowActionType extends AbstractType
                 'constraints' => [
                     new NotBlank(),
                 ],
-            ]);
-            $builder->add('submit', SubmitType::class, ['label' => 'Save']);
+            ])
+            ->add('submit', SubmitType::class, ['label' => 'Save'])
         ;
     }
 
