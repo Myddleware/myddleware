@@ -84,9 +84,9 @@ class Workflow
     private string $description;
 	
 	/**
-     * @ORM\Column(name="workflowCondition", type="text", nullable=false)
+     * @ORM\Column(name="`condition`", type="text", nullable=false)
      */
-    private string $workflowCondition;
+    private string $condition;
 
 	/**
      * @ORM\Column(name="active", type="boolean", options={"default":1})
@@ -211,14 +211,14 @@ private $workflowActions;
         return $this->description;
     }
 	
-	public function getWorkflowCondition(): string
+	public function getCondition(): string
     {
-        return $this->workflowCondition;
+        return $this->condition;
     }
 
-    public function setWorkflowCondition($condition): self
+    public function setCondition($condition): self
     {
-        $this->workflowCondition = $condition;
+        $this->condition = $condition;
         return $this;
     }
 

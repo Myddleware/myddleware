@@ -54,7 +54,7 @@
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.name'|trans}}</th>
 							<th>{{'list_workflow.th.description'|trans}}</th>
-							<th>{{'list_workflow.th.workflowCondition'|trans}}</th>
+							<th>{{'list_workflow.th.condition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
@@ -63,7 +63,7 @@
 								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
 								<td><a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a></td>
 								<td>{{ workflow.description }}</td>
-								<td>{{ workflow.workflowCondition }}</td>
+								<td>{{ workflow.condition }}</td>
 								<td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
 									<a href="{{ path('workflow_active', {'id': workflow.id}) }}">
 										{{ workflow.active ? 'Active' : 'Inactive' }}

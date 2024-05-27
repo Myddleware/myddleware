@@ -36,7 +36,7 @@ class WorkflowType extends AbstractType
                     new NotBlank(),
                 ],
             ]);
-            $builder->add('workflowCondition', TextareaType::class, ['label' => 'Condition']);
+            $builder->add('condition', TextareaType::class, ['label' => 'Condition']);
             $builder->add('submit', SubmitType::class, ['label' => 'Save']);
         ;
     }
