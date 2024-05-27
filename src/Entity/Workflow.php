@@ -38,11 +38,12 @@ use Exception;
  */
 class Workflow
 {
+
     /**
-     * @ORM\Column(name="id", type="string")
      * @ORM\Id
+     * @ORM\Column(type="string")
      */
-    private string $id;
+    private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="workflows")
@@ -50,10 +51,10 @@ class Workflow
      */
     private Rule $rule;
 
-	/**
+    /**
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
-    private DateTime $dateCreated;
+    private $dateCreated;
 
     /**
      * @ORM\Column(name="date_modified", type="datetime", nullable=false)
@@ -83,9 +84,9 @@ class Workflow
     private string $description;
 	
 	/**
-     * @ORM\Column(name="condition", type="text", nullable=false)
+     * @ORM\Column(name="workflowCondition", type="text", nullable=false)
      */
-    private string $condition;
+    private string $workflowCondition;
 
 	/**
      * @ORM\Column(name="active", type="boolean", options={"default":1})
@@ -115,11 +116,22 @@ private $workflowActions;
     {
         $this->workflowActions = new ArrayCollection();
         $this->workflowLogs = new ArrayCollection();
+        $this->dateCreated = new \DateTime();
+        $this->dateModified = new \DateTime();
+        $this->active = 1;
+        $this->deleted = 0;
     }
 	
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getRule(): ?Rule
@@ -199,14 +211,14 @@ private $workflowActions;
         return $this->description;
     }
 	
-	public function getCondition(): string
+	public function getWorkflowCondition(): string
     {
-        return $this->condition;
+        return $this->workflowCondition;
     }
 
-    public function setCondition($condition): self
+    public function setWorkflowCondition($condition): self
     {
-        $this->condition = $condition;
+        $this->workflowCondition = $condition;
         return $this;
     }
 
