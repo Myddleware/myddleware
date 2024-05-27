@@ -356,6 +356,7 @@ list_flux:
         date_modified: Date de modification
         statut: Status
         source_date_modified: Date de référence
+        lock : Verrouiller
         type: Type
         source_field: Champ lié
         reference: Référence

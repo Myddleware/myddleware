@@ -358,6 +358,7 @@ list_flux:
         date_modified: Modification date
         statut: Status
         source_date_modified: Date of reference
+        lock : Lock
         type: Type
         source_field: Field linked
         reference: Reference

@@ -2233,7 +2233,6 @@ $(document).ready(function () {
       url: ajaxUrl,
       type: "POST",
       success: function (response) {
-        alert(read_job_lock_success);
         if ($("." + buttonClass).length > 0) {
           $("#row_" + jobId).removeClass("bg-danger"); // Retire la classe de la ligne
           $("#row_" + jobId + " .btn-opt").removeClass("icon-danger"); // Retire la classe des icônes

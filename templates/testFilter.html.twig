@@ -259,12 +259,15 @@
                     <th>{{ 'list_flux.tab.target_id'|trans }} <span data-sort="target_id"><i class='fas fa-angle-down target_idIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.type'|trans }} <span data-sort="type"><i class='fas fa-angle-down typeIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.source_date_modified'|trans }} <span data-sort="source_date_modified"><i class='fas fa-angle-down source_date_modifiedIcon'></i></span></th>
+                    <th>{{ 'list_flux.tab.lock'|trans }} <span data-sort="lock"><i class='fas fa-angle-down lockIcon'></i></span></th>
                 </tr>
             </thead>
             <tbody>
                 {% if pager is defined and pager is not empty %}
                     {% for document in pager %}
-                        <tr>
+                    	{% set rowClass = document.job_lock is not empty ? 'bg-danger' : '' %}
+    					{% set iconClass = document.job_lock is not empty ? 'icon-danger' : '' %}
+                        <tr class="{{ rowClass }}">
                             <td>
                                 {% if document.global_status|lower == 'close' or document.global_status|lower == 'cancel' %}
                                     <input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
@@ -294,6 +297,12 @@
                             <td>{{ document.target_id }}</td>
                             <td>{{ document.type }}</td>
                             <td>{{ document.source_date_modified }}</td>
+                            {% if document.job_lock is not empty %}
+                                <td>
+                                    <span class="btn-opt {{ iconClass }}">
+                                        <i class="fa fa-lock" aria-hidden="true"></i></td>
+                                    </span>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 {% else %}
