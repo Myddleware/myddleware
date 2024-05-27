@@ -61,7 +61,7 @@
                         <tbody>
                             {% for action in workflow.getWorkflowActions %}
                                 <tr>
-                                    <td>{{ action.name }}</td>
+                                    <td><a href="{{ path('workflow_action_show', {'id': action.id}) }}">{{ action.name }}</a></td>
                                     <td>{{ action.action }}</td>
                                     <td>{{ action.description }}</td>
                                     <td>{{ action.order }}</td>
