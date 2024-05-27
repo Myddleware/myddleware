@@ -63,6 +63,7 @@ use App\Repository\ConfigRepository;
 use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\RelationFilterType;
+use App\Form\Type\WorkflowActionType;
 use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
@@ -263,17 +264,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     // public function to show the detail view of a single workflow
     /**
-     * @Route("/show/{id}", name="workflow_show")
+     * @Route("/showAction/{id}", name="workflow_action_show")
      */
-    public function WorkflowShowAction(string $id, Request $request)
+    public function WorkflowActionShowAction(string $id, Request $request)
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
 
             if ($workflow[0]) {
                 return $this->render(
-                    'Workflow/show.html.twig',
+                    'WorkflowAction/show.html.twig',
                     [
                         'workflow' => $workflow[0],
                     ]
@@ -290,16 +291,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     // public function to edit a workflow
     /**
-     * @Route("/edit/{id}", name="workflow_edit")
+     * @Route("/edit/{id}", name="workflow_action_edit")
      */
     public function WorkflowEditAction(string $id, Request $request)
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
 
             if ($workflow[0]) {
-                $form = $this->createForm(WorkflowType::class, $workflow[0], [
+                $form = $this->createForm(WorkflowActionType::class, $workflow[0], [
                     'entityManager' => $em,
                 ]);
                 $form->handleRequest($request);
@@ -314,7 +315,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 }
 
                 return $this->render(
-                    'Workflow/edit.html.twig',
+                    'WorkflowAction/edit.html.twig',
                     [
                         'form' => $form->createView(),
                     ]
