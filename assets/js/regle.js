@@ -2216,7 +2216,17 @@ $(document).ready(function () {
 
   $(".edit-button").click(function () {
     var jobId = $(this).data("job-id");
-    var buttonId = $(this).attr("id");
+    var allClasses = $(".edit-button").attr("class");
+    var classesArray = $(this).attr("class").split(" ");
+    var buttonClass = "";
+
+    for (var i = 0; i < classesArray.length; i++) {
+      if (classesArray[i].startsWith("unlock_list_rules")) {
+        buttonClass = classesArray[i];
+        break;
+      }
+    }
+
     var ajaxUrl = clearReadJobLockUrl.replace("PLACEHOLDER_ID", jobId);
 
     $.ajax({
@@ -2224,10 +2234,11 @@ $(document).ready(function () {
       type: "POST",
       success: function (response) {
         alert(read_job_lock_success);
-        if (buttonId.startsWith("unlock_list_rules")) {
+        if ($("." + buttonClass).length > 0) {
           $("#row_" + jobId).removeClass("bg-danger"); // Retire la classe de la ligne
           $("#row_" + jobId + " .btn-opt").removeClass("icon-danger"); // Retire la classe des icônes
-          $("#" + buttonId).hide(); // Cache le bouton
+          $("." + buttonClass).hide(); // Cache le bouton
+          console.log(buttonClass);
         } else {
           if (response.read_job_lock === "") {
             $(".job_lock_" + jobId).show();

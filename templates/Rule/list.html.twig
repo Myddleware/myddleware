@@ -147,7 +147,7 @@
 							</td>
 							<td class="value" style="text-align: center !important;">
 								{% if rule.0.readJobLock is not empty %}
-									<button id="unlock_list_rules" class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+									<button class="unlock_list_rules_{{rule.id}} edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
 										<i class="fa fa-lock" aria-hidden="true"></i>
 										<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
 									</button>
