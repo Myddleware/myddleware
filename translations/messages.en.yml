@@ -477,6 +477,7 @@ list_workflow:
         description: Description
         condition: Condition
         active: Active
+        actions: Actions
 
 view_account:
     title: My account
