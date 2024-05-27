@@ -31,7 +31,6 @@ use App\Entity\FuncCat;
 use App\Entity\Document;
 use App\Entity\Solution;
 use App\Entity\Workflow;
-use App\Entity\WorkflowAction;
 use App\Entity\Connector;
 use App\Entity\Functions;
 use App\Entity\RuleAudit;
@@ -49,6 +48,8 @@ use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleParamAudit;
+use App\Entity\WorkflowAction;
+use App\Form\Type\WorkflowType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
@@ -279,6 +280,45 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             }
 
             return $this->redirectToRoute('workflow_list');
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    // public function to create a new workflow
+    /**
+     * @Route("/new", name="workflow_create")
+     */
+    public function WorkflowCreateAction(Request $request)
+    {
+        try {
+
+            $rules = RuleRepository::findActiveRulesNames($this->entityManager);
+
+            $em = $this->getDoctrine()->getManager();
+            $workflow = new Workflow();
+            $workflow->setId(uniqid());
+            $form = $this->createForm(WorkflowType::class, $workflow, [
+                'entityManager' => $em,
+            ]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $workflow->setCreatedBy($this->getUser());
+                $workflow->setModifiedBy($this->getUser());
+                $em->persist($workflow);
+                $em->flush();
+                $this->addFlash('success', 'Workflow created successfully');
+
+                return $this->redirectToRoute('workflow_list');
+            }
+
+            return $this->render(
+                'Workflow/new.html.twig',
+                [
+                    'form' => $form->createView(),
+                ]
+            );
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
