@@ -767,9 +767,9 @@
 							<span class="nb">{{ nb_workflow_logs }}</span>
 						</p>
 					</div>
-					<div class="clr"></div>
 					{% endif %}
-					<table class="listepager table">
+					<div class="">
+					<table class="table">
 						<thead>
 							<tr>
 								<th>ID</th>
@@ -814,6 +814,7 @@
 							{% endfor %}
 						</tbody>
 					</table>
+					</div>
 				{% else %}
 					<p>{{'view_flux.empty_workflow'|trans}}</p>
 				{% endif %}
