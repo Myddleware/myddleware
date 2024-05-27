@@ -246,6 +246,18 @@ class RuleRepository extends ServiceEntityRepository
         return $finalResults;
     }
 
+    public static function findActiveRulesNamesOrdered($entityManager)
+    {
+        $rules = $entityManager->getRepository(Rule::class)->findBy(['active' => true]);
+
+        $rulesNames = [];
+        foreach ($rules as $rule) {
+            $rulesNames[$rule->getName()] = $rule->getId();
+        }
+
+        return $rulesNames;
+    }
+
     public static function findActiveRulesIds(EntityManagerInterface $entityManager)
     {
         $qb = $entityManager->createQueryBuilder();
