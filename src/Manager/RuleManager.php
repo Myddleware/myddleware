@@ -2403,12 +2403,6 @@ class rulecore
     
         return true;
     }
-    public function getAllRuleIds() {
-        $sql = "SELECT id FROM rule";
-        $stmt = $this->connection->prepare($sql);
-        $result = $stmt->executeQuery();
-        return $result->fetchAll(PDO::FETCH_COLUMN);
-    }
 }
 class RuleManager extends rulecore
 {

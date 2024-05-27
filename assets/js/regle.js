@@ -303,39 +303,42 @@ $(function () {
       theme(style_template);
     });
 
-$("#functions").on("dblclick", "li", function () {
-  var position = $("#area_insert").getCursorPosition();
-  var content = $("#area_insert").val();
-  var newContent =
-    content.substr(0, position) +
-    $.trim($(this).text()) +
-    "( " +
-    content.substr(position);
-  // If we click on the function mdw_no_send_field, we don't want to add the parenthesis because it is a constant
-  if (newContent.includes("mdw_no_send_field( ")) {
-    newContent = newContent.replace("mdw_no_send_field( ", '"mdw_no_send_field"');
-}
-  $("#area_insert").val(newContent);
-  // Set the cursor position to the end of the new content
-  $("#area_insert").setCursorPosition(newContent.length);
-  colorationSyntax();
-  theme(style_template);
-});
+    $("#functions").on("dblclick", "li", function () {
+      var position = $("#area_insert").getCursorPosition();
+      var content = $("#area_insert").val();
+      var newContent =
+        content.substr(0, position) +
+        $.trim($(this).text()) +
+        "( " +
+        content.substr(position);
+      // If we click on the function mdw_no_send_field, we don't want to add the parenthesis because it is a constant
+      if (newContent.includes("mdw_no_send_field( ")) {
+        newContent = newContent.replace(
+          "mdw_no_send_field( ",
+          '"mdw_no_send_field"'
+        );
+      }
+      $("#area_insert").val(newContent);
+      // Set the cursor position to the end of the new content
+      $("#area_insert").setCursorPosition(newContent.length);
+      colorationSyntax();
+      theme(style_template);
+    });
 
-$.fn.setCursorPosition = function(pos) {
-  this.each(function(index, elem) {
-    if (elem.setSelectionRange) {
-      elem.setSelectionRange(pos, pos);
-    } else if (elem.createTextRange) {
-      var range = elem.createTextRange();
-      range.collapse(true);
-      range.moveEnd('character', pos);
-      range.moveStart('character', pos);
-      range.select();
-    }
-  });
-  return this;
-};
+    $.fn.setCursorPosition = function (pos) {
+      this.each(function (index, elem) {
+        if (elem.setSelectionRange) {
+          elem.setSelectionRange(pos, pos);
+        } else if (elem.createTextRange) {
+          var range = elem.createTextRange();
+          range.collapse(true);
+          range.moveEnd("character", pos);
+          range.moveStart("character", pos);
+          range.select();
+        }
+      });
+      return this;
+    };
 
     // Btn clear dialogue formule
     $("#area_eff").on("click", function () {
@@ -991,7 +994,6 @@ $.fn.setCursorPosition = function(pos) {
   $("#unlockAllFlux").on("click", function () {
     console.log(mass_unlock);
     if (confirm(confirm_unlock)) {
-      console.log("okkkey");
       $.ajax({
         type: "POST",
         url: mass_unlock,
@@ -1002,12 +1004,9 @@ $.fn.setCursorPosition = function(pos) {
           ids: massFluxTab,
         },
         success: function (data) {
-          console.log(data);
-          console.log("ouiiiii");
           location.reload();
         },
         error: function () {
-          console.log(data);
           alert("Erreur lors de la communication avec le serveur.");
         },
       });
@@ -2159,47 +2158,47 @@ function massAddFlux(id, cond, massFluxTab) {
   $("#unlockAllFlux").find("span").html(massFluxTab.length);
 }
 
-$(document).ready(function() {
-	$('.removeFilters').click(function() {
-		// Get the class list of the clicked element
-		var classList = $(this).attr('class').split(/\s+/);
-		// console.log(classList);
+$(document).ready(function () {
+  $(".removeFilters").click(function () {
+    // Get the class list of the clicked element
+    var classList = $(this).attr("class").split(/\s+/);
+    // console.log(classList);
 
-		// Find the filter class (it's the last class in the list)
-		var filterClass = classList[classList.length - 1];
-		// console.log(filterClass);
+    // Find the filter class (it's the last class in the list)
+    var filterClass = classList[classList.length - 1];
+    // console.log(filterClass);
 
-		// Get the stored filters from local storage
-		var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
-		// console.log(storedFilters);
+    // Get the stored filters from local storage
+    var storedFilters = JSON.parse(localStorage.getItem("storedFilters"));
+    // console.log(storedFilters);
 
-		// Remove the filter from the stored filters
-		delete storedFilters[filterClass];
-		// console.log(storedFilters);
+    // Remove the filter from the stored filters
+    delete storedFilters[filterClass];
+    // console.log(storedFilters);
 
-		// Save the updated filters back to local storage
-		localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
-		// console.log(localStorage.getItem('storedFilters'));
+    // Save the updated filters back to local storage
+    localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
+    // console.log(localStorage.getItem('storedFilters'));
 
-		    // Make an AJAX request to the server to remove the filter from the session
-			$.ajax({
-				url: path_remove_filter,
-				method: 'POST',
-				data: { filterName: 'FluxFilter' + toCamelCase(filterClass) },
-				success: function(response) {
-					if (response.status === 'success') {
-						// console.log('Filter successfully removed Argonien');
-						
-						// Clear the form field
-						var formFieldName = 'combined_filter[document][' + filterClass + ']';
-						$('input[name="' + formFieldName + '"]').val('');
-						// console.log('Filter input cleared');
-					} else {
-						// console.log('Error removing filter: ' + response.message);
-					}
-				}
-			});
-	});
+    // Make an AJAX request to the server to remove the filter from the session
+    $.ajax({
+      url: path_remove_filter,
+      method: "POST",
+      data: { filterName: "FluxFilter" + toCamelCase(filterClass) },
+      success: function (response) {
+        if (response.status === "success") {
+          // console.log('Filter successfully removed Argonien');
+
+          // Clear the form field
+          var formFieldName = "combined_filter[document][" + filterClass + "]";
+          $('input[name="' + formFieldName + '"]').val("");
+          // console.log('Filter input cleared');
+        } else {
+          // console.log('Error removing filter: ' + response.message);
+        }
+      },
+    });
+  });
 });
 
 $(document).ready(function () {
@@ -2214,41 +2213,38 @@ $(document).ready(function () {
     }
   );
 
-  $(".edit-button").click(function () {
-    var jobId = $(this).data("job-id");
-    var allClasses = $(".edit-button").attr("class");
-    var classesArray = $(this).attr("class").split(" ");
-    var buttonClass = "";
+  // Click on the lock icon
+  $(document).ready(function () {
+    $(".edit-button").click(function () {
+      var jobId = $(this).data("job-id");
+      var classesArray = $(this).attr("class").split(" ");
+      var buttonClass = "";
 
-    for (var i = 0; i < classesArray.length; i++) {
-      if (classesArray[i].startsWith("unlock_list_rules")) {
-        buttonClass = classesArray[i];
-        break;
-      }
-    }
-
-    var ajaxUrl = clearReadJobLockUrl.replace("PLACEHOLDER_ID", jobId);
-
-    $.ajax({
-      url: ajaxUrl,
-      type: "POST",
-      success: function (response) {
-        if ($("." + buttonClass).length > 0) {
-          $("#row_" + jobId).removeClass("bg-danger"); // Retire la classe de la ligne
-          $("#row_" + jobId + " .btn-opt").removeClass("icon-danger"); // Retire la classe des icônes
-          $("." + buttonClass).hide(); // Cache le bouton
-          console.log(buttonClass);
-        } else {
-          if (response.read_job_lock === "") {
-            $(".job_lock_" + jobId).show();
-          } else {
-            $(".job_lock_" + jobId).hide();
-          }
+      for (var i = 0; i < classesArray.length; i++) {
+        if (classesArray[i].startsWith("unlock_list_rules")) {
+          buttonClass = classesArray[i];
+          break;
         }
-      },
-      error: function () {
-        alert(read_job_lock_error);
-      },
+      }
+
+      var ajaxUrl = clearReadJobLockUrl.replace("PLACEHOLDER_ID", jobId);
+
+      $.ajax({
+        url: ajaxUrl,
+        type: "POST",
+        success: function (response) {
+          if (buttonClass) {
+            $("#row_" + jobId).removeClass("bg-danger");
+            $("#row_" + jobId + " .btn-opt").removeClass("icon-danger");
+            $("." + buttonClass).hide();
+          } else {
+            $(".job_lock_" + jobId).remove();
+          }
+        },
+        error: function () {
+          alert(read_job_lock_error);
+        },
+      });
     });
   });
 });

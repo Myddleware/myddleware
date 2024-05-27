@@ -3104,26 +3104,4 @@ use App\Form\Type\RelationFilterType;
             return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('view_rule.action.unlock_rule_error')], 500);
         }
     }
-
-    /**
-     * @Route("/list/unlock/", name="flux_mass_unlock_rule")
-     */
-    public function fluxMassUnlockRule($id = null) {
-        try {
-            $ids = $id ? [$id] : $this->ruleManager->getAllRuleIds();
-            $this->ruleManager->unlockRule('rule', $ids);
-            $this->addFlash(
-                'success_unlock_rule',
-                $this->translator->trans('view_rule.action.unlock_rule_success')
-            );
-            return $this->redirectToRoute('regle_list');
-    
-           // return 
-        } catch (Exception $e) {
-            $this->addFlash(
-                'error_unlock_rule',
-                $this->translator->trans('view_rule.action.unlock_rule_error')
-            );
-        }
-    }
 }
