@@ -232,58 +232,110 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
-            // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-            private function nav_pagination($params, $orm = true)
-            {
-                /*
-                 * adapter_em_repository = requete
-                 * maxPerPage = integer
-                 * page = page en cours
-                 */
-    
-                if (is_array($params)) {
-                    /* DOC :
-                     * $pager->setCurrentPage($page);
-                        $pager->getNbResults();
-                        $pager->getMaxPerPage();
-                        $pager->getNbPages();
-                        $pager->haveToPaginate();
-                        $pager->hasPreviousPage();
-                        $pager->getPreviousPage();
-                        $pager->hasNextPage();
-                        $pager->getNextPage();
-                        $pager->getCurrentPageResults();
-                    */
-    
-                    $compact = [];
-    
-                    //On passe l’adapter au bundle qui va s’occuper de la pagination
-                    if ($orm) {
-                        $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
-                    } else {
-                        $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-                    }
-    
-                    //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
-                    $compact['pager']->setMaxPerPage($params['maxPerPage']);
-                    try {
-                        $compact['entities'] = $compact['pager']
-                            //On indique au pager quelle page on veut
-                            ->setCurrentPage($params['page'])
-                            //On récupère les résultats correspondant
-                            ->getCurrentPageResults();
-    
-                        $compact['nb'] = $compact['pager']->getNbResults();
-                    } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-                        //Si jamais la page n’existe pas on léve une 404
-                        throw $this->createNotFoundException("Cette page n'existe pas.");
-                    }
-    
-                    return $compact;
-                }
-    
-                return false;
+    // public function to delet the workflow by id (set deleted to 1)
+    /**
+     * @Route("/delete/{id}", name="workflow_delete")
+     */
+    public function WorkflowDeleteAction(string $id, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+
+            if ($workflow[0]) {
+                $workflow[0]->setDeleted(1);
+                $em->persist($workflow);
+                $em->flush();
+                $this->addFlash('success', 'Workflow deleted successfully');
+            } else {
+                $this->addFlash('error', 'Workflow not found');
             }
+
+            return $this->redirectToRoute('workflow_list');
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    // public function to set the workflow to active or inactive
+    /**
+     * @Route("/active/{id}", name="workflow_active")
+     */
+    public function WorkflowActiveAction(string $id, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $workflowResult[0];
+
+
+            if ($workflow) {
+                $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
+                $em->persist($workflow);
+                $em->flush();
+                $this->addFlash('success', 'Workflow updated successfully');
+            } else {
+                $this->addFlash('error', 'Workflow not found');
+            }
+
+            return $this->redirectToRoute('workflow_list');
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
+    private function nav_pagination($params, $orm = true)
+    {
+        /*
+            * adapter_em_repository = requete
+            * maxPerPage = integer
+            * page = page en cours
+            */
+
+        if (is_array($params)) {
+            /* DOC :
+                * $pager->setCurrentPage($page);
+                $pager->getNbResults();
+                $pager->getMaxPerPage();
+                $pager->getNbPages();
+                $pager->haveToPaginate();
+                $pager->hasPreviousPage();
+                $pager->getPreviousPage();
+                $pager->hasNextPage();
+                $pager->getNextPage();
+                $pager->getCurrentPageResults();
+            */
+
+            $compact = [];
+
+            //On passe l’adapter au bundle qui va s’occuper de la pagination
+            if ($orm) {
+                $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
+            } else {
+                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            }
+
+            //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
+            $compact['pager']->setMaxPerPage($params['maxPerPage']);
+            try {
+                $compact['entities'] = $compact['pager']
+                    //On indique au pager quelle page on veut
+                    ->setCurrentPage($params['page'])
+                    //On récupère les résultats correspondant
+                    ->getCurrentPageResults();
+
+                $compact['nb'] = $compact['pager']->getNbResults();
+            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
+                //Si jamais la page n’existe pas on léve une 404
+                throw $this->createNotFoundException("Cette page n'existe pas.");
+            }
+
+            return $compact;
+        }
+
+        return false;
+    }
     
             // Décrypte les paramètres de connexion d'une solution
             private function decrypt_params($tab_params)
