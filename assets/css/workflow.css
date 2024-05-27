@@ -1,0 +1,7 @@
+.workflow_active a {
+    color: rgb(23, 185, 23) !important;
+}
+
+.workflow_inactive a {
+    color: red !important;
+}
