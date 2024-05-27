@@ -80,7 +80,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     /**
-     * @Route("/workflow")
+     * @Route("/workflowAction")
      */
     class WorkflowActionController extends AbstractController
     {

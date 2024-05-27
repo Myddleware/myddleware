@@ -26,12 +26,6 @@
 {% block title %}{{parent()}} | {{'title.workflow.list'|trans}}{% endblock %}
 {% block titlesm %}{{'title.workflow.list'|trans}}{% endblock titlesm %} 
 {% block body %} 
-{% block js %}
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
-{% endblock js %}
 	<div id="task" >
 
 	<div>
@@ -62,7 +56,6 @@
 							<th>{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.workflowCondition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
-							<th>{{'list_workflow.th.actions'|trans}}</th> <!-- New column for actions -->
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
@@ -76,58 +69,10 @@
 										{{ workflow.active ? 'Active' : 'Inactive' }}
 									</a>
 								</td>
-								<td><button class="toggle-actions" data-id="{{ workflow.id }}">Show Actions</button></td> <!-- Button to toggle actions -->
 							</tr>
-							<tr class="actions-row" id="actions-{{ workflow.id }}" style="display: none;"> <!-- Row for actions, hidden by default -->
-								<td colspan="1">
-									<!-- Here you can list the actions for the workflow -->
-									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.name }}</p>										
-									{% endfor %}
-								</td>
-								<td colspan="1">
-									<!-- Here you can list the actions for the workflow -->
-									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.action }}</p>										
-									{% endfor %}
-								</td>
-								<td colspan="1">
-									<!-- Here you can list the actions for the workflow -->
-									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.description }}</p>										
-									{% endfor %}
-								</td>
-								<td colspan="1">
-									<!-- Here you can list the actions for the workflow -->
-									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.order }}</p>										
-									{% endfor %}
-								</td>
-								<td colspan="1">
-									<!-- Here you can list the actions for the workflow -->
-									{% for action in workflow.getWorkflowActions %}
-										{% if action.arguments is iterable %}
-											{% for key, argument in action.arguments %}
-												<p>{{ key }}: {{ argument }}</p>
-											{% endfor %}
-										{% else %}
-											<p>{{ action.arguments }}</p>
-										{% endif %}
-									{% endfor %}
-								</td>
-							</tr>
-						{% endfor %}        
+						{% endfor %}
 					{% endif %}
-				</table>
-				
-				<script>
-					$(document).ready(function() {
-						$('.toggle-actions').click(function() {
-							var id = $(this).data('id');
-							$('#actions-' + id).toggle();
-						});
-					});
-				</script>
+				</table>				
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
