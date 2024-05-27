@@ -291,7 +291,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     // public function to edit a workflow
     /**
-     * @Route("/edit/{id}", name="workflow_action_edit")
+     * @Route("/editWorkflowAction/{id}", name="workflow_action_edit")
      */
     public function WorkflowEditAction(string $id, Request $request)
     {
