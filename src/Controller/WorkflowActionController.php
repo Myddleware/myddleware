@@ -288,6 +288,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             if ($form->isSubmitted() && $form->isValid()) {
                 $workflowAction->setCreatedBy($this->getUser());
                 $workflowAction->setModifiedBy($this->getUser());
+                $workflowAction->setDateCreated(new \DateTime());
+                $workflowAction->setDateModified(new \DateTime());
+                $workflowAction->setDeleted(0);
                 $em->persist($workflowAction);
                 $em->flush();
                 $this->addFlash('success', 'Workflow action created successfully');
