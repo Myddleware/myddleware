@@ -272,13 +272,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         try {
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
-            $workflow->setId(uniqid());
 
             if (!$workflow) {
                 throw $this->createNotFoundException('No workflow found for id '.$workflowId);
             }
 
             $workflowAction = new WorkflowAction();
+            $workflowAction->setId(uniqid());
             $workflowAction->setWorkflow($workflow);
             $form = $this->createForm(WorkflowActionType::class, $workflowAction, [
                 'entityManager' => $em,
