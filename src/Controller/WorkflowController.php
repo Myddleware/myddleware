@@ -296,6 +296,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflow = $workflowResult[0];
 
             if ($workflow) {
+                $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
+                $em->persist($workflow);
+                $em->flush();
                 $this->addFlash('success', 'Workflow updated successfully');
             } else {
                 $this->addFlash('error', 'Workflow not found');
