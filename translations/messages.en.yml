@@ -239,6 +239,7 @@ list_rule:
         delete: Delete
         edit: Edit
         view: Refer to the form
+    link_title : View task details
 
 animate:
     rulename: Name of your rule 

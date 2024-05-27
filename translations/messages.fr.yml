@@ -238,6 +238,7 @@ list_rule:
         delete: Supprimer
         edit: Editer
         view: Voir la fiche
+    link_title : Voir les détails de la tâche
 
 animate:
     rulename: Nom de votre règle 

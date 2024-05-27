@@ -116,6 +116,9 @@
 							<i class="fa fa-lock" aria-hidden="true"></i>
 							<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
 						</button>
+						<a href="{{ path('task_view',{'id' : rule.readJobLock }) }}" title="{{'list_rule.link_title'|trans}}" class="icon_view_task px-1">
+							<i class="fa fa-eye" aria-hidden="true"></i>
+						</a>
 					</td>
 				</tr>
 				{% endif %}
