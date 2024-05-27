@@ -30,7 +30,7 @@ class WorkflowActionType extends AbstractType
             ->add('description', TextType::class, ['label' => 'Description'])
             ->add('Workflow', EntityType::class, [
                 'class' => Workflow::class,
-                'choices' => $options['entityManager']->getRepository(Workflow::class)->findBy(['active' => true]),
+                'choices' => $options['entityManager']->getRepository(Workflow::class)->findBy(['deleted' => 0]),
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'constraints' => [
