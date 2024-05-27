@@ -324,6 +324,33 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+    // public function to show the detail view of a single workflow
+    /**
+     * @Route("/show/{id}", name="workflow_show")
+     */
+    public function WorkflowShowAction(string $id, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+
+            if ($workflow[0]) {
+                return $this->render(
+                    'Workflow/show.html.twig',
+                    [
+                        'workflow' => $workflow[0],
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Workflow not found');
+
+                return $this->redirectToRoute('workflow_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
     // public function to edit a workflow
     /**
      * @Route("/edit/{id}", name="workflow_edit")
