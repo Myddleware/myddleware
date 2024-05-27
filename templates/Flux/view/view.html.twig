@@ -789,7 +789,7 @@
 							{% for log in workflowLogs %}
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 									<td class="ctr">{{ log.id }}</td>
-									<td class="ctr">{{ log.workflow.id }}</td>
+									<td class="ctr"><a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a></td>
 									<td class="ctr">{{ log.job.id }}</td>
 									<td class="ctr">    {% if log.triggerDocument is not null %}
 										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
