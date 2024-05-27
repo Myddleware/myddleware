@@ -13,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Validator\Constraints\Range;
 
 
 
@@ -35,6 +37,25 @@ class WorkflowActionType extends AbstractType
                 'choice_value' => 'id',
                 'constraints' => [
                     new NotBlank(),
+                ],
+            ])
+            ->add('action', TextType::class, ['label' => 'Action'])
+            ->add('arguments', TextType::class, ['label' => 'Arguments'])
+            ->add('order', IntegerType::class, [
+                'label' => 'Order',
+                'constraints' => [
+                    new Range([
+                        'min' => 1,
+                        'max' => 50,
+                        'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
+                    ]),
+                ],
+            ])
+            ->add('active', ChoiceType::class, [
+                'label' => 'Active',
+                'choices' => [
+                    'Yes' => 1,
+                    'No' => 0,
                 ],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Save'])
