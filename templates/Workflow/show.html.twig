@@ -1,6 +1,13 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'title.workflow.detail'|trans }}{% endblock %}
-{% block titlesm %}{{ 'title.workflow.detail'|trans }}{% endblock titlesm %} 
+
+{% block title %}
+    {{ parent() }} | {{ 'title.workflow.detail'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'title.workflow.detail'|trans }}
+{% endblock titlesm %} 
+
 {% block body %} 
     {% block js %}
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -8,16 +15,19 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
     {% endblock js %}
+
     <div id="task">
         <div>
             <a href="{{ path('workflow_edit', {'id': workflow.id}) }}">Edit this workflow</a>
         </div>
+
         <div>
             {% for message in app.flashes('success') %}
                 <div class="alert alert-success" role="alert">
                     {{ message }}
                 </div>
             {% endfor %}
+
             {% if workflow is not null %}
                 <div>
                     <h2>{{ workflow.name }}</h2>
@@ -26,21 +36,40 @@
                     <p>{{ workflow.active ? 'Active' : 'Inactive' }}</p>
                     <!-- Display other properties of the workflow here -->
                 </div>
+
                 <div>
-                    <!-- Display the actions for the workflow here -->
-                    {% for action in workflow.getWorkflowActions %}
-                        <p>{{ action.name }}</p>
-                        <p>{{ action.action }}</p>
-                        <p>{{ action.description }}</p>
-                        <p>{{ action.order }}</p>
-                        {% if action.arguments is iterable %}
-                            {% for key, argument in action.arguments %}
-                                <p>{{ key }}: {{ argument }}</p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Action</th>
+                                <th>Description</th>
+                                <th>Order</th>
+                                <th>Arguments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for action in workflow.getWorkflowActions %}
+                                <tr>
+                                    <td>{{ action.name }}</td>
+                                    <td>{{ action.action }}</td>
+                                    <td>{{ action.description }}</td>
+                                    <td>{{ action.order }}</td>
+                                    <td>
+                                        {% if action.arguments is iterable %}
+                                            <ul>
+                                                {% for key, argument in action.arguments %}
+                                                    <li>{{ key }}: {{ argument }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            {{ action.arguments }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             {% endfor %}
-                        {% else %}
-                            <p>{{ action.arguments }}</p>
-                        {% endif %}
-                    {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             {% else %}
                 <p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
@@ -48,5 +77,3 @@
         </div>
     </div>
 {% endblock %}
-
-{% block cssin %}{% endblock cssin %}
