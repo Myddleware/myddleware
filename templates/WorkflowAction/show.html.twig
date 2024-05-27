@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'title.workflow.detail'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'title.workflow.detail'|trans }}
+{% endblock titlesm %} 
+
+{% block body %} 
+    {% block js %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+    {% endblock js %}
+
+    <div id="task">
+        <div>
+            <a href="{{ path('workflow_edit', {'id': workflow.id}) }}">Edit this workflow</a>
+        </div>
+
+        <div>
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% if workflow is not null %}
+            <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Name: {{ workflow.name }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Description: {{ workflow.description }}</p>
+                        {# rule #}
+                        <p class="card-text">Rule: <a href="{{ path('regle_open', {'id': workflow.rule.id}) }}">{{ workflow.rule.name }}</a></p>
+                        <p class="card-text">Conditions: {{ workflow.workflowCondition }}</p>
+                        <p class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
+									<a href="{{ path('workflow_active_show', {'id': workflow.id}) }}">
+										{{ workflow.active ? 'Active' : 'Inactive' }}
+									</a>
+								</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>List of Actions</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Action</th>
+                                <th>Description</th>
+                                <th>Order</th>
+                                <th>Arguments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for action in workflow.getWorkflowActions %}
+                                <tr>
+                                    <td>{{ action.name }}</td>
+                                    <td>{{ action.action }}</td>
+                                    <td>{{ action.description }}</td>
+                                    <td>{{ action.order }}</td>
+                                    <td>
+                                        {% if action.arguments is iterable %}
+                                            <ul>
+                                                {% for key, argument in action.arguments %}
+                                                    <li>{{ key }}: {{ argument }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            {{ action.arguments }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
