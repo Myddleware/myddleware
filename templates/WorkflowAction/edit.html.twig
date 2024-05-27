@@ -1,13 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Create a new Workflow</h1>
+    <h1>Edit a Workflow Action</h1>
 
     {{ form_start(form) }}
         {{ form_row(form.name) }}
         {{ form_row(form.description) }}
-        {{ form_row(form.Rule) }}
-        {{ form_row(form.workflowCondition) }}
+        {{ form_row(form.Workflow) }}
         {{ form_row(form.submit) }}
     {{ form_end(form) }}
 {% endblock %}
