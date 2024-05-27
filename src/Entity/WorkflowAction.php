@@ -90,7 +90,7 @@ class WorkflowAction
     private string $description;
 
     /**
-     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
+     * @ORM\Column(name="`order`", type="integer", length=3, nullable=false)
      */
     private int $order;
 	
