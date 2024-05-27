@@ -285,6 +285,31 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+    /**
+     * @Route("/active_show/{id}", name="workflow_active_show")
+     */
+    public function WorkflowActiveShowAction(string $id, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $workflowResult[0];
+
+            if ($workflow) {
+                $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
+                $em->persist($workflow);
+                $em->flush();
+                $this->addFlash('success', 'Workflow updated successfully');
+            } else {
+                $this->addFlash('error', 'Workflow not found');
+            }
+
+            return $this->redirectToRoute('workflow_show', ['id' => $id]);
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
     // public function to create a new workflow
     /**
      * @Route("/new", name="workflow_create")
