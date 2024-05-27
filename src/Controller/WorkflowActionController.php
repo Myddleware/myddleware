@@ -297,21 +297,21 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowAction = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-            if ($workflow[0]) {
-                $form = $this->createForm(WorkflowActionType::class, $workflow[0], [
+            if ($workflowAction[0]) {
+                $form = $this->createForm(WorkflowActionType::class, $workflowAction[0], [
                     'entityManager' => $em,
                 ]);
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-                    $workflow[0]->setModifiedBy($this->getUser());
-                    $em->persist($workflow[0]);
+                    $workflowAction[0]->setModifiedBy($this->getUser());
+                    $em->persist($workflowAction[0]);
                     $em->flush();
-                    $this->addFlash('success', 'Workflow updated successfully');
+                    $this->addFlash('success', 'Action updated successfully');
 
-                    return $this->redirectToRoute('workflow_list');
+                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction[0]->getId()]);
                 }
 
                 return $this->render(
@@ -321,7 +321,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ]
                 );
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('error', 'Action not found');
 
                 return $this->redirectToRoute('workflow_list');
             }
