@@ -112,10 +112,17 @@
 				<tr class="job_lock_{{rule.id}}">
 					<td class="title">{{ 'view_rule.infos.read_job_lock' | trans }}</td>
 					<td class="value" style="text-align: center !important;">
-						<button class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
-							<i class="fa fa-lock" aria-hidden="true"></i>
-							<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
-						</button>
+						{% if is_granted('ROLE_SUPER_ADMIN') %}
+							<button class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+								<i class="fa fa-lock" aria-hidden="true"></i>
+								<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+							</button>
+						{% else %}
+							<button class="unlock_list_rules_{{rule.id}} edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}" disabled>
+								<i class="fa fa-lock" aria-hidden="true"></i>
+								<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+							</button>
+						{% endif %}
 						<a href="{{ path('task_view',{'id' : rule.readJobLock }) }}" title="{{'list_rule.link_title'|trans}}" class="icon_view_task px-1">
 							<i class="fa fa-eye" aria-hidden="true"></i>
 						</a>
