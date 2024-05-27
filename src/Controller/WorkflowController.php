@@ -324,6 +324,47 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+    // public function to edit a workflow
+    /**
+     * @Route("/edit/{id}", name="workflow_edit")
+     */
+    public function WorkflowEditAction(string $id, Request $request)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+
+            if ($workflow[0]) {
+                $form = $this->createForm(WorkflowType::class, $workflow[0], [
+                    'entityManager' => $em,
+                ]);
+                $form->handleRequest($request);
+
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $workflow[0]->setModifiedBy($this->getUser());
+                    $em->persist($workflow[0]);
+                    $em->flush();
+                    $this->addFlash('success', 'Workflow updated successfully');
+
+                    return $this->redirectToRoute('workflow_list');
+                }
+
+                return $this->render(
+                    'Workflow/edit.html.twig',
+                    [
+                        'form' => $form->createView(),
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Workflow not found');
+
+                return $this->redirectToRoute('workflow_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
     // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
     private function nav_pagination($params, $orm = true)
     {
