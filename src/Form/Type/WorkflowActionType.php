@@ -47,7 +47,7 @@ class WorkflowActionType extends AbstractType
                 'label' => 'Order',
                 'constraints' => [
                     new Range([
-                        'min' => 1,
+                        'min' => 0,
                         'max' => 50,
                         'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
                     ]),
