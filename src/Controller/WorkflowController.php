@@ -362,7 +362,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
                 ['workflow' => $id],
-                ['id' => 'DESC']
+                ['dateCreated' => 'DESC']
             );
 
             if ($workflow[0]) {
