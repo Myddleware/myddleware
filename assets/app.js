@@ -43,6 +43,8 @@ require('./js/smtp.js')
 require('./js/filter.js')
 require('./js/crontab.js')
 require('./js/rule_relation_filter.js')
+require('./js/editAction.js')
+
 
 
 // start the Stimulus application
