@@ -38,6 +38,7 @@ use App\Entity\RuleField;
 use App\Entity\RuleParam;
 use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
+use App\Entity\WorkflowLog;
 use App\Form\ConnectorType;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
@@ -53,7 +54,6 @@ use App\Form\Type\WorkflowType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
-use App\Entity\WorkflowLog;
 use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
@@ -71,10 +71,16 @@ use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -353,9 +359,64 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
 
             if ($workflowAction[0]) {
-                $form = $this->createForm(WorkflowActionType::class, $workflowAction[0], [
-                    'entityManager' => $em,
-                ]);
+                // Deserialize the arguments
+                $arguments = $workflowAction[0]->getArguments();
+                
+                // Create a new array to hold the form data
+                $formData = [
+                    'to' => $arguments['to'] ?? null,
+                    'subject' => $arguments['subject'] ?? null,
+                    'message' => $arguments['message'] ?? null,
+                    // Add other WorkflowAction fields here as needed
+                ];
+            
+                $form = $this->createFormBuilder($formData)
+                    ->add('name', TextType::class, [
+                        'label' => 'Action Name',
+                        'required' => true,
+                    ])
+                    ->add('description', TextType::class, ['label' => 'Description'])
+                    ->add('Workflow', EntityType::class, [
+                        'class' => Workflow::class,
+                        'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'constraints' => [
+                            new NotBlank(),
+                        ],
+                    ])
+                    ->add('action', ChoiceType::class, [
+                        'label' => 'Action',
+                        'choices' => [
+                            'updateStatus' => 'updateStatus',
+                            'generateDocument' => 'generateDocument',
+                            'sendNotification' => 'sendNotification',
+                            'generateDocument' => 'generateDocument',
+                            'transformDocument' => 'transformDocument',
+                        ],
+                    ])
+                    ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
+                    ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
+                    ->add('message', TextareaType::class, ['required' => false])
+                    ->add('order', IntegerType::class, [
+                        'label' => 'Order',
+                        'constraints' => [
+                            new Range([
+                                'min' => 0,
+                                'max' => 50,
+                                'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
+                            ]),
+                        ],
+                    ])
+                    ->add('active', ChoiceType::class, [
+                        'label' => 'Active',
+                        'choices' => [
+                            'Yes' => 1,
+                            'No' => 0,
+                        ],
+                    ])
+                    ->add('submit', SubmitType::class, ['label' => 'Save'])
+                    ->getForm();    
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
