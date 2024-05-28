@@ -487,8 +487,13 @@ class jobcore
             }
             
 			// Filter on document locked
-            if ('unlock' == $action) {
+            if ($action == 'unlock') {
                 $where .= " AND document.job_lock != '' AND document.job_lock IS NOT NULL ";
+            }
+			
+			// Filter on document with workflow in error
+            if ($action == 'rerunWorkflow') {
+                $where .= " AND document.workflow_error = 1 ";
             }
             // Build the query
             $sqlParams = '	SELECT 
@@ -499,6 +504,7 @@ class jobcore
 									ON document.rule_id = rule.id'
                             .$where.'
 							ORDER BY rule.id';
+
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
             $documents = $result->fetchAllAssociative();
@@ -514,15 +520,6 @@ class jobcore
 						$this->ruleManager->setManual($this->manual);
                         $this->ruleManager->setRule($document['rule_id']);
                     }
-                    
-                    // If the action is 'unlock', clear the job_lock field for this document                 
-                    if ('unlock' == $action) {
-                        $sqlUnlock = "UPDATE document SET job_lock = '' WHERE id = :id";
-                        $stmtUnlock = $this->connection->prepare($sqlUnlock);
-                        $stmtUnlock->bindValue('id', $document['id'], PDO::PARAM_STR);
-                        $result = $stmtUnlock->executeQuery();
-                    }
-
                     $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
 					// Save the error if exists
 					if (!empty($error)) {
@@ -541,7 +538,6 @@ class jobcore
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
-
         return true;
     }
 
@@ -1432,17 +1428,14 @@ class jobcore
             $stmt->bindValue('error', $error);
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
-            $result = $stmt->executeQuery();	
-			
+            $result = $stmt->executeQuery();
             // $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
             // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
             return false;
         }
-
         return true;
     }
 

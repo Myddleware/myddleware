@@ -69,6 +69,7 @@ class documentcore
     protected bool $jobActive = true;
     protected $attempt;
     protected $jobLock;
+    protected $workflowError = false;
     protected $userId;
     protected $status;
     protected $document_data;
@@ -109,7 +110,6 @@ class documentcore
         'Error_checking' => 'Error',
         'Error_sending' => 'Error',
         'Not_found' => 'Error',
-        'Error_workflow' => 'Error',
     ];
     private array $notSentFields = [];
 
@@ -168,7 +168,6 @@ class documentcore
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
-            'Error_workflow' => 'flux.status.Error_workflow',
         ];
     }
 
@@ -217,6 +216,7 @@ class documentcore
                 $this->documentType = $this->document_data['type'];
                 $this->attempt = $this->document_data['attempt'];
                 $this->jobLock = $this->document_data['job_lock'];
+                $this->workflowError = $this->document_data['workflow_error'];
 				// A document can be loaded only if there is no lock or if the lock is on the current job.
                 if (
 						!empty($this->jobLock)
@@ -366,10 +366,12 @@ class documentcore
         // On ne fait pas de beginTransaction ici car on veut pouvoir tracer ce qui a été fait ou non. Si le créate n'est pas du tout fait alors les données sont perdues
         // L'enregistrement même partiel d'un document nous permet de tracer l'erreur.
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
             // Return false if job has been manually stopped
             if (!$this->jobActive) {
                 $this->message .= 'Job is not active. ';
-
                 return false;
             }
             // Création du header de la requête
@@ -394,13 +396,15 @@ class documentcore
     // Permet de filtrer ou non un document
     public function filterDocument($ruleFilters)
     {
-        // Return false if job has been manually stopped
-        if (!$this->jobActive) {
-            $this->message .= 'Job is not active. ';
-
-            return false;
-        }
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
+			// Return false if job has been manually stopped
+			if (!$this->jobActive) {
+				$this->message .= 'Job is not active. ';
+				return false;
+			}
             $filterOK = true;
             // Only if there is a least one filter
 			// No filter on delete document as they will be filter after is Myddleware never sent the data
@@ -422,7 +426,6 @@ class documentcore
             if (true === $filterOK) {
                 $this->updateStatus('Filter_OK');
             }
-
             return $filterOK;
         } catch (\Exception $e) {
             $this->message .= 'Failed to filter document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -446,7 +449,6 @@ class documentcore
         if (!empty($job['status'])) {
             return $job['status'];
         }
-
         return false;
     }
 
@@ -647,13 +649,15 @@ class documentcore
     // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
     public function checkPredecessorDocument(): bool
     {
-        // Return false if job has been manually stopped
-        if (!$this->jobActive) {
-            $this->message .= 'Job is not active. ';
-
-            return false;
-        }
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
+			// Return false if job has been manually stopped
+			if (!$this->jobActive) {
+				$this->message .= 'Job is not active. ';
+				return false;
+			}
             // Check predecessor in the current rule
             $sqlParams = "	SELECT 
 								document.id,							
@@ -819,13 +823,15 @@ class documentcore
     // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
     public function checkParentDocument(): bool
     {
-        // Return false if job has been manually stopped
-        if (!$this->jobActive) {
-            $this->message .= 'Job is not active. ';
-
-            return false;
-        }
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
+			// Return false if job has been manually stopped
+			if (!$this->jobActive) {
+				$this->message .= 'Job is not active. ';
+				return false;
+			}
             // No relate check for deletion document. The document linked could be also deleted.
             if ('D' == $this->documentType) {
                 $this->updateStatus('Relate_OK');
@@ -943,12 +949,15 @@ class documentcore
     // Permet de transformer les données source en données cibles
     public function transformDocument(): bool
     {
-        // Return false if job has been manually stopped
-        if (!$this->jobActive) {
-            $this->message .= 'Job is not active. ';
-            return false;
-        }
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
+			// Return false if job has been manually stopped
+			if (!$this->jobActive) {
+				$this->message .= 'Job is not active. ';
+				return false;
+			}
             // Transformation des données et insertion dans la table target
             $transformed = $this->updateTargetTable();
             if (!empty($transformed)) {
@@ -1022,14 +1031,16 @@ class documentcore
     // Permet de transformer les données source en données cibles
     public function getTargetDataDocument(): bool
     {
-        // Return false if job has been manually stopped
-        if (!$this->jobActive) {
-            $this->message .= 'Job is not active. ';
-
-            return false;
-        }
-        $history = false;
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
+			// Return false if job has been manually stopped
+			if (!$this->jobActive) {
+				$this->message .= 'Job is not active. ';
+				return false;
+			}
+			$history = false;
             // Check if the rule is a parent and run the child data.
             $this->runChildRule();
 
@@ -1225,6 +1236,9 @@ class documentcore
     protected function checkNoChange($history): bool
     {
         try {
+			// Check on current document before any action
+			$this->checkDocumentBeforeAction();
+			
             // Get target data
             $target = $this->getDocumentData('T');
 
@@ -2554,7 +2568,7 @@ class documentcore
         return $this->status;
     }
 	
-	public function runWorkflow() {
+	public function runWorkflow($rerun=false) {
 		try {
 			// Check if at least on workflow exist for the rule
 			if (!empty($this->ruleWorkflows)) {
@@ -2623,7 +2637,10 @@ class documentcore
 								foreach($ruleWorkflow['actions'] as $action) {
 									// Check if the action has already been executed for the current document 
 									// Only if attempt > 0, if it is the first attempt then the action has never been executed
-									if ($this->attempt > 0) {
+									if (
+											$this->attempt > 0
+										 OR $rerun
+									) {
 										// Search action for the current document
 										$workflowLogEntity = $this->entityManager->getRepository(WorkflowLog::class)
 																->findOneBy([
@@ -2686,7 +2703,7 @@ class documentcore
 						} catch (\Exception $e) {
 							$this->logger->error($this->id.' - Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 							$this->generateDocLog('E','Failed to run the workflow '.$ruleWorkflow['name'].' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-							$this->updateStatus('Error_workflow');
+							$this->setWorkflowError(true);
 						}
 					}
 				}
@@ -2786,6 +2803,33 @@ class documentcore
 			$this->generateDocLog('E','Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
 		}
 	}
+	
+	// Unset the lock on the rule
+	protected function setWorkflowError($flag) {
+		try {
+			// Get the rule details
+			$documentEntity = $this->entityManager->getRepository(Document::class)->find($this->id);
+			// If read lock empty, we set the lock with the job id
+			if (!empty($documentEntity)) {
+				$documentEntity->setWorkflowError($flag);
+				$this->entityManager->persist($documentEntity);
+				$this->entityManager->flush();
+				$this->workflowError = true;
+				return true;
+			}	
+        } catch (Exception $e) {
+            $this->logger->error('Failed set the flag workflow error to '.$flag.' to the document '.$this->id.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+		return false;
+	}
+	
+	// Check the document before an action is executed
+	protected function checkDocumentBeforeAction() {
+		if (!empty($this->workflowError)) {
+			throw new \Exception('The action can\'t be executed because there is an error on a workflow. ');
+		}
+	}
+	
 	/**
      * @throws \Doctrine\DBAL\Exception
      *                                  Les id de la soluton, de la règle et du document
