@@ -81,7 +81,6 @@
 								<th>Status</th>
 								<th>Date Created</th>
 								<th>Message</th>
-								<th>Action Name</th>
 								<th>Action Type</th>
 							</tr>
 						</thead>
@@ -107,7 +106,6 @@
 									</td>
 									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
 									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
 									<td class="ctr">{{ log.action.action }}</td>
 								</tr>
 							{% endfor %}
