@@ -45,6 +45,7 @@ use App\Manager\HomeManager;
 use App\Manager\RuleManager;
 use Doctrine\ORM\Mapping\Id;
 use Psr\Log\LoggerInterface;
+use App\Entity\WorkflowAudit;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
@@ -261,6 +262,36 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+    // public function to save the workflowAudit to the database
+    public function saveWorkflowAudit($workflowId)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
+        $workflow = $workflowArray[0];
+
+                // Encode every workflow parameters
+                $workflowdata = json_encode(
+                    [
+                        'workflowName' => $workflow->getName(),
+                        'ruleId' => $workflow->getRule()->getId(),
+                        'created_by' => $workflow->getCreatedBy()->getUsername(),
+                        'workflowDescription' => $workflow->getDescription(),
+                        'condition' => $workflow->getCondition(),
+                        'active' => $workflow->getActive(),
+                        'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
+                        'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
+                    ]
+                );
+                // Save the workflow audit
+                $oneworkflowAudit = new WorkflowAudit();
+                $oneworkflowAudit->setworkflow($oneworkflow);
+                $oneworkflowAudit->setDateCreated(new \DateTime());
+                $oneworkflowAudit->setData($workflowdata);
+                $this->entityManager->persist($oneworkflowAudit);
+                $this->entityManager->flush();
+    }
+
     // public function to set the workflow to active or inactive
     /**
      * @Route("/active/{id}", name="workflow_active")
@@ -336,6 +367,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $workflow->setModifiedBy($this->getUser());
                 $em->persist($workflow);
                 $em->flush();
+
+                // Save the workflow audit
+                $this->saveWorkflowAudit($workflow->getId());
+
                 $this->addFlash('success', 'Workflow created successfully');
 
                 return $this->redirectToRoute('workflow_list');
