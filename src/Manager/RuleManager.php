@@ -967,6 +967,8 @@ class rulecore
                 return $this->changeStatus($id_document, $param1);
 			case 'unlock':
                 return $this->unlockDocument($id_document);
+            case 'rerunWorkflow':
+                return $this->rerunWorkflowDocument($id_document);
             default:
                 return 'Action '.$event.' unknown. Failed to run this action. ';
         }
@@ -1176,6 +1178,20 @@ class rulecore
                 $session->set('error', [$this->documentManager->getMessage()]);
             }
         }
+    }
+
+	/**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    protected function rerunWorkflowDocument($id_document)
+    {
+		$param['id_doc_myddleware'] = $id_document;
+		$param['jobId'] = $this->jobId;
+		$param['api'] = $this->api;
+		$param['ruleWorkflows'] = $this->ruleWorkflows;
+		// Set the param values and clear all document attributes
+		$this->documentManager->setParam($param, true);
+		$this->documentManager->runWorkflow(true);
     }
 
     /**
@@ -1576,13 +1592,7 @@ class rulecore
 			) {
 				foreach($response as $docId => $value) {
 					if (!empty($value)) {
-						$param['id_doc_myddleware'] = $docId;
-						$param['jobId'] = $this->jobId;
-						$param['api'] = $this->api;
-						$param['ruleWorkflows'] = $this->ruleWorkflows;
-						// Set the param values and clear all document attributes
-						$this->documentManager->setParam($param, true);
-						$this->documentManager->runWorkflow();
+						$this->rerunWorkflowDocument($docId);
 					}
 				}
 			}
@@ -1937,6 +1947,7 @@ class rulecore
 										document.job_lock = '' 
 									 OR document.job_lock = '$this->jobId'
 								)
+								AND document.workflow_error = 0
 							";
         } elseif (!empty($parentDocId)) {
             $documentFilter = " 	document.parent_id = '$parentDocId' 
@@ -1947,6 +1958,7 @@ class rulecore
 										document.job_lock = '' 
 									 OR document.job_lock = '$this->jobId'
 								)
+								AND document.workflow_error = 0
 							";
             // No limit when it comes to child rule. A document could have more than $limit child documents
             $limit = '';
@@ -1961,6 +1973,7 @@ class rulecore
 										document.job_lock = '' 
 									 OR document.job_lock = '$this->jobId'
 								)
+								AND document.workflow_error = 0
 							";
         }
         // Sélection de tous les documents au statut transformed en attente de création pour la règle en cours
