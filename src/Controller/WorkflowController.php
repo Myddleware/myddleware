@@ -242,10 +242,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowSearchResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $workflowSearchResult[0];
 
-            if ($workflow[0]) {
-                $workflow[0]->setDeleted(1);
+
+            if ($workflow) {
+                $workflow->setDeleted(1);
                 $em->persist($workflow);
                 $em->flush();
                 $this->addFlash('success', 'Workflow deleted successfully');
