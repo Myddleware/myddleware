@@ -152,21 +152,22 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     // public function to delet the workflow by id (set deleted to 1)
     /**
-     * @Route("/delete/{id}", name="workflow_action_delete")
+     * @Route("/deleteAction/{id}", name="workflow_action_delete")
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflowAction = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowAction = $workflowActionResult[0];
 
-            if ($workflowAction[0]) {
-                $workflowAction[0]->setDeleted(1);
+            if ($workflowAction) {
+                $workflowAction->setDeleted(1);
                 $em->persist($workflowAction);
                 $em->flush();
-                $this->addFlash('success', 'Workflow deleted successfully');
+                $this->addFlash('success', 'Action deleted successfully');
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('error', 'Action not found');
             }
 
             return $this->redirectToRoute('workflow_list');
