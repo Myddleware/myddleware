@@ -18,7 +18,13 @@
 
     <div id="task">
         <div>
+            <a href="{{ path('workflow_list') }}" class="btn btn-primary">Back to the list</a>
+        </div>
+        <div>
             <a href="{{ path('workflow_edit', {'id': workflow.id}) }}">Edit this workflow</a>
+        </div>
+        <div>
+            <a href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">Delete this workflow</a>
         </div>
 
         <div>
