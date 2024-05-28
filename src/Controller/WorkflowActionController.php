@@ -395,9 +395,25 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
+                    ->add('Rule', EntityType::class, [
+                        'class' => Rule::class,
+                        'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'constraints' => [
+                            new NotBlank(),
+                        ],
+                    ])
+                    ->add('status', ChoiceType::class, [
+                        'label' => 'Status',
+                        'choices' => DocumentRepository::findStatusType($em),
+                        'required' => false
+                    ])
                     ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
+                    ->add('searchField', TextType::class, ['label' => 'searchField', 'mapped' => false, 'required' => false])
+                    ->add('searchValue', TextType::class, ['label' => 'searchValue', 'mapped' => false, 'required' => false])
                     ->add('order', IntegerType::class, [
                         'label' => 'Order',
                         'constraints' => [
