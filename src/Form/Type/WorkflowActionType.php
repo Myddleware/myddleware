@@ -40,9 +40,9 @@ class WorkflowActionType extends AbstractType
                 ],
             ])
             ->add('action', TextType::class, ['label' => 'Action'])
-            ->add('to', TextType::class, ['label' => 'To', 'mapped' => false])
-            ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false])
-            ->add('message', TextareaType::class, ['label' => 'Message', 'mapped' => false])
+            ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
+            ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
+            ->add('message', TextareaType::class, ['label' => 'Message', 'mapped' => false, 'required' => false])
             ->add('order', IntegerType::class, [
                 'label' => 'Order',
                 'constraints' => [
