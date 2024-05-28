@@ -39,7 +39,16 @@ class WorkflowActionType extends AbstractType
                     new NotBlank(),
                 ],
             ])
-            ->add('action', TextType::class, ['label' => 'Action'])
+            ->add('action', ChoiceType::class, [
+                'label' => 'Action',
+                'choices' => [
+                    'updateStatus' => 'updateStatus',
+                    'generateDocument' => 'generateDocument',
+                    'sendNotification' => 'sendNotification',
+                    'generateDocument' => 'generateDocument',
+                    'transformDocument' => 'transformDocument',
+                ],
+            ])
             ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
             ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
             ->add('message', TextareaType::class, ['label' => 'Message', 'mapped' => false, 'required' => false])
