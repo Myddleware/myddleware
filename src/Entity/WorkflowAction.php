@@ -197,7 +197,15 @@ class WorkflowAction
 	
     public function getArguments(): array
     {
-        return isset($this->arguments) && $this->arguments ? unserialize($this->arguments) : [];
+        if (is_array($this->arguments)) {
+            return $this->arguments;
+        }
+
+        if (is_string($this->arguments)) {
+            return unserialize($this->arguments);
+        }
+
+        return [];
     }
 
     public function setArguments($arguments): self
