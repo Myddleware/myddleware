@@ -53,6 +53,7 @@ use App\Form\Type\WorkflowType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
+use App\Entity\WorkflowLog;
 use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
@@ -320,11 +321,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
 
+            // get the workflow logs of this action
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
+
             if ($workflow[0]) {
                 return $this->render(
                     'WorkflowAction/show.html.twig',
                     [
                         'workflow' => $workflow[0],
+                        'workflowLogs' => $workflowLogs,
                     ]
                 );
             } else {
