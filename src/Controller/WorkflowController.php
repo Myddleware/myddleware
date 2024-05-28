@@ -285,7 +285,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 );
                 // Save the workflow audit
                 $oneworkflowAudit = new WorkflowAudit();
-                $oneworkflowAudit->setworkflow($oneworkflow);
+                $oneworkflowAudit->setworkflow($workflow);
                 $oneworkflowAudit->setDateCreated(new \DateTime());
                 $oneworkflowAudit->setData($workflowdata);
                 $this->entityManager->persist($oneworkflowAudit);
@@ -441,6 +441,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $em->persist($workflow[0]);
                     $em->flush();
                     $this->addFlash('success', 'Workflow updated successfully');
+
+                    $this->saveWorkflowAudit($workflow[0]->getId());
 
                     return $this->redirectToRoute('workflow_list');
                 }
