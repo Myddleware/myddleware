@@ -794,21 +794,20 @@
 									<td class="ctr">    {% if log.triggerDocument is not null %}
 										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
 									{% else %}
-										<span>No Document</span>
+										<span></span>
 									{% endif %}</td>
 									<td class="ctr">    {% if log.generateDocument is not null %}
 										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
 									{% else %}
-										<span>No Document</span>
+										<span></span>
 									{% endif %}</td>
-									{# <td class="ctr">{{ log.generateDocument.id|default('N/A') }}</td> #}
 									<td class="ctr">{{ log.createdBy }}</td>
 									<td class="ctr">
 										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
 									</td>
 									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
 									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr">{{ log.action.name }}</td>
+									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
 									<td class="ctr">{{ log.action.action }}</td>
 								</tr>
 							{% endfor %}
