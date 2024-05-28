@@ -1,5 +1,4 @@
 $(function () {
-  console.log("test 0");
 
   // if, on page load, the sort_field and sort_order are set in localStorage, set the form values to those values
   if (
