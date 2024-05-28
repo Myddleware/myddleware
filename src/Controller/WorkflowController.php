@@ -38,6 +38,7 @@ use App\Entity\RuleField;
 use App\Entity\RuleParam;
 use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
+use App\Entity\WorkflowLog;
 use App\Form\ConnectorType;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
@@ -359,11 +360,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['workflow' => $id],
+                ['id' => 'DESC']
+            );
+
             if ($workflow[0]) {
                 return $this->render(
                     'Workflow/show.html.twig',
                     [
                         'workflow' => $workflow[0],
+                        'workflowLogs' => $workflowLogs,
                     ]
                 );
             } else {
