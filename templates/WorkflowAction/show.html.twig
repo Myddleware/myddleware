@@ -37,11 +37,25 @@
                         <p class="card-text">Description: {{ workflow.description }}</p>
                         {# rule #}
                         <p class="card-text">Workflow: <a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}">{{ workflow.workflow.id }}</a></p>
+                        <p class="card-text">Action: {{ workflow.action }}</p>
+                        <p class="card-text">Order: {{ workflow.order }}</p>
+                        <p class="card-text">Arguments: 
+                        {% if workflow.arguments is iterable %}
+                                            <ul>
+                                                {% for key, argument in workflow.arguments %}
+                                                    <li>{{ key }}: {{ argument }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            {{ workflow.arguments }}
+                                        {% endif %}
+                        </p>
                         <p class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
 									<a href="{{ path('workflow_active_show', {'id': workflow.id}) }}">
 										{{ workflow.active ? 'Active' : 'Inactive' }}
 									</a>
 								</p>
+                        
                     </div>
                 </div>
             {% endif %}
