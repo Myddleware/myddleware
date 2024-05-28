@@ -1010,7 +1010,11 @@ use App\Entity\Workflow;
             }
 
             // get the workflows of the rule, if there are none then set hasWorkflows to false. If there is at least one then set it to true. to get the workflows we use the entity manager and filter by the rule id
-            $hasWorkflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId()]) ? true : false;
+            $hasWorkflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId(), 'deleted' => 0]) ? true : false;
+            
+            if ($hasWorkflows) {
+                $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId(), 'deleted' => 0]);
+            }
 
             return $this->render('Rule/edit/fiche.html.twig', [
                 'rule' => $rule,
@@ -1023,6 +1027,7 @@ use App\Entity\Workflow;
                 'params_suite' => $params_suite,
                 'id' => $id,
                 'hasWorkflows' => $hasWorkflows,
+                'workflows' => $workflows,
             ]
             );
         }
