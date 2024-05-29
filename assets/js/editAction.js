@@ -31,8 +31,16 @@ console.log('test');
                     $('#form_searchField').parent().hide();
                     $('#form_searchValue').parent().hide();
                     $('#form_Rule').parent().hide();
+                } else if ($(this).val() === 'generateDocument') {
+                    $('#form_subject').parent().hide();
+                    $('#form_to').parent().hide();
+                    $('#form_message').parent().hide();
+                    $('#form_searchField').parent().show();
+                    $('#form_searchValue').parent().show();
+                    $('#form_Rule').parent().show();
+                    $('#form_status').parent().hide();
+
                 } else {
-                    console.log('we hide the subject');
                     $('#form_subject').parent().hide();
                     $('#form_to').parent().hide();
                     $('#form_message').parent().hide();
@@ -40,7 +48,6 @@ console.log('test');
                     $('#form_searchValue').parent().hide();
                     $('#form_Rule').parent().hide();
                     $('#form_status').parent().hide();
-
                 }
 
             }).trigger('change');
