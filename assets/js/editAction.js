@@ -14,6 +14,8 @@ console.log('test');
                     // hide Rule field
                     $('#form_Rule').parent().hide();
                     $('#form_status').parent().hide();
+                    // hide form_rerun
+                    $('#form_rerun').parent().hide();
                 } else if ($(this).val() === 'updateStatus') {
                     $('#form_status').parent().show();
                     $('#form_subject').parent().hide();
@@ -22,6 +24,7 @@ console.log('test');
                     $('#form_searchField').parent().hide();
                     $('#form_searchValue').parent().hide();
                     $('#form_Rule').parent().hide();
+                    $('#form_rerun').parent().hide();
                 } else if ($(this).val() === 'transformDocument') {
                     $('#form_status').parent().hide();
                     $('#form_subject').parent().hide();
@@ -31,6 +34,7 @@ console.log('test');
                     $('#form_searchField').parent().hide();
                     $('#form_searchValue').parent().hide();
                     $('#form_Rule').parent().hide();
+                    $('#form_rerun').parent().hide();
                 } else if ($(this).val() === 'generateDocument') {
                     $('#form_subject').parent().hide();
                     $('#form_to').parent().hide();
@@ -39,7 +43,7 @@ console.log('test');
                     $('#form_searchValue').parent().show();
                     $('#form_Rule').parent().show();
                     $('#form_status').parent().hide();
-
+                    $('#form_rerun').parent().show();
                 } else {
                     $('#form_subject').parent().hide();
                     $('#form_to').parent().hide();
@@ -48,6 +52,7 @@ console.log('test');
                     $('#form_searchValue').parent().hide();
                     $('#form_Rule').parent().hide();
                     $('#form_status').parent().hide();
+                    $('#form_rerun').parent().hide();
                 }
 
             }).trigger('change');
