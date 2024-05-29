@@ -442,6 +442,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 
                 // Create a new array to hold the form data
                 $formData = [
+                    'name' => $workflowAction->getName(),
+                    'description' => $workflowAction->getDescription(),
+                    'Workflow' => $workflowAction->getWorkflow(),
+                    'action' => $workflowAction->getAction(),
+                    'status' => $arguments['status'] ?? null,
+                    'searchField' => $arguments['searchField'] ?? null,
+                    'searchValue' => $arguments['searchValue'] ?? null,
+                    'order' => $workflowAction->getOrder(),
+                    'active' => $workflowAction->getActive(),
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
@@ -531,6 +540,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $message = $form->get('message')->getData();
                     if (!empty($message)) {
                         $arguments['message'] = $message;
+                    }
+
+                    // set the status
+                    $status = $form->get('status')->getData();
+                    if (!empty($status)) {
+                        $arguments['status'] = $status;
+                    }
+
+                    // set the searchField
+                    $searchField = $form->get('searchField')->getData();
+                    if (!empty($searchField)) {
+                        $arguments['searchField'] = $searchField;
+                    }
+
+                    // set the searchValue
+                    $searchValue = $form->get('searchValue')->getData();
+                    if (!empty($searchValue)) {
+                        $arguments['searchValue'] = $searchValue;
                     }
 
                     $workflowAction->setArguments(serialize($arguments));
