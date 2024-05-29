@@ -477,6 +477,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
+                    'rerun' => $arguments['rerun'] ?? false
                     // Add other WorkflowAction fields here as needed
                 ];
             
@@ -528,6 +529,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'choices' => $sourceFields,
                         'required' => false
                     ])
+                    ->add('rerun', ChoiceType::class, [
+                        'label' => 'Rerun',
+                        'choices' => [
+                            'Yes' => true,
+                            'No' => false,
+                        ],
+                        'required' => false
+                    ])
 
 
 
@@ -572,28 +581,34 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-
+                    
+                    
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
                         
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
-
+                        
                     }
-
+                    
                     // set the searchField
                     $searchField = $form->get('searchField')->getData();
                     if (!empty($searchField)) {
                         $arguments['searchField'] = $searchField;
                     }
-
+                    
                     // set the searchValue
                     $searchValue = $form->get('searchValue')->getData();
                     if (!empty($searchValue)) {
                         $arguments['searchValue'] = $searchValue;
                     }
-
+                    
+                    $rerun = $form->get('rerun')->getData();
+                    if (!empty($rerun)) {
+                        $arguments['rerun'] = $rerun;
+                    }
+                    
                     $workflowAction->setArguments(serialize($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
