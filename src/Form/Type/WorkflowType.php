@@ -40,6 +40,7 @@ class WorkflowType extends AbstractType
             ]);
             $builder->add('condition', TextareaType::class, [
                 'label' => 'Condition',
+                'data' => '{status} == "',
                 'constraints' => [
                     new Callback([
                         'callback' => function($payload, ExecutionContextInterface $context) {
