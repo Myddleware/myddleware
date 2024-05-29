@@ -377,7 +377,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 $this->addFlash('success', 'Workflow created successfully');
 
-                return $this->redirectToRoute('workflow_list');
+                return $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
             }
 
             return $this->render(
