@@ -273,6 +273,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         // get all the actions of the workflow
         $actions = $workflow->getWorkflowActions();
 
+        $actionsArray = array_map(function($action) {
+            return [
+                'id' => $action->getId(),
+                'workflow' => $action->getWorkflow()->getId(),
+                'dateCreated' => $action->getDateCreated()->format('Y-m-d H:i:s'),
+                'dateModified' => $action->getDateModified()->format('Y-m-d H:i:s'),
+                'createdBy' => $action->getCreatedBy()->getUsername(),
+                'modifiedBy' => $action->getModifiedBy()->getUsername(),
+                'name' => $action->getName(),
+                'action' => $action->getAction(),
+                'description' => $action->getDescription(),
+                'order' => $action->getOrder(),
+                'active' => $action->getActive(),
+                'deleted' => $action->getDeleted(),
+                'arguments' => $action->getArguments(),
+            ];  
+        }, $actions->toArray());
+
                 // Encode every workflow parameters
                 $workflowdata = json_encode(
                     [
@@ -284,7 +302,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'active' => $workflow->getActive(),
                         'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
                         'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
-                        'actions' => $actions,
+                        'actions' => $actionsArray,
                     ]
                 );
                 // Save the workflow audit
