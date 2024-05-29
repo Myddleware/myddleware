@@ -270,6 +270,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
         $workflow = $workflowArray[0];
 
+        // get all the actions of the workflow
+        $actions = $workflow->getWorkflowActions();
+
                 // Encode every workflow parameters
                 $workflowdata = json_encode(
                     [
@@ -281,6 +284,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'active' => $workflow->getActive(),
                         'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
                         'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
+                        'actions' => $actions,
                     ]
                 );
                 // Save the workflow audit
@@ -428,23 +432,24 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $workflowArray[0];
 
-            if ($workflow[0]) {
-                $form = $this->createForm(WorkflowType::class, $workflow[0], [
+            if ($workflow) {
+                $form = $this->createForm(WorkflowType::class, $workflow, [
                     'entityManager' => $em,
                 ]);
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-                    $workflow[0]->setModifiedBy($this->getUser());
-                    $em->persist($workflow[0]);
+                    $workflow->setModifiedBy($this->getUser());
+                    $em->persist($workflow);
                     $em->flush();
                     $this->addFlash('success', 'Workflow updated successfully');
 
-                    $this->saveWorkflowAudit($workflow[0]->getId());
+                    $this->saveWorkflowAudit($workflow->getId());
 
-                    return $this->redirectToRoute('workflow_list');
+                    return $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
                 }
 
                 return $this->render(
