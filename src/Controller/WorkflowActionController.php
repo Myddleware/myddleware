@@ -446,8 +446,23 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $StringStatus = [];
                 foreach ($possiblesStatusesWithIntegers as $key => $value) {
                     $StringStatus[$key] = $key;
+
                 }
-                
+
+                    // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
+                    // step 1: get the workflow of the action
+                    $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
+                    // step 2: get the source fields of the rule
+                    $sourceFields = $ruleForSearchValue->getSourceFields();
+
+                    // step 3: modify the source field so that for each, the key is the value and the value is the value
+                    foreach ($sourceFields as $key => $value) {
+                        $sourceFields[$value] = $value;
+                        unset($sourceFields[$key]);
+                    }
+
+
+
                 // Create a new array to hold the form data
                 $formData = [
                     'name' => $workflowAction->getName(),
@@ -508,7 +523,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
                     ->add('searchField', TextType::class, ['label' => 'searchField', 'mapped' => false, 'required' => false])
-                    ->add('searchValue', TextType::class, ['label' => 'searchValue', 'mapped' => false, 'required' => false])
+                    ->add('searchValue', ChoiceType::class, [
+                        'label' => 'searchValue',
+                        'choices' => $sourceFields,
+                        'required' => false
+                    ])
+
+
+
                     ->add('order', IntegerType::class, [
                         'label' => 'Order',
                         'constraints' => [
