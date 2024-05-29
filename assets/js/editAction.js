@@ -6,9 +6,13 @@ console.log('test');
                 if ($(this).val() === 'sendNotification') {
                     console.log('we show the subject');
                     $('#form_subject').parent().show();
+                    $('#form_to').parent().show();
+                    $('#form_message').parent().show();
                 } else {
                     console.log('we hide the subject');
                     $('#form_subject').parent().hide();
+                    $('#form_to').parent().hide();
+                    $('#form_message').parent().hide();
                 }
             }).trigger('change');
         });
