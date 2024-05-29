@@ -11,6 +11,8 @@ console.log('test');
                     // hide searchField
                     $('#form_searchField').parent().hide();
                     $('#form_searchValue').parent().hide();
+                    // hide Rule field
+                    $('#form_Rule').parent().hide();
                 } else if ($(this).val() === 'updateStatus') {
                     $('#form_subject').parent().hide();
                     $('#form_to').parent().hide();
@@ -18,11 +20,23 @@ console.log('test');
                     // hide searchField
                     $('#form_searchField').parent().hide();
                     $('#form_searchValue').parent().hide();
+                    $('#form_Rule').parent().hide();
+                } else if ($(this).val() === 'transformDocument') {
+                    $('#form_subject').parent().hide();
+                    $('#form_to').parent().hide();
+                    $('#form_message').parent().hide();
+                    // hide searchField
+                    $('#form_searchField').parent().hide();
+                    $('#form_searchValue').parent().hide();
+                    $('#form_Rule').parent().hide();
                 } else {
                     console.log('we hide the subject');
                     $('#form_subject').parent().hide();
                     $('#form_to').parent().hide();
                     $('#form_message').parent().hide();
+                    $('#form_searchField').parent().hide();
+                    $('#form_searchValue').parent().hide();
+                    $('#form_Rule').parent().hide();
                 }
 
             }).trigger('change');
