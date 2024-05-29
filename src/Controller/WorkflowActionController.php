@@ -45,6 +45,7 @@ use App\Manager\HomeManager;
 use App\Manager\RuleManager;
 use Doctrine\ORM\Mapping\Id;
 use Psr\Log\LoggerInterface;
+use App\Entity\WorkflowAudit;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
