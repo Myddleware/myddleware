@@ -12,7 +12,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Form\FormEvents;
 
 
 
@@ -36,7 +38,33 @@ class WorkflowType extends AbstractType
                     new NotBlank(),
                 ],
             ]);
-            $builder->add('condition', TextareaType::class, ['label' => 'Condition']);
+            $builder->add('condition', TextareaType::class, [
+                'label' => 'Condition',
+                'constraints' => [
+                    new Callback([
+                        'callback' => function($payload, ExecutionContextInterface $context) {
+                            if (strpos($payload, '{status}==') === false) {
+                                $context->buildViolation('The string "{status}==" must be present in the condition')
+                                    ->atPath('condition')
+                                    ->addViolation();
+                            }
+                        },
+                    ]),
+                ],
+            ]);
+            $builder->get('condition')->addEventListener(FormEvents::SUBMIT, function ($event) {
+                $data = $event->getData();
+                $ternaryOperator = ' ?"1":"0")';
+                $lastPos = strrpos($data, $ternaryOperator);
+                $firstPos = strpos($data, $ternaryOperator);
+                if ($lastPos !== $firstPos) {
+                    $data = substr_replace($data, '', $lastPos, strlen($ternaryOperator));
+                }
+                if ($data[0] !== '(') {
+                    $data = '(' . $data;
+                }
+                $event->setData($data);
+            });
             $builder->add('submit', SubmitType::class, ['label' => 'Save']);
         ;
     }
