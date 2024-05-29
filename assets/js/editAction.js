@@ -57,3 +57,15 @@ console.log('test');
 
             }).trigger('change');
         });
+
+        $(document).ready(function() {
+    $('#form_Rule').change(function() {
+        var selectedRule = $(this).val();
+
+        // Hide all optgroups in form_searchField
+        $('#form_searchField optgroup').hide();
+
+        // Show only the optgroup that matches the selected rule
+        $('#form_searchField optgroup[label="' + selectedRule + '"]').show();
+    }).trigger('change');
+});
