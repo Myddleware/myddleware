@@ -258,7 +258,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $em->flush();
                 $this->addFlash('success', 'Action created successfully');
 
-                return $this->redirectToRoute('workflow_list');
+                return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
             }
 
             return $this->render(
