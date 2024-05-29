@@ -352,7 +352,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     /**
      * @Route("/editWorkflowAction/{id}", name="workflow_action_edit")
      */
-    public function WorkflowEditAction(string $id, Request $request)
+    public function WorkflowActionEditAction(string $id, Request $request)
     {
         try {
             $em = $this->getDoctrine()->getManager();
