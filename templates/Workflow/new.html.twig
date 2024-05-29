@@ -10,4 +10,12 @@
         {{ form_row(form.condition) }}
         {{ form_row(form.submit) }}
     {{ form_end(form) }}
+
+    <h2>Condition Field</h2>
+    <p> The condition field is automatically generated with the string {status} == ", and the opening 
+    parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
+    <br>
+    <br>
+    In short, all you need is to write the status name and we do the rest !
+    </p>
 {% endblock %}
