@@ -653,6 +653,58 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
+        // public function to save the workflowAudit to the database
+        public function saveWorkflowAudit($workflowId)
+        {
+    
+            $em = $this->getDoctrine()->getManager();
+            $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
+            $workflow = $workflowArray[0];
+    
+            // get all the actions of the workflow
+            $actions = $workflow->getWorkflowActions();
+    
+            $actionsArray = array_map(function($action) {
+                return [
+                    'id' => $action->getId(),
+                    'workflow' => $action->getWorkflow()->getId(),
+                    'dateCreated' => $action->getDateCreated()->format('Y-m-d H:i:s'),
+                    'dateModified' => $action->getDateModified()->format('Y-m-d H:i:s'),
+                    'createdBy' => $action->getCreatedBy()->getUsername(),
+                    'modifiedBy' => $action->getModifiedBy()->getUsername(),
+                    'name' => $action->getName(),
+                    'action' => $action->getAction(),
+                    'description' => $action->getDescription(),
+                    'order' => $action->getOrder(),
+                    'active' => $action->getActive(),
+                    'deleted' => $action->getDeleted(),
+                    'arguments' => $action->getArguments(),
+                ];  
+            }, $actions->toArray());
+    
+                    // Encode every workflow parameters
+                    $workflowdata = json_encode(
+                        [
+                            'workflowName' => $workflow->getName(),
+                            'ruleId' => $workflow->getRule()->getId(),
+                            'created_by' => $workflow->getCreatedBy()->getUsername(),
+                            'workflowDescription' => $workflow->getDescription(),
+                            'condition' => $workflow->getCondition(),
+                            'active' => $workflow->getActive(),
+                            'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
+                            'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
+                            'actions' => $actionsArray,
+                        ]
+                    );
+                    // Save the workflow audit
+                    $oneworkflowAudit = new WorkflowAudit();
+                    $oneworkflowAudit->setworkflow($workflow);
+                    $oneworkflowAudit->setDateCreated(new \DateTime());
+                    $oneworkflowAudit->setData($workflowdata);
+                    $this->entityManager->persist($oneworkflowAudit);
+                    $this->entityManager->flush();
+        }
+
     // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
     private function nav_pagination($params, $orm = true)
     {
