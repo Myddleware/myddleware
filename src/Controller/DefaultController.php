@@ -1014,6 +1014,9 @@ use App\Entity\Workflow;
             
             if ($hasWorkflows) {
                 $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId(), 'deleted' => 0]);
+                
+            } else {
+                $workflows = [];
             }
 
             return $this->render('Rule/edit/fiche.html.twig', [
