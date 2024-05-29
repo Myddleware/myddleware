@@ -439,6 +439,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             if ($workflowAction) {
                 // Deserialize the arguments
                 $arguments = $workflowAction->getArguments();
+
+                $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
+
+                // change the array so that for each element, the key is the integer and should be replaced by the value, so the key and the value are both the value, a string
+                $StringStatus = [];
+                foreach ($possiblesStatusesWithIntegers as $key => $value) {
+                    $StringStatus[$key] = $key;
+                }
                 
                 // Create a new array to hold the form data
                 $formData = [
@@ -446,7 +454,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'description' => $workflowAction->getDescription(),
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
-                    'status' => $arguments['status'] ?? null,
+                    'status' => $StringStatus[$arguments['status']] ?? null,
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -493,7 +501,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
-                        'choices' => DocumentRepository::findStatusType($em),
+                        'choices' => $StringStatus,
                         'required' => false
                     ])
                     ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
@@ -542,17 +550,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $possiblesStatuses = DocumentRepository::findStatusType($em);
-
-                    // Flip the array
-                    $possiblesStatuses = array_flip($possiblesStatuses);
 
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
                         
                         //since status is a integer, we have to map it to possible statuses name
-                        $arguments['status'] = $possiblesStatuses[$status];
+                        $arguments['status'] = $status;
 
                     }
 
