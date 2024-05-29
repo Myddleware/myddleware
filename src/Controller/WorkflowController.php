@@ -248,6 +248,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 
             if ($workflow) {
+                $this->saveWorkflowAudit($workflow->getId());
                 $workflow->setDeleted(1);
                 $em->persist($workflow);
                 $em->flush();
