@@ -43,8 +43,8 @@ class WorkflowType extends AbstractType
                 'constraints' => [
                     new Callback([
                         'callback' => function($payload, ExecutionContextInterface $context) {
-                            if (strpos($payload, '{status}==') === false) {
-                                $context->buildViolation('The string "{status}==" must be present in the condition')
+                            if (strpos($payload, '{status} == "') === false) {
+                                $context->buildViolation('The string "{status} == " must be present in the condition')
                                     ->atPath('condition')
                                     ->addViolation();
                             }
@@ -59,6 +59,9 @@ class WorkflowType extends AbstractType
                 $firstPos = strpos($data, $ternaryOperator);
                 if ($lastPos !== $firstPos) {
                     $data = substr_replace($data, '', $lastPos, strlen($ternaryOperator));
+                }
+                if (strrpos($data, $ternaryOperator) !== strlen($data) - strlen($ternaryOperator)) {
+                    $data .= $ternaryOperator;
                 }
                 if ($data[0] !== '(') {
                     $data = '(' . $data;
