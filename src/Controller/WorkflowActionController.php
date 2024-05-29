@@ -356,11 +356,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflowAction = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowAction = $workflowActionArray[0];
 
-            if ($workflowAction[0]) {
+            if ($workflowAction) {
                 // Deserialize the arguments
-                $arguments = $workflowAction[0]->getArguments();
+                $arguments = $workflowAction->getArguments();
                 
                 // Create a new array to hold the form data
                 $formData = [
@@ -436,7 +437,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-                    $workflowAction[0]->setModifiedBy($this->getUser());
+                    $workflowAction->setModifiedBy($this->getUser());
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
 
@@ -455,12 +456,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $workflowAction[0]->setArguments(serialize($arguments));
-                    $em->persist($workflowAction[0]);
+                    $workflowAction->setArguments(serialize($arguments));
+                    $em->persist($workflowAction);
                     $em->flush();
                     $this->addFlash('success', 'Action updated successfully');
 
-                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction[0]->getId()]);
+                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
                 return $this->render(
