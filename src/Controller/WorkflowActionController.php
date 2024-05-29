@@ -233,44 +233,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
-    // public function to create a new workflow
-    /**
-     * @Route("/new", name="workflow_action_create")
-     */
-    public function WorkflowActionCreateAction(Request $request)
-    {
-        try {
-
-            $rules = RuleRepository::findActiveRulesNames($this->entityManager);
-
-            $em = $this->getDoctrine()->getManager();
-            $workflow = new Workflow();
-            $workflow->setId(uniqid());
-            $form = $this->createForm(WorkflowType::class, $workflow, [
-                'entityManager' => $em,
-            ]);
-            $form->handleRequest($request);
-
-            if ($form->isSubmitted() && $form->isValid()) {
-                $workflow->setCreatedBy($this->getUser());
-                $workflow->setModifiedBy($this->getUser());
-                $em->persist($workflow);
-                $em->flush();
-                $this->addFlash('success', 'Action created successfully');
-
-                return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
-            }
-
-            return $this->render(
-                'Workflow/new.html.twig',
-                [
-                    'form' => $form->createView(),
-                ]
-            );
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
-        }
-    }
 
     /**
      * @Route("/new/{workflowId}", name="workflow_action_create_with_workflow")
@@ -288,22 +250,137 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction = new WorkflowAction();
             $workflowAction->setId(uniqid());
             $workflowAction->setWorkflow($workflow);
-            $form = $this->createForm(WorkflowActionType::class, $workflowAction, [
-                'entityManager' => $em,
-            ]);
-            $form->handleRequest($request);
+            // set date created
+            $workflowAction->setCreatedBy($this->getUser());
+            $workflowAction->setModifiedBy($this->getUser());
+            $workflowAction->setDateCreated(new \DateTime());
+            $workflowAction->setDateModified(new \DateTime());
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $workflowAction->setCreatedBy($this->getUser());
-                $workflowAction->setModifiedBy($this->getUser());
-                $workflowAction->setDateCreated(new \DateTime());
-                $workflowAction->setDateModified(new \DateTime());
-                $workflowAction->setDeleted(0);
-                $em->persist($workflowAction);
-                $em->flush();
-                $this->addFlash('success', 'Workflow action created successfully');
+            if ($workflowAction) {
+                // Deserialize the arguments
+                $arguments = $workflowAction->getArguments();
+                
+                // Create a new array to hold the form data
+                $formData = [
+                    'to' => $arguments['to'] ?? null,
+                    'subject' => $arguments['subject'] ?? null,
+                    'message' => $arguments['message'] ?? null,
+                    // Add other WorkflowAction fields here as needed
+                ];
+            
+                $form = $this->createFormBuilder($formData)
+                    ->add('name', TextType::class, [
+                        'label' => 'Action Name',
+                        'required' => true,
+                    ])
+                    ->add('description', TextType::class, ['label' => 'Description'])
+                    ->add('Workflow', EntityType::class, [
+                        'class' => Workflow::class,
+                        'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'constraints' => [
+                            new NotBlank(),
+                        ],
+                    ])
+                    ->add('action', ChoiceType::class, [
+                        'label' => 'Action',
+                        'choices' => [
+                            'updateStatus' => 'updateStatus',
+                            'generateDocument' => 'generateDocument',
+                            'sendNotification' => 'sendNotification',
+                            'generateDocument' => 'generateDocument',
+                            'transformDocument' => 'transformDocument',
+                        ],
+                    ])
+                    ->add('Rule', EntityType::class, [
+                        'class' => Rule::class,
+                        'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'constraints' => [
+                            new NotBlank(),
+                        ],
+                    ])
+                    ->add('status', ChoiceType::class, [
+                        'label' => 'Status',
+                        'choices' => DocumentRepository::findStatusType($em),
+                        'required' => false
+                    ])
+                    ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
+                    ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
+                    ->add('message', TextareaType::class, ['required' => false])
+                    ->add('searchField', TextType::class, ['label' => 'searchField', 'mapped' => false, 'required' => false])
+                    ->add('searchValue', TextType::class, ['label' => 'searchValue', 'mapped' => false, 'required' => false])
+                    ->add('order', IntegerType::class, [
+                        'label' => 'Order',
+                        'constraints' => [
+                            new Range([
+                                'min' => 0,
+                                'max' => 50,
+                                'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
+                            ]),
+                        ],
+                    ])
+                    ->add('active', ChoiceType::class, [
+                        'label' => 'Active',
+                        'choices' => [
+                            'Yes' => 1,
+                            'No' => 0,
+                        ],
+                    ])
+                    ->add('submit', SubmitType::class, ['label' => 'Save'])
+                    ->getForm();    
+                $form->handleRequest($request);
 
-                return $this->redirectToRoute('workflow_show', ['id' => $workflowId]);
+                if ($form->isSubmitted() && $form->isValid()) {
+
+                    // set the name from the form
+                    $workflowAction->setName($form->get('name')->getData());
+
+                    // set the description from the form
+                    $workflowAction->setDescription($form->get('description')->getData());
+
+                    // set the action
+                    $workflowAction->setAction($form->get('action')->getData());
+
+                    // set the order
+                    $workflowAction->setOrder($form->get('order')->getData());
+
+                    // set active
+                    $workflowAction->setActive($form->get('active')->getData());
+
+                    // set deleted to 0
+                    $workflowAction->setDeleted(0);
+
+
+                    $workflowAction->setModifiedBy($this->getUser());
+                    // get the to, the subject, and the message using getdata
+                    $arguments = [];
+
+                    $to = $form->get('to')->getData();
+                    if (!empty($to)) {
+                        $arguments['to'] = $to;
+                    }
+
+                    $subject = $form->get('subject')->getData();
+                    if (!empty($subject)) {
+                        $arguments['subject'] = $subject;
+                    }
+
+                    $message = $form->get('message')->getData();
+                    if (!empty($message)) {
+                        $arguments['message'] = $message;
+                    }
+
+                    $workflowAction->setArguments(serialize($arguments));
+                    $em->persist($workflowAction);
+                    $em->flush();
+                    $this->addFlash('success', 'Action updated successfully');
+
+                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
+                }
+
             }
 
             return $this->render(

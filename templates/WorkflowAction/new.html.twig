@@ -1,12 +1,24 @@
 {% extends 'base.html.twig' %}
 
+
+
 {% block body %}
-    <h1>Create a new Action</h1>
+    <h1>Edit a Workflow Action</h1>
 
     {{ form_start(form) }}
         {{ form_row(form.name) }}
         {{ form_row(form.description) }}
-        {# {{ form_row(form.workflow) }} #}
+        {{ form_row(form.Workflow) }}
+        {{ form_row(form.action) }}
+        {{ form_row(form.Rule) }}
+        {{ form_row(form.status) }}
+        {{ form_row(form.to) }}
+        {{ form_row(form.subject) }}
+        {{ form_row(form.message) }}
+        {{ form_row(form.searchField) }}
+        {{ form_row(form.searchValue) }}
+        {{ form_row(form.order) }}
+        {{ form_row(form.active) }}
         {{ form_row(form.submit) }}
     {{ form_end(form) }}
 {% endblock %}
