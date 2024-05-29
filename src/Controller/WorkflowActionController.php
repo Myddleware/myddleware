@@ -542,10 +542,18 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
+                    $possiblesStatuses = DocumentRepository::findStatusType($em);
+
+                    // Flip the array
+                    $possiblesStatuses = array_flip($possiblesStatuses);
+
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
-                        $arguments['status'] = $status;
+                        
+                        //since status is a integer, we have to map it to possible statuses name
+                        $arguments['status'] = $possiblesStatuses[$status];
+
                     }
 
                     // set the searchField
