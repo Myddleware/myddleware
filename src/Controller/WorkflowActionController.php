@@ -461,6 +461,22 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         unset($sourceFields[$key]);
                     }
 
+                    $sourceSearchValue = [];
+                    // create an array of all the rules
+
+                    $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+
+                    // fill the array with the source fields of each rule
+                    foreach ($rules as $rule) {
+                        // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
+                        $ruleSourceFields = $rule->getSourceFields();
+                        foreach ($ruleSourceFields as $key => $value) {
+                            $ruleSourceFields[$value] = $value;
+                            unset($ruleSourceFields[$key]);
+                        }
+                        $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                    }
+
 
 
                 // Create a new array to hold the form data
@@ -523,7 +539,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
-                    ->add('searchField', TextType::class, ['label' => 'searchField', 'mapped' => false, 'required' => false])
+                    ->add('searchField', ChoiceType::class, [
+                        'label' => 'searchField',
+                        'choices' => $sourceSearchValue,
+                        'required' => false
+                    ])
                     ->add('searchValue', ChoiceType::class, [
                         'label' => 'searchValue',
                         'choices' => $sourceFields,
