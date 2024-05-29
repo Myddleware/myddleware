@@ -169,6 +169,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction = $workflowActionResult[0];
 
             if ($workflowAction) {
+                $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
                 $workflowAction->setDeleted(1);
                 $em->persist($workflowAction);
                 $em->flush();
@@ -376,6 +377,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $workflowAction->setArguments(serialize($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
+
+                    $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
+
                     $this->addFlash('success', 'Action updated successfully');
 
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
@@ -632,6 +636,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $workflowAction->setArguments(serialize($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
+
+                    $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
+
                     $this->addFlash('success', 'Action updated successfully');
 
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
