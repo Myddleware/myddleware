@@ -256,16 +256,66 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction->setModifiedBy($this->getUser());
             $workflowAction->setDateCreated(new \DateTime());
             $workflowAction->setDateModified(new \DateTime());
+            $workflowAction->setDeleted(0);
 
             if ($workflowAction) {
                 // Deserialize the arguments
                 $arguments = $workflowAction->getArguments();
-                
+
+                $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
+
+                // change the array so that for each element, the key is the integer and should be replaced by the value, so the key and the value are both the value, a string
+                $StringStatus = [];
+                foreach ($possiblesStatusesWithIntegers as $key => $value) {
+                    $StringStatus[$key] = $key;
+
+                }
+
+                    // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
+                    // step 1: get the workflow of the action
+                    $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
+                    // step 2: get the source fields of the rule
+                    $sourceFields = $ruleForSearchValue->getSourceFields();
+
+                    // step 3: modify the source field so that for each, the key is the value and the value is the value
+                    foreach ($sourceFields as $key => $value) {
+                        $sourceFields[$value] = $value;
+                        unset($sourceFields[$key]);
+                    }
+
+                    $sourceSearchValue = [];
+                    // create an array of all the rules
+
+                    $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+
+                    // fill the array with the source fields of each rule
+                    foreach ($rules as $rule) {
+                        // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
+                        $ruleSourceFields = $rule->getSourceFields();
+                        foreach ($ruleSourceFields as $key => $value) {
+                            $ruleSourceFields[$value] = $value;
+                            unset($ruleSourceFields[$key]);
+                        }
+                        $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                    }
+
+
+
                 // Create a new array to hold the form data
                 $formData = [
+                    'name' => $workflowAction->getName(),
+                    'description' => $workflowAction->getDescription(),
+                    'Workflow' => $workflowAction->getWorkflow(),
+                    'action' => $workflowAction->getAction(),
+                    'status' => $StringStatus[$arguments['status']] ?? null,
+                    'searchField' => $arguments['searchField'] ?? null,
+                    'searchValue' => $arguments['searchValue'] ?? null,
+                    'order' => $workflowAction->getOrder(),
+                    'active' => $workflowAction->getActive(),
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
+                    'rerun' => $arguments['rerun'] ?? false
                     // Add other WorkflowAction fields here as needed
                 ];
             
@@ -305,14 +355,33 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
-                        'choices' => DocumentRepository::findStatusType($em),
+                        'choices' => $StringStatus,
                         'required' => false
                     ])
                     ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
-                    ->add('searchField', TextType::class, ['label' => 'searchField', 'mapped' => false, 'required' => false])
-                    ->add('searchValue', TextType::class, ['label' => 'searchValue', 'mapped' => false, 'required' => false])
+                    ->add('searchField', ChoiceType::class, [
+                        'label' => 'searchField',
+                        'choices' => $sourceSearchValue,
+                        'required' => false
+                    ])
+                    ->add('searchValue', ChoiceType::class, [
+                        'label' => 'searchValue',
+                        'choices' => $sourceFields,
+                        'required' => false
+                    ])
+                    ->add('rerun', ChoiceType::class, [
+                        'label' => 'Rerun',
+                        'choices' => [
+                            'Yes' => true,
+                            'No' => false,
+                        ],
+                        'required' => false
+                    ])
+
+
+
                     ->add('order', IntegerType::class, [
                         'label' => 'Order',
                         'constraints' => [
@@ -335,26 +404,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-
-                    // set the name from the form
-                    $workflowAction->setName($form->get('name')->getData());
-
-                    // set the description from the form
-                    $workflowAction->setDescription($form->get('description')->getData());
-
-                    // set the action
-                    $workflowAction->setAction($form->get('action')->getData());
-
-                    // set the order
-                    $workflowAction->setOrder($form->get('order')->getData());
-
-                    // set active
-                    $workflowAction->setActive($form->get('active')->getData());
-
-                    // set deleted to 0
-                    $workflowAction->setDeleted(0);
-
-
                     $workflowAction->setModifiedBy($this->getUser());
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
@@ -374,6 +423,34 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
+                    
+                    
+                    // set the status
+                    $status = $form->get('status')->getData();
+                    if (!empty($status)) {
+                        
+                        //since status is a integer, we have to map it to possible statuses name
+                        $arguments['status'] = $status;
+                        
+                    }
+                    
+                    // set the searchField
+                    $searchField = $form->get('searchField')->getData();
+                    if (!empty($searchField)) {
+                        $arguments['searchField'] = $searchField;
+                    }
+                    
+                    // set the searchValue
+                    $searchValue = $form->get('searchValue')->getData();
+                    if (!empty($searchValue)) {
+                        $arguments['searchValue'] = $searchValue;
+                    }
+                    
+                    $rerun = $form->get('rerun')->getData();
+                    if (!empty($rerun)) {
+                        $arguments['rerun'] = $rerun;
+                    }
+                    
                     $workflowAction->setArguments(serialize($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
@@ -385,14 +462,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
-            }
+                return $this->render(
+                    'WorkflowAction/new.html.twig',
+                    [
+                        'form' => $form->createView(),
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Action not found');
 
-            return $this->render(
-                'WorkflowAction/new.html.twig',
-                [
-                    'form' => $form->createView(),
-                ]
-            );
+                return $this->redirectToRoute('workflow_list');
+            }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
