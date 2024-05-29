@@ -278,16 +278,20 @@
                             <td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
                             <td class="ctr" id="documents_filters">
                                 <div class="gblstatus_{{ document.global_status|lower }}">
-                                {{ document.status }}
-                                {% if document.global_status|lower == 'close' %}
-                                    <i class="fa fa-check"></i>
-                                {% elseif document.global_status|lower == 'error' or document.global_status|lower == 'open' %}
-                                    <i class="fa fa-times"></i>
-                                {% elseif document.global_status|lower == 'open' %}
-                                    <span class="glyphicon glyphicon-repeat">
-                                {% elseif document.global_status|lower == 'cancel' %}
-                                    <i class="fa fa-exclamation"></i>
-                                {% endif %}
+                                    {{ document.status }}
+                                    {% if document.global_status|lower == 'close' %}
+                                        <i class="fa fa-check"></i>
+                                    {% elseif document.global_status|lower == 'error' %}
+                                        {% if document.status == 'Error_workflow' %}
+                                            <span style="color: #dc3545; font-size: larger;">W</span>
+                                        {% else %}
+                                            <i class="fa fa-times"></i>
+                                        {% endif %}
+                                    {% elseif document.global_status|lower == 'open' %}
+                                        <span class="glyphicon glyphicon-repeat">
+                                    {% elseif document.global_status|lower == 'cancel' %}
+                                        <i class="fa fa-exclamation"></i>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>{{ document.source_id }}</td>
