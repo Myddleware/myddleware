@@ -350,9 +350,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'constraints' => [
-                            new NotBlank(),
-                        ],
+                        'required' => false
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -570,7 +568,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'description' => $workflowAction->getDescription(),
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
-                    'status' => $StringStatus[$arguments['status']] ?? null,
+                    'status' => isset($arguments['status']) ? $StringStatus[$arguments['status']] : null,
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -612,9 +610,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'constraints' => [
-                            new NotBlank(),
-                        ],
+                        'required' => false
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
