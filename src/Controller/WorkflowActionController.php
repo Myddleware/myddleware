@@ -264,8 +264,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction->setDeleted(0);
 
             if ($workflowAction) {
-                // Deserialize the arguments
                 $arguments = $workflowAction->getArguments();
+
 
                 $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
 
@@ -308,19 +308,20 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
                 // Create a new array to hold the form data
                 $formData = [
-                    'name' => $workflowAction->getName(),
-                    'description' => $workflowAction->getDescription(),
+                    'name' => null,
+                    'description' => null,
                     'Workflow' => $workflowAction->getWorkflow(),
-                    'action' => $workflowAction->getAction(),
-                    'status' => $StringStatus[$arguments['status']] ?? null,
-                    'searchField' => $arguments['searchField'] ?? null,
-                    'searchValue' => $arguments['searchValue'] ?? null,
-                    'order' => $workflowAction->getOrder(),
-                    'active' => $workflowAction->getActive(),
-                    'to' => $arguments['to'] ?? null,
-                    'subject' => $arguments['subject'] ?? null,
-                    'message' => $arguments['message'] ?? null,
-                    'rerun' => $arguments['rerun'] ?? false
+                    'action' => null,
+                    'status' => null,
+                    'Rule' => null,
+                    'searchField' => null,
+                    'searchValue' => null,
+                    'order' => null,
+                    'active' => null,
+                    'to' => null,
+                    'subject' => null,
+                    'message' => null,
+                    'rerun' => null
                     // Add other WorkflowAction fields here as needed
                 ];
             
@@ -407,10 +408,32 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
+
+
+
                     $workflowAction->setModifiedBy($this->getUser());
+
+                    $action = $form->get('action')->getData();
+                    $workflowAction->setAction($action);
+
+                    $name = $form->get('name')->getData();
+                    $workflowAction->setName($name);
+
+                    $description = $form->get('description')->getData();
+                    $workflowAction->setDescription($description);
+
+                    $workflow = $form->get('Workflow')->getData();
+                    $workflowAction->setWorkflow($workflow);
+
+                    $order = $form->get('order')->getData();
+                    $workflowAction->setOrder($order);
+
+                    $active = $form->get('active')->getData();
+                    $workflowAction->setActive($active);
+
+                    
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
-
                     $to = $form->get('to')->getData();
                     if (!empty($to)) {
                         $arguments['to'] = $to;
@@ -426,15 +449,19 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    
+                    $rule = $form->get('Rule')->getData();
+                    if(!empty($rule)) {
+                        $ruleIdForArgument = $rule->getId();
+                    }
+                    if (!empty($rule)) {
+                        $arguments['rule'] = $ruleIdForArgument;
+                    }
                     
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
-                        
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
-                        
                     }
                     
                     // set the searchField
@@ -457,6 +484,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $workflowAction->setArguments(serialize($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
+
+                    $this->emptyArgumentsBasedOnAction($workflowAction->getId());
 
                     $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
 
