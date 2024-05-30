@@ -213,23 +213,27 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     }
 
     /**
-     * @Route("/active_show/{id}", name="workflow_action_active_show")
+     * @Route("/action_active_show/{id}", name="workflow_action_active_show")
      * function activate or deactivate an action in the show view
      */
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
-            $workflow = $workflowResult[0];
+            $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowAction = $workflowActionResult[0];
 
-            if ($workflow) {
+            if ($workflowAction) {
+                $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
+                $em->persist($workflowAction);
+                $em->flush();
+                $this->addFlash('success', 'Workflow Action updated successfully');
             } else {
                 $this->addFlash('error', 'Workflow Action not found');
             }
             
             
-            return $this->redirectToRoute('workflow_show', ['id' => $id]);
+            return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
@@ -663,7 +667,32 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
+
+
+
                     $workflowAction->setModifiedBy($this->getUser());
+
+                    $action = $form->get('action')->getData();
+                    $workflowAction->setAction($action);
+
+                    $name = $form->get('name')->getData();
+                    $workflowAction->setName($name);
+
+                    $description = $form->get('description')->getData();
+                    $workflowAction->setDescription($description);
+
+                    $workflow = $form->get('Workflow')->getData();
+                    $workflowAction->setWorkflow($workflow);
+
+                    $order = $form->get('order')->getData();
+                    $workflowAction->setOrder($order);
+
+                    $active = $form->get('active')->getData();
+                    $workflowAction->setActive($active);
+
+                    $status = $form->get('status')->getData();
+                    $arguments['status'] = $status;
+
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
 
@@ -687,7 +716,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
-                        
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
                         
