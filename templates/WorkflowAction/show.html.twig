@@ -42,7 +42,7 @@
                     <div class="card-body">
                         <p class="card-text">Description: {{ workflow.description }}</p>
                         {# rule #}
-                        <p class="card-text">Workflow: <a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}">{{ workflow.workflow.id }}</a></p>
+                        <p class="card-text">Workflow: <a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}">{{ workflow.workflow.name }}</a></p>
                         <p class="card-text">Action: {{ workflow.action }}</p>
                         <p class="card-text">Order: {{ workflow.order }}</p>
                         <p class="card-text">Arguments: 
