@@ -524,8 +524,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowAction = $workflowActionArray[0];
 
             if ($workflowAction) {
-                // Deserialize the arguments
+                $this->emptyArgumentsBasedOnAction($id);
                 $arguments = $workflowAction->getArguments();
+
 
                 $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
 
@@ -573,6 +574,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
                     'status' => isset($arguments['status']) ? $StringStatus[$arguments['status']] : null,
+                    'Rule' => $workflowAction->getWorkflow()->getRule() ?? null,
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -690,12 +692,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-                    $status = $form->get('status')->getData();
-                    $arguments['status'] = $status;
-
+                    
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
-
                     $to = $form->get('to')->getData();
                     if (!empty($to)) {
                         $arguments['to'] = $to;
@@ -711,14 +710,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    
+                    $rule = $form->get('Rule')->getData();
+                    $ruleIdForArgument = $rule->getId();
+                    if (!empty($rule)) {
+                        $arguments['rule'] = $ruleIdForArgument;
+                    }
                     
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
-                        
                     }
                     
                     // set the searchField
@@ -742,6 +744,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $em->persist($workflowAction);
                     $em->flush();
 
+                    $this->emptyArgumentsBasedOnAction($id);
+
                     $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
 
                     $this->addFlash('success', 'Action updated successfully');
@@ -762,6 +766,33 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    // public function to empty the arguments based on the action
+    public function emptyArgumentsBasedOnAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+        $workflowAction = $workflowActionArray[0];
+
+        if ($workflowAction) {
+            $arguments = $workflowAction->getArguments();
+            $action = $workflowAction->getAction();
+
+            if ($action == 'updateStatus') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['searchField'], $arguments['searchValue']);
+            } elseif ($action == 'generateDocument') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status']);
+            } elseif ($action == 'sendNotification') {
+                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+            } elseif ($action == 'transformDocument') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+            }
+
+            $workflowAction->setArguments(serialize($arguments));
+            $em->persist($workflowAction);
+            $em->flush();
         }
     }
 
