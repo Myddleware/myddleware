@@ -1989,6 +1989,41 @@ use App\Entity\Workflow;
                 $filters = $this->entityManager->getRepository(RuleFilter::class)
                         ->findBy(['rule' => $ruleKey]);
 
+                // we want to make a request that fetches all the rule names and ids, so we can display them in the form
+                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleListRelation = $ruleRepo->createQueryBuilder('r')
+                    ->select('r.id, r.name, r.moduleSource')
+                    ->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')
+                    ->setParameter(1, (int) $this->sessionService->getParamRuleConnectorSourceId($ruleKey))
+                    ->setParameter(2, (int) $this->sessionService->getParamRuleConnectorCibleId($ruleKey))
+                    ->setParameter(3, $this->sessionService->getParamRuleName($ruleKey))
+                    ->getQuery()
+                    ->getResult();
+
+                // from the result ruleListRelation we create an array with the rule name as the key and the rule id as the value
+                $ruleListRelation = array_reduce($ruleListRelation, function ($carry, $item) {
+                    $carry[$item['name']] = $item['id'];
+                    return $carry;
+                }, []);
+
+                $html_list_rules = '';
+                if (!empty($ruleListRelation)) {
+                    foreach ($ruleListRelation as $ruleName => $ruleId) {
+                        $html_list_rules .= '<option value="'.$ruleId.'">'.$ruleName.'</option>';
+                    }
+                }
+
                 //  rev 1.07 --------------------------
                 $result = [
                     'filters' => $filters,
@@ -2008,6 +2043,7 @@ use App\Entity\Workflow;
                     'duplicate_target' => $fieldsDuplicateTarget,
                     'opt_target' => $html_list_target,
                     'opt_source' => $html_list_source,
+                    'html_list_rules' => $html_list_rules,
                     'fieldMappingAddListType' => $fieldMappingAdd,
                     'parentRelationships' => $allowParentRelationship,
                     'lst_parent_fields' => $lstParentFields,
