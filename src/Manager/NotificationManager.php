@@ -152,6 +152,26 @@ class NotificationManager
         }
     }
 
+    /**
+     * Send alert if a batch of documents has the same reference while having more documents than the limit, which will cause a bottleneck. It takas an array of JobSettings as parameter. It returns true if the alert is sent using the function send() and false if the alert is not sent.
+     *
+     * @throws Exception
+     */
+    public function sendAlertSameDocReference(array $JobSettings): bool
+    {
+        $this->setConfigParam();
+        // we create a text mail with the rule id, the job id and the reference date, they are contained in the JobSettings array
+        $textMail = $this->translator->trans('email_alert_same_doc_reference.body', [
+            '%rule_id%' => $JobSettings['rule_id'],
+            '%job_id%' => $JobSettings['job_id'],
+            '%reference_date%' => $JobSettings['reference_date'],
+            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$JobSettings['job_id'].'/log' : ''),
+        ]);
+
+        return $this->send($textMail, $this->translator->trans('email_alert_same_doc_reference.subject'));
+
+    }
+
 
     /**
      * Send alert if limit reached.
