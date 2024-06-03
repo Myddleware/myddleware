@@ -785,6 +785,16 @@ email_alert:
         %base_uri%</p>
 
         Kind regards,
+email_alert_same_doc_reference:
+    subject: Myddleware alert
+    body: |
+        Hello,
+        <p>There are several documents with the same reference date %reference_date% in the same rule. Please check the rule %rule_id% or the job %job_id%.</p>
+
+        %base_uri%
+
+        Kind regards,
+
 jobscheduler:
     id: Id
     command: Command
