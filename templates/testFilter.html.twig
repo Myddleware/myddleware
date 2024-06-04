@@ -255,6 +255,7 @@
                     <th>{{ 'list_flux.tab.date_created'|trans }} <span data-sort="date_created"><i class='fas fa-angle-down date_createdIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.date_modified'|trans }} <span data-sort="date_modified"><i class='fas fa-angle-down date_modifiedIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.statut'|trans }} <span data-sort="status"><i class='fas fa-angle-down statusIcon'></i></span></th>
+                    <th>{{ '!'|trans }} <span data-sort="status"><i class='fas fa-angle-down statusIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.source_id'|trans }} <span data-sort="source_id"><i class='fas fa-angle-down source_idIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.target_id'|trans }} <span data-sort="target_id"><i class='fas fa-angle-down target_idIcon'></i></span></th>
                     <th>{{ 'list_flux.tab.type'|trans }} <span data-sort="type"><i class='fas fa-angle-down typeIcon'></i></span></th>
@@ -294,6 +295,14 @@
                                     {% endif %}
                                 </div>
                             </td>
+                            <td>
+                                {% if document.global_status|lower == 'error' %}
+                                <button class="get-log-msg" data-doc-id="{{ document.id }}">
+                                    <i class="fas fa-comment-dots"></i>
+                                </button>
+                                <div id="log-msg-{{ document.id }}"></div>
+                                {% endif %}
+                            </td>
                             <td>{{ document.source_id }}</td>
                             <td>{{ document.target_id }}</td>
                             <td>{{ document.type }}</td>
@@ -332,6 +341,7 @@
     var mass_run = "{{ path('flux_mass_run') }}";
     var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
     var csvdocumentids = "{{ csvdocumentids }}";
+    
     // DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
     start = new dtsel.DTS('#form_date_modif_end',  {
         showTime: true
@@ -339,6 +349,26 @@
     end = new dtsel.DTS('#form_date_modif_start',  {
         showTime: true
     });
+</script>
+
+<script>
+$(document).ready(function() {
+    $('.get-log-msg').click(function() {
+        var docId = $(this).data('doc-id');
+        var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
+        var testlastmessagefinal= testLastMessage.replace("PLACEHOLDER_ID", docId);
+        console.log(docId);
+        console.log(testlastmessagefinal);
+        $.ajax({
+            url: testlastmessagefinal,
+            method: 'POST',
+            success: function(data) {
+                $('#log-msg-' + docId).text(data);
+                alert(data);
+            }
+        });
+    });
+});
 </script>
 
 {% endblock %}
