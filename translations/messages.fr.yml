@@ -340,6 +340,7 @@ list_flux:
         module_target: Module cible
         module_source: Module source
         reference: Référence
+        message : Message
     tab:
         id: Doc Id
         name: Nom

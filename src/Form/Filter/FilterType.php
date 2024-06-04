@@ -30,6 +30,7 @@ class FilterType extends AbstractType
                     'Type' => 'type',
                     'Source Content' => 'sourceContent',
                     'Target Content' => 'targetContent',
+                    'Message' => 'message',
                 ],
                 'data' => 'default',
                 'attr' => [

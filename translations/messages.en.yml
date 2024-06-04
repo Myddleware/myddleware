@@ -342,6 +342,7 @@ list_flux:
         module_target: Module target
         module_source: Module source
         reference: Reference
+        message : Log
     tab:
         id: Doc Id
         name: Name
