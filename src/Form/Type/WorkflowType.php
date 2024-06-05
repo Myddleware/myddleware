@@ -27,6 +27,9 @@ class WorkflowType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Workflow Name',
                 'required' => true,
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ]);
             $builder->add('description', TextType::class, ['label' => 'Description']);
             $builder->add('Rule', EntityType::class, [
@@ -37,6 +40,9 @@ class WorkflowType extends AbstractType
                 'constraints' => [
                     new NotBlank(),
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ]);
             $builder->add('condition', TextareaType::class, [
                 'label' => 'Condition',
@@ -52,6 +58,9 @@ class WorkflowType extends AbstractType
                         },
                     ]),
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ]);
             $builder->get('condition')->addEventListener(FormEvents::SUBMIT, function ($event) {
                 $data = $event->getData();
@@ -69,7 +78,12 @@ class WorkflowType extends AbstractType
                 }
                 $event->setData($data);
             });
-            $builder->add('submit', SubmitType::class, ['label' => 'Save']);
+            $builder->add('submit', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => [
+                    'class' => 'mt-2 btn btn-primary',
+                    ],
+            ])
         ;
     }
 

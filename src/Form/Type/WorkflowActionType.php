@@ -28,6 +28,9 @@ class WorkflowActionType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Action Name',
                 'required' => true,
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ])
             ->add('description', TextType::class, ['label' => 'Description'])
             ->add('Workflow', EntityType::class, [
@@ -38,6 +41,9 @@ class WorkflowActionType extends AbstractType
                 'constraints' => [
                     new NotBlank(),
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ])
             ->add('action', ChoiceType::class, [
                 'label' => 'Action',
@@ -48,10 +54,33 @@ class WorkflowActionType extends AbstractType
                     'generateDocument' => 'generateDocument',
                     'transformDocument' => 'transformDocument',
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ])
-            ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
-            ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
-            ->add('message', TextareaType::class, ['label' => 'Message', 'mapped' => false, 'required' => false])
+            ->add('to', TextType::class, [
+                'label' => 'To', 
+                'mapped' => false, 
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+                ])
+            ->add('subject', TextType::class, [
+                'label' => 'Subject', 
+                'mapped' => false, 
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+                ])
+            ->add('message', TextareaType::class, [
+                'label' => 'Message', 
+                'mapped' => false, 'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+                ])
             ->add('order', IntegerType::class, [
                 'label' => 'Order',
                 'constraints' => [
@@ -61,6 +90,9 @@ class WorkflowActionType extends AbstractType
                         'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
                     ]),
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ])
             ->add('active', ChoiceType::class, [
                 'label' => 'Active',
@@ -68,9 +100,16 @@ class WorkflowActionType extends AbstractType
                     'Yes' => 1,
                     'No' => 0,
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
             ])
-            ->add('submit', SubmitType::class, ['label' => 'Save'])
-        ;
+            ->add('submit', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => [
+                    'class' => 'mt-2 btn btn-primary',
+                    ],
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

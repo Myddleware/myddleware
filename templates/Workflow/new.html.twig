@@ -1,21 +1,25 @@
 {% extends 'base.html.twig' %}
-
+{% block title %}{{ parent() }} | {{ 'view_workflow.create'| trans}}{% endblock %}
+{% block titlesm %}{{ 'view_workflow.create'| trans}}{% endblock titlesm %}
 {% block body %}
-    <h1>Create a new Workflow</h1>
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <div class=" mx-5 mt-5">
+                {{ form_start(form) }}
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.Rule) }}
+                    {{ form_row(form.condition) }}
+                    {{ form_row(form.submit) }}
+                {{ form_end(form) }}
 
-    {{ form_start(form) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.description) }}
-        {{ form_row(form.Rule) }}
-        {{ form_row(form.condition) }}
-        {{ form_row(form.submit) }}
-    {{ form_end(form) }}
-
-    <h2>Condition Field</h2>
-    <p> The condition field is automatically generated with the string {status} == ", and the opening 
-    parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
-    <br>
-    <br>
-    In short, all you need is to write the status name and we do the rest !
-    </p>
+                <div class="m-2">
+                    <h3 class="m-2">{{ 'view_workflow.title2'| trans}}</h3>
+                    
+                    <p> {{'view_workflow.condition'| trans}}</p>
+                    <p>{{ 'view_workflow.condition2'| trans}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

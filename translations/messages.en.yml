@@ -479,7 +479,36 @@ list_workflow:
         condition: Condition
         active: Active
         actions: Actions
-
+view_workflow:
+    title: Workflow
+    create: Create a new workflow
+    edit: Edit the workflow
+    title2: Condition Field
+    condition: The condition field is automatically generated with the string {status} == ", and the opening parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
+    condition2: In short, all you need is to write the status name and we do the rest !
+    back: Back to the list
+    delete: Delete the workflow
+    description: Description
+    rule: Rule
+    conditions: Conditions
+    status: Status
+    actions_list: List of Actions
+    create_action: Create a new action for this workflow
+    name: Name
+    action: Action
+    order: Order
+    arguments: Arguments
+    logs: Workflow Logs
+    log_id: ID
+    workflow: Workflow
+    job: Job
+    trigger_document: Trigger Document
+    generate_document: Generate Document
+    created_by: Created By
+    date_created: Date Created
+    message: Message
+    action_name: Action Name
+    action_type: Action Type
 view_account:
     title: My account
     user_info: My information

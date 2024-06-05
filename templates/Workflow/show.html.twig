@@ -1,30 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    {{ parent() }} | {{ 'title.workflow.detail'|trans }}
-{% endblock %}
-
+{% block title %}{{ parent() }} | {{ 'view_workflow.title'|trans }}{% endblock %}
 {% block titlesm %}
-    {{ 'title.workflow.detail'|trans }}
+    {{ 'view_workflow.title'|trans }} 
+    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+    {{ workflow.name }}
 {% endblock titlesm %} 
 
 {% block body %} 
-    {% block js %}
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
-    {% endblock js %}
-
     <div id="task">
         <div>
-            <a href="{{ path('workflow_list') }}" class="btn btn-primary">Back to the list</a>
-        </div>
-        <div>
-            <a href="{{ path('workflow_edit', {'id': workflow.id}) }}">Edit this workflow</a>
-        </div>
-        <div>
-            <a href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">Delete this workflow</a>
+            <a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2"> {{ 'view_workflow.back'| trans }}</a>
+            <a href="{{ path('workflow_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2"> {{ 'view_workflow.edit'| trans }}</a>
+            <a href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');" class="btn btn-outline-danger m-2"> {{ 'view_workflow.delete'| trans }}</a>
         </div>
 
         <div>
@@ -35,36 +23,50 @@
             {% endfor %}
 
             {% if workflow is not null %}
-            <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Name: {{ workflow.name }}</h2>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Description: {{ workflow.description }}</p>
-                        {# rule #}
-                        <p class="card-text">Rule: <a href="{{ path('regle_open', {'id': workflow.rule.id}) }}">{{ workflow.rule.name }}</a></p>
-                        <p class="card-text">Conditions: {{ workflow.condition }}</p>
-                        <p class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
-									<a href="{{ path('workflow_active_show', {'id': workflow.id}) }}">
-										{{ workflow.active ? 'Active' : 'Inactive' }}
-									</a>
-								</p>
-                    </div>
-                </div>
+                <table id="headertab" class="listepager table document-history-table">
+                    <thead>
+                        <tr>
+                            <th>{{ 'view_workflow.description'|trans }}</th>
+                            <th>{{ 'view_workflow.rule'|trans }}</th>
+                            <th>{{ 'view_workflow.conditions'|trans }}</th>
+                            <th>{{ 'view_workflow.status'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ workflow.description }}</td>
+                            <td>
+                                <a href="{{ path('regle_open', {'id': workflow.rule.id}) }}">{{ workflow.rule.name }}</a>
+                            </td>
+                            <td>{{ workflow.condition }}</td>
+                            <td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
+                                <a href="{{ path('workflow_active_show', {'id': workflow.id}) }}">
+                                    {{ workflow.active ? 'Active' : 'Inactive' }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <div>
-                    <h2>List of Actions</h2>
+                <div id="fd-title-small" class="left">
+                    <p>{{ 'view_workflow.actions_list'|trans }}</p>
+                </div>
+                <div class="clr"></div>
+
+                <div class="container">
                     <div>
-                        <a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflow.id}) }}">Create a new action for this workflow</a>
+                        <a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflow.id}) }}" class="btn btn-primary mb-3">
+                            {{ 'view_workflow.create_action'|trans }}
+                        </a>
                     </div>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Action</th>
-                                <th>Description</th>
-                                <th>Order</th>
-                                <th>Arguments</th>
+                                <th>{{ 'view_workflow.name'|trans }}</th>
+                                <th>{{ 'view_workflow.action'|trans }}</th>
+                                <th>{{ 'view_workflow.description'|trans }}</th>
+                                <th>{{ 'view_workflow.order'|trans }}</th>
+                                <th>{{ 'view_workflow.arguments'|trans }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,55 +96,63 @@
                 <p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
             {% endif %}
 
-            {# table for the workflow logs #}
-            <div>
-                <h2>Workflow Logs</h2>
+            <div id="fd-title-small" class="left">
+                <p>{{ 'view_workflow.logs'|trans }}</p>
+            </div>
+            <div class="clr"></div>
+            <div class="container">
                 <table class="table">
-						<thead>
-							<tr>
-								<th>ID</th>
-								<th>Workflow</th>
-								<th>Job</th>
-								<th>Trigger Document</th>
-								<th>Generate Document</th>
-								<th>Created By</th>
-								<th>Status</th>
-								<th>Date Created</th>
-								<th>Message</th>
-								<th>Action Name</th>
-								<th>Action Type</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for log in workflowLogs %}
-								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-									<td class="ctr">{{ log.id }}</td>
-									<td class="ctr"><a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a></td>
-									<td class="ctr"><a href="{{ path('task_view',{'id' : log.job.id }) }}">{{ log.job.id }}</a></td>
-									<td class="ctr">    {% if log.triggerDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
-									{% else %}
-										<span></span>
-									{% endif %}</td>
-									<td class="ctr">    {% if log.generateDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
-									{% else %}
-										<span></span>
-									{% endif %}</td>
-									<td class="ctr">{{ log.createdBy }}</td>
-									<td class="ctr">
-										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
-									</td>
-									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
-									<td class="ctr">{{ log.action.action }}</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-
-
+                    <thead>
+                        <tr>
+                            <th>{{ 'view_workflow.log_id'|trans }}</th>
+                            <th>{{ 'view_workflow.workflow'|trans }}</th>
+                            <th>{{ 'view_workflow.job'|trans }}</th>
+                            <th>{{ 'view_workflow.trigger_document'|trans }}</th>
+                            <th>{{ 'view_workflow.generate_document'|trans }}</th>
+                            <th>{{ 'view_workflow.created_by'|trans }}</th>
+                            <th>{{ 'view_workflow.status'|trans }}</th>
+                            <th>{{ 'view_workflow.date_created'|trans }}</th>
+                            <th>{{ 'view_workflow.message'|trans }}</th>
+                            <th>{{ 'view_workflow.action_name'|trans }}</th>
+                            <th>{{ 'view_workflow.action_type'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in workflowLogs %}
+                            <tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+                                <td class="ctr">{{ log.id }}</td>
+                                <td class="ctr"><a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a></td>
+                                <td class="ctr"><a href="{{ path('task_view',{'id' : log.job.id }) }}">{{ log.job.id }}</a></td>
+                                <td class="ctr">{% if log.triggerDocument is not null %}
+                                    <a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
+                                {% else %}
+                                    <span></span>
+                                {% endif %}</td>
+                                <td class="ctr">{% if log.generateDocument is not null %}
+                                    <a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
+                                {% else %}
+                                    <span></span>
+                                {% endif %}</td>
+                                <td class="ctr">{{ log.createdBy }}</td>
+                                <td class="ctr">
+                                    <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+                                </td>
+                                <td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+                                <td class="ctr">{{ log.getMessage }}</td>
+                                <td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
+                                <td class="ctr">{{ log.action.action }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    
+    {% block js %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+    {% endblock js %}
 {% endblock %}

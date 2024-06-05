@@ -476,6 +476,36 @@ list_workflow:
         condition: Condition
         active: Actif
         actions: Actions
+view_workflow:
+    title: Workflow
+    create: Créer un workflow
+    edit: Editer un workflow
+    title2: Condition de champs
+    condition: Le champ de condition est automatiquement généré avec la chaîne {état} == « , et la parenthèse ouvrante ainsi que l'opérateur ternaire ?"1":"0") seront ajoutés automatiquement.
+    condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
+    back: Retour
+    delete: Supprimer le workflow
+    description: Description
+    rule: Règle
+    conditions: Conditions
+    status: Statut
+    actions_list: Liste des actions
+    create_action: Créer une nouvelle action pour ce workflow
+    name: Nom
+    action: Action
+    order: Ordre
+    arguments: Arguments
+    logs: Journaux de workflow
+    log_id: ID
+    workflow: Workflow
+    job: Tâche
+    trigger_document: Document déclencheur
+    generate_document: Document généré
+    created_by: Créé par
+    date_created: Date de création
+    message: Message
+    action_name: Nom de l'action
+    action_type: Type d'action
 
 view_account:
     title: Mon compte
