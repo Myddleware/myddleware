@@ -524,11 +524,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
 
             if ($workflow[0]) {
+                $nb_workflow = count($workflowLogs);
                 return $this->render(
                     'WorkflowAction/show.html.twig',
                     [
                         'workflow' => $workflow[0],
                         'workflowLogs' => $workflowLogs,
+                        'nb_workflow' => $nb_workflow
                     ]
                 );
             } else {

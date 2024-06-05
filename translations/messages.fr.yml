@@ -506,7 +506,15 @@ view_workflow:
     message: Message
     action_name: Nom de l'action
     action_type: Type d'action
-
+view_workflow_action:
+    title: Détail de l'action du workflow
+    edit: Editer cette action
+    delete: Supprimer cette action
+    confirm_delete: Êtes-vous sûr de vouloir supprimer cette action ?
+    workflow: Workflow
+    action: Action
+    order: Ordre
+    back_to_workflow: Retour au workflow
 view_account:
     title: Mon compte
     user_info: Mes informations

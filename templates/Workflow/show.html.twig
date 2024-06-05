@@ -96,10 +96,13 @@
                 <p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
             {% endif %}
 
-            <div id="fd-title-small" class="left">
-                <p>{{ 'view_workflow.logs'|trans }}</p>
-            </div>
-            <div class="clr"></div>
+
+            {% if nb_workflow > 0 %}
+                <div id="fd-title-small" class="left">
+                    <p>{{ 'view_workflow.logs'|trans }}</p>
+                    <span class="nb">{{ nb_workflow }}</span>
+                </div>
+		    {% endif %} 
             <div class="container">
                 <table class="table">
                     <thead>

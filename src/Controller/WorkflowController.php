@@ -426,11 +426,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             );
 
             if ($workflow[0]) {
+                $nb_workflow = count($workflowLogs);
                 return $this->render(
                     'Workflow/show.html.twig',
                     [
                         'workflow' => $workflow[0],
                         'workflowLogs' => $workflowLogs,
+                        'nb_workflow' => $nb_workflow,
                     ]
                 );
             } else {
