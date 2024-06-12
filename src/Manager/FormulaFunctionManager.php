@@ -122,7 +122,7 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $createDocRelationship=true)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errorIfNotFound=true, $createDocRelationship=true)
 	{
 		// Manage error if empty
 		if (empty($field)) {
@@ -208,7 +208,7 @@ class formulafunctioncore
 		$result = $result->fetchAssociative();
 		// Manage error if no result found
 		if (empty($result['record_id'])) {
-			if ($errodIfNoFound) {
+			if ($errorIfNotFound) {
 				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$field.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
