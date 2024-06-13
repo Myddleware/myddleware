@@ -159,7 +159,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
@@ -181,7 +181,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 								source_id record_id,
-								GROUP_CONCAT(DISTINCT document.id) document_id,
+								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 								GROUP_CONCAT(DISTINCT document.type) types
 							FROM document
 							WHERE  
