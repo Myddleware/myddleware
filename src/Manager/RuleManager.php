@@ -2182,7 +2182,7 @@ class rulecore
     protected function setRuleWorkflows()
     {
         try {
-            $sqlWorkflows = 'SELECT * FROM workflow WHERE rule_id = :ruleId AND deleted = 0 AND active = 1';
+            $sqlWorkflows = 'SELECT * FROM workflow WHERE rule_id = :ruleId AND deleted = 0 AND active = 1 ORDER BY `order` ASC';
             $stmt = $this->connection->prepare($sqlWorkflows);
             $stmt->bindValue(':ruleId', $this->ruleId);
             $result = $stmt->executeQuery();

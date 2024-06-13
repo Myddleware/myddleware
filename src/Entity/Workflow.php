@@ -93,6 +93,11 @@ class Workflow
     private int $active;
 	
 	/**
+     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
+     */
+    private int $order;
+	
+	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private int $deleted;
@@ -210,6 +215,18 @@ class Workflow
         return $this;
     }
 
+	public function setOrder($order): self
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    public function getOrder(): string
+    {
+        return $this->order;
+    }
+	
     public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
