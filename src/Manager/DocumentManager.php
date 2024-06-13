@@ -1577,7 +1577,11 @@ class documentcore
     public function getTransformValue($source, $ruleField)
     {
         try {
-            //--
+			// include custom variables that could be used in the formula
+			if (file_exists( __DIR__.'/../Custom/Utils/myddlewareVariables.php')) {
+				include  __DIR__.'/../Custom/Utils/myddlewareVariables.php';
+			}
+            // Manage formula
             if (!empty($ruleField['formula'])) {
                 // -- -- -- Formula management
 
