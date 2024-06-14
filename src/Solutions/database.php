@@ -394,7 +394,12 @@ class databasecore extends solution
     protected function create($param, $record, $idDoc = null)
     {
         // Add this array at the start of the function
-    $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+        $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
         
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
@@ -460,6 +465,12 @@ class databasecore extends solution
     {
             // Add this array at the start of the function
         $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
+        
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
