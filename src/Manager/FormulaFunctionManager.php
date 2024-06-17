@@ -122,7 +122,7 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $createDocRelationship=true)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errorIfNotFound=true, $createDocRelationship=true)
 	{
 		// Manage error if empty
 		if (empty($field)) {
@@ -159,7 +159,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
@@ -181,7 +181,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 								source_id record_id,
-								GROUP_CONCAT(DISTINCT document.id) document_id,
+								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 								GROUP_CONCAT(DISTINCT document.type) types
 							FROM document
 							WHERE  
@@ -208,7 +208,7 @@ class formulafunctioncore
 		$result = $result->fetchAssociative();
 		// Manage error if no result found
 		if (empty($result['record_id'])) {
-			if ($errodIfNoFound) {
+			if ($errorIfNotFound) {
 				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$field.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
