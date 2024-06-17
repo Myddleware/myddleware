@@ -1437,10 +1437,11 @@ class documentcore
                         ) {
                             continue;
                         }
-                        // foreach field of $this->notSentFields, we remove it from the data to send
+                        // foreach field of $this->notSentFields, we remove it from the data to send (Target only)
                         if (
                                 !empty($this->notSentFields)
                             and in_array($ruleField['target_field_name'], $this->notSentFields)
+							and $type == 'T'
                         ) {
                             continue;
                         }
