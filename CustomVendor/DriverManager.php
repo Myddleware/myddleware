@@ -267,25 +267,18 @@ final class DriverManager
             $url = $params['url'];
 
             // Extract the password from the URL
-            $passwordStart = strpos($url, ':', strpos($url, '//')) + 1;
-            $passwordEnd = strpos($url, '@');
+            list($passwordStart, $passwordEnd) = [strpos($url, ':', strpos($url, '//')) + 1, strpos($url, '@')];
             $password = substr($url, $passwordStart, $passwordEnd - $passwordStart);
 
-            // URL encode the password
-            $encodedPassword = urlencode($password);
-
-            // Replace the original password with the encoded password in the URL
-            $encodedUrl = substr_replace($url, $encodedPassword, $passwordStart, $passwordEnd - $passwordStart);
+            // Replace the original password with the URL-encoded password in the URL
+            $encodedUrl = substr_replace($url, urlencode($password), $passwordStart, $passwordEnd - $passwordStart);
 
             // Parse the URL into its components
             $parts = parse_url($encodedUrl);
 
             // Reconstruct the URL
             $reconstructedUrl = "{$parts['scheme']}://{$parts['user']}:{$parts['pass']}@{$parts['host']}:{$parts['port']}{$parts['path']}";
-
-            if (isset($parts['query'])) {
-                $reconstructedUrl .= "?{$parts['query']}";
-            }
+            $reconstructedUrl .= isset($parts['query']) ? "?{$parts['query']}" : '';
 
             $parsedParams = $parser->parse($reconstructedUrl);
             $parsedParams['password'] = urldecode($parts['pass']);
