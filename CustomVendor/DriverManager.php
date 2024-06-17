@@ -264,7 +264,31 @@ final class DriverManager
 
         $parser = new DsnParser(self::$driverSchemeAliases);
         try {
-            $parsedParams = $parser->parse($params['url']);
+            $url = $params['url'];
+
+            // Extract the password from the URL
+            $passwordStart = strpos($url, ':', strpos($url, '//')) + 1;
+            $passwordEnd = strpos($url, '@');
+            $password = substr($url, $passwordStart, $passwordEnd - $passwordStart);
+
+            // URL encode the password
+            $encodedPassword = urlencode($password);
+
+            // Replace the original password with the encoded password in the URL
+            $encodedUrl = substr_replace($url, $encodedPassword, $passwordStart, $passwordEnd - $passwordStart);
+
+            // Parse the URL into its components
+            $parts = parse_url($encodedUrl);
+
+            // Reconstruct the URL
+            $reconstructedUrl = "{$parts['scheme']}://{$parts['user']}:{$parts['pass']}@{$parts['host']}:{$parts['port']}{$parts['path']}";
+
+            if (isset($parts['query'])) {
+                $reconstructedUrl .= "?{$parts['query']}";
+            }
+
+            $parsedParams = $parser->parse($reconstructedUrl);
+            $parsedParams['password'] = urldecode($parts['pass']);
         } catch (MalformedDsnException $e) {
             throw new Exception('Malformed parameter "url".', 0, $e);
         }
