@@ -68,7 +68,16 @@
 							{% else %}
 								<tr>
 							{% endif %}    
-							<td><a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param }}</a></td>
+							<td>
+								<div id="param-short-{{ loop.index }}">
+									{{ task.param|slice(0, 100) ~ '...' }}
+									<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
+								</div>
+								<div id="param-full-{{ loop.index }}" style="display: none;">
+									{{ task.param }}
+									<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
+								</div>
+							</td>
 							<td class="ctr">             
 								{% if task.status|lower == 'end' %}
 								<span class="label label-default">{{ task.status }}</span>
