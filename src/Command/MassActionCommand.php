@@ -82,7 +82,7 @@ class MassActionCommand extends Command
         $this
             ->setName('myddleware:massaction')
             ->setDescription('Action massive sur les flux')
-            ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore, changeStatus, unlock)')
+            ->addArgument('action', InputArgument::REQUIRED, 'Action (rerun, cancel, remove, restore, changeStatus, unlock, rerunWorkflow)')
             ->addArgument('dataType', InputArgument::REQUIRED, 'Data type (rule or document)')
             ->addArgument('ids', InputArgument::REQUIRED, 'Rule or document ids') // id séparés par des ","
             ->addArgument('forceAll', InputArgument::OPTIONAL, 'Set Y to process action on all documents (not only open and error ones)')
@@ -130,7 +130,7 @@ class MassActionCommand extends Command
         $output->writeln('1;'.$this->jobManager->getId());  // Do not remove, used for manual job and webservices (display logs)
 
         // Récupération des paramètres
-        if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus', 'unlock'])) {
+        if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus', 'unlock', 'rerunWorkflow'])) {
             throw new Exception('Action '.$action.' unknown. Please use action rerun, cancel or remove.');
         }
         if (!in_array($dataType, ['document', 'rule'])) {

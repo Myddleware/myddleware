@@ -153,7 +153,11 @@ class Document
      */
     private string $jobLock;
 	
-
+	/**
+     * @ORM\Column(name="workflow_error", type="boolean", options={"default":0})
+     */
+    private $workflowError;
+	
     public function __construct()
     {
         $this->datas = new ArrayCollection();
@@ -521,4 +525,14 @@ class Document
         return $this->jobLock;
     }
     
+	public function setWorkflowError($workflowError): self
+    {
+        $this->workflowError = $workflowError;
+        return $this;
+    }
+
+    public function getWorkflowError(): int
+    {
+        return $this->workflowError;
+    }
 }
