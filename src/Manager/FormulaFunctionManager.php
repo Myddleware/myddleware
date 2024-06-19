@@ -122,7 +122,7 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $createDocRelationship=true)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
 	{
 		// Manage error if empty
 		if (empty($field)) {
@@ -159,7 +159,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types
 								FROM document 
 								WHERE  
@@ -172,8 +172,7 @@ class formulafunctioncore
 										 OR document.status = 'No_send'
 									)
 								GROUP BY target_id
-								HAVING types NOT LIKE '%D%'
-								LIMIT 1";
+								HAVING types NOT LIKE '%D%'";
 			$direction = 1;
 		} elseif (
 				$ruleRef['conn_id_source'] == $ruleLink['conn_id_target']
@@ -181,7 +180,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 								source_id record_id,
-								GROUP_CONCAT(DISTINCT document.id) document_id,
+								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
 								GROUP_CONCAT(DISTINCT document.type) types
 							FROM document
 							WHERE  
@@ -194,8 +193,7 @@ class formulafunctioncore
 									 OR document.status = 'No_send'
 								)
 							GROUP BY source_id
-							HAVING types NOT LIKE '%D%'
-							LIMIT 1";
+							HAVING types NOT LIKE '%D%'";
 			$direction = -1;
 		} else {
 			throw new \Exception('The connectors do not match between rule '.$currentRule.' and rule '.$rule.'. ');
@@ -205,33 +203,32 @@ class formulafunctioncore
 		$stmt->bindValue(':ruleRelateId', $rule);
 		$stmt->bindValue(':record_id', $field);
 		$result = $stmt->executeQuery();
-		$result = $result->fetchAssociative();
+		$result = $result->fetchAllAssociative();
 		// Manage error if no result found
-		if (empty($result['record_id'])) {
+		if (empty($result)) {
 			if ($errodIfNoFound) {
-				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$field.' in the rule '.$ruleLink['name'].'. This document is queued. ');
+				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$fieldValue.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
 			}
 		}
+		// We take the last record in case there is several target id for the source id
+		$resultRecord = end($result);
 		// In cas of several document found we get only the last one
 		if (
-				!empty($result['document_id'])
-			AND strpos($result['document_id'], ',')
+				!empty($resultRecord['document_id'])
+			AND strpos($resultRecord['document_id'], ',')
 		) {
-			$documentList = explode(',',$result['document_id']);
-			$result['document_id'] = end($documentList);
+			$documentList = explode(',',$resultRecord['document_id']);
+			$resultRecord['document_id'] = end($documentList);
 		}
 		// No doc id in case of simulation
-		if (
-				!empty($docId)
-			AND $createDocRelationship
-		) {
+		if (!empty($docId)) {
 			// Add the relationship in the table document Relationship
 			try {
 				$documentRelationship = new DocumentRelationship();
 				$documentRelationship->setDocId($docId);
-				$documentRelationship->setDocRelId($result['document_id']);
+				$documentRelationship->setDocRelId($resultRecord['document_id']);
 				$documentRelationship->setDateCreated(new \DateTime());
 				$documentRelationship->setCreatedBy((int) $myddlewareUserId);
 				$documentRelationship->setSourceField($sourceFieldName);
@@ -240,7 +237,7 @@ class formulafunctioncore
 				throw new \Exception('Failed to save the document relationship for the field '.$sourceFieldName.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			}
 		}
-		return $result['record_id'];
+		return $resultRecord['record_id'];
     }
 }
 
