@@ -53,8 +53,6 @@ class ConnectorParamType extends AbstractType
                     $option['label'] = 'solution.fields.'.$f['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
-                        //required is false
-                        // $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
                     }
                 }
             }
