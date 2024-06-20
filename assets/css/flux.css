@@ -156,6 +156,10 @@
 	margin-right: 5px;
 }
 
+.modified {
+	color: #ffc107 !important;
+}
+
 /* any li with a span inside, the span will have  white-space: normal;*/
 li span {
 	/* white-space: normal; */
