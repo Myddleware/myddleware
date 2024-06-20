@@ -234,7 +234,7 @@
 									{% if value != doc.getId  %}
 										<li class="{{ key }}">
 											<span class="field">{{ key }}</span>
-											<span>{{ value }}</span>
+											<span {% if source[key] is defined and source[key] != value %}class="modified"{% endif %}>{{ value }}</span>
 										</li>
 									{% endif %}
 								{% endfor %}
