@@ -312,6 +312,7 @@ class JobSchedulerController extends AbstractController
     {
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
+		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
 
         //Check the user timezone
         if ($timezone = '') {
@@ -323,7 +324,7 @@ class JobSchedulerController extends AbstractController
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
 
         // Fetch the cron_job_result data
-        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findAll();
+        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findBy(array(), null, $searchLimit, 0);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
