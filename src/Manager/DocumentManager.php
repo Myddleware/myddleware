@@ -254,6 +254,9 @@ class documentcore
     public function setParam($param, $clear = false, $clearRule = true)
     {
 		try {
+			// Clear no send field that belongs to each document
+			$this->notSentFields = array();
+			// Clear attributes if requested
 			if ($clear) {
 				$this->clearAttributes($clearRule);
 			}

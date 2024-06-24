@@ -149,6 +149,7 @@ class formulafunctioncore
 		}
 
 		// Query to search the relate record id is different depending on the direction of the relationship
+		// We order the result by date_modified to be sure we retrieve the lastest target id sent
 		if (
 			(
 					!empty($ruleRef)
@@ -160,7 +161,8 @@ class formulafunctioncore
 			$sqlParams = "	SELECT 
 									target_id record_id,
 									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
-									GROUP_CONCAT(DISTINCT document.type) types
+									GROUP_CONCAT(DISTINCT document.type) types,
+									MAX(document.date_modified) date_modified
 								FROM document 
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -172,7 +174,9 @@ class formulafunctioncore
 										 OR document.status = 'No_send'
 									)
 								GROUP BY target_id
-								HAVING types NOT LIKE '%D%'";
+								HAVING types NOT LIKE '%D%'
+								ORDER BY date_modified DESC
+								LIMIT 1";
 			$direction = 1;
 		} elseif (
 				$ruleRef['conn_id_source'] == $ruleLink['conn_id_target']
@@ -181,7 +185,8 @@ class formulafunctioncore
 			$sqlParams = "	SELECT 
 								source_id record_id,
 								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
-								GROUP_CONCAT(DISTINCT document.type) types
+								GROUP_CONCAT(DISTINCT document.type) types,
+								MAX(document.date_modified) date_modified
 							FROM document
 							WHERE  
 									document.rule_id = :ruleRelateId
@@ -193,7 +198,9 @@ class formulafunctioncore
 									 OR document.status = 'No_send'
 								)
 							GROUP BY source_id
-							HAVING types NOT LIKE '%D%'";
+							HAVING types NOT LIKE '%D%'
+							ORDER BY date_modified DESC
+							LIMIT 1";
 			$direction = -1;
 		} else {
 			throw new \Exception('The connectors do not match between rule '.$currentRule.' and rule '.$rule.'. ');
@@ -203,24 +210,22 @@ class formulafunctioncore
 		$stmt->bindValue(':ruleRelateId', $rule);
 		$stmt->bindValue(':record_id', $field);
 		$result = $stmt->executeQuery();
-		$result = $result->fetchAllAssociative();
+		$result = $result->fetchAssociative();
 		// Manage error if no result found
-		if (empty($result)) {
+		if (empty($result['record_id'])) {
 			if ($errodIfNoFound) {
 				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$fieldValue.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
 			}
 		}
-		// We take the last record in case there is several target id for the source id
-		$resultRecord = end($result);
 		// In cas of several document found we get only the last one
 		if (
-				!empty($resultRecord['document_id'])
-			AND strpos($resultRecord['document_id'], ',')
+				!empty($result['document_id'])
+			AND strpos($result['document_id'], ',')
 		) {
-			$documentList = explode(',',$resultRecord['document_id']);
-			$resultRecord['document_id'] = end($documentList);
+			$documentList = explode(',',$result['document_id']);
+			$result['document_id'] = end($documentList);
 		}
 		// No doc id in case of simulation
 		if (!empty($docId)) {
@@ -228,7 +233,7 @@ class formulafunctioncore
 			try {
 				$documentRelationship = new DocumentRelationship();
 				$documentRelationship->setDocId($docId);
-				$documentRelationship->setDocRelId($resultRecord['document_id']);
+				$documentRelationship->setDocRelId($result['document_id']);
 				$documentRelationship->setDateCreated(new \DateTime());
 				$documentRelationship->setCreatedBy((int) $myddlewareUserId);
 				$documentRelationship->setSourceField($sourceFieldName);
@@ -237,7 +242,7 @@ class formulafunctioncore
 				throw new \Exception('Failed to save the document relationship for the field '.$sourceFieldName.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			}
 		}
-		return $resultRecord['record_id'];
+		return $result['record_id'];
     }
 }
 
