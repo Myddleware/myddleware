@@ -77,7 +77,7 @@
 
 #task #headertab td {
     height: 50px;
-	white-space: nowrap;
+	/* white-space: nowrap; */
     /* max-width: 200px; */
     min-width: 80px;
 	width: 80px;
@@ -90,4 +90,30 @@
 	width: 80px;
 	min-width: 80px;
 	text-align: center;
+}
+
+.button_message_task_collapse {
+	display: none !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 1.2em;
+	/* display: block; */
+}
+
+.button_message_task_expand {
+    white-space: normal;
+}
+
+.button_param_task_collapse {
+	display: none !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 1.2em;
+	/* display: block; */
+}
+
+.button_param_task_expand {
+    white-space: normal;
 }
