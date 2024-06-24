@@ -1627,14 +1627,18 @@ class documentcore
 
                 // Execute formula
                 if ($f = $this->formulaManager->execFormule()) {
-					// Manage lookup formula by adding the current rule as the first parameter
-					if (strpos($f, 'lookup') !== false ) {
+					// Check if variables are requiered for the formula
+					if ($this->isVariableRequested($f)) {
 						$currentRule = $this->ruleId;
 						$connection = $this->connection;
 						$entityManager = $this->entityManager;
 						$myddlewareUserId = $this->userId;
 						$sourceFieldName = $ruleField['source_field_name'];
 						$docId = $this->id;
+					}
+					
+					// Manage lookup formula by adding parameters
+					if (strpos($f, 'lookup') !== false ) {
 						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
 					}
                     try {
@@ -1704,6 +1708,14 @@ class documentcore
         }
     }
 
+	// Function to check if a formula require variables
+	protected function isVariableRequested($formula) {
+		if (strpos($formula, 'lookup') !== false ) {
+			return true;
+		}
+		return false;
+	}
+	
     // Trigger to be able to redefine formula
     protected function changeFormula($f)
     {
