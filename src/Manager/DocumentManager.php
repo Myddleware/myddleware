@@ -57,6 +57,7 @@ class documentcore
     protected $ruleId;
     protected $ruleFields;
     protected $ruleRelationships;
+    protected $ruleFilters;
     protected $ruleWorkflows;
     protected bool $workflowAction = false;
     protected $ruleParams;
@@ -313,6 +314,9 @@ class documentcore
 			if (!empty($param['ruleRelationships'])) {
 				$this->ruleRelationships = $param['ruleRelationships'];
 			}
+			if (!empty($param['ruleFilters'])) {
+				$this->ruleFilters = $param['ruleFilters'];
+			}
 			if (!empty($param['ruleWorkflows'])) {
 				$this->ruleWorkflows = $param['ruleWorkflows'];
 			}
@@ -338,6 +342,7 @@ class documentcore
             $this->ruleId = '';
             $this->ruleFields = [];
             $this->ruleRelationships = [];
+            $this->ruleFilters = [];
             $this->ruleWorkflows = [];
             $this->ruleParams = [];
         }
@@ -1410,7 +1415,6 @@ class documentcore
             } else {
                 $fields = $this->ruleFields;
             }
-
             // We save only fields which belong to the rule
             if (!empty($fields)) {
                 foreach ($fields as $ruleField) {
@@ -1464,6 +1468,16 @@ class documentcore
                     }
                 }
             }
+		
+			// We save the filter fields too (if not already in the list)
+            if (!empty($this->ruleFilters)) {
+                foreach ($this->ruleFilters as $ruleFilter) {
+                    if (!array_key_exists($ruleFilter['target'],$dataInsert)) {
+                        $dataInsert[$ruleFilter['target']] = (!empty($data[$ruleFilter['target']]) ? $data[$ruleFilter['target']] : '');
+                    } 
+                }
+            }
+			
             $documentEntity = $this->entityManager
                                     ->getRepository(Document::class)
                                     ->find($this->id);

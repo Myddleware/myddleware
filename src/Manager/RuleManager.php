@@ -273,6 +273,7 @@ class rulecore
                     $docParam['rule'] = $this->rule;
                     $docParam['ruleFields'] = $this->ruleFields;
                     $docParam['ruleRelationships'] = $this->ruleRelationships;
+                    $docParam['ruleFilters'] = $this->ruleFilters;
 					$docParam['ruleWorkflows'] = $this->ruleWorkflows;
                     $docParam['data'] = $docData;
                     $docParam['jobId'] = $this->jobId;
@@ -405,6 +406,7 @@ class rulecore
                     $param['rule'] = $this->rule;
                     $param['ruleFields'] = $this->ruleFields;
                     $param['ruleRelationships'] = $this->ruleRelationships;
+                    $param['ruleFilters'] = $this->ruleFilters;
 					$param['ruleWorkflows'] = $this->ruleWorkflows;
                     // Set the param of the rule one time for all
                     $this->documentManager->setRuleId($this->ruleId);
