@@ -214,7 +214,7 @@ class formulafunctioncore
 		// Manage error if no result found
 		if (empty($result['record_id'])) {
 			if ($errodIfNoFound) {
-				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$fieldValue.' in the rule '.$ruleLink['name'].'. This document is queued. ');
+				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$field.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
 			}
