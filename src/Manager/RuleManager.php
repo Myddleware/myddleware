@@ -154,6 +154,7 @@ class rulecore
             $this->setRuleParam();
             $this->setLimit();
             $this->setRuleRelationships();
+			$this->setRuleFilter();
 			$this->setRuleWorkflows();
             // Set the rule fields (we use the name_slug in $this->rule)
             $this->setRuleField();
@@ -1341,6 +1342,7 @@ class rulecore
 				$this->ruleId = $this->documentManager->getRuleId();
 				$this->setRule($this->ruleId);
 				$this->setRuleRelationships();
+				$this->setRuleFilter();
 				$this->setRuleParam();
 				$this->setRuleField();
 			}
@@ -2126,6 +2128,13 @@ class rulecore
                 }
             }
 
+			// Read fields used in filter
+			if (!empty($this->ruleFilters)) {
+                foreach ($this->ruleFilters as $ruleFilter) {
+                    $this->sourceFields[] = ltrim($ruleFilter['target']);
+                }
+            }
+			
             // Dédoublonnage des tableaux
             if (!empty($this->targetFields)) {
                 $this->targetFields = array_unique($this->targetFields);
