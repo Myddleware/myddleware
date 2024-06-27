@@ -2051,6 +2051,32 @@ use App\Entity\Workflow;
                     'simulationQueryField' => $this->simulationQueryField,
                 ];
 
+                foreach ($result['source'] as $module => $fields) {
+                    foreach ($fields as $fieldNameEncoded => $fieldValue) {
+                        // Decode the field name
+                        $fieldNameDecoded = urldecode($fieldNameEncoded);
+
+                        // Optionally, clean up the field name by removing or replacing unwanted characters
+                        $fieldNameCleaned = $fieldNameDecoded; // Adjust as needed
+
+                        // Clean the field value
+                        // Example: Trim whitespace and remove special characters
+                        // Adjust the cleaning logic as per your requirements
+                        $fieldValueCleaned = trim($fieldValue); // Trimming whitespace
+                        // For more aggressive cleaning, uncomment and adjust the following line
+                        // $fieldValueCleaned = preg_replace('/[^\x20-\x7E]/', '', $fieldValueCleaned);
+
+                        // Check if any cleaning was necessary for the field name
+                        if ($fieldNameCleaned !== $fieldNameEncoded || $fieldValue !== $fieldValueCleaned) {
+                            // Remove the old key
+                            unset($result['source'][$module][$fieldNameEncoded]);
+
+                            // Add the cleaned field name with its cleaned value
+                            $result['source'][$module][$fieldNameCleaned] = $fieldValueCleaned;
+                        }
+                    }
+                }
+
                 $result = $this->tools->beforeRuleEditViewRender($result);
 
                 // Formatage des listes déroulantes :
