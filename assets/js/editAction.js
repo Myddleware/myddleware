@@ -1,6 +1,4 @@
-console.log('test');
         $(document).ready(function() {
-            console.log('test2 we are in the function');
             $('#form_action').change(function() {
                 console.log('this is the value of the action' + $(this).val());
                 if ($(this).val() === 'sendNotification') {
