@@ -390,9 +390,10 @@ class documentcore
             $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
-            $this->updateStatus('New');
             // Insert source data
-            return $this->insertDataTable($this->data, 'S');
+            $insertDataTable = $this->insertDataTable($this->data, 'S');
+            $this->updateStatus('New');
+			return $insertDataTable;
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->id.' - '.$this->message);
@@ -1492,6 +1493,7 @@ class documentcore
             $this->typeError = 'E';
             $this->updateStatus('Create_KO');
             $this->logger->error($this->id.' - '.$this->message);
+			return false;
         }
 
         return true;
