@@ -555,6 +555,18 @@ $.fn.setCursorPosition = function(pos) {
         }
       }
 
+      const functionsToCheck = ["round", "ceil", "abs", "trim", "ltrim", "rtrim", "lower", "upper", "substr", "striptags", "changeValue", "htmlEntityDecode", "replace", "utf8encode", "utf8decode", "htmlentities", "htmlspecialchars", "strlen", "urlencode", "chr", "json_decode", "json_encode", "getValueFromArray", "lookup", "date", "microtime", "changeTimeZone", "changeFormatDate", "mdw_no_send_field"];
+
+      functionsToCheck.forEach(functionName => {
+        const pattern = `${functionName}()|${functionName}( )`;
+        if (myFormula.includes(functionName) && (myFormula.includes(`${functionName}()`) || myFormula.includes(`${functionName}( )`))) {
+          alert(`Your formula contains the function ${functionName}. Please add the required parameters.`);
+          missingFieldList = []; // Reset or handle as needed
+          values = []; // Reset or handle as needed
+          // return false; // Depending on your needs, you might want to return from the enclosing function
+        }
+      });
+
       var result = checkBrackets(myFormula);
       if (!result.status) {
         alert(
