@@ -131,7 +131,7 @@ class MassActionCommand extends Command
 
         // Récupération des paramètres
         if (!in_array($action, ['rerun', 'cancel', 'remove', 'restore', 'changeStatus', 'unlock', 'rerunWorkflow'])) {
-            throw new Exception('Action '.$action.' unknown. Please use action rerun, cancel or remove.');
+            throw new Exception('Action '.$action.' unknown. Please use action rerun, cancel, remove, restore, changeStatus, unlock or rerunWorkflow.');
         }
         if (!in_array($dataType, ['document', 'rule'])) {
             throw new Exception('Data type '.$dataType.' unknown. Please use data type document or rule.');

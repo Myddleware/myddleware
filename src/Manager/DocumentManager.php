@@ -181,6 +181,10 @@ class documentcore
             'S' => 'flux.type.search',
         ];
     }
+		
+	public function setId($id) {
+		$this->id = $id;
+	}
 
     public function setDocument($id_doc)
     {

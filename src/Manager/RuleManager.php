@@ -1143,6 +1143,9 @@ class rulecore
         $param['api'] = $this->api;
         // Set the param values and clear all document attributes
         $this->documentManager->setParam($param, true);
+		
+		// TO BE TESTED and REPLACE the 4 lines above
+		// $this->documentManager->setId($id_document);
         $this->documentManager->documentCancel();
         $session = new Session();
         $message = $this->documentManager->getMessage();
