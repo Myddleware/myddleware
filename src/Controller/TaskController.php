@@ -182,11 +182,11 @@ class TaskController extends AbstractController
             // Remove lock (send and read) on rule locked by this job
             $ruleRepository = $this->entityManager->getRepository(Rule::class);
             $ruleRepository->removeLock($taskStop->getId());
-	
             $em->flush();
 
             return $this->redirect($this->generateURL('task_view', ['id' => $taskStop->getId()]));
         } catch (Exception $e) {
+			$this->logger->error('Failed to stop task '.$taskStop->getId().' : '.$e->getMessage().''.$e->getFile().' '.$e->getLine());
             return $this->redirect($this->generateUrl('task_list'));
         }
     }
