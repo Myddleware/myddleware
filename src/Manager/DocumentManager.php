@@ -257,6 +257,8 @@ class documentcore
 		try {
 			// Clear no send field that belongs to each document
 			$this->notSentFields = array();
+			// Re activate the workflow if a new document is loaded or if the current document is reloaded
+			$this->workflowAction = false;
 			// Clear attributes if requested
 			if ($clear) {
 				$this->clearAttributes($clearRule);
@@ -2725,6 +2727,7 @@ class documentcore
                                             $workflowStatus = 'Success';
                                             $error = '';
                                             $this->typeError = 'W';
+											// Avoid infinite loop by skipping the call to the workflow after changing the status
                                             $this->workflowAction = true;
                                             // Set back the parameter $this->transformError to false 
                                             // because it could have been set to true by the current action
