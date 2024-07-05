@@ -3091,4 +3091,58 @@ use App\Form\Type\RelationFilterType;
 
         return new Response('', Response::HTTP_OK);
     }
+
+    /**
+     * @Route("/rule/unlock/{id}", name="flux_unlock_rule", methods={"POST"})
+     */
+    public function fluxUnlockRule($id) {
+        try {
+            $rule = $this->entityManager->getRepository(Rule::class)->find($id);
+
+            if (!$rule) {
+                throw new \Exception("Rule not found");
+            }
+
+            $result = $this->ruleManager->unlockRule('rule', [$id]);
+
+            $user = $this->getUser();
+
+            $ruleData = json_encode([
+                'unlockStatus' => $result ? 'true' : 'false',
+                'createdBy' => $user ? $user->getUsername() : 'Unknown',
+            ]);
+
+            $ruleAudit = new RuleAudit();
+            $ruleAudit->setRule($rule);
+            $ruleAudit->setDateCreated(new \DateTime());
+            $ruleAudit->setData($ruleData);
+            $ruleAudit->setCreatedBy($user);
+            $this->entityManager->persist($ruleAudit);
+            $this->entityManager->flush();
+
+            return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('view_rule.action.unlock_rule_success')]);
+        } catch (\Exception $e) {
+            $user = $this->getUser();
+
+            $ruleData = json_encode([
+                'unlockStatus' => 'false',
+                'createdBy' => $user ? $user->getUsername() : 'Unknown',
+            ]);
+
+            $ruleAudit = new RuleAudit();
+            if (isset($rule) && $rule) {
+                $ruleAudit->setRule($rule);
+            }
+            $ruleAudit->setDateCreated(new \DateTime());
+            $ruleAudit->setData($ruleData);
+            $ruleAudit->setCreatedBy($user);
+            $this->entityManager->persist($ruleAudit);
+            $this->entityManager->flush();
+
+            // Réponse JSON d'erreur
+            return new JsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+
 }

@@ -29,13 +29,22 @@
 	{# success message if the rule has been duplicated  #}
 	{% for label, flashes in app.session.flashbag.all %}
 		{% for flash in flashes %}
-			{% if ( label == 'success' ) %}
+			{% if label == 'success' %}
 				<div class="alert alert-success alert-dismissible fade show">
+					{{ flash }}
+				</div>
+			{% elseif ( label == 'success_unlock_rule' ) %}
+				<div class="alert alert-success alert-dismissible fade show">
+					{{ flash }}
+				</div>
+			{% elseif label == 'error_unlock_rule' %}
+				<div class="alert alert-danger alert-dismissible fade show">
 					{{ flash }}
 				</div>
 			{% endif %}
 		{% endfor %}
 	{% endfor %}
+
 	
     <div id="rule">
 		{% if nb_rule > 0 %}
@@ -46,7 +55,6 @@
 		<form id="rulenamesearchbar" action="{{ path('regle_list') }}" method="get">
 			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search...">
 		</form>
-
 
 		<div class="row justify-content-center my-4">
 			<div class="col text-center">
@@ -79,11 +87,14 @@
 							<th>{{'list_rule.th.active'|trans}}</th>
 							<th>{{'list_rule.th.date_created'|trans}}</th>
 							<th>{{'list_rule.th.option'|trans}}</th>
+							<th>{{'list_rule.th.lock_rule'|trans}}</th>
 						</tr>
 					</thead>
 					<tbody id="tbody_rule_list">
 						{% for rule in entities %}
-						<tr>
+						{% set rowClass = rule.0.readJobLock is not empty ? 'bg-danger' : '' %}
+    					{% set iconClass = rule.0.readJobLock is not empty ? 'icon-danger' : '' %}
+						<tr id="row_{{ rule.id }}" class="{{ rowClass }}">
 							<td class="solution_block text-center">
 								<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}" /></p>
 								{{rule.lbl_source }}
@@ -114,20 +125,38 @@
 							</td>
 							<td class="text-center">
 								<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="text-decoration-none">
-									<span class="btn-opt">
+									<span class="btn-opt {{ iconClass }}">
 										<i class="fa fa-pen" aria-hidden="true"></i>
 									</span>
 								</a>		     		
 								<a class="delete text-decoration-none" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
-									<span class="btn-opt">
+									<span class="btn-opt {{ iconClass }}">
 										<i class="fa fa-trash" aria-hidden="true"></i>
 									</span>
 								</a>
 								<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="text-decoration-none">
-									<span class="btn-opt">
+									<span class="btn-opt {{ iconClass }}">
 										<i class="fa fa-file" aria-hidden="true"></i>
 									</span>
 								</a>
+							</td>
+							<td class="value" style="text-align: center !important;">
+								{% if rule.0.readJobLock is not empty %}
+									{% if is_granted('ROLE_SUPER_ADMIN') %}
+										<button class="unlock_list_rules_{{rule.id}} edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+											<i class="fa fa-lock" aria-hidden="true"></i>
+											<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+										</button>
+									{% else %}
+										<button class="unlock_list_rules_{{rule.id}} edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}" disabled>
+											<i class="fa fa-lock" aria-hidden="true"></i>
+											<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+										</button>
+									{% endif %}
+									<a href="{{ path('task_view',{'id' : rule.0.readJobLock }) }}" title="{{'list_rule.link_title'|trans}}" class="{{ iconClass }} px-1">
+										<i class="fa fa-eye" aria-hidden="true"></i>
+									</a>
+								{% endif %}
 							</td>
 						</tr>			
 						{% endfor %}
@@ -138,6 +167,7 @@
 							<th>{{'list_rule.th.active'|trans}}</th>
 							<th>{{'list_rule.th.date_created'|trans}}</th>
 							<th>{{'list_rule.th.option'|trans}}</th>
+							<th>{{'list_rule.th.lock_rule'|trans}}</th>
 						</tr>	
 					</tbody>		
 				{% endif %}
@@ -168,6 +198,11 @@
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}
 	{% endblock %}
+    <script type="text/javascript">
+		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success'|trans }}";
+		var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error'|trans }}";
+        var clearReadJobLockUrl = "{{ path('flux_unlock_rule', {'id': 'PLACEHOLDER_ID'}) }}";
+    </script>
 {% endblock %}
 
 

@@ -78,7 +78,7 @@
 						</a>
 					{% endif %}
 					{% if doc.jobLock %}
-						<a class="btn_action_loading" href="{{ path('document_view', {'id': doc.getId}) }}" title="{{ 'view_flux.btn.unlock'|trans }}">
+						<a class="btn_action_loading" href="{{ path('flux_unlock', {'id': doc.getId}) }}" title="{{ 'view_flux.btn.unlock'|trans }}">
 							<button type="button" class="btn btn-danger">
 								{{ 'view_flux.btn.unlock'|trans }}
 							</button>

@@ -25,30 +25,31 @@
 
 namespace App\Manager;
 
-use App\Entity\Config;
-use App\Entity\DocumentData;
-use App\Entity\Document;
+use PDO;
+use Exception;
 use App\Entity\Rule;
+use App\Entity\Config;
+use App\Entity\Document;
 use App\Entity\RuleParam;
-use App\Entity\RuleParamAudit as RuleParamAudit;
+use App\Entity\DocumentData;
+use Psr\Log\LoggerInterface;
+use Doctrine\DBAL\Connection;
+use App\Repository\RuleRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
-use App\Repository\RuleRelationShipRepository;
-use App\Repository\RuleRepository;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use App\Repository\RuleRelationShipRepository;
+use Symfony\Component\Routing\RouterInterface;
+use App\Entity\RuleParamAudit as RuleParamAudit;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\KernelInterface; // Tools
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class rulecore
 {
@@ -2402,6 +2403,32 @@ class rulecore
                 'label' => 'solution.params.description',
             ],
         ];
+    }
+
+     // Function to clear the unlock on rule
+     public function unlockRule($dataType, $ids): bool
+     {
+        try {
+            if (empty($ids)) {
+                throw new Exception('No ids in the input parameter of the function unlockRule.');
+            }
+    
+            $queryIn = '(' . implode(',', array_map(function($id) { return "'" . $id . "'"; }, $ids)) . ')';
+            $where = ' WHERE id IN ' . $queryIn;
+    
+            if ('rule' == $dataType) {
+                $sqlClear = "UPDATE rule SET read_job_lock = '' " . $where;
+                $stmtClear = $this->connection->prepare($sqlClear);
+                $result = $stmtClear->executeQuery();
+            } else {
+                throw new Exception('Unsupported data type for unlockRule function.');
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage());
+            return false;
+        }
+    
+        return true;
     }
 }
 class RuleManager extends rulecore

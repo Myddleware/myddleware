@@ -54,7 +54,11 @@
 }
 
 .icon-danger {
-    color: #dc3545;
+    color: #dc3545 !important;
+}
+
+.icon-danger:hover {
+  color: #cd2334 !important;
 }
 
 .icon-warning {

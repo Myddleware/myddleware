@@ -161,6 +161,11 @@ view_rule:
         confirm_delete_rule: Do you want to delete this rule?
         displayflux: Display the documents
         new_rule: Create a new rule
+        unlock_rules: Unlock the rules
+        unlock_rule_success : The rule has been unlocked
+        unlock_rule_error : An error occurred while unlocking the rule
+        mass_unlock_rule_success : The rules have been unlocked
+        mass_unlock_rule_error :   An error occurred while unlocking the rules
     tabs:
         info: Information
         mapping: Mapping of the fields
@@ -229,10 +234,12 @@ list_rule:
         active: Activation
         date_created: Creation date
         option: Options
+        lock_rule: Lock
     btn:
         delete: Delete
         edit: Edit
         view: Refer to the form
+    link_title : View task details
 
 animate:
     rulename: Name of your rule 
@@ -352,6 +359,7 @@ list_flux:
         date_modified: Modification date
         statut: Status
         source_date_modified: Date of reference
+        lock : Lock
         type: Type
         source_field: Field linked
         reference: Reference

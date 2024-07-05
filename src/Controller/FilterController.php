@@ -784,6 +784,7 @@ public function removeFilter(Request $request): JsonResponse
                 document.type, 
                 document.attempt, 
                 document.global_status, 
+                document.job_lock,
                 rule.name as rule_name, 
                 rule.module_source,
                 rule.module_target,
