@@ -81,6 +81,7 @@ class solutioncore
     protected DocumentRepository $documentRepository;
     protected RuleRelationShipRepository $ruleRelationshipsRepository;
     protected FormulaManager $formulaManager;
+    protected array $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
 
     public function __construct(
         LoggerInterface $logger,

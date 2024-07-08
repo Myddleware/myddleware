@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             // Create new list item
             let newItem = $(`
             <li class="row align-items-center mb-2">
-                <div class="col-md-3">
+                <div class="col-md-3" style="width: 33%;">
                     <span class="name me-2 mt-2">${fieldInput}</span> 
                     <a class="fancybox me-2" data-fancybox-type="iframe" href="/index.php/rule/info/source/"> 
                         <svg class="svg-inline--fa fa-question-circle fa-w-16" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="question-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         </svg>
                     </a>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3" style="width: 34%;">
                     <span class="translated-text me-2">${anotherFieldInputText}</span>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3" style="width: 33%;">
                     <input type="hidden" name="fieldsfilter[]['anotherFieldInput']" value="${anotherFieldInputVal}" class="form-control filter-input my-3">
                     <input type="text" name="fieldsfilter[]['textareaFieldInput']" value="${textareaFieldInput}" class="form-control filter-input my-3">
                 </div>
-                <div class="col-md-3 d-flex justify-content-end">
+                <div class="col-md-3 d-flex">
                     <button class="btn btn-danger remove-button"> <i class="fa fa-times " aria-hidden="true"></i></button>
                 </div>
             </li>

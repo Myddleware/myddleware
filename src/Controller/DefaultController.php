@@ -74,6 +74,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Form\Type\RelationFilterType;
+use App\Entity\Workflow;
 
     /**
      * @Route("/rule")
@@ -1008,6 +1009,16 @@ use App\Form\Type\RelationFilterType;
                 }
             }
 
+            // get the workflows of the rule, if there are none then set hasWorkflows to false. If there is at least one then set it to true. to get the workflows we use the entity manager and filter by the rule id
+            $hasWorkflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId(), 'deleted' => 0]) ? true : false;
+            
+            if ($hasWorkflows) {
+                $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(['rule' => $rule->getId(), 'deleted' => 0]);
+                
+            } else {
+                $workflows = [];
+            }
+
             return $this->render('Rule/edit/fiche.html.twig', [
                 'rule' => $rule,
                 'connector' => $connector[0],
@@ -1018,6 +1029,8 @@ use App\Form\Type\RelationFilterType;
                 'filters' => $Filters,
                 'params_suite' => $params_suite,
                 'id' => $id,
+                'hasWorkflows' => $hasWorkflows,
+                'workflows' => $workflows,
             ]
             );
         }
@@ -1976,6 +1989,41 @@ use App\Form\Type\RelationFilterType;
                 $filters = $this->entityManager->getRepository(RuleFilter::class)
                         ->findBy(['rule' => $ruleKey]);
 
+                // we want to make a request that fetches all the rule names and ids, so we can display them in the form
+                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleListRelation = $ruleRepo->createQueryBuilder('r')
+                    ->select('r.id, r.name, r.moduleSource')
+                    ->where('(
+												r.connectorSource= ?1 
+											AND r.connectorTarget= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+										)
+									OR (
+												r.connectorTarget= ?1
+											AND r.connectorSource= ?2
+											AND r.name != ?3
+											AND r.deleted = 0
+									)')
+                    ->setParameter(1, (int) $this->sessionService->getParamRuleConnectorSourceId($ruleKey))
+                    ->setParameter(2, (int) $this->sessionService->getParamRuleConnectorCibleId($ruleKey))
+                    ->setParameter(3, $this->sessionService->getParamRuleName($ruleKey))
+                    ->getQuery()
+                    ->getResult();
+
+                // from the result ruleListRelation we create an array with the rule name as the key and the rule id as the value
+                $ruleListRelation = array_reduce($ruleListRelation, function ($carry, $item) {
+                    $carry[$item['name']] = $item['id'];
+                    return $carry;
+                }, []);
+
+                $html_list_rules = '';
+                if (!empty($ruleListRelation)) {
+                    foreach ($ruleListRelation as $ruleName => $ruleId) {
+                        $html_list_rules .= '<option value="'.$ruleId.'">'.$ruleName.'</option>';
+                    }
+                }
+
                 //  rev 1.07 --------------------------
                 $result = [
                     'filters' => $filters,
@@ -1995,12 +2043,39 @@ use App\Form\Type\RelationFilterType;
                     'duplicate_target' => $fieldsDuplicateTarget,
                     'opt_target' => $html_list_target,
                     'opt_source' => $html_list_source,
+                    'html_list_rules' => $html_list_rules,
                     'fieldMappingAddListType' => $fieldMappingAdd,
                     'parentRelationships' => $allowParentRelationship,
                     'lst_parent_fields' => $lstParentFields,
                     'regleId' => $ruleKey,
                     'simulationQueryField' => $this->simulationQueryField,
                 ];
+
+                foreach ($result['source'] as $module => $fields) {
+                    foreach ($fields as $fieldNameEncoded => $fieldValue) {
+                        // Decode the field name
+                        $fieldNameDecoded = urldecode($fieldNameEncoded);
+
+                        // Optionally, clean up the field name by removing or replacing unwanted characters
+                        $fieldNameCleaned = $fieldNameDecoded; // Adjust as needed
+
+                        // Clean the field value
+                        // Example: Trim whitespace and remove special characters
+                        // Adjust the cleaning logic as per your requirements
+                        $fieldValueCleaned = trim($fieldValue); // Trimming whitespace
+                        // For more aggressive cleaning, uncomment and adjust the following line
+                        // $fieldValueCleaned = preg_replace('/[^\x20-\x7E]/', '', $fieldValueCleaned);
+
+                        // Check if any cleaning was necessary for the field name
+                        if ($fieldNameCleaned !== $fieldNameEncoded || $fieldValue !== $fieldValueCleaned) {
+                            // Remove the old key
+                            unset($result['source'][$module][$fieldNameEncoded]);
+
+                            // Add the cleaned field name with its cleaned value
+                            $result['source'][$module][$fieldNameCleaned] = $fieldValueCleaned;
+                        }
+                    }
+                }
 
                 $result = $this->tools->beforeRuleEditViewRender($result);
 

@@ -361,6 +361,20 @@ public function removeFilter(Request $request): JsonResponse
     }
 
     /**
+     * @Route("/document/{docId}/last_error_message", name="document_last_error_message", methods={"POST"})
+     */
+    public function getLatestLogMsg($docId)
+    {
+        $uniqueDocument = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $docId]);
+    
+        $latestLog = $this->entityManager->getRepository(Log::class)->findOneBy(['document' => $uniqueDocument, 'type' => 'E'], ['created' => 'DESC']);
+        if ($latestLog) {
+            return new Response($latestLog->getMessage());
+        }
+        return new Response('');
+    }
+
+    /**
      * @Route("/rule/flux/comment", name="add_document_comment", methods={"POST"})
      */
     public function updateDescription(Request $request): Response

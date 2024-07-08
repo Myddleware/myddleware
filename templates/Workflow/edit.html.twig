@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'view_workflow.edit'| trans}}{% endblock %}
+{% block titlesm %}{{ 'view_workflow.edit'| trans}}{% endblock titlesm %}
+{% block body %}
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <div class=" mx-5 mt-5">
+                {{ form_start(form) }}
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.Rule) }}
+                    {{ form_row(form.condition) }}
+                    {{ form_row(form.submit) }}
+                {{ form_end(form) }}
+
+                <div class="m-2">
+                    <h3 class="m-2">{{ 'view_workflow.title2'| trans}}</h3>
+                    
+                    <p> {{'view_workflow.condition'| trans}}</p>
+                    <p>{{ 'view_workflow.condition2'| trans}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

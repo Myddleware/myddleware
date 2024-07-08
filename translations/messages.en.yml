@@ -342,6 +342,7 @@ list_flux:
         module_target: Module target
         module_source: Module source
         reference: Reference
+        message : Log
     tab:
         id: Doc Id
         name: Name
@@ -400,6 +401,7 @@ view_flux:
     nbChildDocuments: Child documents
     nbParentDocuments: Parent documents
     nbHistoryDocuments: Documents history
+    nbnbWorflowLogs: Workflow logs
     nbPostDocuments: Post documents    
     direct_link: Direct link    
     comment: Add log
@@ -445,8 +447,10 @@ list_task:
         api: Api
         error: Error
 
+
 view_task:
-    empty_log: No log  
+    empty_log: No log
+    empty_workflow: No workflow  
     task_stop: STOP TASK
     refresh: REFRESH
     nblogs: Number of logs  
@@ -464,6 +468,56 @@ view_task:
         type: Type
         msg: Message         
 
+list_workflow:
+    total: Total of workflows
+    empty: No workflows
+    th:
+        id: Id
+        ruleName: Rule name
+        name: Name
+        description: Description
+        condition: Condition
+        active: Active
+        actions: Actions
+view_workflow:
+    title: Workflow
+    create: Create a new workflow
+    edit: Edit the workflow
+    title2: Condition Field
+    condition: The condition field is automatically generated with the string {status} == ", and the opening parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
+    condition2: In short, all you need is to write the status name and we do the rest !
+    back: Back to the list
+    delete: Delete the workflow
+    description: Description
+    rule: Rule
+    conditions: Conditions
+    status: Status
+    actions_list: List of Actions
+    create_action: Create a new action for this workflow
+    name: Name
+    action: Action
+    order: Order
+    arguments: Arguments
+    logs: Workflow Logs
+    log_id: ID
+    workflow: Workflow
+    job: Job
+    trigger_document: Trigger Document
+    generate_document: Generate Document
+    created_by: Created By
+    date_created: Date Created
+    message: Message
+    action_name: Action Name
+    action_type: Action Type
+view_workflow_action:
+    title: Workflow Action Details
+    edit: Edit this Action
+    delete: Delete this Action
+    confirm_delete: Are you sure you want to delete this Action?
+    workflow: Workflow
+    action: Action
+    order: Order
+    back_to_workflow: Back to the workflow
 view_account:
     title: My account
     user_info: My information
@@ -630,6 +684,8 @@ title:
         view: Credits purchases
     support:
         view: Interventions purchases
+    workflow:
+        list: Workflows
 
 menu:
     index: Homepage
@@ -649,6 +705,8 @@ menu:
         title: Tasks
         list: List
     support: Support
+    workflow:
+        list: List of Workflows
 
 breadcrumb:
     rule_list: Rules list
@@ -766,6 +824,16 @@ email_alert:
         %base_uri%</p>
 
         Kind regards,
+email_alert_same_doc_reference:
+    subject: Myddleware alert
+    body: |
+        Hello,
+        <p>There are several documents with the same reference date %reference_date% in the same rule. Please check the rule %rule_id% or the job %job_id%.</p>
+
+        %base_uri%
+
+        Kind regards,
+
 jobscheduler:
     id: Id
     command: Command

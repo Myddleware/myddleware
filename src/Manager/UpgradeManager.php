@@ -73,6 +73,15 @@ class UpgradeManager
     public function processUpgrade($output): string
     {
         try {
+
+            $envFilePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.env';
+            $dotenv = new Dotenv();
+    
+            if (file_exists($envFilePath)) {
+                $dotenv->load($envFilePath);
+            }
+            $oldVersion = $_ENV['MYDDLEWARE_VERSION'];
+
             // Customize update process
             $this->beforeUpdate($output);
             // Set all config parameters
@@ -111,15 +120,17 @@ class UpgradeManager
             // Customize update process
             $this->afterUpdate($output);
 
-            // Get old and new Myddleware version
-            $oldVersion = getenv('MYDDLEWARE_VERSION');
             // Refresh variable from env file
-            if (file_exists(__DIR__.'/../../.env')) {
-                (new Dotenv())->load(__DIR__.'/../../.env');
+            if (file_exists($envFilePath)) {
+                (new Dotenv())->load($envFilePath);
             }
 
-            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').'</info>');
-            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.getenv('MYDDLEWARE_VERSION').chr(10);
+            $newVersion = $_ENV['MYDDLEWARE_VERSION'];
+
+
+
+            $output->writeln('<info>Myddleware has been successfully updated from version '.$oldVersion.' to '.$newVersion.'</info>');
+            $this->message .= 'Myddleware has been successfully updated from version '.$oldVersion.' to '.$newVersion.chr(10);
         } catch (Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
