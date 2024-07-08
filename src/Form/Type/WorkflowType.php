@@ -66,22 +66,6 @@ class WorkflowType extends AbstractType
                     'class' => 'form-control',
                     ],
             ]);
-            $builder->get('condition')->addEventListener(FormEvents::SUBMIT, function ($event) {
-                $data = $event->getData();
-                $ternaryOperator = ' ?"1":"0")';
-                $lastPos = strrpos($data, $ternaryOperator);
-                $firstPos = strpos($data, $ternaryOperator);
-                if ($lastPos !== $firstPos) {
-                    $data = substr_replace($data, '', $lastPos, strlen($ternaryOperator));
-                }
-                if (strrpos($data, $ternaryOperator) !== strlen($data) - strlen($ternaryOperator)) {
-                    $data .= $ternaryOperator;
-                }
-                if ($data[0] !== '(') {
-                    $data = '(' . $data;
-                }
-                $event->setData($data);
-            });
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Save',
                 'attr' => [
