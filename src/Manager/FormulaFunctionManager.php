@@ -160,7 +160,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
+									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types,
 									MAX(document.date_modified) date_modified
 								FROM document 
@@ -184,7 +184,7 @@ class formulafunctioncore
 		){
 			$sqlParams = "	SELECT 
 								source_id record_id,
-								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified ASC) document_id,
+								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 								GROUP_CONCAT(DISTINCT document.type) types,
 								MAX(document.date_modified) date_modified
 							FROM document
@@ -225,7 +225,7 @@ class formulafunctioncore
 			AND strpos($result['document_id'], ',')
 		) {
 			$documentList = explode(',',$result['document_id']);
-			$result['document_id'] = end($documentList);
+			$result['document_id'] = $documentList[0];
 		}
 		// No doc id in case of simulation
 		if (!empty($docId)) {
