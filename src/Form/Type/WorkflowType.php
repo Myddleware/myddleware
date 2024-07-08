@@ -23,6 +23,9 @@ class WorkflowType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $entityManager = $options['entityManager'];
+        $entity = $options['entity']; // Access the entity passed to the form
+
+        $existingCondition = $entity->getCondition();
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Workflow Name',
@@ -46,7 +49,7 @@ class WorkflowType extends AbstractType
             ]);
             $builder->add('condition', TextareaType::class, [
                 'label' => 'Condition',
-                'data' => '{status} == "',
+                'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
                 'constraints' => [
                     new Callback([
                         'callback' => function($payload, ExecutionContextInterface $context) {
@@ -92,6 +95,7 @@ class WorkflowType extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'App\Entity\Workflow', // Replace with your actual Workflow entity class
             'entityManager' => null, // Allow the entityManager option
+            'entity' => null, // Allow the entity option
         ]);
     }
 }

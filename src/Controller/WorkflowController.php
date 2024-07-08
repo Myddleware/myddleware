@@ -459,6 +459,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             if ($workflow) {
                 $form = $this->createForm(WorkflowType::class, $workflow, [
                     'entityManager' => $em,
+                    'entity' => $workflow,
                 ]);
                 $form->handleRequest($request);
 
