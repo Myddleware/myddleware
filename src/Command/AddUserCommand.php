@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use function Symfony\Component\String\u;
 
@@ -53,7 +53,7 @@ class AddUserCommand extends Command
     private $users;
     private $configRepository;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
+    public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $encoder, Validator $validator, UserRepository $users, ConfigRepository $configRepository)
     {
         parent::__construct();
 
@@ -176,7 +176,7 @@ class AddUserCommand extends Command
         $user->setTimezone('UTC');
 
         // See https://symfony.com/doc/current/security.html#c-encoding-passwords
-        $encodedPassword = $this->passwordEncoder->encodePassword($user, $plainPassword);
+        $encodedPassword = $this->passwordEncoder->hashPassword($user, $plainPassword);
         $user->setPassword($encodedPassword);
 
         // prevent user from accessing installation process from browser (using Voter)

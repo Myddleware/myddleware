@@ -38,8 +38,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -97,7 +96,7 @@ class jobcore
 
     private LogRepository $logRepository;
 
-    private SessionInterface $session;
+    private $requestStack;
 
     private int $nbDays;
     private string $pruneDatabaseMaxDate;
@@ -115,7 +114,7 @@ class jobcore
         RuleRepository $ruleRepository,
         LogRepository $logRepository,
         RouterInterface $router,
-        SessionInterface $session,
+        RequestStack $requestStack,
         ToolsManager $tools,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
@@ -129,7 +128,7 @@ class jobcore
         $this->ruleRepository = $ruleRepository;
         $this->logRepository = $logRepository;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->tools = $tools;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
@@ -430,12 +429,12 @@ class jobcore
             }
 
             // Renvoie du message en session
-            $session = new Session();
+            $session = $this->requestStack->getSession();
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (Exception $e) {
-            $session = new Session();
+            $session = $this->requestStack->getSession();
             $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
 
             return false;

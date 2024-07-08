@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
@@ -19,18 +19,19 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 
-class SecurityAuthenticator extends AbstractFormLoginAuthenticator
+class SecurityAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
     private EntityManagerInterface $entityManager;
     private UrlGeneratorInterface $urlGenerator;
     private ?CsrfTokenManagerInterface $csrfTokenManager;
-    private UserPasswordEncoderInterface $passwordEncoder;
+    private UserPasswordHasherInterface $passwordEncoder;
     private SecurityService $securityService;
     private string $env;
     private TranslatorInterface $translator;
@@ -39,7 +40,7 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager = null,
-        UserPasswordEncoderInterface $passwordEncoder,
+        UserPasswordHasherInterface $passwordEncoder,
         SecurityService $securityService,
         KernelInterface $kernel,
         TranslatorInterface $translator
@@ -122,8 +123,23 @@ class SecurityAuthenticator extends AbstractFormLoginAuthenticator
         return new RedirectResponse($this->urlGenerator->generate('regle_panel'));
     }
 
-    protected function getLoginUrl(): string
+    protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate('login');
+    }
+
+    public function authenticate(Request $request): Passport
+    {
+        $apiToken = $request->headers->get('X-AUTH-TOKEN');
+        if (null === $apiToken) {
+            // The token header was empty, authentication fails with HTTP Status
+            // Code 401 "Unauthorized"
+            throw new CustomUserMessageAuthenticationException('No API token provided');
+        }
+
+
+        $userIdentifier = $this->securityService->getUserIdentifierByApiToken($apiToken);
+
+        return new SelfValidatingPassport(new UserBadge($userIdentifier));
     }
 }

@@ -8,3 +8,7 @@ api_platform:
         contact:
             name: Stéphane Faure
             email: contact@myddleware.com
+
+    enable_swagger_ui: false
+    enable_docs: false
+    enable_entrypoint: false
