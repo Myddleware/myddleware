@@ -30,12 +30,14 @@ class DatabaseSetupController extends AbstractController
     private ConfigRepository $configRepository;
     private LoggerInterface $logger;
     private EntityManagerInterface $entityManager;
+    private $kernelSecret;
 
-    public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager, LoggerInterface $logger)
+    public function __construct(ConfigRepository $configRepository, EntityManagerInterface $entityManager, LoggerInterface $logger, string $kernelSecret)
     {
         $this->configRepository = $configRepository;
         $this->entityManager = $entityManager;
         $this->logger = $logger;
+        $this->kernelSecret = $kernelSecret;
     }
 
     /**
@@ -118,7 +120,7 @@ class DatabaseSetupController extends AbstractController
                 $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
                 $prodString = 'APP_ENV=prod'.PHP_EOL.'APP_DEBUG=false';
                 // add Symfony secret to .env.local
-                $appSecret = 'APP_SECRET='.$database->getSecret();
+                $appSecret = 'APP_SECRET='.$this->kernelSecret;
                 // write new URL into the .env.local file (EOL ensures it's written on a new line)
 
                 $ok = file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
@@ -185,7 +187,7 @@ class DatabaseSetupController extends AbstractController
                                 // we edit the database connection parameters with form input
                                 $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
                                 $prodString = 'APP_ENV=prod'.PHP_EOL.'APP_DEBUG=false';
-                                $appSecret = 'APP_SECRET='.$database->getSecret();
+                                $appSecret = 'APP_SECRET='.$this->kernelSecret;
                                 // write new URL into the .env.local file (EOL ensures it's written on a new line)
                                 file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
 

@@ -11,7 +11,7 @@ parameters:
   locale: 'en'
   env: '%env(APP_ENV)%'
   fallbacks: ['%locale%', 'fr']
-  secret: '%env(APP_SECRET)%'
+  secret: '%kernel.secret%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
   email_from: '%env(MAILER_FROM)%'
 
@@ -59,3 +59,7 @@ services:
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
+
+  App\Controller\DatabaseSetupController:
+        arguments:
+            $kernelSecret: '%kernel.secret%'
