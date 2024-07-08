@@ -3,9 +3,10 @@
 namespace App\Form\Filter;
 
 use App\Form\Filter\DocFilterType;
+use App\Form\Filter\LogFilterType;
 use App\Form\Filter\RuleFilterType;
-use App\Form\Filter\SourceDataFilterType;
 use Symfony\Component\Form\AbstractType;
+use App\Form\Filter\SourceDataFilterType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -23,6 +24,9 @@ class CombinedFilterType extends AbstractType
             'entityManager' => $options['entityManager'],
         ]);
         $builder->add('sourceContent', SourceDataFilterType::class, [
+            'required' => false,
+        ]);
+        $builder->add('message', LogFilterType::class, [
             'required' => false,
         ]);
         // add save button to builder

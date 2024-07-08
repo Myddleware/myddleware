@@ -393,6 +393,13 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
+        // Add this array at the start of the function
+        $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
         
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
@@ -412,7 +419,13 @@ class databasecore extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+
+            // Check if the field type is in the $ignoreQuotesOnQuery array
+            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+                $values .= ('null' == $value ? 'null,' : $this->escape($value).',');
+            } else {
+                $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+            }
         }
 
         // Remove the last coma
@@ -450,6 +463,14 @@ class databasecore extends solution
      */
     protected function update($param, $record, $idDoc = null)
     {
+            // Add this array at the start of the function
+        $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
+        
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
@@ -460,7 +481,13 @@ class databasecore extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+
+            // Check if the field type is in the $ignoreQuotesOnQuery array
+            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : $this->escape($value).',');
+            } else {
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+            }
         }
 
         // Remove the last coma

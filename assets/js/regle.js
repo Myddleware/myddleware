@@ -555,6 +555,18 @@ $.fn.setCursorPosition = function(pos) {
         }
       }
 
+      const functionsToCheck = ["round", "ceil", "abs", "trim", "ltrim", "rtrim", "lower", "upper", "substr", "striptags", "changeValue", "htmlEntityDecode", "replace", "utf8encode", "utf8decode", "htmlentities", "htmlspecialchars", "strlen", "urlencode", "chr", "json_decode", "json_encode", "getValueFromArray", "lookup", "date", "microtime", "changeTimeZone", "changeFormatDate", "mdw_no_send_field"];
+
+      functionsToCheck.forEach(functionName => {
+        const pattern = `${functionName}()|${functionName}( )`;
+        if (myFormula.includes(functionName) && (myFormula.includes(`${functionName}()`) || myFormula.includes(`${functionName}( )`))) {
+          alert(`Your formula contains the function ${functionName}. Please add the required parameters.`);
+          missingFieldList = []; // Reset or handle as needed
+          values = []; // Reset or handle as needed
+          // return false; // Depending on your needs, you might want to return from the enclosing function
+        }
+      });
+
       var result = checkBrackets(myFormula);
       if (!result.status) {
         alert(
@@ -617,6 +629,19 @@ $.fn.setCursorPosition = function(pos) {
         content.substr(0, position) +
         '"' +
         $.trim($("select", "#target_info").val()) +
+        '"' +
+        content.substr(position);
+      $("#area_insert").val(newContent);
+      colorationSyntax();
+      theme(style_template);
+    });
+    $("button", "#lookup_rules").on("click", function () {
+      var position = $("#area_insert").getCursorPosition();
+      var content = $("#area_insert").val();
+      var newContent =
+        content.substr(0, position) +
+        '"' +
+        $.trim($("select", "#lookup_rules").val()) +
         '"' +
         content.substr(position);
       $("#area_insert").val(newContent);
@@ -1035,31 +1060,26 @@ $.fn.setCursorPosition = function(pos) {
     }
   });
 
-  // If I double click on the element li inside the element (an ul) with the id flux_target
   $("#flux_target").on("dblclick", "li", function () {
-    // If the attribute data-gbl (for global) is error or open
-    if (
-      $("#gblstatus").attr("data-gbl") == "error" ||
-      $("#gblstatus").attr("data-gbl") == "open"
-    ) {
-      // Retrieves the class of the element we clicked on
-      verif = $(this).attr("class");
-      // Finds the class of the first li element within #flux_target
-      first = $("li:first", "#flux_target").attr("class");
-      classe = $(this).attr("class");
+  if (
+    $("#gblstatus").attr("data-gbl") == "error" ||
+    $("#gblstatus").attr("data-gbl") == "open"
+  ) {
+    verif = $(this).attr("class");
+    first = $("li:first", "#flux_target").attr("class");
+    classe = $(this).attr("class");
 
-      // If the type of the class attribute is not undefinde for the #flux_target element
-      // different if the class of the first element is undefined
-      // And if the class of the clicked element is not undefined
-      if (
-        typeof verif !== "undefined" &&
-        ((first === "undefined") != classe) !== "undefined"
-      ) {
-        // save the text to a variable
+    if (
+      typeof verif !== "undefined" &&
+      ((first === "undefined") != classe) !== "undefined"
+    ) {
+      // Check if an input element already exists
+      if ($(this).find('input').length > 0) {
+        // If it does, show an alert to the user
+        alert('Please close the first one before adding a new one.');
+      } else {
         value = $(this).find(".value").text();
-        // Removes the original value of the field
         $(this).find(".value").remove();
-        // Add a new field
         newElement = $(this).append(
           '<input id="' +
             classe +
@@ -1070,10 +1090,10 @@ $.fn.setCursorPosition = function(pos) {
             '" class="btn-group btn-group-xs load"><i class="fa fa-check-circle"></i ></button> '
         );
         $(this).append(newElement);
-        // add a save button
       }
     }
-  });
+  }
+});
 
   // If the div in flux_target is clicked, then wec call the saveInputFlux function
   $("#flux_target").on("click", ".load", function () {

@@ -340,6 +340,7 @@ list_flux:
         module_target: Module cible
         module_source: Module source
         reference: Référence
+        message : Message
     tab:
         id: Doc Id
         name: Nom
@@ -390,6 +391,7 @@ flux:
 view_flux:
     empty: Pas de données
     empty_log: Aucune log
+    empty_workflow: Aucun workflow
     target: Cible
     source: Source
     history: Historique
@@ -399,6 +401,7 @@ view_flux:
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
+    nbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct  
     btn:
@@ -460,8 +463,58 @@ view_task:
         transfer: Document
         date_created: Date de création
         type: Type
-        msg: Message         
+        msg: Message     
 
+list_workflow:
+    total: Total des workflows
+    empty: Pas workflows
+    th:
+        id: Id
+        RuleName: Nom de la règle
+        name: Nom
+        description: Description
+        condition: Condition
+        active: Actif
+        actions: Actions
+view_workflow:
+    title: Workflow
+    create: Créer un workflow
+    edit: Editer un workflow
+    title2: Condition de champs
+    condition: Le champ de condition est automatiquement généré avec la chaîne {état} == « , et la parenthèse ouvrante ainsi que l'opérateur ternaire ?"1":"0") seront ajoutés automatiquement.
+    condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
+    back: Retour
+    delete: Supprimer le workflow
+    description: Description
+    rule: Règle
+    conditions: Conditions
+    status: Statut
+    actions_list: Liste des actions
+    create_action: Créer une nouvelle action pour ce workflow
+    name: Nom
+    action: Action
+    order: Ordre
+    arguments: Arguments
+    logs: Journaux de workflow
+    log_id: ID
+    workflow: Workflow
+    job: Tâche
+    trigger_document: Document déclencheur
+    generate_document: Document généré
+    created_by: Créé par
+    date_created: Date de création
+    message: Message
+    action_name: Nom de l'action
+    action_type: Type d'action
+view_workflow_action:
+    title: Détail de l'action du workflow
+    edit: Editer cette action
+    delete: Supprimer cette action
+    confirm_delete: Êtes-vous sûr de vouloir supprimer cette action ?
+    workflow: Workflow
+    action: Action
+    order: Ordre
+    back_to_workflow: Retour au workflow
 view_account:
     title: Mon compte
     user_info: Mes informations
@@ -628,7 +681,10 @@ title:
         view: Achats de crédits
     support:
         view: Achats d'interventions
-           
+    workflow:
+        list: Liste des workflows
+
+
 menu:
     index: Accueil
     rule:
@@ -648,6 +704,8 @@ menu:
         list: Liste
     support: Support
         
+    workflow:
+        list: Liste des workflows
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents

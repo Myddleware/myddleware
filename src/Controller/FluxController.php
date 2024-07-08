@@ -34,6 +34,7 @@ use App\Entity\Config;
 use App\Entity\Document;
 use App\Entity\Job;					
 use Pagerfanta\Pagerfanta;
+use App\Entity\WorkflowLog;
 use App\Manager\JobManager;
 use App\Entity\DocumentData;
 use App\Entity\DocumentAudit;
@@ -810,6 +811,12 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 //                 return $this->redirectToRoute('flux_info', ['id' => $id]);
             // }
 
+            // show the workflows logs from the table workflowlog related this document, we are looking for the field trigger_document_id in the table workflowlog
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['triggerDocument' => $id],
+                ['id' => 'DESC']
+            );
+
 
             // Call the view
             return $this->render(
@@ -845,6 +852,8 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
                     'logPagination' => $logPagination,
                     'documentPage' => $documentPage,
                     'logPage' => $logPage,
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow_logs' => count($workflowLogs),
                 ]
             );
         } catch (Exception $e) {

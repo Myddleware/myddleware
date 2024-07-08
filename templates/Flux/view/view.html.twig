@@ -234,7 +234,7 @@
 									{% if value != doc.getId  %}
 										<li class="{{ key }}">
 											<span class="field">{{ key }}</span>
-											<span>{{ value }}</span>
+											<span {% if source[key] is defined and source[key] != value %}class="modified"{% endif %}>{{ value }}</span>
 										</li>
 									{% endif %}
 								{% endfor %}
@@ -323,7 +323,7 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -501,7 +501,7 @@
 								{% if pager.haveToPaginate %}
 									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
 									</div>
 								{% endif %}
@@ -585,7 +585,7 @@
 								{% if pager.haveToPaginate %}
 									<div class="d-flex justify-content-center">
 										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_info_page' } ) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
 										{% endif %}
 									</div>
 								{% endif %}
@@ -757,6 +757,70 @@
 					</div>
 					{# ------------- LOGS ------------- #}
 				</div>
+
+			<div id="message" class="d-grid">
+				{% if workflowLogs is not empty %}
+					{% if nb_workflow_logs > 0 %}
+					<div id="fd-title-small" class="left">
+						<p>{{'view_flux.nbWorflowLogs'|trans}}</p>
+						<p>
+							<span class="nb">{{ nb_workflow_logs }}</span>
+						</p>
+					</div>
+					{% endif %}
+					<div class="">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Workflow</th>
+								<th>Job</th>
+								<th>Trigger Document</th>
+								<th>Generate Document</th>
+								<th>Created By</th>
+								<th>Status</th>
+								<th>Date Created</th>
+								<th>Message</th>
+								<th>Action Name</th>
+								<th>Action Type</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for log in workflowLogs %}
+								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+									<td class="ctr">{{ log.id }}</td>
+									<td class="ctr"><a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a></td>
+									<td class="ctr">{{ log.job.id }}</td>
+									<td class="ctr">    {% if log.triggerDocument is not null %}
+										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
+									{% else %}
+										<span></span>
+									{% endif %}</td>
+									<td class="ctr">    {% if log.generateDocument is not null %}
+										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
+									{% else %}
+										<span></span>
+									{% endif %}</td>
+									<td class="ctr">{{ log.createdBy }}</td>
+									<td class="ctr">
+										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+									</td>
+									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+									<td class="ctr">{{ log.getMessage }}</td>
+									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
+									<td class="ctr">{{ log.action.action }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+					</div>
+				{% else %}
+					<p>{{'view_flux.empty_workflow'|trans}}</p>
+				{% endif %}
+			</div>
+
+			
+
 	<script type="text/javascript">
 		var path_img = "{{ asset('build/images/regle/') }}";
 		var chemin_img = "{{ asset('build/images/regle/') }}";

@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'view_workflow_action.create'| trans}}{% endblock %}
+{% block titlesm %}{{ 'view_workflow_action.create'| trans}}{% endblock titlesm %}
+{% block body %}
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <div class=" mx-5 mt-5">
+                {{ form_start(form) }}
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.Workflow) }}
+                    {{ form_row(form.action) }}
+                    {{ form_row(form.Rule) }}
+                    {{ form_row(form.status) }}
+                    {{ form_row(form.to) }}
+                    {{ form_row(form.subject) }}
+                    {{ form_row(form.message) }}
+                    {{ form_row(form.searchField) }}
+                    {{ form_row(form.searchValue) }}
+                    {{ form_row(form.rerun) }}
+                    {{ form_row(form.order) }}
+                    {{ form_row(form.active) }}
+                    {{ form_row(form.submit) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

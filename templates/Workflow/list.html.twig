@@ -1,0 +1,96 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+
+{% extends 'base.html.twig' %}
+{% block title %}{{parent()}} | {{'title.workflow.list'|trans}}{% endblock %}
+{% block titlesm %}{{'title.workflow.list'|trans}}{% endblock titlesm %} 
+{% block body %} 
+	<div id="task" >
+
+	<div>
+        <a href="{{ path('workflow_create') }}" class="btn btn-primary">{{ 'Create new workflow'|trans }}</a>
+    </div>
+
+<div>
+	{% for message in app.flashes('success') %}
+		<div class="alert alert-success" role="alert">
+			{{ message }}
+		</div>
+	{% endfor %}
+
+
+			{% if nb_workflow > 0 %}
+				<div id="fd-title-small" class="left">
+					<p>{{'list_workflow.total'|trans}} :<p> <span class="nb_workflow">{{ nb_workflow }}</span>
+				</div>
+
+
+				<div class="clr"></div>
+				<table class="listepager table container">
+					{% if entities is not empty %}    
+						<tr>
+							<th>{{'list_workflow.th.id'|trans}}</th>
+							<th>{{'list_workflow.th.ruleName'|trans}}</th>
+							<th>{{'list_workflow.th.name'|trans}}</th>
+							<th>{{'list_workflow.th.description'|trans}}</th>
+							<th>{{'list_workflow.th.condition'|trans}}</th>
+							<th>{{'list_workflow.th.active'|trans}}</th>
+						</tr> 
+						{% for workflow in entities %}
+							<tr>
+								<td>{{ workflow.id }}</td>
+								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
+								<td><a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a></td>
+								<td>{{ workflow.description }}</td>
+								<td>{{ workflow.condition }}</td>
+								<td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
+									<a href="{{ path('workflow_active', {'id': workflow.id}) }}">
+										{{ workflow.active ? 'Active' : 'Inactive' }}
+									</a>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+				</table>				
+				<div class="d-flex justify-content-center mt-4">
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
+					{% endif %}
+				</div>
+			{% else %}
+				<p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
+			{% endif %}
+		</div>
+    </div>
+
+    {# ------------- PARAMETRES JQUERY ------------- #}
+    <script type="text/javascript">   
+		var path_img = "{{ asset('build/images/regle/') }}";
+		var lang = "{{app.request.locale}}";
+    </script>
+    {# ------------- PARAMETRES JQUERY ------------- #}
+{% endblock %}
+
+{% block cssin %}{% endblock cssin %}
+

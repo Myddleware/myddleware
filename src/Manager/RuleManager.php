@@ -49,6 +49,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
+use App\Manager\NotificationManager;
 
 class rulecore
 {
@@ -87,6 +88,7 @@ class rulecore
     private ?SessionInterface $session;
     protected FormulaManager $formulaManager;
     private $dataSource;
+    private ?NotificationManager $notificationManager;
 
     public function __construct(
         LoggerInterface $logger,
@@ -103,7 +105,8 @@ class rulecore
         RouterInterface $router = null,
         KernelInterface $kernel = null,
         SessionInterface $session = null,
-        ToolsManager $tools = null
+        ToolsManager $tools = null,
+        NotificationManager $notificationManager = null
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -120,6 +123,7 @@ class rulecore
         $this->parameterBagInterface = $parameterBagInterface;
         $this->env = $this->parameterBagInterface->get('env'); // access env variable defined in config/services.yaml
         $this->formulaManager = $formulaManager;
+        $this->notificationManager = $notificationManager;
     }
 
     /**
@@ -661,6 +665,19 @@ class rulecore
                     or $this->ruleParams['datereference'] == $this->dataSource['date_ref']
                 )
             ) {
+
+                // On top of returning the error message, we should also send an alert to the user with that message
+                // create an array that is composed of the job id, the rule id, and the date reference
+                $JobSettings = [
+                    'job_id' => $this->jobId,
+                    'rule_id' => $this->ruleId,
+                    'reference_date' => $this->ruleParams['datereference'],
+                ];
+
+                // send the alert to the user
+                $this->notificationManager->sendAlertSameDocReference($JobSettings);
+
+
                 return ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.'];
             }
 

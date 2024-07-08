@@ -1,5 +1,4 @@
 $(function () {
-  console.log("test 0");
 
   // if, on page load, the sort_field and sort_order are set in localStorage, set the form values to those values
   if (
@@ -63,6 +62,7 @@ $(function () {
     { name: "sourceId", selector: "#combined_filter_document_sourceId" },
     { name: "target", selector: "#combined_filter_document_target" },
     { name: "type", selector: "#combined_filter_document_type" },
+    { name: "message", selector: "#combined_filter_message_message" },
     {
       name: "date_modif_start",
       selector: "#combined_filter_document_date_modif_start",
@@ -104,6 +104,8 @@ $(function () {
         ", #combined_filter_rule_" +
         lastClass +
         ", #combined_filter_sourceContent_" +
+        lastClass +
+        ", #combined_filter_message_" +
         lastClass
     ).val("");
     $("#" + filter.name).attr("hidden", true);
@@ -137,7 +139,8 @@ $(function () {
       selectedValue !== "sourceId" &&
       selectedValue !== "target" &&
       selectedValue !== "sourceContent" &&
-      selectedValue !== "targetContent"
+      selectedValue !== "targetContent" &&
+      selectedValue !== "message"
     ) {
       // If there isn't already a reverse checkbox, add one
       if (!$('[name="' + selectedValue + '"][type="checkbox"]').length) {
@@ -184,7 +187,8 @@ $(function () {
               filter.name !== "sourceId" &&
               filter.name !== "target" &&
               filter.name !== "sourceContent" &&
-              filter.name !== "targetContent"
+              filter.name !== "targetContent" &&
+              filter.name !== "message"
             ) {
               $(".removeFilters." + filter.name).after(
                 '<div class="form-check form-switch mt-3"><input class="form-check-input p-2" type="checkbox" role="switch" name="' +

@@ -38,11 +38,12 @@ use Exception;
  */
 class Workflow
 {
+
     /**
-     * @ORM\Column(name="id", type="string")
      * @ORM\Id
+     * @ORM\Column(type="string")
      */
-    private string $id;
+    private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Rule", inversedBy="workflows")
@@ -50,10 +51,10 @@ class Workflow
      */
     private Rule $rule;
 
-	/**
+    /**
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
-    private DateTime $dateCreated;
+    private $dateCreated;
 
     /**
      * @ORM\Column(name="date_modified", type="datetime", nullable=false)
@@ -83,7 +84,7 @@ class Workflow
     private string $description;
 	
 	/**
-     * @ORM\Column(name="condition", type="text", nullable=false)
+     * @ORM\Column(name="`condition`", type="text", nullable=false)
      */
     private string $condition;
 
@@ -102,12 +103,12 @@ class Workflow
      */
     private int $deleted;
 	
-	/**
-     * @var WorkflowAction[]
-     *
-     * @ORM\OneToMany(targetEntity="WorkflowAction", mappedBy="workflow")
-     */
-    private $workflowActions;
+/**
+ * @var Collection|WorkflowAction[]
+ *
+ * @ORM\OneToMany(targetEntity="WorkflowAction", mappedBy="workflow")
+ */
+private $workflowActions;
 	
 	/**
      * @var WorkflowLog[]
@@ -120,11 +121,22 @@ class Workflow
     {
         $this->workflowActions = new ArrayCollection();
         $this->workflowLogs = new ArrayCollection();
+        $this->dateCreated = new \DateTime();
+        $this->dateModified = new \DateTime();
+        $this->active = 1;
+        $this->deleted = 0;
     }
 	
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getRule(): ?Rule
@@ -204,7 +216,7 @@ class Workflow
         return $this->description;
     }
 	
-	public function getCondition(): array
+	public function getCondition(): string
     {
         return $this->condition;
     }
@@ -249,13 +261,15 @@ class Workflow
         return $this->active;
     }
 	
-	/**
-     * @return Collection|WorkflowAction[]
-     */
-    public function getWorkflowActions(): Collection
-    {
-        return $this->workflowActions;
-    }
+/**
+ * @return Collection|WorkflowAction[]
+ */
+public function getWorkflowActions(): Collection
+{
+    return $this->workflowActions->filter(function(WorkflowAction $workflowAction) {
+        return $workflowAction->getDeleted() !== 1;
+    });
+}
 
     public function addWorkflowActions(WorkflowAction $workflowAction): self
     {

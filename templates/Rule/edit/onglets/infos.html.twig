@@ -105,6 +105,27 @@
 					<td class="value">{{ rule.GetDateModified|date("d-m-Y H:i:s") }}</td>
 				</tr>
 				<tr>
+					<tr>
+						<td class="title">Workflows</td>
+						<td class="value">
+							{% if hasWorkflows %}
+								<table>
+									{% for workflow in workflows %}
+										<tr>
+											<td>
+												<a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
+													{{ workflow.name }}
+												</a>
+											</td>
+										</tr>
+									{% endfor %}
+								</table>
+							{% else %}
+								<span>No workflow</span>
+							{% endif %}
+						</td>
+					</tr>
+				<tr>
 					<td class="title">{{'view_rule.infos.mode'|trans}}</td>
 					<td class="value"><span class="label label-default">{{ params_suite.mode }}</span></td>
 				</tr>

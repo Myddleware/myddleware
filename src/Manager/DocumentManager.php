@@ -2671,7 +2671,7 @@ class documentcore
 					$this->formulaManager->init($ruleWorkflow['condition']); // mise en place de la règle dans la classe
 					$this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
 					$f = $this->formulaManager->execFormule();
-					eval('$condition = '.$f.';'); // exec
+					eval('$condition = ('.$f.'?1:0);');
 					// Execute the action if the condition is met
 					if ($condition == 1) {
 						try {

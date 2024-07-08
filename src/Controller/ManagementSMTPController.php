@@ -334,6 +334,7 @@ class ManagementSMTPController extends AbstractController
 
             // Put the content if the mailer is not present in the .env
             if ($mailerInEnv === false) {
+                $currentContent = file_get_contents(self::LOCAL_ENV_FILE);
                 // Check if the last character(s) is/are PHP_EOL, if not, append it
                 if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
                     file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -344,6 +345,7 @@ class ManagementSMTPController extends AbstractController
             // Put the content if there is already a mailer url but it is different from the current one
             if ($mailerInEnv !== false && $mailerInEnv !== $mailerUrlWithoutTitle) {
                 $this->EmptyMailerUrlEnv();
+                $currentContent = file_get_contents(self::LOCAL_ENV_FILE);
                 // Check if the last character(s) is/are PHP_EOL, if not, append it
                 if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
                     file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -537,7 +539,7 @@ class ManagementSMTPController extends AbstractController
         $mailerUrlEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $mailerUrlEnv = getenv('MAILER_URL');
+            $mailerUrlEnv = $_ENV['MAILER_URL'];
             if (!(isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false)) {
                 $mailerUrlEnv = false;
             }
