@@ -205,19 +205,13 @@ class ApiController extends AbstractController
      */
     public function deleteRecordAction(Request $request): JsonResponse
     {
-// $this->logger->error('test SF01 ');
-
         try {
 			$connection = $this->entityManager->getConnection();
-            // $connection = $this->container->get('database_connection');
-            // $connection->beginTransaction(); // -- BEGIN TRANSACTION
             $return = [];
             $return['error'] = '';
 
             // Get input data
             $data = json_decode($request->getContent(), true);
-// $return['error'] = 'test SF01 '.print_r($data,true);
-// return $this->json($return);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -226,9 +220,6 @@ class ApiController extends AbstractController
             if (empty($data['recordId'])) {
                 throw new Exception('recordId is missing. recordId is the id of the record you want to delete. ');
             }
-// $return['error'] = 'test SF02';
-// $return['error'] = 'test SF02 '.print_r($data,true);
-// return $this->json($return);
 
             // Set the document values
             foreach ($data as $key => $value) {
@@ -246,23 +237,11 @@ class ApiController extends AbstractController
                 }
             }
             $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
-			
-			 // $this->logger->error('test');
-// $return['error'] = 'test SF03 '.print_r($docParam,true);
-// return $this->json($return);
 
             // Create job instance
             $this->jobManager->setApi(1);
             $this->jobManager->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
-// $return['error'] = 'test SF04 '.print_r($docParam,true);
-// return $this->json($return);
 
-            // Instantiate the rule
-            $ruleParam['ruleId'] = $data['rule'];
-            $ruleParam['jobId'] = $this->jobManager->getId();
-            $ruleParam['api'] = 1;
-
-			
             $rule = new RuleManager(
                 $this->logger,
                 $connection,
@@ -272,9 +251,11 @@ class ApiController extends AbstractController
                 $this->solutionManager,
                 $this->documentManager
             );
-// $return['error'] = 'test SF05 '.print_r($ruleParam,true);
-// return $this->json($return);
+
+			$rule->setJobId($this->jobManager->getId());
+			$rule->setApi(1);
 			$rule->setRule($data['rule']);
+			
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
             if (!empty($document->error)) {
@@ -318,15 +299,14 @@ class ApiController extends AbstractController
                 }
                 $return['jobData'] = $jobData;
             }
-            // $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            // $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to get the job statistics. '.$e->getMessage());
             $return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
         }
         // Send the response
         return $this->json($return);
     }
+
 
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})

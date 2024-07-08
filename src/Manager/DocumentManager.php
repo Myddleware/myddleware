@@ -1497,7 +1497,7 @@ class documentcore
             $this->entityManager->persist($documentData);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            $this->message .= 'Failed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->message .= 'Failed - Create_KO : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Create_KO');
             $this->logger->error($this->id.' - '.$this->message);
