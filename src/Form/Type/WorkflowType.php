@@ -53,8 +53,9 @@ class WorkflowType extends AbstractType
                 'constraints' => [
                     new Callback([
                         'callback' => function($payload, ExecutionContextInterface $context) {
-                            if (strpos($payload, '{status} == "') === false) {
-                                $context->buildViolation('The string "{status} == " must be present in the condition')
+                            // Check for both possible patterns
+                            if (strpos($payload, '{status} == "') === false && strpos($payload, '{status}=="') === false) {
+                                $context->buildViolation('The condition must contain either "{status} == " or "{status}==""')
                                     ->atPath('condition')
                                     ->addViolation();
                             }
