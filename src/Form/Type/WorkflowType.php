@@ -25,7 +25,12 @@ class WorkflowType extends AbstractType
         $entityManager = $options['entityManager'];
         $entity = $options['entity']; // Access the entity passed to the form
 
-        $existingCondition = $entity->getCondition();
+        if ($entity !== null) {
+            $existingCondition = $entity->getCondition();
+        } else {
+            $existingCondition = false;
+        }
+
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Workflow Name',
