@@ -177,7 +177,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
 
-            $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
+            $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0], ['order' => 'ASC']);
 
             // List of task limited to 1000 and rder by status (start first) and date begin
             $compact = $this->nav_pagination([
