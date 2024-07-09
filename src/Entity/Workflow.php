@@ -30,6 +30,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use Doctrine\Common\Collections\Criteria;
 
 /**
  * @ORM\Table()
@@ -260,15 +261,18 @@ private $workflowActions;
     {
         return $this->active;
     }
-	
+
+
 /**
  * @return Collection|WorkflowAction[]
  */
 public function getWorkflowActions(): Collection
 {
-    return $this->workflowActions->filter(function(WorkflowAction $workflowAction) {
-        return $workflowAction->getDeleted() !== 1;
-    });
+    $criteria = Criteria::create()
+        ->where(Criteria::expr()->neq('deleted', 1)) // Assuming 'deleted' is the field name and it's directly accessible.
+        ->orderBy(['order' => Criteria::ASC]); // Adjust 'order' to your actual field name if different.
+
+    return $this->workflowActions->matching($criteria);
 }
 
     public function addWorkflowActions(WorkflowAction $workflowAction): self
