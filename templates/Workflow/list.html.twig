@@ -50,19 +50,17 @@
 				<table class="listepager table container">
 					{% if entities is not empty %}    
 						<tr>
-							<th>{{'list_workflow.th.id'|trans}}</th>
-							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.name'|trans}}</th>
+							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.condition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
-								<td>{{ workflow.id }}</td>
-								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
 								<td><a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a></td>
-								<td>{{ workflow.description }}</td>
+								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
+								<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{{ workflow.description }}</td>
 								<td>{{ workflow.condition }}</td>
 								<td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
 									<a href="{{ path('workflow_active', {'id': workflow.id}) }}">
