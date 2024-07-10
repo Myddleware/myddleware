@@ -742,8 +742,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     }
 
                     $rule = $form->get('Rule')->getData();
-                    $ruleIdForArgument = $rule->getId();
-                    if (!empty($rule)) {
+                    if ($rule !== null) {
+                        $ruleIdForArgument = $rule->getId();
                         $arguments['rule'] = $ruleIdForArgument;
                     }
                     
