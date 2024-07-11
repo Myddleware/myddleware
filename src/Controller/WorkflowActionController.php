@@ -454,7 +454,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $ruleIdForArgument = $rule->getId();
                     }
                     if (!empty($rule)) {
-                        $arguments['rule'] = $ruleIdForArgument;
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
                     
                     // set the status
@@ -744,7 +744,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $rule = $form->get('Rule')->getData();
                     if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
-                        $arguments['rule'] = $ruleIdForArgument;
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
                     
                     // set the status
