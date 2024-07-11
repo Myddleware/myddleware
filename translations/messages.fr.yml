@@ -476,6 +476,7 @@ list_workflow:
         condition: Condition
         active: Actif
         actions: Actions
+        order: Ordre
 view_workflow:
     title: Workflow
     create: Créer un workflow
