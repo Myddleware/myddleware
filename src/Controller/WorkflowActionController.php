@@ -313,7 +313,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => null,
                     'status' => null,
-                    'Rule' => null,
+                    'ruleId' => null,
                     'searchField' => null,
                     'searchValue' => null,
                     'order' => null,
@@ -350,7 +350,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('Rule', EntityType::class, [
+                    ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
