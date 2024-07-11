@@ -3,18 +3,21 @@
 namespace App\Form\Type;
 use App\Entity\Rule;
 use App\Repository\RuleRepository;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Form\FormEvents;
+
 
 
 
@@ -52,6 +55,19 @@ class WorkflowType extends AbstractType
                     'class' => 'form-control',
                     ],
             ]);
+            $builder->add('order', IntegerType::class, [
+                'label' => 'Order',
+                'constraints' => [
+                    new Range([
+                        'min' => 0,
+                        'max' => 50,
+                        'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
+                    ]),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+                ]);
             $builder->add('condition', TextareaType::class, [
                 'label' => 'Condition',
                 'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
