@@ -481,7 +481,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['rerun'] = $rerun;
                     }
                     
-                    $workflowAction->setArguments(serialize($arguments));
+                    $workflowAction->setArguments(($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
 
@@ -771,7 +771,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['rerun'] = $rerun;
                     }
                     
-                    $workflowAction->setArguments(serialize($arguments));
+                    $workflowAction->setArguments(($arguments));
                     $em->persist($workflowAction);
                     $em->flush();
 
@@ -821,7 +821,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
             }
 
-            $workflowAction->setArguments(serialize($arguments));
+            $workflowAction->setArguments(($arguments));
             $em->persist($workflowAction);
             $em->flush();
         }
