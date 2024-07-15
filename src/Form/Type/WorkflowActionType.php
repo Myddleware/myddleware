@@ -32,6 +32,18 @@ class WorkflowActionType extends AbstractType
                     'class' => 'form-control',
                     ],
             ])
+            ->add('rule', EntityType::class, [
+                'class' => Rule::class,
+                'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['active' => true]),
+                'choice_label' => 'name',
+                'choice_value' => 'id',
+                'constraints' => [
+                    new NotBlank(),
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+            ])
             ->add('description', TextType::class, ['label' => 'Description'])
             ->add('Workflow', EntityType::class, [
                 'class' => Workflow::class,
