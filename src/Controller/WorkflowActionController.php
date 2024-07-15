@@ -313,7 +313,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => null,
                     'status' => null,
-                    'ruleId' => null,
+                    'rule' => null,
                     'searchField' => null,
                     'searchValue' => null,
                     'order' => null,
@@ -350,7 +350,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('ruleId', EntityType::class, [
+                    ->add('rule', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
@@ -449,12 +449,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('Rule')->getData();
+                    $rule = $form->get('rule')->getData();
                     if(!empty($rule)) {
                         $ruleIdForArgument = $rule->getId();
                     }
                     if (!empty($rule)) {
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                        $arguments['rule'] = $ruleIdForArgument;
                     }
                     
                     // set the status
@@ -605,7 +605,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
                     'status' => isset($arguments['status']) ? $StringStatus[$arguments['status']] : null,
-                    'Rule' => $workflowAction->getWorkflow()->getRule() ?? null,
+                    'rule' => $workflowAction->getWorkflow()->getRule() ?? null,
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -642,7 +642,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('Rule', EntityType::class, [
+                    ->add('rule', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
@@ -741,10 +741,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('Rule')->getData();
+                    $rule = $form->get('rule')->getData();
                     if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                        $arguments['rule'] = $ruleIdForArgument;
                     }
                     
                     // set the status
@@ -860,7 +860,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $workflowdata = json_encode(
                         [
                             'workflowName' => $workflow->getName(),
-                            'ruleId' => $workflow->getRule()->getId(),
+                            'rule' => $workflow->getRule()->getId(),
                             'created_by' => $workflow->getCreatedBy()->getUsername(),
                             'workflowDescription' => $workflow->getDescription(),
                             'condition' => $workflow->getCondition(),
