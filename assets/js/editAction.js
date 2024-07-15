@@ -13,10 +13,10 @@
                     $('#form_searchValue').parent().hide();
                     // set the value of the searchValue to null
                     $('#form_searchValue').val('');
-                    // hide Rule field
-                    $('#form_Rule').parent().hide();
-                    // set the value of the Rule to null
-                    $('#form_Rule').val('');
+                    // hide rule field
+                    $('#form_rule').parent().hide();
+                    // set the value of the rule to null
+                    $('#form_rule').val('');
                     $('#form_status').parent().hide();
                     //set the value of the status to null
                     $('#form_rerun').parent().hide();
@@ -38,9 +38,9 @@
                     $('#form_searchValue').parent().hide();
                     // set the value of the searchValue to null
                     $('#form_searchValue').val('');
-                    $('#form_Rule').parent().hide();
-                    // set the value of the Rule to null
-                    $('#form_Rule').val('');
+                    $('#form_rule').parent().hide();
+                    // set the value of the rule to null
+                    $('#form_rule').val('');
                     $('#form_rerun').parent().hide();
                     // set the value of the rerun to null
                     $('#form_rerun').val('');
@@ -63,9 +63,9 @@
                     $('#form_searchValue').parent().hide();
                     // set the value of the searchValue to null
                     $('#form_searchValue').val('');
-                    $('#form_Rule').parent().hide();
-                    // set the value of the Rule to null
-                    $('#form_Rule').val('');
+                    $('#form_rule').parent().hide();
+                    // set the value of the rule to null
+                    $('#form_rule').val('');
                     $('#form_rerun').parent().hide();
                     // set the value of the rerun to null
                     $('#form_rerun').val('');
@@ -84,7 +84,7 @@
                     $('#form_status').val('');
                     $('#form_searchField').parent().show();
                     $('#form_searchValue').parent().show();
-                    $('#form_Rule').parent().show();
+                    $('#form_rule').parent().show();
                     $('#form_rerun').parent().show();
                 }
 
@@ -92,7 +92,7 @@
         });
 
         $(document).ready(function() {
-    $('#form_Rule').change(function() {
+    $('#form_rule').change(function() {
         var selectedRule = $(this).val();
 
         // Hide all optgroups in form_searchField
