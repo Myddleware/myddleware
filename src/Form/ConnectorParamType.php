@@ -57,6 +57,9 @@ class ConnectorParamType extends AbstractType
                 }
             }
             $form->add('value', $type, $option);
+            if (null == $connectorParam->getValue()) {
+                $form->add('name', HiddenType::class, ['data' => $name]);
+            }
         });
     }
 
