@@ -1497,13 +1497,21 @@ class documentcore
             $this->entityManager->persist($documentData);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            $this->message .= 'Failed - Create_KO : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
-            $this->updateStatus('Create_KO');
+			// Change status depending on the data type inserted
+			if($type == 'S') {
+				$this->message .= 'Failed - Create_KO : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->updateStatus('Create_KO');
+			} elseif($type == 'T') {
+				$this->message .= 'Failed - Error_transformed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->updateStatus('Error_transformed');
+			} elseif($type == 'H') {
+				$this->message .= 'Failed - Error_checking : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->updateStatus('Error_checking');
+			}
             $this->logger->error($this->id.' - '.$this->message);
 			return false;
         }
-
         return true;
     }
 

@@ -427,8 +427,8 @@ class sendinbluecore extends solution
 					foreach($recordDetail['statistics'][lcfirst(str_replace('contact','',$param['module']))] as $contactStat) {
 // echo 'D<br>';
 						$recordId = $record['id'].'_'.lcfirst(str_replace('contact','',$param['module'])).'_'.$contactStat['campaignId'];
+						// Get the data when a specific record is requested
 						if(!empty($compaignId)) {
-// echo 'E<br>';
 							if($contactStat['campaignId'] == $compaignId) {
 // echo 'F<br>';
 								$result[] = array(
@@ -442,6 +442,9 @@ class sendinbluecore extends solution
 							} else {
 								continue;
 							}
+						// Get the data when search by date_ref
+						} else {
+							// TO BE DEVELOPPED
 						}
 						
 					}
