@@ -480,6 +480,7 @@ list_workflow:
         active: Active
         actions: Actions
         order: Order
+        option: Options
 view_workflow:
     title: Workflow
     create: Create a new workflow

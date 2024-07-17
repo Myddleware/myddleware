@@ -5,3 +5,7 @@
 .workflow_inactive a {
     color: #dc3545 !important;
 }
+
+.workflow_on_off{
+    padding-left: 60px !important;
+}
