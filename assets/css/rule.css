@@ -537,3 +537,13 @@ color: #000000!important;
 .container_filter_step3{
 	max-width: 1449px;
 }
+
+.form-switch .form-check-input:checked {
+	background-color:  #198BCA !important;
+	border-block-color: #198BCA !important;
+}
+
+/* .form-switch .form-check-input {
+	background-color:  #dc3545 !important;
+	border-block-color: #dc3545 !important;
+} */

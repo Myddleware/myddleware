@@ -206,13 +206,18 @@
                 <tr>
                     <td class="value">
                         {% if hasWorkflows %}
-                            <table>
+                            <table class="table table-sm">
                                 {% for workflow in workflows %}
                                     <tr>
-                                        <td>
+                                        <td class="title">
                                             <a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
                                                 {{ workflow.name }}
                                             </a>
+                                        </td>
+                                        <td class="value">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" {{ workflow.active ? 'checked' : '' }}>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}

@@ -66,6 +66,7 @@ use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\RelationFilterType;
 use App\Repository\DocumentRepository;
+use App\Repository\WorkflowRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -365,6 +366,29 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
+    }
+
+    // public function to toggle the workflow to active or inactive
+    #[Route('/workflow/toggle/{id}', name: 'workflow_toggle', methods: ['POST'])]
+    public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
+    {
+        $workflow = $workflowRepository->find($id);
+        
+        if (!$workflow) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Workflow not found'], 404);
+        }
+
+        $workflow->setActive(!$workflow->getActive());
+        $workflow->setDateModified(new \DateTime());
+
+        try {
+            $em->persist($workflow);
+            $em->flush();
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la sauvegarde du workflow'], 500);
+        }
+
+        return new JsonResponse(['status' => 'success', 'active' => $workflow->getActive()]);
     }
 
     // public function to create a new workflow
