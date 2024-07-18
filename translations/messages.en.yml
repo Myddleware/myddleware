@@ -511,6 +511,7 @@ view_workflow:
     message: Message
     action_name: Action Name
     action_type: Action Type
+    add_action: Add Action
 view_workflow_action:
     title: Workflow Action Details
     edit: Edit this Action

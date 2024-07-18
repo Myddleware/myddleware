@@ -9,3 +9,7 @@
 .workflow_on_off{
     padding-left: 60px !important;
 }
+
+.conditions {
+    border-left: 3px solid rgba(0, 0, 0, 0.03);
+}
