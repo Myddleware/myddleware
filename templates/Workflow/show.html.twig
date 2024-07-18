@@ -106,7 +106,7 @@
 									<th>{{ 'view_workflow.description'|trans }}</th>
 									<th>{{ 'view_workflow.order'|trans }}</th>
 									<th>{{ 'view_workflow.arguments'|trans }}</th>
-									<th>{{ 'list_workflow.th.option'|trans }}</th>
+
 								</tr>
 							</thead>
 							<tbody>
@@ -130,11 +130,7 @@
 												{{ action.arguments }}
 											{% endif %}
 										</td>
-										<td>
-											<button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editActionModal" data-id="{{ action.id }}">
-												<i class="fa fa-edit"></i>
-											</button>
-										</td>
+
 									</tr>
 								{% endfor %}
 							</tbody>
