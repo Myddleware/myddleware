@@ -1,27 +1,68 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'view_workflow.edit'| trans}}{% endblock %}
-{% block titlesm %}{{ 'view_workflow.edit'| trans}}{% endblock titlesm %}
-{% block body %}
-    <div class="row justify-content-md-center">
-        <div class="col">
-            <div class=" mx-5 mt-5">
-                {{ form_start(form) }}
-                    {{ form_row(form.name) }}
-                    {{ form_row(form.description) }}
-                    {{ form_row(form.order) }}
-                    {{ form_row(form.Rule) }}
-                    {{ form_row(form.condition) }}
-                    {{ form_row(form.submit) }}
-                {{ form_end(form) }}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'view_workflow.edit'| trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'view_workflow.edit'| trans }}
+{% endblock titlesm %}
 
-                <div class="m-2">
-                    <h3 class="m-2">{{ 'view_workflow.title2'| trans}}</h3>
-                    
-                    <p> {{'view_workflow.condition'| trans}}</p>
-                    <p>{{ 'view_workflow.condition2'| trans}}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block body %}
+	<div class="container mt-5">
+		<div class="text-center m-5">
+
+			<a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2">
+				{{ 'view_workflow.back'| trans }}</a>
+			<a href="{{ path('workflow_create') }}" class="btn btn-outline-success m-2">{{ 'Create new workflow'| trans }}
+			</a>
+			<a href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');" class="btn btn-outline-danger m-2">
+				{{ 'view_workflow.delete'| trans }}</a>
+		</div>
+		{{ form_start(form) }}<div class="mb-3">
+			<div class="card-header mb-4">
+				{{ 'view_workflow.edit'| trans }}
+			</div>
+			<div class="row mb-4">
+				<div class="col-md-6">
+					{{ form_row(form.name) }}
+				</div>
+				<div class="col-md-6">
+					{{ form_row(form.Rule) }}
+				</div>
+			</div>
+			<div class="row mb-4">
+				<div class="col-md-6">
+					{{ form_row(form.description) }}
+				</div>
+				<div class="col-md-6">
+					{{ form_row(form.order) }}
+				</div>
+			</div>
+		</div>
+		<div>
+			{# <div class="card-header mt-4">
+						                 {{ 'view_workflow.conditions'| trans }}
+						            </div> #}
+			<div class="card-body m-4 conditions">
+				<div class="row mb-4">
+					{{ form_row(form.condition) }}
+				</div>
+			</div>
+		</div>
+		{{ form_end(form) }}<div>
+			<div class="card-header">
+				{{ 'view_workflow.action'| trans }}
+			</div>
+
+			<div class="card-body text-center m-4">
+
+				<a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflow.id}) }}" class="btn btn-primary mb-3">
+
+					<i class="fa fa-plus" aria-hidden="true"></i>
+					{{ 'view_workflow.add_action'| trans }}</a>
+			</div>
+		</div>
+	</div>
 
 {% endblock %}

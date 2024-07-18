@@ -480,6 +480,7 @@ list_workflow:
         active: Active
         actions: Actions
         order: Order
+        option: Options
 view_workflow:
     title: Workflow
     create: Create a new workflow
@@ -510,6 +511,8 @@ view_workflow:
     message: Message
     action_name: Action Name
     action_type: Action Type
+    add_action: Add Action
+    create_by: Created By
 view_workflow_action:
     title: Workflow Action Details
     edit: Edit this Action

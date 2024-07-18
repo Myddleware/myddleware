@@ -90,7 +90,7 @@ class WorkflowType extends AbstractType
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Save',
                 'attr' => [
-                    'class' => 'mt-2 btn btn-primary',
+                    'class' => 'mt-1  mb-4 btn btn-primary',
                     ],
             ])
         ;
