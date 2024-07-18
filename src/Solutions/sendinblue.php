@@ -427,19 +427,25 @@ class sendinbluecore extends solution
 		if (!empty($records)) {
 			$apiInstance = new \SendinBlue\Client\Api\ContactsApi(new \GuzzleHttp\Client(), $this->config);
 			$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+			$moduleKey = lcfirst(str_replace('contact','',$param['module']));
 			// For each contact found in the first search
 			foreach ($records as $record) {
 				// Get contact detail to retrive the statistics
 				$recordDetail = $apiInstance->getContactInfo($record['id']);
-				$stats = $recordDetail['statistics'][lcfirst(str_replace('contact','',$param['module']))];
-				if (!empty($recordDetail['statistics'][lcfirst(str_replace('contact','',$param['module']))])) {
+				if (!empty($recordDetail['statistics'][$moduleKey])) {
 					// Get only the record requested using the campignId (only in case a specific record is requested)
 					if (!empty($param['query']['id'])) {
 						$compaignId = explode('_',$param['query']['id'])[2];
 					}
+					// For unsubscriptions, we merge user and admin unsubscriptions
+					if ($moduleKey == 'unsubscriptions') {
+						$contactStats = array_merge($recordDetail['statistics'][$moduleKey]['userUnsubscription'],$recordDetail['statistics'][$moduleKey]['adminUnsubscription']);
+					} else {
+						$contactStats = $recordDetail['statistics'][$moduleKey];
+					}
 					// For each statistics corresponding to the module 
-					foreach($recordDetail['statistics'][lcfirst(str_replace('contact','',$param['module']))] as $contactStat) {
-						$recordId = $record['id'].'_'.lcfirst(str_replace('contact','',$param['module'])).'_'.$contactStat['campaignId'];
+					foreach($contactStats as $contactStat) {
+						$recordId = $record['id'].'_'.$moduleKey.'_'.$contactStat['campaignId'];
 						// Get the data when a specific record is requested
 						if(!empty($compaignId)) {
 							if($contactStat['campaignId'] == $compaignId) {

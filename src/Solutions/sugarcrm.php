@@ -532,8 +532,6 @@ class sugarcrmcore extends solution
             foreach ($param['data'] as $idDoc => $data) {
                 // Check control before create/update
                 $param['method'] = $method;
-                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-
                 // Check if the module is a many-to-many relationship
                 $rel = $this->isManyToManyRel($param['module']);
                 if (!empty($rel)) {
@@ -553,15 +551,18 @@ class sugarcrmcore extends solution
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$rel->lhs_module.'/'.$data[$rel->join_key_lhs].'/link', 'method' => 'POST', 'data' => $dataRel];
                 // Create record
                 } elseif ('create' == $method) {
+					$data = $this->checkDataBeforeCreate($param, $data, $idDoc);
                     // Myddleware field empty when data transfer type is create
                     unset($data['target_id']);
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'], 'method' => 'POST', 'data' => $data];
                 // Update record
                 } elseif ('delete' == $method) {
+					$data = $this->checkDataBeforeDelete($param, $data, $idDoc);
                     // The record id is stored in $data['target_id']
                     $targetId = $data['target_id'];
                     $bulkData['requests'][] = ['url' => '/'.$this->sugarAPIVersion.'/'.$param['module'].'/'.$targetId, 'method' => 'DELETE'];
                 } else {
+					$data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
                     // The record id is stored in $data['target_id']
                     $targetId = $data['target_id'];
                     unset($data['target_id']);
