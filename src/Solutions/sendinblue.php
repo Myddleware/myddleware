@@ -187,6 +187,8 @@ class sendinbluecore extends solution
     public function read($param)
     {
         $result = [];
+		$offset = 0;
+		$records = [];
         // Function are differents depending on the type of record we read from Sendinblue
         switch ($param['module']) {
 			case 'transactionalEmailActivity':
@@ -196,12 +198,9 @@ class sendinbluecore extends solution
                 }
                 // As we build the id (it doesn't exist in Sendinblue), we add it to the param field
                 $param['fields'][] = 'id';
-
                 // ini call parameters
                 $nbCall = 1;
                 $limitCall = $this->limitEmailActivity;
-                $offset = 0;
-                $records = [];
                 $dateStart = null;
                 $dateEnd = null;
                 $event = null;
@@ -356,8 +355,24 @@ class sendinbluecore extends solution
                 } else {
                     $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
                     $modifiedSince = new \DateTime($dateRef);
-                    $resultApi = $apiInstance->getContacts($param['limit'], '0', $modifiedSince, 'asc');
-                    $records = $resultApi->getContacts();
+					// Get all contacts modified since the date in parameter
+					do {
+						$recordsCall = [];
+						$resultApi = $apiInstance->getContacts($param['limit'], $offset, $modifiedSince, 'asc');
+						$recordsCall = $resultApi->getContacts();
+						if (!empty($recordsCall)) {
+							$records = array_merge($recordsCall, $records);
+						}
+						$offset += $param['limit'];
+					} while (!empty($recordsCall));
+					// If several call, we sort by date modified (sort is by date created in Brevo) and limit the result
+					if ($offset > $param['limit']) {
+						// Order data in the date_modified order
+						$modified = array_column($records, 'modifiedAt');
+						array_multisort($modified, SORT_ASC, $records);
+						// Get only the number of record requested
+						$records = array_slice($records, 0, $param['limit']); 
+					}
                 }
 				// In case we search data linked to teh contacts
 				if ($param['module'] != 'contacts') {
