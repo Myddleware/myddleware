@@ -502,6 +502,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow/edit.html.twig',
                     [
                         'form' => $form->createView(),
+                        'workflow' => $workflow,
                     ]
                 );
             } else {
