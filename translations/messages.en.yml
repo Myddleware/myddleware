@@ -512,6 +512,7 @@ view_workflow:
     action_name: Action Name
     action_type: Action Type
     add_action: Add Action
+    create_by: Created By
 view_workflow_action:
     title: Workflow Action Details
     edit: Edit this Action

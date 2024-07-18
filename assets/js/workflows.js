@@ -32,3 +32,49 @@ $(document).ready(function () {
     });
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  function toggleIcon(button, content) {
+    if (content.classList.contains("show")) {
+      button.innerHTML = '<i class="fa fa-minus"></i>';
+    } else {
+      button.innerHTML = '<i class="fa fa-plus"></i>';
+    }
+  }
+
+  // Panneau principal
+  var mainToggleButton = document.querySelector(".toggle-button");
+  var mainCollapseContent = document.getElementById("workflow-content");
+
+  mainCollapseContent.addEventListener("shown.bs.collapse", function () {
+    toggleIcon(mainToggleButton, mainCollapseContent);
+  });
+
+  mainCollapseContent.addEventListener("hidden.bs.collapse", function () {
+    toggleIcon(mainToggleButton, mainCollapseContent);
+  });
+
+  // Sous-panneau des actions
+  var subToggleButton = document.querySelectorAll(".toggle-button")[1];
+  var subCollapseContent = document.getElementById("actions-content");
+
+  subCollapseContent.addEventListener("shown.bs.collapse", function () {
+    toggleIcon(subToggleButton, subCollapseContent);
+  });
+
+  subCollapseContent.addEventListener("hidden.bs.collapse", function () {
+    toggleIcon(subToggleButton, subCollapseContent);
+  });
+
+  // Panneau des logs
+  var logsToggleButton = document.querySelectorAll(".toggle-button")[2];
+  var logsCollapseContent = document.getElementById("logs-content");
+
+  logsCollapseContent.addEventListener("shown.bs.collapse", function () {
+    toggleIcon(logsToggleButton, logsCollapseContent);
+  });
+
+  logsCollapseContent.addEventListener("hidden.bs.collapse", function () {
+    toggleIcon(logsToggleButton, logsCollapseContent);
+  });
+});

@@ -509,6 +509,7 @@ view_workflow:
     action_name: Nom de l'action
     action_type: Type d'action
     add_action: Ajouter une action
+    create_by: Créé par
 view_workflow_action:
     title: Détail de l'action du workflow
     edit: Editer cette action
