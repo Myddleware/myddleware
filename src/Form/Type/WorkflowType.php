@@ -68,25 +68,31 @@ class WorkflowType extends AbstractType
                     'class' => 'form-control',
                     ],
                 ]);
-            $builder->add('condition', TextareaType::class, [
-                'label' => 'Condition',
-                'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
-                'constraints' => [
-                    new Callback([
-                        'callback' => function($payload, ExecutionContextInterface $context) {
-                            // Check for both possible patterns
-                            if (strpos($payload, '{status} == "') === false && strpos($payload, '{status}=="') === false) {
-                                $context->buildViolation('The condition must contain either "{status} == " or "{status}==""')
-                                    ->atPath('condition')
-                                    ->addViolation();
-                            }
-                        },
-                    ]),
-                ],
-                'attr' => [
-                    'class' => 'form-control',
+                $builder->add('condition', TextareaType::class, [
+                    'label' => 'Condition',
+                    'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
+                    'constraints' => [
+                        new Callback([
+                            'callback' => function($payload, ExecutionContextInterface $context) {
+                                // Check for both possible patterns
+                                if (strpos($payload, '{status} == "') === false && strpos($payload, '{status}=="') === false) {
+                                    $context->buildViolation('The condition must contain either "{status} == " or "{status}==""')
+                                        ->atPath('condition')
+                                        ->addViolation();
+                                }
+                                // Check for the specific pattern indicating an empty condition
+                                if (preg_match('/\(\{status\} == " ?\?"1":"0"\)/', $payload)) {
+                                    $context->buildViolation('The condition is empty')
+                                        ->atPath('condition')
+                                        ->addViolation();
+                                }
+                            },
+                        ]),
                     ],
-            ]);
+                    'attr' => [
+                        'class' => 'form-control',
+                    ],
+                ]);
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Save',
                 'attr' => [
