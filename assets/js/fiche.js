@@ -134,7 +134,7 @@ $(function() {
 });
 
 // --For 'description' in the detail view of the rule
-$('.edit-button').on('click', function() {
+$('.edit-button-description').on('click', function() {
 	var field = $(this).parent();
 	var editForm = field.find('.edit-form');
 	var valueField = field.find('.value');
