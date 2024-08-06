@@ -2430,9 +2430,6 @@ use App\Entity\Workflow;
                             }
                         }
 
-                        // delete space
-                        $field_source = str_replace(' ', '', $field_source);
-
                         // Insert
                         $oneRuleField = new RuleField();
                         $oneRuleField->setRule($oneRule);

@@ -1841,6 +1841,11 @@ class rulecore
 
             // Récupération des valeurs de la source pour chaque champ de recherche
             foreach ($duplicate_fields as $duplicate_field) {
+				// No duplicate check if one of the duplicate field is empty
+				if (empty($rowTransformedData[$duplicate_field])) {
+					$concatduplicate = '';
+					break;
+				}
                 $concatduplicate .= $rowTransformedData[$duplicate_field];
             }
             // Empty data aren't used for duplicate search
