@@ -313,7 +313,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => null,
                     'status' => null,
-                    'rule' => null,
+                    'ruleId' => null,
                     'searchField' => null,
                     'searchValue' => null,
                     'order' => null,
@@ -350,12 +350,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('rule', EntityType::class, [
+                    ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false
+                        'required' => false,
+                        'label' => 'Rule',
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -449,12 +450,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('rule')->getData();
-                    if(!empty($rule)) {
+                    $rule = $form->get('ruleId')->getData();
+                    if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
-                    }
-                    if (!empty($rule)) {
-                        $arguments['rule'] = $ruleIdForArgument;
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
                     
                     // set the status
@@ -642,12 +641,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('rule', EntityType::class, [
+                    ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false
+                        'required' => false,
+                        'label' => 'Rule',
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -741,10 +741,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('rule')->getData();
+                    $rule = $form->get('ruleId')->getData();
                     if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
-                        $arguments['rule'] = $ruleIdForArgument;
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
                     
                     // set the status
