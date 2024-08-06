@@ -281,6 +281,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
                     // step 2: get the source fields of the rule
                     $sourceFields = $ruleForSearchValue->getSourceFields();
+                    $sourceFields['id'] = 'd';
 
                     // step 3: modify the source field so that for each, the key is the value and the value is the value
                     foreach ($sourceFields as $key => $value) {
@@ -301,6 +302,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $ruleSourceFields[$value] = $value;
                             unset($ruleSourceFields[$key]);
                         }
+                        $ruleSourceFields['id'] = 'id'; 
                         $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
                     }
 
@@ -572,6 +574,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
                     // step 2: get the source fields of the rule
                     $sourceFields = $ruleForSearchValue->getSourceFields();
+                    $sourceFields['id'] = 'id';
 
                     // step 3: modify the source field so that for each, the key is the value and the value is the value
                     foreach ($sourceFields as $key => $value) {
@@ -592,6 +595,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             $ruleSourceFields[$value] = $value;
                             unset($ruleSourceFields[$key]);
                         }
+                        $ruleSourceFields['id'] = 'id'; 
                         $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
                     }
 
