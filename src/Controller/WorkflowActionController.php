@@ -608,7 +608,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
                     'status' => isset($arguments['status']) ? $StringStatus[$arguments['status']] : null,
-                    'rule' => $workflowAction->getWorkflow()->getRule() ?? null,
+                    'ruleId' => isset($arguments['ruleId']) ? $arguments['ruleId'] : null, 
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -652,6 +652,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'choice_value' => 'id',
                         'required' => false,
                         'label' => 'Rule',
+                        'data' => $em->getRepository(Rule::class)->find($formData['ruleId']) 
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
