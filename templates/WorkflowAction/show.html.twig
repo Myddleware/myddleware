@@ -12,7 +12,7 @@
 {% endblock titlesm %}
 
 {% block body %}
-	<div id="task">
+	<div id="workflows">
 		<div>
 			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
 			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2">{{ 'view_workflow_action.edit'|trans }}</a>
