@@ -625,7 +625,7 @@ class WorkflowActionController extends AbstractController
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
-                    'rerun' => $arguments['rerun'] ?? false
+                    'rerun' => $arguments['rerun'] ?? 0
                     // Add other WorkflowAction fields here as needed
                 ];
 
@@ -783,6 +783,8 @@ class WorkflowActionController extends AbstractController
                     $rerun = $form->get('rerun')->getData();
                     if (!empty($rerun)) {
                         $arguments['rerun'] = $rerun;
+                    } else {
+                        $arguments['rerun'] = 0;
                     }
 
                     $workflowAction->setArguments($arguments);
