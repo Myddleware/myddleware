@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -87,75 +88,75 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-    /**
-     * @Route("/workflowAction")
-     */
-    class WorkflowActionController extends AbstractController
+/**
+ * @Route("/workflowAction")
+ */
+class WorkflowActionController extends AbstractController
+{
+    private FormulaManager $formuleManager;
+    private SessionService $sessionService;
+    private ParameterBagInterface $params;
+    private EntityManagerInterface $entityManager;
+    private HomeManager $home;
+    private ToolsManager $tools;
+    private TranslatorInterface $translator;
+    private AuthorizationCheckerInterface $authorizationChecker;
+    private JobManager $jobManager;
+    private LoggerInterface $logger;
+    private TemplateManager $template;
+    private RuleRepository $ruleRepository;
+    private JobRepository $jobRepository;
+    private DocumentRepository $documentRepository;
+    private SolutionManager $solutionManager;
+    private RuleManager $ruleManager;
+    private DocumentManager $documentManager;
+    protected Connection $connection;
+    // To allow sending a specific record ID to rule simulation
+    protected $simulationQueryField;
+    private ConfigRepository $configRepository;
+
+    public function __construct(
+        LoggerInterface $logger,
+        RuleManager $ruleManager,
+        FormulaManager $formuleManager,
+        SolutionManager $solutionManager,
+        DocumentManager $documentManager,
+        SessionService $sessionService,
+        EntityManagerInterface $entityManager,
+        RuleRepository $ruleRepository,
+        JobRepository $jobRepository,
+        DocumentRepository $documentRepository,
+        Connection $connection,
+        TranslatorInterface $translator,
+        AuthorizationCheckerInterface $authorizationChecker,
+        HomeManager $home,
+        ToolsManager $tools,
+        JobManager $jobManager,
+        TemplateManager $template,
+        ParameterBagInterface $params
+    ) {
+        $this->logger = $logger;
+        $this->ruleManager = $ruleManager;
+        $this->formuleManager = $formuleManager;
+        $this->solutionManager = $solutionManager;
+        $this->documentManager = $documentManager;
+        $this->sessionService = $sessionService;
+        $this->entityManager = $entityManager;
+        $this->ruleRepository = $ruleRepository;
+        $this->jobRepository = $jobRepository;
+        $this->documentRepository = $documentRepository;
+        $this->connection = $connection;
+        $this->translator = $translator;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->home = $home;
+        $this->tools = $tools;
+        $this->jobManager = $jobManager;
+        $this->template = $template;
+    }
+
+    protected function getInstanceBdd()
     {
-        private FormulaManager $formuleManager;
-        private SessionService $sessionService;
-        private ParameterBagInterface $params;
-        private EntityManagerInterface $entityManager;
-        private HomeManager $home;
-        private ToolsManager $tools;
-        private TranslatorInterface $translator;
-        private AuthorizationCheckerInterface $authorizationChecker;
-        private JobManager $jobManager;
-        private LoggerInterface $logger;
-        private TemplateManager $template;
-        private RuleRepository $ruleRepository;
-        private JobRepository $jobRepository;
-        private DocumentRepository $documentRepository;
-        private SolutionManager $solutionManager;
-        private RuleManager $ruleManager;
-        private DocumentManager $documentManager;
-        protected Connection $connection;
-        // To allow sending a specific record ID to rule simulation
-        protected $simulationQueryField;
-        private ConfigRepository $configRepository;
-
-        public function __construct(
-            LoggerInterface $logger,
-            RuleManager $ruleManager,
-            FormulaManager $formuleManager,
-            SolutionManager $solutionManager,
-            DocumentManager $documentManager,
-            SessionService $sessionService,
-            EntityManagerInterface $entityManager,
-            RuleRepository $ruleRepository,
-            JobRepository $jobRepository,
-            DocumentRepository $documentRepository,
-            Connection $connection,
-            TranslatorInterface $translator,
-            AuthorizationCheckerInterface $authorizationChecker,
-            HomeManager $home,
-            ToolsManager $tools,
-            JobManager $jobManager,
-            TemplateManager $template,
-            ParameterBagInterface $params
-        ) {
-            $this->logger = $logger;
-            $this->ruleManager = $ruleManager;
-            $this->formuleManager = $formuleManager;
-            $this->solutionManager = $solutionManager;
-            $this->documentManager = $documentManager;
-            $this->sessionService = $sessionService;
-            $this->entityManager = $entityManager;
-            $this->ruleRepository = $ruleRepository;
-            $this->jobRepository = $jobRepository;
-            $this->documentRepository = $documentRepository;
-            $this->connection = $connection;
-            $this->translator = $translator;
-            $this->authorizationChecker = $authorizationChecker;
-            $this->home = $home;
-            $this->tools = $tools;
-            $this->jobManager = $jobManager;
-            $this->template = $template;
-        }
-
-        protected function getInstanceBdd()
-        {
-        }
+    }
 
 
     // public function to delet the workflow by id (set deleted to 1)
@@ -231,8 +232,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             } else {
                 $this->addFlash('error', 'Workflow Action not found');
             }
-            
-            
+
+
             return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
@@ -250,7 +251,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
 
             if (!$workflow) {
-                throw $this->createNotFoundException('No workflow found for id '.$workflowId);
+                throw $this->createNotFoundException('No workflow found for id ' . $workflowId);
             }
 
             $workflowAction = new WorkflowAction();
@@ -273,36 +274,37 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $StringStatus = [];
                 foreach ($possiblesStatusesWithIntegers as $key => $value) {
                     $StringStatus[$key] = $key;
-
                 }
 
-                    // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
-                    // step 1: get the workflow of the action
-                    $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
-                    // step 2: get the source fields of the rule
-                    $sourceFields = $ruleForSearchValue->getSourceFields();
+                // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
+                // step 1: get the workflow of the action
+                $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
+                // step 2: get the source fields of the rule
+                $sourceFields = $ruleForSearchValue->getSourceFields();
+                $sourceFields['id'] = 'd';
 
-                    // step 3: modify the source field so that for each, the key is the value and the value is the value
-                    foreach ($sourceFields as $key => $value) {
-                        $sourceFields[$value] = $value;
-                        unset($sourceFields[$key]);
+                // step 3: modify the source field so that for each, the key is the value and the value is the value
+                foreach ($sourceFields as $key => $value) {
+                    $sourceFields[$value] = $value;
+                    unset($sourceFields[$key]);
+                }
+
+                $sourceSearchValue = [];
+                // create an array of all the rules
+
+                $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+
+                // fill the array with the source fields of each rule
+                foreach ($rules as $rule) {
+                    // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
+                    $ruleSourceFields = $rule->getSourceFields();
+                    foreach ($ruleSourceFields as $key => $value) {
+                        $ruleSourceFields[$value] = $value;
+                        unset($ruleSourceFields[$key]);
                     }
-
-                    $sourceSearchValue = [];
-                    // create an array of all the rules
-
-                    $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
-
-                    // fill the array with the source fields of each rule
-                    foreach ($rules as $rule) {
-                        // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
-                        $ruleSourceFields = $rule->getSourceFields();
-                        foreach ($ruleSourceFields as $key => $value) {
-                            $ruleSourceFields[$value] = $value;
-                            unset($ruleSourceFields[$key]);
-                        }
-                        $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
-                    }
+                    $ruleSourceFields['id'] = 'id';
+                    $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                }
 
 
 
@@ -313,7 +315,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => null,
                     'status' => null,
-                    'rule' => null,
+                    'ruleId' => null,
                     'searchField' => null,
                     'searchValue' => null,
                     'order' => null,
@@ -324,7 +326,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'rerun' => null
                     // Add other WorkflowAction fields here as needed
                 ];
-            
+
                 $form = $this->createFormBuilder($formData)
                     ->add('name', TextType::class, [
                         'label' => 'Action Name',
@@ -350,12 +352,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('rule', EntityType::class, [
+                    ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false
+                        'required' => false,
+                        'label' => 'Rule',
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -404,7 +407,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         ],
                     ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
-                    ->getForm();    
+                    ->getForm();
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -431,7 +434,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-                    
+
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
                     $to = $form->get('to')->getData();
@@ -449,38 +452,36 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('rule')->getData();
-                    if(!empty($rule)) {
+                    $rule = $form->get('ruleId')->getData();
+                    if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
-                    if (!empty($rule)) {
-                        $arguments['rule'] = $ruleIdForArgument;
-                    }
-                    
+
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
                     }
-                    
+
                     // set the searchField
                     $searchField = $form->get('searchField')->getData();
                     if (!empty($searchField)) {
                         $arguments['searchField'] = $searchField;
                     }
-                    
+
                     // set the searchValue
                     $searchValue = $form->get('searchValue')->getData();
                     if (!empty($searchValue)) {
                         $arguments['searchValue'] = $searchValue;
                     }
-                    
+
                     $rerun = $form->get('rerun')->getData();
                     if (!empty($rerun)) {
                         $arguments['rerun'] = $rerun;
                     }
-                    
+
                     $workflowAction->setArguments($arguments);
                     $em->persist($workflowAction);
                     $em->flush();
@@ -512,37 +513,49 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
     // public function to show the detail view of a single workflow
     /**
-     * @Route("/showAction/{id}", name="workflow_action_show")
+     * @Route("/showAction/{id}", name="workflow_action_show", defaults={"page"=1})
+     * @Route("/showAction/{id}/page-{page}", name="workflow_action_show_page", requirements={"page"="\d+"})
      */
-    public function WorkflowActionShowAction(string $id, Request $request)
+    public function WorkflowActionShowAction(string $id, Request $request, int $page): Response
     {
         try {
             $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-
-            // get the workflow logs of this action
+            $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
+            if (!$workflow) {
+                $this->addFlash('error', 'Workflow Action not found');
+                return $this->redirectToRoute('workflow_list');
+            }
 
-            if ($workflow[0]) {
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['action' => $workflow],
+                ['dateCreated' => 'DESC']
+            );
+
+            $adapter = new ArrayAdapter($workflowLogs);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(10);
+            $pager->setCurrentPage($page);
+
+            if ($workflow) {
                 $nb_workflow = count($workflowLogs);
                 return $this->render(
                     'WorkflowAction/show.html.twig',
                     [
-                        'workflow' => $workflow[0],
+                        'workflow' => $workflow,
                         'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow
+                        'nb_workflow' => $nb_workflow,
+                        'pager' => $pager,
                     ]
                 );
             } else {
                 $this->addFlash('error', 'Workflow not found');
-
                 return $this->redirectToRoute('workflow_list');
             }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
-
     // public function to edit a workflow
     /**
      * @Route("/editWorkflowAction/{id}", name="workflow_action_edit")
@@ -565,38 +578,37 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $StringStatus = [];
                 foreach ($possiblesStatusesWithIntegers as $key => $value) {
                     $StringStatus[$key] = $key;
-
                 }
 
-                    // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
-                    // step 1: get the workflow of the action
-                    $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
-                    // step 2: get the source fields of the rule
-                    $sourceFields = $ruleForSearchValue->getSourceFields();
+                // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
+                // step 1: get the workflow of the action
+                $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
+                // step 2: get the source fields of the rule
+                $sourceFields = $ruleForSearchValue->getSourceFields();
+                $sourceFields['id'] = 'id';
 
-                    // step 3: modify the source field so that for each, the key is the value and the value is the value
-                    foreach ($sourceFields as $key => $value) {
-                        $sourceFields[$value] = $value;
-                        unset($sourceFields[$key]);
+                // step 3: modify the source field so that for each, the key is the value and the value is the value
+                foreach ($sourceFields as $key => $value) {
+                    $sourceFields[$value] = $value;
+                    unset($sourceFields[$key]);
+                }
+
+                $sourceSearchValue = [];
+                // create an array of all the rules
+
+                $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+
+                // fill the array with the source fields of each rule
+                foreach ($rules as $rule) {
+                    // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
+                    $ruleSourceFields = $rule->getSourceFields();
+                    foreach ($ruleSourceFields as $key => $value) {
+                        $ruleSourceFields[$value] = $value;
+                        unset($ruleSourceFields[$key]);
                     }
-
-                    $sourceSearchValue = [];
-                    // create an array of all the rules
-
-                    $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
-
-                    // fill the array with the source fields of each rule
-                    foreach ($rules as $rule) {
-                        // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
-                        $ruleSourceFields = $rule->getSourceFields();
-                        foreach ($ruleSourceFields as $key => $value) {
-                            $ruleSourceFields[$value] = $value;
-                            unset($ruleSourceFields[$key]);
-                        }
-                        $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
-                    }
-
-
+                    $ruleSourceFields['id'] = 'id';
+                    $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                }
 
                 // Create a new array to hold the form data
                 $formData = [
@@ -605,7 +617,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'Workflow' => $workflowAction->getWorkflow(),
                     'action' => $workflowAction->getAction(),
                     'status' => isset($arguments['status']) ? $StringStatus[$arguments['status']] : null,
-                    'rule' => $workflowAction->getWorkflow()->getRule() ?? null,
+                    'ruleId' => isset($arguments['ruleId']) ? $arguments['ruleId'] : null,
                     'searchField' => $arguments['searchField'] ?? null,
                     'searchValue' => $arguments['searchValue'] ?? null,
                     'order' => $workflowAction->getOrder(),
@@ -613,10 +625,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
-                    'rerun' => $arguments['rerun'] ?? false
+                    'rerun' => $arguments['rerun'] ?? 0
                     // Add other WorkflowAction fields here as needed
                 ];
-            
+
                 $form = $this->createFormBuilder($formData)
                     ->add('name', TextType::class, [
                         'label' => 'Action Name',
@@ -642,12 +654,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             'transformDocument' => 'transformDocument',
                         ],
                     ])
-                    ->add('rule', EntityType::class, [
+                    ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
                         'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false
+                        'required' => false,
+                        'label' => 'Rule',
+                        'data' => $em->getRepository(Rule::class)->find($formData['ruleId'])
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -696,7 +710,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         ],
                     ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
-                    ->getForm();    
+                    ->getForm();
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -723,7 +737,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-                    
+
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
                     $to = $form->get('to')->getData();
@@ -741,36 +755,38 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('rule')->getData();
+                    $rule = $form->get('ruleId')->getData();
                     if ($rule !== null) {
                         $ruleIdForArgument = $rule->getId();
-                        $arguments['rule'] = $ruleIdForArgument;
+                        $arguments['ruleId'] = $ruleIdForArgument;
                     }
-                    
+
                     // set the status
                     $status = $form->get('status')->getData();
                     if (!empty($status)) {
                         //since status is a integer, we have to map it to possible statuses name
                         $arguments['status'] = $status;
                     }
-                    
+
                     // set the searchField
                     $searchField = $form->get('searchField')->getData();
                     if (!empty($searchField)) {
                         $arguments['searchField'] = $searchField;
                     }
-                    
+
                     // set the searchValue
                     $searchValue = $form->get('searchValue')->getData();
                     if (!empty($searchValue)) {
                         $arguments['searchValue'] = $searchValue;
                     }
-                    
+
                     $rerun = $form->get('rerun')->getData();
                     if (!empty($rerun)) {
                         $arguments['rerun'] = $rerun;
+                    } else {
+                        $arguments['rerun'] = 0;
                     }
-                    
+
                     $workflowAction->setArguments($arguments);
                     $em->persist($workflowAction);
                     $em->flush();
@@ -827,57 +843,57 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
-        // public function to save the workflowAudit to the database
-        public function saveWorkflowAudit($workflowId)
-        {
-    
-            $em = $this->getDoctrine()->getManager();
-            $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
-            $workflow = $workflowArray[0];
-    
-            // get all the actions of the workflow
-            $actions = $workflow->getWorkflowActions();
-    
-            $actionsArray = array_map(function($action) {
-                return [
-                    'id' => $action->getId(),
-                    'workflow' => $action->getWorkflow()->getId(),
-                    'dateCreated' => $action->getDateCreated()->format('Y-m-d H:i:s'),
-                    'dateModified' => $action->getDateModified()->format('Y-m-d H:i:s'),
-                    'createdBy' => $action->getCreatedBy()->getUsername(),
-                    'modifiedBy' => $action->getModifiedBy()->getUsername(),
-                    'name' => $action->getName(),
-                    'action' => $action->getAction(),
-                    'description' => $action->getDescription(),
-                    'order' => $action->getOrder(),
-                    'active' => $action->getActive(),
-                    'deleted' => $action->getDeleted(),
-                    'arguments' => $action->getArguments(),
-                ];  
-            }, $actions->toArray());
-    
-                    // Encode every workflow parameters
-                    $workflowdata = json_encode(
-                        [
-                            'workflowName' => $workflow->getName(),
-                            'rule' => $workflow->getRule()->getId(),
-                            'created_by' => $workflow->getCreatedBy()->getUsername(),
-                            'workflowDescription' => $workflow->getDescription(),
-                            'condition' => $workflow->getCondition(),
-                            'active' => $workflow->getActive(),
-                            'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
-                            'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
-                            'actions' => $actionsArray,
-                        ]
-                    );
-                    // Save the workflow audit
-                    $oneworkflowAudit = new WorkflowAudit();
-                    $oneworkflowAudit->setworkflow($workflow);
-                    $oneworkflowAudit->setDateCreated(new \DateTime());
-                    $oneworkflowAudit->setData($workflowdata);
-                    $this->entityManager->persist($oneworkflowAudit);
-                    $this->entityManager->flush();
-        }
+    // public function to save the workflowAudit to the database
+    public function saveWorkflowAudit($workflowId)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
+        $workflow = $workflowArray[0];
+
+        // get all the actions of the workflow
+        $actions = $workflow->getWorkflowActions();
+
+        $actionsArray = array_map(function ($action) {
+            return [
+                'id' => $action->getId(),
+                'workflow' => $action->getWorkflow()->getId(),
+                'dateCreated' => $action->getDateCreated()->format('Y-m-d H:i:s'),
+                'dateModified' => $action->getDateModified()->format('Y-m-d H:i:s'),
+                'createdBy' => $action->getCreatedBy()->getUsername(),
+                'modifiedBy' => $action->getModifiedBy()->getUsername(),
+                'name' => $action->getName(),
+                'action' => $action->getAction(),
+                'description' => $action->getDescription(),
+                'order' => $action->getOrder(),
+                'active' => $action->getActive(),
+                'deleted' => $action->getDeleted(),
+                'arguments' => $action->getArguments(),
+            ];
+        }, $actions->toArray());
+
+        // Encode every workflow parameters
+        $workflowdata = json_encode(
+            [
+                'workflowName' => $workflow->getName(),
+                'rule' => $workflow->getRule()->getId(),
+                'created_by' => $workflow->getCreatedBy()->getUsername(),
+                'workflowDescription' => $workflow->getDescription(),
+                'condition' => $workflow->getCondition(),
+                'active' => $workflow->getActive(),
+                'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
+                'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
+                'actions' => $actionsArray,
+            ]
+        );
+        // Save the workflow audit
+        $oneworkflowAudit = new WorkflowAudit();
+        $oneworkflowAudit->setworkflow($workflow);
+        $oneworkflowAudit->setDateCreated(new \DateTime());
+        $oneworkflowAudit->setData($workflowdata);
+        $this->entityManager->persist($oneworkflowAudit);
+        $this->entityManager->flush();
+    }
 
     // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
     private function nav_pagination($params, $orm = true)
@@ -931,28 +947,26 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         return false;
     }
-    
-            // Décrypte les paramètres de connexion d'une solution
-            private function decrypt_params($tab_params)
-            {
-                // Instanciate object to decrypte data
-                $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
-                if (is_array($tab_params)) {
-                    $return_params = [];
-                    foreach ($tab_params as $key => $value) {
-                        if (
-                            is_string($value)
-                            && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
-                        ) {
-                            $return_params[$key] = $encrypter->decrypt($value);
-                        }
-                    }
-    
-                    return $return_params;
+
+    // Décrypte les paramètres de connexion d'une solution
+    private function decrypt_params($tab_params)
+    {
+        // Instanciate object to decrypte data
+        $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
+        if (is_array($tab_params)) {
+            $return_params = [];
+            foreach ($tab_params as $key => $value) {
+                if (
+                    is_string($value)
+                    && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
+                ) {
+                    $return_params[$key] = $encrypter->decrypt($value);
                 }
-    
-                return $encrypter->decrypt($tab_params);
             }
 
+            return $return_params;
+        }
 
+        return $encrypter->decrypt($tab_params);
+    }
 }

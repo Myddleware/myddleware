@@ -2,10 +2,15 @@ $(document).ready(function () {
   $(".form-check-input").on("change", function () {
     var workflowId = $(this).data("id");
     var newState = $(this).is(":checked") ? 1 : 0;
+  
+    var pathArray = window.location.pathname.split('/');
+    var basePath = window.location.origin + '/' + pathArray[1] + '/' + pathArray[2];
+    var currentUrl = `${basePath}/workflow/workflow/toggle/${workflowId}`;
 
     $.ajax({
-      url: `/myddleware/public/workflow/workflow/toggle/${workflowId}`,
+      url: currentUrl,
       type: "POST",
+      data: { newState: newState },
       beforeSend: function () {
         console.log(
           `Before sending the request for workflow ID: ${workflowId}`

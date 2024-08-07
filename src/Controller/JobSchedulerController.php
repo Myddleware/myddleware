@@ -22,6 +22,8 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -306,9 +308,10 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/crontab_list", name="jobscheduler_cron_list")
+     * @Route("/crontab_list", name="jobscheduler_cron_list", defaults={"page"=1})
+     * @Route("/crontab_list/page-{page}", name="jobscheduler_cron_list_page", requirements={"page"="\d+"})
      */
-    public function crontabList(): Response
+    public function crontabList(int $page): Response
     {
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
@@ -323,14 +326,21 @@ class JobSchedulerController extends AbstractController
 
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
 
-        // Fetch the cron_job_result data
-        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findBy(array(), null, $searchLimit, 0);
+        // Pagination for cron_job_result
+        $query = $this->entityManager->createQuery(
+            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
+        );
+    
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
+        $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
             'entitiesCron' => $entitiesCron,
-            'cronJobResults' => $cronJobResults,
+            'pager' => $pager,
         ]);
     }
 
@@ -425,25 +435,31 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/show_crontab", name="crontab_show")
+     * @Route("/{id}/show_crontab", name="crontab_show", defaults={"page"=1})
+     * @Route("/{id}/show_crontab/page-{page}", name="crontab_show_page", requirements={"page"="\d+"})
      */
-    public function showCrontab($id): Response
+    public function showCrontab($id, int $page): Response
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        // Fetch the CronJobResults and sort them by 'id' in ascending order
-        $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(
-            ['cronJob' => $id],
-        );
+        $query = $this->entityManager->createQuery(
+            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c WHERE c.cronJob = :cronJob ORDER BY c.runAt DESC'
+        )->setParameter('cronJob', $id);
+
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
+        $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
-            'entityResult' => $entityResult,
+            'pager' => $pager,
         ]);
     }
+
     
     /**
      * Disables all cron jobs.
