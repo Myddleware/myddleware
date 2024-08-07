@@ -22,10 +22,6 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Pagerfanta\Pagerfanta;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-
 
 /**
  * @Route("/rule/jobscheduler")
@@ -325,28 +321,16 @@ class JobSchedulerController extends AbstractController
             $timezone = $this->getUser()->getTimezone();
         }
 
-        $page = 1;
-
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
 
         // Fetch the cron_job_result data
-        // $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findBy(array(), null, $searchLimit, 0);
-
-        $compact = $this->nav_pagination([
-            'adapter_em_repository' => $this->entityManager->getRepository(CronJobResult::class)->findAll(),
-            'maxPerPage' => 25,
-            'page' => $page,
-        ], false);
+        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findBy(array(), null, $searchLimit, 0);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
-            'entities' => $compact['entities'],
-            'nb' => $compact['nb'],
-            'pager' => $compact['pager'],
             'timezone' => $timezone,
             'entitiesCron' => $entitiesCron,
-            // 'cronJobResults' => $cronJobResults,
-            $compact
+            'cronJobResults' => $cronJobResults,
         ]);
     }
 
@@ -565,59 +549,6 @@ class JobSchedulerController extends AbstractController
             $this->addFlash('error', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
-    }
-
-    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-    private function nav_pagination($params, $orm = true)
-    {
-        /*
-         * adapter_em_repository = requete
-         * maxPerPage = integer
-         * page = page en cours
-         */
-
-        if (is_array($params)) {
-            /* DOC :
-             * $pager->setCurrentPage($page);
-                $pager->getNbResults();
-                $pager->getMaxPerPage();
-                $pager->getNbPages();
-                $pager->haveToPaginate();
-                $pager->hasPreviousPage();
-                $pager->getPreviousPage();
-                $pager->hasNextPage();
-                $pager->getNextPage();
-                $pager->getCurrentPageResults();
-            */
-
-            $compact = [];
-
-            //On passe l’adapter au bundle qui va s’occuper de la pagination
-            if ($orm) {
-                $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-
-            //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
-            $compact['pager']->setMaxPerPage($params['maxPerPage']);
-            try {
-                $compact['entities'] = $compact['pager']
-                       //On indique au pager quelle page on veut
-                       ->setCurrentPage($params['page'])
-                       //On récupère les résultats correspondant
-                       ->getCurrentPageResults();
-
-                $compact['nb'] = $compact['pager']->getNbResults();
-            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-                //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Cette page n'existe pas.");
-            }
-
-            return $compact;
-        }
-
-        return false;
     }
 
 }
