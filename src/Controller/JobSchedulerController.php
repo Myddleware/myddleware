@@ -22,6 +22,8 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -306,9 +308,10 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/crontab_list", name="jobscheduler_cron_list")
+     * @Route("/crontab_list", name="jobscheduler_cron_list", defaults={"page"=1})
+     * @Route("/crontab_list/page-{page}", name="jobscheduler_cron_list_page", requirements={"page"="\d+"})
      */
-    public function crontabList(): Response
+    public function crontabList(int $page): Response
     {
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
@@ -323,14 +326,21 @@ class JobSchedulerController extends AbstractController
 
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
 
-        // Fetch the cron_job_result data
-        $cronJobResults = $this->entityManager->getRepository(CronJobResult::class)->findBy(array(), null, $searchLimit, 0);
+        // Pagination for cron_job_result
+        $query = $this->entityManager->createQuery(
+            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
+        );
+    
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(3);
+        $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
             'entitiesCron' => $entitiesCron,
-            'cronJobResults' => $cronJobResults,
+            'pager' => $pager,
         ]);
     }
 
@@ -550,5 +560,5 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
-
+    
 }
