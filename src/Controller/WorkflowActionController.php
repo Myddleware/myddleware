@@ -536,7 +536,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 );
             } else {
                 $this->addFlash('error', 'Workflow not found');
-
                 return $this->redirectToRoute('workflow_list');
             }
         } catch (Exception $e) {
@@ -598,9 +597,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         $ruleSourceFields['id'] = 'id'; 
                         $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
                     }
-
-
-
+                    
                 // Create a new array to hold the form data
                 $formData = [
                     'name' => $workflowAction->getName(),
