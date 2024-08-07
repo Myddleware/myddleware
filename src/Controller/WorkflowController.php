@@ -67,6 +67,7 @@ use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\RelationFilterType;
 use App\Repository\DocumentRepository;
 use App\Repository\WorkflowRepository;
+use App\Repository\WorkflowLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -103,6 +104,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         private SolutionManager $solutionManager;
         private RuleManager $ruleManager;
         private DocumentManager $documentManager;
+        private WorkflowLogRepository $workflowLogRepository;
+
+
         protected Connection $connection;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
@@ -126,6 +130,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             ToolsManager $tools,
             JobManager $jobManager,
             TemplateManager $template,
+            WorkflowLogRepository $workflowLogRepository,
             ParameterBagInterface $params
         ) {
             $this->logger = $logger;
@@ -145,6 +150,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
+            $this->workflowLogRepository = $workflowLogRepository;
         }
 
         protected function getInstanceBdd()
@@ -167,13 +173,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
-
-            
-
-            // $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-            //     ['triggerDocument' => $id],
-            //     ['id' => 'DESC']
-            // );
 
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
@@ -433,42 +432,47 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
+    
+/**
+ * @Route("/show/{id}", name="workflow_show", defaults={"page"=1})
+ * @Route("/show/{id}/page-{page}", name="workflow_show_page", requirements={"page"="\d+"})
+ */
+public function WorkflowShowAction(string $id, Request $request, int $page): Response
+{
+    try {
+        $em = $this->getDoctrine()->getManager();
+        $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-    // public function to show the detail view of a single workflow
-    /**
-     * @Route("/show/{id}", name="workflow_show")
-     */
-    public function WorkflowShowAction(string $id, Request $request)
-    {
-        try {
-            $em = $this->getDoctrine()->getManager();
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+        $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+            ['workflow' => $id],
+            ['dateCreated' => 'DESC']
+        );
+        $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['workflow' => $id],
-                ['dateCreated' => 'DESC']
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
+        $pager->setCurrentPage($page);
+
+        if ($workflow[0]) {
+            $nb_workflow = count($workflowLogs);
+            return $this->render(
+                'Workflow/show.html.twig',
+                [
+                    'workflow' => $workflow[0],
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow' => $nb_workflow,
+                    'pager' => $pager,
+                ]
             );
-
-            if ($workflow[0]) {
-                $nb_workflow = count($workflowLogs);
-                return $this->render(
-                    'Workflow/show.html.twig',
-                    [
-                        'workflow' => $workflow[0],
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
-                    ]
-                );
-            } else {
-                $this->addFlash('error', 'Workflow not found');
-
-                return $this->redirectToRoute('workflow_list');
-            }
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+        } else {
+            $this->addFlash('error', 'Workflow not found');
+            return $this->redirectToRoute('workflow_list');
         }
+    } catch (Exception $e) {
+        throw $this->createNotFoundException('Error : ' . $e);
     }
-
+}
     // public function to edit a workflow
     /**
      * @Route("/edit/{id}", name="workflow_edit")
