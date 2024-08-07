@@ -77,42 +77,61 @@
 					</tbody>
 				</table>
 			</div>
-			<div id="jobschedulerresulttable">
-				<table class="table table-light table-hover" id="myTable">
-                
+		 <div id="jobschedulerresulttable">
                 <h4 class="mt-5">{{ 'crontab.results'|trans }}</h4>
                 <h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
-
-                
-					<thead>
-						<tr>
-                            <th class="table-head-result" id="0" >{{ 'jobscheduler.id'|trans }}</th>
-							<th class="table-head-result" id="1" >{{ 'jobscheduler.date_created'|trans }}</th>
-							<th class="table-head-result" id="2" >{{ 'jobscheduler.date_modified'|trans }}</th>
-							<th class="table-head-result" id="3" >{{ 'jobscheduler.output'|trans }}</th>
-							<th class="table-head-result" id="4" >{{ 'jobscheduler.run_at'|trans }}</th>
-							<th class="table-head-result" id="5" >{{ 'jobscheduler.run_time'|trans }}</th>
-							<th class="table-head-result" id="6" >{{ 'jobscheduler.status_code'|trans }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for result in entityResult %}
-							<tr>
+                <table class="table table-light table-hover" id="myTable">
+                    <thead>
+                        <tr>
+                            <th class="table-head-result">{{ 'jobscheduler.id'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.date_created'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.date_modified'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.output'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.run_at'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.run_time'|trans }}</th>
+                            <th class="table-head-result">{{ 'jobscheduler.status_code'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in pager.currentPageResults %}
+                            <tr>
                                 <td>{{ result.id }}</td>
-								<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
-								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
-								<td>{{ result.output|raw }}</td>
-								<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
-								<td>{{ result.runTime }}</td>
-								<td>{{ result.statusCode }}</td>
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			</div>
-
-		</div>
-
-        
-
-	{% endblock %}
+                                <td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
+                                <td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
+                                <td>{{ result.output|raw }}</td>
+                                <td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
+                                <td>{{ result.runTime }}</td>
+                                <td>{{ result.statusCode }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pager.haveToPaginate %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if pager.hasPreviousPage %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.previousPage }) }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for page in 1..pager.nbPages %}
+                                <li class="page-item{% if page == pager.currentPage %} active{% endif %}">
+                                    <a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': page }) }}">{{ page }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if pager.hasNextPage %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.nextPage }) }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

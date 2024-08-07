@@ -333,7 +333,7 @@ class JobSchedulerController extends AbstractController
     
         $adapter = new QueryAdapter($query);
         $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(3);
+        $pager->setMaxPerPage(10);
         $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
@@ -435,25 +435,31 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/show_crontab", name="crontab_show")
+     * @Route("/{id}/show_crontab", name="crontab_show", defaults={"page"=1})
+     * @Route("/{id}/show_crontab/page-{page}", name="crontab_show_page", requirements={"page"="\d+"})
      */
-    public function showCrontab($id): Response
+    public function showCrontab($id, int $page): Response
     {
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        // Fetch the CronJobResults and sort them by 'id' in ascending order
-        $entityResult = $this->entityManager->getRepository(CronJobResult::class)->findBy(
-            ['cronJob' => $id],
-        );
+        $query = $this->entityManager->createQuery(
+            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c WHERE c.cronJob = :cronJob ORDER BY c.runAt DESC'
+        )->setParameter('cronJob', $id);
+
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
+        $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
-            'entityResult' => $entityResult,
+            'pager' => $pager,
         ]);
     }
+
     
     /**
      * Disables all cron jobs.
@@ -560,5 +566,5 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
-    
+
 }
