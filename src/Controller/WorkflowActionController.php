@@ -70,6 +70,7 @@ use App\Form\Type\WorkflowActionType;
 use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use App\Repository\WorkflowActionRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -968,5 +969,27 @@ class WorkflowActionController extends AbstractController
         }
 
         return $encrypter->decrypt($tab_params);
+    }
+
+    #[Route('/workflowAction/toggle/{id}', name: 'workflow_action_toggle', methods: ['POST'])]
+    public function toggleWorkflowAction(Request $request, EntityManagerInterface $em, WorkflowActionRepository $workflowActionRepository, string $id): JsonResponse
+    {
+        $workflowAction = $workflowActionRepository->find($id);
+    
+        if (!$workflowAction) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Workflow action not found'], 404);
+        }
+    
+        $workflowAction->setActive(!$workflowAction->getActive());
+        $workflowAction->setDateModified(new \DateTime());
+    
+        try {
+            $em->persist($workflowAction);
+            $em->flush();
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la sauvegarde du workflow action'], 500);
+        }
+    
+        return new JsonResponse(['status' => 'success', 'active' => $workflowAction->getActive()]);
     }
 }
