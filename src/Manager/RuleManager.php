@@ -170,6 +170,11 @@ class rulecore
         return $this->rule;
     }
 
+    public function getSourceFields()
+    {
+        return $this->sourceFields;
+    }
+
     public function setJobId($jobId)
     {
         $this->jobId = $jobId;

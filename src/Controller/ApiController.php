@@ -221,23 +221,6 @@ class ApiController extends AbstractController
                 throw new Exception('recordId is missing. recordId is the id of the record you want to delete. ');
             }
 
-            // Set the document values
-            foreach ($data as $key => $value) {
-                switch ($key) {
-                    case 'recordId':
-                        $docParam['values']['id'] = $value;
-                        break;
-                    case 'reference':
-                        $docParam['values']['date_modified'] = $value;
-                        break;
-                    case 'rule':
-                        break;
-                    default:
-                        $docParam['values'][$key] = $value;
-                }
-            }
-            $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
-
             // Create job instance
             $this->jobManager->setApi(1);
             $this->jobManager->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
@@ -256,6 +239,35 @@ class ApiController extends AbstractController
 			$rule->setApi(1);
 			$rule->setRule($data['rule']);
 			
+            // Set the document values
+            foreach ($data as $key => $value) {
+                switch ($key) {
+                    case 'recordId':
+                        $docParam['values']['id'] = $value;
+                        break;
+                    case 'reference':
+                        $docParam['values']['date_modified'] = $value;
+                        break;
+                    case 'rule':
+                        break;
+                    default:
+                        $docParam['values'][$key] = $value;
+                }
+            }
+			
+			// Set all fields not set to empty
+			$sourceFields = $rule->getSourceFields();
+			if (!empty($sourceFields)) {
+				foreach ($sourceFields as $sourceField) {
+					if (!array_key_exists($sourceField, $docParam['values'])) {
+						$docParam['values'][$sourceField] = '';
+					}
+				}
+			}
+
+			// Add deletion flag
+            $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
+			
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
             if (!empty($document->error)) {
@@ -270,19 +282,21 @@ class ApiController extends AbstractController
             return $this->json($return);
         }
 
-        // Send the document just created
-        try {
-            // db transaction managed into the method actionDocument
-            $errors = $rule->actionDocument($document[0]->id, 'rerun');
-            // Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it.
-            // We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
-            if (!empty($errors)) {
-                throw new Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
-            }
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-            $return['error'] .= $e->getMessage();
-        }
+        // Send the document just created if requested
+		if (empty($data['asynchronousDeletion'])) {
+			try {
+				// db transaction managed into the method actionDocument
+				$errors = $rule->actionDocument($document[0]->id, 'rerun');
+				// Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it.
+				// We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
+				if (!empty($errors)) {
+					throw new Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
+				}
+			} catch (Exception $e) {
+				$this->logger->error($e->getMessage());
+				$return['error'] .= $e->getMessage();
+			}
+		}
 
         // Close job if it has been created
         try {
@@ -291,8 +305,8 @@ class ApiController extends AbstractController
                 $this->jobManager->closeJob();
             }
             // Get the job statistics even if the job has failed
-            if (!empty($this->jobManager->id)) {
-                $return['jobId'] = $this->jobManager->id;
+            if (!empty($this->jobManager->getId())) {
+                $return['jobId'] = $this->jobManager->getId();
                 $jobData = $this->jobManager->getLogData();
                 if (!empty($jobData['jobError'])) {
                     $return['error'] .= $jobData['jobError'];
