@@ -1,4 +1,5 @@
 <?php
+
 /*********************************************************************************
  * This file is part of Myddleware.
  * @package Myddleware
@@ -67,6 +68,7 @@ use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\RelationFilterType;
 use App\Repository\DocumentRepository;
 use App\Repository\WorkflowRepository;
+use App\Repository\WorkflowLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,75 +83,80 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-    /**
-     * @Route("/workflow")
-     */
-    class WorkflowController extends AbstractController
+/**
+ * @Route("/workflow")
+ */
+class WorkflowController extends AbstractController
+{
+    private FormulaManager $formuleManager;
+    private SessionService $sessionService;
+    private ParameterBagInterface $params;
+    private EntityManagerInterface $entityManager;
+    private HomeManager $home;
+    private ToolsManager $tools;
+    private TranslatorInterface $translator;
+    private AuthorizationCheckerInterface $authorizationChecker;
+    private JobManager $jobManager;
+    private LoggerInterface $logger;
+    private TemplateManager $template;
+    private RuleRepository $ruleRepository;
+    private JobRepository $jobRepository;
+    private DocumentRepository $documentRepository;
+    private SolutionManager $solutionManager;
+    private RuleManager $ruleManager;
+    private DocumentManager $documentManager;
+    private WorkflowLogRepository $workflowLogRepository;
+
+
+    protected Connection $connection;
+    // To allow sending a specific record ID to rule simulation
+    protected $simulationQueryField;
+    private ConfigRepository $configRepository;
+
+    public function __construct(
+        LoggerInterface $logger,
+        RuleManager $ruleManager,
+        FormulaManager $formuleManager,
+        SolutionManager $solutionManager,
+        DocumentManager $documentManager,
+        SessionService $sessionService,
+        EntityManagerInterface $entityManager,
+        RuleRepository $ruleRepository,
+        JobRepository $jobRepository,
+        DocumentRepository $documentRepository,
+        Connection $connection,
+        TranslatorInterface $translator,
+        AuthorizationCheckerInterface $authorizationChecker,
+        HomeManager $home,
+        ToolsManager $tools,
+        JobManager $jobManager,
+        TemplateManager $template,
+        WorkflowLogRepository $workflowLogRepository,
+        ParameterBagInterface $params
+    ) {
+        $this->logger = $logger;
+        $this->ruleManager = $ruleManager;
+        $this->formuleManager = $formuleManager;
+        $this->solutionManager = $solutionManager;
+        $this->documentManager = $documentManager;
+        $this->sessionService = $sessionService;
+        $this->entityManager = $entityManager;
+        $this->ruleRepository = $ruleRepository;
+        $this->jobRepository = $jobRepository;
+        $this->documentRepository = $documentRepository;
+        $this->connection = $connection;
+        $this->translator = $translator;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->home = $home;
+        $this->tools = $tools;
+        $this->jobManager = $jobManager;
+        $this->template = $template;
+        $this->workflowLogRepository = $workflowLogRepository;
+    }
+
+    protected function getInstanceBdd()
     {
-        private FormulaManager $formuleManager;
-        private SessionService $sessionService;
-        private ParameterBagInterface $params;
-        private EntityManagerInterface $entityManager;
-        private HomeManager $home;
-        private ToolsManager $tools;
-        private TranslatorInterface $translator;
-        private AuthorizationCheckerInterface $authorizationChecker;
-        private JobManager $jobManager;
-        private LoggerInterface $logger;
-        private TemplateManager $template;
-        private RuleRepository $ruleRepository;
-        private JobRepository $jobRepository;
-        private DocumentRepository $documentRepository;
-        private SolutionManager $solutionManager;
-        private RuleManager $ruleManager;
-        private DocumentManager $documentManager;
-        protected Connection $connection;
-        // To allow sending a specific record ID to rule simulation
-        protected $simulationQueryField;
-        private ConfigRepository $configRepository;
-
-        public function __construct(
-            LoggerInterface $logger,
-            RuleManager $ruleManager,
-            FormulaManager $formuleManager,
-            SolutionManager $solutionManager,
-            DocumentManager $documentManager,
-            SessionService $sessionService,
-            EntityManagerInterface $entityManager,
-            RuleRepository $ruleRepository,
-            JobRepository $jobRepository,
-            DocumentRepository $documentRepository,
-            Connection $connection,
-            TranslatorInterface $translator,
-            AuthorizationCheckerInterface $authorizationChecker,
-            HomeManager $home,
-            ToolsManager $tools,
-            JobManager $jobManager,
-            TemplateManager $template,
-            ParameterBagInterface $params
-        ) {
-            $this->logger = $logger;
-            $this->ruleManager = $ruleManager;
-            $this->formuleManager = $formuleManager;
-            $this->solutionManager = $solutionManager;
-            $this->documentManager = $documentManager;
-            $this->sessionService = $sessionService;
-            $this->entityManager = $entityManager;
-            $this->ruleRepository = $ruleRepository;
-            $this->jobRepository = $jobRepository;
-            $this->documentRepository = $documentRepository;
-            $this->connection = $connection;
-            $this->translator = $translator;
-            $this->authorizationChecker = $authorizationChecker;
-            $this->home = $home;
-            $this->tools = $tools;
-            $this->jobManager = $jobManager;
-            $this->template = $template;
-        }
-
-        protected function getInstanceBdd()
-        {
-        }
+    }
 
 
     /* ******************************************************
@@ -168,13 +175,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         try {
 
-            
-
-            // $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-            //     ['triggerDocument' => $id],
-            //     ['id' => 'DESC']
-            // );
-
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
 
@@ -188,16 +188,15 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             ], false);
 
 
-                    return $this->render(
-                        'Workflow/list.html.twig',
-                        [
-                            'entities' => $workflows,
-                            'nb_workflow' => count($workflows),
-                            'pager' => $compact['pager'],
-                        ]
-                    );
-                throw $this->createNotFoundException('Error');
-            
+            return $this->render(
+                'Workflow/list.html.twig',
+                [
+                    'entities' => $workflows,
+                    'nb_workflow' => count($workflows),
+                    'pager' => $compact['pager'],
+                ]
+            );
+            throw $this->createNotFoundException('Error');
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
@@ -275,7 +274,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         // get all the actions of the workflow
         $actions = $workflow->getWorkflowActions();
 
-        $actionsArray = array_map(function($action) {
+        $actionsArray = array_map(function ($action) {
             return [
                 'id' => $action->getId(),
                 'workflow' => $action->getWorkflow()->getId(),
@@ -290,30 +289,30 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 'active' => $action->getActive(),
                 'deleted' => $action->getDeleted(),
                 'arguments' => $action->getArguments(),
-            ];  
+            ];
         }, $actions->toArray());
 
-                // Encode every workflow parameters
-                $workflowdata = json_encode(
-                    [
-                        'workflowName' => $workflow->getName(),
-                        'ruleId' => $workflow->getRule()->getId(),
-                        'created_by' => $workflow->getCreatedBy()->getUsername(),
-                        'workflowDescription' => $workflow->getDescription(),
-                        'condition' => $workflow->getCondition(),
-                        'active' => $workflow->getActive(),
-                        'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
-                        'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
-                        'actions' => $actionsArray,
-                    ]
-                );
-                // Save the workflow audit
-                $oneworkflowAudit = new WorkflowAudit();
-                $oneworkflowAudit->setworkflow($workflow);
-                $oneworkflowAudit->setDateCreated(new \DateTime());
-                $oneworkflowAudit->setData($workflowdata);
-                $this->entityManager->persist($oneworkflowAudit);
-                $this->entityManager->flush();
+        // Encode every workflow parameters
+        $workflowdata = json_encode(
+            [
+                'workflowName' => $workflow->getName(),
+                'ruleId' => $workflow->getRule()->getId(),
+                'created_by' => $workflow->getCreatedBy()->getUsername(),
+                'workflowDescription' => $workflow->getDescription(),
+                'condition' => $workflow->getCondition(),
+                'active' => $workflow->getActive(),
+                'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
+                'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
+                'actions' => $actionsArray,
+            ]
+        );
+        // Save the workflow audit
+        $oneworkflowAudit = new WorkflowAudit();
+        $oneworkflowAudit->setworkflow($workflow);
+        $oneworkflowAudit->setDateCreated(new \DateTime());
+        $oneworkflowAudit->setData($workflowdata);
+        $this->entityManager->persist($oneworkflowAudit);
+        $this->entityManager->flush();
     }
 
     // public function to set the workflow to active or inactive
@@ -373,7 +372,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
     {
         $workflow = $workflowRepository->find($id);
-        
+
         if (!$workflow) {
             return new JsonResponse(['status' => 'error', 'message' => 'Workflow not found'], 404);
         }
@@ -434,11 +433,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
-    // public function to show the detail view of a single workflow
     /**
-     * @Route("/show/{id}", name="workflow_show")
+     * @Route("/show/{id}", name="workflow_show", defaults={"page"=1})
+     * @Route("/show/{id}/page-{page}", name="workflow_show_page", requirements={"page"="\d+"})
      */
-    public function WorkflowShowAction(string $id, Request $request)
+    public function WorkflowShowAction(string $id, Request $request, int $page): Response
     {
         try {
             $em = $this->getDoctrine()->getManager();
@@ -448,6 +447,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ['workflow' => $id],
                 ['dateCreated' => 'DESC']
             );
+            $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
+
+            $adapter = new QueryAdapter($query);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(10);
+            $pager->setCurrentPage($page);
 
             if ($workflow[0]) {
                 $nb_workflow = count($workflowLogs);
@@ -457,18 +462,17 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         'workflow' => $workflow[0],
                         'workflowLogs' => $workflowLogs,
                         'nb_workflow' => $nb_workflow,
+                        'pager' => $pager,
                     ]
                 );
             } else {
                 $this->addFlash('error', 'Workflow not found');
-
                 return $this->redirectToRoute('workflow_list');
             }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
-
     // public function to edit a workflow
     /**
      * @Route("/edit/{id}", name="workflow_edit")
@@ -567,28 +571,26 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         return false;
     }
-    
-            // Décrypte les paramètres de connexion d'une solution
-            private function decrypt_params($tab_params)
-            {
-                // Instanciate object to decrypte data
-                $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
-                if (is_array($tab_params)) {
-                    $return_params = [];
-                    foreach ($tab_params as $key => $value) {
-                        if (
-                            is_string($value)
-                            && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
-                        ) {
-                            $return_params[$key] = $encrypter->decrypt($value);
-                        }
-                    }
-    
-                    return $return_params;
+
+    // Décrypte les paramètres de connexion d'une solution
+    private function decrypt_params($tab_params)
+    {
+        // Instanciate object to decrypte data
+        $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
+        if (is_array($tab_params)) {
+            $return_params = [];
+            foreach ($tab_params as $key => $value) {
+                if (
+                    is_string($value)
+                    && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
+                ) {
+                    $return_params[$key] = $encrypter->decrypt($value);
                 }
-    
-                return $encrypter->decrypt($tab_params);
             }
 
+            return $return_params;
+        }
 
+        return $encrypter->decrypt($tab_params);
+    }
 }
