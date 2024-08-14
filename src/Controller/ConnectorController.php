@@ -220,7 +220,8 @@ class ConnectorController extends AbstractController
     public function upload($solution): Response
     {
         if (isset($solution)) {
-            $output_dir = __DIR__.'/../Custom/Solutions/'.trim($solution).'/file/';
+            // $output_dir = __DIR__.'/../Custom/Solutions/'.trim($solution).'/file/';
+            $output_dir = __DIR__.'/../Premium/Solutions/'.trim($solution).'/file/';
             // Get canonicalized absolute pathname
             $path = realpath($output_dir);
             // If it exist, check if it's a directory
@@ -231,7 +232,8 @@ class ConnectorController extends AbstractController
                         exit;
                     }
                 } catch (Exception $e) {
-                    echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+                    // echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Custom . ';
+                    echo '0;'.$e->getMessage().'. Please check you have the web user has the permission to write in the directory '.__DIR__.'/../Premium . ';
                     exit;
                 }
             }
