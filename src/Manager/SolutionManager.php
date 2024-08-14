@@ -58,6 +58,7 @@ use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
+use App\Premium\Solutions\suitecrmpremium;
 use Exception;
 
 /**
