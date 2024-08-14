@@ -5,7 +5,9 @@
   "license": "proprietary",
   "autoload": {
     "psr-4": {
-      "App\\": "src/"
+      "App\\": "src/",
+      "App\\Premium\\": "src/Premium/",
+      "App\\Custom\\": "src/Custom/"
     }
   },
   "autoload-dev": {
