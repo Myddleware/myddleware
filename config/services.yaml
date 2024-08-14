@@ -28,7 +28,12 @@ services:
   # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/*'
-    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib,Custom}'
+    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib,Premium}'
+    # exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Solutions/lib,Custom}'
+
+  App\Premium\Solutions\suitecrmpremium:
+    public: true
+    autowire: true
 
   # controllers are imported separately to make sure services can be injected
   # as action arguments even if you don't extend any base controller class
