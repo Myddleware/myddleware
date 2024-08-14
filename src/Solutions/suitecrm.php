@@ -109,6 +109,9 @@ class suitecrmcore extends solution
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
+
+        return ['error' => 'standard'];
+
         try {
             $login_paramaters = [
                 'user_auth' => [
