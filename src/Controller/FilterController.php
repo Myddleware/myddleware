@@ -190,7 +190,6 @@ public function removeFilter(Request $request): JsonResponse
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
 
-        $toto = 'toto';
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
@@ -342,11 +341,15 @@ public function removeFilter(Request $request): JsonResponse
         $nbDocuments = count($documents);
         foreach ($documents as $documentForCsv) {
             $csvdocumentids .= $documentForCsv['id'].',';
-        }
-
+        }        
+        // Look for the variable PREMIUM in the .env.local file
+        $premium = $_ENV['PREMIUM'] ?? null;
         
+        // Initialize the variable $premium_activated based on the PREMIUM variable
+        $premium_activated = ($premium === 'true');
         
         return $this->render('testFilter.html.twig', [
+            'premium_activated' => $premium_activated,
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
             'documents' => $documents,

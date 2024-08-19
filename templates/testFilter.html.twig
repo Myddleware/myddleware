@@ -237,8 +237,13 @@
             </div> #}
             <div class="px-5 row">
                   <p>
+                        {% if premium_activated is defined and premium_activated == 'true' %}
                         <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
                               (<span></span>)</a>
+                        {% else %}
+                        <a id="cancelflux" class="btn btn-outline-primary disabled" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
+                              (<span></span>)</a>
+                        {% endif %}
                         <a id="reloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
                               (<span></span>)</a>
                         {# <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
