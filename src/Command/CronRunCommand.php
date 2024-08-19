@@ -90,7 +90,7 @@ final class CronRunCommand extends BaseCommand
                 $premium = $_ENV['PREMIUM'] ?? null;
         
                 $premium_activated = ($premium === 'true');
-                if (!($premium_activated) && $command === 'myddleware:synchro ALL') {
+                if (!($premium_activated) && ($command === 'myddleware:synchro ALL' || $command === 'myddleware:cleardata')) {
                     $style->notice('you have to activate the premium version to run this cronjob');
     
                     continue;
