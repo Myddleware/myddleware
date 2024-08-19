@@ -86,6 +86,15 @@ final class CronRunCommand extends BaseCommand
     
                     continue;
                 }
+
+                $premium = $_ENV['PREMIUM'] ?? null;
+        
+                $premium_activated = ($premium === 'true');
+                if (!($premium_activated) && $command === 'myddleware:synchro ALL') {
+                    $style->notice('you have to activate the premium version to run this cronjob');
+    
+                    continue;
+                }
     
                 if ($job->getNextRun() > $now) {
                     $style->notice(sprintf('cronjob will not be executed. Next run is: %s', $job->getNextRun()->format('r')));
