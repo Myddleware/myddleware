@@ -3114,6 +3114,16 @@ use App\Entity\Workflow;
          */
     public function execRuleById($id, Request $request)
     {
+        $premium = $_ENV['PREMIUM'] ?? null;
+        
+        // Initialize the variable $premium_activated based on the PREMIUM variable
+        $premium_activated = ($premium === 'true');
+
+        // If the user is not premium, we redirect him to the home page
+        if (!$premium_activated) {
+            throw $this->createAccessDeniedException('You need the premium version to use this feature');
+        }
+
         $form = $this->createFormBuilder()
             ->add('id', TextareaType::class)
             ->getForm();
