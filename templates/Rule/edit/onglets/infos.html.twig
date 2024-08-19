@@ -60,7 +60,7 @@
     <a href="{{ path('regle_displayflux', {'id': rule.GetId }) }}" title="" role="button" class="btn btn-outline-success mb-2">
         {{ 'view_rule.action.displayflux' | trans }}
     </a>
-    <a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" title="" role="button" class="btn btn-outline-success mb-2">
+    <a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" title="" role="button" class="btn btn-outline-success mb-2 disabled">
         {{ 'view_rule.action.duplic_rule' | trans }}
     </a>
     {% if is_granted('ROLE_SUPER_ADMIN') %}
