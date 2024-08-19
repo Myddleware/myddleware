@@ -2107,6 +2107,10 @@ use App\Entity\Workflow;
          */
         public function infoField(Request $request, $field, $type): Response
         {
+            $premium = $_ENV['PREMIUM'] ?? null;
+        
+            $premium_activated = ($premium === 'true');
+
             $session = $request->getSession();
             $myddlewareSession = $session->get('myddlewareSession');
             // We always add data again in session because these data are removed after the call of the get
@@ -2116,6 +2120,7 @@ use App\Entity\Workflow;
                     return $this->render('Rule/create/onglets/info.html.twig', [
                         'field' => $myddlewareSession['param']['rule'][0][$type]['fields'][$field],
                         'name' => htmlentities(trim($field)),
+                        'premium_activated' => $premium_activated,
                     ]
                     );
                 // SuiteCRM connector uses this structure instead
@@ -2125,6 +2130,7 @@ use App\Entity\Workflow;
                     return $this->render('Rule/create/onglets/info.html.twig', [
                         'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
                         'name' => htmlentities(trim($field)),
+                        'premium_activated' => $premium_activated,
                     ]
                     );
                 } else {
@@ -2134,6 +2140,7 @@ use App\Entity\Workflow;
                             return $this->render('Rule/create/onglets/info.html.twig', [
                                 'field' => $subModule[$field],
                                 'name' => htmlentities(trim($field)),
+                                'premium_activated' => $premium_activated,
                             ]
                             );
                         }
@@ -2142,12 +2149,14 @@ use App\Entity\Workflow;
                 // On retourne vide si on l'a pas trouvé précédemment
                 return $this->render('Rule/create/onglets/info.html.twig', [
                     'field' => '',
+                    'premium_activated' => $premium_activated,
                 ]
                 );
             }
 
             return $this->render('Rule/create/onglets/info.html.twig', [
                 'field' => '',
+                'premium_activated' => $premium_activated,
             ]
             );
         }
