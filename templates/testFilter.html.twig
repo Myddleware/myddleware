@@ -116,20 +116,6 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="target" hidden="true">
-            {{ form_label(form.document.target, 'list_flux.filter.target_id'|trans) }}
-            <div class="input-group">
-                {{ form_widget(form.document.target, {'required': false}) }}
-            </div>
-        </div>
-
-        <div class="col-md-4" id="sourceId" hidden="true">
-            {{ form_label(form.document.sourceId, 'list_flux.filter.source_id'|trans) }}
-            <div class="input-group">
-                {{ form_widget(form.document.sourceId, {'required': false}) }}
-            </div>
-        </div>
-
           <div class="col-md-4" id="message" hidden="true">
             {{ form_label(form.message.message, 'list_flux.filter.message'|trans) }}
             <div class="input-group">

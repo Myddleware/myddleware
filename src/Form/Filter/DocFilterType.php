@@ -35,20 +35,6 @@ class DocFilterType extends AbstractType
                 ],
                 'multiple' => true, // enable multiple choices
             ])
-            ->add('sourceId',  TextType::class, [
-                'attr' => [
-                    'placeholder' => 'Source Id',
-                    'class' => 'form-control mt-2',
-                    'id' => 'source'
-                ],
-            ])
-            ->add('target',  TextType::class, [
-                'attr' => [
-                    'placeholder' => 'Target Id',
-                    'class' => 'form-control mt-2',
-                    'id' => 'target'
-                ],
-            ])
             ->add('sort_field',  TextType::class, [
                 'required' => false,
                 'attr' => [
