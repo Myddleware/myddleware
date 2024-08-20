@@ -1063,8 +1063,12 @@ class jobcore
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function clearData()
+    public function clearData($actvieRule)
     { 	
+		$where = "ruleparam.name = 'delete'";
+		if (!empty($actvieRule)) {
+			$where .= " AND rule.active = '1' ";
+		}
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "	SELECT 
 							rule.id,
@@ -1074,8 +1078,7 @@ class jobcore
 						FROM rule
 							INNER JOIN ruleparam
 								ON rule.id = ruleparam.rule_id
-						WHERE
-							ruleparam.name = 'delete'";
+						WHERE ".$where;
         $stmt = $this->connection->prepare($sqlParams);
         $result = $stmt->executeQuery();
         $rules = $result->fetchAllAssociative();
