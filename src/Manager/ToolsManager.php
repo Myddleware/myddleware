@@ -227,7 +227,11 @@ class toolscore
 				$sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
 				$apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $sendinblue);
 				$sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
-				$sendSmtpEmail['to'] = array(array('email' => $to));
+				$recipients = array();
+				foreach($to as $recipient) {
+					$recipients[] = array('email' => $recipient);
+				}
+				$sendSmtpEmail['to'] = $recipients;
 				$sendSmtpEmail['subject'] = $subject;
 				$sendSmtpEmail['htmlContent'] = $message;
 				$sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');				

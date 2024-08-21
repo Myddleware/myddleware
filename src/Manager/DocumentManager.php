@@ -2715,7 +2715,7 @@ class documentcore
 									}
 
 									// Execute action depending of the function in the workflow
-									$arguments = unserialize($action['arguments']);
+									$arguments = $this->setWorkflowNotificationArguments($action);
 									switch ($action['action']) {
 										case 'generateDocument':
 											$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
@@ -2765,6 +2765,24 @@ class documentcore
             $this->logger->error($this->id.' - Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->generateDocLog('E','Failed to run all workflows : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
+	}
+
+	protected function setWorkflowNotificationArguments($action) {
+		$arguments = unserialize($action['arguments']);
+		// In case of notification, we add informations on the message
+		if ($action['action'] == 'sendNotification') {
+			$arguments['message'] .= '<br><br>Document ID : '.$this->id.'<br><br>';
+			if (!empty($this->sourceData)) {
+				$arguments['message'] .= 'Detail of the document : <br>';
+				foreach($this->sourceData as $key => $value) {
+					$arguments['message'] .= $key.' : '.$value.'<br>';
+				}
+			}
+			$arguments['message'] .= '<br>Best regards<br>Myddleware';
+			// We transform the string to array in case there are several recipients
+			$arguments['to'] = explode(',',$arguments['to']);
+		}
+		return $arguments;
 	}
 
 	// Generate a document using the rule id and search parameters
