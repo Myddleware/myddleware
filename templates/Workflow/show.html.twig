@@ -202,7 +202,7 @@
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 									<td class="ctr">{{ log.id }}</td>
 									<td class="ctr">
-										<a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a>
+										<a href="{{ path('workflow_show', {'id': log.workflow.id}) }}">{{ log.workflow.name }}</a>
 									</td>
 									<td class="ctr">
 										<a href="{{ path('task_view',{'id' : log.job.id }) }}">{{ log.job.id }}</a>
