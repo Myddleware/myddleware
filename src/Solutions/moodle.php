@@ -35,6 +35,7 @@ class moodlecore extends solution
     protected $moodleClient;
     protected array $required_fields = [
         'default' => ['id'],
+        'get_users_statistics_by_date' => ['id', 'timemodified'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
@@ -118,6 +119,7 @@ class moodlecore extends solution
                     'courses' => 'Courses',
                     'get_users_completion' => 'Get course activity completion',
                     'get_users_last_access' => 'Get users last access',
+                    'get_users_statistics_by_date' => 'Get users statistics',
                     'get_enrolments_by_date' => 'Get enrolments',
                     'get_course_completion_by_date' => 'Get course completion',
                     'get_user_compentencies_by_date' => 'Get user compentency',
@@ -215,7 +217,6 @@ class moodlecore extends solution
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
-
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error code $xml->ERRORCODE : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
             }

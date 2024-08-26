@@ -87,6 +87,15 @@ $moduleFields = [
         'customfields' => ['label' => 'Custom fields', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
+	
+	'get_users_statistics' => [
+        'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'totallogins' => ['label' => 'Total logins', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'pagesviewed' => ['label' => 'Pages viewed', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'lastquizattempt' => ['label' => 'Last quiz attempt', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'lastaccess' => ['label' => 'Last access', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+    ],
 
     'courses' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
@@ -312,6 +321,9 @@ $moduleFields = [
         'aggregationstatus' => ['label' => 'Aggregation status', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'aggregationweight' => ['label' => 'Aggregation weight', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'itemname' => ['label' => 'Item name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'itemtype' => ['label' => 'Item type', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'itemmodule' => ['label' => 'Item module', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'iteminstance' => ['label' => 'Item instance', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'course_fullname' => ['label' => 'Course fullname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'course_shortname' => ['label' => 'Course shortname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'userid' => ['label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
