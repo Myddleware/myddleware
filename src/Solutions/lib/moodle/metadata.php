@@ -88,7 +88,7 @@ $moduleFields = [
         'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
 	
-	'get_users_statistics' => [
+	'get_users_statistics_by_date' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'totallogins' => ['label' => 'Total logins', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
