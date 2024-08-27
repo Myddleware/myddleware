@@ -183,6 +183,9 @@ view_rule:
         read_job_lock: DébloquerDébloqué
         read_job_lock_success: La régle a bien été débloqué
         read_job_lock_error: Impossible de débloquer la règle
+        order: Ordre
+        status: Statut
+        workflows: Workflows
     connector:
         title: Connecteur
         solution: Solution
