@@ -169,3 +169,30 @@ li span {
 /* NEW FILTER */
 
 
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+	background-color: #198bca !important;
+    border: 1px solid #198bca !important;
+    color: white !important;
+	/* margin: 6px !important; */
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+	border-right: 0px solid #198bca;
+    color: white !important;
+}
+
+#globalStatus label{
+	margin-bottom: 8px;
+}
+
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--single, .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
+	border: 1px solid #ced4da !important;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple{
+	border: 1px solid #ced4da;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field{
+	margin: 6px;
+}

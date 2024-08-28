@@ -242,3 +242,12 @@ function rearrangeFilters() {
     $(filter).appendTo("#filters-container");
   });
 }
+
+$(document).ready(function() {
+  $('#globalStatus select').select2({
+      placeholder: "Select Global Status",
+      allowClear: true,
+      width: 'resolve' 
+  });
+});
+

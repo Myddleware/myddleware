@@ -50,3 +50,6 @@ require("./js/workflows.js");
 
 // start the Stimulus application
 import './bootstrap';
+import 'select2/dist/css/select2.css';
+import 'select2';
+
