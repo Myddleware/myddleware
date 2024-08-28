@@ -223,34 +223,36 @@
 		<tr>
 			<td class="value">
 				{% if hasWorkflows %}
-					<table class="table">
-						<thead class="thead-light">
-							<tr>
-								<th class="text-left">{{ 'view_rule.infos.name' | trans }}</th>
-								<th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
-								<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for workflow in workflows %}
-								<tr data-toggle="tooltip" title="{{ workflow.description }}">
-									<td class="title">
-										<a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
-											{{ workflow.name }}
-										</a>
-									</td>
-									<td class="title">
-										{{ workflow.order }}
-									</td>
-									<td class="value">
-										<div class="form-check form-switch">
-											<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
-										</div>
-									</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
+                    {% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
+                    
+                    <table class="table table-sm table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="text-left">{{ 'view_rule.infos.name' | trans }}</th>
+                                <th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
+                                <th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workflow in sorted_workflows %}
+                                <tr data-toggle="tooltip" title="{{ workflow.description }}">
+                                    <td class="title">
+                                        <a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
+                                            {{ workflow.name }}
+                                        </a>
+                                    </td>
+                                    <td class="title">
+                                        {{ workflow.order }}
+                                    </td>
+                                    <td class="value">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 				{% else %}
 					<span>No workflow</span>
 				{% endif %}
