@@ -522,6 +522,7 @@ view_workflow_action:
     action: Action
     order: Ordre
     back_to_workflow: Retour au workflow
+    create: Créer une action
 view_account:
     title: Mon compte
     user_info: Mes informations

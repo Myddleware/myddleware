@@ -525,6 +525,7 @@ view_workflow_action:
     action: Action
     order: Order
     back_to_workflow: Back to the workflow
+    create: Create a new action
 view_account:
     title: My account
     user_info: My information
