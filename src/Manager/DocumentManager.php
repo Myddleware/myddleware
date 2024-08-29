@@ -2401,29 +2401,32 @@ class documentcore
         if (empty($documentDataEntity)) {
             throw new Exception("No document data found for the document ".$docId." and the type ".$dataType.".");
         }
-        // Compare data                        
-        $oldData = json_decode($documentDataEntity->getData());
-        if(!empty($oldData)){
-			if (!$refreshData) {
-				foreach ($newValues as $key => $Value) {
-					foreach ($oldData as $oldKey => $oldValue) {
-						if ($oldKey === $key) {
-							if ($oldValue !== $Value) {
-								$newValues[$oldKey] = $Value;
-								$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed  from  '.$oldValue.' to '.$Value.'. ';
-							}
+        // Get the current values                      
+        $values = json_decode($documentDataEntity->getData(),1);
+        if(!empty($values)){
+			// In case we replace all values
+			if ($refreshData) {
+				$values = $newValues;
+				$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed by '.print_r($newValues,true).'. ';
+			} else {
+				// Replace only the new values 
+				foreach ($newValues as $key => $value) {
+					if(isset($values[$key])) {
+						// Remove the field if code mdw_no_send_field
+						if (str_contains($value,'mdw_no_send_field')) {
+							unset($values[$key]);
+							$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' field '.$key.' removed from document. ';
 						} else {
-							$newValues[$oldKey] = $oldValue;
+							$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' value changed  from  '.$values[$key].' to '.$value.'. ';
+							$values[$key] = $value;
 						}
 					}
 				}
-            } else {
-				$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' document value changed by '.print_r($newValues,true).'. ';
-			}
+            }
             $this->typeError = 'I';
             $this->createDocLog();
             // Update the data of the right type
-            $documentDataEntity->setData(json_encode($newValues, true));
+            $documentDataEntity->setData(json_encode($values, true));
             $this->entityManager->persist($documentDataEntity);
             $this->entityManager->flush();
         }
@@ -2733,6 +2736,16 @@ class documentcore
                                             $this->typeError = 'W';
                                             $this->message = 'Status change using workflow. ';
                                             $this->updateStatus($arguments['status'], true);
+											$this->createWorkflowLog($action, $workflowStatus, $error);
+											break;
+                                        case 'changeData':
+                                            $workflowStatus = 'Success';
+                                            $error = '';
+                                            $this->typeError = 'W';
+                                            $this->message = 'Change fields values. ';
+											if (!empty($arguments['fields'])) {
+												$this->updateDocumentData($this->id, $arguments['fields'], 'T');
+											}
 											$this->createWorkflowLog($action, $workflowStatus, $error);
 											break;
                                         case 'transformDocument':
