@@ -58,6 +58,7 @@ class documentcore
     protected $ruleFields;
     protected $ruleRelationships;
     protected $ruleFilters;
+    protected $variables;
     protected $ruleWorkflows;
     protected bool $workflowAction = false;
     protected $ruleParams;
@@ -325,6 +326,9 @@ class documentcore
 			}
 			if (!empty($param['ruleWorkflows'])) {
 				$this->ruleWorkflows = $param['ruleWorkflows'];
+			}
+			if (!empty($param['variables'])) {
+				$this->variables = $param['variables'];
 			}
 			// Init type error for each new document
 			$this->typeError = 'S';
@@ -1613,9 +1617,16 @@ class documentcore
     public function getTransformValue($source, $ruleField)
     {
         try {
-			// include custom variables that could be used in the formula
+			// Include custom variables that could be used in the formula // TO BE REMOVED
 			if (file_exists( __DIR__.'/../Custom/Utils/myddlewareVariables.php')) {
 				include  __DIR__.'/../Custom/Utils/myddlewareVariables.php';
+			}
+			// Include variable in the database
+			if (!empty($this->variables)) {
+				foreach($this->variables as $key => $value) {
+					$fieldNameDyn = 'mydvar_'.$key;
+					$$fieldNameDyn = $value;
+				}
 			}
             // Manage formula
             if (!empty($ruleField['formula'])) {

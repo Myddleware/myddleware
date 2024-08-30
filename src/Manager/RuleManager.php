@@ -31,6 +31,7 @@ use App\Entity\Document;
 use App\Entity\Rule;
 use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit as RuleParamAudit;
+use App\Entity\Variable;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
 use App\Repository\RuleRelationShipRepository;
@@ -59,6 +60,7 @@ class rulecore
     protected $rule;
     protected $ruleFields;
     protected $ruleParams;
+    protected $variables;
     protected $sourceFields;
     protected $targetFields;
     protected $ruleRelationships;
@@ -162,6 +164,7 @@ class rulecore
 			$this->setRuleWorkflows();
             // Set the rule fields (we use the name_slug in $this->rule)
             $this->setRuleField();
+            $this->setVariable();
         }
     }
 
@@ -848,7 +851,6 @@ class rulecore
     {
         // Permet de charger dans la classe toutes les relations de la règle
         $response = [];
-
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Relate_OK');
@@ -857,6 +859,7 @@ class rulecore
             $param['ruleFields'] = $this->ruleFields;
             $param['ruleRelationships'] = $this->ruleRelationships;
 			$param['ruleWorkflows'] = $this->ruleWorkflows;
+			$param['variables'] = $this->variables;
             $param['jobId'] = $this->jobId;
             $param['api'] = $this->api;
             // Set all config parameters
@@ -2196,6 +2199,21 @@ class rulecore
                     $this->ruleParams[$ruleParam['name']] = ltrim($ruleParam['value']);
                 }
             }
+        } catch (\Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+    }
+
+   // Set variable from the database
+    protected function setVariable()
+    {
+        try {
+			$variablesEntity = $this->entityManager->getRepository(Variable::class)->findAll();
+            if (!empty($variablesEntity)) {
+				foreach ($variablesEntity as $variable) {
+					$this->variables[$variable->getName()] = $variable->getvalue();
+				}
+			}
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
