@@ -40,6 +40,7 @@ class moodlecore extends solution
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
         'get_user_grades' => ['id', 'timemodified'],
+        'get_quiz_attempts' => ['id', 'timemodified'],
         'groups' => ['id', 'timemodified'],
         'group_members' => ['id', 'timeadded'],
     ];
@@ -125,6 +126,7 @@ class moodlecore extends solution
                     'get_user_compentencies_by_date' => 'Get user compentency',
                     'get_competency_module_completion_by_date' => 'Get compentency module completion',
                     'get_user_grades' => 'Get user grades',
+                    'get_quiz_attempts' => 'Get quiz attempts',
                     'groups' => 'Groups',
 					'group_members' => 'Group members',
                 ];
