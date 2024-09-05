@@ -267,7 +267,7 @@ class moodlecore extends solution
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->error($result['error']);
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             throw new \Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
         return $result;

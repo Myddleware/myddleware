@@ -122,7 +122,7 @@ class formulafunctioncore
         }
     }
 	
-	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false)
+	public static function lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, $field, $rule, $errorIfEmpty=false, $errodIfNoFound=true, $parent=false, $forceDirection=null)
 	{
 		// Manage error if empty
 		if (empty($field)) {
@@ -134,7 +134,9 @@ class formulafunctioncore
 		}
 		// In case of simulation during rule creation (not edition), we don't have the current rule id.
 		// We set direction = 1 by default
-		if ($currentRule === 0) {
+		if ($forceDirection !== null) {
+			$direction = $forceDirection;
+		} elseif ($currentRule === 0) {
 			$direction = 1;
 		} else {
 			// Get rules detail
