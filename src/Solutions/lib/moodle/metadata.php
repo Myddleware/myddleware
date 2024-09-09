@@ -90,6 +90,9 @@ $moduleFields = [
 	
 	'get_users_statistics_by_date' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'username' => ['label' => 'Username', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+        'lastname' => ['label' => 'Lastname', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
+        'email' => ['label' => 'Email', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'timemodified' => ['label' => 'Time modified', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'totallogins' => ['label' => 'Total logins', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'pagesviewed' => ['label' => 'Pages viewed', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
