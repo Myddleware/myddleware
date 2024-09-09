@@ -471,6 +471,8 @@ view_task:
 list_workflow:
     total: Total des workflows
     empty: Pas workflows
+    searchruleName: Rechercher par nom de règle
+    searchName: Rechercher par nom
     th:
         id: Id
         RuleName: Nom de la règle

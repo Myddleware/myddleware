@@ -474,6 +474,8 @@ view_task:
 list_workflow:
     total: Total of workflows
     empty: No workflows
+    searchruleName: Search by rule name
+    searchName: Search by name
     th:
         id: Id
         ruleName: Rule name

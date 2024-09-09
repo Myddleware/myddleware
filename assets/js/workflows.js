@@ -1,4 +1,64 @@
 $(document).ready(function () {
+
+  function fetchFilteredData() {
+    var workflowName = $('#workflow_name').val();
+    var ruleName = $('#rule_name').val();
+
+
+    $.ajax({
+      url: workflowListUrl, 
+      type: 'GET',
+      data: {
+        workflow_name: workflowName,
+        rule_name: ruleName
+      },
+      success: function (response) {
+        console.log("Réponse reçue :", response);
+        $('#workflowTableContainer').html(response);
+
+        // $('#workflowTableContainer').html($(response).find('#workflowTableContainer').html());
+      },
+      error: function (xhr, status, error) {
+        console.error("Erreur lors de la recherche :", status, error);
+      }
+    });
+  }
+
+  $('#workflow_name, #rule_name').on('keyup', function () {
+    fetchFilteredData();
+  });
+
+  $(".form-check-input").on("change", function () {
+    var $input = $(this);
+    var entityId = $input.data("id");
+    var entityType = $input.data("type");
+    var newState = $input.is(":checked") ? 1 : 0;
+
+    var pathArray = window.location.pathname.split("/");
+    var basePath = window.location.origin + "/" + pathArray[1] + "/" + pathArray[2];
+    var currentUrl = `${basePath}/${entityType}/${entityType}/toggle/${entityId}`;
+
+    $.ajax({
+      url: currentUrl,
+      type: "POST",
+      data: { newState: newState },
+      beforeSend: function () {
+        console.log(`Before sending the request for ${entityType} ID: ${entityId}`);
+      },
+      success: function (response) {
+        console.log(`Success response received for ${entityType} ID: ${entityId}`, response);
+      },
+      error: function (xhr, status, error) {
+        console.error(`Error received for ${entityType} ID: ${entityId}`, xhr, status, error);
+        alert("Erreur lors de la bascule");
+      },
+      complete: function (xhr, status) {
+        console.log(`Request completed for ${entityType} ID: ${entityId}`, status);
+      },
+    });
+  });
+
+
   $(".form-check-input").on("change", function () {
     var $input = $(this);
     var entityId = $input.data("id");
@@ -103,4 +163,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
+
+  
 });
