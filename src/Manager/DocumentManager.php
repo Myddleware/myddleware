@@ -1624,7 +1624,7 @@ class documentcore
 			// Include variable in the database
 			if (!empty($this->variables)) {
 				foreach($this->variables as $key => $value) {
-					$fieldNameDyn = 'mydvar_'.$key;
+					$fieldNameDyn = 'mdwvar_'.$key;
 					$$fieldNameDyn = $value;
 				}
 			}
