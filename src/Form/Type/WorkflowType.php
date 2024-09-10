@@ -45,7 +45,7 @@ class WorkflowType extends AbstractType
             $builder->add('description', TextType::class, ['label' => 'Description']);
             $builder->add('Rule', EntityType::class, [
                 'class' => Rule::class,
-                'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['active' => true]),
+                'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['deleted' => 0]),
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'constraints' => [

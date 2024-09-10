@@ -155,9 +155,7 @@ class WorkflowActionController extends AbstractController
         $this->template = $template;
     }
 
-    protected function getInstanceBdd()
-    {
-    }
+    protected function getInstanceBdd() {}
 
 
     // public function to delet the workflow by id (set deleted to 1)
@@ -355,7 +353,7 @@ class WorkflowActionController extends AbstractController
                     ])
                     ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
+                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
                         'required' => false,
@@ -413,8 +411,6 @@ class WorkflowActionController extends AbstractController
 
                 if ($form->isSubmitted() && $form->isValid()) {
 
-
-
                     $workflowAction->setModifiedBy($this->getUser());
 
                     $action = $form->get('action')->getData();
@@ -434,8 +430,7 @@ class WorkflowActionController extends AbstractController
 
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
-
-
+                    
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
                     $to = $form->get('to')->getData();
@@ -657,7 +652,7 @@ class WorkflowActionController extends AbstractController
                     ])
                     ->add('ruleId', EntityType::class, [
                         'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['active' => true]),
+                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
                         'required' => false,
@@ -975,21 +970,21 @@ class WorkflowActionController extends AbstractController
     public function toggleWorkflowAction(Request $request, EntityManagerInterface $em, WorkflowActionRepository $workflowActionRepository, string $id): JsonResponse
     {
         $workflowAction = $workflowActionRepository->find($id);
-    
+
         if (!$workflowAction) {
             return new JsonResponse(['status' => 'error', 'message' => 'Workflow action not found'], 404);
         }
-    
+
         $workflowAction->setActive(!$workflowAction->getActive());
         $workflowAction->setDateModified(new \DateTime());
-    
+
         try {
             $em->persist($workflowAction);
             $em->flush();
         } catch (\Exception $e) {
             return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la sauvegarde du workflow action'], 500);
         }
-    
+
         return new JsonResponse(['status' => 'success', 'active' => $workflowAction->getActive()]);
     }
 }

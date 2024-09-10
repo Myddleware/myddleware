@@ -50,4 +50,13 @@
     font-size: 1rem;
 }
 
+.card-title-workflow{
+    font-size: x-large;
+    font-weight: 700;
+}
+
+.text-left{
+    text-align: left !important;
+}
+
 

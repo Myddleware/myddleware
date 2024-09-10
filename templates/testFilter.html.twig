@@ -90,7 +90,7 @@
         <div class="col-md-4" id="globalStatus" hidden="true">
             {{ form_label(form.document.globalStatus, 'list_flux.filter.global_status'|trans) }}
             <div class="input-group">
-                {{ form_widget(form.document.globalStatus, {'required': false}) }}
+                 {{ form_widget(form.document.globalStatus, {'required': false, 'attr': {'class': 'select2'}}) }}
             </div>
         </div>
 
@@ -335,52 +335,72 @@
 </section>
 
 {% block javascript %}
+    <!-- Script pour Google Charts -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- Encore scripts (app et filter) -->
     {{ encore_entry_script_tags('app') }}
     {{ encore_entry_script_tags('filter') }}
-{% endblock javascript %}
-<script type="text/javascript">
-    var path_remove_filter = "{{ path('remove_filter') }}";
-    var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
-    var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
-    var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
-    var path_img = "{{ asset('build/images/regle/') }}";
-    var lang = "{{ app.request.locale }}";
-    var mass_cancel = "{{ path('flux_mass_cancel') }}";
-    var mass_unlock = "{{ path('flux_mass_unlock') }}";
-    var mass_run = "{{ path('flux_mass_run') }}";
-    var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
-    var csvdocumentids = "{{ csvdocumentids }}";
-    
-    // DATE & TIME PICKER FOR THE DATE OF MODIFICATION FILTERS
-    start = new dtsel.DTS('#form_date_modif_end',  {
-        showTime: true
-    });
-    end = new dtsel.DTS('#form_date_modif_start',  {
-        showTime: true
-    });
-</script>
 
-<script>
-$(document).ready(function() {
-    $('.get-log-msg').click(function() {
-        var docId = $(this).data('doc-id');
-        var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
-        var testlastmessagefinal= testLastMessage.replace("PLACEHOLDER_ID", docId);
-        console.log(docId);
-        console.log(testlastmessagefinal);
-        $.ajax({
-            url: testlastmessagefinal,
-            method: 'POST',
-            success: function(data) {
-                $('#log-msg-' + docId).text(data);
-                alert(data);
-            }
+    <!-- Script pour Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Scripts personnalisés -->
+    <script type="text/javascript">
+        var path_remove_filter = "{{ path('remove_filter') }}";
+        var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
+        var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
+        var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
+        var path_img = "{{ asset('build/images/regle/') }}";
+        var lang = "{{ app.request.locale }}";
+        var mass_cancel = "{{ path('flux_mass_cancel') }}";
+        var mass_unlock = "{{ path('flux_mass_unlock') }}";
+        var mass_run = "{{ path('flux_mass_run') }}";
+        var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
+        var csvdocumentids = "{{ csvdocumentids }}";
+        
+        // Initialisation du date & time picker pour les filtres de date de modification
+        start = new dtsel.DTS('#form_date_modif_end',  {
+            showTime: true
         });
-    });
-});
-</script>
+        end = new dtsel.DTS('#form_date_modif_start',  {
+            showTime: true
+        });
 
+        // Initialisation de Select2 et autres scripts après le chargement du document
+        $(document).ready(function() {
+            // Initialisation de Select2 sur le champ globalStatus
+            $('#globalStatus .select2').select2({
+                placeholder: "Select Global Status",
+                allowClear: true,
+                width: 'resolve'
+            });
+
+            // Script pour récupérer et afficher les messages d'erreur liés aux documents
+            $('.get-log-msg').click(function() {
+                var docId = $(this).data('doc-id');
+                var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
+                var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
+                
+                console.log(docId);
+                console.log(testlastmessagefinal);
+
+                $.ajax({
+                    url: testlastmessagefinal,
+                    method: 'POST',
+                    success: function(data) {
+                        $('#log-msg-' + docId).text(data);
+                        alert(data);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock javascript %}
 {% endblock %}
-
-{% block cssin %}{% endblock cssin %}
+{% block cssin %}
+    {{ encore_entry_link_tags('app') }}
+    {{ encore_entry_link_tags('filter') }}
+    <!-- Styles pour Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock cssin %}

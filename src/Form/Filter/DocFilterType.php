@@ -29,7 +29,7 @@ class DocFilterType extends AbstractType
             ->add('globalStatus',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentManager::lstGblStatus(),
                 'attr' => [
-                    'class' => 'form-control mt-2',
+                    'class' => 'form-control mt-2 select2',
                     'id' => 'globalStatus',
                     'placeholder' => 'Global Status',
                 ],

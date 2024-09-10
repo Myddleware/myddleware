@@ -183,6 +183,9 @@ view_rule:
         read_job_lock: DébloquerDébloqué
         read_job_lock_success: La régle a bien été débloqué
         read_job_lock_error: Impossible de débloquer la règle
+        order: Ordre
+        status: Statut
+        workflows: Workflows
     connector:
         title: Connecteur
         solution: Solution
@@ -468,6 +471,8 @@ view_task:
 list_workflow:
     total: Total des workflows
     empty: Pas workflows
+    searchruleName: Rechercher par nom de règle
+    searchName: Rechercher par nom
     th:
         id: Id
         RuleName: Nom de la règle
@@ -519,6 +524,7 @@ view_workflow_action:
     action: Action
     order: Ordre
     back_to_workflow: Retour au workflow
+    create: Créer une action
 view_account:
     title: Mon compte
     user_info: Mes informations
