@@ -702,7 +702,10 @@ menu:
         list: Liste
     flux:
         title: Documents
-        list: Liste         
+        list: Liste   
+    variable:
+        title: Documents
+        list: Liste des variables      
     job:
         title: Tâches
         list: Liste
@@ -976,3 +979,20 @@ duplicate_rule:
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
 banner: Crontab est désactivé
+variable:
+  back_to_list: Retour à la liste des variables
+  editing: Modification de la variable
+  save: Enregistrer
+  total: Total des Variables
+  btn:
+    edit: Modifier
+    delete: Supprimer
+    view: Voir
+  create_new: Créer une nouvelle variable
+  list_title: Liste des Variables
+  confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
+  no_variables: Aucune variable trouvée.
+  table_headers:
+    name: Nom
+    value: Valeur
+    actions: Actions
