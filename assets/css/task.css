@@ -22,19 +22,19 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#task, #workflows {
+#task, #workflows, #variables {
     padding: 20px 0;
     text-align: center;
 }
 
-#task th, #workflows th {
+#task th, #workflows th, #variables th {
     background: #ECECEC;
     height: 30px;
     padding: 2px;
     text-align: center;
 }
 
-#task tr, #workflows tr {
+#task tr, #workflows tr, #variables tr {
     border-bottom: 1px solid #ccc;
 }
 
@@ -73,7 +73,8 @@
 }
 
 #task table a, #task table a:hover,
-#workflows table a, #workflows table a:hover {
+#workflows table a, #workflows table a:hover, 
+#variables table a, #variables table a:hover {
     color: #0F66A9;
     text-decoration: none;
 }
@@ -81,11 +82,11 @@
     font-weight: bold;
 }
 
-#task #headertab, #workflows #headertab {
+#task #headertab, #workflows #headertab, #variables #headertab {
     margin-top:20px;
 }
 
-#task #headertab td, #workflows #headertab td {
+#task #headertab td, #workflows #headertab td, #variables #headertab td {
     height: 50px;
     /* white-space: nowrap; */
     /* max-width: 200px; */
@@ -95,7 +96,7 @@
     word-wrap: break-word;
 }
 
-#task .listepager .count, #workflows .listepager .count {
+#task .listepager .count, #workflows .listepager .count, #variables .listepager .count {
     max-width: 80px;
     width: 80px;
     min-width: 80px;
