@@ -47,6 +47,7 @@ class sendinbluecore extends solution
                                 ];
     protected array $FieldsDuplicate = ['contacts' => ['email', 'SMS']];
     protected int $limitEmailActivity = 100;
+    protected int $limitCallContact = 1000;
     protected bool $sendDeletion = true;
 
     public function getFieldsLogin(): array
@@ -353,17 +354,21 @@ class sendinbluecore extends solution
                     }
 				// Search all contact modified after the reference date
                 } else {
+					$limitReached = false;
                     $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
                     $modifiedSince = new \DateTime($dateRef);
+					if ($param['limit'] < $this->limitCallContact) {
+						$this->limitCallContact = $param['limit'];
+					}
 					// Get all contacts modified since the date in parameter
 					do {
 						$recordsCall = [];
-						$resultApi = $apiInstance->getContacts($param['limit'], $offset, $modifiedSince, 'asc');
+						$resultApi = $apiInstance->getContacts($this->limitCallContact, $offset, $modifiedSince, 'asc');
 						$recordsCall = $resultApi->getContacts();
 						if (!empty($recordsCall)) {
 							$records = array_merge($recordsCall, $records);
 						}
-						$offset += $param['limit'];
+						$offset += $this->limitCallContact;
 					} while (!empty($recordsCall));
 					// If several call, we sort by date modified (sort is by date created in Brevo) and limit the result
 					if ($offset > $param['limit']) {
@@ -372,8 +377,10 @@ class sendinbluecore extends solution
 						array_multisort($modified, SORT_ASC, $records);
 						// Get only the number of record requested
 						$records = array_slice($records, 0, $param['limit']); 
+						$limitReached = true;
 					}
                 }
+
 				// In case we search data linked to teh contacts
 				if ($param['module'] != 'contacts') {
 					// Get the stats linked to the contact
@@ -384,9 +391,18 @@ class sendinbluecore extends solution
 					} else {
 						$records = array();
 					}
+					
 					// Return param, we could force the reference date
 					if (!empty($contactsStats['ruleParams'])) {
 						$result['ruleParams'] = $contactsStats['ruleParams'];
+					}
+
+					// if we reach the limit and the new date ref equal the old date ref then we generate an error
+					if (
+							$limitReached
+						AND $contactsStats['ruleParams'][0]['value'] == $param['date_ref']
+					) {
+						throw new \Exception('All records read have the same reference date. Please increase the number of data read by changing the limit attribute in job');
 					}
 				}
                 break;
@@ -460,7 +476,10 @@ class sendinbluecore extends solution
 							} 
 						// Get the data when search by date_ref
 						} else {
-							if ($contactStat['eventTime'] > $dateRef) {
+							if (
+									$contactStat['eventTime'] > $dateRef
+								AND !empty($record['email'])
+							) {
 								$result['records'][] = array(
 												'id' => $recordId,
 												'contactId' => $record['id'],
