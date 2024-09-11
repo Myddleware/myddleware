@@ -125,11 +125,11 @@ To create your Salesforce connector, you will need the following credentials:
 #### Where to find your security token ?
 
 Log in to Salesforce with your username and password.
-1) From the homepage of your account, click on your name in the top right corner, then on ``Setup``.
-2) Then, on the left-hand side, in the ``Personal Setup`` section of the menu, click on ``My Personal Information`` then ``Reset My Security Token``.
+1) From the homepage of your account, click on your avatar/profile icon in the top-right corner, then select ``Settings``.
+2) In the left-hand menu, under ``My Personal Information``, click on ``Reset My Security Token``.
 3) Finally, click on ``Reset my security token`` (it will be sent by email).
 
-![Salesforce Reset Security Token navigation](images/credentials/salesforce_access_token_nav.png)
+![Salesforce Reset Security Token navigation](images/credentials/salesforce_lightning_token.png)
 
 #### Consumer Key and Consumer Secret
 
