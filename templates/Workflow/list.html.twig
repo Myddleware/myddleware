@@ -20,77 +20,70 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.workflow.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.workflow.list'|trans}}{% endblock titlesm %} 
-{% block body %} 
+{% block title %}
+	{{parent()}}
+	|
+	{{'title.workflow.list'|trans}}
+{% endblock %}
+{% block titlesm %}
+	{{'title.workflow.list'|trans}}
+{% endblock titlesm %}
+{% block body %}
 	<div id="workflows">
 
-	<div>
-        <a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
-    </div>
-
-<div>
-	{% for message in app.flashes('success') %}
-		<div class="alert alert-success" role="alert">
-			{{ message }}
+		<div>
+			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
 		</div>
-	{% endfor %}
+
+		<div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success" role="alert">
+					{{ message }}
+				</div>
+			{% endfor %}
 
 
 			{% if nb_workflow > 0 %}
 				<div id="fd-title-small" class="left">
-					<p>{{'list_workflow.total'|trans}} :<p> <span class="nb_workflow">{{ nb_workflow }}</span>
+					<p>{{'list_workflow.total'|trans}}:
+					</p>
+					<p>
+						<span class="nb_workflow">{{ nb_workflow }}</span>
+					</p>
 				</div>
+					<div class="clr"></div>
+
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="col-md-6">
+        <form id="workflowFilterForm" action="{{ path('workflow_list') }}" method="get" class="p-4 rounded">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-12">
+                    <div class="form-floating">
+                        <input type="text" name="workflow_name" id="workflow_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Workflow Name" value="{{ app.request.query.get('workflow_name') }}">
+                        <label for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-floating">
+                        <input type="text" name="rule_name" id="rule_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rule Name" value="{{ app.request.query.get('rule_name') }}">
+                        <label for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 
 
 				<div class="clr"></div>
-				<table class="listepager table container">
-					{% if entities is not empty %}    
-						<tr>
-							<th>{{'list_workflow.th.name'|trans}}</th>
-							<th>{{'list_workflow.th.ruleName'|trans}}</th>
-							<th>{{'list_workflow.th.description'|trans}}</th>
-							<th>{{'list_workflow.th.condition'|trans}}</th>
-							<th>{{'list_workflow.th.order'|trans}}</th>
-							<th>{{'list_workflow.th.active'|trans}}</th>
-							<th>{{'list_workflow.th.option'|trans}}</th>
-						</tr> 
-						{% for workflow in entities %}
-							<tr>
-								<td><a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a></td>
-								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
-								<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{{ workflow.description }}</td>
-								<td>{{ workflow.condition }}</td>
-								<td>{{ workflow.order }}</td>
-								<td class="value workflow_on_off">
-									<div class="form-check form-switch">
-										<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
-									</div>
-								</td>
-								<td class="CRUD-icons">
-									<a href="{{ path('workflow_edit', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
-										<span class="btn-opt">
-											<i class="fa fa-pen" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a class="delete" href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
-										<span class="btn-opt">
-											<i class="fa fa-trash" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a href="{{ path('workflow_show', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
-										<span class="btn-opt">
-											<i class="fa fa-file" aria-hidden="true"></i>
-										</span>
-									</a>
-								</td>
-							</tr>
-						{% endfor %}
-					{% endif %}
-				</table>				
+				<div id="workflowTableContainer">
+					{% include 'Workflow/_workflow_table.html.twig' %}
+				</div>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
@@ -100,15 +93,15 @@
 				<p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
 			{% endif %}
 		</div>
-    </div>
+	</div>
 
-    {# ------------- PARAMETRES JQUERY ------------- #}
-    <script type="text/javascript">   
-		var path_img = "{{ asset('build/images/regle/') }}";
-		var lang = "{{app.request.locale}}";
-    </script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
+	{# ------------- PARAMETRES JQUERY ------------- #}
+	<script type="text/javascript">
+		var workflowListUrl = "{{ path('workflow_list') }}";
+var path_img = "{{ asset('build/images/regle/') }}";
+var lang = "{{ app.request.locale }}";
+	</script>
+	{# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}
 
 {% block cssin %}{% endblock cssin %}
-

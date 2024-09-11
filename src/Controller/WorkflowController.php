@@ -174,20 +174,47 @@ class WorkflowController extends AbstractController
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
-
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
-
-            $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0], ['order' => 'ASC']);
-
-            // List of task limited to 1000 and rder by status (start first) and date begin
+    
+            // Récupérer les filtres depuis la requête
+            $workflowName = $request->query->get('workflow_name');
+            $ruleName = $request->query->get('rule_name');
+    
+            // Modifier la requête pour inclure les filtres
+            $queryBuilder = $em->getRepository(Workflow::class)->createQueryBuilder('w')
+                ->where('w.deleted = 0');
+    
+            if ($workflowName) {
+                $queryBuilder->andWhere('w.name LIKE :workflowName')
+                    ->setParameter('workflowName', '%' . $workflowName . '%');
+            }
+    
+            if ($ruleName) {
+                $queryBuilder->join('w.rule', 'r')
+                    ->andWhere('r.name LIKE :ruleName')
+                    ->setParameter('ruleName', '%' . $ruleName . '%');
+            }
+    
+            $queryBuilder->orderBy('w.order', 'ASC');
+            $workflows = $queryBuilder->getQuery()->getResult();
+    
+            // Pagination
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $workflows,
                 'maxPerPage' => $this->params['pager'] ?? 25,
                 'page' => $page,
             ], false);
-
-
+    
+            // check if the request is an AJAX request
+            if ($request->isXmlHttpRequest()) {
+                return $this->render('Workflow/_workflow_table.html.twig', [
+                    'entities' => $workflows,
+                    'pager' => $compact['pager'],
+                ]);
+            }
+    
+            // if not an AJAX request, render the page
             return $this->render(
                 'Workflow/list.html.twig',
                 [
@@ -196,7 +223,7 @@ class WorkflowController extends AbstractController
                     'pager' => $compact['pager'],
                 ]
             );
-            throw $this->createNotFoundException('Error');
+    
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }

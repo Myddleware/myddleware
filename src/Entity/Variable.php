@@ -42,12 +42,12 @@ class Variable
     /**
      * @ORM\Column(name="name", type="string", length=100, nullable=false)
      */
-    private string $name;
+    private string $name = '';
 
     /**
      * @ORM\Column(name="value", type="text", nullable=false)
      */
-    private string $value;
+    private string $value  = '';
 	
 
     public function getId(): int
@@ -55,12 +55,17 @@ class Variable
         return $this->id;
     }
 
-    public function setName($name): self
+    public function setName(string $name): self
     {
-        $this->name = $name;
-
+        if (strpos($name, 'mdwvar_') !== 0) {
+            $this->name = 'mdwvar_' . $name;
+        } else {
+            $this->name = $name;
+        }
+    
         return $this;
     }
+    
 
     public function getName(): string
     {

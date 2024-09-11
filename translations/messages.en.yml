@@ -185,6 +185,9 @@ view_rule:
         read_job_lock: Unlock job
         read_job_lock_success: The job has been unlocked
         read_job_lock_error: An error occurred while unlocking the job
+        order: Order
+        status: Status
+        workflows: Workflows
     connector:
         title: Connector
         solution: Solution
@@ -471,6 +474,8 @@ view_task:
 list_workflow:
     total: Total of workflows
     empty: No workflows
+    searchruleName: Search by rule name
+    searchName: Search by name
     th:
         id: Id
         ruleName: Rule name
@@ -522,6 +527,7 @@ view_workflow_action:
     action: Action
     order: Order
     back_to_workflow: Back to the workflow
+    create: Create a new action
 view_account:
     title: My account
     user_info: My information
@@ -704,7 +710,10 @@ menu:
         list: List
     flux:
         title: Documents
-        list: List         
+        list: List    
+    variable:
+        title: Documents
+        list: List of variables      
     job:
         title: Tasks
         list: List
@@ -996,3 +1005,20 @@ duplicate_rule:
     new_rule: New rule
     success_duplicate: Your rule has been well duplicated
 banner: Crontab is disabled
+variable:
+  back_to_list: Back to the list
+  save: Save
+  editing: Editing of a variable
+  total: Total of Variables
+  btn:
+    edit: Edit
+    delete: Delete
+    view: View
+  create_new: Create a new variable
+  list_title: List of Variables
+  confirm_delete: Are you sure you want to delete this variable?
+  no_variables: No variables found.
+  table_headers:
+    name: Name
+    value: Value
+    actions: Actions

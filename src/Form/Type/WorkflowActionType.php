@@ -34,7 +34,7 @@ class WorkflowActionType extends AbstractType
             ])
             ->add('rule', EntityType::class, [
                 'class' => Rule::class,
-                'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['active' => true]),
+                'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['deleted' => 0]),
                 'choice_label' => 'name',
                 'choice_value' => 'id',
                 'constraints' => [
