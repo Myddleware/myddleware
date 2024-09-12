@@ -261,8 +261,56 @@ Workflows enable the automation of tasks when specific conditions are met. In th
 To create a workflow, 
 1) Navigate to the Rule’s tab and select List of workflows
 2) Click on ``Create new workflow``
-![Workflow - Access to list of workflow](images/advanced_usage/list_workflows.png)
+   
+![Workflow - Create a workflow](images/advanced_usage/create_workflow.png)
 
+A form will be displayed, and you will need to fill it, in order to create your workflow. You will have to set : 
+1) The name
+2) The rule the workflow is related to
+3) The description
+4) The order it will be launched
+5) The condition that will trigger the workflow
+
+![Workflow - create workflow form](images/advanced_usage/create_workflow_form.png)
+
+The code you will use for condition is PHP. It is structured as follows:
+
+        {variable_1} == "Your_condition"
+
+You can write multiple conditions :
+
+        {variable_1} == "Your_condition1" && {variable_2} == "Your_condition2"
+**Important : Your variables must be enclosed in { }** 
+
+You can create a condition based on :
+1) Document Status (variable name : status), ex: "Ready_to_send", "Send", "Error_transformed" 
+2) Document Type (variable name : documentType), ex : "C", "U", "S"
+3) Document Attemps (variable name : attempts), number
+4) A source field data (you have to use this format : source_fieldname)
+5) A target field based on history data (you have to use this format : history_fieldname)
+6) str_contains({message},"Your message")
+
+For exemple, you want to create a workflow that triggers when your document status is Error_transformed and your documentType is C
+
+        {status} == "Error_transformed" && {documentType} == "C"
+
+Then click on save. You are redirected to the workflow detail page. 
+
+![Workflow - Details view](images/advanced_usage/detail_workflow.png)
+
+Click on ``status`` to enable/disable the workflow.  
 ### Workflowaction
 
-### Workflow details
+A workflow action allows you to initiate an operation when the conditions are met to trigger the workflow. In Myddleware, there are 4 different types of actions, which are detailed below.
+
+#### Create an action
+To create an action, click on ``+ Add Action`` on the workflow details view. 
+
+A form will be displayed, and you will need to fill it, in order to create your action. You will have first to :
+1) Fill ```name``` field
+2) Ensure that the associated workflow is the one you want in ```Rule``` field
+3) Fill ```description``` field
+4) Define the order of the action in the workflow process execution, in ```order``` field.
+   
+![Workflowaction - Creation view](images/advanced_usage/create_workflow_action_form.png)
+
