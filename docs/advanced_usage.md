@@ -252,4 +252,17 @@ But once again, the transfer will be cancelled to avoid an infinite loop :
 If the transfer isn’t cancelled, your server will continue to update the same contacts every time. To avoid this, you will 
 have to detect why the transfer isn’t cancelled. It could be because you used the modification date, or because the data
 format is not the same in both applications. 
-To solve this problem, remove some fields in your rule or create a formula to have the same data format in both applications.
+To solve this problem, remove some fields in your rule or create a formula to have the same data format in both applications
+
+## Workflows
+Workflows enable the automation of tasks when specific conditions are met. In the context of data migration, they offer a powerful feature that allows for more efficient linking of your data. By automating these connections, workflows not only streamline the process but also help ensure consistency and accuracy in how data relationships are established and maintained throughout the migration.
+
+### Create a workflow
+To create a workflow, 
+1) Navigate to the Rule’s tab and select List of workflows
+2) Click on ``Create new workflow``
+![Workflow - Access to list of workflow](images/advanced_usage/list_workflows.png)
+
+### Workflowaction
+
+### Workflow details
