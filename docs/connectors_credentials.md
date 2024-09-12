@@ -137,13 +137,11 @@ You need to create an app.
 
 1) To do so, click on your name, then on ``Setup``.
 
-2) Then, on the left-hand side, go to the ``App Setup`` section, then click on ``Create``, then ``Apps``.
+2) Then, on the left-hand side, go to the ``Platform Tools`` section, then click on ``Apps``, then ``App Manager``.
+   
+3) Create a connected app by clicking on ``New Connected App`` in the top-right corner of the App Manager screen.
 
-![Salesforce Create an App navigation](images/credentials/salesforce_create_app.png)
-
-Create a connected app by clicking on ``New`` at the bottom, inside the ``Connected Apps`` panel.
-
-![Salesforce New App button](images/credentials/salesforce_new_connected_app.png)
+![Salesforce Create an App navigation](images/credentials/salesforce_lightning_app_manager.png)
 
 1) Input your App's name, API name and email address.
 2) Then, enable OAuth Settings by clicking on the checkbox.
