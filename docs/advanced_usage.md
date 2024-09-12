@@ -110,6 +110,10 @@ Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/fun
 
         striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
 
+Lookup target IDs from source IDs from a previous rule and vice versa, **lookup(field, rule_id, errorifempty, errorifnotfound)**:
+
+        lookup({Contact__c},"6b5432f1xxxxx",0,0)
+
 ## Relationships
 
 We can create relationships in Myddleware that not only allow us to transfer unrelated data items but whole data models entirely.
