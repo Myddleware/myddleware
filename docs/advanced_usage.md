@@ -114,6 +114,14 @@ Lookup target IDs from source IDs from a previous rule and vice versa, **lookup(
 
         lookup({Contact__c},"6b5432f1xxxxx",0,0)
 
+Constant function that allows you to not send the selected field.
+        
+        "mdw_no_send_field"
+        
+Constant function that allows you to cancel the actual document
+
+        "mdw_cancel_document"
+
 ## Relationships
 
 We can create relationships in Myddleware that not only allow us to transfer unrelated data items but whole data models entirely.
