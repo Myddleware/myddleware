@@ -1,5 +1,22 @@
 $(document).ready(function () {
 
+    // Function to hide or show the Rule field
+    function toggleRuleField() {
+      var actionValue = $('#form_action').val();
+  
+      if (actionValue === 'transformDocument' || actionValue === 'sendNotification' || actionValue === 'updateStatus') {
+        $('#form_ruleId').closest('.form-group').hide();
+      } else {
+        $('#form_ruleId').closest('.form-group').show();
+      }
+    }
+  
+    toggleRuleField();
+  
+    $('#form_action').on('change', function () {
+      toggleRuleField(); 
+    });
+
   function fetchFilteredData() {
     var workflowName = $('#workflow_name').val();
     var ruleName = $('#rule_name').val();
