@@ -27,6 +27,7 @@ namespace App\Controller;
 
 use App\Entity\Variable;
 use Pagerfanta\Pagerfanta;
+use App\Entity\VariableAudit;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,7 +65,7 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
+  /**
      * @Route("/variables/new", name="variable_create")
      */
     public function create(EntityManagerInterface $em, Request $request, TranslatorInterface $translator): Response
@@ -89,6 +90,16 @@ class VariableController extends AbstractController
             $em->persist($variable);
             $em->flush();
 
+            // Create an audit entry
+            $audit = new VariableAudit();
+            $audit->setVariableId($variable->getId());
+            $audit->setDateModified(new \DateTime());
+            $audit->setAfter($variable->getValue());
+            $audit->setByUser($this->getUser()->getUsername());
+
+            $em->persist($audit);
+            $em->flush();
+
             return $this->redirectToRoute('variable_list');
         }
 
@@ -102,6 +113,8 @@ class VariableController extends AbstractController
      */
     public function edit(EntityManagerInterface $em, Request $request, Variable $variable, TranslatorInterface $translator): Response
     {
+        $originalValue = $variable->getValue();
+
         $form = $this->createFormBuilder($variable)
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
@@ -117,6 +130,17 @@ class VariableController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Create an audit entry
+            $audit = new VariableAudit();
+            $audit->setVariableId($variable->getId());
+            $audit->setDateModified(new \DateTime());
+            $audit->setBefore($originalValue);
+            $audit->setAfter($variable->getValue());
+            $audit->setByUser($this->getUser()->getUsername());
+
+            $em->persist($audit);
+            $em->flush();
+
             $em->flush();
 
             return $this->redirectToRoute('variable_list');
@@ -133,6 +157,16 @@ class VariableController extends AbstractController
      */
     public function delete(EntityManagerInterface $em, Variable $variable): Response
     {
+        // Create an audit entry
+        $audit = new VariableAudit();
+        $audit->setVariableId($variable->getId());
+        $audit->setDateModified(new \DateTime());
+        $audit->setBefore($variable->getValue());
+        $audit->setAfter(null);
+        $audit->setByUser($this->getUser()->getUsername());
+
+        $em->persist($audit);
+
         $em->remove($variable);
         $em->flush();
 
