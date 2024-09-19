@@ -267,6 +267,8 @@ class moodlecore extends solution
                     }
                     $result[] = $row;
                 }
+            } elseif (!empty($xml->MESSAGE)) {
+                throw new \Exception("Error : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
             }
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
@@ -338,6 +340,9 @@ class moodlecore extends solution
                         $functionname = 'enrol_manual_enrol_users';
                         break;
                     case 'manual_unenrol_users':
+						$enrolments = [$obj];
+                        $params = ['enrolments' => $enrolments];
+                        $functionname = 'manual_unenrol_users';
                         break;
                     case 'notes':
                         $notes = [$obj];
@@ -467,6 +472,11 @@ class moodlecore extends solution
                         $enrolments = [$obj];
                         $params = ['enrolments' => $enrolments];
                         $functionname = 'enrol_manual_enrol_users';
+                        break;
+					case 'manual_unenrol_users':
+						$enrolments = [$obj];
+                        $params = ['enrolments' => $enrolments];
+                        $functionname = 'enrol_manual_unenrol_users';
                         break;
                     case 'notes':
                         $obj->id = $data['target_id'];
