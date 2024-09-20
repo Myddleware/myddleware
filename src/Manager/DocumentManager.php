@@ -2671,11 +2671,14 @@ class documentcore
 						$$fieldName = $value;
 					}
 				}
-				// include variables used in the formula
-				include __DIR__.'/../Utils/workflowVariables.php';
-				if (file_exists( __DIR__.'/../Custom/Utils/workflowVariables.php')) {
-					include  __DIR__.'/../Custom/Utils/workflowVariables.php';
-				}
+				
+				// Include variables used in the formula
+				$status = $this->status;
+				$documentType = $this->documentType;
+				$attempt = $this->attempt;
+				$message = $this->message;
+				$typeError = $this->typeError;
+				
 				// Execute every workflow of the rule
 				foreach ($this->ruleWorkflows as $ruleWorkflow) {
 					// Add target fields if requested and if not already calculated
