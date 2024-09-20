@@ -699,9 +699,29 @@ class documentcore
             $result = $stmt->executeQuery();
             $result = $result->fetchAssociative();
 
-            // if id found, we stop to send an error
+            // if id found, we stop to send an error, we cancel the predecessor and try again
             if (!empty($result['id'])) {
-                throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
+				// Load the document that locks the current document
+				$paramCancel['id_doc_myddleware'] = $result['id'];
+				$paramCancel['jobId'] = $this->jobId;
+				$docCancel = clone $this;
+				// Cancel the documents that locks the current document
+				$docCancel->setParam($paramCancel, true);
+				$docCancel->docIdRefError = $this->id;
+				$docCancel->setMessage('This document is cancelled because a predecessor document has been generated (same source_id for the same rule). ');
+				$docCancel->updateStatus('Cancel');
+				// Add an error message to the current document
+				$this->docIdRefError = $result['id'];
+				$this->setMessage('The document in reference has been cancelled to execute the current one. ');
+				$this->createDocLog();
+				unset($docCancel);
+				$result = [];
+				$result = $stmt->executeQuery();
+				$result = $result->fetchAssociative();
+				// If there is still another document in error, we set the status "predecessor_ko" for the current document
+				if (!empty($result['id'])) {
+					throw new \Exception('The document '.$result['id'].' is on the same record and is not closed. This document is queued. ');
+				}
             }
 
             // Check predecessor in the opposite bidirectional rule
