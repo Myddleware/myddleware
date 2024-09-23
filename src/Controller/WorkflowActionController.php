@@ -302,7 +302,7 @@ class WorkflowActionController extends AbstractController
                         unset($ruleSourceFields[$key]);
                     }
                     $ruleSourceFields['id'] = 'id';
-                    $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                    $sourceSearchValue[$rule->getName()] = $ruleSourceFields;
                 }
 
 
