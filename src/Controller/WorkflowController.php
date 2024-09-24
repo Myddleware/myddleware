@@ -197,7 +197,7 @@ class WorkflowController extends AbstractController
             // Pagination avec ArrayAdapter car findBy retourne un tableau
             $adapter = new ArrayAdapter($workflows);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(5);
+            $pager->setMaxPerPage(15);
             $pager->setCurrentPage($page);
 
             // Si la requête est AJAX, rendre uniquement la table des workflows
@@ -238,7 +238,7 @@ class WorkflowController extends AbstractController
             // Pagination avec ArrayAdapter
             $adapter = new ArrayAdapter($workflows);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(5);
+            $pager->setMaxPerPage(15);
             $pager->setCurrentPage($page);
 
             // Rendu des workflows paginés
