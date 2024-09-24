@@ -516,6 +516,7 @@ view_workflow:
     add_action: Ajouter une action
     create_by: Créé par
 view_workflow_action:
+    title2: Action du workflow
     title: Détail de l'action du workflow
     edit: Editer cette action
     delete: Supprimer cette action
