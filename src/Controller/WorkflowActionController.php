@@ -349,6 +349,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'changeData' => 'changeData',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
@@ -648,6 +649,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'changeData' => 'changeData',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
