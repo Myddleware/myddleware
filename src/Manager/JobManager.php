@@ -347,6 +347,13 @@ class jobcore
     {
         // Get job data
         $this->logData = $this->getLogData();
+		
+		// No lock should remain but we check to be sure nothing remains locked
+		// Remove lock on document locked by this job
+		$this->documentRepository->removeLock($this->id);
+
+		// Remove lock (send and read) on rule locked by this job
+		$this->ruleRepository->removeLock($this->id);
 
         // Update table job
         return $this->updateJob();
@@ -1490,10 +1497,12 @@ class jobcore
                 //clone because, the job that is not the current job
                 $jobManagerChekJob = clone $this;
                 $jobManagerChekJob->setId($job['id']);
-                $jobManagerChekJob->closeJob();    
+                $jobManagerChekJob->closeJob();   
+				$this->setMessage('Task '.$job['id'].' successfully closed. ');
             }
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
         return true;

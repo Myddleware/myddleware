@@ -427,13 +427,12 @@ class DocumentRepository extends ServiceEntityRepository
 	
     // Remove lock from document using a job id
 	public function removeLock($jobId) {
-        $empty = null;
 		$q = $this->createQueryBuilder('d')
 			->update()
 			->set('d.jobLock', ':empty')
 			->where('d.jobLock = :jobLock')
 			->setParameter('jobLock', $jobId)
-            ->setParameter('empty', $empty)
+            ->setParameter('empty', '')
 			->getQuery();
         $q->execute();
 	}
