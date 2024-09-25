@@ -359,6 +359,7 @@ class WorkflowActionController extends AbstractController
                         'choice_value' => 'id',
                         'required' => false,
                         'label' => 'Rule',
+                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -659,7 +660,7 @@ class WorkflowActionController extends AbstractController
                         'choice_value' => 'id',
                         'required' => false,
                         'label' => 'Rule',
-                        'data' => $em->getRepository(Rule::class)->find($formData['ruleId'])
+                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
