@@ -1637,6 +1637,10 @@ class documentcore
     public function getTransformValue($source, $ruleField)
     {
         try {
+			// Error if no source data
+			if (empty($source)) {
+				throw new \Exception('Source data are empty. Failed to transform data.' );
+			}
 			// Include custom variables that could be used in the formula // TO BE REMOVED
 			if (file_exists( __DIR__.'/../Custom/Utils/myddlewareVariables.php')) {
 				include  __DIR__.'/../Custom/Utils/myddlewareVariables.php';
