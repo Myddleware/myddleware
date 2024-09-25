@@ -1479,20 +1479,30 @@ class jobcore
             if (empty($period)) {
                 $period = $this->checkJobPeriod;
             }
-            //Search only jobs with status start
-            $sqlParams = "SELECT DISTINCT job.id
-            FROM job 
-                INNER JOIN log    
-                    ON job.id = log.job_id
-            WHERE
-                    job.status = 'start'
-                AND TIMESTAMPDIFF(SECOND,  log.created, NOW()) > :period;";
+            // Search only jobs with status start and last log created before the limit
+			// We use the begin of teh job if no log
+            $sqlParams = "
+			SELECT DISTINCT job.id
+			FROM job 
+				LEFT OUTER JOIN log    
+					ON job.id = log.job_id
+			WHERE
+					job.status = 'start'
+				AND (
+						(
+								log.created IS NULL
+							AND TIMESTAMPDIFF(SECOND,  job.begin, NOW()) > :period
+						) OR (
+								log.created IS NOT NULL
+							AND TIMESTAMPDIFF(SECOND,  (SELECT MAX(log2.created) from log as log2 where log2.job_id = job.id), NOW()) > :period
+						)
+					)
+			";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('period', $period);
 
             $result = $stmt->executeQuery();
             $jobs = $result->fetchAllAssociative();
-
             foreach ($jobs as $job) {
                 //clone because, the job that is not the current job
                 $jobManagerChekJob = clone $this;
