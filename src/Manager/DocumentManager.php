@@ -2759,7 +2759,10 @@ class documentcore
 									$arguments = $this->setWorkflowNotificationArguments($action);
 									switch ($action['action']) {
 										case 'generateDocument':
-											$this->generateDocument($arguments['ruleId'],$this->sourceData[$arguments['searchValue']],$arguments['searchField'],$arguments['rerun'], $action);
+											// Set default value if empty
+											$searchField = (!empty($arguments['searchField']) ? $arguments['searchField'] : 'id');
+											$searchValue = (!empty($arguments['searchValue']) AND !empty($this->sourceData[$arguments['searchValue']]) ? $this->sourceData[$arguments['searchValue']] : '');
+											$this->generateDocument($arguments['ruleId'],$searchValue, $searchField ,$arguments['rerun'], $action);
 											break;
 										case 'sendNotification':
                                             $workflowStatus = 'Success';
