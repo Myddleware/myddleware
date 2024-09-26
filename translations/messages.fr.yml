@@ -290,6 +290,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Editer
+        back: Retour
         save: Sauvegarder
         delete: Supprimer
         confirm_delete: Confirmez-vous la suppression de ce connecteur ?

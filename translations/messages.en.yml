@@ -291,6 +291,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Edit
+        back: Back to the list
         save: Save
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?

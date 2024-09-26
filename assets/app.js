@@ -44,6 +44,7 @@ require('./js/filter.js')
 require('./js/crontab.js')
 require('./js/rule_relation_filter.js')
 require('./js/editAction.js')
+require('./js/connector_detail.js')
 require("./js/workflows.js");
 
 
