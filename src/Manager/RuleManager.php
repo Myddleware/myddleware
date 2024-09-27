@@ -684,9 +684,14 @@ class rulecore
 
                 // send the alert to the user
                 $this->notificationManager->sendAlertSameDocReference($JobSettings);
+				
+				// Disable the rule to avoid to send the alert every time the cronjob runs
+				$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
+				$rule->setActive(false);
+                $this->entityManager->persist($rule);
+                $this->entityManager->flush();
 
-
-                return ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes.'];
+                return ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes. The rule has been disabled. '];
             }
 
             return true;

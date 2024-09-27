@@ -109,7 +109,7 @@ class NotificationManager
         try {
 
             $this->sendAlertTaskTooLong();
-            $this->sendAlertLimitReached();
+            // $this->sendAlertLimitReached();
 
             return true;
 
@@ -191,23 +191,23 @@ class NotificationManager
         //Send Alerte
         if (!empty($newErrorLogs)) {
 
-        $textMail = "Des nouveaux logs d'erreur ont été trouvés :\n\n";
+			$textMail = "Des nouveaux logs d'erreur ont été trouvés :\n\n";
 
-        // TODO: à translate
-        foreach ($newErrorLogs as $log) {
-            $textMail .= "Date de création: " . $log['created']->format('Y-m-d H:i:s') . "\n";
-            $textMail .= "Type: " . $log['type'] . "\n";
-            $textMail .= "Message: " . $log['message'] . "\n\n";
-        }
+			// TODO: à translate
+			foreach ($newErrorLogs as $log) {
+				$textMail .= "Date de création: " . $log['created']->format('Y-m-d H:i:s') . "\n";
+				$textMail .= "Type: " . $log['type'] . "\n";
+				$textMail .= "Message: " . $log['message'] . "\n\n";
+			}
 
-        // TODO: check : envoyez l'e-mail
-        $this->send($textMail, "Alerte: Nouveaux logs d'erreur trouvés");
+			// TODO: check : envoyez l'e-mail
+			$this->send($textMail, "Alerte: Nouveaux logs d'erreur trouvés");
         }
         // Update alert_date_ref
         $currentDate = new \DateTime();
         $this->configRepository->setAlertDateRef($currentDate->format('Y-m-d H:i:s'));
 
-        }
+	}
 		
 	protected function send($textMail, $subject) {
 		// Get the email adresses of all ADMIN
