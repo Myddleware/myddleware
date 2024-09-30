@@ -23,8 +23,20 @@
 # *********************************************************************************/
 
 panel:
+    data: Vos données
+    features:
+        title: Débloquer de nouvelles fonctionnalités avec Myddleware Premium
+    contact:
+        title: Contactez-nous
+        title2 : Besoin d'assistance technique
+        text1 : Pour tout problème technique, bogue ou question relative au développement, n'hésitez pas à nous contacter par les canaux suivants
+        text2 : Contact technique 
+        text3 : Dépôt GitHub, voir ou signaler des problèmes directement sur notre GitHub
+        title3 : Nouveaux projets ou opportunités d'affaires ?
+        text4 : Pour discuter d'un nouveau projet, d'une collaboration ou d'une opportunité commerciale, veuillez nous contacter à l'adresse suivante
+        text5 : Contact professionnel
     solutions:
-        title: Connectez dès à présent ces différentes solutions
+        title: Connectez vos données
         click: Cliquez pour savoir comment créer ce connecteur.
     graph_tranfer_rule:
         desc: Documents envoyés par règle
@@ -673,7 +685,10 @@ title:
     account:
         view: Mon compte
     index:
-        panel: Tableau de bord
+        panel: Bienvenue sur Myddleware !
+        text: Nous sommes ravis de vous compter parmi nous !
+        text2: Démarrez votre projet dès maintenant en consultant notre documentation.
+        btn: Commencer maintenant
     rule:
         create_name: Création de la règle
         create: Création d'une règle

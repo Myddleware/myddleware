@@ -24,21 +24,19 @@
 
 #myd_top {
 	min-height: 40px;
-	background: #444446;
-	border-bottom: 4px solid #198BCA;
 	position: fixed;
 	top: 0;
-	left: 0;
-	right: 0;
+    right: -135px;
 	z-index: 99;
 	font-size: larger;
 }
 
 #myd_title {
+	box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
 	height: 50px;
-	background: #198BCA;
+	background: #f8f9f9;
 	margin: 0 auto;
-	color: white;
+	color: rgb(0, 0, 0);
 	padding: 14px;		
 	font-weight: bold;	
 }

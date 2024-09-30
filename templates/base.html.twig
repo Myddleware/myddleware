@@ -1,4 +1,4 @@
- {#/*********************************************************************************
+{#/*********************************************************************************
  * This file is part of Myddleware.
 
  * @package Myddleware
@@ -20,206 +20,204 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Myddleware{% endblock %}</title>
-        <!-- Latest compiled and minified CSS -->     
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    </head>
-    <body>
-        <header> 
-            <div id="myd_top">
-                <nav>
-                    {% for v in entityBanner.getEntityBanner %}
-                        {% if v.name == "cron_enabled"%}
-                            {% if v.value == false %}
-                            <span class="pl-1 banner">{{'banner'|trans}}</span>
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                    <ul class="nav nav-pills right">
-                        <li class="dropdown">
-                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ app.user.username }}
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu"  aria-labelledby="dropdownMenuLink">
-                                <li>
-                                    <a class="dropdown-item" href="{{ path('my_account') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-                                        </svg>
-                                        {{'menu_user.account'|trans}}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ path('management_smtp_index') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
-                                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.758 2.855L15 11.114v-5.73zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.44A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.73z"/>
-                                        </svg>
-                                        {{'menu_user.management_smtp'|trans}}
-                                    </a>
-                                </li>
-                                                                <li>
-                                    <a class="dropdown-item" href="{{ path('jobscheduler_cron_list') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock" viewBox="0 0 16 16">
-                                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                                        </svg>
-                                        {{'menu_user.crontab'|trans}}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ path('logout') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-                                        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-                                        </svg>
-                                        {{'menu_user.logout'|trans}}
-                                    </a>
-                                </li>                       
-                            </ul>
-                        </li> 
-                    </ul>                   
-                </nav>
-            </div>      
-                <div>
-                    <div>
-                        <menu>  
-                            <ul class="nav nav-pills flex-nav">
-                                <li class="dropdown logo-nav">
-                                    <a href="{{ path('regle_panel')}}"> 
-                                        <span id="logo"></span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ path('regle_panel') }}">
-                                        {{'menu.index'|trans}}
-                                    </a>
-                                </li>
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{'menu.rule.title'|trans}}
-                                    <span class="caret"></span>
-                                    </a>
-                                    <ul class="dropdown-menu" >
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('regle_stepone_animation') }}">
-                                                <i class="fa fa-plus" aria-hidden="true"></i>
-                                                {{'menu.rule.createv2'|trans}}
-                                            </a>
-                                        </li>                                    
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('regle_list') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.rule.list'|trans}}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('workflow_list') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.workflow.list'|trans}}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('variable_list') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.variable.list'|trans}}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="dropdown">
-                                    <a  class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{'menu.connector.title'|trans}}
-                                    <span class="caret"></span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('regle_connector_create') }}">
-                                                <i class="fa fa-plus" aria-hidden="true"></i>
-                                                {{'menu.connector.create'|trans}}
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('regle_connector_list') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.connector.list'|trans}}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>   
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{'menu.flux.title'|trans}}
-                                    <span class="caret"></span>
-                                    </a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('document_empty_search') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.flux.list'|trans}}
-                                            </a>
-                                            {# <a class="dropdown-item" href="{{ path('flux_list', {'search': 0}) }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.flux.list'|trans}}
-                                            </a> #}
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                    {{'menu.job.title'|trans}}
-                                    <span class="caret"></span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('task_list') }}">
-                                                <i class="fa fa-th-list" aria-hidden="true"></i>
-                                                {{'menu.flux.list'|trans}}
-                                            </a>
-                                            
-                                        </li>
-                                        <li><a class="dropdown-item" href="{{ path('task_stopall') }}">
-                                                <i class="fa fa-ban" aria-hidden="true"></i>
-                                                {{'Stop all the Tasks'}}
-                                            </a>
-                                    </ul>
-                                </li>                                                                               
-                                <li><a href="https://github.com/Myddleware/myddleware"  target="_blank">{{'menu.support'|trans}}</a></li>
-                            </ul>                   
-                        </menu>
-                    </div> 
-                </div>  
-            </div>                 
-        </header>
-        <div id="notification">
-        {% include "Layout/notification.html.twig" %}
-        </div>
-        <div id="myd_title">
-            <i class="fa fa-chevron-right" aria-hidden="true"></i>
-            {% block titlesm %}{% endblock titlesm %}
-        </div>
-        <section class="mx-auto">    
-            {% block body %}
-                {% block arianne %}Myddleware{% endblock %}
-            {% endblock %}  
-        </section>
-        <footer>
-            {% include 'footer.html.twig' %}
-        </footer>
+	<head>
+		<meta charset="UTF-8"/>
+		<title>
+			{% block title %}Myddleware
+			{% endblock %}
+		</title>
+		<!-- Latest compiled and minified CSS -->
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+		<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+	</head>
+	<body>
+		<header>
+			{% for v in entityBanner.getEntityBanner %}
+				{% if v.name == "cron_enabled"%}
+					<div id="myd_top">
+						<nav>
 
-        {% block base_js %}
-            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-            {{ encore_entry_script_tags('app') }}
-        {% endblock base_js %}
-        {% block js %}{% endblock js %}
-    </body>
-</html>
+							{% if v.value == false %}
+								<span class="pl-1 banner">{{'banner'|trans}}</span>
+							{% endif %}
+
+						</nav>
+					</div>
+				{% endif %}
+			{% endfor %}
+			<div>
+				<menu>
+					<ul class="nav nav-pills flex-nav">
+						<li class="dropdown logo-nav">
+							<a href="{{ path('regle_panel')}}">
+								<span id="logo"></span>
+							</a>
+						</li>
+						<li>
+							<a href="{{ path('regle_panel') }}">
+								{{'menu.index'|trans}}
+							</a>
+						</li>
+						<li class="dropdown">
+							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.rule.title'|trans}}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li>
+									<a class="dropdown-item" href="{{ path('regle_stepone_animation') }}">
+										<i class="fa fa-plus" aria-hidden="true"></i>
+										{{'menu.rule.createv2'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('regle_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.rule.list'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('workflow_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.workflow.list'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('variable_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.variable.list'|trans}}
+									</a>
+								</li>
+							</ul>
+						</li>
+						<li class="dropdown">
+							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.connector.title'|trans}}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li>
+									<a class="dropdown-item" href="{{ path('regle_connector_create') }}">
+										<i class="fa fa-plus" aria-hidden="true"></i>
+										{{'menu.connector.create'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('regle_connector_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.connector.list'|trans}}
+									</a>
+								</li>
+							</ul>
+						</li>
+						<li class="dropdown">
+							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.flux.title'|trans}}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu" role="menu">
+								<li>
+									<a class="dropdown-item" href="{{ path('document_empty_search') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.flux.list'|trans}}
+									</a>
+									{# <a class="dropdown-item" href="{{ path('flux_list', {'search': 0}) }}">
+																																						                                                <i class="fa fa-th-list" aria-hidden="true"></i>
+																																						                                                {{'menu.flux.list'|trans}}
+																																						                                            </a> #}
+								</li>
+							</ul>
+						</li>
+						<li class="dropdown">
+							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.job.title'|trans}}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li>
+									<a class="dropdown-item" href="{{ path('task_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.flux.list'|trans}}
+									</a>
+
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('task_stopall') }}">
+										<i class="fa fa-ban" aria-hidden="true"></i>
+										{{'Stop all the Tasks'}}</a>
+								</li>
+							</ul>
+						</li>
+						{# <li>
+																				<a href="https://github.com/Myddleware/myddleware" target="_blank">{{'menu.support'|trans}}</a>
+																			</li> #}
+						<li class="dropdown">
+							<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+								{{ app.user.username }}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+								<li>
+									<a class="dropdown-item" href="{{ path('my_account') }}">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewbox="0 0 16 16">
+											<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+											<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+										</svg>
+										{{'menu_user.account'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('management_smtp_index') }}">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewbox="0 0 16 16">
+											<path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.758 2.855L15 11.114v-5.73zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.44A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.73z"/>
+										</svg>
+										{{'menu_user.management_smtp'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('jobscheduler_cron_list') }}">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock" viewbox="0 0 16 16">
+											<path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+											<path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+										</svg>
+										{{'menu_user.crontab'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('logout') }}">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewbox="0 0 16 16">
+											<path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+											<path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+										</svg>
+										{{'menu_user.logout'|trans}}
+									</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</menu>
+			</div>
+		</div>
+	</body>
+</html></header><div id="notification">
+{% include "Layout/notification.html.twig" %}</div><div id="myd_title"> {% block titlesm %}{% endblock titlesm %}
+</div>
+<section class="mx-auto">
+	{% block body %}
+		{% block arianne %}Myddleware
+		{% endblock %}
+	{% endblock %}
+</section>
+<footer>
+	{% include 'footer.html.twig' %}
+</footer>
+{% block base_js %}
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	{{ encore_entry_script_tags('app') }}
+{% endblock base_js %}
+{% block js %}{% endblock js %}</body></html>

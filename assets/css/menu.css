@@ -22,9 +22,9 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-menu {
+/* menu {
     margin-top: 40px;
-}
+} */
 
 menu ul, menu li {
 	list-style: none;
@@ -53,7 +53,7 @@ menu .dropdown-menu > li > a {
 }
 
 menu .dropdown-menu > li > a:hover {
-	color: #198BCA;
+	color: #03c4eb;
 }
 
 menu li li, #myd_top li li {
@@ -91,15 +91,14 @@ menu li li:hover, #myd_top li li:hover {
 	color: #000000;
 }
 
-menu .nav-pills > li > a, menu .nav-pills > li > a:hover, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
+menu .nav-pills > li > a, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
 	color: rgb(0, 0, 0);
 	background-color:transparent;
 	border-radius: none;
 }
 
-menu li:hover {
-	background: #198BCA;
-	color:white;
+menu li:hover , menu .nav-pills > li > a:hover {
+	color:#03c4eb !important;
 	cursor:pointer;
 }
 
