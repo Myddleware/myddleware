@@ -154,16 +154,14 @@ class WorkflowController extends AbstractController
         $this->workflowLogRepository = $workflowLogRepository;
     }
 
-    protected function getInstanceBdd()
-    {
-    }
+    protected function getInstanceBdd() {}
 
 
     /* ******************************************************
          * RULE
          ****************************************************** */
 
-    /**
+/**
      * LISTE DES WORKFLOWs.
      *
      * @return RedirectResponse|Response
@@ -174,58 +172,53 @@ class WorkflowController extends AbstractController
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
-            $session = $request->getSession();
-            $em = $this->getDoctrine()->getManager();
-    
+            
             // Récupérer les filtres depuis la requête
             $workflowName = $request->query->get('workflow_name');
             $ruleName = $request->query->get('rule_name');
-    
-            // Modifier la requête pour inclure les filtres
-            $queryBuilder = $em->getRepository(Workflow::class)->createQueryBuilder('w')
-                ->where('w.deleted = 0');
-    
+
+            // Utilisation de findBy pour récupérer les workflows
+            $criteria = ['deleted' => 0];
+            $orderBy = ['order' => 'ASC'];
+            $workflows = $this->entityManager->getRepository(Workflow::class)->findBy($criteria, $orderBy);
+
             if ($workflowName) {
-                $queryBuilder->andWhere('w.name LIKE :workflowName')
-                    ->setParameter('workflowName', '%' . $workflowName . '%');
+                $workflows = array_filter($workflows, function($workflow) use ($workflowName) {
+                    return stripos($workflow->getName(), $workflowName) !== false;
+                });
             }
-    
+
             if ($ruleName) {
-                $queryBuilder->join('w.rule', 'r')
-                    ->andWhere('r.name LIKE :ruleName')
-                    ->setParameter('ruleName', '%' . $ruleName . '%');
+                $workflows = array_filter($workflows, function($workflow) use ($ruleName) {
+                    return stripos($workflow->getRule()->getName(), $ruleName) !== false;
+                });
             }
-    
-            $queryBuilder->orderBy('w.order', 'ASC');
-            $workflows = $queryBuilder->getQuery()->getResult();
-    
-            // Pagination
-            $compact = $this->nav_pagination([
-                'adapter_em_repository' => $workflows,
-                'maxPerPage' => $this->params['pager'] ?? 25,
-                'page' => $page,
-            ], false);
-    
-            // check if the request is an AJAX request
+
+            // Pagination avec ArrayAdapter car findBy retourne un tableau
+            $adapter = new ArrayAdapter($workflows);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(15);
+            $pager->setCurrentPage($page);
+
+            // Si la requête est AJAX, rendre uniquement la table des workflows
             if ($request->isXmlHttpRequest()) {
                 return $this->render('Workflow/_workflow_table.html.twig', [
-                    'entities' => $workflows,
-                    'pager' => $compact['pager'],
+                    'entities' => $pager->getCurrentPageResults(),
+                    'pager' => $pager,
                 ]);
             }
-    
-            // if not an AJAX request, render the page
+
+            // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
                 'Workflow/list.html.twig',
                 [
-                    'entities' => $workflows,
-                    'nb_workflow' => count($workflows),
-                    'pager' => $compact['pager'],
+                    'entities' => $pager->getCurrentPageResults(),
+                    'nb_workflow' => $pager->getNbResults(),
+                    'pager_workflow_list' => $pager,
                 ]
             );
-    
         } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
         }
     }
 
@@ -236,31 +229,29 @@ class WorkflowController extends AbstractController
     public function WorkflowListByRuleAction(string $ruleId, int $page = 1, Request $request)
     {
         try {
-            $session = $request->getSession();
-            $em = $this->getDoctrine()->getManager();
-
-            // Get workflows filtered by rule id
-            $entities = $em->getRepository(Workflow::class)->findBy(['rule' => $ruleId, 'deleted' => 0]);
-
-            // List of task limited to 1000 and order by status (start first) and date begin
-            $compact = $this->nav_pagination([
-                'adapter_em_repository' => $entities,
-                'maxPerPage' => $this->params['pager'] ?? 25,
-                'page' => $page,
-            ], false);
-
-            return $this->render(
-                'Workflow/list.html.twig',
-                [
-                    'entities' => $entities,
-                    'nb_workflow' => count($entities),
-                    'pager' => $compact['pager'],
-                ]
+            // Récupération des workflows par règle
+            $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(
+                ['rule' => $ruleId, 'deleted' => 0],
+                ['order' => 'ASC']
             );
+
+            // Pagination avec ArrayAdapter
+            $adapter = new ArrayAdapter($workflows);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(15);
+            $pager->setCurrentPage($page);
+
+            // Rendu des workflows paginés
+            return $this->render('Workflow/list.html.twig', [
+                'entities' => $pager->getCurrentPageResults(),
+                'nb_workflow' => $pager->getNbResults(),
+                'pager_workflow_list' => $pager,
+            ]);
         } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
         }
     }
+
 
     // public function to delet the workflow by id (set deleted to 1)
     /**
@@ -500,6 +491,8 @@ class WorkflowController extends AbstractController
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
+
+
     // public function to edit a workflow
     /**
      * @Route("/edit/{id}", name="workflow_edit")
@@ -544,80 +537,5 @@ class WorkflowController extends AbstractController
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
-    }
-
-    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-    private function nav_pagination($params, $orm = true)
-    {
-        /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
-
-        if (is_array($params)) {
-            /* DOC :
-                * $pager->setCurrentPage($page);
-                $pager->getNbResults();
-                $pager->getMaxPerPage();
-                $pager->getNbPages();
-                $pager->haveToPaginate();
-                $pager->hasPreviousPage();
-                $pager->getPreviousPage();
-                $pager->hasNextPage();
-                $pager->getNextPage();
-                $pager->getCurrentPageResults();
-            */
-
-            $compact = [];
-
-            //On passe l’adapter au bundle qui va s’occuper de la pagination
-            if ($orm) {
-                $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-
-            //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
-            $compact['pager']->setMaxPerPage($params['maxPerPage']);
-            try {
-                $compact['entities'] = $compact['pager']
-                    //On indique au pager quelle page on veut
-                    ->setCurrentPage($params['page'])
-                    //On récupère les résultats correspondant
-                    ->getCurrentPageResults();
-
-                $compact['nb'] = $compact['pager']->getNbResults();
-            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-                //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Cette page n'existe pas.");
-            }
-
-            return $compact;
-        }
-
-        return false;
-    }
-
-    // Décrypte les paramètres de connexion d'une solution
-    private function decrypt_params($tab_params)
-    {
-        // Instanciate object to decrypte data
-        $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
-        if (is_array($tab_params)) {
-            $return_params = [];
-            foreach ($tab_params as $key => $value) {
-                if (
-                    is_string($value)
-                    && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
-                ) {
-                    $return_params[$key] = $encrypter->decrypt($value);
-                }
-            }
-
-            return $return_params;
-        }
-
-        return $encrypter->decrypt($tab_params);
     }
 }

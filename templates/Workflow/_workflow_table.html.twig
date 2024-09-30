@@ -3,7 +3,7 @@
         <tr>
             <th>{{ 'list_workflow.th.name'|trans }}</th>
             <th>{{ 'list_workflow.th.ruleName'|trans }}</th>
-            <th>{{ 'list_workflow.th.description'|trans }}</th>
+            <th class="description_workflow_list">{{ 'list_workflow.th.description'|trans }}</th>
             <th>{{ 'list_workflow.th.condition'|trans }}</th>
             <th>{{ 'list_workflow.th.order'|trans }}</th>
             <th>{{ 'list_workflow.th.active'|trans }}</th>
@@ -18,12 +18,25 @@
 					<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
 						{{ workflow.rule.name }}</a>
 				</td>
-				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{{ workflow.description }}</td>
+				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{% if workflow.description|length > 60 %}
+					{{ workflow.description|slice(0, 30) ~ '...' }}
+						<div id="param-short-{{ loop.index }}">
+							{{ workflow.description|slice(0, 100) ~ '...' }}
+							<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
+						</div>
+						<div id="param-full-{{ loop.index }}" style="display: none;">
+							{{ workflow.description }}
+							<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
+						</div>
+					{% else %}
+						{{ workflow.description }}
+					{% endif %}
+				</td>
 				<td>{{ workflow.condition }}</td>
 				<td>{{ workflow.order }}</td>
 				<td class="value workflow_on_off">
 					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
+						<input class="form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
 					</div>
 				</td>
 				<td class="CRUD-icons">

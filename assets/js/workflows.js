@@ -45,7 +45,7 @@ $(document).ready(function () {
     fetchFilteredData();
   });
 
-  $(".form-check-input").on("change", function () {
+  $(".workflow-check-input").on("change", function () {
     var $input = $(this);
     var entityId = $input.data("id");
     var entityType = $input.data("type");
@@ -76,7 +76,7 @@ $(document).ready(function () {
   });
 
 
-  $(".form-check-input").on("change", function () {
+  $(".workflow-check-input").on("change", function () {
     var $input = $(this);
     var entityId = $input.data("id");
     var entityType = $input.data("type");

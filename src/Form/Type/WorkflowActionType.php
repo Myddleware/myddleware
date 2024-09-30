@@ -65,6 +65,7 @@ class WorkflowActionType extends AbstractType
                     'sendNotification' => 'sendNotification',
                     'generateDocument' => 'generateDocument',
                     'transformDocument' => 'transformDocument',
+                    'changeData' => 'changeData',
                 ],
                 'attr' => [
                     'class' => 'form-control',
