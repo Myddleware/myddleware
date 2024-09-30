@@ -32,7 +32,7 @@
 						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#workflow-content" aria-expanded="true" aria-controls="workflow-content">
 							<i class="fa fa-minus"></i>
 						</button>
-						{{ 'view_workflow.title'| trans | upper }}
+						{{ 'view_workflow_action.title2'| trans | upper }}
 					</div>
 					<div id="workflow-content" class="collapse show">
 						<div class="workflow-row mb-2">
@@ -76,7 +76,7 @@
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.status'|trans|upper }}</strong>
                             	<div class="form-check form-switch text-center">
-									<input class="workflow_status form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}"  data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
+									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}"  data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
 								</div>
 							</div>
 						</div>

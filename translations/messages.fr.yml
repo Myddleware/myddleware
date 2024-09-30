@@ -290,6 +290,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Editer
+        back: Retour
         save: Sauvegarder
         delete: Supprimer
         confirm_delete: Confirmez-vous la suppression de ce connecteur ?
@@ -516,6 +518,7 @@ view_workflow:
     add_action: Ajouter une action
     create_by: Créé par
 view_workflow_action:
+    title2: Action du workflow
     title: Détail de l'action du workflow
     edit: Editer cette action
     delete: Supprimer cette action

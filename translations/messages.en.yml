@@ -291,6 +291,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Edit
+        back: Back to the list
         save: Save
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
@@ -519,6 +521,7 @@ view_workflow:
     add_action: Add Action
     create_by: Created By
 view_workflow_action:
+    title2: Workflow Action
     title: Workflow Action Details
     edit: Edit this Action
     delete: Delete this Action

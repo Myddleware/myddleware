@@ -59,10 +59,10 @@
 							<th>{{'list_workflow.th.id'|trans}}</th>
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
 							<th>{{'list_workflow.th.name'|trans}}</th>
-							<th>{{'list_workflow.th.description'|trans}}</th>
+							<th class="description_workflow_list">{{'list_workflow.th.description'|trans}}</th>
 							<th>{{'list_workflow.th.workflowCondition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
-							<th>{{'list_workflow.th.actions'|trans}}</th> <!-- New column for actions -->
+							<th>{{'list_workflow.th.actions'|trans}}</th>
 						</tr> 
 						{% for workflow in entities %}
 							<tr>
@@ -130,7 +130,7 @@
 				</script>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_list'}) }}
 					{% endif %}
 				</div>
 			{% else %}

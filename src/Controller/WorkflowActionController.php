@@ -349,6 +349,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'changeData' => 'changeData',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
@@ -358,6 +359,7 @@ class WorkflowActionController extends AbstractController
                         'choice_value' => 'id',
                         'required' => false,
                         'label' => 'Rule',
+                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -648,6 +650,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'changeData' => 'changeData',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
@@ -657,7 +660,7 @@ class WorkflowActionController extends AbstractController
                         'choice_value' => 'id',
                         'required' => false,
                         'label' => 'Rule',
-                        'data' => $em->getRepository(Rule::class)->find($formData['ruleId'])
+                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -889,81 +892,6 @@ class WorkflowActionController extends AbstractController
         $oneworkflowAudit->setData($workflowdata);
         $this->entityManager->persist($oneworkflowAudit);
         $this->entityManager->flush();
-    }
-
-    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-    private function nav_pagination($params, $orm = true)
-    {
-        /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
-
-        if (is_array($params)) {
-            /* DOC :
-                * $pager->setCurrentPage($page);
-                $pager->getNbResults();
-                $pager->getMaxPerPage();
-                $pager->getNbPages();
-                $pager->haveToPaginate();
-                $pager->hasPreviousPage();
-                $pager->getPreviousPage();
-                $pager->hasNextPage();
-                $pager->getNextPage();
-                $pager->getCurrentPageResults();
-            */
-
-            $compact = [];
-
-            //On passe l’adapter au bundle qui va s’occuper de la pagination
-            if ($orm) {
-                $compact['pager'] = new Pagerfanta(new QueryAdapter($params['adapter_em_repository']));
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-
-            //On définit le nombre d’article à afficher par page (que l’on a biensur définit dans le fichier param)
-            $compact['pager']->setMaxPerPage($params['maxPerPage']);
-            try {
-                $compact['entities'] = $compact['pager']
-                    //On indique au pager quelle page on veut
-                    ->setCurrentPage($params['page'])
-                    //On récupère les résultats correspondant
-                    ->getCurrentPageResults();
-
-                $compact['nb'] = $compact['pager']->getNbResults();
-            } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-                //Si jamais la page n’existe pas on léve une 404
-                throw $this->createNotFoundException("Cette page n'existe pas.");
-            }
-
-            return $compact;
-        }
-
-        return false;
-    }
-
-    // Décrypte les paramètres de connexion d'une solution
-    private function decrypt_params($tab_params)
-    {
-        // Instanciate object to decrypte data
-        $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
-        if (is_array($tab_params)) {
-            $return_params = [];
-            foreach ($tab_params as $key => $value) {
-                if (
-                    is_string($value)
-                    && !in_array($key, ['solution', 'module']) // Soe data aren't crypted
-                ) {
-                    $return_params[$key] = $encrypter->decrypt($value);
-                }
-            }
-
-            return $return_params;
-        }
-
-        return $encrypter->decrypt($tab_params);
     }
 
     #[Route('/workflowAction/toggle/{id}', name: 'workflow_action_toggle', methods: ['POST'])]

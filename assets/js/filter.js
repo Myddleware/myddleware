@@ -118,7 +118,7 @@ $(function () {
 
   // Show default filters
   function showDefaultFilters() {
-    ["name", "sourceId", "target", "globalStatus"].forEach(function (
+    ["name", "sourceId", "globalStatus"].forEach(function (
       filterName
     ) {
       $("#" + filterName).removeAttr("hidden");
