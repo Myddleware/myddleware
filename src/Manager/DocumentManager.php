@@ -2761,7 +2761,7 @@ class documentcore
 										case 'generateDocument':
 											// Set default value if empty
 											$searchField = (!empty($arguments['searchField']) ? $arguments['searchField'] : 'id');
-											$searchValue = (!empty($arguments['searchValue']) AND !empty($this->sourceData[$arguments['searchValue']]) ? $this->sourceData[$arguments['searchValue']] : '');
+											$searchValue = ((!empty($arguments['searchValue']) AND !empty($this->sourceData[$arguments['searchValue']])) ? $this->sourceData[$arguments['searchValue']] : '');
 											$this->generateDocument($arguments['ruleId'],$searchValue, $searchField ,$arguments['rerun'], $action);
 											break;
 										case 'sendNotification':
