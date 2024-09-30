@@ -207,6 +207,9 @@
     box-shadow: rgb(0 0 0 / 15%) 0px 15px 25px, rgb(0 0 0 / 5%) 0px 5px 10px;
 }
 
+.title_section_homepage{
+    font-weight: bold !important;
+}
 .title_solution_homepage{
     margin-top: 25px;
 }
@@ -224,4 +227,34 @@
 
 .contact-panel p {
     margin-bottom: 5px;
+}
+
+.icon_small_homepage{
+    width: 50px;
+    height: 60px;
+}
+
+.icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#countNbDocuments {
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.title_countNbDocuments{
+    color :#777777;
+}
+
+.error_rule_homepage{
+    text-decoration: none;
+    color: #777777;
+}
+
+.error_rule_homepage:hover{
+    color: #03c4eb;
+    font-weight: bold;
 }
