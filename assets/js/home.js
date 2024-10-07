@@ -26,39 +26,39 @@ google.charts.load("visualization", "1", {packages:["corechart"]});
 
 //--------------
 
-$(function()  {
-	if($('#listing-solutions','#panel').length != 0) {
-		$('#listing-solutions','#panel').scrollbox({
-			direction: 'h',
-			distance: 65
-		});
-		$('#listing-solutions-backward','#panel').on('click', function () {
-			$('#listing-solutions','#panel').trigger('backward');
-		});
-		$('#listing-solutions-forward','#panel').on('click', function () {
-			$('#listing-solutions','#panel').trigger('forward');
-		});
-		$('#listing-solutions li','#panel').on('hover', function () {
-			string = $("img", this).attr('alt')
-			$("img", this).qtip({
-				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,
-				show: {
-					delay: 700,
-					ready: 'true',
-		    	},
-				position: {
-					my: 'top center',  // Position my top left...
-					at: 'bottom center', // at the bottom right of...
-				}
-			})},
-			function () {
-				$('#listing-solutions img','#panel').each(function(){
-					$(this).qtip("hide");
-				});
-			}
-		);
-	}
-});	
+// $(function()  {
+// 	if($('#listing-solutions','#panel').length != 0) {
+// 		$('#listing-solutions','#panel').scrollbox({
+// 			direction: 'h',
+// 			distance: 65
+// 		});
+// 		$('#listing-solutions-backward','#panel').on('click', function () {
+// 			$('#listing-solutions','#panel').trigger('backward');
+// 		});
+// 		$('#listing-solutions-forward','#panel').on('click', function () {
+// 			$('#listing-solutions','#panel').trigger('forward');
+// 		});
+// 		$('#listing-solutions li','#panel').on('hover', function () {
+// 			string = $("img", this).attr('alt')
+// 			$("img", this).qtip({
+// 				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,
+// 				show: {
+// 					delay: 700,
+// 					ready: 'true',
+// 		    	},
+// 				position: {
+// 					my: 'top center',  // Position my top left...
+// 					at: 'bottom center', // at the bottom right of...
+// 				}
+// 			})},
+// 			function () {
+// 				$('#listing-solutions img','#panel').each(function(){
+// 					$(this).qtip("hide");
+// 				});
+// 			}
+// 		);
+// 	}
+// });	
 
 document.addEventListener('DOMContentLoaded', function () {
 

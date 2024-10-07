@@ -42,7 +42,8 @@
 }
 
 #myd_title a, #myd_title a:hover { 
-	color: #ffffff;
+	color: #000000;
+	text-decoration: none;
 }
 
 .myd_loading > img{
