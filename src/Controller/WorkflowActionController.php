@@ -388,7 +388,11 @@ class WorkflowActionController extends AbstractController
                         'required' => false
                     ])
 
-
+                    ->add('targetField', ChoiceType::class, [
+                        'label' => 'Target Field',
+                        'choices' => [],
+                        'required' => false,
+                    ])
 
                     ->add('order', IntegerType::class, [
                         'label' => 'Order',
@@ -432,7 +436,7 @@ class WorkflowActionController extends AbstractController
 
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
-                    
+
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
                     $to = $form->get('to')->getData();
@@ -507,6 +511,26 @@ class WorkflowActionController extends AbstractController
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
+    }
+
+    /**
+     * @Route("/get-target-fields/{ruleId}", name="get_target_fields", methods={"GET"})
+     */
+    public function getTargetFields(string $ruleId, EntityManagerInterface $em): JsonResponse
+    {
+        $ruleFields = $em->getRepository(RuleField::class)->findBy(['rule' => $ruleId]);
+
+        if (!$ruleFields) {
+            return new JsonResponse(['fields' => []], 404);
+        }
+
+        // get the target fields
+        $fields = [];
+        foreach ($ruleFields as $ruleField) {
+            $fields[] = $ruleField->getTarget();
+        }
+
+        return new JsonResponse(['fields' => $fields]);
     }
 
     // public function to show the detail view of a single workflow
