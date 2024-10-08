@@ -109,4 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			showMoreBtn.classList.remove('d-none');
 		});
 	}
+
+    document.querySelectorAll('.dropdown-toggle').forEach(function (dropdown) {
+        dropdown.addEventListener('click', function (e) {
+            e.preventDefault();
+        });
+    });
 });

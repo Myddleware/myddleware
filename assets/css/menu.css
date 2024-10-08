@@ -33,9 +33,9 @@ menu ul, menu li {
 menu li {
 	background: #ffffff;	
 	display: inline-block;
-    width: 330px;
-    padding-top: 32px;
-    height: 95px;
+    width: 233px;
+    padding-top: 12px;
+    height: 57px;
     text-align: center;
     font-weight: bold;
 }
@@ -137,10 +137,19 @@ menu li a {
 
 .flex-nav{
 	flex-wrap: initial !important;
-	width: 87%;
-  margin-right:auto;
+	width: 92%;
+    margin-right:auto;
 }
 
 header{
 	background-color: #ffffff !important;
+}
+
+
+.dropdown:hover .dropdown-menu {
+	display: block;
+}
+
+.dropdown-toggle::after {
+	display: none;
 }

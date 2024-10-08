@@ -58,15 +58,9 @@
 								<span id="logo"></span>
 							</a>
 						</li>
-						<li>
-							<a href="{{ path('regle_panel') }}">
-								{{'menu.index'|trans}}
-							</a>
-						</li>
 						<li class="dropdown">
-							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.rule.title'|trans}}
-								<span class="caret"></span>
+							<a class="title_section_menu" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.rule.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu">
 								<li>
@@ -96,9 +90,8 @@
 							</ul>
 						</li>
 						<li class="dropdown">
-							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.connector.title'|trans}}
-								<span class="caret"></span>
+							<a class="title_section_menu" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.connector.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu">
 								<li>
@@ -116,9 +109,8 @@
 							</ul>
 						</li>
 						<li class="dropdown">
-							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.flux.title'|trans}}
-								<span class="caret"></span>
+							<a class="title_section_menu" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.flux.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu" role="menu">
 								<li>
@@ -134,9 +126,8 @@
 							</ul>
 						</li>
 						<li class="dropdown">
-							<a class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.job.title'|trans}}
-								<span class="caret"></span>
+							<a class="title_section_menu" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								{{'menu.job.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu">
 								<li>
@@ -157,9 +148,8 @@
 																				<a href="https://github.com/Myddleware/myddleware" target="_blank">{{'menu.support'|trans}}</a>
 																			</li> #}
 						<li class="dropdown">
-							<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-								{{ app.user.username }}
-								<span class="caret"></span>
+							<a class="title_section_menu" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+								{{ app.user.username | upper}}
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 								<li>
