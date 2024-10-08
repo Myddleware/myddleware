@@ -2446,7 +2446,7 @@ class documentcore
 			} else {
 				// Replace only the new values 
 				foreach ($newValues as $key => $value) {
-					if(isset($values[$key])) {
+					if(array_key_exists($key,$values)){
 						// Remove the field if code mdw_no_send_field
 						if (str_contains($value,'mdw_no_send_field')) {
 							unset($values[$key]);
@@ -2455,6 +2455,8 @@ class documentcore
 							$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' value changed  from  '.$values[$key].' to '.$value.'. ';
 							$values[$key] = $value;
 						}
+					} else {
+						$this->message .= ($dataType == 'S' ? 'Source' : ($dataType == 'T' ? 'Target' : 'History')).' field '.$key.' not found in the document. ';
 					}
 				}
             }
