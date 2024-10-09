@@ -65,18 +65,29 @@
 										<ul>
 											{% for key, argument in workflow.arguments %}
 												<li>{{ key }}:
-													{{ argument }}</li>
+													{% if argument is iterable %}
+														<ul>
+															{% for subKey, subArgument in argument %}
+																<li>{{ subKey }}:
+																	{{ subArgument }}</li>
+															{% endfor %}
+														</ul>
+													{% else %}
+														{{ argument }}
+													{% endif %}
+												</li>
 											{% endfor %}
 										</ul>
 									{% else %}
 										{{ workflow.arguments }}
 									{% endif %}
+
 								</div>
 							</div>
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.status'|trans|upper }}</strong>
-                            	<div class="form-check form-switch text-center">
-									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}"  data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
+								<div class="form-check form-switch text-center">
+									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
 								</div>
 							</div>
 						</div>
@@ -99,87 +110,87 @@
 						</button>
 						{{ 'view_workflow.logs'| trans | upper }}
 					</div>
-													{# templates/workflow/show.html.twig #}
-									
-									<div id="workflow-logs-content" class="collapse show">
-										<table class="table table-striped">
-											<thead>
-												<tr>
-													<th>{{ 'view_workflow.log_id'|trans }}</th>
-													<th>{{ 'view_workflow.workflow'|trans }}</th>
-													<th>{{ 'view_workflow.job'|trans }}</th>
-													<th>{{ 'view_workflow.trigger_document'|trans }}</th>
-													<th>{{ 'view_workflow.generate_document'|trans }}</th>
-													<th>{{ 'view_workflow.created_by'|trans }}</th>
-													<th>{{ 'view_workflow.status'|trans }}</th>
-													<th>{{ 'view_workflow.date_created'|trans }}</th>
-													<th>{{ 'view_workflow.message'|trans }}</th>
-													<th>{{ 'view_workflow.action_type'|trans }}</th>
-												</tr>
-											</thead>
-											<tbody>
-												{% for log in pager.currentPageResults %}
-													<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-														<td class="ctr">{{ log.id }}</td>
-														<td class="ctr">
-															<a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a>
-														</td>
-														<td class="ctr">
-															<a href="{{ path('task_view', {'id': log.job.id}) }}">{{ log.job.id }}</a>
-														</td>
-														<td class="ctr">
-															{% if log.triggerDocument is not null %}
-																<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.triggerDocument.id }}</a>
-															{% else %}
-																<span></span>
-															{% endif %}
-														</td>
-														<td class="ctr">
-															{% if log.generateDocument is not null %}
-																<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.generateDocument.id }}</a>
-															{% else %}
-																<span></span>
-															{% endif %}
-														</td>
-														<td class="ctr">{{ log.createdBy }}</td>
-														<td class="ctr">
-															<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
-														</td>
-														<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-														<td class="ctr">{{ log.getMessage }}</td>
-														<td class="ctr">{{ log.action.action }}</td>
-													</tr>
-												{% endfor %}
-											</tbody>
-										</table>
-									
-										{# Pagination links #}
-										{% if pager.haveToPaginate %}
-											<nav aria-label="Page navigation">
-												<ul class="pagination">
-													{% if pager.hasPreviousPage %}
-														<li class="page-item">
-															<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': pager.previousPage }) }}" aria-label="Previous">
-																<span aria-hidden="true">&laquo;</span>
-															</a>
-														</li>
-													{% endif %}
-													{% for page in 1..pager.nbPages %}
-														<li class="page-item{% if page == pager.currentPage %} active{% endif %}">
-															<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': page }) }}">{{ page }}</a>
-														</li>
-													{% endfor %}
-													{% if pager.hasNextPage %}
-														<li class="page-item">
-															<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': pager.nextPage }) }}" aria-label="Next">
-																<span aria-hidden="true">&raquo;</span>
-															</a>
-														</li>
-													{% endif %}
-												</ul>
-											</nav>
-										{% endif %}
-									</div>
+					{# templates/workflow/show.html.twig #}
+
+					<div id="workflow-logs-content" class="collapse show">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>{{ 'view_workflow.log_id'|trans }}</th>
+									<th>{{ 'view_workflow.workflow'|trans }}</th>
+									<th>{{ 'view_workflow.job'|trans }}</th>
+									<th>{{ 'view_workflow.trigger_document'|trans }}</th>
+									<th>{{ 'view_workflow.generate_document'|trans }}</th>
+									<th>{{ 'view_workflow.created_by'|trans }}</th>
+									<th>{{ 'view_workflow.status'|trans }}</th>
+									<th>{{ 'view_workflow.date_created'|trans }}</th>
+									<th>{{ 'view_workflow.message'|trans }}</th>
+									<th>{{ 'view_workflow.action_type'|trans }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for log in pager.currentPageResults %}
+									<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+										<td class="ctr">{{ log.id }}</td>
+										<td class="ctr">
+											<a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a>
+										</td>
+										<td class="ctr">
+											<a href="{{ path('task_view', {'id': log.job.id}) }}">{{ log.job.id }}</a>
+										</td>
+										<td class="ctr">
+											{% if log.triggerDocument is not null %}
+												<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.triggerDocument.id }}</a>
+											{% else %}
+												<span></span>
+											{% endif %}
+										</td>
+										<td class="ctr">
+											{% if log.generateDocument is not null %}
+												<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.generateDocument.id }}</a>
+											{% else %}
+												<span></span>
+											{% endif %}
+										</td>
+										<td class="ctr">{{ log.createdBy }}</td>
+										<td class="ctr">
+											<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+										</td>
+										<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+										<td class="ctr">{{ log.getMessage }}</td>
+										<td class="ctr">{{ log.action.action }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+
+						{# Pagination links #}
+						{% if pager.haveToPaginate %}
+							<nav aria-label="Page navigation">
+								<ul class="pagination">
+									{% if pager.hasPreviousPage %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': pager.previousPage }) }}" aria-label="Previous">
+												<span aria-hidden="true">&laquo;</span>
+											</a>
+										</li>
+									{% endif %}
+									{% for page in 1..pager.nbPages %}
+										<li class="page-item{% if page == pager.currentPage %} active{% endif %}">
+											<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': page }) }}">{{ page }}</a>
+										</li>
+									{% endfor %}
+									{% if pager.hasNextPage %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('workflow_action_show_page', { 'id': workflow.id, 'page': pager.nextPage }) }}" aria-label="Next">
+												<span aria-hidden="true">&raquo;</span>
+											</a>
+										</li>
+									{% endif %}
+								</ul>
+							</nav>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 

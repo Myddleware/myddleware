@@ -197,55 +197,121 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // WORKFLOWACTION TARGETFIELD
-  
-  const ruleIdField = document.getElementById('form_ruleId');
-  const targetFieldContainer = document.getElementById('targetFieldContainer');
-  const targetFieldSelect = document.getElementById('form_targetField');
+  const ruleIdField = document.getElementById("form_ruleId");
+  const targetFieldContainer = document.getElementById("targetFieldContainer");
+  const targetFieldSelect = document.getElementById("form_targetField");
+  const targetFieldValueContainer = document.getElementById("targetFieldValueContainer"); // Le nouveau champ de saisie de valeur
 
-  console.log("DOM Loaded");
+  // Cacher au démarrage
+  targetFieldContainer.style.display = "none";
+  targetFieldValueContainer.style.display = "none";
+  const addFieldButton = document.getElementById('addFieldButton');
+  const dynamicFieldsContainer = document.getElementById("dynamicFieldsContainer");
 
-  targetFieldContainer.style.display = 'none';
+  // Masquer le bouton et le conteneur des champs dynamiques au démarrage
+  addFieldButton.style.display = "none";
+  dynamicFieldsContainer.style.display = "none";
 
-  ruleIdField.addEventListener('change', function() {
+  ruleIdField.addEventListener("change", function () {
+    console.log('toto');
+    
     const ruleId = ruleIdField.value;
 
-    console.log("Rule ID changed:", ruleId);
+    if (ruleId !== "") {
+      // Afficher le bouton et le conteneur pour ajouter des champs
+      addFieldButton.style.display = "block";
+      dynamicFieldsContainer.style.display = "block";
 
-    if (ruleId !== '') {
-        targetFieldContainer.style.display = 'block';
+      // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
+      const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
+      $.ajax({
+        url: updatedUrl,
+        type: "GET",
+        success: function (data) {
+          console.log("Réponse reçue :", data);
+          dynamicFieldsContainer.innerHTML = ''; // Vider les anciens champs
 
-        // Afficher l'URL avant modification
-        console.log("URL avant modification :", workflowTargetFieldUrl);
-        
-        // Remplacer 'ruleFields' par le vrai ruleId dans l'URL
-        const updatedUrl = workflowTargetFieldUrl.replace('ruleFields', ruleId);
-
-        // Afficher l'URL après modification
-        console.log("URL après modification :", updatedUrl);
-        
-        $.ajax({
-            url: updatedUrl,  // Utilisation de l'URL modifiée
-            type: 'GET',
-            success: function(data) {
-                console.log("Réponse reçue :", data);
-                targetFieldSelect.innerHTML = ''; // Vider les anciennes options
-
-                // Ajouter les nouvelles options
-                data.fields.forEach(function(field) {
-                    let option = document.createElement('option');
-                    option.value = field;
-                    option.text = field;
-                    targetFieldSelect.appendChild(option);
-                });
-                console.log("Options ajoutées :", targetFieldSelect);
-            },
-            error: function(xhr, status, error) {
-                console.error("Erreur lors de la récupération des champs:", status, error);
-            }
-        });
+          // Ajouter un premier champ Target Field (select) avec les options disponibles
+          addNewTargetField(data.fields); 
+        },
+        error: function (xhr, status, error) {
+          console.error("Erreur lors de la récupération des champs:", status, error);
+        },
+      });
     } else {
-          targetFieldContainer.style.display = 'none';
-          targetFieldSelect.innerHTML = ''; 
-      }
+      // Cacher les champs si aucune règle n'est sélectionnée
+      addFieldButton.style.display = "none";
+      dynamicFieldsContainer.style.display = "none";
+      dynamicFieldsContainer.innerHTML = ''; // Vider les champs si aucune règle n'est sélectionnée
+    }
+  });
+
+  // Fonction pour ajouter un champ targetField (select) et targetFieldValue (input)
+  function addNewTargetField(fields) {
+    const newFieldRow = document.createElement('div');
+    newFieldRow.classList.add('row', 'mb-4');
+
+    // Champ targetField (select avec options)
+    const targetFieldDiv = document.createElement('div');
+    targetFieldDiv.classList.add('col-md-6');
+    const targetFieldLabel = document.createElement('label');
+    targetFieldLabel.innerText = 'Target Field';
+    const targetFieldSelect = document.createElement('select');
+    targetFieldSelect.name = 'targetFields[]';
+    targetFieldSelect.classList.add('form-control');
+
+    // Ajouter les options au select
+    fields.forEach(function(field) {
+      const option = document.createElement('option');
+      option.value = field;
+      option.text = field;
+      targetFieldSelect.appendChild(option);
+    });
+
+    targetFieldDiv.appendChild(targetFieldLabel);
+    targetFieldDiv.appendChild(targetFieldSelect);
+
+    // Champ targetFieldValue
+    const targetFieldValueDiv = document.createElement('div');
+    targetFieldValueDiv.classList.add('col-md-6');
+    const targetFieldValueLabel = document.createElement('label');
+    targetFieldValueLabel.innerText = 'New Value';
+    const targetFieldValueInput = document.createElement('input');
+    targetFieldValueInput.name = 'targetFieldValues[]';
+    targetFieldValueInput.type = 'text';
+    targetFieldValueInput.classList.add('form-control');
+    targetFieldValueDiv.appendChild(targetFieldValueLabel);
+    targetFieldValueDiv.appendChild(targetFieldValueInput);
+
+    // Bouton de suppression
+    const removeButtonDiv = document.createElement('div');
+    removeButtonDiv.classList.add('col-md-12', 'd-flex', 'justify-content-end', 'mt-2');
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.classList.add('btn', 'btn-danger');
+    removeButton.innerText = 'Supprimer';
+    removeButton.addEventListener('click', function () {
+      newFieldRow.remove();
+    });
+    removeButtonDiv.appendChild(removeButton);
+
+    newFieldRow.appendChild(targetFieldDiv);
+    newFieldRow.appendChild(targetFieldValueDiv);
+    newFieldRow.appendChild(removeButtonDiv);
+    dynamicFieldsContainer.appendChild(newFieldRow);
+  }
+
+  addFieldButton.addEventListener('click', function () {
+
+    $.ajax({
+      url: workflowTargetFieldUrl.replace("ruleFields", ruleIdField.value),
+      type: "GET",
+      success: function (data) {
+        addNewTargetField(data.fields);
+      },
+      error: function (xhr, status, error) {
+        console.error("Erreur lors de la récupération des champs:", status, error);
+      },
+    });
   });
 });

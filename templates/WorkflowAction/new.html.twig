@@ -67,10 +67,18 @@
 					<div class="col-md-6">
 						{{ form_row(form.ruleId) }}
 					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
 						{{ form_row(form.targetField) }}
 					</div>
+					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+						<label for="form_targetFieldValue">New value</label>
+						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+					</div>
 				</div>
+				<div id="dynamicFieldsContainer"></div>
+				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
 				<div class="row mb-4">
 					<div class="col-md-6">
 						{{ form_row(form.to) }}
@@ -84,8 +92,8 @@
 		{{ form_end(form) }}
 	</div>
 
-<script type="text/javascript">
-    var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
-</script>
+	<script type="text/javascript">
+		var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+	</script>
 
 {% endblock %}

@@ -1,75 +1,95 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'view_workflow_action.edit'| trans}}{% endblock %}
-{% block titlesm %}{{ 'view_workflow_action.edit'| trans}}{% endblock titlesm %}
-{% block body %}
-    <div class="container mt-5">
-        {{ form_start(form) }}
-        <div class="card mb-3">
-            <div class="card-header">
-                {{ 'view_workflow.edit'|trans }}
-            </div>
-            <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.name) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.Workflow) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.description) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.action) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.order) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.status) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.active) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.subject) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        {{ form_row(form.message) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.searchField) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.searchValue) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.rerun) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.ruleId) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.to) }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center">
-            {{ form_row(form.submit) }}
-        </div>
-        {{ form_end(form) }}
-    </div>
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'view_workflow_action.edit'| trans}}
 {% endblock %}
+{% block titlesm %}
+	{{ 'view_workflow_action.edit'| trans}}
+{% endblock titlesm %}
+{% block body %}
+	<div class="container mt-5">
+		{{ form_start(form) }}
+		<div class="card mb-3">
+			<div class="card-header">
+				{{ 'view_workflow.edit'|trans }}
+			</div>
+			<div class="card-body">
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.name) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.Workflow) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.description) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.action) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.order) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.status) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.active) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.subject) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-12">
+						{{ form_row(form.message) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.searchField) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.searchValue) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.rerun) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.ruleId) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.to) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
+						{{ form_row(form.targetFields) }}
+					</div>
+					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+						<label for="form_targetFieldValue">New value</label>
+						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+					</div>
+				</div>
+				<div id="dynamicFieldsContainer"></div>
+				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
+			</div>
+			<div class="text-center">
+				{{ form_row(form.submit) }}
+			</div>
+			{{ form_end(form) }}
+		</div>
+
+		<script type="text/javascript">
+			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+		</script>
+	{% endblock %}

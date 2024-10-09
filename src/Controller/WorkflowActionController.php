@@ -42,6 +42,7 @@ use Pagerfanta\Pagerfanta;
 use App\Entity\WorkflowLog;
 use App\Form\ConnectorType;
 use App\Manager\JobManager;
+use App\Entity\DocumentData;
 use App\Manager\HomeManager;
 use App\Manager\RuleManager;
 use Doctrine\ORM\Mapping\Id;
@@ -85,6 +86,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -322,11 +324,13 @@ class WorkflowActionController extends AbstractController
                     'to' => null,
                     'subject' => null,
                     'message' => null,
-                    'rerun' => null
+                    'rerun' => null,
+                    'targetFields' => null,
+                    'targetFieldValues' => null,
                     // Add other WorkflowAction fields here as needed
                 ];
 
-                $form = $this->createFormBuilder($formData)
+                $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                     ->add('name', TextType::class, [
                         'label' => 'Action Name',
                         'required' => true,
@@ -392,6 +396,13 @@ class WorkflowActionController extends AbstractController
                         'label' => 'Target Field',
                         'choices' => [],
                         'required' => false,
+                        'mapped' => false,
+                    ])
+                    ->add('targetFieldValues', CollectionType::class, [
+                        'entry_type' => TextType::class,
+                        'allow_add' => true,
+                        'allow_delete' => true,
+                        'mapped' => false,
                     ])
 
                     ->add('order', IntegerType::class, [
@@ -484,6 +495,17 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = $rerun;
                     }
 
+                    $formData = $request->request->all();
+                    $targetFields = $formData['targetFields'] ?? [];
+                    $targetFieldValues = $formData['targetFieldValues'] ?? [];
+                
+                    if (!empty($targetFields) && !empty($targetFieldValues)) {
+                        foreach ($targetFields as $index => $targetField) {
+                            if (isset($targetFieldValues[$index])) {
+                                $arguments['fields'][$targetField] = $targetFieldValues[$index];
+                            }
+                        }
+                    }
                     $workflowAction->setArguments($arguments);
                     $em->persist($workflowAction);
                     $em->flush();
@@ -714,6 +736,18 @@ class WorkflowActionController extends AbstractController
                     ])
 
 
+                    ->add('targetFields', CollectionType::class, [
+                        'entry_type' => TextType::class,
+                        'allow_add' => true,
+                        'allow_delete' => true,
+                        'mapped' => false,
+                    ])
+                    ->add('targetFieldValues', CollectionType::class, [
+                        'entry_type' => TextType::class,
+                        'allow_add' => true,
+                        'allow_delete' => true,
+                        'mapped' => false,
+                    ])
 
                     ->add('order', IntegerType::class, [
                         'label' => 'Order',
@@ -808,6 +842,19 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = $rerun;
                     } else {
                         $arguments['rerun'] = 0;
+                    }
+
+                    
+
+                    $formData = $request->request->all();
+                    $targetFields = $formData['targetFields'] ?? [];
+                    $targetFieldValues = $formData['targetFieldValues'] ?? [];
+                    if (is_array($targetFields) && is_array($targetFieldValues)) {
+                        foreach ($targetFields as $index => $targetField) {
+                            if (isset($targetFieldValues[$index])) {
+                                $arguments['fields'][$targetField] = $targetFieldValues[$index];
+                            }
+                        }
                     }
 
                     $workflowAction->setArguments($arguments);
@@ -939,4 +986,28 @@ class WorkflowActionController extends AbstractController
 
         return new JsonResponse(['status' => 'success', 'active' => $workflowAction->getActive()]);
     }
+
+    // /**
+    //  * @Route("/update-field-value", name="update_field_value", methods={"POST"})
+    //  */
+    // public function updateFieldValue(Request $request, EntityManagerInterface $em): JsonResponse
+    // {
+    //     $targetField = $request->request->get('targetField');
+    //     $newValue = $request->request->get('newValue');
+    //     $docId = 'oihjkjn';
+
+    //     if ($targetField && $newValue) {
+    //         $documentData = new DocumentData();
+    //         $documentData->setDocId($docId);
+    //         $documentData->setType('S');
+    //         $documentData->setData(json_encode([$targetField => $newValue]));
+
+    //         $em->persist($documentData);
+    //         $em->flush();
+
+    //         return new JsonResponse(['message' => 'Mise à jour réussie']);
+    //     }
+
+    //     return new JsonResponse(['error' => 'Données invalides'], 400);
+    // }
 }
