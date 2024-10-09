@@ -23,8 +23,22 @@
 # *********************************************************************************/
 
 panel:
+    data: Your data
+    features:
+        title: Unlock new featues with Myddleware Premium
+    contact:
+        title: Contact us
+        title2: Need technical assistance
+        text1: For any technical issues, bugs, or development-related inquiries, feel free to contact us through the following channels
+        text2: Technical contact 
+        text3: GitHub Repository, view or report issues directly on our GitHub
+        title3: New projects or buisiness opportunities ?
+        text4: To discuss a new project, collaboration, or business opportunities, please reach out to us at the following address
+        text5: Business contact
+    documents:
+        title: Documents envoyés par Myddleware
     solutions:
-        title: Start by connecting these applications
+        title: Connect your data
         click: Click to see how to create this connector.
     graph_tranfer_rule:
         desc: Documents sent by rule
@@ -676,7 +690,10 @@ title:
     account:
         view: My account
     index:
-        panel: Control panel
+        panel: Welcome to Myddleware !
+        text: We're excited to have you on board !
+        text2: Start your project now by giving a look to our documentation.
+        btn: Start now !
     rule:
         create_name: Creation of the rule
         create: Creation of a rule

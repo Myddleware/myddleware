@@ -486,11 +486,11 @@
 }
 
 .nav-link.active {
-color: #000000!important; 
+color: #03c4eb!important; 
 }
 
 #ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
-	background-color: #ecedee;
+	box-shadow: rgb(248 249 249) 0px -5px 9px -4px inset, rgba(255, 255, 256, 14.5) 20px 1px 2px 0px inset;
 }
 
 .fancybox {
