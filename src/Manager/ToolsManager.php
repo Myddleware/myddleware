@@ -253,6 +253,9 @@ class toolscore
 			}
         }
 	}
+	
+	public function isPremium() {
+	}
 }
 
 class ToolsManager extends toolscore
