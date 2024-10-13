@@ -23,116 +23,96 @@
 *********************************************************************************/
 
 google.charts.load("visualization", "1", {packages:["corechart"]});
-google.charts.setOnLoadCallback(drawChart);
-
-function drawChart() {
-	if ($('#pie_chart_error_doc').length) {
-		$.ajax({
-			type: "POST",
-			url: 'graph/type/error/doc',
-			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(dataServ);
-				var options = {
-					is3D: false,
-				};
-
-				var chart = new google.visualization.PieChart(document.getElementById('pie_chart_error_doc'));
-				chart.draw(data, options);
-			}
-		});
-	}
-
-	if ($('#pie_chart_transfer_rule').length) {
-		$.ajax({
-			type: "POST",
-			url: 'graph/type/transfer/rule',
-			success: function (dataServ) {
-				
-				var data = google.visualization.arrayToDataTable(dataServ);
-				var options = {
-					is3D: false,
-				};
-				var chart = new google.visualization.PieChart(document.getElementById('pie_chart_transfer_rule'));
-				chart.draw(data, options);
-			}
-		});
-	}
-
-	if ($('#column_chart_histo').length) {
-		$.ajax({
-			type: "POST",
-			url: 'graph/type/transfer/histo',
-			success: function (dataServ) {
-				var data = google.visualization.arrayToDataTable(dataServ);
-				var options = {
-					is3D: false,
-					isStacked: true,
-					legend: { position: 'bottom'},
-					height: 400,
-					width: 575
-				};
-
-				var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_histo'));
-				chart.draw(data, options);
-			}
-		});
-	}
-
-	if ($('#column_chart_job_histo').length) {
-		$.ajax({
-			type: "POST",
-			url: 'graph/type/job/histo',
-			success: function (dataServ) {
-				
-				var data = google.visualization.arrayToDataTable(dataServ);
-				
-				var options = {
-					is3D: false,
-					isStacked: true,
-					legend: { position: 'bottom'},
-					height: 400,
-					width: 600,
-				};
-
-				var chart = new google.visualization.ColumnChart(document.getElementById('column_chart_job_histo'));
-				chart.draw(data, options);
-			}
-		});
-	}
-}    
 
 //--------------
 
-$(function()  {
-	if($('#listing-solutions','#panel').length != 0) {
-		$('#listing-solutions','#panel').scrollbox({
-			direction: 'h',
-			distance: 65
-		});
-		$('#listing-solutions-backward','#panel').on('click', function () {
-			$('#listing-solutions','#panel').trigger('backward');
-		});
-		$('#listing-solutions-forward','#panel').on('click', function () {
-			$('#listing-solutions','#panel').trigger('forward');
-		});
-		$('#listing-solutions li','#panel').on('hover', function () {
-			string = $("img", this).attr('alt')
-			$("img", this).qtip({
-				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,
-				show: {
-					delay: 700,
-					ready: 'true',
-		    	},
-				position: {
-					my: 'top center',  // Position my top left...
-					at: 'bottom center', // at the bottom right of...
+// $(function()  {
+// 	if($('#listing-solutions','#panel').length != 0) {
+// 		$('#listing-solutions','#panel').scrollbox({
+// 			direction: 'h',
+// 			distance: 65
+// 		});
+// 		$('#listing-solutions-backward','#panel').on('click', function () {
+// 			$('#listing-solutions','#panel').trigger('backward');
+// 		});
+// 		$('#listing-solutions-forward','#panel').on('click', function () {
+// 			$('#listing-solutions','#panel').trigger('forward');
+// 		});
+// 		$('#listing-solutions li','#panel').on('hover', function () {
+// 			string = $("img", this).attr('alt')
+// 			$("img", this).qtip({
+// 				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,
+// 				show: {
+// 					delay: 700,
+// 					ready: 'true',
+// 		    	},
+// 				position: {
+// 					my: 'top center',  // Position my top left...
+// 					at: 'bottom center', // at the bottom right of...
+// 				}
+// 			})},
+// 			function () {
+// 				$('#listing-solutions img','#panel').each(function(){
+// 					$(this).qtip("hide");
+// 				});
+// 			}
+// 		);
+// 	}
+// });	
+
+document.addEventListener('DOMContentLoaded', function () {
+
+	if (typeof countNbDocuments !== 'undefined') {
+		// Fonction for animation of the counter
+		function animateCounter(id, start, end, duration) {
+			var obj = document.getElementById(id);
+			var current = start;
+			var range = end - start;
+			var increment = end > start ? 1 : -1;
+			var stepTime = Math.abs(Math.floor(duration / range));
+			
+			var timer = setInterval(function() {
+				current += increment;
+				obj.innerHTML = current;
+				if (current == end) {
+					clearInterval(timer);
 				}
-			})},
-			function () {
-				$('#listing-solutions img','#panel').each(function(){
-					$(this).qtip("hide");
-				});
-			}
-		);
+			}, stepTime);
+		}
+
+		animateCounter('countNbDocuments', 0, countNbDocuments, 1000);
+	} else {
+		console.error("countNbDocuments not defined");
 	}
-});	
+
+	const showMoreBtn = document.getElementById('show-more-btn');
+	const showLessBtn = document.getElementById('show-less-btn');
+	const hiddenItems = document.querySelectorAll('#error-list .list-group-item.d-none');
+	const allItems = document.querySelectorAll('#error-list .list-group-item');
+
+	if (showMoreBtn) {
+		showMoreBtn.addEventListener('click', function () {
+			hiddenItems.forEach(item => item.classList.remove('d-none'));
+			showMoreBtn.classList.add('d-none');
+			showLessBtn.classList.remove('d-none');
+		});
+	}
+
+	if (showLessBtn) {
+		showLessBtn.addEventListener('click', function () {
+			allItems.forEach((item, index) => {
+				if (index >= 5) {
+					item.classList.add('d-none');
+				}
+			});
+			showLessBtn.classList.add('d-none');
+			showMoreBtn.classList.remove('d-none');
+		});
+	}
+
+    document.querySelectorAll('.dropdown-toggle').forEach(function (dropdown) {
+        dropdown.addEventListener('click', function (e) {
+            e.preventDefault();
+        });
+    });
+});

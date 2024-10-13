@@ -1,8 +1,8 @@
 #logo {
-    background: url('./../images/template/logo.png') no-repeat;
-    background-size: 158px;
-    height: 113px;
-    width: 160px;
+    background: url('./../images/template/logo.jpg') no-repeat;
+    background-size: 209px;
+    height: 185px;
+    width: 240px;
     display: inline-block;
 }
 menu .caret, #myd_top .caret {

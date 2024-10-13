@@ -454,24 +454,24 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/statistics", name="statistics", methods={"POST"})
-     */
-    public function statisticsAction(Request $request): JsonResponse
-    {
-        try {
-            $return = [];
-            $home = $this->container->get('myddleware.home');
+    // /**
+    //  * @Route("/statistics", name="statistics", methods={"POST"})
+    //  */
+    // public function statisticsAction(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $return = [];
+    //         $home = $this->container->get('myddleware.home');
 
-            $return['errorByRule'] = $this->ruleRepository->errorByRule();
-            $return['countTypeDoc'] = $this->documentRepository->countTypeDoc();
-            $return['listJobDetail'] = $this->jobRepository->listJobDetail();
-            $return['countTransferHisto'] = $home->countTransferHisto();
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-            $return['error'] = $e->getMessage();
-        }
-        // Send the response
-        return $this->json($return);
-    }
+    //         $return['errorByRule'] = $this->ruleRepository->errorByRule();
+    //         $return['countTypeDoc'] = $this->documentRepository->countTypeDoc();
+    //         $return['listJobDetail'] = $this->jobRepository->listJobDetail();
+    //         $return['countTransferHisto'] = $home->countTransferHisto();
+    //     } catch (Exception $e) {
+    //         $this->logger->error($e->getMessage());
+    //         $return['error'] = $e->getMessage();
+    //     }
+    //     // Send the response
+    //     return $this->json($return);
+    // }
 }

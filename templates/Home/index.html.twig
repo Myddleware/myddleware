@@ -20,107 +20,122 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block titlesm %}{{'title.index.panel'|trans}}{% endblock titlesm %}
+{% block titlesm %}
+	<div class="homepage_welcome m-3">
+		{{'title.index.panel'|trans }}
+		<p class="homepage_welcome_text mt-4">{{'title.index.text'|trans }}</p>
+		<p class="homepage_welcome_text">{{'title.index.text2'|trans }}</p>
+		<button id="bnt_welcome" class="btn btn-dark text-center mt-4" onclick="window.open('https://myddleware.github.io/myddleware/#/', '_blank')">
+			{{ 'title.index.btn'|trans }}
+		</button>
+	</div>
+{% endblock titlesm %}
 {% block body %}
-	<div class="container">
+	<div>
 		<div id="panel" class="row">
-			<div class="col">	
-				{% if solutions is not empty %}
+			<div class="col">
 				<div class="d-flex justify-content-center my-4">
-					<h3 class="display-6">{{'panel.solutions.title'|trans}}</h3>
+					<h3 class="display-6 mt-4 title_section_homepage">{{'panel.data'|trans}}</h3>
 				</div>
-				<div id="listing-solutions-container" class="d-flex justify-content-center">
-					<button class="btn btn-light" id="listing-solutions-backward">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
-						<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-						</svg>
-					</button>
-					<div id="listing-solutions" class="scroll-img">
-						<ul>
-						{% for solution in solutions %}
-							<li><a href="{{'view_connector.help.link'|trans}}{{solution}}" target="_blank"><img alt="{{solution}}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}"></a></li>
-						{% endfor %}
-						</ul>
-					</div>
-					<button class="btn btn-light" id="listing-solutions-forward">
-						<i class="fa fa-chevron-right" aria-hidden="true"></i>
-					</button>
-				</div>
-				{% endif %}
 			</div>
 			<div id="info-blocks" class="container my-5 px-4">
 				<div class="row justify-content-center align-center">
 					<div class="col">
 						<div class="row d-flex">
-							<div class="card m-2 info col ">
+							<div class="card m-2 info col">
 								<div class="card-body">
-									<h4 class="card-title">{{'panel.graph_tranfer_rule.desc'|trans}}</h4>
-									<div id="pie_chart_transfer_rule" ></div>
+									<span class="icon-container">
+										<svg
+											class="icon_small_homepage" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512">
+											<!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+											<path d="M438.6 150.6c12.5-12.5 12.5-32.8 0-45.3l-96-96c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 96 32 96C14.3 96 0 110.3 0 128s14.3 32 32 32l306.7 0-41.4 41.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l96-96zm-333.3 352c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 416 416 416c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0 41.4-41.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-96 96c-12.5 12.5-12.5 32.8 0 45.3l96 96z"/>
+										</svg>
+									</span>
+									<div class="text-center">
+										<p id="countNbDocuments">0</p>
+										<h4 class="card-title title_countNbDocuments">{{'panel.documents.title'|trans}}</h4>
+									</div>
 								</div>
 							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{'panel.graph_error.title'|trans}} ({{ nbFlux }})</h4>
-									<div id="pie_chart_error_doc" ></div>
-								</div>   
-							</div>
-						</div>	
-						<div  class="row d-flex">         
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{ 'panel.graph_job_histo.title'|trans }}</h4>
-									<div id="column_chart_job_histo" ></div>
-								</div>   
-							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{ 'panel.graph_histo.title'|trans }}</h4>
-									<div id="column_chart_histo" ></div>
-								</div>   
-							</div>
 						</div>
-						<div  class="row d-flex">   
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{'panel.list_job.title'|trans}}</h4>
-									<ul class="list-group">
-										{% for job in listJobDetail %} 
-										<li class="list-group-item">
-											<a href="{{ path('task_view',{'id' : job.id }) }}">{{ job.begin|date('d/m/Y') }}</span></a>
-											<span> | {{ job.duration }} {{'panel.list_job.duration'|trans}}</span>
-											<span> | {{ job.status }}</span>
-											<span> | {{ job.message|sensor }}</span>
-										</li>
-										{% endfor %}
-									</ul>
-								</div>   	
-							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									{% if errorByRule %}
-									<h4 class="card-title">{{'panel.list_job.nb'|trans}}</h4>
-									<ul class="list-group">
-										{% for rule in errorByRule %} 
-										<li class="list-group-item">
+					</div>
+					<div class="card m-2 info col">
+						<div class="card-body">
+							{% if errorByRule %}
+								<div class="text-center">
+									<h4 class="card-title title_countNbDocuments">{{'panel.list_job.nb'|trans}}</h4>
+								</div>
+								<ul class="list-group" id="error-list">
+									{% for rule in errorByRule %}
+										<li class="list-group-item {% if loop.index > 5 %}d-none{% endif %}">
 											<span class="badge">{{ rule.cpt }}</span>
-											<a href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</span></a>
+											<a class="error_rule_homepage" href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</a>
 										</li>
-										{% endfor %}
-									</ul>
-									{% endif %}
-								</div>   
-							</div>
+									{% endfor %}
+								</ul>
+								{% if errorByRule|length > 5 %}
+									<div class="text-center mt-3">
+										<button class="btn btn-outline-dark" id="show-more-btn">{{ 'Show More'|trans }}</button>
+										<button class="btn btn-primary d-none" id="show-less-btn">{{ 'Show Less'|trans }}</button>
+									</div>
+								{% endif %}
+							{% endif %}
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="clr"></div>
+			{# SOLUTION #}
+			<section class="solution_homepage">
+				<div class="col" id="title_solution_homepage">
+					<div class="d-flex justify-content-center my-4">
+						<h3 class="display-6 title_section_homepage">{{'panel.solutions.title'|trans}}</h3>
+					</div>
+				</div>
+				{% if solutions is not empty %}
+					<ul class="inline-images">
+						{% for solution in solutions %}
+							<li class="solution_liste_homepage">
+								<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+									<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			</section>
+			{# FEATURES #}
+			<section class="feature_homepage">
+				<div class="col">
+					<div class="d-flex justify-content-center my-4">
+						<h3 class="display-6 title_section_homepage">{{'panel.features.title'|trans}}</h3>
+					</div>
+				</div>
+				{# EN ATTENTE DE LA LISTE DES FEATURES	 #}
+			</section>
+			{# CONTACT US #}
+			<section class="solution_homepage">
+				<div class="col" id="title_solution_homepage">
+					<div class="d-flex justify-content-center my-4">
+						<h3 class="display-6 title_section_homepage">{{'panel.contact.title'|trans}}</h3>
+					</div>
+				</div>
+				<div class="d-flex justify-content-center my-4">
+					<div class="contact-panel mx-2">
+						<h4>{{'panel.contact.title2'|trans}}</h4>
+						<p>{{'panel.contact.text1'|trans}}</p>
+						<p>{{'panel.contact.text2'|trans}}</p>
+						<p>{{'panel.contact.text3'|trans}}</p>
+					</div>
+					<div class="contact-panel mx-2">
+						<h4>{{'panel.contact.title3'|trans}}</h4>
+						<p>{{'panel.contact.text4'|trans}}</p>
+						<p>{{'panel.contact.text5'|trans}}</p>
+					</div>
+				</div>
+			</section>
 		</div>
 	</div>
-    <script type="text/javascript">
-		let trans_click = "{{'panel.solutions.click'|trans}}";
-    </script>
-{% endblock %}
+</div></div><div class="clr"></div></div></div><script type="text/javascript">let trans_click = "{{ 'panel.solutions.click'|trans }}";</script><script type="text/javascript">var countNbDocuments = {{ countNbDocuments|json_encode|raw }};</script>{% endblock %}

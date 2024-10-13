@@ -2629,113 +2629,17 @@ use App\Entity\Workflow;
                 $nbFlux = $nbFlux + (int) $value['nb'];
             }
 
+            $countNbDocuments = $this->documentRepository->countNbDocuments();
+
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
                 'listJobDetail' => $this->jobRepository->listJobDetail(),
                 'nbFlux' => $nbFlux,
                 'solutions' => $lstArray,
                 'locale' => $language,
+                'countNbDocuments' => $countNbDocuments,
             ]
             );
-        }
-
-        /**
-         * @Route("/graph/type/error/doc", name="graph_type_error_doc", options={"expose"=true})
-         */
-        public function graphTypeError(): Response
-        {
-            $countTypeDoc = [];
-            $documents = $this->documentRepository->countTypeDoc($this->getUser());
-            if (count($documents)) {
-                $countTypeDoc[] = ['test', 'test2'];
-                foreach ($documents as $value) {
-                    $countTypeDoc[] = [$value['global_status'], (int) $value['nb']];
-                }
-            }
-
-            return $this->json($countTypeDoc);
-        }
-
-        /**
-         * @Route("/graph/type/transfer/rule", name="graph_type_transfer_rule", options={"expose"=true})
-         */
-        public function graphTransferRule(): Response
-        {
-            $countTransferRule = [];
-            $values = $this->documentRepository->countTransferRule($this->getUser());
-            if (count($values)) {
-                $countTransferRule[] = ['test', 'test2'];
-                foreach ($values as $value) {
-                    $countTransferRule[] = [$value['name'], (int) $value['nb']];
-                }
-            }
-
-            return $this->json($countTransferRule);
-        }
-
-        /**
-         * @Route("/graph/type/transfer/histo", name="graph_type_transfer_histo", options={"expose"=true})
-         */
-        public function graphTransferHisto(): Response
-        {
-            $countTransferRule = [];
-            $values = $this->home->countTransferHisto($this->getUser());
-            if (count($values)) {
-                $countTransferRule[] = [
-                    'date',
-                    $this->translator->trans('flux.gbl_status.open'),
-                    $this->translator->trans('flux.gbl_status.error'),
-                    $this->translator->trans('flux.gbl_status.cancel'),
-                    $this->translator->trans('flux.gbl_status.close'),
-                ];
-                foreach ($values as $field => $value) {
-                    $countTransferRule[] = [
-                        $value['date'],
-                        (int) $value['open'],
-                        (int) $value['error'],
-                        (int) $value['cancel'],
-                        (int) $value['close'],
-                    ];
-                }
-            }
-
-            return $this->json($countTransferRule);
-        }
-
-        /**
-         * @Route("/graph/type/job/histo", name="graph_type_job_histo", options={"expose"=true})
-         */
-        public function graphJobHisto(): Response
-        {
-            $countTransferRule = [];
-            $jobs = $this->jobRepository->findBy([], ['begin' => 'ASC'], 5);
-            
-            $timeZone = $this->get('session')->get('_timezone', 'UTC'); 
-            $userTimeZone = new \DateTimeZone($timeZone);
-            
-            if (count($jobs)) {
-                $countTransferRule[] = [
-                    'date',
-                    $this->translator->trans('flux.gbl_status.open'),
-                    $this->translator->trans('flux.gbl_status.error'),
-                    $this->translator->trans('flux.gbl_status.cancel'),
-                    $this->translator->trans('flux.gbl_status.close'),
-                ];
-                foreach ($jobs as $job) {
-                    $start = clone $job->getBegin();
-                    $start->setTimezone($userTimeZone);
-            
-                    $countTransferRule[] = [
-                        $start->format('d/m/Y H:i:s'),
-                        (int) $job->getOpen(),
-                        (int) $job->getError(),
-                        (int) $job->getCancel(),
-                        (int) $job->getClose(),
-                    ];
-                }
-            }
-
-            return $this->json($countTransferRule);
         }
 
         /**

@@ -170,20 +170,6 @@ class DocumentRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function countTransferRule(User $user = null)
-    {
-        $qb = $this->createQueryBuilder('d')
-            ->select('COUNT(d) as nb, rule.name')
-            ->join('d.rule', 'rule')
-            ->andWhere('d.deleted = 0')
-            ->andWhere('d.status = :send')
-            ->setParameter('send', 'Send')
-            ->groupBy('rule.name')
-            ->orderBy('nb', 'DESC');
-
-        return $qb->getQuery()->getResult();
-    }
-
     public function countTransferHisto(User $user = null)
     {
         $qb = $this->createQueryBuilder('d')
@@ -436,4 +422,14 @@ class DocumentRepository extends ServiceEntityRepository
 			->getQuery();
         $q->execute();
 	}
+
+    public function countNbDocuments(): int 
+    {
+        return $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->where('d.deleted = :deleted')
+            ->setParameter('deleted', 0)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
