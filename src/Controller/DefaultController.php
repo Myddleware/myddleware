@@ -2638,7 +2638,6 @@ use App\Entity\Workflow;
                 'solutions' => $lstArray,
                 'locale' => $language,
                 'countNbDocuments' => $countNbDocuments,
-                'isPremium' => $this->tools->isPremium() ? true : false,
             ]
             );
         }
