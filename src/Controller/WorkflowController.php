@@ -172,7 +172,7 @@ class WorkflowController extends AbstractController
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
@@ -233,7 +233,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
 
@@ -269,7 +269,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
 
@@ -298,7 +298,7 @@ class WorkflowController extends AbstractController
     public function saveWorkflowAudit($workflowId)
     {
 
-        if (($this->tools->isPremium())) {
+        if (!($this->tools->isPremium())) {
             return $this->redirectToRoute('premium_list');
         }
         
@@ -359,7 +359,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
@@ -390,7 +390,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
@@ -418,7 +418,7 @@ class WorkflowController extends AbstractController
     public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
     {
 
-        if (($this->tools->isPremium())) {
+        if (!($this->tools->isPremium())) {
             return $this->redirectToRoute('premium_list');
         }
 
@@ -449,7 +449,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
@@ -497,7 +497,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
@@ -544,7 +544,7 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (($this->tools->isPremium())) {
+            if (!($this->tools->isPremium())) {
                 return $this->redirectToRoute('premium_list');
             }
             
