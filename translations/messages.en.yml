@@ -1042,3 +1042,15 @@ variable:
     name: Name
     value: Value
     actions: Actions
+
+premium:
+    upgrade:
+        title_main: "Upgrade to Premium"
+        title: "Unlock Premium Features"
+        description: "Get access to exclusive features and support by upgrading to the premium version of Myddleware."
+        button: "Buy Premium"
+        benefits:
+            title: "Premium Benefits"
+            benefit1: "Benefit 1 description"
+            benefit2: "Benefit 2 description"
+            benefit3: "Benefit 3 description"
