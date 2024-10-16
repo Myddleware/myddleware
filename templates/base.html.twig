@@ -76,17 +76,10 @@
 									</a>
 								</li>
 								<li>
-									{% if isPremium is defined and isPremium %}
-										<a class="dropdown-item" href="{{ path('workflow_list') }}">
-											<i class="fa fa-th-list" aria-hidden="true"></i>
-											{{ 'menu.workflow.list'|trans }}
-										</a>
-									{% else %}
-										<a class="dropdown-item text-muted" href="javascript:void(0);" title="Premium Required">
-											<i class="fa fa-lock" aria-hidden="true"></i>
-											Premium Required
-										</a>
-									{% endif %}
+									<a class="dropdown-item" href="{{ path('workflow_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.workflow.list'|trans}}
+									</a>
 								</li>
 								<li>
 									<a class="dropdown-item" href="{{ path('variable_list') }}">
