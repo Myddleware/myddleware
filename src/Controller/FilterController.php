@@ -189,8 +189,6 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
-
-        $toto = 'toto';
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
