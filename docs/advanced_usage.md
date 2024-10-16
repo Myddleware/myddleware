@@ -363,11 +363,13 @@ To achieve this:
 1) First, select **changeData** from the ``Action`` dropdown.
 2) Select the rule with the fields you want to modify
 3) Click on the ``Add Field`` button to create a first field change
+
+![Workflowaction - ChangeData - Part 1)](images/advanced_usage/workflow_action_changeData1.png)
+
 4) Select the name of the target field you want to change (``Target Field``).
 5) Add the new value for the field (``New Value``).
 6) You can add additional field changes by clicking on ``Add Field`` button.
 
-![Workflowaction - ChangeData - Part 1)](images/advanced_usage/workflow_action_changeData1.png)
 ![Workflowaction - ChangeData - Part 2](images/advanced_usage/workflow_action_changeData2.png)
 
 ## Variables
