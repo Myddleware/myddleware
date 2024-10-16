@@ -361,9 +361,14 @@ This action allows you to unlock data sending. For exemple, during data migratio
 This action allows the system to modify the value of a specific field whenever the workflow is triggered. For exemple, you want to create and update a CRM (CRM_1) user from another CRM (CRM_2) contact, the user is created with a password. However, when updating the user, the password should not be updated. To handle this, the changeData action modifies the password field during an update, setting its value to "mdw_no_send_field", ensuring the password remains unchanged.
 To achieve this:
 1) First, select **changeData** from the ``Action`` dropdown.
-2) Add the name of the target field you want to change (``changeField``).
-3) Add the new value for the field (``changeValue``).
-4) You can add additional field changes by clicking on ``New Field Change`` button.
+2) Select the rule with the fields you want to modify
+3) Click on the ``Add Field`` button to create a first field change
+4) Select the name of the target field you want to change (``Target Field``).
+5) Add the new value for the field (``New Value``).
+6) You can add additional field changes by clicking on ``Add Field`` button.
+
+![Workflowaction - ChangeData - Part 1)](images/advanced_usage/workflow_action_changeData1.png)
+![Workflowaction - ChangeData - Part 2](images/advanced_usage/workflow_action_changeData2.png)
 
 ## Variables
 Sometimes, it's necessary to hard-code values like course IDs, names, etc., directly into rules. This feature allows those values to be grouped in a central location, where they can be assigned to variables and referenced by their variable names in the rules. This way, if any of these values (like IDs) need to be changed, you only need to update them in one place, simplifying management and reducing the risk of errors.
