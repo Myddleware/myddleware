@@ -58,15 +58,10 @@ class PremiumController extends AbstractController
      * @return RedirectResponse|Response
      *
      * @Route("/list", name="premium_list", defaults={"page"=1})
-     * @Route("/list/page-{page}", name="premium_list_page", requirements={"page"="\d+"})
      */
     public function PremiumListAction(int $page = 1, Request $request)
     {
         try {
-            
-            
-
-
             // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
                 'premium/list.html.twig',
