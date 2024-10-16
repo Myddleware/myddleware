@@ -24,6 +24,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
+use App\Manager\ToolsManager;
+
 
 /**
  * @Route("/rule/jobscheduler")
@@ -32,11 +34,13 @@ class JobSchedulerController extends AbstractController
 {
     private JobSchedulerManager $jobSchedulerManager;
     private EntityManagerInterface $entityManager;
+    private ToolsManager $tools;
 
-    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager)
+    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools)
     {
         $this->entityManager = $entityManager;
         $this->jobSchedulerManager = $jobSchedulerManager;
+        $this->tools = $tools;
     }
 
     /**
@@ -44,6 +48,12 @@ class JobSchedulerController extends AbstractController
      */
     public function index(): Response
     {
+
+        if (!($this->tools->isPremium())) {
+            return $this->redirectToRoute('premium_list');
+        }
+        
+
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
 
         return $this->render('JobScheduler/index.html.twig', [
@@ -151,7 +161,6 @@ class JobSchedulerController extends AbstractController
     public function edit($id): Response
     {
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
-
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
         }
@@ -313,6 +322,13 @@ class JobSchedulerController extends AbstractController
      */
     public function crontabList(int $page): Response
     {
+
+        if (!($this->tools->isPremium())) {
+            return $this->redirectToRoute('premium_list');
+        }
+        
+
+
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
 		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
