@@ -172,6 +172,10 @@ class WorkflowController extends AbstractController
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
+
+            if (!($this->tools->isPremium())) {
+                return $this->redirectToRoute('regle_panel');
+            }
             
             // Récupérer les filtres depuis la requête
             $workflowName = $request->query->get('workflow_name');
