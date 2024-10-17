@@ -437,11 +437,10 @@ class JobSchedulerController extends AbstractController
         }
 
         // Get the current running instances from the $entity
-        $currentRunningInstances = $entity->getRunningInstances();
         $currentMaxInstances = $entity->getMaxInstances();
         $currentMaxInstancesString = (string) $currentMaxInstances;
 
-        $currentRunningInstancesString = (string) $currentRunningInstances;
+        $currentRunningInstancesString = (string) $entity->getRunningInstances();
 
         // get the new value of the running instances from the request
         $newRunningInstances = $request->request->get('job_scheduler_cron')['runningInstances'];
@@ -449,7 +448,7 @@ class JobSchedulerController extends AbstractController
         $newRunningInstancesInteger = (int) $newRunningInstances;
 
         // if the new value is different from the current value, update the request to not update the running instances
-        if ($currentRunningInstances !== $newRunningInstancesInteger) {
+        if ($entity->getRunningInstances() !== $newRunningInstancesInteger) {
             $request->request->set('job_scheduler_cron', ['runningInstances' => $currentRunningInstancesString, 'maxInstances' => $currentMaxInstancesString, "period" => $entity->getPeriod(), "command" => $entity->getCommand(), "description" => $entity->getDescription()]);
         }
 
