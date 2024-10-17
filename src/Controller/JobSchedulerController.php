@@ -437,8 +437,7 @@ class JobSchedulerController extends AbstractController
         }
 
         // Get the current running instances from the $entity
-        $currentMaxInstances = $entity->getMaxInstances();
-        $currentMaxInstancesString = (string) $currentMaxInstances;
+        $currentMaxInstancesString = (string) $entity->getMaxInstances();
 
         $currentRunningInstancesString = (string) $entity->getRunningInstances();
 
