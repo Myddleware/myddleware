@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'premium.upgrade.title_main'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'premium.upgrade.title_main'|trans }}
+{% endblock titlesm %}
+
+{% block body %}
+<div id="premium-upgrade">
+
+    <div class="text-center mt-4">
+        <h1>{{ 'premium.upgrade.title'|trans }}</h1>
+        <p class="lead">{{ 'premium.upgrade.description'|trans }}</p>
+        <a href="{{ path('regle_panel') }}" class="btn btn-primary mt-4">{{ 'premium.upgrade.button'|trans }}</a>
+    </div>
+
+    <div class="mt-5">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="container mt-5">
+        <h2>{{ 'premium.upgrade.benefits.title'|trans }}</h2>
+        <ul class="list-group">
+            <li class="list-group-item">{{ 'premium.upgrade.benefit1'|trans }}</li>
+            <li class="list-group-item">{{ 'premium.upgrade.benefit2'|trans }}</li>
+            <li class="list-group-item">{{ 'premium.upgrade.benefit3'|trans }}</li>
+        </ul>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block cssin %}{% endblock cssin %}

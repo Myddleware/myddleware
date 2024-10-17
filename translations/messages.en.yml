@@ -722,24 +722,27 @@ menu:
     rule:
         title: Rules
         createv1: Creation (v1)
-        createv2: Creation
-        list: List
+        createv2: Create Rule
+        list: Rules
     connector:
         title: Connectors
-        create: Creation
-        list: List
+        create: Create Connector
+        list: Connectors
     flux:
         title: Documents
         list: List    
     variable:
         title: Documents
-        list: List of variables      
+        list: Variables
     job:
         title: Tasks
         list: List
     support: Support
     workflow:
-        list: List of Workflows
+        list: Workflows
+    task:
+        title: Tasks
+        stopall: Stop all tasks
 
 breadcrumb:
     rule_list: Rules list
@@ -1042,3 +1045,15 @@ variable:
     name: Name
     value: Value
     actions: Actions
+
+premium:
+    upgrade:
+        title_main: "Upgrade to Premium"
+        title: "Unlock Premium Features"
+        description: "Get access to exclusive features and support by upgrading to the premium version of Myddleware."
+        button: "Buy Premium"
+        benefits:
+            title: "Premium Benefits"
+            benefit1: "Benefit 1 description"
+            benefit2: "Benefit 2 description"
+            benefit3: "Benefit 3 description"
