@@ -739,6 +739,9 @@ menu:
         
     workflow:
         list: Liste des workflows
+    task:
+        title: Tâches
+        stopall: Arrêter toutes les tâches
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents
