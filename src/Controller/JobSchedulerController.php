@@ -435,12 +435,37 @@ class JobSchedulerController extends AbstractController
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Crontab entity.');
         }
+
+        // Get the current running instances from the $entity
+        $currentRunningInstances = $entity->getRunningInstances();
+        $currentMaxInstances = $entity->getMaxInstances();
+        $currentMaxInstancesString = (string) $currentMaxInstances;
+
+        $currentRunningInstancesString = (string) $currentRunningInstances;
+
+        // get the new value of the running instances from the request
+        $newRunningInstances = $request->request->get('job_scheduler_cron')['runningInstances'];
+
+        $newRunningInstancesInteger = (int) $newRunningInstances;
+
+        // if the new value is different from the current value, update the request to not update the running instances
+        if ($currentRunningInstances !== $newRunningInstancesInteger) {
+            $request->request->set('job_scheduler_cron', ['runningInstances' => $currentRunningInstancesString, 'maxInstances' => $currentMaxInstancesString, "period" => $entity->getPeriod(), "command" => $entity->getCommand(), "description" => $entity->getDescription()]);
+        }
+
         $editForm = $this->createEditFormCrontab($entity);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->entityManager->flush();
 
+            return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+        } else if ($editForm->isSubmitted() && !($editForm->isValid())) {
+            // do an sql statement to update the running instances
+            $this->entityManager->getConnection()->executeQuery('UPDATE cron_job SET running_instances = :running_instances WHERE id = :id', ['running_instances' => $newRunningInstances, 'id' => $id]);
+            $this->entityManager->flush();
+
+            // redirect to the show view
             return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
         }
 
