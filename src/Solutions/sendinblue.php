@@ -538,7 +538,6 @@ class sendinbluecore extends solution
 
         try {
             $result = $apiInstance->getEmailEventReport($limit, $offset, $startDate, $endDate, $messageId, $templateId);
-            print_r($result);
         } catch (\Exception $e) {
             echo 'Exception when calling TransactionalEmailsApi->getEmailEventReport: ', $e->getMessage();
         }

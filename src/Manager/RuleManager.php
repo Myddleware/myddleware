@@ -446,7 +446,13 @@ class rulecore
                     }
                     // Mise à jour de la date de référence si des documents ont été créés
                     $this->updateReferenceDate();
-                }
+                // In case there is no result but the reference date has changed (e.g. stat reding from Brevo)
+				} elseif (
+						$readSource['count'] == 0
+					AND $readSource['date_ref'] != $this->ruleParams['datereference']
+				) {
+					$this->updateReferenceDate();
+				}
                 // If params has been added in the output of the rule we saved it
                 $this->updateParams();
 				
