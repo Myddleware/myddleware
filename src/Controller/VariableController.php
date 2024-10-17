@@ -76,6 +76,9 @@ class VariableController extends AbstractController
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
             ])
+            ->add('description', TextareaType::class, [
+                'label' => $translator->trans('variable.table_headers.description'),
+            ])
             ->add('value', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.value'),
             ])
@@ -118,6 +121,9 @@ class VariableController extends AbstractController
         $form = $this->createFormBuilder($variable)
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => $translator->trans('variable.table_headers.description'),
             ])
             ->add('value', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.value'),

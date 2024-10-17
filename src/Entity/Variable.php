@@ -48,8 +48,25 @@ class Variable
      * @ORM\Column(name="value", type="text", nullable=false)
      */
     private string $value  = '';
-	
 
+        /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $description;
+
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+	
     public function getId(): int
     {
         return $this->id;

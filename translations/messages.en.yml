@@ -235,7 +235,7 @@ rule:
     help: What should I do ?
 
 list_rule:
-    title: List of rules
+    title: Rules
     total: Number of rules
     empty: You do not have any rules yet !
     delete: Are you sure you want to delete this rule?
@@ -1042,3 +1042,4 @@ variable:
     name: Name
     value: Value
     actions: Actions
+    description: Description

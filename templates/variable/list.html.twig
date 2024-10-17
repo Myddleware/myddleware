@@ -26,6 +26,7 @@
                         <tr>
                             <th>{{ 'variable.table_headers.name'|trans }}</th>
                             <th>{{ 'variable.table_headers.value'|trans }}</th>
+                            <th>{{ 'variable.table_headers.description'|trans }}</th>
                             <th>{{ 'variable.table_headers.actions'|trans }}</th>
                         </tr>
                     </thead>
@@ -34,6 +35,7 @@
                             <tr>
                                 <td><a href="{{ path('variable_show', {'id': variable.id}) }}">{{ variable.name }}</a></td>
                                 <td>{{ variable.value }}</td>
+                                <td>{{ variable.description }}</td>
                                 <td class="CRUD-icons">
                                     <a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
                                         <span class="btn-opt">
