@@ -23,21 +23,27 @@ use Symfony\Component\Process\Process;
 use App\Entity\Config;
 use Doctrine\ORM\EntityManagerInterface;
 
+use App\Manager\ToolsManager;
+
 final class CronRunCommand extends BaseCommand
 {
     private CommandHelper $commandHelper;
     //protected $configParams;
     protected EntityManagerInterface $entityManager;
+	
+	private ToolsManager $toolsManager;
 
     public function __construct(
         CommandHelper $commandHelper,
         ManagerRegistry $registry,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+		ToolsManager $toolsManager,
     ) {
         parent::__construct($registry);
 
         $this->commandHelper = $commandHelper;
         $this->entityManager = $entityManager;
+        $this->toolsManager = $toolsManager;
     }
 
     protected function configure(): void
@@ -49,6 +55,9 @@ final class CronRunCommand extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+		if (!$this->toolsManager->isPremium()) {
+			throw new Exception("Command cronrun only available with the entreprise package. ");
+		}
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
         //Check if crontab is enabled

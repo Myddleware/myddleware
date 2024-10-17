@@ -24,22 +24,22 @@ services:
   #     decoration_on_invalid: ignore
   #     decoration_priority: 1
 
-  App\Custom\Premium\Solutions\mysqlpremium:
-    decorates: App\Solutions\mysql
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Premium\Solutions\mysqlpremium:
+    # decorates: App\Solutions\mysql
+    # decoration_on_invalid: ignore
+    # decoration_priority: 1
 
-  App\Custom\Solutions\mysqlcustom:
-    decorates: App\Custom\Premium\Solutions\mysqlpremium
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Solutions\mysqlcustom:
+    # decorates: App\Custom\Premium\Solutions\mysqlpremium
+    # decoration_on_invalid: ignore
+    # decoration_priority: 1
     
-  App\Custom\Premium\Manager\DocumentManagerPremium:
-    decorates: App\Manager\DocumentManager
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Premium\Manager\DocumentManagerPremium:
+    # decorates: App\Manager\DocumentManager
+    # decoration_on_invalid: ignore
+    # decoration_priority: 1
     
-  App\Custom\Premium\Manager\ToolsManagerPremium:
-    decorates: App\Manager\ToolsManager
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Premium\Manager\ToolsManagerPremium:
+    # decorates: App\Manager\ToolsManager
+    # decoration_on_invalid: ignore
+    # decoration_priority: 1

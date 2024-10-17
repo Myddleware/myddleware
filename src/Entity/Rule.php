@@ -169,6 +169,12 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="RuleGroup")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     */
+    private RuleGroup $group;
 	
 	/**
      * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
@@ -732,6 +738,18 @@ class Rule
     public function isModuleTargetSet(): bool
     {
         return isset($this->moduleTarget);
+    }
+	
+	public function setGroup(RuleGroup $group): self
+    {
+        $this->group = $group;
+
+        return $this;
+    }
+
+    public function getGroup(): RuleGroup
+    {
+        return $this->group;
     }
 
 }
