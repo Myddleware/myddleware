@@ -722,24 +722,27 @@ menu:
     rule:
         title: Rules
         createv1: Creation (v1)
-        createv2: Creation
-        list: List
+        createv2: Create Rule
+        list: Rules
     connector:
         title: Connectors
-        create: Creation
-        list: List
+        create: Create Connector
+        list: Connectors
     flux:
         title: Documents
         list: List    
     variable:
         title: Documents
-        list: List of variables      
+        list: Variables
     job:
         title: Tasks
         list: List
     support: Support
     workflow:
-        list: List of Workflows
+        list: Workflows
+    task:
+        title: Tasks
+        stopall: Stop all tasks
 
 breadcrumb:
     rule_list: Rules list
