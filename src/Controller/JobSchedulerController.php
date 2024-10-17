@@ -446,6 +446,11 @@ class JobSchedulerController extends AbstractController
 
         $newRunningInstancesInteger = (int) $newRunningInstances;
 
+        $newDescription = $request->request->get('job_scheduler_cron')['description'];
+        $newPeriod = $request->request->get('job_scheduler_cron')['period'];
+        $newMaxInstances = $request->request->get('job_scheduler_cron')['maxInstances'];
+
+
         // if the new value is different from the current value, update the request to not update the running instances
         if ($entity->getRunningInstances() !== $newRunningInstancesInteger) {
             $request->request->set('job_scheduler_cron', ['runningInstances' => $currentRunningInstancesString, 'maxInstances' => $currentMaxInstancesString, "period" => $entity->getPeriod(), "command" => $entity->getCommand(), "description" => $entity->getDescription()]);
@@ -460,7 +465,18 @@ class JobSchedulerController extends AbstractController
             return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
         } else if ($editForm->isSubmitted() && !($editForm->isValid())) {
             // do an sql statement to update the running instances
-            $this->entityManager->getConnection()->executeQuery('UPDATE cron_job SET running_instances = :running_instances WHERE id = :id', ['running_instances' => $newRunningInstances, 'id' => $id]);
+            $this->entityManager->getConnection()->executeQuery('UPDATE cron_job SET running_instances = :running_instances,
+            max_instances = :max_instances,
+            period = :period,
+            description = :description
+            
+            WHERE id = :id', 
+            ['running_instances' => $newRunningInstances,
+             'id' => $id,
+            'max_instances' => $newMaxInstances,
+            'period' => $newPeriod,
+            'description' => $newDescription
+            ]);
             $this->entityManager->flush();
 
             // redirect to the show view
