@@ -303,11 +303,9 @@ class WorkflowActionController extends AbstractController
                         $ruleSourceFields[$value] = $value;
                         unset($ruleSourceFields[$key]);
                     }
-                    $ruleSourceFields['id'] = 'id';
+                    $ruleSourceFields['Name'] = 'Name';
                     $sourceSearchValue[$rule->getName()] = $ruleSourceFields;
                 }
-
-
 
                 // Create a new array to hold the form data
                 $formData = [
@@ -650,8 +648,8 @@ class WorkflowActionController extends AbstractController
                         $ruleSourceFields[$value] = $value;
                         unset($ruleSourceFields[$key]);
                     }
-                    $ruleSourceFields['id'] = 'id';
-                    $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                    $ruleSourceFields['name'] = 'name';
+                    $sourceSearchValue[$rule->getName()] = $ruleSourceFields;
                 }
 
                 // Create a new array to hold the form data
