@@ -172,9 +172,6 @@ class WorkflowController extends AbstractController
     public function WorkflowListAction(int $page = 1, Request $request)
     {
         try {
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
             
             // Récupérer les filtres depuis la requête
             $workflowName = $request->query->get('workflow_name');
@@ -233,9 +230,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
 
             // Récupération des workflows par règle
             $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(
@@ -269,9 +263,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
 
             $em = $this->getDoctrine()->getManager();
             $workflowSearchResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -298,9 +289,6 @@ class WorkflowController extends AbstractController
     public function saveWorkflowAudit($workflowId)
     {
 
-        if (!($this->tools->isPremium())) {
-            return $this->redirectToRoute('premium_list');
-        }
         
 
         $em = $this->getDoctrine()->getManager();
@@ -359,9 +347,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
             
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -390,9 +375,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
             
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -418,9 +400,6 @@ class WorkflowController extends AbstractController
     public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
     {
 
-        if (!($this->tools->isPremium())) {
-            return $this->redirectToRoute('premium_list');
-        }
 
         $workflow = $workflowRepository->find($id);
 
@@ -449,10 +428,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
-            
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
@@ -497,9 +472,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
             
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -544,9 +516,6 @@ class WorkflowController extends AbstractController
     {
         try {
 
-            if (!($this->tools->isPremium())) {
-                return $this->redirectToRoute('premium_list');
-            }
             
             $em = $this->getDoctrine()->getManager();
             $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
