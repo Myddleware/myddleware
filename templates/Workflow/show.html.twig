@@ -259,6 +259,8 @@
 											</form>
 										
 											<script>
+											const maxPage = {{ pager.getNbPages() }};
+											
 												function updateFormAction(event) {
 													event.preventDefault();
 													const page = document.getElementById('page').value;
