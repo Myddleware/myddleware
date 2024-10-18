@@ -247,9 +247,29 @@
 						</tbody>
 					</table>
 
-					{% if pager.haveToPaginate %}
-            			{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id}}) }}
-        			{% endif %}
+										{% if pager.haveToPaginate %}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
+											
+											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
+												<div class="form-group">
+													<label for="page" class="sr-only">Page</label>
+													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
+												</div>
+												<button type="submit" class="btn btn-primary ml-2">Go</button>
+											</form>
+										
+											<script>
+												function updateFormAction(event) {
+													event.preventDefault();
+													const page = document.getElementById('page').value;
+													const form = document.getElementById('pageForm');
+													const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
+													const action = baseUrl.replace('/page-1', '/page-' + page);
+													form.action = action;
+													form.submit();
+												}
+											</script>
+										{% endif %}
 
 		{% block js %}
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
