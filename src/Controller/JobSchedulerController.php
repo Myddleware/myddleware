@@ -49,9 +49,6 @@ class JobSchedulerController extends AbstractController
     public function index(): Response
     {
 
-        if (!($this->tools->isPremium())) {
-            return $this->redirectToRoute('premium_list');
-        }
         
 
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
@@ -323,9 +320,6 @@ class JobSchedulerController extends AbstractController
     public function crontabList(int $page): Response
     {
 
-        if (!($this->tools->isPremium())) {
-            return $this->redirectToRoute('premium_list');
-        }
         
 
 
