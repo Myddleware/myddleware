@@ -2034,6 +2034,7 @@ class rulecore
         $result = $stmt->executeQuery();
         $documents = $result->fetchAllAssociative();
         foreach ($documents as $document) {
+			$error = '';
             // If the rule is a parent, we have to get the data of all rules child
             $childRules = $this->getChildRules();
             if (!empty($childRules)) {
@@ -2067,7 +2068,7 @@ class rulecore
                     // Document is added to the result to be sent
                     $return[$document['id_doc_myddleware']] = array_merge($document, $data);
                 } else {
-                    $error = 'No data found in the document';
+                    $error = 'No data found in the document. ';
                 }
             } else {
                 $error = $documentLock['error'];

@@ -564,11 +564,26 @@ class documentcore
                 $stmt->bindValue(':now', $now);
                 $stmt->bindValue(':id', $this->id);
                 $result = $stmt->executeQuery();
-                return true;
-            }
+				$this->typeError = 'S';
+				$this->message .= 'Document unlocked. ';
+				$this->createDocLog();
+				if (
+					!$this->api
+					AND $this->env == 'background'
+				) {
+					echo 'Unlock document '.$this->id.'  '.$now.chr(10);
+				}
+				return true;
+			} else {
+				throw new \Exception('This document is locked by the task '.$documentData['job_lock'].' and cannot be unclocked by the task '.$this->jobId.'. ');
+			}
         } catch (\Exception $e) {
-            return false;
+			$this->message .= 'Failed to unlock the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->typeError = 'E';
+            $this->logger->error($this->id.' - '.$this->message);
+            $this->createDocLog();
 		}
+		return false;
     }
 
     // Permet d'indiquer si le filtreest rempli ou pas
