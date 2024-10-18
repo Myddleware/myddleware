@@ -110,6 +110,18 @@ Strips HTML and PHP tags from a string, ([PHP](https://www.php.net/manual/fr/fun
 
         striptags(“<p>Test paragraph.</p><!– Comment –> <a href=”#fragment”>Other text</a>”) // Returns “Test paragraph. Other text”
 
+Lookup target IDs from source IDs from a previous rule and vice versa, **lookup(field, rule_id, errorifempty, errorifnotfound)**:
+
+        lookup({Contact__c},"6b5432f1xxxxx",0,0)
+
+Constant function that allows you to not send the selected field.
+        
+        "mdw_no_send_field"
+        
+Constant function that allows you to cancel the actual document
+
+        "mdw_cancel_document"
+
 ## Relationships
 
 We can create relationships in Myddleware that not only allow us to transfer unrelated data items but whole data models entirely.
@@ -248,4 +260,133 @@ But once again, the transfer will be cancelled to avoid an infinite loop :
 If the transfer isn’t cancelled, your server will continue to update the same contacts every time. To avoid this, you will 
 have to detect why the transfer isn’t cancelled. It could be because you used the modification date, or because the data
 format is not the same in both applications. 
-To solve this problem, remove some fields in your rule or create a formula to have the same data format in both applications.
+To solve this problem, remove some fields in your rule or create a formula to have the same data format in both applications
+
+## Workflows
+Workflows enable the automation of tasks when specific conditions are met. In the context of data migration, they offer a powerful feature that allows for more efficient linking of your data. By automating these connections, workflows not only streamline the process but also help ensure consistency and accuracy in how data relationships are established and maintained throughout the migration.
+
+### Create a workflow
+To create a workflow, 
+1) Navigate to the Rule’s tab and select ``List of workflows``
+2) Click on ``Create new workflow``
+   
+![Workflow - Create a workflow](images/advanced_usage/create_workflow.png)
+
+A form will be displayed, and you will need to fill it, in order to create your workflow. You will have to set : 
+1) The name
+2) The rule the workflow is related to
+3) The description
+4) The order it will be launched
+5) The condition that will trigger the workflow
+
+![Workflow - create workflow form](images/advanced_usage/create_workflow_form.png)
+
+The code you will use for condition is PHP. It is structured as follows:
+
+        {variable_1} == "Your_condition"
+
+You can write multiple conditions :
+
+        {variable_1} == "Your_condition1" && {variable_2} == "Your_condition2"
+**Important : Your variables must be enclosed in { }** 
+
+You can create a condition based on :
+1) Document Status (variable name : ``status``), ex: "Ready_to_send", "Send", "Error_transformed" 
+2) Document Type (variable name : ``documentType``), ex : "C", "U", "S"
+3) Document Attemps (variable name : ``attempts``), number
+4) A source field data (format : add the prefix source_ before your field name : ``source_fieldname``)
+5) A target field based on history data (format : add the prefix history_ before your field name : ``history_fieldname``)
+6) str_contains({message},"Your message")
+
+For exemple, you want to create a workflow that triggers when your document status is Error_transformed and your documentType is C
+
+        {status} == "Error_transformed" && {documentType} == "C"
+
+Then click on save. You are redirected to the workflow detail page. 
+
+![Workflow - Details view](images/advanced_usage/detail_workflow.png)
+
+Click on ``status`` to enable/disable the workflow.  
+### Workflowaction
+
+A workflow action allows you to initiate an operation when the conditions are met to trigger the workflow. 
+
+#### Create an action
+To create an action, click on ``+ Add Action`` on the workflow details view. 
+
+A form will be displayed, and you will need to fill it, in order to create your action. You will have first to :
+1) Fill ``Action Name`` field
+2) Ensure that the associated workflow is the one you want in ``Workflow`` field
+3) Fill ``Description`` field
+4) Define the order of the action in the workflow process execution, in ``Order`` field.
+5) Define if you want your action to be Active or inactive, in ``Active``
+   
+![Workflowaction - Creation view](images/advanced_usage/create_workflow_action_form.png)
+
+Then choose an action. There are 5 different actions, which are detailed below.
+
+##### updateStatus
+This action allows you to change the status of a document. For exemple, you want to cancel data sending when your workflow is triggered. To achieve this:
+1) First, select **updateStatus** from ``Action`` dropdown.
+2) Then fill ``status``. There are 5 possible choices.  
+
+![Workflowaction - UpdateStatus](images/advanced_usage/workflow_action_updateStatus.png)
+
+##### generateDocument
+This action allows you to create a document (to send data) via another rule. For example, in the context of a university, when a school is sent through a rule called 'Send_School' (with the document status set to 'Sent'), you may want to send the contact associated with this school through the rule 'Send_contact'. To achieve this:
+
+1) First, select **generateDocument** from ``Action`` dropdown.
+2) Add the name of the field in the actual rule (``searchValue``). In this exemple, the contact ID in the 'Send_school' rule.
+3) Add the name of the field in the related rule (``searchField``). In this exemple, this would be a field containing the source ID of the school.
+4) Define the related rule that will generate the document (``Rule``). In this exemple, the'Send_contact' rule.
+5) Define whether to rerun the workflow or not (``Rerun``).
+
+![Workflowaction - UpdateStatus](images/advanced_usage/workflow_action_generateDocument.png)
+
+##### sendNotification
+This action allows you to send an email to inform user about an element of your data. For exemple, you can send a notification if some fields are missing. To achieve this:
+1) First, select **sendNotification** from ``Action`` dropdown.
+2) Add ``Subject`` : Object of the notification
+3) Fill ``Message``  : The message you want to send 
+4) Fill ``To`` : one or many users email address (address separated by semicolon)
+
+![Workflowaction - UpdateStatus](images/advanced_usage/workflow_action_sendNotification.png)
+
+##### transformDocument
+This action allows you to unlock data sending. For exemple, during data migration, some documents are linked to other documents. If a linked document hasn't been sent before, the current document will show an error with the status 'Error_transformed'. To fix this, we trigger a workflow containing an action that sends the missing linked document. After that, action **transformDocument** updates the actual document status "Error_transformed" to "Transformed" of the current document so it is no longer in error and can be sent properly during the next synchronization. You just need to select **transformDocument** from ``Action`` dropdown.
+
+![Workflowaction - UpdateStatus](images/advanced_usage/workflow_action_transformDocument.png)
+
+##### changeData
+This action allows the system to modify the value of a specific field whenever the workflow is triggered. For exemple, you want to create and update a CRM (CRM_1) user from another CRM (CRM_2) contact, the user is created with a password. However, when updating the user, the password should not be updated. To handle this, the changeData action modifies the password field during an update, setting its value to "mdw_no_send_field", ensuring the password remains unchanged.
+To achieve this:
+1) First, select **changeData** from the ``Action`` dropdown.
+2) Select the rule with the fields you want to modify
+3) Click on the ``Add Field`` button to create a first field change
+
+![Workflowaction - ChangeData - Part 1)](images/advanced_usage/workflow_action_changeData1.png)
+
+4) Select the name of the target field you want to change (``Target Field``).
+5) Add the new value for the field (``New Value``).
+6) You can add additional field changes by clicking on ``Add Field`` button.
+
+![Workflowaction - ChangeData - Part 2](images/advanced_usage/workflow_action_changeData2.png)
+
+## Variables
+Sometimes, it's necessary to hard-code values like course IDs, names, etc., directly into rules. This feature allows those values to be grouped in a central location, where they can be assigned to variables and referenced by their variable names in the rules. This way, if any of these values (like IDs) need to be changed, you only need to update them in one place, simplifying management and reducing the risk of errors.
+
+### Create a variable
+To create a variable, 
+1) Navigate to the Rule’s tab and select ``List of variables``.
+2) Click on ``Create new variable``
+3) A form will be displayed, fill ``variable name`` and its ``value``.
+
+![Variable - Create variable](images/advanced_usage/create_variable.png)
+
+You will see the variable in the List view. The prefix mdwvar_ has been added on its name. 
+
+To call this variable, go on a Rule field and write your variable in the formula area.  
+**Important : your variable must be enclosed with { } and you have to call it with prefix ``mdwvar_`` as below** 
+
+![Variable - Call variable](images/advanced_usage/call_variable.png)
+
