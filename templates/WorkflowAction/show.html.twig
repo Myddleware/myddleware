@@ -177,10 +177,14 @@
 										
 											<script>
 											const maxPage = {{ pager.getNbPages() }};
-											
+
 												function updateFormAction(event) {
 													event.preventDefault();
 													const page = document.getElementById('page').value;
+													if (page < 1 || page > maxPage) {
+														alert('Please enter a valid page number between 1 and ' + maxPage);
+														return;
+													}
 													const form = document.getElementById('pageForm');
 													const baseUrl = "{{ path('workflow_action_show_page', {'id': workflow.id, 'page': 1}) }}";
 													const action = baseUrl.replace('/page-1', '/page-' + page);
