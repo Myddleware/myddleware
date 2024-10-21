@@ -229,6 +229,8 @@ class WorkflowController extends AbstractController
     public function WorkflowListByRuleAction(string $ruleId, int $page = 1, Request $request)
     {
         try {
+
+
             // Récupération des workflows par règle
             $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(
                 ['rule' => $ruleId, 'deleted' => 0],
@@ -260,6 +262,8 @@ class WorkflowController extends AbstractController
     public function WorkflowDeleteAction(string $id, Request $request)
     {
         try {
+
+
             $em = $this->getDoctrine()->getManager();
             $workflowSearchResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowSearchResult[0];
@@ -284,6 +288,8 @@ class WorkflowController extends AbstractController
     // public function to save the workflowAudit to the database
     public function saveWorkflowAudit($workflowId)
     {
+
+        
 
         $em = $this->getDoctrine()->getManager();
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
@@ -340,6 +346,8 @@ class WorkflowController extends AbstractController
     public function WorkflowActiveAction(string $id, Request $request)
     {
         try {
+
+            
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
@@ -366,6 +374,8 @@ class WorkflowController extends AbstractController
     public function WorkflowActiveShowAction(string $id, Request $request)
     {
         try {
+
+            
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
@@ -389,6 +399,8 @@ class WorkflowController extends AbstractController
     #[Route('/workflow/toggle/{id}', name: 'workflow_toggle', methods: ['POST'])]
     public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
     {
+
+
         $workflow = $workflowRepository->find($id);
 
         if (!$workflow) {
@@ -415,6 +427,7 @@ class WorkflowController extends AbstractController
     public function WorkflowCreateAction(Request $request)
     {
         try {
+
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
@@ -458,6 +471,8 @@ class WorkflowController extends AbstractController
     public function WorkflowShowAction(string $id, Request $request, int $page): Response
     {
         try {
+
+            
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
@@ -500,6 +515,8 @@ class WorkflowController extends AbstractController
     public function WorkflowEditAction(string $id, Request $request)
     {
         try {
+
+            
             $em = $this->getDoctrine()->getManager();
             $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowArray[0];

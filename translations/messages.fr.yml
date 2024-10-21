@@ -720,25 +720,28 @@ menu:
     rule:
         title: Règles
         createv1: Création (v1)
-        createv2: Création
-        list: Liste
+        createv2: Créer une règle
+        list: Règles
     connector:
         title: Connecteurs
-        create: Création
-        list: Liste
+        create: Créer un connecteur
+        list: Connecteurs
     flux:
         title: Documents
         list: Liste   
     variable:
         title: Documents
-        list: Liste des variables      
+        list: Variables      
     job:
         title: Tâches
         list: Liste
     support: Support
         
     workflow:
-        list: Liste des workflows
+        list: Workflows
+    task:
+        title: Tâches
+        stopall: Arrêter toutes les tâches
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents

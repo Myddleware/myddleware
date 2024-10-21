@@ -253,6 +253,13 @@ class toolscore
 			}
         }
 	}
+	
+	public function isPremium() {
+	}
+	
+	public function getRulesFromGroup($ruleGroup, $force = false) {
+		return array();
+	}
 }
 
 class ToolsManager extends toolscore

@@ -28,6 +28,7 @@ namespace App\Command;
 use App\Manager\DocumentManager;
 use App\Manager\JobManager;
 use App\Manager\RuleManager;
+use App\Manager\ToolsManager;
 use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -45,6 +46,7 @@ class SynchroCommand extends Command
     private DocumentManager $documentManager;
     private RuleManager $ruleManager;
     private DocumentRepository $documentRepository;
+	private ToolsManager $toolsManager;
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:synchro';
@@ -56,7 +58,8 @@ class SynchroCommand extends Command
         RuleManager $ruleManager,
         EntityManagerInterface $entityManager,
         DocumentRepository $documentRepository,
-		ManagerRegistry $registry
+		ManagerRegistry $registry,
+		ToolsManager $toolsManager,
     ) {
         parent::__construct();
         $this->logger = $logger;
@@ -66,6 +69,7 @@ class SynchroCommand extends Command
         $this->documentManager = $documentManager;
         $this->documentRepository = $documentRepository;
 		$this->registry = $registry;
+		$this->toolsManager = $toolsManager;
     }
 
     protected function configure()
@@ -110,7 +114,20 @@ class SynchroCommand extends Command
                         if ('ALL' == $rule) {
                             $rules = $this->jobManager->getRules($force);
                         } else {
-                            $rules = explode(',',$rule);
+							//Check if the parameter is a rule group 
+							if ($this->toolsManager->isPremium()) {
+								// Get the rules from the group
+								$rulesGroup = $this->toolsManager->getRulesFromGroup($rule, $force);
+								if (!empty($rulesGroup)) {
+									foreach($rulesGroup as $ruleGroup) {
+										$rules[] = $ruleGroup['name_slug'];
+									}
+								}
+							}
+							// If the parameter isn't a group
+							if (empty($rules)) {
+								$rules = explode(',',$rule);
+							}
                         }
                         if (!empty($rules)) {
                             foreach ($rules as $key => $value) {
