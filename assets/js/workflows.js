@@ -216,17 +216,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Fonction pour afficher/masquer les champs et le bouton en fonction de la valeur de form_action
   function toggleTargetFields() {
     const actionValue = formAction.value;
-    console.log("Valeur de form_action :", actionValue);
 
-    // Vérifier si l'action est "changeData"
     if (actionValue === "changeData") {
-      console.log("Action est changeData, affichage des champs.");
-      addFieldButton.style.display = "block";
+      addFieldButton.style.display = "none";
       dynamicFieldsContainer.style.display = "none";
       targetFieldContainer.style.display = "none";
       targetFieldValueContainer.style.display = "none";
     } else {
-      console.log("Action n'est pas changeData, masquage des champs.");
       targetFieldContainer.style.display = "none";
       targetFieldValueContainer.style.display = "none";
       addFieldButton.style.display = "none";
@@ -241,33 +237,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Ecouter le changement de valeur sur le champ "Action"
   formAction.addEventListener("change", function () {
-    console.log("Changement de valeur de form_action détecté.");
     toggleTargetFields();
   });
 
   // Ecouter le changement de la règle
   ruleIdField.addEventListener("change", function () {
     const ruleId = ruleIdField.value;
-    console.log("Changement de règle détecté, valeur de ruleIdField :", ruleId);
 
     // Vérifier à nouveau si l'action est bien "changeData" avant d'afficher les champs
     if (formAction.value === "changeData") {
       if (ruleId !== "") {
-        console.log("Règle sélectionnée et action est 'changeData', affichage du bouton et conteneur.");
         addFieldButton.style.display = "block";
         dynamicFieldsContainer.style.display = "block";
 
         // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
         const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
-        console.log("Envoi de la requête AJAX à :", updatedUrl);
         $.ajax({
           url: updatedUrl,
           type: "GET",
           success: function (data) {
-            console.log("Réponse AJAX reçue :", data);
-            dynamicFieldsContainer.innerHTML = ''; // Vider les anciens champs
+            dynamicFieldsContainer.innerHTML = '';
 
-            // Ajouter un premier champ Target Field (select) avec les options disponibles
             addNewTargetField(data.fields); 
           },
           error: function (xhr, status, error) {
@@ -275,27 +265,22 @@ document.addEventListener("DOMContentLoaded", function () {
           },
         });
       } else {
-        console.log("Aucune règle sélectionnée, masquage des champs.");
         addFieldButton.style.display = "none";
         dynamicFieldsContainer.style.display = "none";
-        dynamicFieldsContainer.innerHTML = ''; // Vider les champs si aucune règle n'est sélectionnée
+        dynamicFieldsContainer.innerHTML = '';
       }
     } else {
-      // Si l'action n'est pas "changeData", masquer les champs même si une règle est sélectionnée
-      console.log("Action n'est pas 'changeData', masquage des champs.");
       addFieldButton.style.display = "none";
       dynamicFieldsContainer.style.display = "none";
-      dynamicFieldsContainer.innerHTML = ''; // Vider les champs dynamiques
+      dynamicFieldsContainer.innerHTML = '';
     }
   });
 
   // Fonction pour ajouter un champ targetField (select) et targetFieldValue (input)
   function addNewTargetField(fields) {
-    console.log("Ajout de nouveaux champs pour targetField et targetFieldValue avec les champs :", fields);
     const newFieldRow = document.createElement('div');
     newFieldRow.classList.add('row', 'mb-4');
 
-    // Champ targetField (select avec options)
     const targetFieldDiv = document.createElement('div');
     targetFieldDiv.classList.add('col-md-6');
     const targetFieldLabel = document.createElement('label');
@@ -348,13 +333,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Ecouter le clic sur le bouton "Add Field"
   addFieldButton.addEventListener('click', function () {
     const ruleId = ruleIdField.value;
-    console.log("Clic sur 'Add Field', valeur de ruleIdField :", ruleId);
 
     $.ajax({
       url: workflowTargetFieldUrl.replace("ruleFields", ruleId),
       type: "GET",
       success: function (data) {
-        console.log("Réponse AJAX pour ajout de champ :", data);
         addNewTargetField(data.fields);
       },
       error: function (xhr, status, error) {

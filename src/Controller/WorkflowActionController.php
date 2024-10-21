@@ -496,7 +496,7 @@ class WorkflowActionController extends AbstractController
                     $formData = $request->request->all();
                     $targetFields = $formData['targetFields'] ?? [];
                     $targetFieldValues = $formData['targetFieldValues'] ?? [];
-                
+
                     if (!empty($targetFields) && !empty($targetFieldValues)) {
                         foreach ($targetFields as $index => $targetField) {
                             if (isset($targetFieldValues[$index])) {
@@ -671,7 +671,7 @@ class WorkflowActionController extends AbstractController
                     // Add other WorkflowAction fields here as needed
                 ];
 
-                $form = $this->createFormBuilder($formData)
+                $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                     ->add('name', TextType::class, [
                         'label' => 'Action Name',
                         'required' => true,
@@ -842,18 +842,27 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = 0;
                     }
 
-                    
-
                     $formData = $request->request->all();
-                    $targetFields = $formData['targetFields'] ?? [];
-                    $targetFieldValues = $formData['targetFieldValues'] ?? [];
-                    if (is_array($targetFields) && is_array($targetFieldValues)) {
+
+                    $targetFields = $formData['targetFields'] ?? null;
+                    $targetFieldValues = $formData['targetFieldValues'] ?? null;
+
+                    if (!empty($targetFields) && is_array($targetFields) && !empty($targetFieldValues) && is_array($targetFieldValues)) {
                         foreach ($targetFields as $index => $targetField) {
-                            if (isset($targetFieldValues[$index])) {
+                            if (isset($targetFieldValues[$index]) && !empty($targetField)) {
                                 $arguments['fields'][$targetField] = $targetFieldValues[$index];
                             }
                         }
                     }
+                    // $targetFields = $formData['targetFields'] ?? [];
+                    // $targetFieldValues = $formData['targetFieldValues'] ?? [];
+                    // if (is_array($targetFields) && is_array($targetFieldValues)) {
+                    //     foreach ($targetFields as $index => $targetField) {
+                    //         if (isset($targetFieldValues[$index])) {
+                    //             $arguments['fields'][$targetField] = $targetFieldValues[$index];
+                    //         }
+                    //     }
+                    // }
 
                     $workflowAction->setArguments($arguments);
                     $em->persist($workflowAction);
