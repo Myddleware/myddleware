@@ -2,6 +2,7 @@ $(document).ready(function () {
   // Function to hide or show the Rule field
   function toggleRuleField() {
     var actionValue = $("#form_action").val();
+    $("#form_ruleId").val('');
 
     if (
       actionValue === "transformDocument" ||
@@ -12,12 +13,14 @@ $(document).ready(function () {
     } else {
       $("#form_ruleId").closest(".form-group").show();
     }
+
   }
 
   toggleRuleField();
 
   $("#form_action").on("change", function () {
     toggleRuleField();
+
   });
 
   function fetchFilteredData() {
@@ -199,55 +202,96 @@ document.addEventListener("DOMContentLoaded", function () {
   // WORKFLOWACTION TARGETFIELD
   const ruleIdField = document.getElementById("form_ruleId");
   const targetFieldContainer = document.getElementById("targetFieldContainer");
-  const targetFieldSelect = document.getElementById("form_targetField");
-  const targetFieldValueContainer = document.getElementById("targetFieldValueContainer"); // Le nouveau champ de saisie de valeur
-
-  // Cacher au démarrage
-  targetFieldContainer.style.display = "none";
-  targetFieldValueContainer.style.display = "none";
+  const targetFieldValueContainer = document.getElementById("targetFieldValueContainer");
   const addFieldButton = document.getElementById('addFieldButton');
   const dynamicFieldsContainer = document.getElementById("dynamicFieldsContainer");
+  const formAction = document.getElementById("form_action");
 
-  // Masquer le bouton et le conteneur des champs dynamiques au démarrage
+  // Cacher les champs et le bouton au démarrage
+  targetFieldContainer.style.display = "none";
+  targetFieldValueContainer.style.display = "none";
   addFieldButton.style.display = "none";
   dynamicFieldsContainer.style.display = "none";
 
-  ruleIdField.addEventListener("change", function () {
-    console.log('toto');
-    
-    const ruleId = ruleIdField.value;
+  // Fonction pour afficher/masquer les champs et le bouton en fonction de la valeur de form_action
+  function toggleTargetFields() {
+    const actionValue = formAction.value;
+    console.log("Valeur de form_action :", actionValue);
 
-    if (ruleId !== "") {
-      // Afficher le bouton et le conteneur pour ajouter des champs
+    // Vérifier si l'action est "changeData"
+    if (actionValue === "changeData") {
+      console.log("Action est changeData, affichage des champs.");
       addFieldButton.style.display = "block";
-      dynamicFieldsContainer.style.display = "block";
-
-      // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
-      const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
-      $.ajax({
-        url: updatedUrl,
-        type: "GET",
-        success: function (data) {
-          console.log("Réponse reçue :", data);
-          dynamicFieldsContainer.innerHTML = ''; // Vider les anciens champs
-
-          // Ajouter un premier champ Target Field (select) avec les options disponibles
-          addNewTargetField(data.fields); 
-        },
-        error: function (xhr, status, error) {
-          console.error("Erreur lors de la récupération des champs:", status, error);
-        },
-      });
+      dynamicFieldsContainer.style.display = "none";
+      targetFieldContainer.style.display = "none";
+      targetFieldValueContainer.style.display = "none";
     } else {
-      // Cacher les champs si aucune règle n'est sélectionnée
+      console.log("Action n'est pas changeData, masquage des champs.");
+      targetFieldContainer.style.display = "none";
+      targetFieldValueContainer.style.display = "none";
       addFieldButton.style.display = "none";
       dynamicFieldsContainer.style.display = "none";
-      dynamicFieldsContainer.innerHTML = ''; // Vider les champs si aucune règle n'est sélectionnée
+      dynamicFieldsContainer.innerHTML = '';
+    }
+  }
+
+  // Appeler la fonction lors du chargement de la page pour vérifier l'état initial
+  console.log("Appel initial à toggleTargetFields.");
+  toggleTargetFields();
+
+  // Ecouter le changement de valeur sur le champ "Action"
+  formAction.addEventListener("change", function () {
+    console.log("Changement de valeur de form_action détecté.");
+    toggleTargetFields();
+  });
+
+  // Ecouter le changement de la règle
+  ruleIdField.addEventListener("change", function () {
+    const ruleId = ruleIdField.value;
+    console.log("Changement de règle détecté, valeur de ruleIdField :", ruleId);
+
+    // Vérifier à nouveau si l'action est bien "changeData" avant d'afficher les champs
+    if (formAction.value === "changeData") {
+      if (ruleId !== "") {
+        console.log("Règle sélectionnée et action est 'changeData', affichage du bouton et conteneur.");
+        addFieldButton.style.display = "block";
+        dynamicFieldsContainer.style.display = "block";
+
+        // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
+        const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
+        console.log("Envoi de la requête AJAX à :", updatedUrl);
+        $.ajax({
+          url: updatedUrl,
+          type: "GET",
+          success: function (data) {
+            console.log("Réponse AJAX reçue :", data);
+            dynamicFieldsContainer.innerHTML = ''; // Vider les anciens champs
+
+            // Ajouter un premier champ Target Field (select) avec les options disponibles
+            addNewTargetField(data.fields); 
+          },
+          error: function (xhr, status, error) {
+            console.error("Erreur lors de la récupération des champs:", status, error);
+          },
+        });
+      } else {
+        console.log("Aucune règle sélectionnée, masquage des champs.");
+        addFieldButton.style.display = "none";
+        dynamicFieldsContainer.style.display = "none";
+        dynamicFieldsContainer.innerHTML = ''; // Vider les champs si aucune règle n'est sélectionnée
+      }
+    } else {
+      // Si l'action n'est pas "changeData", masquer les champs même si une règle est sélectionnée
+      console.log("Action n'est pas 'changeData', masquage des champs.");
+      addFieldButton.style.display = "none";
+      dynamicFieldsContainer.style.display = "none";
+      dynamicFieldsContainer.innerHTML = ''; // Vider les champs dynamiques
     }
   });
 
   // Fonction pour ajouter un champ targetField (select) et targetFieldValue (input)
   function addNewTargetField(fields) {
+    console.log("Ajout de nouveaux champs pour targetField et targetFieldValue avec les champs :", fields);
     const newFieldRow = document.createElement('div');
     newFieldRow.classList.add('row', 'mb-4');
 
@@ -301,16 +345,20 @@ document.addEventListener("DOMContentLoaded", function () {
     dynamicFieldsContainer.appendChild(newFieldRow);
   }
 
+  // Ecouter le clic sur le bouton "Add Field"
   addFieldButton.addEventListener('click', function () {
+    const ruleId = ruleIdField.value;
+    console.log("Clic sur 'Add Field', valeur de ruleIdField :", ruleId);
 
     $.ajax({
-      url: workflowTargetFieldUrl.replace("ruleFields", ruleIdField.value),
+      url: workflowTargetFieldUrl.replace("ruleFields", ruleId),
       type: "GET",
       success: function (data) {
+        console.log("Réponse AJAX pour ajout de champ :", data);
         addNewTargetField(data.fields);
       },
       error: function (xhr, status, error) {
-        console.error("Erreur lors de la récupération des champs:", status, error);
+        console.error("Erreur lors de la récupération des champs :", status, error);
       },
     });
   });
