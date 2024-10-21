@@ -88,8 +88,6 @@ class documentcore
     protected $container;
     protected LoggerInterface $logger;
     protected FormulaManager $formulaManager;
-    private DocumentRepository $documentRepository;
-    private RuleRelationShipRepository $ruleRelationshipsRepository;
     protected ?ParameterBagInterface $parameterBagInterface;
     protected ?SolutionManager $solutionManager;
     protected array $globalStatus = [
@@ -120,8 +118,6 @@ class documentcore
         LoggerInterface $logger,
         Connection $dbalConnection,
         EntityManagerInterface $entityManager,
-        DocumentRepository $documentRepository,
-        RuleRelationShipRepository $ruleRelationshipsRepository,
         FormulaManager $formulaManager,
         SolutionManager $solutionManager = null,
         ParameterBagInterface $parameterBagInterface = null,
@@ -130,8 +126,6 @@ class documentcore
         $this->connection = $dbalConnection;
         $this->logger = $logger;
         $this->entityManager = $entityManager;
-        $this->documentRepository = $documentRepository;
-        $this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
         $this->parameterBagInterface = $parameterBagInterface;
         // $param = $params->get('param');
         $this->tools = $tools;

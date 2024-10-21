@@ -294,9 +294,12 @@ class rulecore
                     if (!empty($param['parent_id'])) {
                         $docParam['parentId'] = $param['parent_id'];
                     }
-                    // We have to clone the document because if we have several child documents,
-                    // the result $documents will have a list of several instances of the same document
-                    $childDocument = clone $this->documentManager;
+					
+                    // Create new documentManager with a clean entityManager			
+                    $chlidEntityManager = clone $this->entityManager;
+					$chlidEntityManager->clear();
+					$childDocument = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager);
+            
                     // Set the param values and clear all document attributes
                     $childDocument->setParam($docParam, true);
                     $createDocument = $childDocument->createDocument();
