@@ -154,7 +154,10 @@ class solutioncore
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->formulaManager, null, $this->parameterBagInterface);
+			// Create new documentManager with a clean entityManager
+			$chlidEntityManager = clone $this->entityManager;
+			$chlidEntityManager->clear();
+            $documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
             $documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
@@ -656,8 +659,11 @@ class solutioncore
 							// Calculation of all target fields where the source field exists
 							if(array_search($field, $fieldsArray) !== false) {
 								$param['id_doc_myddleware'] = $docId;
-								$param['api'] = $this->api;				
-								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->formulaManager);
+								$param['api'] = $this->api;	
+								// Create new documentManager with a clean entityManager
+								$chlidEntityManager = clone $this->entityManager;
+								$chlidEntityManager->clear();								
+								$documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager);
 								$documentManager->setParam($param);			
 								$send['data'][$docId][$ruleField['target_field_name']] = $documentManager->getTransformValue($send['source'][$docId], $ruleField);			
 							}
