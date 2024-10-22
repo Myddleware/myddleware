@@ -48,8 +48,61 @@ class Variable
      * @ORM\Column(name="value", type="text", nullable=false)
      */
     private string $value  = '';
+
+        /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $description;
+
+	/**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     */
+    private User $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
+     */
+    private User $modifiedBy;
 	
 
+	public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+        return $this;
+    }
+
+    public function getModifiedBy(): ?User
+    {
+        return $this->modifiedBy;
+    }
+
+    public function setModifiedBy(?User $modifiedBy): self
+    {
+        $this->modifiedBy = $modifiedBy;
+        return $this;
+    }
+	    
+
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+	
     public function getId(): int
     {
         return $this->id;

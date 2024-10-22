@@ -10,7 +10,7 @@
 {% block body %}
 	<div class="container mt-5">
 		{{ form_start(form) }}
-		<div class="card mb-3">
+		<div class="card mb-3 pb-3">
 			<div class="card-header">
 				{{ 'view_workflow.edit'|trans }}
 			</div>
@@ -91,5 +91,6 @@
 
 		<script type="text/javascript">
 			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+			var targetFieldsData = {{ targetFieldsData|json_encode()|raw }};
 		</script>
 	{% endblock %}

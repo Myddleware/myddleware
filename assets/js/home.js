@@ -24,53 +24,20 @@
 
 google.charts.load("visualization", "1", {packages:["corechart"]});
 
-//--------------
-
-// $(function()  {
-// 	if($('#listing-solutions','#panel').length != 0) {
-// 		$('#listing-solutions','#panel').scrollbox({
-// 			direction: 'h',
-// 			distance: 65
-// 		});
-// 		$('#listing-solutions-backward','#panel').on('click', function () {
-// 			$('#listing-solutions','#panel').trigger('backward');
-// 		});
-// 		$('#listing-solutions-forward','#panel').on('click', function () {
-// 			$('#listing-solutions','#panel').trigger('forward');
-// 		});
-// 		$('#listing-solutions li','#panel').on('hover', function () {
-// 			string = $("img", this).attr('alt')
-// 			$("img", this).qtip({
-// 				content: string.charAt(0).toUpperCase() + string.slice(1) + ": " + trans_click,
-// 				show: {
-// 					delay: 700,
-// 					ready: 'true',
-// 		    	},
-// 				position: {
-// 					my: 'top center',  // Position my top left...
-// 					at: 'bottom center', // at the bottom right of...
-// 				}
-// 			})},
-// 			function () {
-// 				$('#listing-solutions img','#panel').each(function(){
-// 					$(this).qtip("hide");
-// 				});
-// 			}
-// 		);
-// 	}
-// });	
-
 document.addEventListener('DOMContentLoaded', function () {
 
 	if (typeof countNbDocuments !== 'undefined') {
 		// Fonction for animation of the counter
-		function animateCounter(id, start, end, duration) {
+		function animateCounter(id, start, end, maxDuration) {
 			var obj = document.getElementById(id);
 			var current = start;
 			var range = end - start;
 			var increment = end > start ? 1 : -1;
-			var stepTime = Math.abs(Math.floor(duration / range));
+			var duration = maxDuration;
 			
+			var stepTime = Math.abs(Math.floor(duration / Math.abs(range)));
+			stepTime = Math.max(stepTime, 1);
+
 			var timer = setInterval(function() {
 				current += increment;
 				obj.innerHTML = current;
@@ -80,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			}, stepTime);
 		}
 
-		animateCounter('countNbDocuments', 0, countNbDocuments, 1000);
+		animateCounter('countNbDocuments', 0, countNbDocuments, 2000);
 	} else {
 		console.error("countNbDocuments not defined");
 	}
