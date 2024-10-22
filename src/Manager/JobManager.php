@@ -55,7 +55,7 @@ class jobcore
     protected $container;
     protected DriverConnection $connection;
     protected LoggerInterface $logger;
-    protected ToolsManager $tools;
+    protected ToolsManager $toolsManager;
 
     protected RuleManager $ruleManager;
     protected $ruleId;
@@ -116,7 +116,7 @@ class jobcore
         LogRepository $logRepository,
         RouterInterface $router,
         SessionInterface $session,
-        ToolsManager $tools,
+        ToolsManager $toolsManager,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
         UpgradeManager $upgrade
@@ -130,7 +130,7 @@ class jobcore
         $this->logRepository = $logRepository;
         $this->router = $router;
         $this->session = $session;
-        $this->tools = $tools;
+        $this->toolsManager = $toolsManager;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
         $this->templateManager = $templateManager;
@@ -399,7 +399,7 @@ class jobcore
                 }
             }
             // Get the php executable
-            $php = $this->tools->getPhpVersion();
+            $php = $this->toolsManager->getPhpVersion();
 
             //Create your own folder in the cache directory
             $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/job/'.$guid.'.txt';
@@ -438,7 +438,7 @@ class jobcore
 
             // Renvoie du message en session
             $session = new Session();
-            $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
+            $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (Exception $e) {
@@ -457,11 +457,23 @@ class jobcore
             if (empty($ids)) {
                 throw new Exception('No ids in the input parameter of the function massAction.');
             }
+			//Check if the parameter is a rule group 
+			if ($this->toolsManager->isPremium()) {
+				// Get the rules from the group
+				$rulesGroup = $this->toolsManager->getRulesFromGroup(implode(',',$ids));
+				if (!empty($rulesGroup)) {
+					// Recalculate the array ids
+					$ids = array();
+					foreach($rulesGroup as $ruleGroup) {
+						$ids[] = $ruleGroup['id'];
+					}
+				}
+			}
+			
             // Build IN parameter
-            // $idsDocArray = explode(',',$ids);
             $queryIn = '(';
-            foreach ($ids as $idDoc) {
-                $queryIn .= "'".$idDoc."',";
+            foreach ($ids as $recordId) {
+                $queryIn .= "'".$recordId."',";
             }
             $queryIn = rtrim($queryIn, ',');
             $queryIn .= ')';
@@ -469,7 +481,7 @@ class jobcore
             // Buid WHERE section
             // Filter on rule or docuement depending on the data type
             $where = ' WHERE ';
-            if ('rule' == $dataType) {
+            if (in_array($dataType, array('rule','group'))) {
                 $where .= " rule.id IN $queryIn ";
             } elseif ('document' == $dataType) {
                 $where .= " document.id IN $queryIn ";

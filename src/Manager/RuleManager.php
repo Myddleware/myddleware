@@ -294,9 +294,12 @@ class rulecore
                     if (!empty($param['parent_id'])) {
                         $docParam['parentId'] = $param['parent_id'];
                     }
-                    // We have to clone the document because if we have several child documents,
-                    // the result $documents will have a list of several instances of the same document
-                    $childDocument = clone $this->documentManager;
+					
+                    // Create new documentManager with a clean entityManager			
+                    $chlidEntityManager = clone $this->entityManager;
+					$chlidEntityManager->clear();
+					$childDocument = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager);
+            
                     // Set the param values and clear all document attributes
                     $childDocument->setParam($docParam, true);
                     $createDocument = $childDocument->createDocument();
@@ -446,7 +449,13 @@ class rulecore
                     }
                     // Mise à jour de la date de référence si des documents ont été créés
                     $this->updateReferenceDate();
-                }
+                // In case there is no result but the reference date has changed (e.g. stat reding from Brevo)
+				} elseif (
+						$readSource['count'] == 0
+					AND $readSource['date_ref'] != $this->ruleParams['datereference']
+				) {
+					$this->updateReferenceDate();
+				}
                 // If params has been added in the output of the rule we saved it
                 $this->updateParams();
 				
@@ -2028,6 +2037,7 @@ class rulecore
         $result = $stmt->executeQuery();
         $documents = $result->fetchAllAssociative();
         foreach ($documents as $document) {
+			$error = '';
             // If the rule is a parent, we have to get the data of all rules child
             $childRules = $this->getChildRules();
             if (!empty($childRules)) {
@@ -2061,7 +2071,7 @@ class rulecore
                     // Document is added to the result to be sent
                     $return[$document['id_doc_myddleware']] = array_merge($document, $data);
                 } else {
-                    $error = 'No data found in the document';
+                    $error = 'No data found in the document. ';
                 }
             } else {
                 $error = $documentLock['error'];
