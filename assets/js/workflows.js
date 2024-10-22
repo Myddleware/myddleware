@@ -1,7 +1,87 @@
 $(document).ready(function () {
+
+  let isEditMode = $("#form_ruleId").val() !== '';
+  let isEditModeValue = false; 
+
+  $('fieldset:has(#form_targetFieldValues)').hide();
+  
+  if (isEditMode && targetFieldsData && targetFieldsData.length > 0) {
+    targetFieldsData.forEach(function (fieldData) {
+      addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+    });
+  }
+
+  function addNewTargetFieldWithValue(fieldName, fieldValue) {
+  
+    const newFieldRow = document.createElement('div');
+    newFieldRow.classList.add('row', 'mb-4');
+  
+    const targetFieldDiv = document.createElement('div');
+    targetFieldDiv.classList.add('col-md-6');
+    const targetFieldLabel = document.createElement('label');
+    targetFieldLabel.innerText = 'Target Field';
+    const targetFieldSelect = document.createElement('select');
+    targetFieldSelect.name = 'targetFields[]';
+    targetFieldSelect.classList.add('form-control');
+  
+    // Ajouter l'option pré-sélectionnée
+    const option = document.createElement('option');
+    option.value = fieldName;
+    option.text = fieldName;
+    option.selected = true;
+    targetFieldSelect.appendChild(option);
+  
+    targetFieldDiv.appendChild(targetFieldLabel);
+    targetFieldDiv.appendChild(targetFieldSelect);
+  
+    const targetFieldValueDiv = document.createElement('div');
+    targetFieldValueDiv.classList.add('col-md-6');
+    const targetFieldValueLabel = document.createElement('label');
+    targetFieldValueLabel.innerText = 'New Value';
+    const targetFieldValueInput = document.createElement('input');
+    targetFieldValueInput.name = 'targetFieldValues[]';
+    targetFieldValueInput.type = 'text';
+    targetFieldValueInput.classList.add('form-control');
+  
+    // Ici, on vérifie que la valeur est bien affectée
+    targetFieldValueInput.value = fieldValue;
+  
+    targetFieldValueDiv.appendChild(targetFieldValueLabel);
+    targetFieldValueDiv.appendChild(targetFieldValueInput);
+  
+    const removeButtonDiv = document.createElement('div');
+    removeButtonDiv.classList.add('col-md-12', 'd-flex', 'justify-content-end', 'mt-2');
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.classList.add('btn', 'btn-danger');
+    removeButton.innerText = 'Supprimer';
+    removeButton.addEventListener('click', function () {
+      newFieldRow.remove();
+    });
+    removeButtonDiv.appendChild(removeButton);
+  
+    newFieldRow.appendChild(targetFieldDiv);
+    newFieldRow.appendChild(targetFieldValueDiv);
+    newFieldRow.appendChild(removeButtonDiv);
+  
+    document.getElementById("dynamicFieldsContainer").appendChild(newFieldRow);
+
+    document.getElementById("targetFieldContainer").style.display = 'block';
+    document.getElementById("targetFieldValueContainer").style.display = 'block';
+    document.getElementById("dynamicFieldsContainer").style.display = 'block';
+    document.getElementById("addFieldButton").style.display = 'block';
+    document.getElementById("targetFieldContainer").style.display = 'none';
+    document.getElementById("targetFieldValueContainer").style.display = 'none';
+  }
+  
   // Function to hide or show the Rule field
   function toggleRuleField() {
     var actionValue = $("#form_action").val();
+    if (!isEditMode || isEditModeValue) {
+      $("#form_ruleId").val('');
+  }
+
+  isEditModeValue = true;
 
     if (
       actionValue === "transformDocument" ||
@@ -12,12 +92,14 @@ $(document).ready(function () {
     } else {
       $("#form_ruleId").closest(".form-group").show();
     }
+
   }
 
   toggleRuleField();
 
   $("#form_action").on("change", function () {
     toggleRuleField();
+
   });
 
   function fetchFilteredData() {
@@ -32,7 +114,6 @@ $(document).ready(function () {
         rule_name: ruleName,
       },
       success: function (response) {
-        console.log("Réponse reçue :", response);
         $("#workflowTableContainer").html(response);
 
         // $('#workflowTableContainer').html($(response).find('#workflowTableContainer').html());
@@ -199,50 +280,74 @@ document.addEventListener("DOMContentLoaded", function () {
   // WORKFLOWACTION TARGETFIELD
   const ruleIdField = document.getElementById("form_ruleId");
   const targetFieldContainer = document.getElementById("targetFieldContainer");
-  const targetFieldSelect = document.getElementById("form_targetField");
-  const targetFieldValueContainer = document.getElementById("targetFieldValueContainer"); // Le nouveau champ de saisie de valeur
-
-  // Cacher au démarrage
-  targetFieldContainer.style.display = "none";
-  targetFieldValueContainer.style.display = "none";
+  const targetFieldValueContainer = document.getElementById("targetFieldValueContainer");
   const addFieldButton = document.getElementById('addFieldButton');
   const dynamicFieldsContainer = document.getElementById("dynamicFieldsContainer");
+  const formAction = document.getElementById("form_action");
 
-  // Masquer le bouton et le conteneur des champs dynamiques au démarrage
+  // Cacher les champs et le bouton au démarrage
+  targetFieldContainer.style.display = "none";
+  targetFieldValueContainer.style.display = "none";
   addFieldButton.style.display = "none";
   dynamicFieldsContainer.style.display = "none";
 
-  ruleIdField.addEventListener("change", function () {
-    console.log('toto');
-    
-    const ruleId = ruleIdField.value;
+  // Fonction pour afficher/masquer les champs et le bouton en fonction de la valeur de form_action
+  function toggleTargetFields() {
+    const actionValue = formAction.value;
 
-    if (ruleId !== "") {
-      // Afficher le bouton et le conteneur pour ajouter des champs
-      addFieldButton.style.display = "block";
-      dynamicFieldsContainer.style.display = "block";
-
-      // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
-      const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
-      $.ajax({
-        url: updatedUrl,
-        type: "GET",
-        success: function (data) {
-          console.log("Réponse reçue :", data);
-          dynamicFieldsContainer.innerHTML = ''; // Vider les anciens champs
-
-          // Ajouter un premier champ Target Field (select) avec les options disponibles
-          addNewTargetField(data.fields); 
-        },
-        error: function (xhr, status, error) {
-          console.error("Erreur lors de la récupération des champs:", status, error);
-        },
-      });
-    } else {
-      // Cacher les champs si aucune règle n'est sélectionnée
+    if (actionValue === "changeData") {
       addFieldButton.style.display = "none";
       dynamicFieldsContainer.style.display = "none";
-      dynamicFieldsContainer.innerHTML = ''; // Vider les champs si aucune règle n'est sélectionnée
+      targetFieldContainer.style.display = "none";
+      targetFieldValueContainer.style.display = "none";
+    } else {
+      targetFieldContainer.style.display = "none";
+      targetFieldValueContainer.style.display = "none";
+      addFieldButton.style.display = "none";
+      dynamicFieldsContainer.style.display = "none";
+      dynamicFieldsContainer.innerHTML = '';
+    }
+  }
+
+  toggleTargetFields();
+
+  // Ecouter le changement de valeur sur le champ "Action"
+  formAction.addEventListener("change", function () {
+    toggleTargetFields();
+  });
+
+  // Ecouter le changement de la règle
+  ruleIdField.addEventListener("change", function () {
+    const ruleId = ruleIdField.value;
+
+    // Vérifier à nouveau si l'action est bien "changeData" avant d'afficher les champs
+    if (formAction.value === "changeData") {
+      if (ruleId !== "") {
+        addFieldButton.style.display = "block";
+        dynamicFieldsContainer.style.display = "block";
+
+        // Envoyer la requête AJAX pour récupérer les champs liés à la règle sélectionnée
+        const updatedUrl = workflowTargetFieldUrl.replace("ruleFields", ruleId);
+        $.ajax({
+          url: updatedUrl,
+          type: "GET",
+          success: function (data) {
+            dynamicFieldsContainer.innerHTML = '';
+            addNewTargetField(data.fields); 
+          },
+          error: function (xhr, status, error) {
+            console.error("Erreur lors de la récupération des champs:", status, error);
+          },
+        });
+      } else {
+        addFieldButton.style.display = "none";
+        dynamicFieldsContainer.style.display = "none";
+        dynamicFieldsContainer.innerHTML = '';
+      }
+    } else {
+      addFieldButton.style.display = "none";
+      dynamicFieldsContainer.style.display = "none";
+      dynamicFieldsContainer.innerHTML = '';
     }
   });
 
@@ -250,8 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function addNewTargetField(fields) {
     const newFieldRow = document.createElement('div');
     newFieldRow.classList.add('row', 'mb-4');
-
-    // Champ targetField (select avec options)
     const targetFieldDiv = document.createElement('div');
     targetFieldDiv.classList.add('col-md-6');
     const targetFieldLabel = document.createElement('label');
@@ -301,16 +404,18 @@ document.addEventListener("DOMContentLoaded", function () {
     dynamicFieldsContainer.appendChild(newFieldRow);
   }
 
+  // Ecouter le clic sur le bouton "Add Field"
   addFieldButton.addEventListener('click', function () {
+    const ruleId = ruleIdField.value;
 
     $.ajax({
-      url: workflowTargetFieldUrl.replace("ruleFields", ruleIdField.value),
+      url: workflowTargetFieldUrl.replace("ruleFields", ruleId),
       type: "GET",
       success: function (data) {
         addNewTargetField(data.fields);
       },
       error: function (xhr, status, error) {
-        console.error("Erreur lors de la récupération des champs:", status, error);
+        console.error("Erreur lors de la récupération des champs :", status, error);
       },
     });
   });

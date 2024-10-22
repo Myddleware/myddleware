@@ -303,11 +303,9 @@ class WorkflowActionController extends AbstractController
                         $ruleSourceFields[$value] = $value;
                         unset($ruleSourceFields[$key]);
                     }
-                    $ruleSourceFields['id'] = 'id';
+                    $ruleSourceFields['Name'] = 'Name';
                     $sourceSearchValue[$rule->getName()] = $ruleSourceFields;
                 }
-
-
 
                 // Create a new array to hold the form data
                 $formData = [
@@ -498,7 +496,7 @@ class WorkflowActionController extends AbstractController
                     $formData = $request->request->all();
                     $targetFields = $formData['targetFields'] ?? [];
                     $targetFieldValues = $formData['targetFieldValues'] ?? [];
-                
+
                     if (!empty($targetFields) && !empty($targetFieldValues)) {
                         foreach ($targetFields as $index => $targetField) {
                             if (isset($targetFieldValues[$index])) {
@@ -650,8 +648,8 @@ class WorkflowActionController extends AbstractController
                         $ruleSourceFields[$value] = $value;
                         unset($ruleSourceFields[$key]);
                     }
-                    $ruleSourceFields['id'] = 'id';
-                    $sourceSearchValue[$rule->getId()] = $ruleSourceFields;
+                    $ruleSourceFields['name'] = 'name';
+                    $sourceSearchValue[$rule->getName()] = $ruleSourceFields;
                 }
 
                 // Create a new array to hold the form data
@@ -673,7 +671,7 @@ class WorkflowActionController extends AbstractController
                     // Add other WorkflowAction fields here as needed
                 ];
 
-                $form = $this->createFormBuilder($formData)
+                $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                     ->add('name', TextType::class, [
                         'label' => 'Action Name',
                         'required' => true,
@@ -734,8 +732,6 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false
                     ])
-
-
                     ->add('targetFields', CollectionType::class, [
                         'entry_type' => TextType::class,
                         'allow_add' => true,
@@ -747,6 +743,7 @@ class WorkflowActionController extends AbstractController
                         'allow_add' => true,
                         'allow_delete' => true,
                         'mapped' => false,
+                        'prototype' => false,
                     ])
 
                     ->add('order', IntegerType::class, [
@@ -844,14 +841,14 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = 0;
                     }
 
-                    
-
                     $formData = $request->request->all();
-                    $targetFields = $formData['targetFields'] ?? [];
-                    $targetFieldValues = $formData['targetFieldValues'] ?? [];
-                    if (is_array($targetFields) && is_array($targetFieldValues)) {
+
+                    $targetFields = $formData['targetFields'] ?? null;
+                    $targetFieldValues = $formData['targetFieldValues'] ?? null;
+
+                    if (!empty($targetFields) && is_array($targetFields) && !empty($targetFieldValues) && is_array($targetFieldValues)) {
                         foreach ($targetFields as $index => $targetField) {
-                            if (isset($targetFieldValues[$index])) {
+                            if (isset($targetFieldValues[$index]) && !empty($targetField)) {
                                 $arguments['fields'][$targetField] = $targetFieldValues[$index];
                             }
                         }
@@ -870,10 +867,20 @@ class WorkflowActionController extends AbstractController
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
+                $targetFieldsData = [];
+                if (isset($arguments['fields']) && is_array($arguments['fields'])) {
+                    foreach ($arguments['fields'] as $field => $value) {
+                        $targetFieldsData[] = [
+                            'field' => $field,
+                            'value' => $value,
+                        ];
+                    }
+                }
                 return $this->render(
                     'WorkflowAction/edit.html.twig',
                     [
                         'form' => $form->createView(),
+                        'targetFieldsData' => $targetFieldsData,
                     ]
                 );
             } else {

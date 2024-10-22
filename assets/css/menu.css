@@ -34,7 +34,7 @@ menu li {
 	background: #ffffff;	
 	display: inline-block;
     width: 233px;
-    padding-top: 12px;
+    padding-top: 15px;
     height: 57px;
     text-align: center;
     font-weight: bold;
@@ -95,6 +95,7 @@ menu .nav-pills > li > a, menu .nav .open > a, menu .nav .open > a:hover, menu .
 	color: rgb(0, 0, 0);
 	background-color:transparent;
 	border-radius: none;
+	font-size: smaller;
 }
 
 menu li:hover , menu .nav-pills > li > a:hover {
@@ -152,4 +153,21 @@ header{
 
 .dropdown-toggle::after {
 	display: none;
+}
+
+.title_section_menu.active {
+    color: #03c4eb !important;
+}
+
+.svg_user {
+    min-width: 30px;
+    height: auto;
+}
+
+.sous_menu_navbar{
+    width: 338px !important;
+    padding: 0.5rem 5px !important;
+    font-size: 1rem !important;
+    color: #3a3a3a !important;
+    border-radius: 0.5rem !important;
 }

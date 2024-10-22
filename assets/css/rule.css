@@ -124,8 +124,8 @@
 
 #rule th {
 	background: #ECECEC;
-	height: 20px;
-	padding: 2px;
+	height: 45px;
+	padding: 10px;
 	text-align: center;
 }
 
@@ -506,32 +506,19 @@ color: #03c4eb!important;
 }
 
 #rulenamesearchbar {
-	/* center the search bar horizontally */
-	margin: auto;
-	width: 20%;
-	/* put a nice border and a shadow, make it nice to look at */
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
-	/* here is the cool part */
-	/* we use a linear gradient bg which will fall-back to a solid color if needed */
-	background: #f1f1f1;
-	background: linear-gradient(to bottom, #f1f1f1 0%, #e1e1e1 100%);
-	/* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1f1f1', endColorstr='#e1e1e1', GradientType=0); */
-	/* just a small styling */
-	padding: 9px 14px;
-	color: #333;
-	transition: all 0.5s;
-	/* make the search bar responsive */
-	max-width: 400px;
-	/* make sure we can see the search bar above everything else */
-	position: relative;
-	z-index: 9999;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    transition: all 0.5s;
+    max-width: 400px;
+    position: relative;
+	margin-top: 15px;
+}
 
-	
+#rule_name{
+	padding: 10px;
+}
 
-	/* make the search bar form red */
-	/* background-color: #f44336; */
+#myd_title:has(.rule_list_view) {
+    height: 151px !important;
 }
 
 .container_filter_step3{
@@ -542,10 +529,6 @@ color: #03c4eb!important;
 	background-color:  #198BCA !important;
 	border-block-color: #198BCA !important;
 }
-
-/* .form-switch .form-check-input {
-	margin-left: 7px !important;
-} */
 
 .workflow_status.form-check-input:checked {
     margin-left: 7px !important;

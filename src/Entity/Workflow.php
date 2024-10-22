@@ -95,7 +95,7 @@ class Workflow
     private int $active;
 	
     /**
-     * @ORM\Column(name="`order`", type="integer", length=3, nullable=false)
+     * @ORM\Column(name="`order`", type="integer", length=3, nullable=false, options={"default": 1})
      */
     private int $order;
 	
@@ -126,6 +126,7 @@ private $workflowActions;
         $this->dateModified = new \DateTime();
         $this->active = 1;
         $this->deleted = 0;
+        $this->order = 1;
     }
 	
     public function getId(): string

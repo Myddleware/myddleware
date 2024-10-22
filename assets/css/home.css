@@ -176,6 +176,12 @@
     border-radius: 30px !important;
 }
 
+#bnt_welcome:hover{
+    background-color: white;
+    color: #03c4eb;
+    border: solid #03c4eb;
+}
+
 .solution_homepage{
     min-height: 265px !important;
     margin-top: 50px !important;

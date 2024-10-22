@@ -234,7 +234,7 @@ rule:
     help: Que dois-je faire ?
 
 list_rule:
-    title: Liste des règles
+    title: Règles
     total: Nombre de règles
     empty: Vous n'avez pas encore de règle !
     delete: Etes-vous sûr de vouloir supprimer cette règle ?
@@ -1025,3 +1025,4 @@ variable:
     name: Nom
     value: Valeur
     actions: Actions
+    description: Description
