@@ -1,8 +1,86 @@
 $(document).ready(function () {
+
+  let isEditMode = $("#form_ruleId").val() !== '';
+
+  console.log(targetFieldsData);
+  $('fieldset:has(#form_targetFieldValues)').hide();
+  
+  if (isEditMode && targetFieldsData && targetFieldsData.length > 0) {
+    targetFieldsData.forEach(function (fieldData) {
+      addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+    });
+  }
+
+  function addNewTargetFieldWithValue(fieldName, fieldValue) {
+  
+    const newFieldRow = document.createElement('div');
+    newFieldRow.classList.add('row', 'mb-4');
+  
+    const targetFieldDiv = document.createElement('div');
+    targetFieldDiv.classList.add('col-md-6');
+    const targetFieldLabel = document.createElement('label');
+    targetFieldLabel.innerText = 'Target Field';
+    const targetFieldSelect = document.createElement('select');
+    targetFieldSelect.name = 'targetFields[]';
+    targetFieldSelect.classList.add('form-control');
+  
+    // Ajouter l'option pré-sélectionnée
+    const option = document.createElement('option');
+    option.value = fieldName;
+    option.text = fieldName;
+    option.selected = true;
+    targetFieldSelect.appendChild(option);
+  
+    targetFieldDiv.appendChild(targetFieldLabel);
+    targetFieldDiv.appendChild(targetFieldSelect);
+  
+    const targetFieldValueDiv = document.createElement('div');
+    targetFieldValueDiv.classList.add('col-md-6');
+    const targetFieldValueLabel = document.createElement('label');
+    targetFieldValueLabel.innerText = 'New Value';
+    const targetFieldValueInput = document.createElement('input');
+    targetFieldValueInput.name = 'targetFieldValues[]';
+    targetFieldValueInput.type = 'text';
+    targetFieldValueInput.classList.add('form-control');
+  
+    // Ici, on vérifie que la valeur est bien affectée
+    targetFieldValueInput.value = fieldValue;
+    console.log("Set input value to: " + targetFieldValueInput.value);
+  
+    targetFieldValueDiv.appendChild(targetFieldValueLabel);
+    targetFieldValueDiv.appendChild(targetFieldValueInput);
+  
+    const removeButtonDiv = document.createElement('div');
+    removeButtonDiv.classList.add('col-md-12', 'd-flex', 'justify-content-end', 'mt-2');
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.classList.add('btn', 'btn-danger');
+    removeButton.innerText = 'Supprimer';
+    removeButton.addEventListener('click', function () {
+      newFieldRow.remove();
+    });
+    removeButtonDiv.appendChild(removeButton);
+  
+    newFieldRow.appendChild(targetFieldDiv);
+    newFieldRow.appendChild(targetFieldValueDiv);
+    newFieldRow.appendChild(removeButtonDiv);
+  
+    document.getElementById("dynamicFieldsContainer").appendChild(newFieldRow);
+
+    document.getElementById("targetFieldContainer").style.display = 'block';
+    document.getElementById("targetFieldValueContainer").style.display = 'block';
+    document.getElementById("dynamicFieldsContainer").style.display = 'block';
+    document.getElementById("addFieldButton").style.display = 'block';
+    document.getElementById("targetFieldContainer").style.display = 'none';
+    document.getElementById("targetFieldValueContainer").style.display = 'none';
+  }
+  
   // Function to hide or show the Rule field
   function toggleRuleField() {
     var actionValue = $("#form_action").val();
-    $("#form_ruleId").val('');
+      if (!isEditMode) {
+        $("#form_ruleId").val('');
+      }
 
     if (
       actionValue === "transformDocument" ||

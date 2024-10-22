@@ -732,8 +732,6 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false
                     ])
-
-
                     ->add('targetFields', CollectionType::class, [
                         'entry_type' => TextType::class,
                         'allow_add' => true,
@@ -745,6 +743,7 @@ class WorkflowActionController extends AbstractController
                         'allow_add' => true,
                         'allow_delete' => true,
                         'mapped' => false,
+                        'prototype' => false,
                     ])
 
                     ->add('order', IntegerType::class, [
@@ -854,15 +853,6 @@ class WorkflowActionController extends AbstractController
                             }
                         }
                     }
-                    // $targetFields = $formData['targetFields'] ?? [];
-                    // $targetFieldValues = $formData['targetFieldValues'] ?? [];
-                    // if (is_array($targetFields) && is_array($targetFieldValues)) {
-                    //     foreach ($targetFields as $index => $targetField) {
-                    //         if (isset($targetFieldValues[$index])) {
-                    //             $arguments['fields'][$targetField] = $targetFieldValues[$index];
-                    //         }
-                    //     }
-                    // }
 
                     $workflowAction->setArguments($arguments);
                     $em->persist($workflowAction);
@@ -877,10 +867,20 @@ class WorkflowActionController extends AbstractController
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
+                $targetFieldsData = [];
+                if (isset($arguments['fields']) && is_array($arguments['fields'])) {
+                    foreach ($arguments['fields'] as $field => $value) {
+                        $targetFieldsData[] = [
+                            'field' => $field,
+                            'value' => $value,
+                        ];
+                    }
+                }
                 return $this->render(
                     'WorkflowAction/edit.html.twig',
                     [
                         'form' => $form->createView(),
+                        'targetFieldsData' => $targetFieldsData,
                     ]
                 );
             } else {
