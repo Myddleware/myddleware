@@ -1,8 +1,8 @@
 $(document).ready(function () {
 
   let isEditMode = $("#form_ruleId").val() !== '';
+  let isEditModeValue = false; 
 
-  console.log(targetFieldsData);
   $('fieldset:has(#form_targetFieldValues)').hide();
   
   if (isEditMode && targetFieldsData && targetFieldsData.length > 0) {
@@ -45,7 +45,6 @@ $(document).ready(function () {
   
     // Ici, on vérifie que la valeur est bien affectée
     targetFieldValueInput.value = fieldValue;
-    console.log("Set input value to: " + targetFieldValueInput.value);
   
     targetFieldValueDiv.appendChild(targetFieldValueLabel);
     targetFieldValueDiv.appendChild(targetFieldValueInput);
@@ -78,9 +77,11 @@ $(document).ready(function () {
   // Function to hide or show the Rule field
   function toggleRuleField() {
     var actionValue = $("#form_action").val();
-      if (!isEditMode) {
-        $("#form_ruleId").val('');
-      }
+    if (!isEditMode || isEditModeValue) {
+      $("#form_ruleId").val('');
+  }
+
+  isEditModeValue = true;
 
     if (
       actionValue === "transformDocument" ||
@@ -113,7 +114,6 @@ $(document).ready(function () {
         rule_name: ruleName,
       },
       success: function (response) {
-        console.log("Réponse reçue :", response);
         $("#workflowTableContainer").html(response);
 
         // $('#workflowTableContainer').html($(response).find('#workflowTableContainer').html());
@@ -309,8 +309,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Appeler la fonction lors du chargement de la page pour vérifier l'état initial
-  console.log("Appel initial à toggleTargetFields.");
   toggleTargetFields();
 
   // Ecouter le changement de valeur sur le champ "Action"
@@ -335,7 +333,6 @@ document.addEventListener("DOMContentLoaded", function () {
           type: "GET",
           success: function (data) {
             dynamicFieldsContainer.innerHTML = '';
-
             addNewTargetField(data.fields); 
           },
           error: function (xhr, status, error) {
@@ -358,7 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function addNewTargetField(fields) {
     const newFieldRow = document.createElement('div');
     newFieldRow.classList.add('row', 'mb-4');
-
     const targetFieldDiv = document.createElement('div');
     targetFieldDiv.classList.add('col-md-6');
     const targetFieldLabel = document.createElement('label');
