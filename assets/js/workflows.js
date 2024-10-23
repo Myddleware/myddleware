@@ -5,7 +5,7 @@ $(document).ready(function () {
 
   $('fieldset:has(#form_targetFieldValues)').hide();
   
-  if (isEditMode && targetFieldsData && targetFieldsData.length > 0) {
+  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0) {
     targetFieldsData.forEach(function (fieldData) {
       addNewTargetFieldWithValue(fieldData.field, fieldData.value);
     });
