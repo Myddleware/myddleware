@@ -2288,3 +2288,12 @@ function saveInputFlux(div, link) {
 		}
 	});
 }
+
+function toggleCommentBox(button) {
+  const commentBox = button.nextElementSibling;
+  if (commentBox.style.display === "block") {
+      commentBox.style.display = "none";
+  } else {
+      commentBox.style.display = "block";
+  }
+}

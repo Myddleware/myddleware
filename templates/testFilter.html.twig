@@ -20,12 +20,22 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'title.flux.list'|trans }}{% endblock %}
-{% block titlesm %}{{ 'title.flux.list'|trans }}{% endblock titlesm %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'title.flux.list'|trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'title.flux.list'|trans }}
+	{% if nbDocuments > 0 %}
+		({{ nbDocuments }})
+	{% endif %}
+{% endblock titlesm %}
 {% block body %}
+
 
 {% for type, messages in app.flashes %}
     {% for message in messages %}
@@ -34,16 +44,6 @@
         </div>
     {% endfor %}
 {% endfor %}
-
-{% if nbDocuments > 0 %}
-    <div id="fd-title-small" class="left">
-        <p>{{ 'list_flux.total2'|trans }}</p>
-        <p>
-            <span class="nb">{{ nbDocuments }}</span>
-        </p>
-    </div>
-    <div class="clr"></div>
-{% endif %}
 
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5">
@@ -253,155 +253,187 @@
             </div>
 </div>
 <section class="p-3">
-    <h2 class="text-center m-3">Documents</h2>
-    <div class="table-responsive">
-        <table class="listepagerflux table">
-            <thead>
-                <tr>
-                    <th scope="col">
-                        <input id="massselectall" type="checkbox" name="massselectall"/>
-                    </th>
-                    <th>{{ 'list_flux.tab.id'|trans }} <span data-sort="id"><i class='fas fa-angle-down idIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.name'|trans }} <span data-sort="name"><i class='fas fa-angle-down nameIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.date_created'|trans }} <span data-sort="date_created"><i class='fas fa-angle-down date_createdIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.date_modified'|trans }} <span data-sort="date_modified"><i class='fas fa-angle-down date_modifiedIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.statut'|trans }} <span data-sort="status"><i class='fas fa-angle-down statusIcon'></i></span></th>
-                    <th>!<span data-sort="status"><i class='fas fa-angle-down statusIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.source_id'|trans }} <span data-sort="source_id"><i class='fas fa-angle-down source_idIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.target_id'|trans }} <span data-sort="target_id"><i class='fas fa-angle-down target_idIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.type'|trans }} <span data-sort="type"><i class='fas fa-angle-down typeIcon'></i></span></th>
-                    <th>{{ 'list_flux.tab.source_date_modified'|trans }} <span data-sort="source_date_modified"><i class='fas fa-angle-down source_date_modifiedIcon'></i></span></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if pager is defined and pager is not empty %}
-                    {% for document in pager %}
-                        <tr>
-                            <td>
-                                {% if document.global_status|lower == 'close' or document.global_status|lower == 'cancel' %}
-                                    <input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
-                                {% else %}
-                                    <input type="checkbox" name="{{ document.id }}"/>
-                                {% endif %}
-                            </td>
-                            <td><a href="{{ path('flux_info_page', {'id' : document.id, 'page' : 1, 'logPage' : 1}) }}">{{ document.id }}</a></td>                                          
-                            <td><a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="">{{ document.rule_name }}</a></td>
-                            <td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
-                            <td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
-                            <td class="ctr" id="documents_filters">
-                                <div class="gblstatus_{{ document.global_status|lower }}">
-                                    {{ document.status }}
-                                    {% if document.global_status|lower == 'close' %}
-                                        <i class="fa fa-check"></i>
-                                    {% elseif document.global_status|lower == 'error' %}
-                                        {% if document.status == 'Error_workflow' %}
-                                            <i class="fa fa-cog" style="color: #dc3545; font-size: larger;"></i>
-                                        {% else %}
-                                            <i class="fa fa-times"></i>
-                                        {% endif %}
-                                    {% elseif document.global_status|lower == 'open' %}
-                                        <span class="glyphicon glyphicon-repeat">
-                                    {% elseif document.global_status|lower == 'cancel' %}
-                                        <i class="fa fa-exclamation"></i>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td>
-                                {% if document.global_status|lower == 'error' %}
-                                <button class="get-log-msg" data-doc-id="{{ document.id }}">
-                                    <i class="fas fa-comment-dots"></i>
-                                </button>
-                                <div id="log-msg-{{ document.id }}"></div>
-                                {% endif %}
-                            </td>
-                            <td>{{ document.source_id }}</td>
-                            <td>{{ document.target_id }}</td>
-                            <td>{{ document.type }}</td>
-                            <td>{{ document.source_date_modified }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="11">No documents found.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-    <div class="d-flex justify-content-center">
-        {% if pager.haveToPaginate %}
-            {{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'document_list_page'}) }}
-        {% endif %}
-    </div>
+	<h2 class="text-center m-3">Documents</h2>
+	<div class="table-responsive">
+		<table class="listepagerflux table">
+			<thead>
+				<tr>
+					<th scope="col">
+						<input id="massselectall" type="checkbox" name="massselectall"/>
+					</th>
+					<th>{{ 'list_flux.tab.id'|trans }}
+						<span data-sort="id">
+							<i class='fas fa-angle-down idIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.name'|trans }}
+						<span data-sort="name">
+							<i class='fas fa-angle-down nameIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.date_created'|trans }}
+						<span data-sort="date_created">
+							<i class='fas fa-angle-down date_createdIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.date_modified'|trans }}
+						<span data-sort="date_modified">
+							<i class='fas fa-angle-down date_modifiedIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.statut'|trans }}
+						<span data-sort="status">
+							<i class='fas fa-angle-down statusIcon'></i>
+						</span>
+					</th>
+					<th>!<span data-sort="status">
+							<i class='fas fa-angle-down statusIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.source_id'|trans }}
+						<span data-sort="source_id">
+							<i class='fas fa-angle-down source_idIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.target_id'|trans }}
+						<span data-sort="target_id">
+							<i class='fas fa-angle-down target_idIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.type'|trans }}
+						<span data-sort="type">
+							<i class='fas fa-angle-down typeIcon'></i>
+						</span>
+					</th>
+					<th>{{ 'list_flux.tab.source_date_modified'|trans }}
+						<span data-sort="source_date_modified">
+							<i class='fas fa-angle-down source_date_modifiedIcon'></i>
+						</span>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if pager is defined and pager is not empty %}
+					{% for document in pager %}
+						<tr>
+							<td>
+								{% if document.global_status|lower == 'close' or document.global_status|lower == 'cancel' %}
+									<input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
+								{% else %}
+									<input type="checkbox" name="{{ document.id }}"/>
+								{% endif %}
+							</td>
+							<td>
+								<a href="{{ path('flux_info_page', {'id' : document.id, 'page' : 1, 'logPage' : 1}) }}">{{ document.id }}</a>
+							</td>
+							<td>
+								<a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="">{{ document.rule_name }}</a>
+							</td>
+							<td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
+							<td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
+							<td class="ctr" id="documents_filters">
+								<div class="gblstatus_{{ document.global_status|lower }}">
+									{{ document.status }}
+									{% if document.global_status|lower == 'close' %}
+										<i class="fa fa-check"></i>
+									{% elseif document.global_status|lower == 'error' %}
+										{% if document.status == 'Error_workflow' %}
+											<i class="fa fa-cog" style="color: #dc3545; font-size: larger;"></i>
+										{% else %}
+											<i class="fa fa-times"></i>
+										{% endif %}
+									{% elseif document.global_status|lower == 'open' %}
+										<span class="glyphicon glyphicon-repeat">
+										{% elseif document.global_status|lower == 'cancel' %}
+											<i class="fa fa-exclamation"></i>
+										{% endif %}
+									</div>
+								</td>
+							</td>
+							<td>
+								{% if document.global_status|lower == 'error' %}
+									<button class="get-log-msg" data-doc-id="{{ document.id }}">
+										<i class="fas fa-comment-dots"></i>
+									</button>
+									<div id="log-msg-{{ document.id }}"></div>
+								{% endif %}
+							</td>
+							<td>{{ document.source_id }}</td>
+							<td>{{ document.target_id }}</td>
+							<td>{{ document.type }}</td>
+							<td>{{ document.source_date_modified }}</td>
+						</tr>
+					{% endfor %}
+				{% else %}
+					<tr>
+						<td colspan="11">No documents found.</td>
+					</tr>
+				{% endif %}
+			</tbody>
+		</table>
+	</div>
+	<div class="d-flex justify-content-center">
+		{% if pager.haveToPaginate %}
+			{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'document_list_page'}) }}
+		{% endif %}
+	</div>
 </section>
 
 {% block javascript %}
-    <!-- Script pour Google Charts -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<!-- Script pour Google Charts -->
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-    <!-- Encore scripts (app et filter) -->
-    {{ encore_entry_script_tags('app') }}
-    {{ encore_entry_script_tags('filter') }}
+	<!-- Encore scripts (app et filter) -->
+	{{ encore_entry_script_tags('app') }}
+	{{ encore_entry_script_tags('filter') }}
 
-    <!-- Script pour Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<!-- Script pour Select2 -->
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <!-- Scripts personnalisés -->
-    <script type="text/javascript">
-        var path_remove_filter = "{{ path('remove_filter') }}";
-        var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
-        var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
-        var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
-        var path_img = "{{ asset('build/images/regle/') }}";
-        var lang = "{{ app.request.locale }}";
-        var mass_cancel = "{{ path('flux_mass_cancel') }}";
-        var mass_unlock = "{{ path('flux_mass_unlock') }}";
-        var mass_run = "{{ path('flux_mass_run') }}";
-        var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
-        var csvdocumentids = "{{ csvdocumentids }}";
-        
-        // Initialisation du date & time picker pour les filtres de date de modification
-        start = new dtsel.DTS('#form_date_modif_end',  {
-            showTime: true
-        });
-        end = new dtsel.DTS('#form_date_modif_start',  {
-            showTime: true
-        });
+	<!-- Scripts personnalisés -->
+	<script type="text/javascript">
+		var path_remove_filter = "{{ path('remove_filter') }}";
+var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
+var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
+var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
+var path_img = "{{ asset('build/images/regle/') }}";
+var lang = "{{ app.request.locale }}";
+var mass_cancel = "{{ path('flux_mass_cancel') }}";
+var mass_unlock = "{{ path('flux_mass_unlock') }}";
+var mass_run = "{{ path('flux_mass_run') }}";
+var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
+var csvdocumentids = "{{ csvdocumentids }}";
 
-        // Initialisation de Select2 et autres scripts après le chargement du document
-        $(document).ready(function() {
-            // Initialisation de Select2 sur le champ globalStatus
-            $('#globalStatus .select2').select2({
-                placeholder: "Select Global Status",
-                allowClear: true,
-                width: 'resolve'
-            });
+// Initialisation du date & time picker pour les filtres de date de modification
+start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
+end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
 
-            // Script pour récupérer et afficher les messages d'erreur liés aux documents
-            $('.get-log-msg').click(function() {
-                var docId = $(this).data('doc-id');
-                var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
-                var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
-                
-                console.log(docId);
-                console.log(testlastmessagefinal);
+// Initialisation de Select2 et autres scripts après le chargement du document
+$(document).ready(function () { // Initialisation de Select2 sur le champ globalStatus
+$('#globalStatus .select2').select2({placeholder: "Select Global Status", allowClear: true, width: 'resolve'});
 
-                $.ajax({
-                    url: testlastmessagefinal,
-                    method: 'POST',
-                    success: function(data) {
-                        $('#log-msg-' + docId).text(data);
-                        alert(data);
-                    }
-                });
-            });
-        });
-    </script>
-{% endblock javascript %}
-{% endblock %}
-{% block cssin %}
-    {{ encore_entry_link_tags('app') }}
-    {{ encore_entry_link_tags('filter') }}
-    <!-- Styles pour Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-{% endblock cssin %}
+// Script pour récupérer et afficher les messages d'erreur liés aux documents
+$('.get-log-msg').click(function () {
+var docId = $(this).data('doc-id');
+var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
+var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
+
+console.log(docId);
+console.log(testlastmessagefinal);
+
+$.ajax({
+url: testlastmessagefinal,
+method: 'POST',
+success: function (data) {
+$('#log-msg-' + docId).text(data);
+alert(data);
+}
+});
+});
+});
+	</script>
+{% endblock javascript %}{% endblock %}{% block cssin %}
+{{ encore_entry_link_tags('app') }}
+{{ encore_entry_link_tags('filter') }}
+<!-- Styles pour Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>{% endblock cssin %}

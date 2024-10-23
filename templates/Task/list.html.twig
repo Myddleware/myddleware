@@ -24,7 +24,12 @@
 
 {% extends 'base.html.twig' %}
 {% block title %}{{parent()}} | {{'title.task.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
+{% block titlesm %}
+  {{'title.task.list'|trans}}
+  {% if nb > 0 %}
+    ({{ nb }})
+  {% endif %}
+{% endblock titlesm %} 
 {% block body %} 
 	<div id="task" >
 <a href="{{ path('task_stopall') }}">
@@ -40,15 +45,7 @@
 			{{ message }}
 		</div>
 	{% endfor %}
-
-
 			{% if nb > 0 %}
-				<div id="fd-title-small" class="left">
-					<p>{{'list_task.total'|trans}} :<p> <span class="nb">{{ nb }}</span>
-				</div>
-
-
-				<div class="clr"></div>
 				<table class="listepager table container">
 					{% if entities is not empty %}	
 						<tr>

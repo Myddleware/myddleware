@@ -23,7 +23,7 @@
 *********************************************************************************/
 
 #myd_top {
-	min-height: 40px;
+	min-height: 100px;
 	position: fixed;
 	top: 0;
     right: -135px;
@@ -60,7 +60,7 @@ header {
 section  {
 	margin-bottom: 15vh!important;
 	/* width: 80vw; */
-	min-height: 570px;
+	min-height: 150px;
 	background: white !important;
 }
 
@@ -293,3 +293,7 @@ footer {
 	margin-bottom: 0.35rem !important;
  }
 
+ .page-item.active .page-link {
+	background-color: #03c4eb !important;
+    border-color: #03c4eb !important;
+ }

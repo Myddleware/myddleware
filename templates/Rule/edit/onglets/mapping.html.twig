@@ -20,46 +20,60 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 <div class="link-help-view row text-end mx-4">
 	<a href="#help-content-mapping">
-			<i class="fa fa-info-circle" aria-hidden="true"></i>
-			{{'rule.help'|trans}}
-		</a>
+		<i class="fa fa-info-circle" aria-hidden="true"></i>
+		{{'rule.help'|trans}}
+	</a>
 </div>
 
 <div id="fd-title" class="left">
-	<p>{{'view_rule.mapping.module_target'|trans}} : {{ rule.getModuleTarget }}<p>
-	<p>{{'view_rule.mapping.module_source'|trans}} : {{ rule.getModuleSource }}<p>
+	<p>{{'view_rule.mapping.module_target'|trans}}
+		:{{ rule.getModuleTarget }}
+	</p>
+	<p></p>
+	<p>{{'view_rule.mapping.module_source'|trans}}
+		:{{ rule.getModuleSource }}
+	</p>
+	<p></p>
 </div>
 <div class="clr"></div>
 <div class="d-flex mapping-container flex-wrap p-5">
-			{% if fields %}
-				{% for c, f in fields %}
-					<div class="card mapping-card text-center">
-						<div class="card-body mapping-card-body">
-							<h4  class="card-title mapping-card-title">{{ f.getTarget }}</h4>
-							<p class="card-text mapping-card-text">
-									<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }} </p>
-									{% if f.getFormula %}
-										<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}} : {{ f.getFormula }} </p>
-									{% else %}
-										<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
-									{% endif %}
-							</p> 
-						</div> 
-					</div>
-				{% endfor %}
-					<div class="clr"></div>
+	{% if fields %}
+		{% for c, f in fields %}
+			<div class="card mapping-card text-center">
+				<div class="card-body mapping-card-body">
+					<h4 class="card-title mapping-card-title">{{ f.getTarget }}</h4>
+					<p class="card-text mapping-card-text"></p>
+					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}
+					</p>
+					{% if f.getFormula %}
+						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
+							:
+							{{ f.getFormula }}
+						</p>
+					{% else %}
+						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
+					{% endif %}
+				</p>
+				<button type="button" class="btn btn-icon tooltip-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter/Modifier le commentaire">
+					<i class="fa fa-info-circle" aria-hidden="true"></i>
+				</button>
+				<div class="comment-box">
+					<p class="comment-text">Votre com</p>
+					<button class="edit-btn">Modifier</button>
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+	<div class="clr"></div>
 
-			{% else %}
-				<div>{{'view_rule.mapping.empty'|trans}}</div>
-			{% endif %}
-</div>
-<div id="help-content-mapping" class="help-content">
-	<h2>{{'help.title'|trans}} 
-		<i class="fa fa-info-circle" aria-hidden="true"></i>
-	</h2>
-	<p>{{'help.viewrule.mapping'|trans|raw}}</p>
-</div>
+{% else %}
+	<div>{{'view_rule.mapping.empty'|trans}}</div>
+{% endif %}</div><div id="help-content-mapping" class="help-content">
+<h2>{{'help.title'|trans}}
+	<i class="fa fa-info-circle" aria-hidden="true"></i>
+</h2>
+<p>{{'help.viewrule.mapping'|trans|raw}}</p></div>

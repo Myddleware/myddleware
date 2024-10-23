@@ -60,7 +60,7 @@ menu li li, #myd_top li li {
 	background: white;
     text-align: left;
     overflow:hidden;  
-    height: 25px; 	
+    height: 27px; 	
 	padding: 0;
 	padding-left: 10px;
 }
@@ -70,8 +70,9 @@ menu li li, #myd_top li li {
 
 
 .dropdown-menu{
-	margin-left: -48px!important;
-	margin-top: 19px!important;
+	margin-left: -5px !important;
+    margin-top: 10px !important;
+	border: 0px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 menu li li:hover, #myd_top li li:hover {
@@ -170,4 +171,9 @@ header{
     font-size: 1rem !important;
     color: #3a3a3a !important;
     border-radius: 0.5rem !important;
+}
+
+.icon_navbar {
+	margin-left: 191px;
+    margin-right: -140px;
 }
