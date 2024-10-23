@@ -58,12 +58,13 @@
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
 					{% endif %}
 				</p>
-				<button type="button" class="btn btn-icon tooltip-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter/Modifier le commentaire">
+				<button type="button" class="btn btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter/Modifier le commentaire">
 					<i class="fa fa-info-circle" aria-hidden="true"></i>
 				</button>
 				<div class="comment-box">
+					  <i class="fa fa-times close-icon" aria-hidden="true" onclick="closeCommentBox(this)"></i>
 					<p class="comment-text">Votre com</p>
-					<button class="edit-btn">Modifier</button>
+					<button class="btn btn-primary edit-btn">Edit</button>
 				</div>
 			</div>
 		</div>
@@ -77,3 +78,19 @@
 	<i class="fa fa-info-circle" aria-hidden="true"></i>
 </h2>
 <p>{{'help.viewrule.mapping'|trans|raw}}</p></div>
+
+<script>
+    function toggleCommentBox(button) {
+        const commentBox = button.nextElementSibling;
+        if (commentBox.style.display === "block") {
+            commentBox.style.display = "none";
+        } else {
+            commentBox.style.display = "block";
+        }
+    }
+
+	function closeCommentBox(icon) {
+    const commentBox = icon.parentElement;
+    commentBox.style.display = "none";
+}
+</script>
