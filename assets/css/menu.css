@@ -70,8 +70,9 @@ menu li li, #myd_top li li {
 
 
 .dropdown-menu{
-	margin-left: -48px!important;
-	margin-top: 19px!important;
+	margin-left: -5px !important;
+    margin-top: 10px !important;
+	border: 0px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 menu li li:hover, #myd_top li li:hover {
