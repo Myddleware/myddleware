@@ -41,8 +41,16 @@
 	<div id="workflows">
 
 		<div>
-			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
-		</div>
+        <a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
+
+    <div class="link-help-view row text-end mb-4 mx-4">
+		<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-workflow">
+			<i class="fa fa-info-circle" aria-hidden="true"></i>
+			{{ 'rule.help' | trans }}
+		</a>
+	</div>
+
+    </div>
 
 		<div>
 			{% for message in app.flashes('success') %}
