@@ -90,6 +90,8 @@ class VariableController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $variable->setCreatedBy($this->getUser());
+            $variable->setModifiedBy($this->getUser());
             $em->persist($variable);
             $em->flush();
 
@@ -136,6 +138,9 @@ class VariableController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $variable->setCreatedBy($this->getUser());
+            $variable->setModifiedBy($this->getUser());
             // Create an audit entry
             $audit = new VariableAudit();
             $audit->setVariableId($variable->getId());

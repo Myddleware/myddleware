@@ -36,7 +36,7 @@ panel:
         text4 : Pour discuter d'un nouveau projet, d'une collaboration ou d'une opportunité commerciale, veuillez nous contacter à l'adresse suivante
         text5 : Contact professionnel
     documents:
-        title: Documents sent by Myddleware
+        title: Documents envoyés par Myddleware
     solutions:
         title: Connectez vos données
         click: Cliquez pour savoir comment créer ce connecteur.
