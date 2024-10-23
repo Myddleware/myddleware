@@ -86,6 +86,13 @@
                 </div>
             </div>
         </div>
+        
+        <div class="col-md-4" id="name" hidden="true">
+            {{ form_label(form.rule.name, 'list_flux.filter.rule'|trans) }}
+            <div class="input-group">
+                {{ form_widget(form.rule.name, {'required': false}) }}
+            </div>
+        </div>
 
         <div class="col-md-4" id="globalStatus" hidden="true">
             {{ form_label(form.document.globalStatus, 'list_flux.filter.global_status'|trans) }}
@@ -196,12 +203,6 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="name" hidden="true">
-            {{ form_label(form.rule.name, 'list_flux.filter.rule'|trans) }}
-            <div class="input-group">
-                {{ form_widget(form.rule.name, {'required': false}) }}
-            </div>
-        </div>
 
         <div class="col-md-4" id="connectorSource" hidden="true">
             {{ form_label(form.rule.connectorSource, 'list_flux.filter.connector_source'|trans) }}
