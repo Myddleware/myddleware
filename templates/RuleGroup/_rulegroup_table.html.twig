@@ -1,56 +1,56 @@
 <table class="listepager table container">
     {% if entities is not empty %}
         <tr>
-            <th>{{ 'list_workflow.th.name'|trans }}</th>
-            <th>{{ 'list_workflow.th.ruleName'|trans }}</th>
-            <th class="description_workflow_list">{{ 'list_workflow.th.description'|trans }}</th>
-            <th>{{ 'list_workflow.th.condition'|trans }}</th>
-            <th>{{ 'list_workflow.th.order'|trans }}</th>
-            <th>{{ 'list_workflow.th.active'|trans }}</th>
-            <th>{{ 'list_workflow.th.option'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.name'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.ruleName'|trans }}</th>
+            <th class="description_rulegroup_list">{{ 'list_rulegroup.th.description'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.condition'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.order'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.active'|trans }}</th>
+            <th>{{ 'list_rulegroup.th.option'|trans }}</th>
         </tr>
-		{% for workflow in entities %}
+		{% for rulegroup in entities %}
 			<tr>
 				<td>
-					<a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a>
+					<a href="{{ path('rulegroup_show', {'id': rulegroup.id}) }}">{{ rulegroup.name }}</a>
 				</td>
 				<td>
-					<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
-						{{ workflow.rule.name }}</a>
+					<a href="{{ path('regle_open',{'id' : rulegroup.rule.id }) }}" title="{{ rulegroup.rule.name }}" class="text-decoration-none">
+						{{ rulegroup.rule.name }}</a>
 				</td>
-				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{% if workflow.description|length > 60 %}
-					{{ workflow.description|slice(0, 30) ~ '...' }}
+				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{% if rulegroup.description|length > 60 %}
+					{{ rulegroup.description|slice(0, 30) ~ '...' }}
 						<div id="param-short-{{ loop.index }}">
-							{{ workflow.description|slice(0, 100) ~ '...' }}
+							{{ rulegroup.description|slice(0, 100) ~ '...' }}
 							<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
 						</div>
 						<div id="param-full-{{ loop.index }}" style="display: none;">
-							{{ workflow.description }}
+							{{ rulegroup.description }}
 							<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
 						</div>
 					{% else %}
-						{{ workflow.description }}
+						{{ rulegroup.description }}
 					{% endif %}
 				</td>
-				<td>{{ workflow.condition }}</td>
-				<td>{{ workflow.order }}</td>
-				<td class="value workflow_on_off">
+				<td>{{ rulegroup.condition }}</td>
+				<td>{{ rulegroup.order }}</td>
+				<td class="value rulegroup_on_off">
 					<div class="form-check form-switch">
-						<input class="form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
+						<input class="form-check-input rulegroup-check-input" type="checkbox" id="activeRulegroup_{{ rulegroup.id }}" data-id="{{ rulegroup.id }}" data-type="rulegroup" {{ rulegroup.active ? 'checked' : '' }}>
 					</div>
 				</td>
 				<td class="CRUD-icons">
-					<a href="{{ path('workflow_edit', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
+					<a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
 						<span class="btn-opt">
 							<i class="fa fa-pen" aria-hidden="true"></i>
 						</span>
 					</a>
-					<a class="delete" href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
+					<a class="delete" href="{{ path('rulegroup_delete', {'id': rulegroup.id}) }}" onclick="return confirm('Are you sure you want to delete this rulegroup ?');">
 						<span class="btn-opt">
 							<i class="fa fa-trash" aria-hidden="true"></i>
 						</span>
 					</a>
-					<a href="{{ path('workflow_show', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
+					<a href="{{ path('rulegroup_show', {'id': rulegroup.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
 						<span class="btn-opt">
 							<i class="fa fa-file" aria-hidden="true"></i>
 						</span>
