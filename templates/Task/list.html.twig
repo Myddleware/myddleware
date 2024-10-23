@@ -121,6 +121,7 @@
 						</tr>			
 					{% endif %}
 				</table>
+				<div class="container task-pagination" >
 				{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
 											
@@ -150,6 +151,7 @@
 												}
 											</script>
 										{% endif %}
+			</div>
 			{% else %}
 				<p class="display-6">{{ 'list_task.empty'|trans }}</p>
 			{% endif %}
