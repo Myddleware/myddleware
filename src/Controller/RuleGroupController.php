@@ -170,25 +170,18 @@ class RuleGroupController extends AbstractController
     public function RulegroupListAction(int $page = 1, Request $request)
     {
         try {
+
+            $rulegroupName = $request->query->get('workflow_name');
+
+            $rulegroupName = 'badla';
             
             // Récupérer les filtres depuis la requête
-            $rulegroupName = $request->query->get('rulegroup_name');
-            $ruleName = $request->query->get('rule_name');
-
-            // Utilisation de findBy pour récupérer les rulegroups
             $criteria = ['deleted' => 0];
-            $orderBy = ['order' => 'ASC'];
-            $rulegroups = $this->entityManager->getRepository(Rulegroup::class)->findBy($criteria, $orderBy);
+            $rulegroups = $this->entityManager->getRepository(Rulegroup::class)->findBy($criteria);
 
             if ($rulegroupName) {
                 $rulegroups = array_filter($rulegroups, function($rulegroup) use ($rulegroupName) {
                     return stripos($rulegroup->getName(), $rulegroupName) !== false;
-                });
-            }
-
-            if ($ruleName) {
-                $rulegroups = array_filter($rulegroups, function($rulegroup) use ($ruleName) {
-                    return stripos($rulegroup->getRule()->getName(), $ruleName) !== false;
                 });
             }
 
@@ -418,49 +411,49 @@ class RuleGroupController extends AbstractController
     //     return new JsonResponse(['status' => 'success', 'active' => $rulegroup->getActive()]);
     // }
 
-    // // public function to create a new rulegroup
-    // /**
-    //  * @Route("/new", name="rulegroup_create")
-    //  */
-    // public function RulegroupCreateAction(Request $request)
-    // {
-    //     try {
+    // public function to create a new rulegroup
+    /**
+     * @Route("/new", name="rulegroup_create")
+     */
+    public function RulegroupCreateAction(Request $request)
+    {
+        try {
 
 
-    //         $rules = RuleRepository::findActiveRulesNames($this->entityManager);
+            $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroup = new Rulegroup();
-    //         $rulegroup->setId(uniqid());
-    //         $form = $this->createForm(RulegroupType::class, $rulegroup, [
-    //             'entityManager' => $em,
-    //         ]);
-    //         $form->handleRequest($request);
+            $em = $this->getDoctrine()->getManager();
+            $rulegroup = new Rulegroup();
+            $rulegroup->setId(uniqid());
+            $form = $this->createForm(RulegroupType::class, $rulegroup, [
+                'entityManager' => $em,
+            ]);
+            $form->handleRequest($request);
 
-    //         if ($form->isSubmitted() && $form->isValid()) {
-    //             $rulegroup->setCreatedBy($this->getUser());
-    //             $rulegroup->setModifiedBy($this->getUser());
-    //             $em->persist($rulegroup);
-    //             $em->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $rulegroup->setCreatedBy($this->getUser());
+                $rulegroup->setModifiedBy($this->getUser());
+                $em->persist($rulegroup);
+                $em->flush();
 
-    //             // Save the rulegroup audit
-    //             $this->saveRulegroupAudit($rulegroup->getId());
+                // Save the rulegroup audit
+                $this->saveRulegroupAudit($rulegroup->getId());
 
-    //             $this->addFlash('success', 'Rulegroup created successfully');
+                $this->addFlash('success', 'Rulegroup created successfully');
 
-    //             return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
-    //         }
+                return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
+            }
 
-    //         return $this->render(
-    //             'Rulegroup/new.html.twig',
-    //             [
-    //                 'form' => $form->createView(),
-    //             ]
-    //         );
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+            return $this->render(
+                'Rulegroup/new.html.twig',
+                [
+                    'form' => $form->createView(),
+                ]
+            );
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
     // /**
     //  * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
