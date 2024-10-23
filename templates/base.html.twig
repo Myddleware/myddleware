@@ -156,9 +156,8 @@
 							</ul>
 						</li>
 
-						<li class="dropdown">
-							<a class="title_section_menu
-							{% if app.request.attributes.get('_route') in ['my_account', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
+						<li class="dropdown icon_navbar">
+							<a class="title_section_menu {% if app.request.attributes.get('_route') in ['my_account', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
 								active
 							{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle svg_user" viewbox="0 0 16 16">

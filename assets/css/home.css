@@ -264,3 +264,46 @@
     color: #03c4eb;
     font-weight: bold;
 }
+
+.home_fa_info_circle {
+    width: 25px !important;
+    height: 25px !important;
+    position: relative;
+}
+
+.extra-text {
+    background-color: white;
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    padding: 5px;
+    border-radius: 16px;
+    color: #000000;
+}
+
+.toggle-btn-homepage {
+    position: relative;
+    transition: height 0.3s ease;
+    overflow: hidden;
+    display: flex !important;
+    flex-wrap: wrap;
+    background-color: #444446 !important;
+    border-color: #444446 !important;
+}
+
+.toggle-btn-homepage:hover {
+    background-color: #444446 !important;
+    border-color: #444446 !important;
+} 
+.toggle-btn-homepage p {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.toggle-btn-homepage span {
+    width: 100%;
+}
+
+.toggle-btn-homepage div {
+    position: absolute;
+}

@@ -1,66 +1,72 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{ 'variable.list_title'|trans }}{% endblock %}
-{% block titlesm %}{{ 'variable.list_title'|trans }}{% endblock titlesm %} 
+{% block title %}
+	{{parent()}}
+	|
+	{{ 'variable.list_title'|trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'variable.list_title'|trans }}
+	{% if nb_variables > 0 %}
+		({{ nb_variables }})
+	{% endif %}
+{% endblock titlesm %}
 
 {% block body %}
-    <div id="variables">
-        <div>
-            <a href="{{ path('variable_create') }}" class="btn btn-primary mt-4">{{ 'variable.create_new'|trans }}</a>
-        </div>
+	<div id="variables">
+		<div>
+			<a href="{{ path('variable_create') }}" class="btn btn-primary mt-5 mb-5">{{ 'variable.create_new'|trans }}</a>
+		</div>
 
-        <div>
-            {% for message in app.flashes('success') %}
-                <div class="alert alert-success" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
+		<div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success" role="alert">
+					{{ message }}
+				</div>
+			{% endfor %}
 
-            {% if nb_variables > 0 %}
-                <div id="fd-title-small" class="left">
-                    <p>{{ 'variable.total'|trans }} :<p> <span class="nb_variable">{{ nb_variables }}</span>
-                </div>
+			{% if nb_variables > 0 %}
+				<table class="listepager table container">
+					<thead>
+						<tr>
+							<th>{{ 'variable.table_headers.name'|trans }}</th>
+							<th>{{ 'variable.table_headers.value'|trans }}</th>
+							<th>{{ 'variable.table_headers.description'|trans }}</th>
+							<th>{{ 'variable.table_headers.actions'|trans }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for variable in variables %}
+							<tr>
+								<td>
+									<a href="{{ path('variable_show', {'id': variable.id}) }}">{{ variable.name }}</a>
+								</td>
+								<td>{{ variable.value }}</td>
+								<td>{{ variable.description }}</td>
+								<td class="CRUD-icons">
+									<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
+										<span class="btn-opt">
+											<i class="fa fa-pen" aria-hidden="true"></i>
+										</span>
+									</a>
+									<a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
+										<span class="btn-opt">
+											<i class="fa fa-trash" aria-hidden="true"></i>
+										</span>
+									</a>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
 
-                <div class="clr"></div>
-                <table class="listepager table container">
-                    <thead>
-                        <tr>
-                            <th>{{ 'variable.table_headers.name'|trans }}</th>
-                            <th>{{ 'variable.table_headers.value'|trans }}</th>
-                            <th>{{ 'variable.table_headers.description'|trans }}</th>
-                            <th>{{ 'variable.table_headers.actions'|trans }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for variable in variables %}
-                            <tr>
-                                <td><a href="{{ path('variable_show', {'id': variable.id}) }}">{{ variable.name }}</a></td>
-                                <td>{{ variable.value }}</td>
-                                <td>{{ variable.description }}</td>
-                                <td class="CRUD-icons">
-                                    <a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
-                                        <span class="btn-opt">
-                                            <i class="fa fa-pen" aria-hidden="true"></i>
-                                        </span>
-                                    </a>
-                                    <a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
-                                        <span class="btn-opt">
-                                            <i class="fa fa-trash" aria-hidden="true"></i>
-                                        </span>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <div class="d-flex justify-content-center mt-4">
-                    {% if pager.haveToPaginate %}
-                        {{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'variable_list_page'}) }}
-                    {% endif %}
-                </div>
-            {% else %}
-                <p class="display-6">{{ 'variable.no_variables'|trans }}</p>
-            {% endif %}
-        </div>
-    </div>
+				<div class="d-flex justify-content-center mt-4">
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'variable_list_page'}) }}
+					{% endif %}
+				</div>
+			{% else %}
+				<p class="display-6">{{ 'variable.no_variables'|trans }}</p>
+			{% endif %}
+		</div>
+	</div>
 {% endblock %}

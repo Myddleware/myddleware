@@ -260,6 +260,7 @@ td {
 
 td a {
 	color: #337ab7!important;
+	text-decoration: none;
 }
 
 .title_source_ctr, .title_target_ctr {
