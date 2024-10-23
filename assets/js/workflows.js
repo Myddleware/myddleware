@@ -85,6 +85,7 @@ $(document).ready(function () {
 
     if (
       actionValue === "transformDocument" ||
+      actionValue === "rerun" ||
       actionValue === "sendNotification" ||
       actionValue === "updateStatus"
     ) {
