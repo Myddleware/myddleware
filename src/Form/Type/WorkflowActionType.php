@@ -66,6 +66,7 @@ class WorkflowActionType extends AbstractType
                     'generateDocument' => 'generateDocument',
                     'transformDocument' => 'transformDocument',
                     'changeData' => 'changeData',
+                    'rerun' => 'rerun'
                 ],
                 'attr' => [
                     'class' => 'form-control',
