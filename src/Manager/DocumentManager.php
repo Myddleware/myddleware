@@ -2239,10 +2239,6 @@ class documentcore
             $stmt->bindValue(':attempt', $this->attempt);
             $stmt->bindValue(':new_status', $new_status);
             $stmt->bindValue(':id', $this->id);
-			// Remove the lock on the document in the class and in the database
-            $this->jobLock = '';
-            $stmt->bindValue(':jobLock', $this->jobLock);
-            $result = $stmt->executeQuery();
             $this->message .= 'Status : '.$new_status;
             $this->status = $new_status;
             $this->afterStatusChange($new_status);
@@ -2257,6 +2253,11 @@ class documentcore
 			}
 			$this->message = '';
 			$this->docIdRefError = '';
+			
+			// Remove the lock on the document in the class and in the database
+            $this->jobLock = '';
+            $stmt->bindValue(':jobLock', $this->jobLock);
+            $result = $stmt->executeQuery();
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';

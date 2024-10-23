@@ -45,7 +45,7 @@ class DocumentData
 
     /**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=false)
      */
     private Document $doc_id;
 
