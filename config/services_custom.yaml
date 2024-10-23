@@ -14,12 +14,12 @@ services:
 # You must use the same syntax for each custom class you create. For further info : 
 # https://symfony.com/doc/4.4/service_container/service_decoration.html 
 
-  App\Custom\Premium\Manager\DocumentManagerPremium:
-    decorates: App\Manager\DocumentManager
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Premium\Manager\DocumentManagerPremium:
+  #   decorates: App\Manager\DocumentManager
+  #   decoration_on_invalid: ignore
+  #   decoration_priority: 1
     
-  App\Custom\Premium\Manager\ToolsManagerPremium:
-    decorates: App\Manager\ToolsManager
-    decoration_on_invalid: ignore
-    decoration_priority: 1
+  # App\Custom\Premium\Manager\ToolsManagerPremium:
+  #   decorates: App\Manager\ToolsManager
+  #   decoration_on_invalid: ignore
+  #   decoration_priority: 1

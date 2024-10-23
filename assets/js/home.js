@@ -26,6 +26,15 @@ google.charts.load("visualization", "1", {packages:["corechart"]});
 
 document.addEventListener('DOMContentLoaded', function () {
 
+	$(".toggle-btn-homepage").click(function () {
+        var extraText = $(this).find(".extra-text");
+        if (extraText.is(":visible")) {
+            extraText.slideUp();
+        } else {
+            extraText.slideDown();
+        }
+    });
+
 	if (typeof countNbDocuments !== 'undefined') {
 		// Fonction for animation of the counter
 		function animateCounter(id, start, end, maxDuration) {
