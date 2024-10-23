@@ -2,12 +2,7 @@
     {% if entities is not empty %}
         <tr>
             <th>{{ 'list_rulegroup.th.name'|trans }}</th>
-            <th>{{ 'list_rulegroup.th.ruleName'|trans }}</th>
             <th class="description_rulegroup_list">{{ 'list_rulegroup.th.description'|trans }}</th>
-            <th>{{ 'list_rulegroup.th.condition'|trans }}</th>
-            <th>{{ 'list_rulegroup.th.order'|trans }}</th>
-            <th>{{ 'list_rulegroup.th.active'|trans }}</th>
-            <th>{{ 'list_rulegroup.th.option'|trans }}</th>
         </tr>
 		{% for rulegroup in entities %}
 			<tr>
@@ -16,7 +11,7 @@
 				</td>
 				<td>
 					<a href="{{ path('regle_open',{'id' : rulegroup.rule.id }) }}" title="{{ rulegroup.rule.name }}" class="text-decoration-none">
-						{{ rulegroup.rule.name }}</a>
+						{{ rulegroup.name }}</a>
 				</td>
 				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{% if rulegroup.description|length > 60 %}
 					{{ rulegroup.description|slice(0, 30) ~ '...' }}
@@ -32,8 +27,6 @@
 						{{ rulegroup.description }}
 					{% endif %}
 				</td>
-				<td>{{ rulegroup.condition }}</td>
-				<td>{{ rulegroup.order }}</td>
 				<td class="value rulegroup_on_off">
 					<div class="form-check form-switch">
 						<input class="form-check-input rulegroup-check-input" type="checkbox" id="activeRulegroup_{{ rulegroup.id }}" data-id="{{ rulegroup.id }}" data-type="rulegroup" {{ rulegroup.active ? 'checked' : '' }}>
