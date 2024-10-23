@@ -452,6 +452,7 @@ class rulecore
                 // In case there is no result but the reference date has changed (e.g. stat reding from Brevo)
 				} elseif (
 						$readSource['count'] == 0
+					AND !empty($readSource['date_ref'])
 					AND $readSource['date_ref'] != $this->ruleParams['datereference']
 				) {
 					$this->updateReferenceDate();
