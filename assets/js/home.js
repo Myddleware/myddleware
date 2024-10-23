@@ -36,30 +36,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 	if (typeof countNbDocuments !== 'undefined') {
-		// Fonction for animation of the counter
-		function animateCounter(id, start, end, maxDuration) {
+		// Function for smooth animation of the counter
+		function animateCounter(id, start, end, duration) {
 			var obj = document.getElementById(id);
-			var current = start;
-			var range = end - start;
-			var increment = end > start ? 1 : -1;
-			var duration = maxDuration;
-			
-			var stepTime = Math.abs(Math.floor(duration / Math.abs(range)));
-			stepTime = Math.max(stepTime, 1);
-
-			var timer = setInterval(function() {
-				current += increment;
-				obj.innerHTML = current;
-				if (current == end) {
-					clearInterval(timer);
+			var startTime = null;
+	
+			function easeOutQuad(t) {
+				return t * (2 - t);
+			}
+	
+			function animate(currentTime) {
+				if (startTime === null) startTime = currentTime;
+				var timeElapsed = currentTime - startTime;
+				var progress = Math.min(timeElapsed / duration, 1);
+				var easedProgress = easeOutQuad(progress);
+				
+				var currentValue = Math.round(start + (end - start) * easedProgress);
+				obj.innerHTML = currentValue;
+	
+				if (progress < 1) {
+					requestAnimationFrame(animate);
 				}
-			}, stepTime);
+			}
+	
+			requestAnimationFrame(animate);
 		}
-
+	
 		animateCounter('countNbDocuments', 0, countNbDocuments, 2000);
 	} else {
 		console.error("countNbDocuments not defined");
 	}
+	
 
 	const showMoreBtn = document.getElementById('show-more-btn');
 	const showLessBtn = document.getElementById('show-less-btn');

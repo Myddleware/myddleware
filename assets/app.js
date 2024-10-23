@@ -30,22 +30,39 @@ require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
 require('./js/lib/jquery_scrollbox/jquery.scrollbox.min.js')
 require('./js/lib/jquery_qtip/jquery.qtip.min.js')
 require('./js/lib/jquery_myddleware/function.js')
-require('./js/regle.js')
 require('./js/account.js')
 require('./js/lib/d3.v2.js')
-require('./js/home.js')
-require('./js/jobscheduler.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
 require('./js/connector.js')
-require('./js/smtp.js')
-require('./js/filter.js')
-require('./js/crontab.js')
 require('./js/rule_relation_filter.js')
-require('./js/editAction.js')
 require('./js/connector_detail.js')
-require("./js/workflows.js");
+require('./js/regle.js')
+
+
+if (window.location.href.includes('rule/document/list')) {
+    require('./js/filter.js');
+}
+
+if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
+    require('./js/workflows.js')
+    require('./js/editAction.js')
+}
+
+if (window.location.href.includes('rule/panel')) {
+    require('./js/home.js')
+}
+
+if (window.location.href.includes('rule/jobscheduler')) {
+require('./js/crontab.js')
+require('./js/jobscheduler.js')
+}
+
+if (window.location.href.includes('rule/managementsmtp')) {
+    require('./js/smtp.js')
+}
+
 
 
 

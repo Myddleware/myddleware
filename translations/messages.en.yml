@@ -36,7 +36,7 @@ panel:
         text4: To discuss a new project, collaboration, or business opportunities, please reach out to us at the following address
         text5: Business contact
     documents:
-        title: Documents envoyés par Myddleware
+        title: Document sent by Myddleware
     solutions:
         title: Connect your data
         click: Click to see how to create this connector.

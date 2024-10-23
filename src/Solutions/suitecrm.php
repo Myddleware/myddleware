@@ -645,7 +645,7 @@ class suitecrmcore extends solution
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
-                    'name_value_lists' => $dataSugar,
+                    'name_value_list' => $dataSugar,
                 ];
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
 
@@ -784,7 +784,7 @@ class suitecrmcore extends solution
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
-                    'name_value_lists' => $dataSugar,
+                    'name_value_list' => $dataSugar,
                 ];
 
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
@@ -880,7 +880,7 @@ class suitecrmcore extends solution
                     } elseif ('Employees' == $param['module']) {
                         $query .= 'users.'.$key." = '".$value."' ";
                     } else {
-                        $query .= strtolower($param['module']).'.'.$key." = '".$value."' ";
+                        $query .= (substr($key,-2) == '_c' ? strtolower($param['module']).'_cstm' : strtolower($param['module'])).'.'.$key." = '".$value."' ";
                     }
                 }
             }
