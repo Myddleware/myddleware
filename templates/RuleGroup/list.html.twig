@@ -1,0 +1,108 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'title.workflow.list'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+	{{ 'title.workflow.list'|trans }}
+	{% if nb_workflow > 0 %}
+		({{ nb_workflow }})
+	{% endif %}
+{% endblock titlesm %}
+
+{% block body %}
+	<div id="workflows">
+
+		<div>
+        <a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
+
+    <div class="link-help-view row text-end mb-4 mx-4">
+		<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-workflow">
+			<i class="fa fa-info-circle" aria-hidden="true"></i>
+			{{ 'rule.help' | trans }}
+		</a>
+	</div>
+
+    </div>
+
+		<div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success" role="alert">
+					{{ message }}
+				</div>
+			{% endfor %}
+			{% if nb_workflow > 0 %}
+				<div class="container d-flex justify-content-center align-items-center">
+					<div class="col-md-6">
+						<form id="workflowFilterForm" action="{{ path('workflow_list') }}" method="get" class="p-4 rounded">
+							<div class="row g-3 align-items-center">
+								<div class="col-md-6">
+									<div class="form-floating">
+										<input type="text" name="workflow_name" id="workflow_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Workflow Name" value="{{ app.request.query.get('workflow_name') }}">
+										<label for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-floating">
+										<input type="text" name="rule_name" id="rule_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rule Name" value="{{ app.request.query.get('rule_name') }}">
+										<label for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="clr"></div>
+				<div id="workflowTableContainer">
+					{% include 'Workflow/_workflow_table.html.twig' %}
+				</div>
+				<div class="d-flex justify-content-center mt-4">
+					{% if pager_workflow_list.haveToPaginate %}
+						{{ pagerfanta(pager_workflow_list, 'twitter_bootstrap4', {'routeName': 'workflow_list_page'}) }}
+					{% endif %}
+				</div>
+			{% else %}
+				<p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
+			{% endif %}
+		</div>
+	</div>
+
+	{# ------------- PARAMETRES JQUERY ------------- #}
+	<script type="text/javascript">
+		var workflowListUrl = "{{ path('workflow_list') }}";
+var path_img = "{{ asset('build/images/regle/') }}";
+var lang = "{{ app.request.locale }}";
+	</script>
+	{# ------------- PARAMETRES JQUERY ------------- #}
+
+{% endblock %}
+
+{% block cssin %}{% endblock cssin %}
