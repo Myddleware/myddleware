@@ -128,3 +128,9 @@
 .button_param_task_expand {
     white-space: normal;
 }
+
+.task-pagination {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
