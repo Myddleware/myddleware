@@ -351,6 +351,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'rerun' => 'rerun',
                             'changeData' => 'changeData',
                         ],
                     ])
@@ -694,6 +695,7 @@ class WorkflowActionController extends AbstractController
                             'sendNotification' => 'sendNotification',
                             'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
+                            'rerun' => 'rerun',
                             'changeData' => 'changeData',
                         ],
                     ])
@@ -911,6 +913,8 @@ class WorkflowActionController extends AbstractController
             } elseif ($action == 'sendNotification') {
                 unset($arguments['status'], $arguments['searchField'], $arguments['searchValue']);
             } elseif ($action == 'transformDocument') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+            } elseif ($action == 'rerun') {
                 unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
             }
 
