@@ -2259,9 +2259,10 @@ class documentcore
 			}
 			// Remove the lock on the document in the class and in the database
 			// Exception : status New because there is no lock on documet for this status, the lock in on the rule
-			// Update status call by a workflow, the lock will be removed only by the main call
+			// Exception : status No_send because the dcument has already been unlock by the status ready_to_send
+			// Exception : Update status call by a workflow, the lock will be removed only by the main call
 			if (
-					!in_array($new_status, array('New'))
+					!in_array($new_status, array('New','No_send'))
 				AND !$workflow
 			) {
 				$this->unsetLock();
