@@ -200,6 +200,7 @@ view_rule:
         order: Ordre
         status: Statut
         workflows: Workflows
+        workflow_create: Créer un nouveau workflow
     connector:
         title: Connecteur
         solution: Solution
