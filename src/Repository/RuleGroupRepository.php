@@ -29,7 +29,7 @@ use App\Entity\Rulegroup;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class RulegroupRepository extends ServiceEntityRepository
+class RuleGroupRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
