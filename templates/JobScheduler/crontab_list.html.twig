@@ -1,16 +1,11 @@
 {% extends 'base.html.twig' %}
 {% block titlesm %}
 	{{ 'crontab.title'|trans }}
+	({{ entity | length }})
 {% endblock %}
 {% block body %}
-	<div id="fd-title-small" class="left">
-		<p>{{ 'jobscheduler.total'|trans }}</p>
-		<p>
-			<span class="nb">{{ entity | length }}</span>
-		</p>
-	</div>
-	<div class="clr"></div>
-	<div class="text-center">
+
+	<div class="text-center mt-5">
 		<h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
 		{% for entityCron in entitiesCron %}
 			{% if entityCron.value == true %}
@@ -77,14 +72,14 @@
 				<tbody>
 					{% for value in entity %}
 						<tr class="
-																								                    {% if value.runningInstances == value.maxInstances %}
-																								                        bg-danger
-																								                    {% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}
-																								                        bg-warning
-																								                    {% else %}
-																								                        bg-none
-																								                    {% endif %}
-																								                ">
+																																                    {% if value.runningInstances == value.maxInstances %}
+																																                        bg-danger
+																																                    {% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}
+																																                        bg-warning
+																																                    {% else %}
+																																                        bg-none
+																																                    {% endif %}
+																																                ">
 							<td class="value">
 								<div id="command-short-{{ loop.index }}">
 									{{ value.command|slice(0, 20) ~ '...' }}
@@ -196,9 +191,9 @@
 				</table>
 
 				<div class="navigation" id="workflows">
-										{% if pager.haveToPaginate %}
+					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'jobscheduler_cron_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
-						
+
 						<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
 							<div class="form-group" required style="width: 15em;">
 								<label for="page" class="sr-only">Page</label>
@@ -206,23 +201,23 @@
 							</div>
 							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
 						</form>
-					
+
 						<script>
 							const maxPage = {{ pager.getNbPages() }};
-					
-							function updateFormAction(event) {
-								event.preventDefault();
-								const page = document.getElementById('page').value;
-								if (page < 1 || page > maxPage) {
-									alert('Please enter a valid page number between 1 and ' + maxPage);
-									return;
-								}
-								const form = document.getElementById('pageForm');
-								const baseUrl = "{{ path('jobscheduler_cron_list_page', {'page': 1}) }}";
-								const action = baseUrl.replace('/page-1', '/page-' + page);
-								form.action = action;
-								form.submit();
-							}
+
+function updateFormAction(event) {
+event.preventDefault();
+const page = document.getElementById('page').value;
+if (page < 1 || page > maxPage) {
+alert('Please enter a valid page number between 1 and ' + maxPage);
+return;
+}
+const form = document.getElementById('pageForm');
+const baseUrl = "{{ path('jobscheduler_cron_list_page', {'page': 1}) }}";
+const action = baseUrl.replace('/page-1', '/page-' + page);
+form.action = action;
+form.submit();
+}
 						</script>
 					{% endif %}
 				</div>

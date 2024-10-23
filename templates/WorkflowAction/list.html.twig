@@ -20,41 +20,43 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.workflow.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.workflow.list'|trans}}{% endblock titlesm %} 
-{% block body %} 
-{% block js %}
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
-{% endblock js %}
-	<div id="workflows" >
+{% block title %}
+	{{parent()}}
+	|
+	{{'title.workflow.list'|trans}}
+{% endblock %}
+{% block titlesm %}
+	{{'title.workflow.list'|trans}}
 
-	<div>
-        <a href="{{ path('workflow_create') }}" class="btn btn-primary">{{ 'Create new workflow'|trans }}</a>
-    </div>
+	{% if nb_workflow > 0 %}
+		{{ nb_workflow }}
+	{% endif %}
+{% endblock titlesm %}
+{% block body %}
+	{% block js %}
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+	{% endblock js %}
+	<div id="workflows">
 
-<div>
-	{% for message in app.flashes('success') %}
-		<div class="alert alert-success" role="alert">
-			{{ message }}
+		<div>
+			<a href="{{ path('workflow_create') }}" class="btn btn-primary">{{ 'Create new workflow'|trans }}</a>
 		</div>
-	{% endfor %}
 
-
-			{% if nb_workflow > 0 %}
-				<div id="fd-title-small" class="left">
-					<p>{{'list_workflow.total'|trans}} :<p> <span class="nb_workflow">{{ nb_workflow }}</span>
+		<div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success" role="alert">
+					{{ message }}
 				</div>
-
-
-				<div class="clr"></div>
+			{% endfor %}
+			{% if nb_workflow > 0 %}
 				<table class="listepager table container">
-					{% if entities is not empty %}    
+					{% if entities is not empty %}
 						<tr>
 							<th>{{'list_workflow.th.id'|trans}}</th>
 							<th>{{'list_workflow.th.ruleName'|trans}}</th>
@@ -63,12 +65,17 @@
 							<th>{{'list_workflow.th.workflowCondition'|trans}}</th>
 							<th>{{'list_workflow.th.active'|trans}}</th>
 							<th>{{'list_workflow.th.actions'|trans}}</th>
-						</tr> 
+						</tr>
 						{% for workflow in entities %}
 							<tr>
 								<td>{{ workflow.id }}</td>
-								<td><a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none"> {{ workflow.rule.name }}</a></td>
-								<td><a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a></td>
+								<td>
+									<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
+										{{ workflow.rule.name }}</a>
+								</td>
+								<td>
+									<a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a>
+								</td>
 								<td>{{ workflow.description }}</td>
 								<td>{{ workflow.condition }}</td>
 								<td class="{{ workflow.active ? 'workflow_active' : 'workflow_inactive' }}">
@@ -76,39 +83,50 @@
 										{{ workflow.active ? 'Active' : 'Inactive' }}
 									</a>
 								</td>
-								<td><button class="toggle-actions" data-id="{{ workflow.id }}">Show Actions</button></td> <!-- Button to toggle actions -->
+								<td>
+									<button class="toggle-actions" data-id="{{ workflow.id }}">Show Actions</button>
+								</td>
+								<!-- Button to toggle actions -->
 							</tr>
-							<tr class="actions-row" id="actions-{{ workflow.id }}" style="display: none;"> <!-- Row for actions, hidden by default -->
-								<td colspan="1">
+							<tr
+								class="actions-row" id="actions-{{ workflow.id }}" style="display: none;">
+								<!-- Row for actions, hidden by default -->
+								<td
+									colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.name }}</p>										
+										<p>{{ action.name }}</p>
 									{% endfor %}
 								</td>
-								<td colspan="1">
+								<td
+									colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.action }}</p>										
+										<p>{{ action.action }}</p>
 									{% endfor %}
 								</td>
-								<td colspan="1">
+								<td
+									colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.description }}</p>										
+										<p>{{ action.description }}</p>
 									{% endfor %}
 								</td>
-								<td colspan="1">
+								<td
+									colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
-										<p>{{ action.order }}</p>										
+										<p>{{ action.order }}</p>
 									{% endfor %}
 								</td>
-								<td colspan="1">
+								<td
+									colspan="1">
 									<!-- Here you can list the actions for the workflow -->
 									{% for action in workflow.getWorkflowActions %}
 										{% if action.arguments is iterable %}
 											{% for key, argument in action.arguments %}
-												<p>{{ key }}: {{ argument }}</p>
+												<p>{{ key }}:
+													{{ argument }}</p>
 											{% endfor %}
 										{% else %}
 											<p>{{ action.arguments }}</p>
@@ -116,17 +134,17 @@
 									{% endfor %}
 								</td>
 							</tr>
-						{% endfor %}        
+						{% endfor %}
 					{% endif %}
 				</table>
-				
+
 				<script>
-					$(document).ready(function() {
-						$('.toggle-actions').click(function() {
-							var id = $(this).data('id');
-							$('#actions-' + id).toggle();
-						});
-					});
+					$(document).ready(function () {
+$('.toggle-actions').click(function () {
+var id = $(this).data('id');
+$('#actions-' + id).toggle();
+});
+});
 				</script>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
@@ -137,15 +155,14 @@
 				<p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
 			{% endif %}
 		</div>
-    </div>
+	</div>
 
-    {# ------------- PARAMETRES JQUERY ------------- #}
-    <script type="text/javascript">   
+	{# ------------- PARAMETRES JQUERY ------------- #}
+	<script type="text/javascript">
 		var path_img = "{{ asset('build/images/regle/') }}";
-		var lang = "{{app.request.locale}}";
-    </script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
+var lang = "{{ app.request.locale }}";
+	</script>
+	{# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}
 
 {% block cssin %}{% endblock cssin %}
-

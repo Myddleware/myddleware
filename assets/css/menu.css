@@ -171,3 +171,8 @@ header{
     color: #3a3a3a !important;
     border-radius: 0.5rem !important;
 }
+
+.icon_navbar {
+	margin-left: 191px;
+    margin-right: -140px;
+}

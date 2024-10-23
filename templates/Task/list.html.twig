@@ -20,127 +20,129 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.task.list'|trans}}{% endblock %}
-{% block titlesm %}{{'title.task.list'|trans}}{% endblock titlesm %} 
-{% block body %} 
-	<div id="task" >
-<a href="{{ path('task_stopall') }}">
-    <button class="btn btn-danger">
-        <i class="fa fa-ban" aria-hidden="true"></i>
-        {{'Stop all the Tasks'}}
-    </button>
-</a>
+{% block title %}
+	{{parent()}}
+	|
+	{{'title.task.list'|trans}}
+{% endblock %}
+{% block titlesm %}
+	{{'title.task.list'|trans}}
+	{% if nb > 0 %}
+		({{ nb }})
+	{% endif %}
+{% endblock titlesm %}
+{% block body %}
+	<div id="task">
+		<a href="{{ path('task_stopall') }}">
+			<button class="btn btn-danger mt-5">
+				<i class="fa fa-ban" aria-hidden="true"></i>
+				{{'Stop all the Tasks'}}
+			</button>
+		</a>
 
-<div>
-	{% for message in app.flashes('success') %}
-		<div class="alert alert-success" role="alert">
-			{{ message }}
-		</div>
-	{% endfor %}
+		<div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success" role="alert">
+					{{ message }}
+				</div>
+			{% endfor %}
 
 
 			{% if nb > 0 %}
-				<div id="fd-title-small" class="left">
-					<p>{{'list_task.total'|trans}} :<p> <span class="nb">{{ nb }}</span>
-				</div>
-
-
-				<div class="clr"></div>
-				<table class="listepager table container">
-					{% if entities is not empty %}	
+				<table class="listepager table container mt-4">
+					{% if entities is not empty %}
 						<tr>
 							<th>{{'list_task.th.param'|trans}}</th>
-							<th>{{'list_task.th.status'|trans}}</th>
-							<th>{{'list_task.th.begin'|trans}}</th>
-							<th>{{'list_task.th.end'|trans}}</th>				
-							<th>{{'list_task.th.open'|trans}}</th>
-							<th>{{'list_task.th.close'|trans}}</th>
-							<th>{{'list_task.th.cancel'|trans}}</th>
-							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>
-						</tr> 
-						{% for task in entities %}
-							{% if task.message is not empty %}
-								<tr class="fd_normal">
-							{% else %}
-								<tr>
-							{% endif %}    
-							<td>
-								{% if task.param|length > 60 %}
-									<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param|slice(0, 30) ~ '...' }}</a>
-									<div id="param-short-{{ loop.index }}">
-										{{ task.param|slice(0, 100) ~ '...' }}
-										<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
-									</div>
-									<div id="param-full-{{ loop.index }}" style="display: none;">
-										{{ task.param }}
-										<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
-									</div>
-								{% else %}
-									<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param }}</a>
-								{% endif %}
-							</td>
-							<td class="ctr">             
-								{% if task.status|lower == 'end' %}
-								<span class="label label-default">{{ task.status }}</span>
-								{% else %}
-								<span class="label label-warning">{{ task.status }}</span>
-								{% endif %}
-							</td>    
-							<td>{{ task.begin|date("d/m/Y H:i:s", timezone) }}</td>
-							<td>{{ task.end|date("d/m/Y H:i:s", timezone) }}</td>
-							<td class="count">{{ task.open }}</td>    
-							<td class="count">{{ task.close }}</td>
-							<td class="count">{{ task.cancel }}</td> 
-							<td class="count">{{ task.error }}</td>    
-							<td>
-								<div id="message-short-{{ loop.index }}">
-									{{ task.message|slice(0, 100) ~ '...' }}
-									<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
-								</div>
-								<div id="message-full-{{ loop.index }}" style="display: none;">
-									{{ task.message }}
-									<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
-								</div>
-							</td>                     
-						</tr>            
-						{% endfor %}		
-						<tr>
-							<th>{{'list_task.th.id'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
 							<th>{{'list_task.th.end'|trans}}</th>
 							<th>{{'list_task.th.open'|trans}}</th>
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
-							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>			
-						</tr>			
-					{% endif %}
-				</table>
-				<div class="d-flex justify-content-center mt-4">
-					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
-					{% endif %}
-				</div>
-			{% else %}
-				<p class="display-6">{{ 'list_task.empty'|trans }}</p>
-			{% endif %}
+							<th>{{'list_task.th.error'|trans}}</th>
+							<th>{{'list_task.th.message'|trans}}</th>
+						</tr>
+						{% for task in entities %}
+							{% if task.message is not empty %}
+								<tr class="fd_normal">
+								{% else %}
+									<tr>
+									{% endif %}
+									<td>
+										{% if task.param|length > 60 %}
+											<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param|slice(0, 30) ~ '...' }}</a>
+											<div id="param-short-{{ loop.index }}">
+												{{ task.param|slice(0, 100) ~ '...' }}
+												<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
+											</div>
+											<div id="param-full-{{ loop.index }}" style="display: none;">
+												{{ task.param }}
+												<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
+											</div>
+										{% else %}
+											<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param }}</a>
+										{% endif %}
+									</td>
+									<td class="ctr">
+										{% if task.status|lower == 'end' %}
+											<span class="label label-default">{{ task.status }}</span>
+										{% else %}
+											<span class="label label-warning">{{ task.status }}</span>
+										{% endif %}
+									</td>
+									<td>{{ task.begin|date("d/m/Y H:i:s", timezone) }}</td>
+									<td>{{ task.end|date("d/m/Y H:i:s", timezone) }}</td>
+									<td class="count">{{ task.open }}</td>
+									<td class="count">{{ task.close }}</td>
+									<td class="count">{{ task.cancel }}</td>
+									<td class="count">{{ task.error }}</td>
+									<td>
+										<div id="message-short-{{ loop.index }}">
+											{{ task.message|slice(0, 100) ~ '...' }}
+											<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
+										</div>
+										<div id="message-full-{{ loop.index }}" style="display: none;">
+											{{ task.message }}
+											<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+							<tr>
+								<th>{{'list_task.th.id'|trans}}</th>
+								<th>{{'list_task.th.status'|trans}}</th>
+								<th>{{'list_task.th.begin'|trans}}</th>
+								<th>{{'list_task.th.end'|trans}}</th>
+								<th>{{'list_task.th.open'|trans}}</th>
+								<th>{{'list_task.th.close'|trans}}</th>
+								<th>{{'list_task.th.cancel'|trans}}</th>
+								<th>{{'list_task.th.error'|trans}}</th>
+								<th>{{'list_task.th.message'|trans}}</th>
+							</tr>
+						{% endif %}
+					</table>
+					<div class="d-flex justify-content-center mt-4">
+						{% if pager.haveToPaginate %}
+							{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page'}) }}
+						{% endif %}
+					</div>
+				{% else %}
+					<p class="display-6">{{ 'list_task.empty'|trans }}</p>
+				{% endif %}
+			</div>
 		</div>
-    </div>
 
-    {# ------------- PARAMETRES JQUERY ------------- #}
-    <script type="text/javascript">   
-		var path_img = "{{ asset('build/images/regle/') }}";
-		var lang = "{{app.request.locale}}";
-    </script>
-    {# ------------- PARAMETRES JQUERY ------------- #}
-{% endblock %}
+		{# ------------- PARAMETRES JQUERY ------------- #}
+		<script type="text/javascript">
+			var path_img = "{{ asset('build/images/regle/') }}";
+var lang = "{{ app.request.locale }}";
+		</script>
+		{# ------------- PARAMETRES JQUERY ------------- #}
+	{% endblock %}
 
-{% block cssin %}{% endblock cssin %}
+	{% block cssin %}{% endblock cssin %}
 
-{% block js %}
-{% endblock js %}
+	{% block js %}{% endblock js %}

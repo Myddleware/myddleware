@@ -30,91 +30,87 @@
 {% endblock %}
 {% block titlesm %}
 	{{'title.connector.list'|trans}}
+	{% if nb > 0 %}
+		({{ nb }})
+	{% endif %}
 {% endblock titlesm %}
 {% block body %}
-		<div id="rule" class="row justify-content-center pb-4">
-			<div class="col ">
-				{% if nb > 0 %}
-					<div id="fd-title-small" class="nb-connector">
-						<p>{{'list_connector.total'|trans}}</p>
-						<p>{{'list_connector.total2'|trans}}</p>
-						<p>
-							<span class="nb">{{ nb }}</span>
-						</p>
-					</div>
-					<div class="clr"></div>
-					<div class="row justify-content-center">
-						<div class="col" id="connector-list">
-							<table class="table table-hover align-middle">
-								{% if entities is not empty %}
-									<thead>
+	<div id="rule" class="row justify-content-center pb-4">
+		<div class="col mt-5">
+			{% if nb > 0 %}
+
+				<div class="row justify-content-center">
+					<div class="col" id="connector-list">
+						<table class="table table-hover align-middle">
+							{% if entities is not empty %}
+								<thead>
+									<tr>
+										<th>{{'list_connector.th.name'|trans}}</th>
+										<th>{{'list_connector.th.date_created'|trans}}</th>
+										<th>{{'list_connector.th.option'|trans}}</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for connector in entities %}
 										<tr>
-											<th>{{'list_connector.th.name'|trans}}</th>
-											<th>{{'list_connector.th.date_created'|trans}}</th>
-											<th>{{'list_connector.th.option'|trans}}</th>
+											<td class="solution_block">
+												<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
+													<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt=""/></p>
+													{{connector.0.getName}}
+												</a>
+											</td>
+											<td class="creation-date">
+												{{connector.0.getDateCreated|date("d/m/Y") }}
+												{% if app.user.getUsername == 'support' %}
+													<p>
+														<span class="label label-default">{{ connector.0.getCreatedBy.username }}</span>
+													</p>
+												{% endif %}
+											</td>
+											<td class="CRUD-icons">
+												<a class="delete" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
+													<span class="btn-opt">
+														<i class="fa fa-trash" aria-hidden="true"></i>
+													</span>
+												</a>
+												<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
+													<span class="btn-opt">
+														<i class="fa fa-pen" aria-hidden="true"></i>
+													</span>
+												</a>
+												<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
+													<span class="btn-opt">
+														<i class="fa fa-file" aria-hidden="true"></i>
+													</span>
+												</a>
+											</td>
 										</tr>
-									</thead>
-									<tbody>
-										{% for connector in entities %}
-											<tr>
-												<td class="solution_block">
-													<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-														<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt=""/></p>
-														{{connector.0.getName}}
-													</a>
-												</td>
-												<td class="creation-date">
-													{{connector.0.getDateCreated|date("d/m/Y") }}
-													{% if app.user.getUsername == 'support' %}
-														<p>
-															<span class="label label-default">{{ connector.0.getCreatedBy.username }}</span>
-														</p>
-													{% endif %}
-												</td>
-												<td class="CRUD-icons">
-													<a class="delete" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
-														<span class="btn-opt">
-															<i class="fa fa-trash" aria-hidden="true"></i>
-														</span>
-													</a>
-													<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-														<span class="btn-opt">
-															<i class="fa fa-pen" aria-hidden="true"></i>
-														</span>
-													</a>
-													<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-														<span class="btn-opt">
-															<i class="fa fa-file" aria-hidden="true"></i>
-														</span>
-													</a>
-												</td>
-											</tr>
-										{% endfor %}
-										<tr>
-											<th>{{'list_connector.th.name'|trans}}</th>
-											<th>{{'list_connector.th.date_created'|trans}}</th>
-											<th>{{'list_connector.th.option'|trans}}</th>
-										</tr>
+									{% endfor %}
+									<tr>
+										<th>{{'list_connector.th.name'|trans}}</th>
+										<th>{{'list_connector.th.date_created'|trans}}</th>
+										<th>{{'list_connector.th.option'|trans}}</th>
+									</tr>
 								</tbody>
-								{% endif %}
-							</table>
-						</div>
+							{% endif %}
+						</table>
 					</div>
-					<div class="d-flex justify-content-center">
-						{% if pager.haveToPaginate %}
-							{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'regle_connector_page'}) }}
-						{% endif %}
-					</div>
-				{% else %}
-					<div class="d-grid justify-content-center pt-4">
-						<h2 class="display-6">{{'list_connector.empty'|trans}}</h2>
-						<a href="{{ path('regle_connector_create') }}" title="" class="mt-4 btn btn-success">{{'list_connector.create_first_connector'|trans}}</a>
-					</div>
-				{% endif %}
-			</div>
+				</div>
+				<div class="d-flex justify-content-center">
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'regle_connector_page'}) }}
+					{% endif %}
+				</div>
+			{% else %}
+				<div class="d-grid justify-content-center pt-4">
+					<h2 class="display-6">{{'list_connector.empty'|trans}}</h2>
+					<a href="{{ path('regle_connector_create') }}" title="" class="mt-4 btn btn-success">{{'list_connector.create_first_connector'|trans}}</a>
+				</div>
+			{% endif %}
 		</div>
+	</div>
 	<script type="text/javascript">
 		var chemin_img = "{{ asset('build/images/regle/') }}";
-		var question = "{{ 'list_connector.delete'|trans }}";
+var question = "{{ 'list_connector.delete'|trans }}";
 	</script>
 {% endblock %}
