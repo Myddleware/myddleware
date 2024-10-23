@@ -718,7 +718,12 @@ class rulecore
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('New');
-        }
+        } else {
+			// Lock the documents in input parameter
+			foreach ($documents as $document) {
+				$this->setDocumentLock($document['id'], true);
+			}
+		}
 
         // Pour tous les docuements sélectionnés on vérifie les prédécesseurs
         if (!empty($documents)) {
@@ -763,7 +768,12 @@ class rulecore
         // Sélection de tous les docuements de la règle au statut 'Filter_OK' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Filter_OK');
-        }
+        } else {
+			// Lock the documents in input parameter
+			foreach ($documents as $document) {
+				$this->setDocumentLock($document['id'], true);
+			}
+		}
         // Pour tous les docuements sélectionnés on vérifie les prédécesseurs
         if (!empty($documents)) {
             try {
@@ -808,7 +818,12 @@ class rulecore
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Predecessor_OK');
-        }
+        } else {
+			// Lock the documents in input parameter
+			foreach ($documents as $document) {
+				$this->setDocumentLock($document['id'], true);
+			}
+		}
         if (!empty($documents)) {
             $param['jobId'] = $this->jobId;
             $param['ruleRelationships'] = $this->ruleRelationships;
@@ -868,7 +883,12 @@ class rulecore
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Relate_OK');
-        }
+        } else {
+			// Lock the documents in input parameter
+			foreach ($documents as $document) {
+				$this->setDocumentLock($document['id'], true);
+			}
+		}
         if (!empty($documents)) {
             $param['ruleFields'] = $this->ruleFields;
             $param['ruleRelationships'] = $this->ruleRelationships;
@@ -933,7 +953,12 @@ class rulecore
         // Sélection de tous les documents de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
             $documents = $this->selectDocuments('Transformed');
-        }
+        } else {
+			// Lock the documents in input parameter
+			foreach ($documents as $document) {
+				$this->setDocumentLock($document['id'], true);
+			}
+		}
 
         if (!empty($documents)) {
             // Connexion à la solution cible pour rechercher les données
