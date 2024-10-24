@@ -420,6 +420,51 @@ class WorkflowController extends AbstractController
         return new JsonResponse(['status' => 'success', 'active' => $workflow->getActive()]);
     }
 
+    // public function to create a new workflow from a rule
+    /**
+    * @Route("/new/{rule_id}", name="workflow_create_from_rule")
+    */
+    public function WorkflowCreateFromRuleAction(Request $request, $rule_id)
+    {
+        try {
+
+            $em = $this->getDoctrine()->getManager();
+            $workflow = new Workflow();
+            $workflow->setId(uniqid());
+            // set rule to the workflow
+            $rule = $em->getRepository(Rule::class)->find($rule_id);
+            $workflow->setRule($rule);
+            $form = $this->createForm(WorkflowType::class, $workflow, [
+                'entityManager' => $em,
+            ]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $workflow->setCreatedBy($this->getUser());
+                $workflow->setModifiedBy($this->getUser());
+                $em->persist($workflow);
+                $em->flush();
+
+                // Save the workflow audit
+                $this->saveWorkflowAudit($workflow->getId());
+
+                $this->addFlash('success', 'Workflow created successfully');
+
+                return $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
+            }
+
+            return $this->render(
+                'Workflow/new.html.twig',
+                [
+                    'form' => $form->createView(),
+                ]
+            );
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+    
     // public function to create a new workflow
     /**
      * @Route("/new", name="workflow_create")

@@ -268,7 +268,7 @@
 					<span>No workflow</span>
 				{% endif %}
 
-				<a class="dropdown-item" href="{{ path('workflow_create') }}" class="center">
+				<a class="dropdown-item" href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
                                             {{ 'view_rule.infos.workflow_create' | trans }}
                                         </a>
 
