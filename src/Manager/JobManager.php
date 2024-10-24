@@ -1494,21 +1494,19 @@ class jobcore
             // Search only jobs with status start and last log created before the limit
 			// We use the begin of teh job if no log
             $sqlParams = "
-			SELECT DISTINCT job.id
-			FROM job 
-				LEFT OUTER JOIN log    
+			SELECT 
+				job.id, 
+				job.begin, 
+				TIMESTAMPDIFF(SECOND,  job.begin, NOW()) diff_job,
+				MAX(log.created) log_created,
+				TIMESTAMPDIFF(SECOND, MAX(log.created), NOW()) diff_log
+			FROM job
+				LEFT OUTER JOIN log
 					ON job.id = log.job_id
 			WHERE
 					job.status = 'start'
-				AND (
-						(
-								log.created IS NULL
-							AND TIMESTAMPDIFF(SECOND,  job.begin, NOW()) > :period
-						) OR (
-								log.created IS NOT NULL
-							AND TIMESTAMPDIFF(SECOND,  (SELECT MAX(log2.created) from log as log2 where log2.job_id = job.id), NOW()) > :period
-						)
-					)
+			GROUP BY job.id
+			HAVING diff_log > :period OR (diff_job > :period AND log_created IS NULL)
 			";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('period', $period);
