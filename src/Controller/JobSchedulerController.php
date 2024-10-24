@@ -281,23 +281,30 @@ class JobSchedulerController extends AbstractController
         try {
             $command = '';
             $period = ' */5 * * * *';
-            $crontabForm = new CronJob($command, $period);
+            $crontabForm = new CronJob($command, $period);     
             $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
             $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
-
+            
             // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
             $formParam = $request->request->get('job_scheduler_cron');
             $form->handleRequest($request);
-
+        
             if ($form->isSubmitted() && $form->isValid()) {
                 // use the static method create because command can be set
-                $crontab = CronJob::create($formParam['command'], $formParam['period']);
+                $crontab = CronJob::create($formParam['command'], $formParam['period']);  
                 $crontab->setDescription($formParam['description']);
+                
+                for ($i = 0; $i < $formParam['runningInstances']; $i++) {
+                    $crontab->increaseRunningInstances();
+                }
+                
+                $crontab->setMaxInstances((int) $formParam['maxInstances']);
+                
                 $this->entityManager->persist($crontab);
                 $this->entityManager->flush();
                 $success = $translator->trans('crontab.success');
                 $this->addFlash('success', $success);
-
+            
                 return $this->redirectToRoute('jobscheduler_cron_list');
             } else {
                 return $this->render('JobScheduler/crontab.html.twig', [
@@ -308,7 +315,7 @@ class JobSchedulerController extends AbstractController
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('error', $failure);
-
+                        
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
@@ -319,10 +326,6 @@ class JobSchedulerController extends AbstractController
      */
     public function crontabList(int $page): Response
     {
-
-        
-
-
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
 		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
