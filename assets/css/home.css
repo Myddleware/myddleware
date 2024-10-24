@@ -150,7 +150,10 @@
     font-size: 0.9em;
     border-radius: 6px;
     padding-left: 10px;
-    padding-right: 50px;
+    padding-right: 50px;    
+    top: 69px;
+    left: -209px;
+    position: absolute;
     color: #d40015;
     border: solid 0.5px #DC3545;
     background-color: rgb(249, 155, 155);
