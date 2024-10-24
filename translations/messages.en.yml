@@ -214,6 +214,7 @@ view_rule:
         module_source: Source Module
         comment: Comment
         add_comment: Save
+        comment_title: Add/Edit comment
     relate:
         empty: No relation
         solution_source: Source
@@ -710,7 +711,7 @@ title:
         list: documents list
         view: document form
     task:
-        list: Tasks list
+        list: Tasks
         view: The task form
     credit:
         view: Credits purchases

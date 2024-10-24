@@ -212,6 +212,7 @@ view_rule:
         module_source: Module Source
         comment: Commentaire
         add_comment: Sauvegarder
+        comment_title: Ajouter/Modifier le commentaire
     relate:
         empty: Aucune relation
         solution_source: Source
@@ -707,7 +708,7 @@ title:
         list: Liste des documents
         view: Fiche du document
     task:
-        list: Liste des tâches
+        list: Tâches
         view: Fiche de la tâche
     credit:
         view: Achats de crédits
