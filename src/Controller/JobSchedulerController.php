@@ -448,6 +448,16 @@ class JobSchedulerController extends AbstractController
 
         $newEnable = $request->request->get('job_scheduler_cron')['enable'] ?? 0;
 
+        // Validation: runningInstances should never be greater than maxInstances
+        if ($newRunningInstances > $newMaxInstances) {
+            $this->addFlash('error', 'Running instances cannot be greater than max instances.');
+    
+            return $this->render('JobScheduler/edit_crontab.html.twig', [
+                'entity' => $entity,
+                'edit_form' => $this->createEditFormCrontab($entity)->createView(),
+            ]);
+        }
+
 
         // if the new value is different from the current value, update the request to not update the running instances
         if ($entity->getRunningInstances() !== $newRunningInstancesInteger) {
