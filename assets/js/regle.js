@@ -2239,8 +2239,6 @@ $(document).ready(function () {
       url: ajaxUrl,
       type: "POST",
       success: function (response) {
-        alert(read_job_lock_success);
-        console.log(jobId);
         if (response.read_job_lock === "") {
           $(".job_lock_" + jobId).show();
         } else {
