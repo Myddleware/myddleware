@@ -543,8 +543,11 @@ class documentcore
             $documentData = $documentResult->fetchAssociative(); // 1 row
             // If document already lock by the current job, we return true;
             if (
-					$documentData['job_lock'] == $this->jobId
-				 OR $force === true
+					!empty($documentData['job_lock'])
+				AND (
+						$documentData['job_lock'] == $this->jobId
+					 OR $force === true
+				)
 			) {
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
@@ -2248,8 +2251,6 @@ class documentcore
             $result = $stmt->executeQuery();
             // We don't clear the message because we could need it in the workflow, we clear it after the workflow execution
 			$this->createDocLog(false);
-			$this->message = '';
-			$this->docIdRefError = '';
 			// runWorkflow can't be executed if updateStatus is called from the solution class
 			if (
                     $new_status!='Send'
@@ -2257,6 +2258,9 @@ class documentcore
             ) {
 				$this->runWorkflow();
 			}
+			// Clear message after running workflow because we could use it in the workflow
+			$this->message = '';
+			$this->docIdRefError = '';
 			// Remove the lock on the document in the class and in the database
 			// Exception : status New because there is no lock on documet for this status, the lock in on the rule
 			// Exception : status No_send because the dcument has already been unlock by the status ready_to_send

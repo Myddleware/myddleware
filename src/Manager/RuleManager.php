@@ -1262,6 +1262,10 @@ class rulecore
 		$param['ruleWorkflows'] = $this->ruleWorkflows;
 		// Set the param values and clear all document attributes
 		$this->documentManager->setParam($param, true);
+		// Set the message that could be used in workflow
+		if (!empty($param['error'])) {
+			$this->documentManager->setMessage($param['error']);
+		}
 		$this->documentManager->runWorkflow(true);
     }
 
