@@ -3067,4 +3067,19 @@ use App\Entity\Workflow;
 
         return new Response('', Response::HTTP_OK);
     }
+
+
+/**
+     * @Route("/rulefield/{id}/comment", name="rulefield_update_comment", methods={"POST"})
+     */
+    public function updateComment(RuleField $ruleField, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $comment = $request->request->get('comment');
+        
+        $ruleField->setComment($comment);
+        $entityManager->persist($ruleField);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('regle_open', ['id' => $ruleField->getRule()->getId()]);
+    }
 }
