@@ -21,7 +21,7 @@ class JobSchedulerCronType extends AbstractType
             ])
             ->add('command', TextType::class, ['mapped' => false])
             ->add('description', TextType::class)
-            ->add('runningInstances', IntegerType::class)
+            ->add('runningInstances', IntegerType::class, ['mapped' => false])
             ->add('maxInstances', IntegerType::class)
             ->add('period', TextType::class)
             ->add('save', SubmitType::class, [

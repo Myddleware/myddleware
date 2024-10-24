@@ -817,6 +817,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
                 ['id' => 'DESC']
             );
 
+           // $firstParentDocumentId = $parentDocuments[0]->getId();
 
             // Call the view
             return $this->render(
@@ -840,6 +841,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
                     'parent_documents' => $parentDocuments,
                     'parent_Documents_Rule' => $parentDocumentsRule,
                     'nb_parent_documents' => count($parentDocuments),
+                    //'firstParentDocumentId' => $firstParentDocumentId,
                     'history_documents' => $documentPagination['entities'],
                     'nb_history_documents' => $documentPagination['nb'],
                     'nb_logs' => $logPagination['nb'],

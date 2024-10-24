@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'view_workflow.create'| trans}}{% endblock %}
+{% block titlesm %}{{ 'view_workflow.create'| trans}}{% endblock titlesm %}
+{% block body %}
+    <div class="container mt-5">
+        <div class="text-center m-5">
+            <a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2"> {{ 'view_workflow.back'| trans }}</a>
+        </div>
+        
+        {{ form_start(form) }}
+        <div class="mb-3">
+            <div class="card-header mb-4 card-title-workflow">
+                {{ 'view_workflow.create'| trans }}
+            </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.Rule) }}
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        {{ form_row(form.description) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.order) }}
+                    </div>
+                </div>
+        </div>
+        
+        <div class=" mb-3 ">
+            <div class="card-header mt-4">
+                 {{ 'view_workflow.conditions'| trans }}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                        {{ form_row(form.condition) }}
+                </div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

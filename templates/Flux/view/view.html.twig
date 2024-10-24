@@ -103,6 +103,7 @@
 						<td>
 							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
 						</td>
+						{# <a href="{{ path('flux_info_page',{'id' : firstParentDocumentId, 'page' : 1, 'logPage' : 1 }) }}">{{ firstParentDocumentId }}</a #}
 						<td class="ctr">
 							<div class="gblstatus_{{ doc.getGlobalStatus|lower }}">{{ doc.getStatus }}
 								{% if doc.getGlobalStatus|lower == 'close' %}
