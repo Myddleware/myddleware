@@ -62,10 +62,18 @@
 					<i class="fa fa-info-circle" aria-hidden="true"></i>
 				</button>
 				<div class="comment-box">
-					  <i class="fa fa-times close-icon" aria-hidden="true" onclick="closeCommentBox(this)"></i>
-					<p class="comment-text">Votre com</p>
-					<button class="btn btn-primary edit-btn">Edit</button>
+					<i class="fa fa-times close-icon" aria-hidden="true" onclick="closeCommentBox(this)"></i>
+					<p class="comment-text m-2">{{ 'view_rule.mapping.comment'| trans }}</p>
+					<form method="post" action="{{ path('rulefield_update_comment', {'id': f.getId()}) }}">
+						<textarea class="form-control comment-textarea" name="comment" rows="3" placeholder="{{ 'view_rule.mapping.placeholder_comment'| trans }}">
+							{{ f.getComment is not empty ? f.getComment : '' }}
+						</textarea>
+						<button type="submit" class="btn btn-primary m-2">{{ 'view_rule.mapping.add_comment'| trans }}</button>
+					</form>
 				</div>
+				{% if f.getComment is not empty %}
+					<div class="comment-outside">{{ f.getComment }}</div>
+				{% endif %}
 			</div>
 		</div>
 	{% endfor %}
@@ -77,20 +85,17 @@
 <h2>{{'help.title'|trans}}
 	<i class="fa fa-info-circle" aria-hidden="true"></i>
 </h2>
-<p>{{'help.viewrule.mapping'|trans|raw}}</p></div>
-
-<script>
-    function toggleCommentBox(button) {
-        const commentBox = button.nextElementSibling;
-        if (commentBox.style.display === "block") {
-            commentBox.style.display = "none";
-        } else {
-            commentBox.style.display = "block";
-        }
-    }
-
-	function closeCommentBox(icon) {
-    const commentBox = icon.parentElement;
-    commentBox.style.display = "none";
+<p>{{'help.viewrule.mapping'|trans|raw}}</p></div><script>
+function toggleCommentBox(button) {
+const commentBox = button.nextElementSibling;
+if (commentBox.style.display === "block") {
+commentBox.style.display = "none";
+} else {
+commentBox.style.display = "block";
 }
-</script>
+}
+
+function closeCommentBox(icon) {
+const commentBox = icon.parentElement;
+commentBox.style.display = "none";
+}</script>

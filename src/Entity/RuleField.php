@@ -62,6 +62,12 @@ class RuleField
      */
     private ?string $formula;
 
+    /**
+     * @ORM\Column(name="comment", type="text", nullable=true)
+     */
+    private ?string $comment = null;
+
+
     public function getId(): int
     {
         return $this->id;
@@ -113,5 +119,17 @@ class RuleField
         $this->rule = $rule;
 
         return $this;
+    }
+
+    public function setComment(?string $comment): self
+    {
+        $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
     }
 }

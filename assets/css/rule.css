@@ -599,6 +599,23 @@ color: #03c4eb!important;
 	box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
 }
 
+.comment-outside {
+    display: none;
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 0.85rem;
+    color: #333;
+    z-index: 1000;
+}
 
-
-
+.mapping-card-body:hover .comment-outside {
+    display: block;
+}

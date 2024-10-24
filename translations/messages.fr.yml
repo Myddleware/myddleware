@@ -210,6 +210,9 @@ view_rule:
         formula: Formule
         module_target: Module Cible
         module_source: Module Source
+        comment: Commentaire
+        add_comment: Sauvegarder
+        placeholder_comment: Ajoutez votre commentaire ici...
     relate:
         empty: Aucune relation
         solution_source: Source
