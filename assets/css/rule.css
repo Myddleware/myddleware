@@ -557,6 +557,7 @@ color: #03c4eb!important;
 }
 
 .comment-box {
+	z-index: 9999;
     display: none;
     position: absolute;
     bottom: -76px;
@@ -618,4 +619,9 @@ color: #03c4eb!important;
 
 .mapping-card-body:hover .comment-outside {
     display: block;
+}
+
+.mapping-card-body {
+	display: flex;
+	flex-direction: column;
 }

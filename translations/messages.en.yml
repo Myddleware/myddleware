@@ -214,7 +214,6 @@ view_rule:
         module_source: Source Module
         comment: Comment
         add_comment: Save
-        placeholder_comment: Add your comment here...
     relate:
         empty: No relation
         solution_source: Source
