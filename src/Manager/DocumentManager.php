@@ -1016,6 +1016,10 @@ class documentcore
 					$this->updateStatus('Cancel',$this->workflowAction);
 					return false;
 				}
+				// If the value mdw_error_transformed is found in the target data of the document after transformation we send an error transformed
+				if (array_search('mdw_error_transformed',$transformed, true) !== false) {
+					 throw new \Exception('The code mdw_error_transformed found in document'); 
+				}
                 // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
                 // it means that the target ID is mapped in the rule field
                 // In this case, we force the document's type to Update because Myddleware will update the record into the target application
