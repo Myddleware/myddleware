@@ -541,13 +541,14 @@ class documentcore
             $stmt->bindValue(':doc_id', $this->id);
             $documentResult = $stmt->executeQuery();
             $documentData = $documentResult->fetchAssociative(); // 1 row
+            // No action if document not locked
+			if (empty($documentData['job_lock'])) {
+				return true;
+			}
             // If document already lock by the current job, we return true;
             if (
-					!empty($documentData['job_lock'])
-				AND (
-						$documentData['job_lock'] == $this->jobId
-					 OR $force === true
-				)
+				$documentData['job_lock'] == $this->jobId
+			 OR $force === true
 			) {
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
