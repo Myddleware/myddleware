@@ -47,7 +47,7 @@ class Functions
     private FuncCat $categoryId;
 
     /**
-     * @ORM\Column(name="name", type="string", length=20)
+     * @ORM\Column(name="name", type="string", length=255)
      */
     private string $name;
 
