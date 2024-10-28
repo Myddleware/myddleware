@@ -63,8 +63,9 @@ if (window.location.href.includes('rule/managementsmtp')) {
     require('./js/smtp.js')
 }
 
-
-
+if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
+    require('./js/connector_detail.js')
+}
 
 // start the Stimulus application
 import './bootstrap';
