@@ -98,7 +98,10 @@
 
  <script type="text/javascript">
 
-    var password = "{{ paramConnexion['password'] }}";
+    {% if paramConnexion['password'] is defined and paramConnexion['password'] is not empty %}
+        var password = "{{ paramConnexion['password'] }}";
+		console.log('bingo');
+    {% endif %}
 </script>
 {% endblock %}
 
