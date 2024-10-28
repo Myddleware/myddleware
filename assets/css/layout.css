@@ -23,8 +23,6 @@
 *********************************************************************************/
 
 #myd_top {
-	min-height: 100px;
-	position: fixed;
 	top: 0;
     right: -135px;
 	z-index: 99;
@@ -296,4 +294,8 @@ footer {
  .page-item.active .page-link {
 	background-color: #03c4eb !important;
     border-color: #03c4eb !important;
+	color:white !important;
+ }
+ .page-link {
+	color: #000000 !important;
  }
