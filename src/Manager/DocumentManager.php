@@ -541,10 +541,14 @@ class documentcore
             $stmt->bindValue(':doc_id', $this->id);
             $documentResult = $stmt->executeQuery();
             $documentData = $documentResult->fetchAssociative(); // 1 row
+            // No action if document not locked
+			if (empty($documentData['job_lock'])) {
+				return true;
+			}
             // If document already lock by the current job, we return true;
             if (
-					$documentData['job_lock'] == $this->jobId
-				 OR $force === true
+				$documentData['job_lock'] == $this->jobId
+			 OR $force === true
 			) {
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
@@ -1012,6 +1016,10 @@ class documentcore
 					$this->typeError = 'W';
 					$this->updateStatus('Cancel',$this->workflowAction);
 					return false;
+				}
+				// If the value mdw_error_transformed is found in the target data of the document after transformation we send an error transformed
+				if (array_search('mdw_error_transformed',$transformed, true) !== false) {
+					 throw new \Exception('The code mdw_error_transformed found in document'); 
 				}
                 // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
                 // it means that the target ID is mapped in the rule field
@@ -2248,8 +2256,6 @@ class documentcore
             $result = $stmt->executeQuery();
             // We don't clear the message because we could need it in the workflow, we clear it after the workflow execution
 			$this->createDocLog(false);
-			$this->message = '';
-			$this->docIdRefError = '';
 			// runWorkflow can't be executed if updateStatus is called from the solution class
 			if (
                     $new_status!='Send'
@@ -2257,6 +2263,9 @@ class documentcore
             ) {
 				$this->runWorkflow();
 			}
+			// Clear message after running workflow because we could use it in the workflow
+			$this->message = '';
+			$this->docIdRefError = '';
 			// Remove the lock on the document in the class and in the database
 			// Exception : status New because there is no lock on documet for this status, the lock in on the rule
 			// Exception : status No_send because the dcument has already been unlock by the status ready_to_send

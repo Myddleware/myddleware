@@ -268,14 +268,12 @@ class WorkflowActionController extends AbstractController
             if ($workflowAction) {
                 $arguments = $workflowAction->getArguments();
 
-
-                $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
-
                 // change the array so that for each element, the key is the integer and should be replaced by the value, so the key and the value are both the value, a string
                 $StringStatus = [];
-                foreach ($possiblesStatusesWithIntegers as $key => $value) {
+                foreach ($this->documentManager->lstStatus() as $key => $value) {
                     $StringStatus[$key] = $key;
                 }
+
 
                 // to get the searchValue, we need to get the rule, and from the rule we need to get the list of the source fields. The possible choisces are the source fields of the rule. The searchValue is a choicetype
                 // step 1: get the workflow of the action
@@ -614,12 +612,9 @@ class WorkflowActionController extends AbstractController
                 $this->emptyArgumentsBasedOnAction($id);
                 $arguments = $workflowAction->getArguments();
 
-
-                $possiblesStatusesWithIntegers = DocumentRepository::findStatusType($em);
-
                 // change the array so that for each element, the key is the integer and should be replaced by the value, so the key and the value are both the value, a string
                 $StringStatus = [];
-                foreach ($possiblesStatusesWithIntegers as $key => $value) {
+                foreach ($this->documentManager->lstStatus() as $key => $value) {
                     $StringStatus[$key] = $key;
                 }
 
