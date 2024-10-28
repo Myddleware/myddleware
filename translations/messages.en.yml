@@ -36,7 +36,7 @@ panel:
         text4: To discuss a new project, collaboration, or business opportunities, please reach out to us at the following address
         text5: Business contact
     documents:
-        title: Document sent by Myddleware
+        title: Documents sent by Myddleware
     solutions:
         title: Connect your data
         click: Click to see how to create this connector.
@@ -703,7 +703,7 @@ title:
         create: Creation of a rule
         edit: Editing the rule
         list: Rules
-        view: Rule form
+        view: Rule
     connector:
         create: Creation of a connector
         edit: Editing the connector
@@ -749,10 +749,10 @@ menu:
         stopall: Stop all tasks
 
 breadcrumb:
-    rule_list: Rules list
-    transfert_list: Documents list
-    task_list: Tasks list
-    connector_list: Connectors list
+    rule_list: Rules
+    transfert_list: Documents
+    task_list: Tasks
+    connector_list: Connectors
 
 menu_user:
     account: My account
