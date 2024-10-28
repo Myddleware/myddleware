@@ -211,7 +211,7 @@
                             </div>
                         </td>
                         <td>
-                            <button class="edit-button-description btn btn-outline-primary">{{ 'Edit' | trans }}</button>
+                            <button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
                             <form class="edit-form" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
                                 <textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
                                 <input type="hidden" name="ruleId" value="{{ rule.id }}"/>

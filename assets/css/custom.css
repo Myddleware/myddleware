@@ -43,9 +43,11 @@ menu .caret, #myd_top .caret {
 }
 
 #fd-title {
-    background: url('./../images/template/fd-title.png') no-repeat;
-    height: 71px;
-    width: 293px;
+    background-color: #444446;
+    border-radius: 0px 40px 40px 0px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+    height: 66px;
+    width: 233px;
     display: inline-block;
     border: none;
     margin: 20px 20px 20px 0px;
