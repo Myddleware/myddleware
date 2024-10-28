@@ -21,7 +21,7 @@ var initialTableState = $('#tbody_rule_list').html();
 $("#rule_name").on("keyup input", function() {
     var ruleName = $(this).val();
     var url = $(this).data('url');
-
+    
     if (ruleName.length > 0) {
         $.ajax({
             type: "GET",
@@ -30,7 +30,12 @@ $("#rule_name").on("keyup input", function() {
             success: function(data){
                 var html = $(data);
                 var tbody_html = html.find('#tbody_rule_list').html();
-                $('#tbody_rule_list').html(tbody_html);
+                
+                if ($.trim(tbody_html) === '') {
+                    $('#tbody_rule_list').html('<tr><td colspan="100%" class="text-center">No rules found</td></tr>');
+                } else {
+                    $('#tbody_rule_list').html(tbody_html);
+                }
             }
         });
     } else {
