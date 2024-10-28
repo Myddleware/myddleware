@@ -15,33 +15,6 @@ $("#rulenamesearchbar").on("submit", function(event) {
     event.preventDefault();
 });
 
-// $('#rule_name').on('keyup', function() {
-//     var ruleName = $(this).val();
-//     console.log('the rule name', ruleName);
-//     var url = $(this).data('url');
-//     console.log('the url', url);
-//     console.log('the url of the function', regle_list);
-
-//     regle_list = 'http://localhost/myddleware_NORMAL/public/rule/list?rule_name=sui';
-
-//     if (ruleName.length >= 3) {
-//         // $.get(url, { rule_name: ruleName }, function(data) {
-//             // console.log(data);
-//             // update the rules table with the new data
-//             console.log('id', ruleName);
-//             $.ajax({
-//                 type: "POST",
-//                 url: regle_list,
-//                 // id: ruleName,						
-//                     success: function(data){
-//                         // location.reload();                 
-//                 }			
-//             });	
-//         // });
-//     }
-// });
-
-
 // save the initial table state somewhere accessible
 var initialTableState = $('#tbody_rule_list').html();
 
