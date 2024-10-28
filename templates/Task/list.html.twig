@@ -94,14 +94,18 @@
 							<td class="count">{{ task.cancel }}</td> 
 							<td class="count">{{ task.error }}</td>    
 							<td>
-								<div id="message-short-{{ loop.index }}">
-									{{ task.message|slice(0, 100) ~ '...' }}
-									<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
-								</div>
-								<div id="message-full-{{ loop.index }}" style="display: none;">
+								{% if task.message is not empty %}
+									<div id="message-short-{{ loop.index }}">
+										{{ task.message|slice(0, 100) ~ '...' }}
+										<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
+									</div>
+									<div id="message-full-{{ loop.index }}" style="display: none;">
+										{{ task.message }}
+										<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
+									</div>
+								{% else %}
 									{{ task.message }}
-									<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
-								</div>
+								{% endif %}
 							</td>                     
 						</tr>            
 						{% endfor %}		
