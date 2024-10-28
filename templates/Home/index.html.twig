@@ -47,7 +47,7 @@
 						<div class="row d-flex">
 							<div class="card m-2 info col">
 								<div class="card-body">
-									<span class="icon-container">
+									<span class="icon-container pt-5">
 										<svg
 											class="icon_small_homepage" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512">
 											<!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -56,7 +56,7 @@
 									</span>
 									<div class="text-center">
 										<p id="countNbDocuments">0</p>
-										<h4 class="card-title title_countNbDocuments">{{'panel.documents.title'|trans}}</h4>
+										<h4 class="card-title title_countNbDocuments pt-3 pb-3">{{'panel.documents.title'|trans}}</h4>
 									</div>
 								</div>
 							</div>
@@ -87,23 +87,32 @@
 					</div>
 				</div>
 			</div>
-			{# SOLUTION #}
-			<section class="solution_homepage">
-				<div class="col" id="title_solution_homepage">
+			<section class="solution-home-section">
+				<div class="col" id="title-solution-home">
 					<div class="d-flex justify-content-center my-4">
-						<h3 class="display-6 title_section_homepage">{{'panel.solutions.title'|trans}}</h3>
+						<h3 class="display-6 title-section-home">{{ 'panel.solutions.title'|trans }}</h3>
 					</div>
 				</div>
 				{% if solutions is not empty %}
-					<ul class="inline-images">
-						{% for solution in solutions %}
-							<li class="solution_liste_homepage">
-								<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
-									<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
-								</a>
-							</li>
-						{% endfor %}
-					</ul>
+					<div class="solution-home-scroll-container">
+						<ul class="solution-home-scroll solution-home-list">
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
+							{# Duplicate the list for continuous effect #}
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</div>
 				{% endif %}
 			</section>
 			{# FEATURES #}
@@ -174,7 +183,7 @@
 				</div>
 			</section>
 			{# CONTACT US #}
-			<section class="solution_homepage">
+			<section class="solution-home-section">
 				<div class="col" id="title_solution_homepage">
 					<div class="d-flex justify-content-center my-4">
 						<h3 class="display-6 title_section_homepage">{{'panel.contact.title'|trans}}</h3>
@@ -184,16 +193,18 @@
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title2'|trans}}</h4>
 						<p>{{'panel.contact.text1'|trans}}</p>
-						<p>{{'panel.contact.text2'|trans}}
-							: support@myddleware.com
+						<p>{{'panel.contact.text2'|trans}} :
+							<div class="home-contact">support@myddleware.com</div>
 						</p>
-						<p>{{'panel.contact.text3'|trans}}</p>
+						<p>{{'panel.contact.text3'|trans}} <a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
+</p> 
 					</div>
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title3'|trans}}</h4>
 						<p>{{'panel.contact.text4'|trans}}</p>
-						<p>{{'panel.contact.text5'|trans}}
-							: romanfaure@myddleware.com</p>
+						<p>{{'panel.contact.text5'|trans}} :
+							<div class="home-contact">romanfaure@myddleware.com</div>
+						</p>
 					</div>
 				</div>
 			</section>

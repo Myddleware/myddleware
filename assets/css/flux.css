@@ -196,3 +196,8 @@ li span {
 .select2-container--default .select2-search--inline .select2-search__field{
 	margin: 6px;
 }
+
+.removeFilters{
+	margin-top: 13px !important;
+    padding: 1px 8px !important;
+}

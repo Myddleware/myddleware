@@ -699,14 +699,14 @@ title:
         create_name: Création de la règle
         create: Création d'une règle
         edit: Edition de la règle
-        list: Liste des règles
+        list: Règles
         view: Fiche de la règle
     connector:
         create: Création d'un connecteur
         edit: Edition du connecteur
-        list: Liste des connecteurs
+        list: Connecteurs
     flux: 
-        list: Liste des documents
+        list: Documents
         view: Fiche du document
     task:
         list: Tâches
@@ -1022,7 +1022,7 @@ variable:
     delete: Supprimer
     view: Voir
   create_new: Créer une nouvelle variable
-  list_title: Liste des Variables
+  list_title: Variables
   confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
   no_variables: Aucune variable trouvée.
   table_headers:

@@ -133,4 +133,8 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-  }
+}
+
+.date_task_list {
+    white-space: nowrap;
+}

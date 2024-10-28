@@ -258,9 +258,13 @@ td {
 	text-align: left!important;
 }
 
-td a {
+td > a {
 	color: #337ab7!important;
 	text-decoration: none;
+}
+
+td > a:hover {
+	font-weight: bold;
 }
 
 .title_source_ctr, .title_target_ctr {

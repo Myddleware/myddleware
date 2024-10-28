@@ -29,15 +29,11 @@
 	{{'list_rule.title'|trans}}
 {% endblock %}
 {% block titlesm %}
-	<div class="rule_list_view m-3">
+	<div class="rule_list_view">
 		{{'list_rule.title'|trans}}
 		{% if nb_rule > 0 %}
 			({{ nb_rule }})
 		{% endif %}
-		<div class="clr"></div>
-		<form id="rulenamesearchbar" action="{{ path('regle_list') }}" method="get">
-			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
-		</form>
 	</div>
 {% endblock titlesm %}
 {% block body %}
@@ -53,11 +49,13 @@
 	{% endfor %}
 
 	<div id="rule">
-		{% if nb_rule > 0 %}
+		{% if nb_rule > 0 %} 
+		<form id="rulenamesearchbar" class="m-3" action="{{ path('regle_list') }}" method="get">
+			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
+		</form>
 			<div class="row justify-content-center my-4">
 				<div class="col text-center">
-					<a id="exec_all" class="btn btn-primary" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
-
+					<a id="exec_all" class="btn btn-outline-success" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
 						{{'view_rule.action.exec_all'|trans}}
 					</a>
 				</div>
@@ -67,7 +65,7 @@
 					</a>
 				</div>
 				<div class="col text-center">
-					<a id="new_rule" class="btn btn-outline-success" href="{{ path('regle_stepone_animation') }}" title="" role="button">
+					<a id="new_rule" class="btn btn-primary" href="{{ path('regle_stepone_animation') }}" title="" role="button">
 						{{'view_rule.action.new_rule'|trans}}
 					</a>
 				</div>
