@@ -431,7 +431,7 @@ class RuleGroupController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $rulegroup = new Rulegroup();
             $rulegroup->setId(uniqid());
-            $form = $this->createForm(RulegroupType::class, $rulegroup, [
+            $form = $this->createForm(RuleGroupType::class, $rulegroup, [
                 'entityManager' => $em,
             ]);
             $form->handleRequest($request);
