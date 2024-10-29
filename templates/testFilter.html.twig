@@ -422,9 +422,6 @@ var docId = $(this).data('doc-id');
 var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
 var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
 
-console.log(docId);
-console.log(testlastmessagefinal);
-
 $.ajax({
 url: testlastmessagefinal,
 method: 'POST',
