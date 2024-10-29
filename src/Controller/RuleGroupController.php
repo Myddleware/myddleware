@@ -442,9 +442,6 @@ class RuleGroupController extends AbstractController
                 $em->persist($rulegroup);
                 $em->flush();
 
-                // Save the rulegroup audit
-                $this->saveRulegroupAudit($rulegroup->getId());
-
                 $this->addFlash('success', 'Rulegroup created successfully');
 
                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
