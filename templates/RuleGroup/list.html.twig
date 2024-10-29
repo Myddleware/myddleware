@@ -60,7 +60,9 @@
 				{% for ruleGroup in entities %}
 					<tr>
 						<td>{{ ruleGroup.id }}</td>
-						<td>{{ ruleGroup.name }}</td>
+						<td>
+							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}">{{ ruleGroup.name }}</a>
+						</td>
 						<td>{{ ruleGroup.dateCreated|date('Y-m-d H:i:s') }}</td>
 						<td>{{ ruleGroup.dateModified|date('Y-m-d H:i:s') }}</td>
 						<td>{{ ruleGroup.createdBy.username }}</td>
