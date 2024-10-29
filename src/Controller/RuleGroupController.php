@@ -171,9 +171,11 @@ class RuleGroupController extends AbstractController
     {
         try {
 
-            $rulegroupName = $request->query->get('workflow_name');
+            $rulegroupName = $request->query->get('rulegroup_name');
 
-            $rulegroupName = 'badla';
+            $rulegroupName = 'testrulegroup';
+
+            error_log('rulegroupName: ' . $rulegroupName);
             
             // Récupérer les filtres depuis la requête
             $criteria = ['deleted' => 0];
