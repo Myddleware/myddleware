@@ -247,7 +247,13 @@
 									{% if value != doc.getId  %}
 										<li class="{{ key }}">
 											<span class="field">{{ key }}</span>
-											<span {% if source[key] is defined and source[key] != value %}class="modified"{% endif %}>{{ value }}</span>
+											<span {% if source[key] is defined and source[key] != value %}class="modified"{% endif %}>
+											{% if value|default('')|replace({'&#039;': "'"}) != value %}
+												{{ value|raw|replace({'&#039;': "'"}) }}
+											{% else %}
+												{{ value }}
+												{% endif %}
+											</span>
 										</li>
 									{% endif %}
 								{% endfor %}
