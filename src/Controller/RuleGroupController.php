@@ -488,51 +488,48 @@ class RuleGroupController extends AbstractController
     }
 
 
-    // // public function to edit a rulegroup
-    // /**
-    //  * @Route("/edit/{id}", name="rulegroup_edit")
-    //  */
-    // public function RulegroupEditAction(string $id, Request $request)
-    // {
-    //     try {
+    // public function to edit a rulegroup
+    /**
+     * @Route("/edit/{id}", name="rulegroup_edit")
+     */
+    public function RulegroupEditAction(string $id, Request $request)
+    {
+        try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupArray[0];
+            $em = $this->getDoctrine()->getManager();
+            $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $rulegroup = $rulegroupArray[0];
 
-    //         if ($rulegroup) {
-    //             $form = $this->createForm(RulegroupType::class, $rulegroup, [
-    //                 'entityManager' => $em,
-    //                 'entity' => $rulegroup,
-    //             ]);
-    //             $form->handleRequest($request);
+            if ($rulegroup) {
+                $form = $this->createForm(RulegroupType::class, $rulegroup, [
+                    'entityManager' => $em,
+                ]);
+                $form->handleRequest($request);
 
-    //             if ($form->isSubmitted() && $form->isValid()) {
-    //                 $rulegroup->setModifiedBy($this->getUser());
-    //                 $em->persist($rulegroup);
-    //                 $em->flush();
-    //                 $this->addFlash('success', 'Rulegroup updated successfully');
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $rulegroup->setModifiedBy($this->getUser());
+                    $em->persist($rulegroup);
+                    $em->flush();
+                    $this->addFlash('success', 'rulegroup.updated_successfully');
 
-    //                 $this->saveRulegroupAudit($rulegroup->getId());
+                    return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
+                }
 
-    //                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
-    //             }
+                return $this->render(
+                    'Rulegroup/edit.html.twig',
+                    [
+                        'form' => $form->createView(),
+                        'rulegroup' => $rulegroup,
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
 
-    //             return $this->render(
-    //                 'Rulegroup/edit.html.twig',
-    //                 [
-    //                     'form' => $form->createView(),
-    //                     'rulegroup' => $rulegroup,
-    //                 ]
-    //             );
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-
-    //             return $this->redirectToRoute('rulegroup_list');
-    //         }
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+                return $this->redirectToRoute('rulegroup_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 }
