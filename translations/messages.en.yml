@@ -238,6 +238,11 @@ rule:
     yourtarget: Your target solution
     help: What should I do ?
 
+rulegroup:
+    title: Rule groups
+    create: Create a new rule group
+    back: Back to the list
+
 list_rule:
     title: Rules
     total: Number of rules

@@ -237,6 +237,11 @@ rule:
     yourtarget: Votre solution cible
     help: Que dois-je faire ?
 
+rulegroup:
+    title: Groupes de règles
+    create: Créer un nouveau groupe de règles
+    back: Retour à la liste
+
 list_rule:
     title: Règles
     total: Nombre de règles
