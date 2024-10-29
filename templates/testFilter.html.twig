@@ -46,7 +46,7 @@
 {% endfor %}
 
 <!-- removeFilterFilter.html.twig -->
-<div class="px-5 mb-4 py-3">
+<div class="px-5 mb-4 py-1">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
     <div class="input-group">
@@ -237,7 +237,7 @@
                         {{'list_flux.btn.filter_delete'|trans}}
                   </a>
             </div> #}
-            <div class="px-5 row">
+            <div class="px-5 row py-1">
                   <p>
                         <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
                               (<span></span>)</a>
@@ -251,8 +251,7 @@
                   </p>
             </div>
 </div>
-<section class="p-3">
-	<h2 class="text-center m-3">Documents</h2>
+<section class="p-1">
 	<div class="table-responsive">
 		<table class="listepagerflux table">
 			<thead>
