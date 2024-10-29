@@ -471,19 +471,12 @@ class RuleGroupController extends AbstractController
             $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
 
 
-            $adapter = new QueryAdapter($query);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
-            $pager->setCurrentPage($page);
 
             if ($rulegroup[0]) {
-                $nb_rulegroup = count($rulegroupLogs);
                 return $this->render(
                     'Rulegroup/show.html.twig',
                     [
                         'rulegroup' => $rulegroup[0],
-                        'nb_rulegroup' => $nb_rulegroup,
-                        'pager' => $pager,
                     ]
                 );
             } else {
