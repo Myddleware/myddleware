@@ -19,8 +19,8 @@
 
 			<a href="{{ path('rulegroup_list') }}" class="btn btn-outline-primary m-2">
 				{{ 'rulegroup.back'| trans }}</a>
-			{# <a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" class="btn btn-outline-success m-2">
-				{{ 'rulegroup.edit'| trans }}</a> #}
+			<a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" class="btn btn-outline-success m-2">
+				{{ 'rulegroup.edit'| trans }}</a>
 			<a href="{{ path('rulegroup_delete', {'id': rulegroup.id}) }}" onclick="return confirm('Are you sure you want to delete this rulegroup ?');" class="btn btn-outline-danger m-2">
 				{{ 'rulegroup.delete'| trans }}</a>
 		</div>
