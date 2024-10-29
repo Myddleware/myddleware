@@ -46,7 +46,7 @@
 {% endfor %}
 
 <!-- removeFilterFilter.html.twig -->
-<div class="px-5 mb-4 py-1">
+<div class="px-5 mb-1 py-1">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
     <div class="input-group">
