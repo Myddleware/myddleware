@@ -37,7 +37,6 @@ require('./js/animation.js')
 require('./js/task.js')
 require('./js/connector.js')
 require('./js/rule_relation_filter.js')
-require('./js/connector_detail.js')
 require('./js/regle.js')
 
 
