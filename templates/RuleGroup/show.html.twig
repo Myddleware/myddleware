@@ -58,16 +58,13 @@
 								<div>{{ rulegroup.modifiedBy.username }}</div>
 							</div>
 						</div>
+						<div class="rulegroup-row mb-2">
 							<div class="rulegroup-col mb-2">
-								<strong>{{ 'view_rulegroup.status'| trans | upper }}</strong>
-								<div class="form-check form-switch text-center">
-									<input class="rulegroup_status form-check-input rulegroup-check-input" type="checkbox" id="activeRulegroup_{{ rulegroup.id }}" data-id="{{ rulegroup.id }}" data-type="rulegroup" {{ rulegroup.active ? 'checked' : '' }}>
-								</div>
 							</div>
 						</div>
 						<div class="rulegroup-row mb-2">
 							<div class="rulegroup-col mb-2">
-								<strong>{{ 'view_rulegroup.description'| trans | upper }}</strong>
+								<strong>{{ 'rulegroup.description'| trans | upper }}</strong>
 								<div>{{ rulegroup.description }}</div>
 							</div>
 						</div>
