@@ -458,48 +458,42 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    // /**
-    //  * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
-    //  * @Route("/show/{id}/page-{page}", name="rulegroup_show_page", requirements={"page"="\d+"})
-    //  */
-    // public function RulegroupShowAction(string $id, Request $request, int $page): Response
-    // {
-    //     try {
+    /**
+     * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
+     * @Route("/show/{id}/page-{page}", name="rulegroup_show_page", requirements={"page"="\d+"})
+     */
+    public function RulegroupShowAction(string $id, Request $request, int $page): Response
+    {
+        try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $em = $this->getDoctrine()->getManager();
+            $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-    //         $rulegroupLogs = $em->getRepository(RulegroupLog::class)->findBy(
-    //             ['rulegroup' => $id],
-    //             ['dateCreated' => 'DESC']
-    //         );
-    //         $query = $this->rulegroupLogRepository->findLogsByRulegroupId($id);
 
-    //         $adapter = new QueryAdapter($query);
-    //         $pager = new Pagerfanta($adapter);
-    //         $pager->setMaxPerPage(10);
-    //         $pager->setCurrentPage($page);
+            $adapter = new QueryAdapter($query);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(10);
+            $pager->setCurrentPage($page);
 
-    //         if ($rulegroup[0]) {
-    //             $nb_rulegroup = count($rulegroupLogs);
-    //             return $this->render(
-    //                 'Rulegroup/show.html.twig',
-    //                 [
-    //                     'rulegroup' => $rulegroup[0],
-    //                     'rulegroupLogs' => $rulegroupLogs,
-    //                     'nb_rulegroup' => $nb_rulegroup,
-    //                     'pager' => $pager,
-    //                 ]
-    //             );
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //             return $this->redirectToRoute('rulegroup_list');
-    //         }
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+            if ($rulegroup[0]) {
+                $nb_rulegroup = count($rulegroupLogs);
+                return $this->render(
+                    'Rulegroup/show.html.twig',
+                    [
+                        'rulegroup' => $rulegroup[0],
+                        'nb_rulegroup' => $nb_rulegroup,
+                        'pager' => $pager,
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
+                return $this->redirectToRoute('rulegroup_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
 
     // // public function to edit a rulegroup
