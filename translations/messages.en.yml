@@ -242,6 +242,12 @@ rulegroup:
     title: Rule groups
     create: Create a new rule group
     back: Back to the list
+    title_one: Rule group
+    name: Name
+    description: Description
+    status: Status
+    create_by: Created by
+    modified_by: Modified by
 
 list_rule:
     title: Rules

@@ -241,6 +241,12 @@ rulegroup:
     title: Groupes de règles
     create: Créer un nouveau groupe de règles
     back: Retour à la liste
+    title_one: Groupe de règles
+    name: Nom
+    description: Description
+    status: Statut
+    create_by: Créé par
+    modified_by: Modifié par
 
 list_rule:
     title: Règles
