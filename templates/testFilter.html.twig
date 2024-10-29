@@ -416,21 +416,21 @@ var csvdocumentids = "{{ csvdocumentids }}";
 $(document).ready(function () { // Initialisation de Select2 sur le champ globalStatus
 $('#globalStatus .select2').select2({placeholder: "Select Global Status", allowClear: true, width: 'resolve'});
 
+    });
 // Script pour récupérer et afficher les messages d'erreur liés aux documents
 $('.get-log-msg').click(function () {
 var docId = $(this).data('doc-id');
 var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
 var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
 
-$.ajax({
-url: testlastmessagefinal,
-method: 'POST',
-success: function (data) {
-$('#log-msg-' + docId).text(data);
-alert(data);
-}
-});
-});
+    $.ajax({
+    url: testlastmessagefinal,
+    method: 'POST',
+    success: function (data) {
+    $('#log-msg-' + docId).text(data);
+        alert(data);
+        }
+    });
 });
 	</script>
 {% endblock javascript %}{% endblock %}{% block cssin %}
