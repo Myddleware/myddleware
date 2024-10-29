@@ -27,11 +27,11 @@
 {% block title %}
 	{{ parent() }}
 	|
-	{{ 'title.rulegroup.list'|trans }}
+	{{ 'rulegroup.list'|trans }}
 {% endblock %}
 
 {% block titlesm %}
-	{{ 'title.rulegroup.list'|trans }}
+	{{ 'rulegroup.list'|trans }}
 	{% if nb_rulegroup > 0 %}
 		({{ nb_rulegroup }})
 	{% endif %}
