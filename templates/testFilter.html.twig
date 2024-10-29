@@ -403,8 +403,14 @@ var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
 var csvdocumentids = "{{ csvdocumentids }}";
 
 // Initialisation du date & time picker pour les filtres de date de modification
-start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
-end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
+    // Initialize date & time pickers only if elements exist
+    if (document.getElementById('form_date_modif_end')) {
+        start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
+    }
+    if (document.getElementById('form_date_modif_start')) {
+        end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
+    }
+
 
 // Initialisation de Select2 et autres scripts après le chargement du document
 $(document).ready(function () { // Initialisation de Select2 sur le champ globalStatus
