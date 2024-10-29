@@ -252,35 +252,34 @@ class RuleGroupController extends AbstractController
     // }
 
 
-    // // public function to delet the rulegroup by id (set deleted to 1)
-    // /**
-    //  * @Route("/delete/{id}", name="rulegroup_delete")
-    //  */
-    // public function RulegroupDeleteAction(string $id, Request $request)
-    // {
-    //     try {
+    // public function to delet the rulegroup by id (set deleted to 1)
+    /**
+     * @Route("/delete/{id}", name="rulegroup_delete")
+     */
+    public function RulegroupDeleteAction(string $id, Request $request)
+    {
+        try {
 
 
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupSearchResult[0];
+            $em = $this->getDoctrine()->getManager();
+            $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $rulegroup = $rulegroupSearchResult[0];
 
 
-    //         if ($rulegroup) {
-    //             $this->saveRulegroupAudit($rulegroup->getId());
-    //             $rulegroup->setDeleted(1);
-    //             $em->persist($rulegroup);
-    //             $em->flush();
-    //             $this->addFlash('success', 'Rulegroup deleted successfully');
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //         }
+            if ($rulegroup) {
+                $rulegroup->setDeleted(1);
+                $em->persist($rulegroup);
+                $em->flush();
+                $this->addFlash('success', 'Rulegroup deleted successfully');
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
+            }
 
-    //         return $this->redirectToRoute('rulegroup_list');
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+            return $this->redirectToRoute('rulegroup_list');
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
     // // public function to save the rulegroupAudit to the database
     // public function saveRulegroupAudit($rulegroupId)
