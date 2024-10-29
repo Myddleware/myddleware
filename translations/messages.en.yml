@@ -250,6 +250,8 @@ rulegroup:
     create_by: Created by
     modified_by: Modified by
     delete: Delete
+    edit: Edit
+    updated_successfully: Rule group updated successfully
 
 list_rule:
     title: Rules

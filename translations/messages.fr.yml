@@ -249,6 +249,9 @@ rulegroup:
     create_by: Créé par
     modified_by: Modifié par
     delete: Supprimer
+    edit: Editer
+    updated_successfully: Groupe de règles modifié avec succès
+
 list_rule:
     title: Règles
     total: Nombre de règles
