@@ -201,12 +201,16 @@ class RuleGroupController extends AbstractController
                 ]);
             }
 
+            $entities = $pager->getCurrentPageResults();
+
+            $nb_rulegroup = $pager->getNbResults();
+
             // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
                 'Rulegroup/list.html.twig',
                 [
-                    'entities' => $pager->getCurrentPageResults(),
-                    'nb_rulegroup' => $pager->getNbResults(),
+                    'entities' => $entities,
+                    'nb_rulegroup' => $nb_rulegroup,
                     'pager_rulegroup_list' => $pager,
                 ]
             );
