@@ -239,6 +239,7 @@ rule:
     help: What should I do ?
 
 rulegroup:
+    list: Rule groups
     title: Rule groups
     create: Create a new rule group
     back: Back to the list
@@ -248,6 +249,7 @@ rulegroup:
     status: Status
     create_by: Created by
     modified_by: Modified by
+    delete: Delete
 
 list_rule:
     title: Rules
