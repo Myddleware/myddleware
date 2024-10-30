@@ -488,16 +488,21 @@ use App\Entity\Workflow;
             // then duplicate each workflow, create a new one with the same name and link it to the new rule
             foreach ($workflows as $workflow) {
                 $newWorkflow = new Workflow();
+                $newWorkflow->setId(uniqid());
                 $newWorkflow->setName($workflow->getName());
                 $newWorkflow->setRule($newRule);
                 $newWorkflow->setDeleted(false);
-                $newWorkflow->setActive($workflow->getActive());
                 $newWorkflow->setCreatedBy($this->getUser());
                 $newWorkflow->setModifiedBy($this->getUser());
                 $newWorkflow->setDateCreated(new \DateTime());
                 $newWorkflow->setDateModified(new \DateTime());
+                $newWorkflow->setCondition($workflow->getCondition());
+                $newWorkflow->setDescription($workflow->getDescription());
+                $newWorkflow->setActive($workflow->getActive());
                 $newWorkflow->setOrder($workflow->getOrder());
                 $this->entityManager->persist($newWorkflow);
+
+                $this->entityManager->flush();
             }
 
             error_log('end duplicateWorkflows in the function');
