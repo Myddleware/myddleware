@@ -253,6 +253,8 @@ rulegroup:
     edit: Edit
     updated_successfully: Rule group updated successfully
     rules: List of rules
+    rule_removed_successfully: Rule removed successfully
+    no_rules: No rules in this group
     rule:
         name: Name
         module_source: Source module

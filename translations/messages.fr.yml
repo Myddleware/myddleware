@@ -252,6 +252,8 @@ rulegroup:
     edit: Editer
     updated_successfully: Groupe de règles modifié avec succès
     rules: Liste des règles
+    rule_removed_successfully: Règle supprimée avec succès
+    no_rules: Aucune règle dans ce groupe
     rule:
         name: Nom
         module_source: Module source
