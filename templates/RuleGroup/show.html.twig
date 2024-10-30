@@ -82,10 +82,10 @@
 										<table class="table table-striped">
 											<thead>
 												<tr>
-													<th>{{ 'rule.name'|trans }}</th>
-													<th>{{ 'rule.module_source'|trans }}</th>
-													<th>{{ 'rule.module_target'|trans }}</th>
-													<th>{{ 'rule.active'|trans }}</th>
+													<th>{{ 'rulegroup.rule.name'|trans }}</th>
+													<th>{{ 'rulegroup.rule.module_source'|trans }}</th>
+													<th>{{ 'rulegroup.rule.module_target'|trans }}</th>
+													<th>{{ 'rulegroup.rule.active'|trans }}</th>
 													<th>{{ 'actions'|trans }}</th>
 												</tr>
 											</thead>
@@ -108,7 +108,7 @@
 															</a>
 															<a href="{{ path('rulegroup_remove_rule', {'groupId': rulegroup.id, 'ruleId': rule.id}) }}" 
 															   class="btn btn-sm btn-outline-danger unlink_rule_from_group" 
-															   onclick="return confirm('{{ 'rulegroup.confirm_remove_rule'|trans }}')"
+															   onclick="return confirm('{{ 'rulegroup.rule.confirm_remove_rule'|trans }}')"
 															   title="{{ 'rulegroup.remove_rule'|trans }}">
 																<i class="fa fa-unlink"></i>
 															</a>
