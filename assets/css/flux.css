@@ -259,23 +259,3 @@ li span {
     margin-bottom: 0 !important;
     width: 100%;
 }
-
-/* Remove any previous td a styling and replace with this */
-td a:not(.btn-opt):not(:has(span.btn-opt)) {
-    font-weight: normal;
-    /* Create invisible bold copy to reserve space */
-    position: relative;
-}
-
-td a:not(.btn-opt):not(:has(span.btn-opt))::after {
-    content: attr(href);
-    display: block;
-    font-weight: bold;
-    height: 0;
-    overflow: hidden;
-    visibility: hidden;
-}
-
-td a:not(.btn-opt):not(:has(span.btn-opt)):hover {
-    font-weight: bold;
-}
