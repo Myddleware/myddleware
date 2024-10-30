@@ -452,6 +452,10 @@ use App\Entity\Workflow;
                         $this->addFlash('success', $success);
                     }
 
+                    error_log('duplicateWorkflows');
+                    $this->duplicateWorkflows($id, $newRule);
+                    error_log('end duplicateWorkflows');
+
                     return $this->redirect($this->generateURL('regle_list'));
                 }
 
@@ -464,6 +468,39 @@ use App\Entity\Workflow;
             } catch (Exception $e) {
                 return new JsonResponse($e->getMessage());
             }
+        }
+
+        public function duplicateWorkflows($id, Rule $newRule)
+        {
+            error_log('start duplicateWorkflows');
+
+            // start by getting the rule fromthe id
+            $rule = $this->getDoctrine()
+                ->getManager()
+                ->getRepository(Rule::class)
+                ->findOneBy([
+                    'id' => $id,
+                ]);
+
+            // then get all the workflows linked to this rule
+            $workflows = $rule->getWorkflows();
+
+            // then duplicate each workflow, create a new one with the same name and link it to the new rule
+            foreach ($workflows as $workflow) {
+                $newWorkflow = new Workflow();
+                $newWorkflow->setName($workflow->getName());
+                $newWorkflow->setRule($newRule);
+                $newWorkflow->setDeleted(false);
+                $newWorkflow->setActive($workflow->getActive());
+                $newWorkflow->setCreatedBy($this->getUser());
+                $newWorkflow->setModifiedBy($this->getUser());
+                $newWorkflow->setDateCreated(new \DateTime());
+                $newWorkflow->setDateModified(new \DateTime());
+                $newWorkflow->setOrder($workflow->getOrder());
+                $this->entityManager->persist($newWorkflow);
+            }
+
+            error_log('end duplicateWorkflows in the function');
         }
 
         /**
