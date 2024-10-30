@@ -172,9 +172,9 @@ class Rule
 
     /**
      * @ORM\ManyToOne(targetEntity="RuleGroup")
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=true)
      */
-    private RuleGroup $group;
+    private ?RuleGroup $group = null;
 	
 	/**
      * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
@@ -740,14 +740,14 @@ class Rule
         return isset($this->moduleTarget);
     }
 	
-	public function setGroup(RuleGroup $group): self
+	public function setGroup(?RuleGroup $group): self
     {
         $this->group = $group;
 
         return $this;
     }
 
-    public function getGroup(): RuleGroup
+    public function getGroup(): ?RuleGroup
     {
         return $this->group;
     }
