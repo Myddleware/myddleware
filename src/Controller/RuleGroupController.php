@@ -76,11 +76,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
  * @Route("/rulegroup")
@@ -557,4 +558,57 @@ class RuleGroupController extends AbstractController
 
         return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
     }
+
+    /**
+     * @Route("/add-rule/{id}", name="rulegroup_add_rule")
+     */
+    public function addRuleAction(Request $request, string $id): Response
+    {
+        $ruleGroup = $this->entityManager->getRepository(RuleGroup::class)->find($id);
+        
+        if (!$ruleGroup) {
+            throw $this->createNotFoundException('RuleGroup not found');
+        }
+
+        // Get all active rules that aren't already in a group
+        $availableRules = $this->entityManager->getRepository(Rule::class)->findBy([
+            'active' => true,
+            'deleted' => false,
+            'group' => null
+        ]);
+
+        // Create form with rule choices
+        $form = $this->createFormBuilder()
+            ->add('rule', EntityType::class, [
+                'class' => Rule::class,
+                'choices' => $availableRules,
+                'choice_label' => 'name',
+                'required' => true,
+                'label' => 'rulegroup.select_rule'
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'rulegroup.add_rule'
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $rule = $form->get('rule')->getData();
+            $rule->setGroup($ruleGroup);
+            
+            $this->entityManager->persist($rule);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'rulegroup.rule_added_successfully');
+            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+        }
+
+        return $this->render('RuleGroup/add_rule.html.twig', [
+            'form' => $form->createView(),
+            'rulegroup' => $ruleGroup
+        ]);
+    }
+
+    
 }
