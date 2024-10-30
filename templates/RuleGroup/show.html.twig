@@ -75,6 +75,9 @@
 									<i class="fa fa-minus"></i>
 								</button>
 								{{ 'rulegroup.rules'| trans | upper }}
+								<a href="{{ path('rulegroup_add_rule', {'id': rulegroup.id}) }}" class="btn btn-sm btn-outline-success ms-2">
+									<i class="fa fa-plus"></i> {{ 'rulegroup.add_rule'|trans }}
+								</a>
 							</div>
 							<div id="rules-content" class="collapse show">
 								{% if rulegroup.rules|length > 0 %}
