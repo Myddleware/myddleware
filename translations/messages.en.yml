@@ -261,6 +261,9 @@ rulegroup:
         module_target: Target module
         active: Active
         confirm_remove_rule: Are you sure you want to remove this rule from the group?
+    add_rule: 'Add Rule'
+    select_rule: 'Select Rule'
+    rule_added_successfully: 'Rule added successfully'
 
 list_rule:
     title: Rules

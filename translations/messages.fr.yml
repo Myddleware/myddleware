@@ -260,6 +260,9 @@ rulegroup:
         module_target: Module cible
         active: Activation
         confirm_remove_rule: Êtes-vous sûr de vouloir supprimer cette règle du groupe ?
+    add_rule: Ajouter une règle
+    select_rule: Sélectionner une règle
+    rule_added_successfully: Règle ajoutée avec succès
 
 list_rule:
     title: Règles
