@@ -225,3 +225,17 @@ li span {
 .invisibele-row-bottom {
 	border-bottom-color: transparent !important;
 }
+
+.table-wrapper {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    display: inline-block;
+    width: auto;
+}
+
+.shadow-table {
+    background-color: white;
+    margin-bottom: 0;
+    width: 100%;
+}
