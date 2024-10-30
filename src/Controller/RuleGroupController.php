@@ -553,7 +553,7 @@ class RuleGroupController extends AbstractController
         $rule->setGroup(null);
         $entityManager->flush();
 
-        $this->addFlash('success', 'rulegroup.rule_removed_successfully');
+        $this->addFlash('success', 'Rule removed successfully');
 
         return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
     }
