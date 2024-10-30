@@ -233,7 +233,7 @@ li span {
 .table-wrapper {
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     display: inline-block;
     width: auto;
 }
@@ -241,7 +241,7 @@ li span {
 .table-wrapper-connector {
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     display: flex;
 	width: 100%;
 }
@@ -249,7 +249,7 @@ li span {
 .table-wrapper-rule {
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
     display: flex;
 	width: 100%;
 }
