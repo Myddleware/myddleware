@@ -62,6 +62,10 @@ section  {
 	background: white !important;
 }
 
+section.solution-home-section {
+	margin-bottom: -15vh !important;
+}
+
 footer {
 	padding: 5px;
 	height: 35px;
