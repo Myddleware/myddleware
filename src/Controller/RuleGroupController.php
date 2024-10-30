@@ -532,4 +532,29 @@ class RuleGroupController extends AbstractController
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
+
+    /**
+     * @Route("/rulegroup/{groupId}/remove-rule/{ruleId}", name="rulegroup_remove_rule")
+     */
+    public function removeRule(
+        Request $request, 
+        EntityManagerInterface $entityManager,
+        string $groupId,
+        string $ruleId
+    ): Response {
+        $ruleGroup = $entityManager->getRepository(RuleGroup::class)->find($groupId);
+        $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
+
+        if (!$ruleGroup || !$rule) {
+            throw $this->createNotFoundException('RuleGroup or Rule not found');
+        }
+
+        // Remove the rule from the group
+        $rule->setGroup(null);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'rulegroup.rule_removed_successfully');
+
+        return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
+    }
 }
