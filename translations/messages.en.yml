@@ -252,6 +252,13 @@ rulegroup:
     delete: Delete
     edit: Edit
     updated_successfully: Rule group updated successfully
+    rules: List of rules
+    rule:
+        name: Name
+        module_source: Source module
+        module_target: Target module
+        active: Active
+        confirm_remove_rule: Are you sure you want to remove this rule from the group?
 
 list_rule:
     title: Rules

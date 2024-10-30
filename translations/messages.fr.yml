@@ -251,6 +251,13 @@ rulegroup:
     delete: Supprimer
     edit: Editer
     updated_successfully: Groupe de règles modifié avec succès
+    rules: Liste des règles
+    rule:
+        name: Nom
+        module_source: Module source
+        module_target: Module cible
+        active: Activation
+        confirm_remove_rule: Êtes-vous sûr de vouloir supprimer cette règle du groupe ?
 
 list_rule:
     title: Règles
