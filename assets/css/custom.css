@@ -250,3 +250,24 @@ menu .caret, #myd_top .caret {
     border-radius: 25px !important;
 }
 
+.typewriter {
+    display: inline-block;
+    overflow: hidden;
+    border-right: .15em solid #000;
+    white-space: nowrap;
+    margin: 0;
+    letter-spacing: .15em;
+    animation: 
+      typing 3.5s steps(40, end),
+      blink-caret .75s step-end infinite;
+  }
+  
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+  
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #000 }
+  }
