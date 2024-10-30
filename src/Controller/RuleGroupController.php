@@ -554,7 +554,7 @@ class RuleGroupController extends AbstractController
         $rule->setGroup(null);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Rule removed successfully');
+        $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_removed_successfully'));
 
         return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
     }
@@ -600,7 +600,7 @@ class RuleGroupController extends AbstractController
             $this->entityManager->persist($rule);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'rulegroup.rule_added_successfully');
+            $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_added_successfully'));
             return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
