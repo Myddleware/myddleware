@@ -53,9 +53,9 @@
 							{% if entities is not empty %}
 								<thead>
 									<tr>
-										<th>{{'list_connector.th.name'|trans}}</th>
+										<th class="rounded-table-up-left">{{'list_connector.th.name'|trans}}</th>
 										<th>{{'list_connector.th.date_created'|trans}}</th>
-										<th>{{'list_connector.th.option'|trans}}</th>
+										<th class="rounded-table-up-right">{{'list_connector.th.option'|trans}}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -94,10 +94,10 @@
 											</td>
 										</tr>
 									{% endfor %}
-									<tr>
-										<th>{{'list_connector.th.name'|trans}}</th>
+									<tr class="invisibele-row-bottom">
+										<th class="rounded-table-down-left">{{'list_connector.th.name'|trans}}</th>
 										<th>{{'list_connector.th.date_created'|trans}}</th>
-										<th>{{'list_connector.th.option'|trans}}</th>
+										<th class="rounded-table-down-right">{{'list_connector.th.option'|trans}}</th>
 									</tr>
 								</tbody>
 							{% endif %}
