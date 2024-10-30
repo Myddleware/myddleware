@@ -49,8 +49,9 @@
 
 				<div class="row justify-content-center">
 					<div class="col" id="connector-list">
-						<table class="table table-hover align-middle">
-							{% if entities is not empty %}
+						<div class="table-wrapper-connector">
+							<table class="table table-hover align-middle">
+								{% if entities is not empty %}
 								<thead>
 									<tr>
 										<th class="rounded-table-up-left">{{'list_connector.th.name'|trans}}</th>
@@ -101,7 +102,8 @@
 									</tr>
 								</tbody>
 							{% endif %}
-						</table>
+							</table>
+						</div>
 					</div>
 				</div>
 				<div class="d-flex justify-content-center">
