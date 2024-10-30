@@ -259,15 +259,24 @@ menu .caret, #myd_top .caret {
     letter-spacing: .15em;
     animation: 
       typing 2s steps(40, end),
-      blink-caret .75s step-end infinite;
-  }
-  
-  @keyframes typing {
+      blink-caret .75s step-end infinite 0s,
+      hideCursor 0s step-end forwards 2s;
+    width: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes typing {
     from { width: 0 }
     to { width: 520px }
-  }
-  
-  @keyframes blink-caret {
+}
+
+@keyframes blink-caret {
     from, to { border-color: transparent }
     50% { border-color: #000 }
-  }
+}
+
+@keyframes hideCursor {
+    to {
+        border-right: transparent;
+    }
+}
