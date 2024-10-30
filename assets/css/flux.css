@@ -236,6 +236,6 @@ li span {
 
 .shadow-table {
     background-color: white;
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
     width: 100%;
 }
