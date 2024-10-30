@@ -242,6 +242,14 @@ li span {
 	width: 100%;
 }
 
+.table-wrapper-rule {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    display: flex;
+	width: 100%;
+}
+
 .shadow-table {
     background-color: white;
     margin-bottom: 0 !important;

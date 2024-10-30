@@ -73,8 +73,9 @@
 			<p></p>
 			<div class="row justify-content-center">
 				<div class="col" id="rule-list">
-					<table class="table table-hover align-middle">
-						{% if entities is not empty %}
+					<div class="table-wrapper-rule">
+						<table class="table table-hover align-middle shadow-table">
+							{% if entities is not empty %}
 							<thead>
 								<tr>
 									<th class="rounded-table-up-left">{{'rule.source'|trans}}</th>
@@ -152,6 +153,7 @@
 							</tbody>
 						{% endif %}
 					</table>
+					</div>
 				</div>
 			</div>
 			<div class="d-flex justify-content-center mt-4">
