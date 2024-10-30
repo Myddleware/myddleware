@@ -258,13 +258,13 @@ menu .caret, #myd_top .caret {
     margin: 0;
     letter-spacing: .15em;
     animation: 
-      typing 3.5s steps(40, end),
+      typing 2s steps(40, end),
       blink-caret .75s step-end infinite;
   }
   
   @keyframes typing {
     from { width: 0 }
-    to { width: 100% }
+    to { width: 520px }
   }
   
   @keyframes blink-caret {
