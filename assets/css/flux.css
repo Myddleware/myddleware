@@ -181,6 +181,10 @@ li span {
     color: white !important;
 }
 
+.select2-selection__choice__remove:hover {
+	background-color: #1475a9 !important;
+}
+
 #globalStatus label{
 	margin-bottom: 8px;
 }
