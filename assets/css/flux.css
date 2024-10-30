@@ -263,8 +263,11 @@ li span {
 /* Remove any previous td a styling and replace with this */
 td a:not(.btn-opt):not(:has(span.btn-opt)) {
     font-weight: normal;
-    /* Create invisible bold copy to reserve space */
     position: relative;
+    display: inline-block;
+    margin-right: -15em;
+    margin-left: -15em;
+    transform: scale(0.98);
 }
 
 td a:not(.btn-opt):not(:has(span.btn-opt))::after {
