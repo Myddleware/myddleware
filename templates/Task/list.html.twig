@@ -49,7 +49,7 @@
 				<table class="listepager table container">
 					{% if entities is not empty %}	
 						<tr>
-							<th>{{'list_task.th.param'|trans}}</th>
+							<th class="rounded-table-up-left">{{'list_task.th.param'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
 							<th>{{'list_task.th.end'|trans}}</th>				
@@ -57,7 +57,7 @@
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
 							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>
+							<th class="rounded-table-up-right">{{'list_task.th.message'|trans}}</th>
 						</tr> 
 						{% for task in entities %}
 							{% if task.message is not empty %}
@@ -109,8 +109,8 @@
 							</td>                     
 						</tr>            
 						{% endfor %}		
-						<tr>
-							<th>{{'list_task.th.id'|trans}}</th>
+						<tr class="invisibele-row-bottom">
+							<th class="rounded-table-down-left">{{'list_task.th.id'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
 							<th>{{'list_task.th.end'|trans}}</th>
@@ -118,7 +118,7 @@
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
 							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>			
+							<th class="rounded-table-down-right">{{'list_task.th.message'|trans}}</th>			
 						</tr>			
 					{% endif %}
 				</table>
