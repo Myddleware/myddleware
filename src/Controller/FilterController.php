@@ -151,7 +151,7 @@ public function emptySearchAction(Request $request): Response
         'page' => 1,
     ], false);
 
-    return $this->render('testFilter.html.twig', [
+    return $this->render('documentFilter.html.twig', [
         'form' => $form->createView(),
         'formFilter'=> $formFilter->createView(),
         'documents' => $documents,
@@ -187,7 +187,7 @@ public function removeFilter(Request $request): JsonResponse
      * @Route("/document/list/search-{search}", name="document_list", defaults={"page"=1})
      * @Route("/document/list/page-{page}", name="document_list_page", requirements={"page"="\d+"})
      */
-    public function testFilterAction(Request $request, int $page = 1, int $search = 1): Response
+    public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
@@ -344,7 +344,7 @@ public function removeFilter(Request $request): JsonResponse
 
         
         
-        return $this->render('testFilter.html.twig', [
+        return $this->render('documentFilter.html.twig', [
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
             'documents' => $documents,
