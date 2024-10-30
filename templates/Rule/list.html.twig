@@ -77,12 +77,12 @@
 						{% if entities is not empty %}
 							<thead>
 								<tr>
-									<th>{{'rule.source'|trans}}</th>
+									<th class="rounded-table-up-left">{{'rule.source'|trans}}</th>
 									<th>{{'rule.target'|trans}}</th>
 									<th>{{'list_rule.th.name'|trans}}</th>
 									<th>{{'list_rule.th.active'|trans}}</th>
 									<th>{{'list_rule.th.date_created'|trans}}</th>
-									<th>{{'list_rule.th.option'|trans}}</th>
+									<th class="rounded-table-up-right">{{'list_rule.th.option'|trans}}</th>
 								</tr>
 							</thead>
 							<tbody id="tbody_rule_list">
@@ -141,13 +141,13 @@
 										</td>
 									</tr>
 								{% endfor %}
-								<tr>
-									<th>{{'rule.source'|trans}}</th>
+								<tr class="invisibele-row-bottom">
+									<th class="rounded-table-down-left">{{'rule.source'|trans}}</th>
 									<th>{{'rule.target'|trans}}</th>
 									<th>{{'list_rule.th.name'|trans}}</th>
 									<th>{{'list_rule.th.active'|trans}}</th>
 									<th>{{'list_rule.th.date_created'|trans}}</th>
-									<th>{{'list_rule.th.option'|trans}}</th>
+									<th class="rounded-table-down-right">{{'list_rule.th.option'|trans}}</th>
 								</tr>
 							</tbody>
 						{% endif %}

@@ -201,3 +201,27 @@ li span {
 	margin-top: 13px !important;
     padding: 1px 8px !important;
 }
+
+.rounded-table-up-left {
+    border-top-left-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-up-right {
+    border-top-right-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-down-left {
+    border-bottom-left-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-down-right {
+    border-bottom-right-radius: 15px;
+	overflow: hidden;
+}
+
+.invisibele-row-bottom {
+	border-bottom-color: transparent !important;
+}
