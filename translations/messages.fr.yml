@@ -429,7 +429,6 @@ flux:
 view_flux:
     empty: Pas de données
     empty_log: Aucune log
-    empty_workflow: Aucun workflow
     target: Cible
     source: Source
     history: Historique
