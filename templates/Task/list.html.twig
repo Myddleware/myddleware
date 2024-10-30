@@ -46,8 +46,9 @@
 		</div>
 	{% endfor %}
 			{% if nb > 0 %}
-				<table class="listepager table container">
-					{% if entities is not empty %}	
+				<div class="table-wrapper">
+					<table class="listepager table container shadow-table">
+						{% if entities is not empty %}	
 						<tr>
 							<th class="rounded-table-up-left">{{'list_task.th.param'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
@@ -122,6 +123,7 @@
 						</tr>			
 					{% endif %}
 				</table>
+			</div>
 				<div class="container task-pagination" >
 				{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
