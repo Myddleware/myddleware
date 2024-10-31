@@ -503,9 +503,36 @@ use App\Entity\Workflow;
                 $this->entityManager->persist($newWorkflow);
 
                 $this->entityManager->flush();
+
+                $this->duplicateWorkflowActions($workflow, $newWorkflow);
             }
 
-            error_log('end duplicateWorkflows in the function');
+
+        }
+
+        public function duplicateWorkflowActions(Workflow $workflow, Workflow $newWorkflow): void
+        {
+            // duplicate the actions of the workflow
+            $actions = $workflow->getWorkflowActions();
+            foreach ($actions as $action) {
+                $newAction = new WorkflowAction();
+                $newAction->setId(uniqid());
+                $newAction->setWorkflow($newWorkflow);
+                $newAction->setCreatedBy($this->getUser());
+                $newAction->setModifiedBy($this->getUser());
+                $newAction->setDateCreated(new \DateTime());
+                $newAction->setDateModified(new \DateTime());
+                $newAction->setName($action->getName());
+                $newAction->setAction($action->getAction());
+                $newAction->setDescription($action->getDescription());
+                $newAction->setOrder($action->getOrder());
+                $newAction->setArguments($action->getArguments());
+                $newAction->setDeleted(false);
+                $newAction->setActive($action->getActive());
+                $this->entityManager->persist($newAction);
+            }
+
+            $this->entityManager->flush();
         }
 
         /**
