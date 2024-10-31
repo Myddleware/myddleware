@@ -615,7 +615,7 @@ class RuleGroupController extends AbstractController
                 'label' => 'rulegroup.select_rule'
             ])
             ->add('confirm', SubmitType::class, [
-                'label' => $request->query->get('confirm') ? 'rulegroup.confirm_transfer' : 'rulegroup.add_rule'
+                'label' => $request->query->get('confirm') ? 'rulegroup.confirm_transfer_final' : 'rulegroup.add_rule'
             ])
             ->getForm();
 
