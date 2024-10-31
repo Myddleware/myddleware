@@ -439,6 +439,9 @@ class RuleGroupController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 $rulegroup->setCreatedBy($this->getUser());
                 $rulegroup->setModifiedBy($this->getUser());
+                $rulegroup->setDateCreated(new \DateTime());
+                $rulegroup->setDateModified(new \DateTime());
+                $rulegroup->setDeleted(false);
                 $em->persist($rulegroup);
                 $em->flush();
 
@@ -510,6 +513,7 @@ class RuleGroupController extends AbstractController
 
                 if ($form->isSubmitted() && $form->isValid()) {
                     $rulegroup->setModifiedBy($this->getUser());
+                    $rulegroup->setDateModified(new \DateTime());
                     $em->persist($rulegroup);
                     $em->flush();
                     $this->addFlash('success', 'rulegroup.updated_successfully');
