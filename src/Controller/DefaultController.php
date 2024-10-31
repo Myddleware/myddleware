@@ -452,9 +452,7 @@ use App\Entity\WorkflowAction;
                         $this->addFlash('success', $success);
                     }
 
-                    error_log('duplicateWorkflows');
                     $this->duplicateWorkflows($id, $newRule);
-                    error_log('end duplicateWorkflows');
 
                     return $this->redirect($this->generateURL('regle_list'));
                 }
@@ -472,8 +470,6 @@ use App\Entity\WorkflowAction;
 
         public function duplicateWorkflows($id, Rule $newRule)
         {
-            error_log('start duplicateWorkflows');
-
             // start by getting the rule fromthe id
             $rule = $this->getDoctrine()
                 ->getManager()
