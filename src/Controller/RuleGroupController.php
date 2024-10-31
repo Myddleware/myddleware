@@ -173,10 +173,6 @@ class RuleGroupController extends AbstractController
         try {
 
             $rulegroupName = $request->query->get('rulegroup_name');
-
-            $rulegroupName = 'testrulegroup';
-
-            error_log('rulegroupName: ' . $rulegroupName);
             
             // Récupérer les filtres depuis la requête
             $criteria = ['deleted' => 0];
