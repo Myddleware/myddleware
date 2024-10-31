@@ -75,7 +75,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Form\Type\RelationFilterType;
 use App\Entity\Workflow;
-
+use App\Entity\WorkflowAction;
     /**
      * @Route("/rule")
      */
