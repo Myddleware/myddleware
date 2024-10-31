@@ -570,6 +570,9 @@ class RuleGroupController extends AbstractController
             throw $this->createNotFoundException('RuleGroup not found');
         }
 
+        // Get selected rule ID from request if it exists
+        $selectedRuleId = $request->query->get('rule');
+
         // Get all active rules except those already in this group
         $availableRules = $this->entityManager->getRepository(Rule::class)
             ->createQueryBuilder('r')
@@ -585,14 +588,25 @@ class RuleGroupController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // If no available rules, redirect with message
         if (empty($availableRules)) {
             $this->addFlash('warning_rulegroup', $this->translator->trans('rulegroup.no_available_rules'));
             return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
         // Create form with rule choices
-        $form = $this->createFormBuilder()
+        $formBuilder = $this->createFormBuilder();
+        
+        // If we have a selected rule, set it as the default data
+        $defaultData = [];
+        if ($selectedRuleId) {
+            $selectedRule = $this->entityManager->getRepository(Rule::class)->find($selectedRuleId);
+            if ($selectedRule) {
+                $defaultData['rule'] = $selectedRule;
+            }
+        }
+
+        $form = $formBuilder
+            ->setData($defaultData)
             ->add('rule', EntityType::class, [
                 'class' => Rule::class,
                 'choices' => $availableRules,
@@ -601,7 +615,7 @@ class RuleGroupController extends AbstractController
                 'label' => 'rulegroup.select_rule'
             ])
             ->add('confirm', SubmitType::class, [
-                'label' => 'rulegroup.add_rule'
+                'label' => $request->query->get('confirm') ? 'rulegroup.confirm_transfer' : 'rulegroup.add_rule'
             ])
             ->getForm();
 
