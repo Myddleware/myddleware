@@ -52,7 +52,7 @@ use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleParamAudit;
 use App\Entity\RulegroupAction;
-use App\Form\Type\RulegroupType;
+use App\Form\Type\RuleGroupType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
