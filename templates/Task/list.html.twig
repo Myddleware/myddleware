@@ -124,7 +124,7 @@
 					{% endif %}
 				</table>
 			</div>
-				<div class="container task-pagination" >
+				<div class="container task-pagination pt-4" >
 				{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
 											
