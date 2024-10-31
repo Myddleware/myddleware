@@ -268,7 +268,7 @@ rulegroup:
     confirm_transfer: Oui, transférer la règle
     cancel: Annuler
     no_available_rules: Aucune règle disponible
-
+    confirm_transfer_final: Confirmer et transférer la règle
 list_rule:
     title: Règles
     total: Nombre de règles

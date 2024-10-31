@@ -267,6 +267,7 @@ rulegroup:
     confirm_transfer_title: 'Confirm Rule Transfer'
     confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
     confirm_transfer: 'Yes, transfer rule'
+    confirm_transfer_final: 'Confirm and transfer rule'
     cancel: 'Cancel'
     no_available_rules: 'No available rules'
 
