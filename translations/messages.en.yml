@@ -264,6 +264,11 @@ rulegroup:
     add_rule: 'Add Rule'
     select_rule: 'Select Rule'
     rule_added_successfully: 'Rule added successfully'
+    confirm_transfer_title: 'Confirm Rule Transfer'
+    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
+    confirm_transfer: 'Yes, transfer rule'
+    cancel: 'Cancel'
+    no_available_rules: 'No available rules'
 
 list_rule:
     title: Rules

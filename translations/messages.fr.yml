@@ -263,6 +263,11 @@ rulegroup:
     add_rule: Ajouter une règle
     select_rule: Sélectionner une règle
     rule_added_successfully: Règle ajoutée avec succès
+    confirm_transfer_title: Confirmer le transfert de la règle
+    confirm_transfer_message: La règle "%rule%" est actuellement dans le groupe "%currentGroup%". Voulez-vous la transférer dans "%newGroup%"?
+    confirm_transfer: Oui, transférer la règle
+    cancel: Annuler
+    no_available_rules: Aucune règle disponible
 
 list_rule:
     title: Règles
