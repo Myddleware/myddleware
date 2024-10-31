@@ -570,12 +570,26 @@ class RuleGroupController extends AbstractController
             throw $this->createNotFoundException('RuleGroup not found');
         }
 
-        // Get all active rules that aren't already in a group
-        $availableRules = $this->entityManager->getRepository(Rule::class)->findBy([
-            'active' => true,
-            'deleted' => false,
-            'group' => null
-        ]);
+        // Get all active rules except those already in this group
+        $availableRules = $this->entityManager->getRepository(Rule::class)
+            ->createQueryBuilder('r')
+            ->where('r.active = :active')
+            ->andWhere('r.deleted = :deleted')
+            ->andWhere('r.group != :currentGroup OR r.group IS NULL')
+            ->setParameters([
+                'active' => true,
+                'deleted' => false,
+                'currentGroup' => $ruleGroup
+            ])
+            ->orderBy('r.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // If no available rules, redirect with message
+        if (empty($availableRules)) {
+            $this->addFlash('warning_rulegroup', $this->translator->trans('rulegroup.no_available_rules'));
+            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+        }
 
         // Create form with rule choices
         $form = $this->createFormBuilder()
@@ -586,7 +600,7 @@ class RuleGroupController extends AbstractController
                 'required' => true,
                 'label' => 'rulegroup.select_rule'
             ])
-            ->add('submit', SubmitType::class, [
+            ->add('confirm', SubmitType::class, [
                 'label' => 'rulegroup.add_rule'
             ])
             ->getForm();
@@ -595,8 +609,20 @@ class RuleGroupController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $rule = $form->get('rule')->getData();
+            $currentGroup = $rule->getGroup();
+
+            // If rule is already in another group and transfer not confirmed
+            if ($currentGroup && $currentGroup->getId() !== $id && !$request->query->get('confirm')) {
+                return $this->render('RuleGroup/confirm_transfer.html.twig', [
+                    'rule' => $rule,
+                    'currentGroup' => $currentGroup,
+                    'newGroup' => $ruleGroup,
+                    'form' => $form->createView()
+                ]);
+            }
+
+            // Process the rule transfer
             $rule->setGroup($ruleGroup);
-            
             $this->entityManager->persist($rule);
             $this->entityManager->flush();
 
