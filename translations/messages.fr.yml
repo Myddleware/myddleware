@@ -748,6 +748,9 @@ title:
 
 menu:
     index: Accueil
+    rulegroup:
+        title: Groupes de règles
+        list: Groupes de règles
     rule:
         title: Règles
         createv1: Création (v1)
