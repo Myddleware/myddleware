@@ -750,6 +750,9 @@ title:
 
 menu:
     index: Homepage
+    rulegroup:
+        title: Rule groups
+        list: Rule groups
     rule:
         title: Rules
         createv1: Creation (v1)
