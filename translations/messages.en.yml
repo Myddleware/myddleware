@@ -761,6 +761,7 @@ menu:
     task:
         title: Tasks
         stopall: Stop all tasks
+    nav_history: Navigation History
 
 breadcrumb:
     rule_list: Rules
