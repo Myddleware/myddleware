@@ -32,6 +32,11 @@
 					{{ message }}
 				</div>
 			{% endfor %}
+			{% for message in app.flashes('warning_rulegroup') %}
+				<div class="alert alert-warning" role="alert">
+					{{ message }}
+				</div>
+			{% endfor %}
 
 
 			{% if rulegroup is not null %}
