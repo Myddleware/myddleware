@@ -253,7 +253,7 @@ class RuleGroupController extends AbstractController
     /**
      * @Route("/delete/{id}", name="rulegroup_delete")
      */
-    public function RulegroupDeleteAction(string $id, Request $request)
+    public function RulegroupDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
         try {
 
@@ -267,7 +267,7 @@ class RuleGroupController extends AbstractController
                 $rulegroup->setDeleted(1);
                 $em->persist($rulegroup);
                 $em->flush();
-                $this->addFlash('success', 'Rulegroup deleted successfully');
+                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.deleted_successfully'));
             } else {
                 $this->addFlash('error', 'Rulegroup not found');
             }
@@ -417,7 +417,7 @@ class RuleGroupController extends AbstractController
     /**
      * @Route("/new", name="rulegroup_create")
      */
-    public function RulegroupCreateAction(Request $request)
+    public function RulegroupCreateAction(Request $request, TranslatorInterface $translator)
     {
         try {
 
@@ -441,7 +441,7 @@ class RuleGroupController extends AbstractController
                 $em->persist($rulegroup);
                 $em->flush();
 
-                $this->addFlash('success', 'Rulegroup created successfully');
+                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.created_successfully'));
 
                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
             }
@@ -492,7 +492,7 @@ class RuleGroupController extends AbstractController
     /**
      * @Route("/edit/{id}", name="rulegroup_edit")
      */
-    public function RulegroupEditAction(string $id, Request $request)
+    public function RulegroupEditAction(string $id, Request $request, TranslatorInterface $translator)
     {
         try {
 
@@ -512,7 +512,7 @@ class RuleGroupController extends AbstractController
                     $rulegroup->setDateModified(new \DateTime());
                     $em->persist($rulegroup);
                     $em->flush();
-                    $this->addFlash('success', 'rulegroup.updated_successfully');
+                    $this->addFlash('success_rulegroup', $translator->trans('rulegroup.updated_successfully'));
 
                     return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
                 }
