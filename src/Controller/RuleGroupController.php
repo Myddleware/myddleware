@@ -196,7 +196,7 @@ class RuleGroupController extends AbstractController
 
             // Si la requête est AJAX, rendre uniquement la table des rulegroups
             if ($request->isXmlHttpRequest()) {
-                return $this->render('Rulegroup/_rulegroup_table.html.twig', [
+                return $this->render('RuleGroup/_rulegroup_table.html.twig', [
                     'entities' => $pager->getCurrentPageResults(),
                     'pager' => $pager,
                 ]);
@@ -208,7 +208,7 @@ class RuleGroupController extends AbstractController
 
             // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
-                'Rulegroup/list.html.twig',
+                'RuleGroup/list.html.twig',
                 [
                     'entities' => $entities,
                     'nb_rulegroup' => $nb_rulegroup,
@@ -448,7 +448,7 @@ class RuleGroupController extends AbstractController
             }
 
             return $this->render(
-                'Rulegroup/new.html.twig',
+                'RuleGroup/new.html.twig',
                 [
                     'form' => $form->createView(),
                 ]
@@ -474,7 +474,7 @@ class RuleGroupController extends AbstractController
 
             if ($rulegroup[0]) {
                 return $this->render(
-                    'Rulegroup/show.html.twig',
+                    'RuleGroup/show.html.twig',
                     [
                         'rulegroup' => $rulegroup[0],
                     ]
@@ -518,7 +518,7 @@ class RuleGroupController extends AbstractController
                 }
 
                 return $this->render(
-                    'Rulegroup/edit.html.twig',
+                    'RuleGroup/edit.html.twig',
                     [
                         'form' => $form->createView(),
                         'rulegroup' => $rulegroup,
