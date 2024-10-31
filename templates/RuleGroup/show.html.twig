@@ -100,7 +100,11 @@
 											<tbody>
 												{% for rule in rulegroup.rules %}
 													<tr>
-														<td>{{ rule.name }}</td>
+														<td>
+															<a href="{{ path('regle_open', {'id': rule.id}) }}" class="btn btn-sm btn-outline-primary">
+																{{ rule.name }}
+															</a>
+														</td>
 														<td>{{ rule.moduleSource }}</td>
 														<td>{{ rule.moduleTarget }}</td>
 														<td>
