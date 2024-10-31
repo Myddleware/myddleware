@@ -68,9 +68,9 @@ section  {
 
 footer {
 	padding: 5px;
-	height: 35px;
-	min-height: 35px;
-	max-height: 35px;
+	height: 75px;
+	min-height: 75px;
+	max-height: 75px;
 	background: #444446;
 	position: fixed;
 	right:0;
@@ -81,6 +81,35 @@ footer {
 	color: white;
 	text-align: center;
 	z-index: 99;
+}
+
+.help-link {
+    color: white;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.help-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #03c4eb;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
+}
+
+.help-link:hover {
+    color: #03c4eb;
+}
+
+.help-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
 }
 
 .clr {
