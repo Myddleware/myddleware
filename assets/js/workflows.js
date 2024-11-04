@@ -96,7 +96,6 @@ $(document).ready(function () {
 
   }
 
-  toggleRuleField();
 
   $("#form_action").on("change", function () {
     toggleRuleField();

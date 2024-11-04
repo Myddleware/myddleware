@@ -25,7 +25,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
 use App\Manager\ToolsManager;
-
+use App\Command\SynchroCommand;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -35,12 +37,14 @@ class JobSchedulerController extends AbstractController
     private JobSchedulerManager $jobSchedulerManager;
     private EntityManagerInterface $entityManager;
     private ToolsManager $tools;
+    private SynchroCommand $synchroCommand;
 
-    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools)
+    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools, SynchroCommand $synchroCommand)
     {
         $this->entityManager = $entityManager;
         $this->jobSchedulerManager = $jobSchedulerManager;
         $this->tools = $tools;
+        $this->synchroCommand = $synchroCommand;
     }
 
     /**
@@ -632,6 +636,49 @@ class JobSchedulerController extends AbstractController
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('error', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
+        }
+    }
+
+    /**
+     * @Route("/executeTerminalCommand", name="executeTerminalCommand")
+     */
+    public function executeTerminalCommand(Request $request)
+    {
+        $command = $request->request->get('command');
+        $result = $this->analyzeCommand($command);
+        return $this->json(['result' => $result]);
+    }
+
+    public function analyzeCommand($command)
+    {
+        try {
+
+// Parse the command string to extract the rule ID
+            // Example command: "php bin/console myddleware:synchro 66b3539fde732 --env=background"
+            preg_match('/myddleware:synchro\s+(\S+)/', $command, $matches);
+            
+            if (!isset($matches[1])) {
+                throw new \Exception('Could not extract rule ID from command');
+            }
+            
+            $rule = $matches[1];
+
+            // Create input and output objects
+            $input = new ArrayInput([
+                'rule' => $rule,  // Pass the command as the rule argument
+                'api' => true        // Indicate this is coming from API
+            ]);
+            $output = new NullOutput();
+
+            // Get the command using dependency injection
+            $command = $this->synchroCommand;
+            
+            // Execute the command
+            $returnCode = $command->run($input, $output);
+            
+            return $returnCode === 0 ? 'Command executed successfully' : 'Command failed';
+        } catch (\Exception $e) {
+            return 'Error executing command: ' . $e->getMessage();
         }
     }
 

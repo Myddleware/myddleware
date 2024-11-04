@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'rulegroup.add_rule'|trans }}
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>{{ 'rulegroup.add_rule'|trans }}</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <a href="{{ path('rulegroup_show', {'id': rulegroup.id}) }}" class="btn btn-outline-secondary mt-3">
+            {{ 'rulegroup.back'|trans }}
+        </a>
+    </div>
+{% endblock %} 

@@ -67,6 +67,10 @@ if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
     require('./js/connector_detail.js')
 }
 
+if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
+    require('./js/workflowActionSearchFields.js')
+}
+
 // start the Stimulus application
 import './bootstrap';
 import 'select2/dist/css/select2.css';

@@ -28,6 +28,8 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Table()
@@ -79,6 +81,46 @@ class RuleGroup
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
     private int $deleted;
+
+    /**
+     * @var Collection<int, Rule>
+     * 
+     * @ORM\OneToMany(targetEntity="Rule", mappedBy="group")
+     */
+    private $rules;
+
+    public function __construct()
+    {
+        $this->rules = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection|Rule[]
+     */
+    public function getRules(): Collection
+    {
+        return $this->rules;
+    }
+
+    public function addRule(Rule $rule): self
+    {
+        if (!$this->rules->contains($rule)) {
+            $this->rules[] = $rule;
+            $rule->setGroup($this);
+        }
+        return $this;
+    }
+
+    public function removeRule(Rule $rule): self
+    {
+        if ($this->rules->removeElement($rule)) {
+            // set the owning side to null (unless already changed)
+            if ($rule->getGroup() === $this) {
+                $rule->setGroup(null);
+            }
+        }
+        return $this;
+    }
 
 	
     public function getId(): string

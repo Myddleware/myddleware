@@ -251,7 +251,24 @@ rulegroup:
     delete: Supprimer
     edit: Editer
     updated_successfully: Groupe de règles modifié avec succès
-
+    rules: Liste des règles
+    rule_removed_successfully: Règle supprimée avec succès
+    no_rules: Aucune règle dans ce groupe
+    rule:
+        name: Nom
+        module_source: Module source
+        module_target: Module cible
+        active: Activation
+        confirm_remove_rule: Êtes-vous sûr de vouloir supprimer cette règle du groupe ?
+    add_rule: Ajouter une règle
+    select_rule: Sélectionner une règle
+    rule_added_successfully: Règle ajoutée avec succès
+    confirm_transfer_title: Confirmer le transfert de la règle
+    confirm_transfer_message: La règle "%rule%" est actuellement dans le groupe "%currentGroup%". Voulez-vous la transférer dans "%newGroup%"?
+    confirm_transfer: Oui, transférer la règle
+    cancel: Annuler
+    no_available_rules: Aucune règle disponible
+    confirm_transfer_final: Confirmer et transférer la règle
 list_rule:
     title: Règles
     total: Nombre de règles
@@ -735,6 +752,9 @@ title:
 
 menu:
     index: Accueil
+    rulegroup:
+        title: Groupes de règles
+        list: Groupes de règles
     rule:
         title: Règles
         createv1: Création (v1)

@@ -75,7 +75,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Form\Type\RelationFilterType;
 use App\Entity\Workflow;
-
+use App\Entity\WorkflowAction;
     /**
      * @Route("/rule")
      */
@@ -452,6 +452,8 @@ use App\Entity\Workflow;
                         $this->addFlash('success', $success);
                     }
 
+                    $this->duplicateWorkflows($id, $newRule);
+
                     return $this->redirect($this->generateURL('regle_list'));
                 }
 
@@ -464,6 +466,69 @@ use App\Entity\Workflow;
             } catch (Exception $e) {
                 return new JsonResponse($e->getMessage());
             }
+        }
+
+        public function duplicateWorkflows($id, Rule $newRule)
+        {
+            // start by getting the rule fromthe id
+            $rule = $this->getDoctrine()
+                ->getManager()
+                ->getRepository(Rule::class)
+                ->findOneBy([
+                    'id' => $id,
+                ]);
+
+            // then get all the workflows linked to this rule
+            $workflows = $rule->getWorkflows();
+
+            // then duplicate each workflow, create a new one with the same name and link it to the new rule
+            foreach ($workflows as $workflow) {
+                $newWorkflow = new Workflow();
+                $newWorkflow->setId(uniqid());
+                $newWorkflow->setName($workflow->getName());
+                $newWorkflow->setRule($newRule);
+                $newWorkflow->setDeleted(false);
+                $newWorkflow->setCreatedBy($this->getUser());
+                $newWorkflow->setModifiedBy($this->getUser());
+                $newWorkflow->setDateCreated(new \DateTime());
+                $newWorkflow->setDateModified(new \DateTime());
+                $newWorkflow->setCondition($workflow->getCondition());
+                $newWorkflow->setDescription($workflow->getDescription());
+                $newWorkflow->setActive($workflow->getActive());
+                $newWorkflow->setOrder($workflow->getOrder());
+                $this->entityManager->persist($newWorkflow);
+
+                $this->entityManager->flush();
+
+                $this->duplicateWorkflowActions($workflow, $newWorkflow);
+            }
+
+
+        }
+
+        public function duplicateWorkflowActions(Workflow $workflow, Workflow $newWorkflow): void
+        {
+            // duplicate the actions of the workflow
+            $actions = $workflow->getWorkflowActions();
+            foreach ($actions as $action) {
+                $newAction = new WorkflowAction();
+                $newAction->setId(uniqid());
+                $newAction->setWorkflow($newWorkflow);
+                $newAction->setCreatedBy($this->getUser());
+                $newAction->setModifiedBy($this->getUser());
+                $newAction->setDateCreated(new \DateTime());
+                $newAction->setDateModified(new \DateTime());
+                $newAction->setName($action->getName());
+                $newAction->setAction($action->getAction());
+                $newAction->setDescription($action->getDescription());
+                $newAction->setOrder($action->getOrder());
+                $newAction->setArguments($action->getArguments());
+                $newAction->setDeleted(false);
+                $newAction->setActive($action->getActive());
+                $this->entityManager->persist($newAction);
+            }
+
+            $this->entityManager->flush();
         }
 
         /**

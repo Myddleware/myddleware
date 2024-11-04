@@ -263,6 +263,14 @@ td > a {
 	text-decoration: none;
 }
 
+.unlink_rule_from_group {
+	color: #dc3545 !important;
+}
+
+.unlink_rule_from_group:hover {
+	color: white !important;
+}
+
 td > a:hover {
 	text-shadow: 0.3px 0 0 currentColor, -1px 0 0 currentColor;
 }

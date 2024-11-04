@@ -252,6 +252,24 @@ rulegroup:
     delete: Delete
     edit: Edit
     updated_successfully: Rule group updated successfully
+    rules: List of rules
+    rule_removed_successfully: Rule removed successfully
+    no_rules: No rules in this group
+    rule:
+        name: Name
+        module_source: Source module
+        module_target: Target module
+        active: Active
+        confirm_remove_rule: Are you sure you want to remove this rule from the group?
+    add_rule: 'Add Rule'
+    select_rule: 'Select Rule'
+    rule_added_successfully: 'Rule added successfully'
+    confirm_transfer_title: 'Confirm Rule Transfer'
+    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
+    confirm_transfer: 'Yes, transfer rule'
+    confirm_transfer_final: 'Confirm and transfer rule'
+    cancel: 'Cancel'
+    no_available_rules: 'No available rules'
 
 list_rule:
     title: Rules
@@ -737,6 +755,9 @@ title:
 
 menu:
     index: Homepage
+    rulegroup:
+        title: Rule groups
+        list: Rule groups
     rule:
         title: Rules
         createv1: Creation (v1)

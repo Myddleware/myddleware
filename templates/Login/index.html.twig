@@ -104,7 +104,35 @@
 				<a href="http://www.myddleware.com" class="external-link btn btn-outline-secondary text-white" target="_blank">{{ 'login.btn.here'|trans }}</a>
 			</div>
 		</div>
-		<script type="text/javascript">
-			var path_control = "{#  {{ path('login_protect') }}#}";
-		</script>
-	{% endblock %}
+	</div>
+	<script type="text/javascript">
+		var path_control = "{#{{ path('login_protect') }}#}";
+	</script>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('mydlogin');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        // Handle enter key in username field
+        usernameInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                passwordInput.focus();
+            }
+        });
+
+        // Handle enter key in password field
+        passwordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitButton.click();
+            }
+        });
+    });
+</script>
+{% endblock %}
