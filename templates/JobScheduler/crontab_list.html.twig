@@ -202,27 +202,7 @@
 							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
 						</form>
 
-						<button onclick="openTerminal()" class="btn btn-secondary">
-							<i class="fa fa-terminal"></i> {{ 'Open Terminal'|trans }}
-						</button>
-
 						<script>
-
-function openTerminal() {
-    fetch('{{ path('open_terminal') }}')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Failed to open terminal');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to open terminal');
-							});
-						}
-
-
 							const maxPage = {{ pager.getNbPages() }};
 
 function updateFormAction(event) {
