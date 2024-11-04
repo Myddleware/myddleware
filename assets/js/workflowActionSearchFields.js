@@ -6,10 +6,15 @@ $(document).ready(function () {
         const $searchField = $('#form_searchField');
         
         if (!ruleName) {
-            // If no rule selected, hide all options
+            // If no rule selected, hide all options and show default message
             $searchField.find('optgroup').hide();
-            $searchField.val('');
+            $searchField.find('option').hide();  // Hide the empty option too
+            $searchField.html('<option value="">Please select a rule first</option>');
         } else {
+            // Restore original options if they were replaced
+            if ($searchField.find('optgroup').length === 0) {
+                $searchField.html($searchField.data('original-options'));
+            }
             // Hide all optgroups first
             $searchField.find('optgroup').hide();
             // Show only the optgroup that matches the rule name
@@ -18,6 +23,10 @@ $(document).ready(function () {
             $searchField.val('');
         }
     }
+
+    // Store original options when page loads
+    const $searchField = $('#form_searchField');
+    $searchField.data('original-options', $searchField.html());
 
     // Handle initial load
     const ruleName = $('#form_ruleId option:selected').text();
