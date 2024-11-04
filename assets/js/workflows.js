@@ -1,5 +1,4 @@
 $(document).ready(function () {
-  console.log("workflows.js loaded");
 
   let isEditMode = $("#form_ruleId").val() !== '';
   let isEditModeValue = false; 
@@ -324,7 +323,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Ajouter les options au select
     fields.forEach(function(field) {
-      console.log("field", field);
       const option = document.createElement('option');
       option.value = field;
       option.text = field;
