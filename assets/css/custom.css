@@ -43,9 +43,11 @@ menu .caret, #myd_top .caret {
 }
 
 #fd-title {
-    background: url('./../images/template/fd-title.png') no-repeat;
-    height: 71px;
-    width: 293px;
+    background-color: #444446;
+    border-radius: 0px 40px 40px 0px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+    height: 66px;
+    width: 233px;
     display: inline-block;
     border: none;
     margin: 20px 20px 20px 0px;
@@ -248,3 +250,33 @@ menu .caret, #myd_top .caret {
     border-radius: 25px !important;
 }
 
+.typewriter {
+    display: inline-block;
+    overflow: hidden;
+    border-right: .15em solid #000;
+    white-space: nowrap;
+    margin: 0;
+    letter-spacing: .15em;
+    animation: 
+      typing 2s steps(40, end),
+      blink-caret .75s step-end infinite 0s,
+      hideCursor 0s step-end forwards 2s;
+    width: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 520px }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #000 }
+}
+
+@keyframes hideCursor {
+    to {
+        border-right: transparent;
+    }
+}

@@ -514,11 +514,7 @@ color: #03c4eb!important;
 }
 
 #rule_name{
-	padding: 10px;
-}
-
-#myd_title:has(.rule_list_view) {
-    height: 151px !important;
+	padding: 5px;
 }
 
 .container_filter_step3{

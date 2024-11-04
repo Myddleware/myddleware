@@ -46,10 +46,11 @@
 		</div>
 	{% endfor %}
 			{% if nb > 0 %}
-				<table class="listepager table container">
-					{% if entities is not empty %}	
+				<div class="table-wrapper">
+					<table class="listepager table container shadow-table">
+						{% if entities is not empty %}	
 						<tr>
-							<th>{{'list_task.th.param'|trans}}</th>
+							<th class="rounded-table-up-left">{{'list_task.th.param'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
 							<th>{{'list_task.th.end'|trans}}</th>				
@@ -57,7 +58,7 @@
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
 							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>
+							<th class="rounded-table-up-right">{{'list_task.th.message'|trans}}</th>
 						</tr> 
 						{% for task in entities %}
 							{% if task.message is not empty %}
@@ -87,26 +88,30 @@
 								<span class="label label-warning">{{ task.status }}</span>
 								{% endif %}
 							</td>    
-							<td>{{ task.begin|date("d/m/Y H:i:s", timezone) }}</td>
-							<td>{{ task.end|date("d/m/Y H:i:s", timezone) }}</td>
+							<td class="date_task_list">{{ task.begin|date("d/m/Y H:i:s", timezone) }}</td>
+							<td class="date_task_list">{{ task.end|date("d/m/Y H:i:s", timezone) }}</td>
 							<td class="count">{{ task.open }}</td>    
 							<td class="count">{{ task.close }}</td>
 							<td class="count">{{ task.cancel }}</td> 
 							<td class="count">{{ task.error }}</td>    
 							<td>
-								<div id="message-short-{{ loop.index }}">
-									{{ task.message|slice(0, 100) ~ '...' }}
-									<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
-								</div>
-								<div id="message-full-{{ loop.index }}" style="display: none;">
+								{% if task.message is not empty %}
+									<div id="message-short-{{ loop.index }}">
+										{{ task.message|slice(0, 100) ~ '...' }}
+										<button onclick="document.getElementById('message-short-{{ loop.index }}').style.display='none';document.getElementById('message-full-{{ loop.index }}').style.display='block';">Show more</button>
+									</div>
+									<div id="message-full-{{ loop.index }}" style="display: none;">
+										{{ task.message }}
+										<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
+									</div>
+								{% else %}
 									{{ task.message }}
-									<button onclick="document.getElementById('message-full-{{ loop.index }}').style.display='none';document.getElementById('message-short-{{ loop.index }}').style.display='block';">Show less</button>
-								</div>
+								{% endif %}
 							</td>                     
 						</tr>            
 						{% endfor %}		
-						<tr>
-							<th>{{'list_task.th.id'|trans}}</th>
+						<tr class="invisibele-row-bottom">
+							<th class="rounded-table-down-left">{{'list_task.th.id'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
 							<th>{{'list_task.th.end'|trans}}</th>
@@ -114,10 +119,11 @@
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
 							<th>{{'list_task.th.error'|trans}}</th>	
-							<th>{{'list_task.th.message'|trans}}</th>			
+							<th class="rounded-table-down-right">{{'list_task.th.message'|trans}}</th>			
 						</tr>			
 					{% endif %}
 				</table>
+			</div>
 				<div class="container task-pagination" >
 				{% if pager.haveToPaginate %}
 											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}

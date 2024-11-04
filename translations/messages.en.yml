@@ -31,12 +31,12 @@ panel:
         title2: Need technical assistance
         text1: For any technical issues, bugs, or development-related inquiries, feel free to contact us through the following channels
         text2: Technical contact 
-        text3: GitHub Repository, view or report issues directly on our GitHub
+        text3: GitHub Repository, view or report issues directly on our
         title3: New projects or buisiness opportunities ?
         text4: To discuss a new project, collaboration, or business opportunities, please reach out to us at the following address
         text5: Business contact
     documents:
-        title: Document sent by Myddleware
+        title: Documents sent by Myddleware
     solutions:
         title: Connect your data
         click: Click to see how to create this connector.
@@ -237,6 +237,39 @@ rule:
     yoursource: Your source solution
     yourtarget: Your target solution
     help: What should I do ?
+
+rulegroup:
+    list: Rule groups
+    title: Rule groups
+    create: Create a new rule group
+    back: Back to the list
+    title_one: Rule group
+    name: Name
+    description: Description
+    status: Status
+    create_by: Created by
+    modified_by: Modified by
+    delete: Delete
+    edit: Edit
+    updated_successfully: Rule group updated successfully
+    rules: List of rules
+    rule_removed_successfully: Rule removed successfully
+    no_rules: No rules in this group
+    rule:
+        name: Name
+        module_source: Source module
+        module_target: Target module
+        active: Active
+        confirm_remove_rule: Are you sure you want to remove this rule from the group?
+    add_rule: 'Add Rule'
+    select_rule: 'Select Rule'
+    rule_added_successfully: 'Rule added successfully'
+    confirm_transfer_title: 'Confirm Rule Transfer'
+    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
+    confirm_transfer: 'Yes, transfer rule'
+    confirm_transfer_final: 'Confirm and transfer rule'
+    cancel: 'Cancel'
+    no_available_rules: 'No available rules'
 
 list_rule:
     title: Rules
@@ -702,14 +735,14 @@ title:
         create_name: Creation of the rule
         create: Creation of a rule
         edit: Editing the rule
-        list: Rules list
-        view: Rule form
+        list: Rules
+        view: Rule
     connector:
         create: Creation of a connector
         edit: Editing the connector
-        list: Connectors list
+        list: Connectors
     flux: 
-        list: documents list
+        list: Documents
         view: document form
     task:
         list: Tasks
@@ -723,6 +756,9 @@ title:
 
 menu:
     index: Homepage
+    rulegroup:
+        title: Rule groups
+        list: Rule groups
     rule:
         title: Rules
         createv1: Creation (v1)
@@ -749,10 +785,10 @@ menu:
         stopall: Stop all tasks
 
 breadcrumb:
-    rule_list: Rules list
-    transfert_list: Documents list
-    task_list: Tasks list
-    connector_list: Connectors list
+    rule_list: Rules
+    transfert_list: Documents
+    task_list: Tasks
+    connector_list: Connectors
 
 menu_user:
     account: My account
@@ -1042,7 +1078,7 @@ variable:
     delete: Delete
     view: View
   create_new: Create a new variable
-  list_title: List of Variables
+  list_title: Variables
   confirm_delete: Are you sure you want to delete this variable?
   no_variables: No variables found.
   table_headers:

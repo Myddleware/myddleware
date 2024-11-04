@@ -181,6 +181,10 @@ li span {
     color: white !important;
 }
 
+.select2-selection__choice__remove:hover {
+	background-color: #1475a9 !important;
+}
+
 #globalStatus label{
 	margin-bottom: 8px;
 }
@@ -195,4 +199,63 @@ li span {
 
 .select2-container--default .select2-search--inline .select2-search__field{
 	margin: 6px;
+}
+
+.removeFilters{
+	margin-top: 13px !important;
+    padding: 1px 8px !important;
+}
+
+.rounded-table-up-left {
+    border-top-left-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-up-right {
+    border-top-right-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-down-left {
+    border-bottom-left-radius: 15px;
+	overflow: hidden;
+}
+
+.rounded-table-down-right {
+    border-bottom-right-radius: 15px;
+	overflow: hidden;
+}
+
+.invisibele-row-bottom {
+	border-bottom-color: transparent !important;
+}
+
+.table-wrapper {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    display: inline-block;
+    width: auto;
+}
+
+.table-wrapper-connector {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    display: flex;
+	width: 100%;
+}
+
+.table-wrapper-rule {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    display: flex;
+	width: 100%;
+}
+
+.shadow-table {
+    background-color: white;
+    margin-bottom: 0 !important;
+    width: 100%;
 }

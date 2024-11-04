@@ -91,3 +91,30 @@
 		var path_control = "{#{{ path('login_protect') }}#}";
 	</script>
 {% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('mydlogin');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        // Handle enter key in username field
+        usernameInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                passwordInput.focus();
+            }
+        });
+
+        // Handle enter key in password field
+        passwordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitButton.click();
+            }
+        });
+    });
+</script>
+{% endblock %}

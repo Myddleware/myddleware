@@ -258,9 +258,21 @@ td {
 	text-align: left!important;
 }
 
-td a {
+td > a {
 	color: #337ab7!important;
 	text-decoration: none;
+}
+
+.unlink_rule_from_group {
+	color: #dc3545 !important;
+}
+
+.unlink_rule_from_group:hover {
+	color: white !important;
+}
+
+td > a:hover {
+	font-weight: bold;
 }
 
 .title_source_ctr, .title_target_ctr {

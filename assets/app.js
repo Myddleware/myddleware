@@ -37,7 +37,6 @@ require('./js/animation.js')
 require('./js/task.js')
 require('./js/connector.js')
 require('./js/rule_relation_filter.js')
-require('./js/connector_detail.js')
 require('./js/regle.js')
 
 
@@ -63,8 +62,13 @@ if (window.location.href.includes('rule/managementsmtp')) {
     require('./js/smtp.js')
 }
 
+if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
+    require('./js/connector_detail.js')
+}
 
-
+if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
+    require('./js/workflowActionSearchFields.js')
+}
 
 // start the Stimulus application
 import './bootstrap';

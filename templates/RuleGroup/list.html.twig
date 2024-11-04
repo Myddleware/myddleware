@@ -27,82 +27,58 @@
 {% block title %}
 	{{ parent() }}
 	|
-	{{ 'title.rulegroup.list'|trans }}
+	{{ 'rulegroup.list'|trans }}
 {% endblock %}
 
 {% block titlesm %}
-	{{ 'title.rulegroup.list'|trans }}
+	{{ 'rulegroup.list'|trans }}
 	{% if nb_rulegroup > 0 %}
 		({{ nb_rulegroup }})
 	{% endif %}
 {% endblock titlesm %}
 
 {% block body %}
+
+<div>
+                {% for message in app.flashes('success_rulegroup') %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+		<a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
+	</div>
 	<div id="rulegroups">
-
-		<div>
-        <a href="{{ path('rulegroup_create') }}" class="btn btn-primary mt-4">{{ 'Create new rulegroup'|trans }}</a>
-
-    <div class="link-help-view row text-end mb-4 mx-4">
-		<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-rulegroup">
-			<i class="fa fa-info-circle" aria-hidden="true"></i>
-			{{ 'rule.help' | trans }}
-		</a>
+		<table class="listepager table container">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Date Created</th>
+					<th>Date Modified</th>
+					<th>Created By</th>
+					<th>Modified By</th>
+					<th>Description</th>
+					<th>Deleted</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for ruleGroup in entities %}
+					<tr>
+						<td>{{ ruleGroup.id }}</td>
+						<td>
+							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}">{{ ruleGroup.name }}</a>
+						</td>
+						<td>{{ ruleGroup.dateCreated|date('Y-m-d H:i:s') }}</td>
+						<td>{{ ruleGroup.dateModified|date('Y-m-d H:i:s') }}</td>
+						<td>{{ ruleGroup.createdBy.username }}</td>
+						<td>{{ ruleGroup.modifiedBy.username }}</td>
+						<td>{{ ruleGroup.description }}</td>
+						<td>{{ ruleGroup.deleted ? 'Yes' : 'No' }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 	</div>
-
-    </div>
-
-		<div>
-			{% for message in app.flashes('success') %}
-				<div class="alert alert-success" role="alert">
-					{{ message }}
-				</div>
-			{% endfor %}
-			{% if nb_rulegroup > 0 %}
-				<div class="container d-flex justify-content-center align-items-center">
-					<div class="col-md-6">
-						<form id="rulegroupFilterForm" action="{{ path('rulegroup_list') }}" method="get" class="p-4 rounded">
-							<div class="row g-3 align-items-center">
-								<div class="col-md-6">
-									<div class="form-floating">
-										<input type="text" name="rulegroup_name" id="rulegroup_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rulegroup Name" value="{{ app.request.query.get('rulegroup_name') }}">
-										<label for="rulegroup_name">{{ 'list_rulegroup.searchName'|trans }}</label>
-									</div>
-								</div>
-								<div class="col-md-6">
-									<div class="form-floating">
-										<input type="text" name="rule_name" id="rule_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rule Name" value="{{ app.request.query.get('rule_name') }}">
-										<label for="rule_name">{{ 'list_rulegroup.searchruleName'|trans }}</label>
-									</div>
-								</div>
-							</div>
-						</form>
-					</div>
-				</div>
-
-				<div class="clr"></div>
-				<div id="rulegroupTableContainer">
-					{% include 'Rulegroup/_rulegroup_table.html.twig' %}
-				</div>
-				<div class="d-flex justify-content-center mt-4">
-					{% if pager_rulegroup_list.haveToPaginate %}
-						{{ pagerfanta(pager_rulegroup_list, 'twitter_bootstrap4', {'routeName': 'rulegroup_list_page'}) }}
-					{% endif %}
-				</div>
-			{% else %}
-				<p class="display-6">{{ 'list_rulegroup.empty'|trans }}</p>
-			{% endif %}
-		</div>
-	</div>
-
-	{# ------------- PARAMETRES JQUERY ------------- #}
-	<script type="text/javascript">
-		var rulegroupListUrl = "{{ path('rulegroup_list') }}";
-var path_img = "{{ asset('build/images/regle/') }}";
-var lang = "{{ app.request.locale }}";
-	</script>
-	{# ------------- PARAMETRES JQUERY ------------- #}
-
 {% endblock %}
 
 {% block cssin %}{% endblock cssin %}

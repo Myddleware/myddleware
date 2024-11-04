@@ -36,25 +36,34 @@
 {% endblock titlesm %}
 {% block body %}
 	<div id="rule" class="row justify-content-center pb-4">
+	
+			<div class="row justify-content-center my-4">
+				<div class="col text-center">
+					<a id="exec_all" class="btn btn-primary mt-3" href="{{ path('regle_connector_create') }}" title="" role="button">
+						{{'menu.connector.create'|trans}}
+					</a>
+				</div>
+			</div>
 		<div class="col mt-5">
 			{% if nb > 0 %}
 
 				<div class="row justify-content-center">
 					<div class="col" id="connector-list">
-						<table class="table table-hover align-middle">
-							{% if entities is not empty %}
+						<div class="table-wrapper-connector">
+							<table class="table table-hover align-middle shadow-table">
+								{% if entities is not empty %}
 								<thead>
 									<tr>
-										<th>{{'list_connector.th.name'|trans}}</th>
+										<th class="rounded-table-up-left">{{'list_connector.th.name'|trans}}</th>
 										<th>{{'list_connector.th.date_created'|trans}}</th>
-										<th>{{'list_connector.th.option'|trans}}</th>
+										<th class="rounded-table-up-right">{{'list_connector.th.option'|trans}}</th>
 									</tr>
 								</thead>
 								<tbody>
 									{% for connector in entities %}
 										<tr>
 											<td class="solution_block">
-												<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
+												<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
 													<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt=""/></p>
 													{{connector.0.getName}}
 												</a>
@@ -86,14 +95,15 @@
 											</td>
 										</tr>
 									{% endfor %}
-									<tr>
-										<th>{{'list_connector.th.name'|trans}}</th>
+									<tr class="invisibele-row-bottom">
+										<th class="rounded-table-down-left">{{'list_connector.th.name'|trans}}</th>
 										<th>{{'list_connector.th.date_created'|trans}}</th>
-										<th>{{'list_connector.th.option'|trans}}</th>
+										<th class="rounded-table-down-right">{{'list_connector.th.option'|trans}}</th>
 									</tr>
 								</tbody>
 							{% endif %}
-						</table>
+							</table>
+						</div>
 					</div>
 				</div>
 				<div class="d-flex justify-content-center">

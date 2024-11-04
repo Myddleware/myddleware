@@ -25,7 +25,7 @@
 {% extends 'base.html.twig' %}
 {% block titlesm %}
 	<div class="homepage_welcome m-3">
-		{{'title.index.panel'|trans }}
+		<span class="typewriter">{{'title.index.panel'|trans }}</span>
 		<p class="homepage_welcome_text mt-4">{{'title.index.text'|trans }}</p>
 		<p class="homepage_welcome_text">{{'title.index.text2'|trans }}</p>
 		<button id="bnt_welcome" class="btn btn-dark text-center mt-4" onclick="window.open('https://myddleware.github.io/myddleware/#/', '_blank')">
@@ -47,7 +47,7 @@
 						<div class="row d-flex">
 							<div class="card m-2 info col">
 								<div class="card-body">
-									<span class="icon-container">
+									<span class="icon-container pt-5">
 										<svg
 											class="icon_small_homepage" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512">
 											<!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -56,7 +56,7 @@
 									</span>
 									<div class="text-center">
 										<p id="countNbDocuments">0</p>
-										<h4 class="card-title title_countNbDocuments">{{'panel.documents.title'|trans}}</h4>
+										<h4 class="card-title title_countNbDocuments pt-3 pb-3">{{'panel.documents.title'|trans}}</h4>
 									</div>
 								</div>
 							</div>
@@ -87,23 +87,32 @@
 					</div>
 				</div>
 			</div>
-			{# SOLUTION #}
-			<section class="solution_homepage">
-				<div class="col" id="title_solution_homepage">
+			<section class="solution-home-section">
+				<div class="col" id="title-solution-home">
 					<div class="d-flex justify-content-center my-4">
-						<h3 class="display-6 title_section_homepage">{{'panel.solutions.title'|trans}}</h3>
+						<h3 class="display-6 title-section-home">{{ 'panel.solutions.title'|trans }}</h3>
 					</div>
 				</div>
 				{% if solutions is not empty %}
-					<ul class="inline-images">
-						{% for solution in solutions %}
-							<li class="solution_liste_homepage">
-								<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
-									<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
-								</a>
-							</li>
-						{% endfor %}
-					</ul>
+					<div class="solution-home-scroll-container">
+						<ul class="solution-home-scroll solution-home-list">
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
+							{# Duplicate the list for continuous effect #}
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</div>
 				{% endif %}
 			</section>
 			{# FEATURES #}
@@ -122,7 +131,7 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>Direct job scheduler access in Myddleware</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">Control various processes in Myddleware and monitor their progress, have them run automatically at various intervals. Let Myddleware work for you!</span>
 							</button>
 						</div>
 						<div class="col-md-4 mb-3">
@@ -131,7 +140,7 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>Workflow</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">Let Myddleware execute automatic actions for your documents based on your specific conditions!</span>
 							</button>
 						</div>
 						<div class="col-md-4 mb-3">
@@ -140,7 +149,7 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>Document Mass action</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">Execute actions, such as reload, cancel or delete on multiple documents at once with a single click!</span>
 							</button>
 						</div>
 						<div class="col-md-4 mb-3">
@@ -149,7 +158,7 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>Rule Duplication</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">Duplicate a rule if you need to create a new one with similar settings. It won't affect the original rule in any way, and it's so much faster than creating a new rule from scratch! What's more, if you need to test something for a rule, you can duplicate it, and you immediately have your test rule ready to go!</span>
 							</button>
 						</div>
 						<div class="col-md-4 mb-3">
@@ -158,7 +167,7 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>More document filters</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">Use a wide array of custom filters to refine your search, such as date range, specific document status, document type, document content, etc.</span>
 							</button>
 						</div>
 						<div class="col-md-4 mb-3">
@@ -167,14 +176,15 @@
 									<i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
 								</div>
 								<p>Variables</p>
-								<span class="extra-text" style="display: none;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</span>
+								<span class="extra-text" style="display: none;">You have a word or a number that is the same across many rules and only changes occasionally ? Use the variables so you don't have to change it everywhere at the same time
+</span>
 							</button>
 						</div>
 					</div>
 				</div>
 			</section>
 			{# CONTACT US #}
-			<section class="solution_homepage">
+			<section class="solution-home-section" id="bottom_section_homepage">
 				<div class="col" id="title_solution_homepage">
 					<div class="d-flex justify-content-center my-4">
 						<h3 class="display-6 title_section_homepage">{{'panel.contact.title'|trans}}</h3>
@@ -184,16 +194,18 @@
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title2'|trans}}</h4>
 						<p>{{'panel.contact.text1'|trans}}</p>
-						<p>{{'panel.contact.text2'|trans}}
-							: support@myddleware.com
+						<p>{{'panel.contact.text2'|trans}} :
+							<div class="home-contact">support@myddleware.com</div>
 						</p>
-						<p>{{'panel.contact.text3'|trans}}</p>
+						<p>{{'panel.contact.text3'|trans}} <a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
+</p> 
 					</div>
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title3'|trans}}</h4>
 						<p>{{'panel.contact.text4'|trans}}</p>
-						<p>{{'panel.contact.text5'|trans}}
-							: romanfaure@myddleware.com</p>
+						<p>{{'panel.contact.text5'|trans}} :
+							<div class="home-contact">romanfaure@myddleware.com</div>
+						</p>
 					</div>
 				</div>
 			</section>

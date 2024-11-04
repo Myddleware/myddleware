@@ -52,7 +52,7 @@ use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleParamAudit;
 use App\Entity\RulegroupAction;
-use App\Form\Type\RulegroupType;
+use App\Form\Type\RuleGroupType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
@@ -76,11 +76,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
  * @Route("/rulegroup")
@@ -171,9 +172,7 @@ class RuleGroupController extends AbstractController
     {
         try {
 
-            $rulegroupName = $request->query->get('workflow_name');
-
-            $rulegroupName = 'badla';
+            $rulegroupName = $request->query->get('rulegroup_name');
             
             // Récupérer les filtres depuis la requête
             $criteria = ['deleted' => 0];
@@ -193,18 +192,22 @@ class RuleGroupController extends AbstractController
 
             // Si la requête est AJAX, rendre uniquement la table des rulegroups
             if ($request->isXmlHttpRequest()) {
-                return $this->render('Rulegroup/_rulegroup_table.html.twig', [
+                return $this->render('RuleGroup/_rulegroup_table.html.twig', [
                     'entities' => $pager->getCurrentPageResults(),
                     'pager' => $pager,
                 ]);
             }
 
+            $entities = $pager->getCurrentPageResults();
+
+            $nb_rulegroup = $pager->getNbResults();
+
             // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
-                'Rulegroup/list.html.twig',
+                'RuleGroup/list.html.twig',
                 [
-                    'entities' => $pager->getCurrentPageResults(),
-                    'nb_rulegroup' => $pager->getNbResults(),
+                    'entities' => $entities,
+                    'nb_rulegroup' => $nb_rulegroup,
                     'pager_rulegroup_list' => $pager,
                 ]
             );
@@ -246,35 +249,34 @@ class RuleGroupController extends AbstractController
     // }
 
 
-    // // public function to delet the rulegroup by id (set deleted to 1)
-    // /**
-    //  * @Route("/delete/{id}", name="rulegroup_delete")
-    //  */
-    // public function RulegroupDeleteAction(string $id, Request $request)
-    // {
-    //     try {
+    // public function to delet the rulegroup by id (set deleted to 1)
+    /**
+     * @Route("/delete/{id}", name="rulegroup_delete")
+     */
+    public function RulegroupDeleteAction(string $id, Request $request, TranslatorInterface $translator)
+    {
+        try {
 
 
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupSearchResult[0];
+            $em = $this->getDoctrine()->getManager();
+            $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $rulegroup = $rulegroupSearchResult[0];
 
 
-    //         if ($rulegroup) {
-    //             $this->saveRulegroupAudit($rulegroup->getId());
-    //             $rulegroup->setDeleted(1);
-    //             $em->persist($rulegroup);
-    //             $em->flush();
-    //             $this->addFlash('success', 'Rulegroup deleted successfully');
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //         }
+            if ($rulegroup) {
+                $rulegroup->setDeleted(1);
+                $em->persist($rulegroup);
+                $em->flush();
+                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.deleted_successfully'));
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
+            }
 
-    //         return $this->redirectToRoute('rulegroup_list');
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+            return $this->redirectToRoute('rulegroup_list');
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
     // // public function to save the rulegroupAudit to the database
     // public function saveRulegroupAudit($rulegroupId)
@@ -415,7 +417,7 @@ class RuleGroupController extends AbstractController
     /**
      * @Route("/new", name="rulegroup_create")
      */
-    public function RulegroupCreateAction(Request $request)
+    public function RulegroupCreateAction(Request $request, TranslatorInterface $translator)
     {
         try {
 
@@ -425,7 +427,7 @@ class RuleGroupController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $rulegroup = new Rulegroup();
             $rulegroup->setId(uniqid());
-            $form = $this->createForm(RulegroupType::class, $rulegroup, [
+            $form = $this->createForm(RuleGroupType::class, $rulegroup, [
                 'entityManager' => $em,
             ]);
             $form->handleRequest($request);
@@ -433,19 +435,19 @@ class RuleGroupController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 $rulegroup->setCreatedBy($this->getUser());
                 $rulegroup->setModifiedBy($this->getUser());
+                $rulegroup->setDateCreated(new \DateTime());
+                $rulegroup->setDateModified(new \DateTime());
+                $rulegroup->setDeleted(false);
                 $em->persist($rulegroup);
                 $em->flush();
 
-                // Save the rulegroup audit
-                $this->saveRulegroupAudit($rulegroup->getId());
-
-                $this->addFlash('success', 'Rulegroup created successfully');
+                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.created_successfully'));
 
                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
             }
 
             return $this->render(
-                'Rulegroup/new.html.twig',
+                'RuleGroup/new.html.twig',
                 [
                     'form' => $form->createView(),
                 ]
@@ -455,95 +457,198 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    // /**
-    //  * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
-    //  * @Route("/show/{id}/page-{page}", name="rulegroup_show_page", requirements={"page"="\d+"})
-    //  */
-    // public function RulegroupShowAction(string $id, Request $request, int $page): Response
-    // {
-    //     try {
+    /**
+     * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
+     * @Route("/show/{id}/page-{page}", name="rulegroup_show_page", requirements={"page"="\d+"})
+     */
+    public function RulegroupShowAction(string $id, Request $request, int $page): Response
+    {
+        try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-
-    //         $rulegroupLogs = $em->getRepository(RulegroupLog::class)->findBy(
-    //             ['rulegroup' => $id],
-    //             ['dateCreated' => 'DESC']
-    //         );
-    //         $query = $this->rulegroupLogRepository->findLogsByRulegroupId($id);
-
-    //         $adapter = new QueryAdapter($query);
-    //         $pager = new Pagerfanta($adapter);
-    //         $pager->setMaxPerPage(10);
-    //         $pager->setCurrentPage($page);
-
-    //         if ($rulegroup[0]) {
-    //             $nb_rulegroup = count($rulegroupLogs);
-    //             return $this->render(
-    //                 'Rulegroup/show.html.twig',
-    //                 [
-    //                     'rulegroup' => $rulegroup[0],
-    //                     'rulegroupLogs' => $rulegroupLogs,
-    //                     'nb_rulegroup' => $nb_rulegroup,
-    //                     'pager' => $pager,
-    //                 ]
-    //             );
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //             return $this->redirectToRoute('rulegroup_list');
-    //         }
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+            $em = $this->getDoctrine()->getManager();
+            $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
 
 
-    // // public function to edit a rulegroup
-    // /**
-    //  * @Route("/edit/{id}", name="rulegroup_edit")
-    //  */
-    // public function RulegroupEditAction(string $id, Request $request)
-    // {
-    //     try {
+
+            if ($rulegroup[0]) {
+                return $this->render(
+                    'RuleGroup/show.html.twig',
+                    [
+                        'rulegroup' => $rulegroup[0],
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
+                return $this->redirectToRoute('rulegroup_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
+
+
+    // public function to edit a rulegroup
+    /**
+     * @Route("/edit/{id}", name="rulegroup_edit")
+     */
+    public function RulegroupEditAction(string $id, Request $request, TranslatorInterface $translator)
+    {
+        try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
-    //         $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupArray[0];
+            $em = $this->getDoctrine()->getManager();
+            $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $rulegroup = $rulegroupArray[0];
 
-    //         if ($rulegroup) {
-    //             $form = $this->createForm(RulegroupType::class, $rulegroup, [
-    //                 'entityManager' => $em,
-    //                 'entity' => $rulegroup,
-    //             ]);
-    //             $form->handleRequest($request);
+            if ($rulegroup) {
+                $form = $this->createForm(RulegroupType::class, $rulegroup, [
+                    'entityManager' => $em,
+                ]);
+                $form->handleRequest($request);
 
-    //             if ($form->isSubmitted() && $form->isValid()) {
-    //                 $rulegroup->setModifiedBy($this->getUser());
-    //                 $em->persist($rulegroup);
-    //                 $em->flush();
-    //                 $this->addFlash('success', 'Rulegroup updated successfully');
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $rulegroup->setModifiedBy($this->getUser());
+                    $rulegroup->setDateModified(new \DateTime());
+                    $em->persist($rulegroup);
+                    $em->flush();
+                    $this->addFlash('success_rulegroup', $translator->trans('rulegroup.updated_successfully'));
 
-    //                 $this->saveRulegroupAudit($rulegroup->getId());
+                    return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
+                }
 
-    //                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
-    //             }
+                return $this->render(
+                    'RuleGroup/edit.html.twig',
+                    [
+                        'form' => $form->createView(),
+                        'rulegroup' => $rulegroup,
+                    ]
+                );
+            } else {
+                $this->addFlash('error', 'Rulegroup not found');
 
-    //             return $this->render(
-    //                 'Rulegroup/edit.html.twig',
-    //                 [
-    //                     'form' => $form->createView(),
-    //                     'rulegroup' => $rulegroup,
-    //                 ]
-    //             );
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
+                return $this->redirectToRoute('rulegroup_list');
+            }
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
-    //             return $this->redirectToRoute('rulegroup_list');
-    //         }
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
+    /**
+     * @Route("/rulegroup/{groupId}/remove-rule/{ruleId}", name="rulegroup_remove_rule")
+     */
+    public function removeRule(
+        Request $request, 
+        EntityManagerInterface $entityManager,
+        string $groupId,
+        string $ruleId
+    ): Response {
+        $ruleGroup = $entityManager->getRepository(RuleGroup::class)->find($groupId);
+        $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
+
+        if (!$ruleGroup || !$rule) {
+            throw $this->createNotFoundException('RuleGroup or Rule not found');
+        }
+
+        // Remove the rule from the group
+        $rule->setGroup(null);
+        $entityManager->flush();
+
+        $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_removed_successfully'));
+
+        return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
+    }
+
+    /**
+     * @Route("/add-rule/{id}", name="rulegroup_add_rule")
+     */
+    public function addRuleAction(Request $request, string $id): Response
+    {
+        $ruleGroup = $this->entityManager->getRepository(RuleGroup::class)->find($id);
+        
+        if (!$ruleGroup) {
+            throw $this->createNotFoundException('RuleGroup not found');
+        }
+
+        // Get selected rule ID from request if it exists
+        $selectedRuleId = $request->query->get('rule');
+
+        // Get all active rules except those already in this group
+        $availableRules = $this->entityManager->getRepository(Rule::class)
+            ->createQueryBuilder('r')
+            ->where('r.active = :active')
+            ->andWhere('r.deleted = :deleted')
+            ->andWhere('r.group != :currentGroup OR r.group IS NULL')
+            ->setParameters([
+                'active' => true,
+                'deleted' => false,
+                'currentGroup' => $ruleGroup
+            ])
+            ->orderBy('r.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        if (empty($availableRules)) {
+            $this->addFlash('warning_rulegroup', $this->translator->trans('rulegroup.no_available_rules'));
+            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+        }
+
+        // Create form with rule choices
+        $formBuilder = $this->createFormBuilder();
+        
+        // If we have a selected rule, set it as the default data
+        $defaultData = [];
+        if ($selectedRuleId) {
+            $selectedRule = $this->entityManager->getRepository(Rule::class)->find($selectedRuleId);
+            if ($selectedRule) {
+                $defaultData['rule'] = $selectedRule;
+            }
+        }
+
+        $form = $formBuilder
+            ->setData($defaultData)
+            ->add('rule', EntityType::class, [
+                'class' => Rule::class,
+                'choices' => $availableRules,
+                'choice_label' => 'name',
+                'required' => true,
+                'label' => 'rulegroup.select_rule'
+            ])
+            ->add('confirm', SubmitType::class, [
+                'label' => $request->query->get('confirm') ? 'rulegroup.confirm_transfer_final' : 'rulegroup.add_rule'
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $rule = $form->get('rule')->getData();
+            $currentGroup = $rule->getGroup();
+
+            // If rule is already in another group and transfer not confirmed
+            if ($currentGroup && $currentGroup->getId() !== $id && !$request->query->get('confirm')) {
+                return $this->render('RuleGroup/confirm_transfer.html.twig', [
+                    'rule' => $rule,
+                    'currentGroup' => $currentGroup,
+                    'newGroup' => $ruleGroup,
+                    'form' => $form->createView()
+                ]);
+            }
+
+            // Process the rule transfer
+            $rule->setGroup($ruleGroup);
+            $this->entityManager->persist($rule);
+            $this->entityManager->flush();
+
+            $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_added_successfully'));
+            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+        }
+
+        return $this->render('RuleGroup/add_rule.html.twig', [
+            'form' => $form->createView(),
+            'rulegroup' => $ruleGroup
+        ]);
+    }
+
+    
 }

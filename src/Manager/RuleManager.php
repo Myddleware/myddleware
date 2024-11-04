@@ -1319,6 +1319,11 @@ class rulecore
     protected function runMyddlewareJob($ruleId, $event = null, $documentId = null)
     {
         try {
+            // Check if exec function is disabled
+            if (!function_exists('exec') || in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
+                throw new \Exception('The PHP exec() function is disabled. Please enable it in php.ini to run background jobs.');
+            }
+
             $session = new Session();
             // create temp file
             $guid = uniqid();

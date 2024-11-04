@@ -53,6 +53,11 @@
 											<i class="fa fa-trash" aria-hidden="true"></i>
 										</span>
 									</a>
+									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
+										<span class="btn-opt">
+											<i class="fa fa-file" aria-hidden="true"></i>
+										</span>
+									</a>
 								</td>
 							</tr>
 						{% endfor %}

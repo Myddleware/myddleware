@@ -33,7 +33,7 @@
 		{% block stylesheets %}
 			{{ encore_entry_link_tags('app') }}
 		{% endblock %}
-		<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}"/>
 	</head>
 	<body>
 		<header>
@@ -60,9 +60,9 @@
 						</li>
 						<li class="dropdown">
 							<a class="title_section_menu
-																        {% if app.request.attributes.get('_route') in ['regle_panel', 'regle_stepone_animation', 'regle_list', 'workflow_list', 'variable_list'] %}
-																            active
-																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+																								{% if app.request.attributes.get('_route') in ['regle_panel', 'regle_stepone_animation', 'regle_list', 'workflow_list', 'variable_list'] %}
+																									active
+																								{% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 								{{'menu.rule.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar">
@@ -76,6 +76,12 @@
 									<a class="dropdown-item" href="{{ path('regle_list') }}">
 										<i class="fa fa-th-list" aria-hidden="true"></i>
 										{{'menu.rule.list'|trans}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('rulegroup_list') }}">
+										<i class="fa fa-th-list" aria-hidden="true"></i>
+										{{'menu.rulegroup.list'|trans}}
 									</a>
 								</li>
 								<li>
@@ -95,9 +101,9 @@
 
 						<li class="dropdown">
 							<a class="title_section_menu
-																        {% if app.request.attributes.get('_route') in ['regle_connector_create', 'regle_connector_list'] %}
-																            active
-																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+																																        {% if app.request.attributes.get('_route') in ['regle_connector_create', 'regle_connector_list'] %}
+																																            active
+																																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 								{{'menu.connector.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar">
@@ -115,45 +121,28 @@
 								</li>
 							</ul>
 						</li>
-
 						<li class="dropdown">
 							<a class="title_section_menu
-																        {% if app.request.attributes.get('_route') in ['document_empty_search', 'flux_list'] %}
-																            active
-																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.flux.title'|trans | upper}}
+								            {% if app.request.attributes.get('_route') in ['document_empty_search', 'flux_list'] %}
+								                active
+								            {% endif %}" href="{{ path('document_empty_search') }}">
+								{{ 'menu.flux.title'|trans | upper }}
 							</a>
-							<ul class="dropdown-menu sous_menu_navbar" role="menu">
-								<li>
-									<a class="dropdown-item" href="{{ path('document_empty_search') }}">
-										<i class="fa fa-th-list" aria-hidden="true"></i>
-										{{'menu.flux.list'|trans}}
-									</a>
-								</li>
-							</ul>
 						</li>
 
 						<li class="dropdown">
 							<a class="title_section_menu
-																        {% if app.request.attributes.get('_route') in ['task_list', 'task_stopall'] %}
-																            active
-																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								{{'menu.job.title'|trans | upper}}
+								            {% if app.request.attributes.get('_route') in ['task_list', 'task_stopall'] %}
+								                active
+								            {% endif %}" href="{{ path('task_list') }}">
+								{{ 'menu.job.title'|trans | upper }}
 							</a>
-							<ul class="dropdown-menu sous_menu_navbar">
-								<li>
-									<a class="dropdown-item" href="{{ path('task_list') }}">
-										<i class="fa fa-th-list" aria-hidden="true"></i>
-										{{'menu.task.title'|trans}}
-									</a>
-								</li>
-							</ul>
 						</li>
 
 						<li class="dropdown icon_navbar">
 							<a class="title_section_menu {% if app.request.attributes.get('_route') in ['my_account', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
-								active
-							{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+																								active
+																							{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle svg_user" viewbox="0 0 16 16">
 									<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
 									<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>

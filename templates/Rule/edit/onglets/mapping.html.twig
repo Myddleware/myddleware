@@ -31,11 +31,13 @@
 
 <div id="fd-title" class="left">
 	<p>{{'view_rule.mapping.module_target'|trans}}
-		: {{ rule.getModuleTarget }}
+		:
+		{{ rule.getModuleTarget }}
 	</p>
 	<p></p>
 	<p>{{'view_rule.mapping.module_source'|trans}}
-		: {{ rule.getModuleSource }}
+		:
+		{{ rule.getModuleSource }}
 	</p>
 	<p></p>
 </div>
@@ -65,10 +67,8 @@
 					<i class="fa fa-times close-icon" aria-hidden="true" onclick="closeCommentBox(this)"></i>
 					<p class="comment-text m-2">{{ 'view_rule.mapping.comment'| trans }}</p>
 					<form method="post" action="{{ path('rulefield_update_comment', {'id': f.getId()}) }}">
-						<textarea class="form-control comment-textarea" name="comment" rows="3">
-							{{ f.getComment is not empty ? f.getComment : '' }}
-						</textarea>
-						<button type="submit" class="btn btn-primary m-2">{{ 'view_rule.mapping.add_comment'| trans }}</button>
+						<textarea class="form-control comment-textarea" name="comment" rows="3">{{ f.getComment is not empty ? f.getComment : '' }}</textarea>
+						<button type="submit" class="btn btn-primary m-2">{{ 'view_rule.mapping.add_comment'|trans }}</button>
 					</form>
 				</div>
 				{% if f.getComment is not empty %}
@@ -85,7 +85,9 @@
 <h2>{{'help.title'|trans}}
 	<i class="fa fa-info-circle" aria-hidden="true"></i>
 </h2>
-<p>{{'help.viewrule.mapping'|trans|raw}}</p></div><script>
+<p>{{'help.viewrule.mapping'|trans|raw}}</p></div>
+
+<script>
 function toggleCommentBox(button) {
 const commentBox = button.nextElementSibling;
 if (commentBox.style.display === "block") {
@@ -98,4 +100,5 @@ commentBox.style.display = "block";
 function closeCommentBox(icon) {
 const commentBox = icon.parentElement;
 commentBox.style.display = "none";
-}</script>
+}
+</script>
