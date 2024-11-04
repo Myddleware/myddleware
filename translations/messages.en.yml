@@ -505,8 +505,7 @@ list_task:
 
 
 view_task:
-    empty_log: No log
-    empty_workflow: No workflow  
+    empty_log: No log 
     task_stop: STOP TASK
     refresh: REFRESH
     nblogs: Number of logs  
@@ -783,6 +782,7 @@ menu:
     task:
         title: Tasks
         stopall: Stop all tasks
+    nav_history: Navigation History
 
 breadcrumb:
     rule_list: Rules

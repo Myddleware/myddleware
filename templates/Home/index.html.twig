@@ -93,8 +93,10 @@
 						<h3 class="display-6 title-section-home">{{ 'panel.solutions.title'|trans }}</h3>
 					</div>
 				</div>
+
 				{% if solutions is not empty %}
-					<div class="solution-home-scroll-container">
+				{# Right #}
+					<div class="solution-home-scroll-container scroll-right">
 						<ul class="solution-home-scroll solution-home-list">
 							{% for solution in solutions %}
 								<li class="solution-home-item">
@@ -103,7 +105,25 @@
 									</a>
 								</li>
 							{% endfor %}
-							{# Duplicate the list for continuous effect #}
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</div>
+					{# gauche #}
+					<div class="solution-home-scroll-container scroll-left mb-4">
+						<ul class="solution-home-scroll solution-home-list">
+							{% for solution in solutions %}
+								<li class="solution-home-item">
+									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
+										<img alt="{{ solution }}" src="{{ asset('build/images/solution/' ~ solution ~ '.png') }}">
+									</a>
+								</li>
+							{% endfor %}
 							{% for solution in solutions %}
 								<li class="solution-home-item">
 									<a href="{{ 'view_connector.help.link'|trans }}{{ solution }}" target="_blank">
@@ -115,6 +135,7 @@
 					</div>
 				{% endif %}
 			</section>
+
 			{# FEATURES #}
 			<section class="feature_homepage">
 				<div class="col">
@@ -194,16 +215,19 @@
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title2'|trans}}</h4>
 						<p>{{'panel.contact.text1'|trans}}</p>
-						<p>{{'panel.contact.text2'|trans}} :
+						<p>{{'panel.contact.text2'|trans}}
+							:
 							<div class="home-contact">support@myddleware.com</div>
 						</p>
-						<p>{{'panel.contact.text3'|trans}} <a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
-</p> 
+						<p>{{'panel.contact.text3'|trans}}
+							<a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
+						</p>
 					</div>
 					<div class="contact-panel mx-5">
 						<h4>{{'panel.contact.title3'|trans}}</h4>
 						<p>{{'panel.contact.text4'|trans}}</p>
-						<p>{{'panel.contact.text5'|trans}} :
+						<p>{{'panel.contact.text5'|trans}}
+							:
 							<div class="home-contact">romanfaure@myddleware.com</div>
 						</p>
 					</div>

@@ -446,7 +446,6 @@ flux:
 view_flux:
     empty: Pas de données
     empty_log: Aucune log
-    empty_workflow: Aucun workflow
     target: Cible
     source: Source
     history: Historique
@@ -781,6 +780,7 @@ menu:
     task:
         title: Tâches
         stopall: Arrêter toutes les tâches
+    nav_history: Historique Navigation
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents

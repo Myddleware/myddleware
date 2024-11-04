@@ -1,44 +1,61 @@
 {% extends 'base.html.twig' %}
-{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block titlesm %}
+	{{ 'crontab.title'|trans }}
+{% endblock %}
 {% block body %}
- <div class="container">
-        <div class="row">
-            <div class="col">
-                <div class="mt-5 p-5">
-                <table class="table">
-                    <thead class="table-light">
-                    {{ form_start(form) }} 
-                        <tr>
-                            <th scope="col">{{ 'crontab.period'|trans }}</th>
-                            <th scope="col">{{ 'crontab.command'|trans }}</th>
-                            <th scope="col">{{ 'crontab.description'|trans }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-bs-toggle="tooltip" data-bs-placement="left" title="{{ 'crontab.period_help'|trans }}">
-                                {{ form_widget(form.period, { 'attr': {'placeholder': '* /5 * * * *'} }) }}
-                                {{ form_errors(form.period)}}
-                            </td>
-                            <td>{{ form_widget(form.command, { 'attr': {'placeholder': 'Your command'} }) }}</td>
-                            <td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                    {{ form_widget(form.enable) }}
-                    <div class="col-md-6 m-3">
-                    {{ form_widget(form.save) }}
-                    </div>
-                    {{ form_end(form) }}
-                    <div class="col-md-6 m-3">
-                        <a id="link_button" href="{{ path('jobscheduler_cron_list') }}">
-                            <button type="button" class="btn btn-secondary">
-                            {{ 'jobscheduler.cancel' | trans }}
-                            </button>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div> 
-    </div>
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<div class="mt-5 p-5">
+					<table class="table">
+						<thead class="table-light">
+							{{ form_start(form) }}
+							<tr>
+								<th scope="col">{{ 'crontab.period'|trans }}</th>
+								<th scope="col">{{ 'crontab.command'|trans }}</th>
+								<th scope="col">{{ 'crontab.description'|trans }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td data-bs-toggle="tooltip" data-bs-placement="left" title="{{ 'crontab.period_help'|trans }}">
+									{{ form_widget(form.period, { 'attr': {'placeholder': '* /5 * * * *'} }) }}
+									{{ form_errors(form.period)}}
+								</td>
+								<td>{{ form_widget(form.command, { 'attr': {'placeholder': 'Your command'} }) }}</td>
+								<td>{{ form_widget(form.description, { 'attr': {'placeholder': 'Your description'} }) }}</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="table">
+						<thead class="table-light">
+							{{ form_start(form) }}
+							<tr>
+								<th scope="col">{{ 'crontab.running'|trans }}</th>
+								<th scope="col">{{ 'crontab.max_instance'|trans }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ form_widget(form.runningInstances, { 'attr': {'placeholder': 'Your running instances'} }) }}</td>
+								<td>{{ form_widget(form.maxInstances, { 'attr': {'placeholder': 'Your maxInstances'} }) }}</td>
+							</tr>
+						</tbody>
+					</table>
+					{{ form_widget(form.enable) }}
+					<div class="col-md-6 my-4">
+						{{ form_widget(form.save) }}
+
+						<a id="link_button my-5" href="{{ path('jobscheduler_cron_list') }}">
+							<button type="button" class="btn btn-secondary mx-3">
+								{{ 'jobscheduler.cancel' | trans }}
+							</button>
+						</a>
+					</div>
+					{{ form_end(form) }}
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

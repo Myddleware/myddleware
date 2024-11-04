@@ -38,6 +38,7 @@ require('./js/task.js')
 require('./js/connector.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
+require('./js/historique.js')
 
 
 if (window.location.href.includes('rule/document/list')) {
