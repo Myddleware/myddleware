@@ -105,7 +105,6 @@ $moduleFields = [
         'fullname' => ['label' => 'Full name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'shortname' => ['label' => 'Short name  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'categoryid' => ['label' => 'Category ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
-        'categoryname' => ['label' => 'Category name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
         'idnumber' => ['label' => 'ID number  ', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'summary' => ['label' => 'Summary', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'summaryformat' => ['label' => 'Summary format', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'option' => [
