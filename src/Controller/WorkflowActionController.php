@@ -280,7 +280,18 @@ class WorkflowActionController extends AbstractController
                 $ruleForSearchValue = $workflowAction->getWorkflow()->getRule();
                 // step 2: get the source fields of the rule
                 $sourceFields = $ruleForSearchValue->getSourceFields();
-                $sourceFields['id'] = 'Id';
+                // Find the 'Id' field and move it to the beginning
+                $idKey = array_search('Id', $sourceFields);
+                if ($idKey === false) {
+                    $idKey = array_search('id', $sourceFields);
+                }
+                
+                if ($idKey !== false) {
+                    // Remove Id from its current position
+                    unset($sourceFields[$idKey]);
+                    // Add it to the beginning
+                    $sourceFields = [$idKey => 'id'] + $sourceFields;
+                }
 
                 // step 3: modify the source field so that for each, the key is the value and the value is the value
                 foreach ($sourceFields as $key => $value) {
@@ -314,7 +325,7 @@ class WorkflowActionController extends AbstractController
                     'status' => null,
                     'ruleId' => null,
                     'searchField' => null,
-                    'searchValue' => null,
+                    'searchValue' => 'id',
                     'order' => null,
                     'active' => null,
                     'to' => null,
