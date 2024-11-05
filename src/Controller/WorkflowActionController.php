@@ -302,7 +302,7 @@ class WorkflowActionController extends AbstractController
                 $sourceSearchValue = [];
                 // create an array of all the rules
 
-                $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+                $rules = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
@@ -656,7 +656,7 @@ class WorkflowActionController extends AbstractController
                 $sourceSearchValue = [];
                 // create an array of all the rules
 
-                $rules = $em->getRepository(Rule::class)->findBy(['active' => true]);
+                $rules = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
