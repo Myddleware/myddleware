@@ -8,14 +8,20 @@ $(document).ready(function() {
         $('#form_searchValue').parent().hide();
         $('#form_rule').parent().hide();
         $('#form_rerun').parent().hide();
-        $('#form_subject').val('');
+        $('#form_subject').val(''); 
         $('#form_to').val('');
         $('#form_message').val('');
         $('#form_status').val('');
-        $('#form_searchField').val('');
-        $('#form_searchValue').val('');
+
+        // if the action is changeData, clear the search field and value
+        if ($(this).val() === 'changeData') {
+            $('#form_searchField').val('');
+            $('#form_searchValue').val('');
+            $('#form_rerun').val('');
+        }
+
         $('#form_rule').val('');
-        $('#form_rerun').val('');
+
         $('#form_targetField').val('');
         $('#form_targetFieldValue').val('');
 
