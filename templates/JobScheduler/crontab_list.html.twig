@@ -252,7 +252,7 @@ function executeCommand() {
 		if (data.error) {
 			resultDiv.textContent = 'Error: ' + data.error;
 		} else {
-			resultDiv.textContent = data.result || 'No output';
+			resultDiv.innerHTML = (data.result || 'No output').replace(/\n/g, '<br>');
 		}
 		resultDiv.style.display = 'block';
 	})
