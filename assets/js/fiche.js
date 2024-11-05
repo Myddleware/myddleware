@@ -203,3 +203,20 @@ function recup_params() {
 	return params;
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-button-description');
+    const closeButtons = document.querySelectorAll('.close-button-description');
+    const editForms = document.querySelectorAll('.edit-form');
+
+    editButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            editForms[index].style.display = 'block';
+        });
+    });
+
+    closeButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            editForms[index].style.display = 'none';
+        });
+    });
+});
