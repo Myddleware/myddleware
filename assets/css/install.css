@@ -21,9 +21,6 @@ code {
     border: none;
 }
 
-.main-requirements-box {
-    background: linear-gradient(135deg,#2c2c54,#03c4eb);
-}
 
 .card .card-body {
     padding: 30px;
@@ -53,4 +50,16 @@ aside {
 
 #card-install-blue-like-logo{
     background-color: #198bca !important;
+}
+
+/* New install section */
+
+.main-requirements-box {
+    background: linear-gradient(135deg,#2c2c54,#03c4eb);
+}
+
+.install-step-title {
+    background-color: none !important;
+    color: white;
+    font-weight: bold;
 }
