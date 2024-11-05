@@ -99,7 +99,21 @@
 					</tr>
 					<tr>
 						<td class="title">{{ 'view_rule.infos.name' | trans }}</td>
-						<td class="value">{{ rule.GetName }}</td>
+						<td class="value"> <span class="detail-rule-name">{{ rule.GetName }}</span>
+							<a class="btn btn-sm btn-outline-primary mx-3 edit-button-name">
+								<i class="fa fa-pen" aria-hidden="true"></i>
+							</a>
+							<form class="edit-form-name-rule" style="display:none;" action="{{ path('update_rule_name') }}" method="post">
+								<button type="button" class="close-button-name close-button-name-rule">
+									<i class="fa fa-times close-icon" aria-hidden="true"></i>
+								</button>
+								<input type="text" name="ruleName" class="form-control m-2" data-rule-id="{{ rule.id }}" value="{{ rule.GetName }}"/>
+								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+								<button type="submit" class="btn btn-success m-2">
+									{{ 'Save' | trans }}
+								</button>
+							</form>
+						</td>
 					</tr>
 					<tr>
 						<td class="title">{{ 'view_rule.infos.datecreated' | trans }}</td>
@@ -222,7 +236,9 @@
 									<td>
 										<button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
 										<form class="edit-form edit-form-description-close" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
-											<button type="button" class="close-button-description"><i class="fa fa-times close-icon" aria-hidden="true"></i></button>
+											<button type="button" class="close-button-description">
+												<i class="fa fa-times close-icon" aria-hidden="true"></i>
+											</button>
 											<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
 											<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
 											<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>

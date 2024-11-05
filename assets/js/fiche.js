@@ -179,6 +179,59 @@ $('.edit-form').off('submit').on('submit', function (event) {
 	});
 });
 
+// --For 'rule name' in the detail view of the rule
+$('.edit-button-name').on('click', function () {
+    var field = $(this).closest('td');
+    var editForm = field.find('.edit-form-name-rule');
+    var valueField = field.find('.detail-rule-name');
+    var newValueField = editForm.find('input[name="ruleName"]');
+
+    console.log(valueField.text().trim());
+    console.log(newValueField);
+
+    editForm.show();
+    newValueField.val(valueField.text().trim());
+});
+
+$('.close-button-name').on('click', function () {
+    var editForm = $(this).closest('.edit-form-name-rule');
+    var valueField = editForm.closest('td').find('.rule-name');
+
+    editForm.hide();
+    valueField.show();
+});
+
+$('.edit-form-name-rule').on('submit', function (event) {
+    event.preventDefault();
+
+    var editForm = $(this);
+    var valueField = editForm.closest('td').find('.detail-rule-name');
+    var newValueField = editForm.find('input[name="ruleName"]');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
+
+    if (newValue === "") {
+        alert("Rule name is empty");
+        return;
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: updateUrl,
+        data: {
+            ruleId: ruleId,
+            ruleName: newValue
+        },
+        success: function (response) {
+            valueField.text(newValue);
+            editForm.hide();
+        },
+        error: function (error) {
+            alert("Une erreur s'est produite lors de la mise à jour.");
+        }
+    });
+});
 
 // Récupère la liste des params
 function recup_params() {	

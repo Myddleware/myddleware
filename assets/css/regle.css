@@ -371,19 +371,27 @@ td > a:hover {
 	max-width: 645px;
 }
 
-.close-button-description {
+.close-button-description, .close-button-name-rule  {
     background: none;
     color: #dc3545;
     font-size: 20px;
     cursor: pointer;
     position: absolute;
+}
+.close-button-description {
 	top: -41px;
     right: 10px;
 }
-.close-button-description:hover {
+.close-button-name-rule{  
+	top: 457px;
+    right: 788px;
+}
+
+.close-button-description:hover, .close-button-name-rule:hover {
     color: #cd2536;
 	transform: scale(1.1);
 }
+
 .edit-form-description-close {
     position: relative; 
 }
