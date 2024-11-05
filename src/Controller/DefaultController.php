@@ -3095,12 +3095,11 @@ use App\Entity\WorkflowAction;
             'rule' => $ruleId,
             'name' => 'description'
         ]);
-        // if $description is the same as the previous one or is equal to 0 or is empty
+
         if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
             return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
         }
 
-        // Retrieve the RuleParam entity using the ruleId
         $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
 
         if (!$rule) {
@@ -3125,6 +3124,32 @@ use App\Entity\WorkflowAction;
         return new Response('', Response::HTTP_OK);
     }
 
+    /**
+     * @Route("/rule/update_name", name="update_rule_name", methods={"POST"})
+     */
+    public function updateRuleName(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $name = $request->request->get('ruleName');
+        $entityManager = $this->getDoctrine()->getManager();
+        $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
+
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in the database');
+        }
+
+        if ($name === '0' || empty($name) || $name === $rule->getName()) {
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
+        }
+
+        $rule->setName($name);
+        $nameSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '_', $name), '_'));
+        $rule->setNameSlug($nameSlug);
+
+        $entityManager->flush();
+
+        return new Response('Update successful', Response::HTTP_OK);
+    }
 
 /**
      * @Route("/rulefield/{id}/comment", name="rulefield_update_comment", methods={"POST"})

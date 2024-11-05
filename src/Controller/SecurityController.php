@@ -171,7 +171,7 @@ class SecurityController extends AbstractController
      *
      * @throws Exception
      */
-    public function reset(Request $request, $token,  UserPasswordEncoderInterface $encoder)
+    public function reset(Request $request, $token, UserPasswordEncoderInterface $encoder)
     {
         if (!$token) {
             $form = $this->createForm(UserForgotPasswordType::class);
@@ -181,20 +181,21 @@ class SecurityController extends AbstractController
                 /** @var User|null $user */
                 $user = $this->userRepository->findOneBy(['email' => $email]);
                 if (!$user) {
-                    $form->get('email')->addError(new FormError('Aucune utilisateur avec cet email n\'a été trouvée.'));
+                    $this->addFlash('danger-reset-password', 'No user with this email was found.');
+                    return $this->redirectToRoute('resetting_request');
                 }
 
-                    $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
-                    // dump($user);
-                    $this->entityManager->flush();
+                $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+                $this->entityManager->flush();
 
-                    try {
-                        $this->notificationManager->resetPassword($user);
-
-                        return new Response('Un email a été envoyé sur '.$user->getEmail().' avec un lien de réinitialisation du mot de passe.');
-                    } catch (Exception $e) {
-                        return new Response('Impossible d\'envoyer un email. '.$e->getMessage());
-                    }
+                try {
+                    $this->notificationManager->resetPassword($user);
+                    $this->addFlash('success-reset-password', 'An email has been sent to ' . $user->getEmail() . ' with a password reset link.');
+                    return $this->redirectToRoute('resetting_request');
+                } catch (Exception $e) {
+                    $this->addFlash('danger', 'Unable to send email. ' . $e->getMessage());
+                    return $this->redirectToRoute('resetting_request');
+                }
             }
 
             return $this->render('Login/reset_request.html.twig', [
@@ -213,18 +214,17 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $oldPassword = $request->request->get('reset_password')['oldPassword'];
-            // first we test whether the old password input is correct
             if ($encoder->isPasswordValid($user, $oldPassword)) {
                 $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
                 $user->setPassword($newEncodedPassword);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 
+                $this->addFlash('success', 'Password has been successfully reset.');
                 return $this->redirectToRoute('regle_panel');
             } else {
+                $this->addFlash('danger', 'The old password is incorrect.');
             }
-
-            return $this->redirectToRoute('regle_panel');
         }
 
         return $this->render('Login/reset.html.twig', [
@@ -232,4 +232,5 @@ class SecurityController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
 }

@@ -23,25 +23,40 @@
 *********************************************************************************/ #}
 
 {% extends "baseone.html.twig" %}
-{% block title %}{{ parent() }} | {{ 'login.title'|trans }}{% endblock %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'login.title'|trans }}
+{% endblock %}
 {% set body_class = 'login' %}
 
 {% block body %}
-    <div id="reset_password">
-        {{ form_start(form) }}
-        <div class="input-group row">
-            <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.email ) }}</label>
-            <div class="col-sm-12">
-                {{ form_widget(form.email, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
-                {{ form_errors (form.email) }}
-                <div>
-                    <p><input class="btn-primary rounded" id="reset-password-button-request" type="submit" value="Reset password"></p>
-                </div>
-            </div>
-        </div>
-        {{ form_end(form) }}
-    </div>
-    <script type="text/javascript">
-        var path_control = "{#{{ path('login_protect') }}#}";
-    </script>
+	<div id="reset_password">
+		{% for message in app.flashes('success-reset-password') %}
+			<div class="alert alert-success">
+				{{ message }}
+			</div>
+		{% endfor %}
+		{% for message in app.flashes('danger-reset-password') %}
+			<div class="alert alert-danger">
+				{{ message }}
+			</div>
+		{% endfor %}
+		{{ form_start(form) }}
+		<div class="input-group">
+			<label for="transport" class="col-sm-2 col-form-label">
+				{{ form_label( form.email ) }}</label>
+			<div class="col-sm-12">
+				{{ form_widget(form.email, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
+				{{ form_errors (form.email) }}
+				<div>
+					<p><input class="btn-primary rounded" id="reset-password-button-request" type="submit" value="Reset password"></p>
+				</div>
+			</div>
+		</div>
+		{{ form_end(form) }}
+	</div>
+	<script type="text/javascript">
+		var path_control = "{# {{ path('login_protect') }}#}";
+	</script>
 {% endblock %}
