@@ -29,7 +29,7 @@
 {% block body %}
     <div id="reset_password">
         {{ form_start(form) }}
-        <div class="input-group row">
+        <div class="input-group">
             <label for="transport" class="col-sm-2 col-form-label"> {{ form_label( form.email ) }}</label>
             <div class="col-sm-12">
                 {{ form_widget(form.email, { 'attr': {'class': 'form-control' , 'id' : 'transport'} }) }}
