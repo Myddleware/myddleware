@@ -237,6 +237,8 @@ function toggleTerminalForm() {
 function executeCommand() {
 	const command = document.getElementById('commandInput').value;
 	const resultDiv = document.getElementById('commandResult');
+	resultDiv.style.display = 'block';
+	resultDiv.textContent = 'Executing command...';
 	
 	fetch('{{ path('executeTerminalCommand') }}', {
 		method: 'POST',
@@ -247,11 +249,15 @@ function executeCommand() {
 	})
 	.then(response => response.json())
 	.then(data => {
-		resultDiv.textContent = data.result || 'No output';
+		if (data.error) {
+			resultDiv.textContent = 'Error: ' + data.error;
+		} else {
+			resultDiv.textContent = data.result || 'No output';
+		}
 		resultDiv.style.display = 'block';
 	})
 	.catch(error => {
-		resultDiv.textContent = 'Error executing command';
+		resultDiv.textContent = 'Error executing command: ' + error;
 		resultDiv.style.display = 'block';
 	});
 }
