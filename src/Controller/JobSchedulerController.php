@@ -28,6 +28,7 @@ use App\Manager\ToolsManager;
 use App\Command\SynchroCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -640,46 +641,35 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/executeTerminalCommand", name="executeTerminalCommand")
+     * @Route("/execute-terminal-command", name="executeTerminalCommand")
      */
-    public function executeTerminalCommand(Request $request)
+    public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
     {
         $command = $request->request->get('command');
-        $result = $this->analyzeCommand($command);
-        return $this->json(['result' => $result]);
-    }
-
-    public function analyzeCommand($command)
-    {
-        try {
-
-// Parse the command string to extract the rule ID
-            // Example command: "php bin/console myddleware:synchro 66b3539fde732 --env=background"
-            preg_match('/synchro\s+(\S+)/', $command, $matches);
+        
+        // If the command starts with "synchro", handle it with SynchroCommand
+        if (strpos($command, 'synchro') === 0) {
+            // Extract the rule ID from the command
+            $parts = explode(' ', $command);
+            $ruleId = $parts[1] ?? null;
             
-            if (!isset($matches[1])) {
-                throw new \Exception('Could not extract rule ID from command');
+            if (!$ruleId) {
+                return new JsonResponse(['error' => 'Rule ID is required']);
             }
-            
-            $rule = $matches[1];
 
-            // Create input and output objects
+            ob_start();
             $input = new ArrayInput([
-                'rule' => $rule,  // Pass the command as the rule argument
-                'api' => true        // Indicate this is coming from API
+                'rule' => $ruleId,
+                'force' => false,
             ]);
-            $output = new NullOutput();
+            $output = new BufferedOutput();
+            $synchroCommand->run($input, $output);
+            $result = ob_get_clean();
 
-            // Get the command using dependency injection
-            $command = $this->synchroCommand;
-            
-            // Execute the command
-            $returnCode = $command->run($input, $output);
-            
-            return $returnCode === 0 ? 'Command executed successfully' : 'Command failed';
-        } catch (\Exception $e) {
-            return 'Error executing command: ' . $e->getMessage();
+            return new JsonResponse(['result' => $output->fetch()]);
         }
+        
+        // ... handle other commands as before ...
     }
 
 }
