@@ -655,7 +655,7 @@ class JobSchedulerController extends AbstractController
 
 // Parse the command string to extract the rule ID
             // Example command: "php bin/console myddleware:synchro 66b3539fde732 --env=background"
-            preg_match('/myddleware:synchro\s+(\S+)/', $command, $matches);
+            preg_match('/synchro\s+(\S+)/', $command, $matches);
             
             if (!isset($matches[1])) {
                 throw new \Exception('Could not extract rule ID from command');
