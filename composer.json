@@ -85,7 +85,7 @@
     "symfony/webpack-encore-bundle": "1.16.*",
     "symfony/yaml": "5.4.*",
     "twig/extra-bundle": "3.4.*",
-    "twig/twig": "3.4.*"
+    "twig/twig": "3.11.*"
   },
     "repositories": [
         {
