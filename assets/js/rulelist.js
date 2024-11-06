@@ -43,3 +43,54 @@ $("#rule_name").on("keyup input", function() {
         $('#tbody_rule_list').html(initialTableState);
     }
 });
+
+// --For 'rule name' in the list view
+$('.edit-button-name-list').on('click', function () {        
+    var field = $(this).closest('td'); 
+    var editFormContainer = field.find('.edit-form-container'); 
+    editFormContainer.show();
+});
+
+
+$('.close-button-name-list').on('click', function () {
+    var editFormContainer = $(this).closest('.edit-form-container');
+    editFormContainer.css('display', 'none');
+});
+
+$('.edit-form-name-list').on('submit', function (event) {
+    event.preventDefault();
+
+    var editForm = $(this);
+    var displayText = editForm.closest('td').find('.rule-name-display');
+    var newValueField = editForm.find('input[name="ruleName"]');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
+
+    if (newValue === "") {
+        alert("Le nom de la règle ne peut pas être vide.");
+        return;
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: updateUrl,
+        data: {
+            ruleId: ruleId,
+            ruleName: newValue
+        },
+        success: function (response) {
+            console.log(newValue);
+            console.log(displayText.text());
+            
+            
+            displayText.text(newValue);
+            displayText.show();
+            editForm.closest('.edit-form-container').css('display', 'none');
+        },
+        error: function (error) {
+            console.log(error);
+            alert("Une erreur s'est produite lors de la mise à jour.");
+        }
+    });
+});

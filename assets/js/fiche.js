@@ -186,9 +186,6 @@ $('.edit-button-name').on('click', function () {
     var valueField = field.find('.detail-rule-name');
     var newValueField = editForm.find('input[name="ruleName"]');
 
-    console.log(valueField.text().trim());
-    console.log(newValueField);
-
     editForm.show();
     newValueField.val(valueField.text().trim());
 });
