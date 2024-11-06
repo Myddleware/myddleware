@@ -113,15 +113,6 @@
 	margin-left: 0;
 }
 
-#rule .btn-opt {
-	color: #555555;
-	font-size: 1.2em;
-}
-
-#rule .btn-opt:hover {
-	color: #0F66A9;
-}
-
 #rule th {
 	background: #ECECEC;
 	height: 45px;

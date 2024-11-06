@@ -137,19 +137,19 @@
 												{% endif %}
 											</td>
 											<td class="text-center">
-												<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="text-decoration-none">
+												<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="btn btn-sm btn-outline-primary">
 													<span class="btn-opt">
 														<i class="fa fa-pen" aria-hidden="true"></i>
 													</span>
 												</a>
-												<a class="delete text-decoration-none" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
+												<a class="delete text-decoration-none btn btn-sm btn-outline-danger" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
 													<span class="btn-opt">
 														<i class="fa fa-trash" aria-hidden="true"></i>
 													</span>
 												</a>
-												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="text-decoration-none">
+												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="btn btn-sm btn-outline-primary">
 													<span class="btn-opt">
-														<i class="fa fa-file" aria-hidden="true"></i>
+														<i class="fa fa-eye"></i>
 													</span>
 												</a>
 											</td>
