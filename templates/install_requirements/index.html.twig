@@ -51,7 +51,26 @@
                                         </div>
                                         <div class="card-body">
                                             <p>{{ 'install.note_message' | trans }} :</p>
-                                            <code>symfony check:requirements</code>
+                                            <div class="command-group">
+                                                <div class="command-line">
+                                                    <code>php bin/console symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="php bin/console symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="command-line">
+                                                    <code>bin/console symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="bin/console symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="command-line">
+                                                    <code>symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </aside>
                                     <div class="btn-group">
