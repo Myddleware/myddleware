@@ -105,3 +105,14 @@ button.btn-primary:hover {
     align-items: center;
     flex-direction: column;
 }
+
+#install-requirements-checker-title {
+    font-weight: bold;
+    /* background-color: #03c4ebc4 !important; */
+    background: linear-gradient(135deg,#2c2c54,#03c4eb);
+}
+
+#install-note-title {
+    background: linear-gradient(135deg,#2c2c54,#03c4eb);
+    padding-top: 10px;
+}
