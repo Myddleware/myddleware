@@ -21,8 +21,10 @@
                                 <div class="card-body">
                                     <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
                                     {% if php_version %}
+                                    <div class="row php-version-row">
                                         <p>PHP version : </p>
-                                        <p class="alert-success">{{ php_version }}</p>
+                                        <p id="install-php-version-value" class="alert-success">{{ php_version }}</p>
+                                    </div>
                                     {% else %}
                                     <p>{{ 'install.php_version_not_found' | trans }}</p>
                                     {% endif %}
@@ -53,14 +55,14 @@
                                         </div>
                                     </aside>
                                     <div class="btn-group">
-                                        <button class="btn btn-outline-success btn-lg" onClick="window.location.reload()">
-                                            <i class="fas fa-sync-alt"></i>
+                                        <button id="install-button-check" class="btn btn-primary mb-2" onClick="window.location.reload()">
+                                            <i id="install-button-check-icon" class="fas fa-sync-alt"></i>
                                             {{ 'install.check_button' | trans }}
                                         </button>
                                         {% if not error_messages %} 
-                                        <a href="{{path('database_setup')}}" class="btn btn-outline-primary btn-lg" role="button">
+                                        <a id="install-button-next" href="{{path('database_setup')}}" class="btn btn-primary mb-2" role="button">
                                             {{ 'install.next' | trans }}
-                                            <i class="fas fa-arrow-right"></i>
+                                            <i id="install-button-next-icon" class="fas fa-arrow-right"></i>
                                         </a>
                                         {% endif %}
                                     </div>
