@@ -106,7 +106,7 @@ class RuleGroupController extends AbstractController
     private RuleManager $ruleManager;
     private DocumentManager $documentManager;
     private RulegroupRepository $RuleGroupRepository;
-
+    private ToolsManager $toolsManager;
     protected Connection $connection;
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
@@ -131,7 +131,8 @@ class RuleGroupController extends AbstractController
         JobManager $jobManager,
         TemplateManager $template,
         RulegroupRepository $RuleGroupRepository,
-        ParameterBagInterface $params
+        ParameterBagInterface $params,
+        ToolsManager $toolsManager
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -151,6 +152,7 @@ class RuleGroupController extends AbstractController
         $this->jobManager = $jobManager;
         $this->template = $template;
         $this->RuleGroupRepository = $RuleGroupRepository;
+        $this->toolsManager = $toolsManager;
     }
 
     protected function getInstanceBdd() {}
@@ -171,6 +173,10 @@ class RuleGroupController extends AbstractController
     public function RulegroupListAction(int $page = 1, Request $request)
     {
         try {
+
+            if (!$this->toolsManager->isPremium()) {
+                throw new Exception("RuleGroup list only available with the entreprise package. ");
+            }
 
             $rulegroupName = $request->query->get('rulegroup_name');
             
@@ -257,6 +263,9 @@ class RuleGroupController extends AbstractController
     {
         try {
 
+            if (!$this->toolsManager->isPremium()) {
+                throw new Exception("RuleGroup delete only available with the entreprise package. ");
+            }
 
             $em = $this->getDoctrine()->getManager();
             $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -421,6 +430,9 @@ class RuleGroupController extends AbstractController
     {
         try {
 
+            if (!$this->toolsManager->isPremium()) {
+                throw new Exception("RuleGroup create only available with the entreprise package. ");
+            }
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
@@ -465,7 +477,10 @@ class RuleGroupController extends AbstractController
     {
         try {
 
-            
+            if (!$this->toolsManager->isPremium()) {
+                throw new Exception("RuleGroup show only available with the entreprise package. ");
+            }
+
             $em = $this->getDoctrine()->getManager();
             $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
 
@@ -496,7 +511,10 @@ class RuleGroupController extends AbstractController
     {
         try {
 
-            
+            if (!$this->toolsManager->isPremium()) {
+                throw new Exception("RuleGroup edit only available with the entreprise package. ");
+            }
+
             $em = $this->getDoctrine()->getManager();
             $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
             $rulegroup = $rulegroupArray[0];
@@ -543,6 +561,12 @@ class RuleGroupController extends AbstractController
         string $groupId,
         string $ruleId
     ): Response {
+
+
+        if (!$this->toolsManager->isPremium()) {
+            throw new Exception("RuleGroup remove rule only available with the entreprise package. ");
+        }
+
         $ruleGroup = $entityManager->getRepository(RuleGroup::class)->find($groupId);
         $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
 
@@ -564,6 +588,11 @@ class RuleGroupController extends AbstractController
      */
     public function addRuleAction(Request $request, string $id): Response
     {
+
+        if (!$this->toolsManager->isPremium()) {
+            throw new Exception("RuleGroup add rule only available with the entreprise package. ");
+        }
+
         $ruleGroup = $this->entityManager->getRepository(RuleGroup::class)->find($id);
         
         if (!$ruleGroup) {

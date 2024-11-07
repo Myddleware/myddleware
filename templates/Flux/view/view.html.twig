@@ -30,8 +30,8 @@
 	{{ doc.getId }}
 {% endblock %}
 {% block titlesm %}
-	<a href="{{ path('flux_list', {'search': 1}) }}">{{'breadcrumb.transfert_list'|trans}}</a>
-	<i class="fa fa-chevron-right" aria-hidden="true"></i>
+	<a>{{'breadcrumb.transfert_list'|trans}}</a>
+	<i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
 	{{'title.flux.view'|trans}}
 	{{ doc.getId }}
 {% endblock titlesm %}
@@ -833,8 +833,6 @@
 						</tbody>
 					</table>
 					</div>
-				{% else %}
-					<p>{{'view_flux.empty_workflow'|trans}}</p>
 				{% endif %}
 			</div>
 

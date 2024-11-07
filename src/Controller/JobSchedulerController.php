@@ -25,7 +25,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
 use App\Manager\ToolsManager;
-
+use App\Command\SynchroCommand;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -35,12 +38,14 @@ class JobSchedulerController extends AbstractController
     private JobSchedulerManager $jobSchedulerManager;
     private EntityManagerInterface $entityManager;
     private ToolsManager $tools;
+    private SynchroCommand $synchroCommand;
 
-    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools)
+    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools, SynchroCommand $synchroCommand)
     {
         $this->entityManager = $entityManager;
         $this->jobSchedulerManager = $jobSchedulerManager;
         $this->tools = $tools;
+        $this->synchroCommand = $synchroCommand;
     }
 
     /**
@@ -633,6 +638,38 @@ class JobSchedulerController extends AbstractController
             $this->addFlash('error', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
+    }
+
+    /**
+     * @Route("/execute-terminal-command", name="executeTerminalCommand")
+     */
+    public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
+    {
+        $command = $request->request->get('command');
+        
+        // If the command starts with "synchro", handle it with SynchroCommand
+        if (strpos($command, 'synchro') === 0) {
+            // Extract the rule ID from the command
+            $parts = explode(' ', $command);
+            $ruleId = $parts[1] ?? null;
+            
+            if (!$ruleId) {
+                return new JsonResponse(['error' => 'Rule ID is required']);
+            }
+
+            ob_start();
+            $input = new ArrayInput([
+                'rule' => $ruleId,
+                'force' => false,
+            ]);
+            $output = new BufferedOutput();
+            $synchroCommand->run($input, $output);
+            $result = ob_get_clean();
+
+            return new JsonResponse(['result' => $output->fetch()]);
+        }
+        
+        // ... handle other commands as before ...
     }
 
 }

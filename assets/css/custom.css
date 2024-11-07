@@ -280,3 +280,19 @@ menu .caret, #myd_top .caret {
         border-right: transparent;
     }
 }
+
+.btn {
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+i.fa-sharp.fa-solid.fa-arrow-right.fa-flip.fa-flip {
+    animation-duration: 3s;
+    animation-iteration-count: 2; 
+}
+
+

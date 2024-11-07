@@ -19,8 +19,10 @@ $(document).ready(function () {
             $searchField.find('optgroup').hide();
             // Show only the optgroup that matches the rule name
             $searchField.find(`optgroup[label="${ruleName}"]`).show();
-            // Reset selection
-            $searchField.val('');
+            // Reset selection but only if the action is changeData
+            if ($('#form_action').val() === 'changeData') {
+                $searchField.val('');
+            }
         }
     }
 

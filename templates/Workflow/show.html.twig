@@ -8,11 +8,9 @@
 
 {% block titlesm %}
 	{{ 'view_workflow.title'|trans }}
-	<i class="fa fa-chevron-right" aria-hidden="true"></i>
+	<i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
 	{{ workflow.name }}
 {% endblock titlesm %}
-
-
 {% block body %}
 	<div id="workflows">
 		<div>
@@ -25,7 +23,7 @@
 				{{ 'view_workflow.delete'| trans }}</a>
 		</div>
 
-		<div class="link-help-view row text-end mb-4 mx-4">
+		<div class="link-help-view text-end mb-4 mx-4">
 			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=workflows">
 				<i class="fa fa-info-circle" aria-hidden="true"></i>
 				{{ 'rule.help' | trans }}
