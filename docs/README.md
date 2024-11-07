@@ -88,11 +88,11 @@ yarn build
 
 #### **Donwload zip archive**
 
-Download the Myddleware zip file [here](http://www.myddleware.com/solution/download)
+Download the Myddleware zip file [here](https://web.myddleware.com/wp-content/uploads/2024/11/myddleware.zip)
 
 #### Installing from the archive
 
-Once you've downloaded our ready-to-use [Myddleware archive](http://www.myddleware.com/solution/download), you need to unzip it at the root of your webserver directory (for example /var/www/html). You can unzip it manually or using the following command :
+Once you've downloaded our ready-to-use [Myddleware archive](https://web.myddleware.com/wp-content/uploads/2024/11/myddleware.zip), you need to unzip it at the root of your webserver directory (for example /var/www/html). You can unzip it manually or using the following command :
 
 ```bash
 unzip myddleware.zip -d <myddleware_dirname>
