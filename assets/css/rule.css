@@ -629,3 +629,12 @@ color: #03c4eb!important;
 .trash-icon:hover {
 	color: #dc3545 !important;
 }
+
+.crontab-icon {
+	color: #555555 !important;
+	font-size: 1.2em !important;
+}
+
+.crontab-icon-pen:hover {
+	color: #0F66A9 !important;
+}
