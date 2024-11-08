@@ -42,22 +42,18 @@
 								</td>
 								<td>{{ variable.value }}</td>
 								<td>{{ variable.description }}</td>
-								<td class="CRUD-icons">
-									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
-										<span class="btn-opt">
-											<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
-										<span class="btn-opt">
-											<i class="fa fa-pen" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
-										<span class="btn-opt">
-											<i class="fa fa-trash trash-icon" aria-hidden="true"></i>
-										</span>
-									</a>
+								<td class="text-center CRUD-icons">
+									<div class="d-flex justify-content-center gap-2">
+										<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
+											<i class="fa fa-eye eye-icon btn-opt crontab-icon" aria-hidden="true"></i>
+										</a>
+										<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}" class="text-decoration-none">
+											<i class="fa fa-pen btn-opt crontab-icon crontab-icon-pen" aria-hidden="true"></i>
+										</a>
+										<a class="delete text-decoration-none" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
+											<i class="fa fa-trash trash-icon btn-opt crontab-icon" aria-hidden="true"></i>
+										</a>
+									</div>
 								</td>
 							</tr>
 						{% endfor %}
