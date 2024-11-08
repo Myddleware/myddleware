@@ -83,6 +83,11 @@
 		<div class="login-info-box p-5">
 			<div class="login-info-content">
 				<p>Before trying to log in, please ensure you've completed the installation process</p>
+							{% for message in app.flashes('error_install') %}
+				<div class="alert alert-danger">
+					{{ message }}
+					</div>
+				{% endfor %}
 				<a href="{{ path('install_requirements') }}" class="btn btn-outline-secondary text-white">Install Myddleware</a>
 				{% if platform_sh %}
 					<p>
