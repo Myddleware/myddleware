@@ -43,6 +43,11 @@
 								<td>{{ variable.value }}</td>
 								<td>{{ variable.description }}</td>
 								<td class="CRUD-icons">
+									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
+										<span class="btn-opt">
+											<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
+										</span>
+									</a>
 									<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
 										<span class="btn-opt">
 											<i class="fa fa-pen" aria-hidden="true"></i>
@@ -51,11 +56,6 @@
 									<a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
 										<span class="btn-opt">
 											<i class="fa fa-trash trash-icon" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
-										<span class="btn-opt">
-											<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
 										</span>
 									</a>
 								</td>
