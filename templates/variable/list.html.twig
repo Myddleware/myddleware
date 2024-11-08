@@ -50,7 +50,7 @@
 									</a>
 									<a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
 										<span class="btn-opt">
-											<i class="fa fa-trash" aria-hidden="true"></i>
+											<i class="fa fa-trash trash-icon" aria-hidden="true"></i>
 										</span>
 									</a>
 									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
