@@ -485,7 +485,9 @@ use App\Entity\WorkflowAction;
             foreach ($workflows as $workflow) {
                 $newWorkflow = new Workflow();
                 $newWorkflow->setId(uniqid());
-                $newWorkflow->setName($workflow->getName());
+                $ruleName = substr($newRule->getName(), 0, 5);
+                $workflowName = $workflow->getName();
+                $newWorkflow->setName($workflowName. "-duplicate-".$ruleName);
                 $newWorkflow->setRule($newRule);
                 $newWorkflow->setDeleted(false);
                 $newWorkflow->setCreatedBy($this->getUser());
