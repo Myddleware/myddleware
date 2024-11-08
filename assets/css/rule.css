@@ -621,3 +621,7 @@ color: #03c4eb!important;
 	display: flex;
 	flex-direction: column;
 }
+
+.eye-icon:hover {
+	color: #19ca42 !important;
+}
