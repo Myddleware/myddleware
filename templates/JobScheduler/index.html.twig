@@ -48,11 +48,6 @@
                             {% if entity.active %} true {% else %} false {% endif %}
                         </td>
                         <td class="CRUD-icons">
-                            <a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
-                                <span class="btn-opt">
-                                    <i class="fa fa-eye eye-icon" aria-hidden="true"></i>
-                                </span>
-                            </a>
                             <a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
                                 <span class="btn-opt">
                                     <i class="fa fa-pen" aria-hidden="true"></i>
@@ -61,6 +56,11 @@
                             <a class="delete" href="{{ path('jobscheduler_delete',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.delete'|trans }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
                                 <span class="btn-opt">
                                     <i class="fa fa-trash trash-icon" aria-hidden="true"></i>
+                                </span>
+                            </a>
+                            <a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
+                                <span class="btn-opt">
+                                    <i class="fa fa-eye eye-icon" aria-hidden="true"></i>
                                 </span>
                             </a>
                         </td>
