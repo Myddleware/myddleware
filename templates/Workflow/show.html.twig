@@ -149,6 +149,11 @@
 											{% endif %}
 										</td>
 										<td class="CRUD-icons">
+											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
+												<span class="btn-opt">
+													<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
+												</span>
+											</a>
 											<a href="{{ path('workflow_action_edit', {'id': action.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
 												<span class="btn-opt">
 													<i class="fa fa-pen" aria-hidden="true"></i>
@@ -157,11 +162,6 @@
 											<a class="delete" href="{{ path('workflow_action_delete', {'id': action.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
 												<span class="btn-opt">
 													<i class="fa fa-trash trash-icon" aria-hidden="true"></i>
-												</span>
-											</a>
-											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
-												<span class="btn-opt">
-													<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
 												</span>
 											</a>
 										</td>
