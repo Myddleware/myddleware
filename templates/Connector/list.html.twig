@@ -76,22 +76,18 @@
 													</p>
 												{% endif %}
 											</td>
-											<td class="CRUD-icons">
-												<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-													<span class="btn-opt">
-														<i class="fa fa-eye eye-icon" aria-hidden="true"></i>
-													</span>
-												</a>
-												<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-													<span class="btn-opt">
-														<i class="fa fa-pen" aria-hidden="true"></i>
-													</span>
-												</a>
-												<a class="delete" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
-													<span class="btn-opt">
-														<i class="fa fa-trash trash-icon" aria-hidden="true"></i>
-													</span>
-												</a>
+											<td class="text-center CRUD-icons">
+												<div class="d-flex justify-content-center gap-2">
+													<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="text-decoration-none">
+														<i class="fa fa-eye eye-icon btn-opt" aria-hidden="true"></i>
+													</a>
+													<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="text-decoration-none">
+														<i class="fa fa-pen btn-opt" aria-hidden="true"></i>
+													</a>
+													<a class="delete text-decoration-none" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
+														<i class="fa fa-trash trash-icon btn-opt" aria-hidden="true"></i>
+													</a>
+												</div>
 											</td>
 										</tr>
 									{% endfor %}
