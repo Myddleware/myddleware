@@ -98,6 +98,11 @@
 							<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
 							<td class="value">{{ value.enable }}</td>
 							<td class="CRUD-icons">
+								<a href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
+									<span class="btn-opt">
+										<i class="fa fa-eye eye-icon  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
+									</span>
+								</a>
 								<a href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
 									<span class="btn-opt">
 										<i class="fa fa-pen  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %} " aria-hidden="true"></i>
@@ -106,11 +111,6 @@
 								<a class="delete" href="{{ path('crontab_delete',{'id' : value.id }) }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
 									<span class="btn-opt">
 										<i class="fa fa-trash trash-icon  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
-									</span>
-								</a>
-								<a href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
-									<span class="btn-opt">
-										<i class="fa fa-eye eye-icon  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
 									</span>
 								</a>
 							</td>
