@@ -33,7 +33,12 @@
 						<input class="form-check-input rulegroup-check-input" type="checkbox" id="activeRulegroup_{{ rulegroup.id }}" data-id="{{ rulegroup.id }}" data-type="rulegroup" {{ rulegroup.active ? 'checked' : '' }}>
 					</div>
 				</td>
-				<td class="CRUD-icons">
+				<td class="CRUD-icons">   
+					<a href="{{ path('rulegroup_show', {'id': rulegroup.id}) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-success">
+						<span class="btn-opt">
+							<i class="fa fa-eye" aria-hidden="true"></i>
+						</span>
+					</a>
 					<a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
 						<span class="btn-opt">
 							<i class="fa fa-pen" aria-hidden="true"></i>
@@ -42,11 +47,6 @@
 					<a class="delete btn btn-sm btn-outline-danger" href="{{ path('rulegroup_delete', {'id': rulegroup.id}) }}" onclick="return confirm('Are you sure you want to delete this rulegroup ?');">
 						<span class="btn-opt">
 							<i class="fa fa-trash" aria-hidden="true"></i>
-						</span>
-					</a>
-					<a href="{{ path('rulegroup_show', {'id': rulegroup.id}) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-primary">
-						<span class="btn-opt">
-							<i class="fa fa-eye"></i>
 						</span>
 					</a>
 				</td>

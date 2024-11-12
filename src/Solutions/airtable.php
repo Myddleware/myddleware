@@ -414,7 +414,11 @@ class airtablecore extends solution
                         ++$i;
                         continue;
                     }
-
+					// No action if null is returned
+					if ($data === null) {
+						unset($records[$idDoc]);
+						continue;
+					}
                     $body['records'][$i]['fields'] = $data;
 
                     /*

@@ -39,15 +39,15 @@
 
 {% block body %}
 
-<div>
-                {% for message in app.flashes('success_rulegroup') %}
-                    <div class="alert alert-success">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-		<a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
-	</div>
-	<div id="rulegroups">
+<div class="d-flex align-items-center justify-content-center mb-3 mt-3">
+    {% for message in app.flashes('success_rulegroup') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
+</div>
+<div id="rulegroups">
 		<table class="listepager table container">
 			<thead>
 				<tr>

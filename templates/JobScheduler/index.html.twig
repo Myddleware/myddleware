@@ -68,7 +68,12 @@
 								false
 							{% endif %}
 						</td>
-						<td class="CRUD-icons">
+						<td class="CRUD-icons">        
+							<a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-success">
+								<span class="btn-opt">
+									<i class="fa fa-eye"></i>
+								</span>
+							</a>
 							<a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
 								<span class="btn-opt">
 									<i class="fa fa-pen" aria-hidden="true"></i>
@@ -77,11 +82,6 @@
 							<a class="delete btn btn-sm btn-outline-danger" href="{{ path('jobscheduler_delete',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.delete'|trans }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
 								<span class="btn-opt">
 									<i class="fa fa-trash" aria-hidden="true"></i>
-								</span>
-							</a>
-							<a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-primary">
-								<span class="btn-opt">
-									<i class="fa fa-eye"></i>
 								</span>
 							</a>
 						</td>
@@ -103,3 +103,4 @@
 		<p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
 	</div>
 {% endblock %}
+
