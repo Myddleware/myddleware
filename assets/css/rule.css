@@ -619,3 +619,11 @@ opacity: 0%;
 .col-rule-name:hover .edit-button-name-list{
 	opacity: 100%;
 }
+
+.rule-name-display:hover {
+    color: #0a58ca;
+}
+
+.rule-name-display::after{
+    background-color: #0a58ca;
+}
