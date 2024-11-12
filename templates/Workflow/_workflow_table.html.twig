@@ -1,62 +1,69 @@
-<table class="listepager table container">
-    {% if entities is not empty %}
-        <tr>
-            <th>{{ 'list_workflow.th.name'|trans }}</th>
-            <th>{{ 'list_workflow.th.ruleName'|trans }}</th>
-            <th class="description_workflow_list">{{ 'list_workflow.th.description'|trans }}</th>
-            <th>{{ 'list_workflow.th.condition'|trans }}</th>
-            <th>{{ 'list_workflow.th.order'|trans }}</th>
-            <th>{{ 'list_workflow.th.active'|trans }}</th>
-            <th>{{ 'list_workflow.th.option'|trans }}</th>
-        </tr>
-		{% for workflow in entities %}
-			<tr>
-				<td>
-					<a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a>
-				</td>
-				<td>
-					<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
-						{{ workflow.rule.name }}</a>
-				</td>
-				<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">{% if workflow.description|length > 60 %}
-					{{ workflow.description|slice(0, 30) ~ '...' }}
-						<div id="param-short-{{ loop.index }}">
-							{{ workflow.description|slice(0, 100) ~ '...' }}
-							<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
-						</div>
-						<div id="param-full-{{ loop.index }}" style="display: none;">
-							{{ workflow.description }}
-							<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
-						</div>
-					{% else %}
-						{{ workflow.description }}
-					{% endif %}
-				</td>
-				<td>{{ workflow.condition }}</td>
-				<td>{{ workflow.order }}</td>
-				<td class="value workflow_on_off">
-					<div class="form-check form-switch">
-						<input class="form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
-					</div>
-				</td>
-				<td class="CRUD-icons">
-					<a href="{{ path('workflow_edit', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
-						<span class="btn-opt">
-							<i class="fa fa-pen" aria-hidden="true"></i>
-						</span>
-					</a>
-					<a class="delete" href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
-						<span class="btn-opt">
-							<i class="fa fa-trash" aria-hidden="true"></i>
-						</span>
-					</a>
-					<a href="{{ path('workflow_show', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
-						<span class="btn-opt">
-							<i class="fa fa-eye" aria-hidden="true"></i>
-						</span>
-					</a>
-				</td>
-			</tr>
-		{% endfor %}
-	{% endif %}
-</table>
+<div class="table-wrapper">
+	<table class="listepager table container">
+		{% if entities is not empty %}
+			<thead class="text-center">
+				<tr>
+					<th>{{ 'list_workflow.th.name'|trans }}</th>
+					<th>{{ 'list_workflow.th.ruleName'|trans }}</th>
+					<th class="description_workflow_list">{{ 'list_workflow.th.description'|trans }}</th>
+					<th>{{ 'list_workflow.th.condition'|trans }}</th>
+					<th>{{ 'list_workflow.th.order'|trans }}</th>
+					<th>{{ 'list_workflow.th.active'|trans }}</th>
+					<th>{{ 'list_workflow.th.option'|trans }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for workflow in entities %}
+					<tr>
+						<td>
+							<a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a>
+						</td>
+						<td>
+							<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
+								{{ workflow.rule.name }}</a>
+						</td>
+						<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">
+							{% if workflow.description|length > 60 %}
+								{{ workflow.description|slice(0, 30) ~ '...' }}
+								<div id="param-short-{{ loop.index }}">
+									{{ workflow.description|slice(0, 100) ~ '...' }}
+									<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
+								</div>
+								<div id="param-full-{{ loop.index }}" style="display: none;">
+									{{ workflow.description }}
+									<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
+								</div>
+							{% else %}
+								{{ workflow.description }}
+							{% endif %}
+						</td>
+						<td>{{ workflow.condition }}</td>
+						<td>{{ workflow.order }}</td>
+						<td class="value workflow_on_off">
+							<div class="form-check form-switch">
+								<input class="form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
+							</div>
+						</td>
+						<td class="CRUD-icons">
+							<a href="{{ path('workflow_show', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-success">
+								<span class="btn-opt">
+									<i class="fa fa-eye"></i>
+								</span>
+							</a>
+							<a href="{{ path('workflow_edit', {'id': workflow.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
+								<span class="btn-opt">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</span>
+							</a>
+							<a class="delete btn btn-sm btn-outline-danger" href="{{ path('workflow_delete', {'id': workflow.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
+								<span class="btn-opt">
+									<i class="fa fa-trash" aria-hidden="true"></i>
+								</span>
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+			{% endif %}
+		</tbody>
+	</table>
+</div>

@@ -83,8 +83,15 @@ footer {
 	z-index: 99;
 }
 
-.help-link {
+.help-content-link{
     color: white;
+}
+
+.help-content-link::after{
+    background-color: #03c4eb;
+}
+
+.help-link {
     text-decoration: none;
     position: relative;
     transition: color 0.3s ease;
@@ -97,13 +104,12 @@ footer {
     height: 2px;
     bottom: -2px;
     left: 0;
-    background-color: #03c4eb;
     transform: scaleX(0);
     transform-origin: bottom right;
     transition: transform 0.3s ease;
 }
 
-.help-link:hover {
+.help-content-link:hover {
     color: #03c4eb;
 }
 

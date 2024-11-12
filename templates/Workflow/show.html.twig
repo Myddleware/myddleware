@@ -128,7 +128,7 @@
 										<td>
 											{% if action.arguments is iterable %}
 												<ul>
-												
+
 													{% for key, argument in action.arguments %}
 														<li>{{ key }}:
 															{% if argument is iterable %}
@@ -149,17 +149,17 @@
 											{% endif %}
 										</td>
 										<td class="CRUD-icons">
-											<a href="{{ path('workflow_action_edit', {'id': action.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
+											<a href="{{ path('workflow_action_edit', {'id': action.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}"  class="btn btn-sm btn-outline-primary">
 												<span class="btn-opt">
 													<i class="fa fa-pen" aria-hidden="true"></i>
 												</span>
 											</a>
-											<a class="delete" href="{{ path('workflow_action_delete', {'id': action.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
+											<a class="delete btn btn-sm btn-outline-danger" href="{{ path('workflow_action_delete', {'id': action.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
 												<span class="btn-opt">
 													<i class="fa fa-trash" aria-hidden="true"></i>
 												</span>
 											</a>
-											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
+											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}"  class="btn btn-sm btn-outline-primary">
 												<span class="btn-opt">
 													<i class="fa fa-eye" aria-hidden="true"></i>
 												</span>
@@ -252,41 +252,41 @@
 						</tbody>
 					</table>
 
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
-											
-											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
-												<div class="form-group" required style="width: 15em;">
-													<label for="page" class="sr-only">Page</label>
-													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
-												</div>
-												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >Go to page</button>
-											</form>
-										
-											<script>
-											const maxPage = {{ pager.getNbPages() }};
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
 
-												function updateFormAction(event) {
-													event.preventDefault();
-													const page = document.getElementById('page').value;
-													if (page < 1 || page > maxPage) {
-														alert('Please enter a valid page number between 1 and ' + maxPage);
-														return;
-													}
-													const form = document.getElementById('pageForm');
-													const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
-													const action = baseUrl.replace('/page-1', '/page-' + page);
-													form.action = action;
-													form.submit();
-												}
-											</script>
-										{% endif %}
+						<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
+							<div class="form-group" required style="width: 15em;">
+								<label for="page" class="sr-only">Page</label>
+								<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
+							</div>
+							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
+						</form>
 
-		{% block js %}
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
-		{% endblock js %}
+						<script>
+							const maxPage = {{ pager.getNbPages() }};
 
-	{% endblock %}
+function updateFormAction(event) {
+event.preventDefault();
+const page = document.getElementById('page').value;
+if (page < 1 || page > maxPage) {
+alert('Please enter a valid page number between 1 and ' + maxPage);
+return;
+}
+const form = document.getElementById('pageForm');
+const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
+const action = baseUrl.replace('/page-1', '/page-' + page);
+form.action = action;
+form.submit();
+}
+						</script>
+					{% endif %}
+
+					{% block js %}
+						<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+					{% endblock js %}
+
+				{% endblock %}

@@ -1,84 +1,106 @@
 {% extends 'base.html.twig' %}
-{% block title %}{{ parent() }} | {{ 'jobscheduler.title'|trans }}{% endblock %}
-{% block titlesm %}{{ 'jobscheduler.title'| trans }}{% endblock titlesm %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'jobscheduler.title'|trans }}
+{% endblock %}
+{% block titlesm %}
+	{{ 'jobscheduler.title'| trans }}
+{% endblock titlesm %}
 
 {% block body %}
-    <div id="rule">
-        <div id="fd-title-small" class="left">
-            <p>{{ 'jobscheduler.total'|trans }}<p><span class="nb">{{ entities | length }}</span>
-        </div>
-        <div class="clr"></div>
-        <div class="text-center">
-            <h3 class="display-4">{{ 'jobscheduler.title'|trans }}</h3>
-            <p class="jobscheduler_text">{{'jobscheduler.description.top'|trans|raw}}</p>
-        </div>
-        <div class="block-btn-infos mx-4">
-            <a id="new_jobscheduler" href="{{ path('jobscheduler_new') }}" title="" role="button" class="btn btn-primary">
-                {{ 'jobscheduler.action.new_jobscheduler'|trans }}</a>
-        </div>
-        <table class="listepager table mt-4">
-            {% if entities is not empty %}
-                <tr>
-                    <th>{{ 'jobscheduler.command'|trans }}</th>
-                    <th>{{ 'jobscheduler.paramName1'|trans }}</th>
-                    <th>{{ 'jobscheduler.paramName2'|trans }}</th>
-                    <th>{{ 'jobscheduler.period'|trans }}</th>
-                    <th>{{ 'jobscheduler.job_order'|trans }}</th>
-                    <th>{{ 'jobscheduler.active'|trans }}</th>
-                    <th>{{ 'jobscheduler.actions'|trans }}</th>
-                </tr>
-                {% for entity in entities %}
-                    <tr>
-                        <td>
-                            {{ entity.command }}
-                        </td>
-                        <td class="solution_block">
-                            {% if entity.paramName1 %}{{ entity.paramName1 }} : {{ entity.paramValue1 }}{% endif %}
-                        </td>
-                        <td class="solution_block">
-                            {% if entity.paramName2 %}{{ entity.paramName2 }} : {{ entity.paramValue2 }}{% endif %}
-                        </td>
-                        <td>
-                            {{ entity.period }}
-                        </td>
-                        <td>
-                            {{ entity.jobOrder }}
-                        </td>
-                        <td>
-                            {% if entity.active %} true {% else %} false {% endif %}
-                        </td>
-                        <td class="CRUD-icons">
-                            <a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
-                                <span class="btn-opt">
-                                    <i class="fa fa-pen" aria-hidden="true"></i>
-                                </span>
-                            </a>
-                            <a class="delete" href="{{ path('jobscheduler_delete',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.delete'|trans }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
-                                <span class="btn-opt">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </span>
-                            </a>
-                            <a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
-                                <span class="btn-opt">
-                                    <i class="fa fa-eye" aria-hidden="true"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <th>{{ 'jobscheduler.command'|trans }}</th>
-                    <th>{{ 'jobscheduler.paramName1'|trans }}</th>
-                    <th>{{ 'jobscheduler.paramName2'|trans }}</th>
-                    <th>{{ 'jobscheduler.period'|trans }}</th>
-                    <th>{{ 'jobscheduler.job_order'|trans }}</th>
-                    <th>{{ 'jobscheduler.active'|trans }}</th>
-                    <th>{{ 'jobscheduler.actions'|trans }}</th>
-                </tr>
-            {% endif %}
-        </table>
-    </div>
-    <div class="row text-center">
-        <p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
-    </div>
+	<div id="jobscheduler">
+		<div id="fd-title-small" class="left">
+			<p>{{ 'jobscheduler.total'|trans }}</p>
+			<p>
+				<span class="nb">{{ entities | length }}</span>
+			</p>
+		</div>
+		<div class="clr"></div>
+		<div class="text-center">
+			<h3 class="display-4">{{ 'jobscheduler.title'|trans }}</h3>
+			<p class="jobscheduler_text">{{'jobscheduler.description.top'|trans|raw}}</p>
+		</div>
+		<div class="block-btn-infos mx-4">
+			<a id="new_jobscheduler" href="{{ path('jobscheduler_new') }}" title="" role="button" class="btn btn-primary">
+				{{ 'jobscheduler.action.new_jobscheduler'|trans }}</a>
+		</div>
+		<table class="listepager table mt-4">
+			{% if entities is not empty %}
+				<tr>
+					<th>{{ 'jobscheduler.command'|trans }}</th>
+					<th>{{ 'jobscheduler.paramName1'|trans }}</th>
+					<th>{{ 'jobscheduler.paramName2'|trans }}</th>
+					<th>{{ 'jobscheduler.period'|trans }}</th>
+					<th>{{ 'jobscheduler.job_order'|trans }}</th>
+					<th>{{ 'jobscheduler.active'|trans }}</th>
+					<th>{{ 'jobscheduler.actions'|trans }}</th>
+				</tr>
+				{% for entity in entities %}
+					<tr>
+						<td>
+							{{ entity.command }}
+						</td>
+						<td class="solution_block">
+							{% if entity.paramName1 %}
+								{{ entity.paramName1 }}
+								:
+								{{ entity.paramValue1 }}
+							{% endif %}
+						</td>
+						<td class="solution_block">
+							{% if entity.paramName2 %}
+								{{ entity.paramName2 }}
+								:
+								{{ entity.paramValue2 }}
+							{% endif %}
+						</td>
+						<td>
+							{{ entity.period }}
+						</td>
+						<td>
+							{{ entity.jobOrder }}
+						</td>
+						<td>
+							{% if entity.active %}
+								true
+							{% else %}
+								false
+							{% endif %}
+						</td>
+						<td class="CRUD-icons">        
+							<a href="{{ path('jobscheduler_show',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.view'|trans }}" class="btn btn-sm btn-outline-success">
+								<span class="btn-opt">
+									<i class="fa fa-eye"></i>
+								</span>
+							</a>
+							<a href="{{ path('jobscheduler_edit',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
+								<span class="btn-opt">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</span>
+							</a>
+							<a class="delete btn btn-sm btn-outline-danger" href="{{ path('jobscheduler_delete',{'id' : entity.id }) }}" title="{{ 'list_rule.btn.delete'|trans }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
+								<span class="btn-opt">
+									<i class="fa fa-trash" aria-hidden="true"></i>
+								</span>
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+				<tr>
+					<th>{{ 'jobscheduler.command'|trans }}</th>
+					<th>{{ 'jobscheduler.paramName1'|trans }}</th>
+					<th>{{ 'jobscheduler.paramName2'|trans }}</th>
+					<th>{{ 'jobscheduler.period'|trans }}</th>
+					<th>{{ 'jobscheduler.job_order'|trans }}</th>
+					<th>{{ 'jobscheduler.active'|trans }}</th>
+					<th>{{ 'jobscheduler.actions'|trans }}</th>
+				</tr>
+			{% endif %}
+		</table>
+	</div>
+	<div class="row text-center">
+		<p class="jobscheduler_text">{{'jobscheduler.description.bottom'|trans|raw}}</p>
+	</div>
 {% endblock %}
+

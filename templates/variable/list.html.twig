@@ -17,7 +17,7 @@
 			<a href="{{ path('variable_create') }}" class="btn btn-primary mt-5 mb-5">{{ 'variable.create_new'|trans }}</a>
 		</div>
 
-		<div>
+		<div class="table-wrapper table-wrapper-variable">
 			{% for message in app.flashes('success') %}
 				<div class="alert alert-success" role="alert">
 					{{ message }}
@@ -43,19 +43,19 @@
 								<td>{{ variable.value }}</td>
 								<td>{{ variable.description }}</td>
 								<td class="CRUD-icons">
-									<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}">
+									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none btn btn-sm btn-outline-success">
+										<span class="btn-opt">
+											<i class="fa fa-eye"></i>
+										</span>
+									</a>
+									<a href="{{ path('variable_edit', {'id': variable.id}) }}" title="{{ 'variable.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
 										<span class="btn-opt">
 											<i class="fa fa-pen" aria-hidden="true"></i>
 										</span>
 									</a>
-									<a class="delete" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
+									<a class="delete btn btn-sm btn-outline-danger" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
 										<span class="btn-opt">
 											<i class="fa fa-trash" aria-hidden="true"></i>
-										</span>
-									</a>
-									<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none">
-										<span class="btn-opt">
-											<i class="fa fa-eye" aria-hidden="true"></i>
 										</span>
 									</a>
 								</td>
