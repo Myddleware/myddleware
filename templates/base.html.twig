@@ -62,9 +62,9 @@
 						</li>
 						<li class="dropdown">
 							<a class="title_section_menu
-																																{% if app.request.attributes.get('_route') in ['regle_panel', 'regle_stepone_animation', 'regle_list', 'workflow_list', 'variable_list'] %}
-																																	active
-																																{% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+																																								{% if app.request.attributes.get('_route') in ['regle_panel', 'regle_stepone_animation', 'regle_list', 'workflow_list', 'variable_list'] %}
+																																									active
+																																								{% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 								{{'menu.rule.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar">
@@ -103,9 +103,9 @@
 
 						<li class="dropdown">
 							<a class="title_section_menu
-																																								        {% if app.request.attributes.get('_route') in ['regle_connector_create', 'regle_connector_list'] %}
-																																								            active
-																																								        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+																																																        {% if app.request.attributes.get('_route') in ['regle_connector_create', 'regle_connector_list'] %}
+																																																            active
+																																																        {% endif %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 								{{'menu.connector.title'|trans | upper}}
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar">
@@ -125,18 +125,18 @@
 						</li>
 						<li class="dropdown">
 							<a class="title_section_menu
-																            {% if app.request.attributes.get('_route') in ['document_empty_search', 'flux_list'] %}
-																                active
-																            {% endif %}" href="{{ path('document_empty_search') }}">
+																								            {% if app.request.attributes.get('_route') in ['document_empty_search', 'flux_list'] %}
+																								                active
+																								            {% endif %}" href="{{ path('document_empty_search') }}">
 								{{ 'menu.flux.title'|trans | upper }}
 							</a>
 						</li>
 
 						<li class="dropdown">
 							<a class="title_section_menu
-																            {% if app.request.attributes.get('_route') in ['task_list', 'task_stopall'] %}
-																                active
-																            {% endif %}" href="{{ path('task_list') }}">
+																								            {% if app.request.attributes.get('_route') in ['task_list', 'task_stopall'] %}
+																								                active
+																								            {% endif %}" href="{{ path('task_list') }}">
 								{{ 'menu.job.title'|trans | upper }}
 							</a>
 						</li>
@@ -148,19 +148,20 @@
 									<path fill-rule="evenodd" d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
 								</svg>
 							</a>
-							<ul
-								class="dropdown-menu" aria-labelledby="dropdownNavHistory" id="navHistoryDropdown">
-							</ul>
+							<ul class="dropdown-menu" aria-labelledby="dropdownNavHistory" id="navHistoryDropdown"></ul>
 						</li>
 
 						<li class="dropdown icon_navbar">
 							<a class="title_section_menu {% if app.request.attributes.get('_route') in ['my_account', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
-																																active
-																															{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+																																								active
+																																							{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle svg_user" viewbox="0 0 16 16">
 									<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
 									<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
 								</svg>
+								{% if isPremium() %}
+									<i class="fa-solid fa-star star-icon"></i>
+								{% endif %}
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar" aria-labelledby="dropdownMenuLink">
 								<li>

@@ -3162,6 +3162,6 @@ use App\Entity\WorkflowAction;
         $entityManager->persist($ruleField);
         $entityManager->flush();
 
-        return $this->redirectToRoute('regle_open', ['id' => $ruleField->getRule()->getId()]);
+        return new Response('Update successful', Response::HTTP_OK);
     }
 }
