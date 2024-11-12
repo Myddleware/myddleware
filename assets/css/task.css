@@ -75,7 +75,7 @@
 #task table a, #task table a:hover,
 #workflows table a, #workflows table a:hover, 
 #variables table a, #variables table a:hover {
-    color: #0F66A9;
+    /* color: #0F66A9; */
     text-decoration: none;
 }
 #workflows table a:hover{

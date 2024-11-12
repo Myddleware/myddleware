@@ -46,7 +46,6 @@
 			</div>
 		<div class="col mt-2">
 			{% if nb > 0 %}
-
 				<div class="row justify-content-center">
 					<div class="col" id="connector-list">
 						<div class="table-wrapper-connector">
@@ -77,6 +76,11 @@
 												{% endif %}
 											</td>
 											<td class="CRUD-icons">
+												<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="btn btn-sm btn-outline-success">
+													<span class="btn-opt">
+														<i class="fa fa-eye"></i>
+													</span>
+												</a>
 												<a class="delete btn btn-sm btn-outline-danger" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
 													<span class="btn-opt">
 														<i class="fa fa-trash" aria-hidden="true"></i>
@@ -85,11 +89,6 @@
 												<a href="{{ path('connector_open',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="btn btn-sm btn-outline-primary">
 													<span class="btn-opt">
 														<i class="fa fa-pen" aria-hidden="true"></i>
-													</span>
-												</a>
-												<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="btn btn-sm btn-outline-primary">
-													<span class="btn-opt">
-														<i class="fa fa-eye"></i>
 													</span>
 												</a>
 											</td>
