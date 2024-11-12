@@ -612,3 +612,11 @@ color: #03c4eb!important;
 	display: flex;
 	flex-direction: column;
 }
+
+.edit-button-name-list{
+opacity: 0%;
+}
+
+.col-rule-name:hover .edit-button-name-list{
+	opacity: 100%;
+}
