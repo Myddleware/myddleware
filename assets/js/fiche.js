@@ -135,48 +135,53 @@ $(function() {
 
 // --For 'description' in the detail view of the rule
 $('.edit-button-description').on('click', function () {
-	var field = $(this).closest('td');
-	var editForm = field.find('.edit-form');
-	var valueField = field.find('.value');
-	var newValueField = editForm.find('textarea');
+    var field = $(this).closest('tr');
+    var editForm = field.find('.edit-form');
+    var valueField = field.find('.description-field .value');
+    var newValueField = editForm.find('textarea');
 
-	valueField.hide();
-	editForm.show();
-	newValueField.val(valueField.text().trim());
+    valueField.css('visibility', 'hidden');
+    editForm.show();
+    newValueField.val(valueField.text().trim());
+});
+
+$('.close-button-description').on('click', function () {
+    var editForm = $(this).closest('.edit-form');
+    var field = editForm.closest('tr');
+    var valueField = field.find('.description-field .value');
+
+    editForm.hide();
+    valueField.css('visibility', 'visible');
 });
 
 $('.edit-form').off('submit').on('submit', function (event) {
-	event.preventDefault();
+    event.preventDefault();
 
-	var editForm = $(this);
-	var valueField = editForm.closest('td').find('.value');
-	var newValueField = editForm.find('textarea');
-	var ruleId = editForm.find('input[name="ruleId"]').val();
-	var newValue = newValueField.val().trim();
-	var updateUrl = editForm.attr('action');
+    var editForm = $(this);
+    var field = editForm.closest('tr');
+    var valueField = field.find('.description-field .value');
+    var newValueField = editForm.find('textarea');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
 
-	if (newValue === "") {
-		return;
-	}
-
-	$.ajax({
-		type: 'POST',
-		url: updateUrl,
-		data: {
-			ruleId: ruleId,
-			description: newValue
-		},
-		success: function (response) {
-			valueField.text(newValue);
-			valueField.show();
-			editForm.hide();
-			location.reload();
-		},
-		error: function (error) {
-			console.log(error);
-			alert("Une erreur s'est produite lors de la mise à jour.");
-		}
-	});
+    $.ajax({
+        type: 'POST',
+        url: updateUrl,
+        data: {
+            ruleId: ruleId,
+            description: newValue
+        },
+        success: function (response) {
+            valueField.text(newValue);
+            valueField.css('visibility', 'visible');
+            editForm.hide();
+        },
+        error: function (error) {
+            console.log(error);
+            alert("Une erreur s'est produite lors de la mise à jour.");
+        }
+    });
 });
 
 // --For 'rule name' in the detail view of the rule
@@ -252,21 +257,3 @@ function recup_params() {
 	
 	return params;
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const editButtons = document.querySelectorAll('.edit-button-description');
-    const closeButtons = document.querySelectorAll('.close-button-description');
-    const editForms = document.querySelectorAll('.edit-form');
-
-    editButtons.forEach((button, index) => {
-        button.addEventListener('click', () => {
-            editForms[index].style.display = 'block';
-        });
-    });
-
-    closeButtons.forEach((button, index) => {
-        button.addEventListener('click', () => {
-            editForms[index].style.display = 'none';
-        });
-    });
-});
