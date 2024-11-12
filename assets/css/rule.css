@@ -113,25 +113,24 @@
 	margin-left: 0;
 }
 
-#rule th {
+#rule th, #connector th, #jobscheduler th, #workflowTableContainer th {
 	background: #ECECEC;
 	height: 45px;
 	padding: 10px;
 	text-align: center;
 }
 
-#rule tr {
+#rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr {
 	border-bottom: 1px solid #ccc;	
 }
 
-#rule td.lft > a{
+#rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a{
 	color: black;
 }
 
-#rule .vignette {
+#rule .vignette, #connector .vignette, #jobscheduler .vignette {
 	width: 50px;
 }
-
 
 /* relate */
 
