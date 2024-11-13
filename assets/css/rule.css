@@ -627,3 +627,16 @@ opacity: 0%;
 .rule-name-display::after{
     background-color: #0a58ca;
 }
+
+#deletion-rule-tr-deletion {
+	border-bottom: none !important;
+	border-bottom-width: 0px !important;
+}
+
+#deletion-rule-left-deletion {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-deletion {
+	border-bottom: none !important;
+}

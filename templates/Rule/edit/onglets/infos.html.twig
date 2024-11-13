@@ -162,9 +162,9 @@
 					{% endif %}
 					{% if params_suite.customParams is defined and params_suite.customParams is not empty %}
 						{% for r in params_suite.customParams %}
-							<tr>
-								<td class="title">{{ r.name }}</td>
-								<td class="value">
+							<tr id="deletion-rule-tr-{{ r.name }}">
+								<td id="deletion-rule-left-{{ r.name }}" class="title rounded-table-down-left">{{ r.name }}</td>
+								<td id="deletion-rule-right-{{ r.name }}" class="value rounded-table-down-right">
 									<span class="label label-default">{{ r.value }}</span>
 								</td>
 							</tr>
