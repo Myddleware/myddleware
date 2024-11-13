@@ -481,7 +481,20 @@ view_flux:
         job: Job
         date_created: Date de création
         type: Type
-        msg: Message
+        msg: Message    
+    workflow_log:
+        id: Id
+        workflow: Workflow
+        job: Job
+        trigger_document: Document déclencheur
+        generate_document: Document généré
+        created_by: Créé par
+        status: Statut
+        date_created: Date de création
+        message: Message
+        action_name: Nom de l'action
+        action_type: Type d'action
+
 
 list_task:
     total: Total de tâches
