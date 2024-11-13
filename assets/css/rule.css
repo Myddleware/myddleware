@@ -652,3 +652,7 @@ opacity: 0%;
 #deletion-rule-left-description {
 	border-bottom: none !important;
 }
+
+#description-field-value {
+	padding-left: 1em;
+}
