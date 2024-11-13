@@ -183,12 +183,12 @@
 
 	</div>
 	<script type="text/javascript">
-
 		var chemin_img = "{{ asset('build/images/regle/') }}";
-var question = "Désirez-vous supprimer cette règle ?";
-var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
-var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
-var regle_list = "{{ path('regle_list') }}";
+		var question = "Désirez-vous supprimer cette règle ?";
+		var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
+		var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
+		var regle_list = "{{ path('regle_list') }}";
+		var checkRuleNameUrlList = "{{ path('check_rule_name') }}";
 	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}

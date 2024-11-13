@@ -379,8 +379,8 @@ td > a {
     right: 10px;
 }
 .close-button-name-rule{  
-	top: 457px;
-    right: 788px;
+    top: -35px;
+    right: 5px;
 }
 
 .close-button-description:hover, .close-button-name-rule:hover {
@@ -390,4 +390,8 @@ td > a {
 
 .edit-form-description-close {
     position: relative; 
+}
+
+.edit-form-name-rule {
+	position: relative;
 }
