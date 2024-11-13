@@ -656,3 +656,7 @@ opacity: 0%;
 #description-field-value {
 	padding-left: 1em;
 }
+
+.inner-table-workflow {
+	padding: 0px 0px !important;
+}
