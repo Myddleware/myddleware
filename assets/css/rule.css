@@ -640,3 +640,15 @@ opacity: 0%;
 #deletion-rule-right-deletion {
 	border-bottom: none !important;
 }
+
+#deletion-rule-tr-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-left-description {
+	border-bottom: none !important;
+}

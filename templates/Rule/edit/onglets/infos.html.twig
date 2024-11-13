@@ -229,13 +229,13 @@
 					<tbody>
 						{% for param in rule.params %}
 							{% if param.name == 'description' %}
-								<tr>
-									<td class="value">
+								<tr id="deletion-rule-tr-description">
+									<td id="deletion-rule-left-description" class="value rounded-table-down-left ">
 										<div class="description-field">
 											<div class="value">{{ param.value }}</div>
 										</div>
 									</td>
-									<td>
+									<td id="deletion-rule-right-description" class="rounded-table-down-right">
 										<button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
 										<form class="edit-form edit-form-description-close" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
 											<button type="button" class="close-button-description">
