@@ -275,7 +275,7 @@
 									<tbody>
 										{% for workflow in sorted_workflows %}
 											<tr data-toggle="tooltip" title="{{ workflow.description }}">
-												<td class="title">
+												<td class="title rounded-table-down-left">
 													<a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
 														{{ workflow.name }}
 													</a>
@@ -283,7 +283,7 @@
 												<td class="title">
 													{{ workflow.order }}
 												</td>
-												<td class="value">
+												<td class="value rounded-table-down-right">
 													<div class="form-check form-switch">
 														<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
 													</div>
