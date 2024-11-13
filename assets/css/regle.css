@@ -271,10 +271,6 @@ td > a {
 	color: white !important;
 }
 
-td > a:hover {
-	text-shadow: 0.3px 0 0 currentColor, -1px 0 0 currentColor;
-}
-
 .title_source_ctr, .title_target_ctr {
 	font-weight: bold;
 }

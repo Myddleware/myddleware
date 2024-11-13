@@ -78,9 +78,6 @@
     /* color: #0F66A9; */
     text-decoration: none;
 }
-#workflows table a:hover{
-    font-weight: bold;
-}
 
 #task #headertab, #workflows #headertab, #variables #headertab {
     margin-top:20px;

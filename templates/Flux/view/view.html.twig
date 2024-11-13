@@ -101,7 +101,7 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
+							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
 						</td>
 						{# <a href="{{ path('flux_info_page',{'id' : firstParentDocumentId, 'page' : 1, 'logPage' : 1 }) }}">{{ firstParentDocumentId }}</a #}
 						<td class="ctr">
@@ -294,10 +294,10 @@
 								{% for flux in post_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
-											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a>
+											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(post_Documents_Rule,flux.id) }}</a>
 										</td>
 										<td class="ctr">{{ flux.source }}</td>
 										<td class="ctr">{{ flux.target }}</td>
@@ -387,10 +387,10 @@
 												<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
 												</svg>
 											{% endif %}
-													<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+													<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
 												</td>
 												<td class="ctr">
-													<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
+													<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
 												</td>
 												<td class="ctr">{{ flux.source }}</td>
 												<td class="ctr">{{ flux.target }}</td>
@@ -472,10 +472,10 @@
 									{% for flux in parent_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
-												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
+												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
 											</td>
 											<td class="ctr">{{ flux.sourceField }}</td>
 											<td class="ctr">{{ flux.source }}</td>
@@ -556,10 +556,10 @@
 									{% for flux in child_documents %}
 										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 											<td class="ctr">
-												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
 											</td>
 											<td class="ctr">
-												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a>
+												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(child_Documents_Rule,flux.id) }}</a>
 											</td>
 											<td class="ctr">id</td>
 											<td class="ctr">{{ flux.source }}</td>
@@ -667,7 +667,7 @@
 											<td>
 
 												{% if log.getRef is not empty %}
-													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
+													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}" class="help-link all-link">
 														{{ log.getRef }}
 													</a>
 												{% else %}
@@ -676,7 +676,7 @@
 											</td>
 											<td>
 												{% if log.getJob is not empty %}
-													<a href="{{ path('task_view', {'id':log.getJob.id}) }}">{{ log.getJob.id }}</a>
+													<a href="{{ path('task_view', {'id':log.getJob.id}) }}" class="help-link all-link">{{ log.getJob.id }}</a>
 												{% endif %}
 											</td>
 											<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
@@ -808,15 +808,15 @@
 							{% for log in workflowLogs %}
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 									<td class="ctr">{{ log.id }}</td>
-									<td class="ctr"><a href="{{ path('workflow_show', {'id': log.workflow.id}) }}">{{ log.workflow.name }}</a></td>
+									<td class="ctr"><a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a></td>
 									<td class="ctr">{{ log.job.id }}</td>
 									<td class="ctr">    {% if log.triggerDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
+										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
 									{% else %}
 										<span></span>
 									{% endif %}</td>
 									<td class="ctr">    {% if log.generateDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
+										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
 									{% else %}
 										<span></span>
 									{% endif %}</td>
@@ -826,7 +826,7 @@
 									</td>
 									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
 									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
+									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a></td>
 									<td class="ctr">{{ log.action.action }}</td>
 								</tr>
 							{% endfor %}
