@@ -660,3 +660,8 @@ opacity: 0%;
 .inner-table-workflow {
 	padding: 0px 0px !important;
 }
+
+.border-bottom-connector-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
+}
