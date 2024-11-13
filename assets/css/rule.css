@@ -620,11 +620,11 @@ opacity: 0%;
 	opacity: 100%;
 }
 
-.rule-name-display:hover {
+.all-link:hover {
     color: #0a58ca;
 }
 
-.rule-name-display::after{
+.all-link::after {
     background-color: #0a58ca;
 }
 

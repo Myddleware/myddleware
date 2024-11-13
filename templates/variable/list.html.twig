@@ -38,7 +38,7 @@
 						{% for variable in variables %}
 							<tr>
 								<td>
-									<a href="{{ path('variable_show', {'id': variable.id}) }}">{{ variable.name }}</a>
+									<a href="{{ path('variable_show', {'id': variable.id}) }}" class="help-link all-link">{{ variable.name }}</a>
 								</td>
 								<td>{{ variable.value }}</td>
 								<td>{{ variable.description }}</td>

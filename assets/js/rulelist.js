@@ -68,29 +68,40 @@ $('.edit-form-name-list').on('submit', function (event) {
     var updateUrl = editForm.attr('action');
 
     if (newValue === "") {
-        alert("Le nom de la règle ne peut pas être vide.");
+        alert("Rule name is empty");
         return;
     }
 
     $.ajax({
-        type: 'POST',
-        url: updateUrl,
+        type: 'GET',
+        url: checkRuleNameUrlList,
         data: {
             ruleId: ruleId,
             ruleName: newValue
         },
         success: function (response) {
-            console.log(newValue);
-            console.log(displayText.text());
-            
-            
-            displayText.text(newValue);
-            displayText.show();
-            editForm.closest('.edit-form-container').css('display', 'none');
+            if (response.exists) {
+                alert("This rule name already exists. Please choose a different name.");
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: updateUrl,
+                    data: {
+                        ruleId: ruleId,
+                        ruleName: newValue
+                    },
+                    success: function (response) {
+                        displayText.text(newValue);
+                        editForm.closest('.edit-form-container').css('display', 'none');
+                    },
+                    error: function (error) {
+                        alert("An error occurred while updating the rule name.");
+                    }
+                });
+            }
         },
         error: function (error) {
-            console.log(error);
-            alert("Une erreur s'est produite lors de la mise à jour.");
+            alert("An error occurred while checking the rule name.");
         }
     });
 });

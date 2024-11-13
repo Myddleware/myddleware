@@ -16,10 +16,10 @@
 				{% for workflow in entities %}
 					<tr>
 						<td>
-							<a href="{{ path('workflow_show', {'id': workflow.id}) }}">{{ workflow.name }}</a>
+							<a href="{{ path('workflow_show', {'id': workflow.id}) }}" class="help-link all-link">{{ workflow.name }}</a>
 						</td>
 						<td>
-							<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none">
+							<a href="{{ path('regle_open',{'id' : workflow.rule.id }) }}" title="{{ workflow.rule.name }}" class="text-decoration-none help-link all-link">
 								{{ workflow.rule.name }}</a>
 						</td>
 						<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">

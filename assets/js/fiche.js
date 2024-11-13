@@ -219,18 +219,35 @@ $('.edit-form-name-rule').on('submit', function (event) {
     }
 
     $.ajax({
-        type: 'POST',
-        url: updateUrl,
+        type: 'GET',
+        url: checkRuleNameUrl,
         data: {
             ruleId: ruleId,
             ruleName: newValue
         },
         success: function (response) {
-            valueField.text(newValue);
-            editForm.hide();
+            if (response.exists) {
+                alert("This rule name already exists. Please choose a different name.");
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: updateUrl,
+                    data: {
+                        ruleId: ruleId,
+                        ruleName: newValue
+                    },
+                    success: function (response) {
+                        valueField.text(newValue);
+                        editForm.hide();
+                    },
+                    error: function (error) {
+                        alert("An error occurred while updating the rule name.");
+                    }
+                });
+            }
         },
         error: function (error) {
-            alert("Une erreur s'est produite lors de la mise à jour.");
+            alert("An error occurred while checking the rule name.");
         }
     });
 });

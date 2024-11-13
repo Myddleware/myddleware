@@ -271,10 +271,6 @@ td > a {
 	color: white !important;
 }
 
-td > a:hover {
-	text-shadow: 0.3px 0 0 currentColor, -1px 0 0 currentColor;
-}
-
 .title_source_ctr, .title_target_ctr {
 	font-weight: bold;
 }
@@ -383,8 +379,8 @@ td > a:hover {
     right: 10px;
 }
 .close-button-name-rule{  
-	top: 457px;
-    right: 788px;
+    top: -35px;
+    right: 5px;
 }
 
 .close-button-description:hover, .close-button-name-rule:hover {
@@ -394,4 +390,8 @@ td > a:hover {
 
 .edit-form-description-close {
     position: relative; 
+}
+
+.edit-form-name-rule {
+	position: relative;
 }
