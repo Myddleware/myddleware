@@ -316,7 +316,8 @@
 	{% endblock %}
 	<script type="text/javascript">
 		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success' | trans }}";
-var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
-var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
+		var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
+		var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
+		var checkRuleNameUrl = "{{ path('check_rule_name') }}";
 	</script>
 {% endblock %}

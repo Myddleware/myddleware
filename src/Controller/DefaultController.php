@@ -3153,7 +3153,27 @@ use App\Entity\WorkflowAction;
         return new Response('Update successful', Response::HTTP_OK);
     }
 
-/**
+    /**
+     * @Route("/check-rule-name", name="check_rule_name", methods={"GET"})
+     */
+    public function checkRuleName(Request $request): JsonResponse
+    {
+        $name = $request->query->get('ruleName');
+        $ruleId = $request->query->get('ruleId');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $ruleRepository = $entityManager->getRepository(Rule::class);
+
+        $existingRule = $ruleRepository->findOneBy(['name' => $name]);
+        
+        if ($existingRule && $existingRule->getId() !== $ruleId) {
+            return new JsonResponse(['exists' => true]);
+        }
+
+        return new JsonResponse(['exists' => false]);
+    }
+
+    /**
      * @Route("/rulefield/{id}/comment", name="rulefield_update_comment", methods={"POST"})
      */
     public function updateComment(RuleField $ruleField, Request $request, EntityManagerInterface $entityManager): Response
