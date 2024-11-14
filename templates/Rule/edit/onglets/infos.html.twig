@@ -274,7 +274,7 @@
 									</thead>
 									<tbody>
 										{% for workflow in sorted_workflows %}
-											<tr data-toggle="tooltip" title="{{ workflow.description }}">
+											<tr class="border-bottom-workflow-none" data-toggle="tooltip" title="{{ workflow.description }}">
 												<td class="title rounded-table-down-left">
 													<a class="dropdown-item" href="{{ path('workflow_show', {'id': workflow.id}) }}">
 														{{ workflow.name }}

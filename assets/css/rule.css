@@ -665,3 +665,7 @@ opacity: 0%;
 	border-bottom: none !important;
 	border-bottom-style: hidden !important;
 }
+.border-bottom-workflow-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
+}
