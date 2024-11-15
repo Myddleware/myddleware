@@ -41,6 +41,13 @@ aside {
 /* spread on whole block width as display grid doesn't seem to do the trick here */
 #database_setup_Save {
     width: 100%;
+    background-color: #03c4eb !important;
+  border: none !important;
+  font-size: 18px !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  transition: background-color 0.3s !important;
 }
 
 .logo-myddleware-install-container {
