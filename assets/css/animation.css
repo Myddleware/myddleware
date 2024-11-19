@@ -503,3 +503,12 @@ h2 { margin-top: 50px;}
 #dropdown-variables:hover {
     padding: 0.20rem 1rem !important;
 }
+
+.hover-image {
+    display: none; /* Initially hide the image */
+    position: absolute; /* Position it as needed */
+    top: 50px; /* Adjust based on your layout */
+    left: 50px; /* Adjust based on your layout */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
