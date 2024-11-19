@@ -364,15 +364,18 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        cancel_tooltip: Cela annule les documents, ils ne seront pas envoyés.
         unlockall: Débloquer les documents
         mass_unlock_confirm: Débloquer les documents sélectionnés ?
         reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
+        reload_tooltip: Cela relance les documents avec les mêmes données et le même identifiant, rien ne change.
         mass_reload_confirm: Relancer les documents selectionnés ?
         delete: Supprimer documents
         mass_delete_confirm: Supprimer les documents sélectionnés ?
         exportcsv: Exporter Documents
+        unlockall_tooltip: Si les documents sont verrouillés par un autre processus, ils seront déverrouillés pour pouvoir être accédés à nouveau.
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création

@@ -367,15 +367,18 @@ list_flux:
         filter: Filter
         filter_delete: Clear all filters
         cancel: Cancel documents
+        cancel_tooltip: This cancels the documents, they will not be sent.
         reloadcancel: Cancel and rerun documents
         unlockall: Unlock all documents
         mass_unlock_confirm: Unlock the selected documents?
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
+        reload_tooltip: This reloads the documents with the same data and the same id, nothing changes.
         mass_reload_confirm: Reload the selected documents?   
         delete: Delete documents
         mass_delete_confirm: Delete the selected documents?
         exportcsv: Export Documents
+        unlockall_tooltip: If the document are locked by another process, they will be unlocked so they can be accessed again.
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date
