@@ -226,17 +226,7 @@
 
     <div class="input-group mt-2">
         {{ form_widget(form.save) }}
-    </div>
-    {{ form_end(form) }}
-            {# <div class="col mt-4">
-                  <a class="removeFilter btn btn-danger ms-5" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
-                        <i class="fas fa-redo"></i>
-                        {{'list_flux.btn.filter_delete'|trans}}
-                  </a>
-            </div> #}
-            <div class="px-5 row py-1">
-                  <p>
-                        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2" role="button" href="javascript:void(0);" title="">
+        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2" role="button" href="javascript:void(0);" title="">
                             {{'list_flux.btn.exportcsv'|trans}}
                         </a>
                         <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="{{'list_flux.btn.cancel_tooltip'|trans}}">{{'list_flux.btn.cancel'|trans}}
@@ -253,6 +243,17 @@
                               {{ 'list_flux.btn.unlockall'|trans }} (<span id="countSelected"></span>)
                               <i class="fa-solid fa-star star-icon"></i>
                               </a>
+    </div>
+    {{ form_end(form) }}
+            {# <div class="col mt-4">
+                  <a class="removeFilter btn btn-danger ms-5" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
+                        <i class="fas fa-redo"></i>
+                        {{'list_flux.btn.filter_delete'|trans}}
+                  </a>
+            </div> #}
+            <div class="px-5 row py-1">
+                  <p>
+                        
                   </p>
             </div>
 </div>
