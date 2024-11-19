@@ -479,3 +479,27 @@ h2 { margin-top: 50px;}
     display: flex;
     justify-content: center;
 }
+
+.star-icon-menu-item {
+    margin-left: 10px; /* Adjust horizontal spacing */
+    vertical-align: top; /* Options: baseline, middle, top, bottom */
+}
+
+#dropdown-rulegroup {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-rulegroup:hover {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-workflow {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-workflow:hover {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-variables {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-variables:hover {
+    padding: 0.20rem 1rem !important;
+}
