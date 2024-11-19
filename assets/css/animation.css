@@ -477,7 +477,7 @@ h2 { margin-top: 50px;}
 
 #rulesearchbarcontainer {
     display: flex;
-    justify-content: center;
+    margin-left: 4.9vw !important;
 }
 
 .star-icon-menu-item {
