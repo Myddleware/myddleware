@@ -58,7 +58,6 @@
 					<th>Created By</th>
 					<th>Modified By</th>
 					<th>Description</th>
-					<th>Deleted</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -73,7 +72,6 @@
 						<td>{{ ruleGroup.createdBy.username }}</td>
 						<td>{{ ruleGroup.modifiedBy.username }}</td>
 						<td>{{ ruleGroup.description }}</td>
-						<td>{{ ruleGroup.deleted ? 'Yes' : 'No' }}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
