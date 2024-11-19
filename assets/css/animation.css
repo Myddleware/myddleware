@@ -474,3 +474,8 @@ h2 { margin-top: 50px;}
 #workflow_name, #rule_name {
     height: 35px;
 }
+
+#rulesearchbarcontainer {
+    display: flex;
+    justify-content: center;
+}
