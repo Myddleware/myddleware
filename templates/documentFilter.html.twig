@@ -226,9 +226,6 @@
 
     <div class="input-group mt-2">
         {{ form_widget(form.save) }}
-        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2 mb-2" role="button" href="javascript:void(0);" title="">
-            {{'list_flux.btn.exportcsv'|trans}}
-        </a>
     </div>
     {{ form_end(form) }}
             {# <div class="col mt-4">
@@ -239,6 +236,9 @@
             </div> #}
             <div class="px-5 row py-1">
                   <p>
+                        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2" role="button" href="javascript:void(0);" title="">
+                            {{'list_flux.btn.exportcsv'|trans}}
+                        </a>
                         <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
                               (<span></span>)
                               <i class="fa-solid fa-star star-icon"></i>
