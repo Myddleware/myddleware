@@ -70,9 +70,10 @@
 								{{'view_flux.btn.cancel'|trans}}
 							</button>
 						</a>
+						<img src="{{ asset('build/images/status_online.png') }}" alt="Hover Image" class="hover-image" id="hoverImage" />
 					{% endif %}
 					{% if read_record_btn %}
-						<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
+						<a class="btn_action_loading  hover-button" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
 							<button type="button" class="btn btn-primary">
 								{{'view_flux.btn.readrecord'|trans}}
 							</button>
