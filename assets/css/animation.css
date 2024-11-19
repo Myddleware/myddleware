@@ -466,3 +466,11 @@ h2 { margin-top: 50px;}
 #form_click_filter {
 	width: 120px;
 }
+
+#workflow_name_label, #rule_name_label {
+    padding-top: 5px;
+}
+
+#workflow_name, #rule_name {
+    height: 35px;
+}

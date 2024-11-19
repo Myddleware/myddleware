@@ -65,13 +65,13 @@
 							<div class="col-md-6">
 								<div class="form-floating">
 									<input type="text" name="workflow_name" id="workflow_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Workflow Name" value="{{ app.request.query.get('workflow_name') }}">
-									<label for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
+									<label id="workflow_name_label" for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
 								</div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-floating">
 									<input type="text" name="rule_name" id="rule_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rule Name" value="{{ app.request.query.get('rule_name') }}">
-									<label for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
+									<label id="rule_name_label" for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
 								</div>
 							</div>
 						</div>
