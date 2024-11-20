@@ -2694,7 +2694,6 @@ use App\Entity\WorkflowAction;
 
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
-                'listJobDetail' => $this->jobRepository->listJobDetail(),
                 'nbFlux' => $nbFlux,
                 'solutions' => $lstArray,
                 'locale' => $language,
