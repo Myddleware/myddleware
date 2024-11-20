@@ -425,11 +425,10 @@ class DocumentRepository extends ServiceEntityRepository
 
     public function countNbDocuments(): int 
     {
-        return $this->createQueryBuilder('d')
-            ->select('COUNT(d.id)')
-            ->where('d.deleted = :deleted')
-            ->setParameter('deleted', 0)
-            ->getQuery()
-            ->getSingleScalarResult();
+        $query = $this->getEntityManager()->createQuery(
+            'SELECT COUNT(d.id) FROM App\Entity\Document d WHERE d.deleted = :deleted'
+        )->setParameter('deleted', 0);
+
+        return (int) $query->getSingleScalarResult();
     }
 }
