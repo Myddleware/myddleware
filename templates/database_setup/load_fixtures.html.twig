@@ -29,18 +29,15 @@
                                     {% endif %}
                                     <div class="btn-group d-flex justify-content-center mt-5">
                                             <a href="{{ path('database_connect') }}" id="previous" role="button" class="btn btn-outline-secondary btn-lg">
-                                                <i class="fas fa-arrow-left"></i>
                                                 {{ 'install.previous' | trans }}
                                             </a>
                                         {% if connection_failed_message %}
                                             <button class="btn btn-outline-secondary btn-lg" id="next-btn" disabled>
                                                 {{ 'install.next' | trans }}
-                                                <i class="fas fa-arrow-right"></i>
                                             </button>
                                         {% elseif connection_success_message %}
                                             <a href="{{ path('app_register') }}" id="next" class="btn btn-outline-primary btn-lg" role="button">
                                                 {{ 'install.next' | trans }}
-                                                <i class="fas fa-arrow-right"></i>
                                             </a>
                                         {% endif %}
                                     </div>
