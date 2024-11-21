@@ -1421,7 +1421,6 @@ class jobcore
      */
     protected function updateJob(): bool
     {
-        // $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -1451,9 +1450,7 @@ class jobcore
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();
-            // $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             return false;
@@ -1466,18 +1463,14 @@ class jobcore
      */
     protected function insertJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
             return false;
         }
 
