@@ -116,11 +116,12 @@
 		});
 	document.getElementById('logHelloButton').addEventListener('click', function() {
 		var dateReferenceValue = document.getElementById('datereference').value;
-		
-		// Store the value in localStorage
-		localStorage.setItem('dateReference', dateReferenceValue);
+		var ruleId = '{{ rule.id }}';
+
+		// Store the value in localStorage with a key that includes the rule ID
+		localStorage.setItem('dateReference_' + ruleId, dateReferenceValue);
 		
 		// Log the stored value to verify
-		console.log('Stored date reference:', localStorage.getItem('dateReference'));
+		console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
 	});
 </script>
