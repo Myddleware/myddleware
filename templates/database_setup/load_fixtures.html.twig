@@ -28,7 +28,7 @@
                                         {% endif %}
                                     {% endif %}
                                     <div class="btn-group d-flex justify-content-center mt-5">
-                                            <a href="{{ path('database_connect') }}" id="previous" role="button" class="btn btn-outline-secondary btn-lg">
+                                            <a href="{{ path('database_connect') }}" id="previous" role="button" class="btn btn-secondary btn-lg">
                                                 {{ 'install.previous' | trans }}
                                             </a>
                                         {% if connection_failed_message %}
@@ -36,7 +36,7 @@
                                                 {{ 'install.next' | trans }}
                                             </button>
                                         {% elseif connection_success_message %}
-                                            <a href="{{ path('app_register') }}" id="next" class="btn btn-outline-primary btn-lg" role="button">
+                                            <a href="{{ path('app_register') }}" id="next" class="btn btn-primary btn-lg" role="button">
                                                 {{ 'install.next' | trans }}
                                             </a>
                                         {% endif %}
