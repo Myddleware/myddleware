@@ -466,3 +466,7 @@ h2 { margin-top: 50px;}
 #form_click_filter {
 	width: 120px;
 }
+
+.text-left {
+    text-align: left !important;
+}
