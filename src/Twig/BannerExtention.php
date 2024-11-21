@@ -24,21 +24,25 @@ use App\Entity\Config;
 use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Manager\ToolsManager;
 
 class BannerExtention extends AbstractExtension
 {
 
     private $em;
+    private $toolsManager;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, ToolsManager $toolsManager)
     {
         $this->em = $em;
+        $this->toolsManager = $toolsManager;
     }
 
     public function getFunctions(): array
     {
         return [
             new TwigFunction('entityBanner', [$this, 'getEntityBanner']),
+            new TwigFunction('isPremium', [$this, 'getIsPremium']),
         ];
     }
 
@@ -46,4 +50,11 @@ class BannerExtention extends AbstractExtension
     {
         return $this->em->getRepository(Config::class)->findAll();
     }
+
+    // Méthode pour vérifier si l'utilisateur est premium
+    public function getIsPremium()
+    {
+        return $this->toolsManager->isPremium();
+    }
 }
+

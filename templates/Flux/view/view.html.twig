@@ -36,14 +36,15 @@
 	{{ doc.getId }}
 {% endblock titlesm %}
 {% block body %}
-	<div id="flux" class="pt-4">
+	<div
+		id="flux" class="pt-4">
 		{# ------------- FLUX ------------- #}
 		<div>
 			{# {% for message in app.flashes('success_unlock') %}
-				<div class="alert alert-success">
-					{{ message }}
-				</div>
-			{% endfor %} #}
+							<div class="alert alert-success">
+								{{ message }}
+							</div>
+						{% endfor %} #}
 			<div class="block-btn-infos d-flex justify-content-around">
 				{% if ctm_btn %}
 					{% for btn in ctm_btn %}
@@ -69,9 +70,10 @@
 								{{'view_flux.btn.cancel'|trans}}
 							</button>
 						</a>
+						<img src="{{ asset('build/images/status_online.png') }}" alt="Hover Image" class="hover-image" id="hoverImage" />
 					{% endif %}
 					{% if read_record_btn %}
-						<a class="btn_action_loading" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
+						<a class="btn_action_loading  hover-button" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
 							<button type="button" class="btn btn-primary">
 								{{'view_flux.btn.readrecord'|trans}}
 							</button>
@@ -84,7 +86,7 @@
 							</button>
 						</a>
 					{% endif %}
-			</div>
+				</div>
 				<table id="headertab" class="listepager table document-history-table">
 					<tr>
 						<th>{{'view_flux.header.rule'|trans}}</th>
@@ -101,22 +103,22 @@
 					</tr>
 					<tr>
 						<td>
-							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
+							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
 						</td>
 						{# <a href="{{ path('flux_info_page',{'id' : firstParentDocumentId, 'page' : 1, 'logPage' : 1 }) }}">{{ firstParentDocumentId }}</a #}
 						<td class="ctr">
 							<div class="gblstatus_{{ doc.getGlobalStatus|lower }}">{{ doc.getStatus }}
 								{% if doc.getGlobalStatus|lower == 'close' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-									<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+										<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
 									</svg>
 								{% elseif doc.getGlobalStatus|lower == 'error' or doc.getGlobalStatus|lower == 'open' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
+										<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 									</svg>
 								{% elseif doc.getGlobalStatus|lower == 'cancel' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
-									<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+										<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
 									</svg>
 								{% endif %}
 							</div>
@@ -126,16 +128,16 @@
 						<td id="gblstatus" data-gbl="{{ doc.getGlobalStatus|lower }}" class="ctr">
 							<div class="gblstatus_{{ doc.getGlobalStatus|lower }}">{{ doc.getGlobalStatus }}
 								{% if doc.getGlobalStatus|lower == 'close' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-									<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+										<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
 									</svg>
 								{% elseif doc.getGlobalStatus|lower == 'error' or doc.getGlobalStatus|lower == 'open' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
+										<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 									</svg>
 								{% elseif doc.getGlobalStatus|lower == 'cancel' %}
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
-									<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+										<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
 									</svg>
 								{% endif %}
 							</div>
@@ -221,10 +223,10 @@
 										<li class="{{ key }}">
 											<span class="field">{{ key }}</span>
 											<span class="value">
-											{% if value|default('')|replace({'&#039;': "'"}) != value %}
-												{{ value|raw|replace({'&#039;': "'"}) }}
-											{% else %}
-												{{ value }}
+												{% if value|default('')|replace({'&#039;': "'"}) != value %}
+													{{ value|raw|replace({'&#039;': "'"}) }}
+												{% else %}
+													{{ value }}
 												{% endif %}
 											</span>
 										</li>
@@ -247,11 +249,11 @@
 									{% if value != doc.getId  %}
 										<li class="{{ key }}">
 											<span class="field">{{ key }}</span>
-											<span {% if source[key] is defined and source[key] != value %}class="modified"{% endif %}>
-											{% if value|default('')|replace({'&#039;': "'"}) != value %}
-												{{ value|raw|replace({'&#039;': "'"}) }}
-											{% else %}
-												{{ value }}
+											<span {% if source[key] is defined and source[key] != value %} class="modified" {% endif %}>
+												{% if value|default('')|replace({'&#039;': "'"}) != value %}
+													{{ value|raw|replace({'&#039;': "'"}) }}
+												{% else %}
+													{{ value }}
 												{% endif %}
 											</span>
 										</li>
@@ -294,10 +296,10 @@
 								{% for flux in post_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
-											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(post_Documents_Rule,flux.id) }}</a>
+											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(post_Documents_Rule,flux.id) }}</a>
 										</td>
 										<td class="ctr">{{ flux.source }}</td>
 										<td class="ctr">{{ flux.target }}</td>
@@ -306,21 +308,21 @@
 										<td class="ctr">
 											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
 												{% if flux.globalStatus|lower == 'close' %}
-													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-													<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
 													</svg>
 												{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
-													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-													<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
+														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
 													</svg>
 												{% elseif flux.globalStatus|lower == 'open' %}
-													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-													<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-													<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
+														<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+														<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
 													</svg>
 												{% elseif flux.globalStatus|lower == 'cancel' %}
-													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
-													<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
 													</svg>
 												{% endif %}
 											</div>
@@ -379,341 +381,340 @@
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
 											{% if current_document == flux.id %}
-												<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-												<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+												<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+													<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
 												</svg>
 											{% else %}
-												<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
-												<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+												<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewbox="0 0 16 16">
+													<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
 												</svg>
 											{% endif %}
-													<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
-												</td>
-												<td class="ctr">
-													<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="">{{ rule.getName }}</a>
-												</td>
-												<td class="ctr">{{ flux.source }}</td>
-												<td class="ctr">{{ flux.target }}</td>
-												<td class="ctr">{{ flux.sourceDateModified|date("d/m/Y H:i:s", timezone) }}</td>
-												<td class="ctr">{{ flux.type }}</td>
-												<td class="ctr">
-													<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
-														{% if flux.globalStatus|lower == 'close' %}
-															<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-															<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-															</svg>
-														{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
-															<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-															<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-															</svg>
-														{% elseif flux.globalStatus|lower == 'open' %}
-															<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-															<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-															<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-															</svg>
-														{% elseif flux.globalStatus|lower == 'cancel' %}
-															<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
-															<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
-															</svg>
-														{% endif %}
-													</div>
-												</td>
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+										</td>
+										<td class="ctr">
+											<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
+										</td>
+										<td class="ctr">{{ flux.source }}</td>
+										<td class="ctr">{{ flux.target }}</td>
+										<td class="ctr">{{ flux.sourceDateModified|date("d/m/Y H:i:s", timezone) }}</td>
+										<td class="ctr">{{ flux.type }}</td>
+										<td class="ctr">
+											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
+												{% if flux.globalStatus|lower == 'close' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
+														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
+														<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+														<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'cancel' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+													</svg>
+												{% endif %}
+											</div>
+										</td>
 									</tr>
-										{% endfor %}
-										
-									<tr>
-										<th>{{'list_flux.tab.id'|trans}}</th>
-										<th>{{'list_flux.tab.name'|trans}}</th>
-										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										<th>{{'list_flux.tab.target_id'|trans}}</th>
-										<th>{{'list_flux.tab.date_modified'|trans}}</th>
-										<th>{{'list_flux.tab.type'|trans}}</th>
-										<th>{{'list_flux.tab.statut'|trans}}</th>
-									</tr>
-								{% endif %}
-							</table>
-							<div class="d-flex justify-content-center">
+								{% endfor %}
+
+								<tr>
+									<th>{{'list_flux.tab.id'|trans}}</th>
+									<th>{{'list_flux.tab.name'|trans}}</th>
+									<th>{{'list_flux.tab.source_id'|trans}}</th>
+									<th>{{'list_flux.tab.target_id'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.type'|trans}}</th>
+									<th>{{'list_flux.tab.statut'|trans}}</th>
+								</tr>
+							{% endif %}
+						</table>
+						<div
+							class="d-flex justify-content-center">
 
 							{# ------------- HISTORY DOCUMENTS ------------- #}
 							<div class="pagination-flux-history">
-    						{% if pager.haveToPaginate %}
-    						    {{ pagerfanta(documentPagination.pager, 'default', { (documentPagination.pageParameterName): documentPagination.pager.currentPage }) }}
-    						{% endif %}
+								{% if pager.haveToPaginate %}
+									{{ pagerfanta(documentPagination.pager, 'default', { (documentPagination.pageParameterName): documentPagination.pager.currentPage }) }}
+								{% endif %}
 							</div>
-							</div>
-						{% endif %}
+						</div>
+					{% endif %}
+				</div>
+
+
+				{# ------------- PARENT RELATE DOCUMENTS ------------- #}
+				{% if nb_parent_documents > 0 %}
+					<div id="fd-title-small" class="left">
+						<p>{{'view_flux.nbParentDocuments'|trans}}</p>
+						<p>
+							<span class="nb">{{ nb_parent_documents }}</span>
+						</p>
 					</div>
-
-
-					{# ------------- PARENT RELATE DOCUMENTS ------------- #}
+					<div class="clr"></div>
+				{% endif %}
+				{# ------------- PARENT RELATE DOCUMENTS ------------- #}
+				<div id="message" class="d-grid">
 					{% if nb_parent_documents > 0 %}
-						<div id="fd-title-small" class="left">
-							<p>{{'view_flux.nbParentDocuments'|trans}}</p>
-							<p>
-								<span class="nb">{{ nb_parent_documents }}</span>
-							</p>
-						</div>
-						<div class="clr"></div>
-					{% endif %}
-					{# ------------- PARENT RELATE DOCUMENTS ------------- #}
-					<div id="message" class="d-grid">
-						{% if nb_parent_documents > 0 %}
-							<table class="listepager table">
-								{% if entities is not empty %}
-									<tr>
-										<th>{{'list_flux.tab.id'|trans}}</th>
-										<th>{{'list_flux.tab.name'|trans}}</th>
-										<th>{{'list_flux.tab.source_field'|trans}}</th>
-										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										<th>{{'list_flux.tab.date_modified'|trans}}</th>
-										<th>{{'list_flux.tab.type'|trans}}</th>
-										<th>{{'list_flux.tab.statut'|trans}}</th>
-									</tr>
-									{% for flux in parent_documents %}
-										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
-											<td class="ctr">
-												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
-											</td>
-											<td class="ctr">
-												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
-											</td>
-											<td class="ctr">{{ flux.sourceField }}</td>
-											<td class="ctr">{{ flux.source }}</td>
-											<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
-											<td class="ctr">{{ flux.type }}</td>
-											<td class="ctr">
-												<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
-													{% if flux.globalStatus|lower == 'close' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+						<table class="listepager table">
+							{% if entities is not empty %}
+								<tr>
+									<th>{{'list_flux.tab.id'|trans}}</th>
+									<th>{{'list_flux.tab.name'|trans}}</th>
+									<th>{{'list_flux.tab.source_field'|trans}}</th>
+									<th>{{'list_flux.tab.source_id'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.type'|trans}}</th>
+									<th>{{'list_flux.tab.statut'|trans}}</th>
+								</tr>
+								{% for flux in parent_documents %}
+									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
+										<td class="ctr">
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+										</td>
+										<td class="ctr">
+											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
+										</td>
+										<td class="ctr">{{ flux.sourceField }}</td>
+										<td class="ctr">{{ flux.source }}</td>
+										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+										<td class="ctr">{{ flux.type }}</td>
+										<td class="ctr">
+											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
+												{% if flux.globalStatus|lower == 'close' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
 														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+													</svg>
+												{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
 														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'open' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+													</svg>
+												{% elseif flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
 														<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
 														<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'cancel' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
+													</svg>
+												{% elseif flux.globalStatus|lower == 'cancel' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
 														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
-														</svg>
-													{% endif %}
-												</div>
-											</td>
-										</tr>
-									{% endfor %}
-									<tr>
-										<th>{{'list_flux.tab.id'|trans}}</th>
-										<th>{{'list_flux.tab.name'|trans}}</th>
-										<th>{{'list_flux.tab.source_field'|trans}}</th>
-										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										<th>{{'list_flux.tab.date_modified'|trans}}</th>
-										<th>{{'list_flux.tab.type'|trans}}</th>
-										<th>{{'list_flux.tab.statut'|trans}}</th>
+													</svg>
+												{% endif %}
+											</div>
+										</td>
 									</tr>
-								{% endif %}
-							</table>
-							<div class="d-flex justify-content-center">
-								{% if pager.haveToPaginate %}
-									<div class="d-flex justify-content-center">
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
-										{% endif %}
-									</div>
-								{% endif %}
-							</div>
-						{% endif %}
+								{% endfor %}
+								<tr>
+									<th>{{'list_flux.tab.id'|trans}}</th>
+									<th>{{'list_flux.tab.name'|trans}}</th>
+									<th>{{'list_flux.tab.source_field'|trans}}</th>
+									<th>{{'list_flux.tab.source_id'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.type'|trans}}</th>
+									<th>{{'list_flux.tab.statut'|trans}}</th>
+								</tr>
+							{% endif %}
+						</table>
+						<div class="d-flex justify-content-center">
+							{% if pager.haveToPaginate %}
+								<div class="d-flex justify-content-center">
+									{% if pager.haveToPaginate %}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
+									{% endif %}
+								</div>
+							{% endif %}
+						</div>
+					{% endif %}
+				</div>
+
+
+				{# ------------- CHILD RELATE DOCUMENTS ------------- #}
+				{% if nb_child_documents > 0 %}
+					<div id="fd-title-small" class="left">
+						<p>{{'view_flux.nbChildDocuments'|trans}}</p>
+						<p>
+							<span class="nb">{{ nb_child_documents }}</span>
+						</p>
 					</div>
-
-
-					{# ------------- CHILD RELATE DOCUMENTS ------------- #}
+					<div class="clr"></div>
+				{% endif %}
+				{# ------------- CHILD RELATE DOCUMENTS ------------- #}
+				<div id="message">
 					{% if nb_child_documents > 0 %}
+						<table class="listepager table">
+							{% if entities is not empty %}
+								<tr>
+									<th>{{'list_flux.tab.id'|trans}}</th>
+									<th>{{'list_flux.tab.name'|trans}}</th>
+									<th>{{'list_flux.tab.source_field'|trans}}</th>
+									<th>{{'list_flux.tab.source_id'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.type'|trans}}</th>
+									<th>{{'list_flux.tab.statut'|trans}}</th>
+								</tr>
+								{% for flux in child_documents %}
+									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
+										<td class="ctr">
+											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+										</td>
+										<td class="ctr">
+											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(child_Documents_Rule,flux.id) }}</a>
+										</td>
+										<td class="ctr">id</td>
+										<td class="ctr">{{ flux.source }}</td>
+										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+										<td class="ctr">{{ flux.type }}</td>
+										<td class="ctr">
+											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
+												{% if flux.globalStatus|lower == 'close' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
+														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
+														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'open' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
+														<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+														<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+													</svg>
+												{% elseif flux.globalStatus|lower == 'cancel' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+													</svg>
+												{% endif %}
+											</div>
+										</td>
+									</tr>
+								{% endfor %}
+								<tr>
+									<th>{{'list_flux.tab.id'|trans}}</th>
+									<th>{{'list_flux.tab.name'|trans}}</th>
+									<th>{{'list_flux.tab.source_field'|trans}}</th>
+									<th>{{'list_flux.tab.source_id'|trans}}</th>
+									<th>{{'list_flux.tab.date_modified'|trans}}</th>
+									<th>{{'list_flux.tab.type'|trans}}</th>
+									<th>{{'list_flux.tab.statut'|trans}}</th>
+								</tr>
+							{% endif %}
+						</table>
+						<div class="d-flex justify-content-center">
+							{% if pager.haveToPaginate %}
+								<div class="d-flex justify-content-center">
+									{% if pager.haveToPaginate %}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
+									{% endif %}
+								</div>
+							{% endif %}
+						</div>
+					{% endif %}
+				</div>
+
+
+				{# ------------- MESSAGE ------------- #}
+				{% for message in app.flashes('success') %}
+					<div class="alert alert-success">
+						{{ message }}
+					</div>
+				{% endfor %}
+
+
+				<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
+					{% if nb > 0 %}
 						<div id="fd-title-small" class="left">
-							<p>{{'view_flux.nbChildDocuments'|trans}}</p>
+							<p>{{'view_flux.nblogs'|trans}}</p>
 							<p>
-								<span class="nb">{{ nb_child_documents }}</span>
+								<span class="nb">{{ nb_logs }}</span>
 							</p>
 						</div>
 						<div class="clr"></div>
 					{% endif %}
-					{# ------------- CHILD RELATE DOCUMENTS ------------- #}
-					<div id="message">
-						{% if nb_child_documents > 0 %}
-							<table class="listepager table">
-								{% if entities is not empty %}
-									<tr>
-										<th>{{'list_flux.tab.id'|trans}}</th>
-										<th>{{'list_flux.tab.name'|trans}}</th>
-										<th>{{'list_flux.tab.source_field'|trans}}</th>
-										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										<th>{{'list_flux.tab.date_modified'|trans}}</th>
-										<th>{{'list_flux.tab.type'|trans}}</th>
-										<th>{{'list_flux.tab.statut'|trans}}</th>
-									</tr>
-									{% for flux in child_documents %}
-										<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
-											<td class="ctr">
-												<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}">{{ flux.id }}</a>
-											</td>
-											<td class="ctr">
-												<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="">{{ attribute(child_Documents_Rule,flux.id) }}</a>
-											</td>
-											<td class="ctr">id</td>
-											<td class="ctr">{{ flux.source }}</td>
-											<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
-											<td class="ctr">{{ flux.type }}</td>
-											<td class="ctr">
-												<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
-													{% if flux.globalStatus|lower == 'close' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
-														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'error' or flux.globalStatus|lower == 'open' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'open' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-														<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-														<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-														</svg>
-													{% elseif flux.globalStatus|lower == 'cancel' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
-														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
-														</svg>
-													{% endif %}
-												</div>
-											</td>
-										</tr>
-									{% endfor %}
-									<tr>
-										<th>{{'list_flux.tab.id'|trans}}</th>
-										<th>{{'list_flux.tab.name'|trans}}</th>
-										<th>{{'list_flux.tab.source_field'|trans}}</th>
-										<th>{{'list_flux.tab.source_id'|trans}}</th>
-										<th>{{'list_flux.tab.date_modified'|trans}}</th>
-										<th>{{'list_flux.tab.type'|trans}}</th>
-										<th>{{'list_flux.tab.statut'|trans}}</th>
-									</tr>
-								{% endif %}
-							</table>
-							<div class="d-flex justify-content-center">
-								{% if pager.haveToPaginate %}
-									<div class="d-flex justify-content-center">
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
-										{% endif %}
-									</div>
-								{% endif %}
-							</div>
-						{% endif %}
+
+					<div
+						class="l-5 flux-comment-container">{# {{ form_start(formComment) }}
+														{{ form_widget(formComment) }}
+														<button type="submit" class="btn btn-primary m-2 document-comment-submit">{{'view_flux.comment'|trans}}</button>
+													{{ form_end(formComment) }} #}
+
 					</div>
+				</div>
 
 
-					{# ------------- MESSAGE ------------- #}
-					{% for message in app.flashes('success') %}
-						<div class="alert alert-success">
-							{{ message }}
-						</div>
-					{% endfor %}
+				<div id="message">
 
+					{% if nb > 0 %}
 
-					<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
-						{% if nb > 0 %}
-							<div id="fd-title-small" class="left">
-								<p>{{'view_flux.nblogs'|trans}}</p>
-								<p>
-									<span class="nb">{{ nb_logs }}</span>
-								</p>
-							</div>
-							<div class="clr"></div>
-						{% endif %}
+						<table class="listepager table">
+							{% if logPagination.pager.currentPageResults is not empty %}
+								<tr>
+									<th>{{'view_flux.log.id'|trans}}</th>
+									<th>{{'view_flux.log.ref'|trans}}</th>
+									<th>{{'view_flux.log.job'|trans}}</th>
+									<th>{{'view_flux.log.date_created'|trans}}</th>
+									<th>{{'view_flux.log.type'|trans}}</th>
+									<th>{{'view_flux.log.msg'|trans}}</th>
+								</tr>
+								{% for log in logPagination.pager.currentPageResults %}
+									<tr class="fd_log_{{ log.getType|lower }}">
+										<td class="ctr">
+											{{ log.getId }}
+										</td>
+										<td>
 
-						<div class="l-5 flux-comment-container">
-
-						
-						{# {{ form_start(formComment) }}
-							{{ form_widget(formComment) }}
-							<button type="submit" class="btn btn-primary m-2 document-comment-submit">{{'view_flux.comment'|trans}}</button>
-						{{ form_end(formComment) }} #}
-
-						</div>
-					</div>
-
-
-
-					<div id="message">
-
-						{% if nb > 0 %}
-
-							<table class="listepager table">
-								{% if logPagination.pager.currentPageResults is not empty %}
-									<tr>
-										<th>{{'view_flux.log.id'|trans}}</th>
-										<th>{{'view_flux.log.ref'|trans}}</th>
-										<th>{{'view_flux.log.job'|trans}}</th>
-										<th>{{'view_flux.log.date_created'|trans}}</th>
-										<th>{{'view_flux.log.type'|trans}}</th>
-										<th>{{'view_flux.log.msg'|trans}}</th>
-									</tr>
-									{% for log in logPagination.pager.currentPageResults %}
-										<tr class="fd_log_{{ log.getType|lower }}">
-											<td class="ctr">
-												{{ log.getId }}
-											</td>
-											<td>
-
-												{% if log.getRef is not empty %}
-													<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
-														{{ log.getRef }}
-													</a>
-												{% else %}
+											{% if log.getRef is not empty %}
+												<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}" class="help-link all-link">
 													{{ log.getRef }}
-												{% endif %}
-											</td>
-											<td>
-												{% if log.getJob is not empty %}
-													<a href="{{ path('task_view', {'id':log.getJob.id}) }}">{{ log.getJob.id }}</a>
-												{% endif %}
-											</td>
-											<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
-											<td class="ctr">
-												<div class="log_{{ log.getType|lower }}">{{ log.getType }}
-													{% if log.getType|lower == 's' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+												</a>
+											{% else %}
+												{{ log.getRef }}
+											{% endif %}
+										</td>
+										<td>
+											{% if log.getJob is not empty %}
+												<a href="{{ path('task_view', {'id':log.getJob.id}) }}" class="help-link all-link">{{ log.getJob.id }}</a>
+											{% endif %}
+										</td>
+										<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
+										<td class="ctr">
+											<div class="log_{{ log.getType|lower }}">{{ log.getType }}
+												{% if log.getType|lower == 's' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewbox="0 0 16 16">
 														<path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-														</svg>
-													{% elseif log.getType|lower == 'e' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+													</svg>
+												{% elseif log.getType|lower == 'e' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewbox="0 0 16 16">
 														<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-														</svg>
-													{% elseif log.getType|lower == 'w' %}
-														<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
+													</svg>
+												{% elseif log.getType|lower == 'w' %}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
 														<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
-														</svg>
-													{% endif %}
-												</div>
-											</td>
-											<td class="msg">
-												{{ log.getMessage }}
-											</td>
-										</tr>
-									{% endfor %}
-									<tr>
-										<th>{{'view_flux.log.id'|trans}}</th>
-										<th>{{'view_flux.log.ref'|trans}}</th>
-										<th>{{'view_flux.log.job'|trans}}</th>
-										<th>{{'view_flux.log.date_created'|trans}}</th>
-										<th>{{'view_flux.log.type'|trans}}</th>
-										<th>{{'view_flux.log.msg'|trans}}</th>
+													</svg>
+												{% endif %}
+											</div>
+										</td>
+										<td class="msg">
+											{{ log.getMessage }}
+										</td>
 									</tr>
-								{% endif %}
-							</table>
-							{# ------------- LOGS ------------- #}
-							<div class="d-flex justify-content-center">
+								{% endfor %}
+								<tr>
+									<th>{{'view_flux.log.id'|trans}}</th>
+									<th>{{'view_flux.log.ref'|trans}}</th>
+									<th>{{'view_flux.log.job'|trans}}</th>
+									<th>{{'view_flux.log.date_created'|trans}}</th>
+									<th>{{'view_flux.log.type'|trans}}</th>
+									<th>{{'view_flux.log.msg'|trans}}</th>
+								</tr>
+							{% endif %}
+						</table>
+						{# ------------- LOGS ------------- #}
+						<div
+							class="d-flex justify-content-center">
 
 							{# Import the macros file #}
 							{% import 'Flux/view/macros.html.twig' as custom_macros %}
@@ -723,16 +724,22 @@
 							{% set custom_route_previous = custom_macros.custom_route_generator_previous(logPage, documentPage) %}
 							{% set custom_route_last = custom_macros.custom_route_generator_last(logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1, documentPage) %}
 							{% set custom_route_next = custom_macros.custom_route_generator_next(logPage, documentPage) %}
-							
+
 							{% set more_than_one_page = logPagination.pager.nbResults > logPagination.pager.maxPerPage %}
 							{# Use the generated custom_route in your links or wherever needed #}
 							{% if more_than_one_page %}
-							<p class="m-1" >{{logPagination.pager.currentPage}} out of {{ (logPagination.pager.nbResults / logPagination.pager.maxPerPage)|round(0, 'ceil') }}</p>
+								<p class="m-1">{{logPagination.pager.currentPage}}
+									out of
+									{{ (logPagination.pager.nbResults / logPagination.pager.maxPerPage)|round(0, 'ceil') }}</p>
 
-							<a class='m-1' href="{{ custom_route_first }}"> First </a>
-							{% if logPagination.pager.currentPage > 1 %}
-								<a class='m-1' href="{{ custom_route_previous }}"> Previous </a>
-							{% endif %}
+								<a class='m-1' href="{{ custom_route_first }}">
+									First
+								</a>
+								{% if logPagination.pager.currentPage > 1 %}
+									<a class='m-1' href="{{ custom_route_previous }}">
+										Previous
+									</a>
+								{% endif %}
 							{% endif %}
 
 
@@ -752,95 +759,105 @@
 							{# in between end #}
 
 							{# <pre>
-								{{ dump(logPagination.pager.nbResults) }}
-								{{ dump(logPagination.pager.maxPerPage) }}
-								{{ dump(logPagination.pager.nbResults % logPagination.pager.maxPerPage) }}
-								{{ dump(more_than_one_page) }}
-							</pre> #}
+															{{ dump(logPagination.pager.nbResults) }}
+															{{ dump(logPagination.pager.maxPerPage) }}
+															{{ dump(logPagination.pager.nbResults % logPagination.pager.maxPerPage) }}
+															{{ dump(more_than_one_page) }}
+														</pre> #}
 
-								
 
 							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_next }}"> Next </a>
+								<a class='m-1' href="{{ custom_route_next }}">
+									Next
+								</a>
 							{% endif %}
 							{% if logPagination.pager.currentPage <= logPagination.pager.nbResults // logPagination.pager.maxPerPage and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
-								<a class='m-1' href="{{ custom_route_last }}"> Last </a>
+								<a class='m-1' href="{{ custom_route_last }}">
+									Last
+								</a>
 							{% endif %}
 
-							
-							</div>
-							
-						{% else %}
-							<p>{{'view_flux.empty_log'|trans}}</p>
-						{% endif %}
-					</div>
-					{# ------------- LOGS ------------- #}
+
+						</div>
+
+					{% else %}
+						<p>{{'view_flux.empty_log'|trans}}</p>
+					{% endif %}
 				</div>
+				{# ------------- LOGS ------------- #}
+			</div>
 
 			<div id="message" class="d-grid">
 				{% if workflowLogs is not empty %}
 					{% if nb_workflow_logs > 0 %}
-					<div id="fd-title-small" class="left">
-						<p>{{'view_flux.nbWorflowLogs'|trans}}</p>
-						<p>
-							<span class="nb">{{ nb_workflow_logs }}</span>
-						</p>
-					</div>
+						<div id="fd-title-small" class="left">
+							<p>{{'view_flux.nbWorflowLogs'|trans}}</p>
+							<p>
+								<span class="nb">{{ nb_workflow_logs }}</span>
+							</p>
+						</div>
 					{% endif %}
 					<div class="">
-					<table class="table">
-						<thead>
-							<tr>
-								<th>ID</th>
-								<th>Workflow</th>
-								<th>Job</th>
-								<th>Trigger Document</th>
-								<th>Generate Document</th>
-								<th>Created By</th>
-								<th>Status</th>
-								<th>Date Created</th>
-								<th>Message</th>
-								<th>Action Name</th>
-								<th>Action Type</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for log in workflowLogs %}
-								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-									<td class="ctr">{{ log.id }}</td>
-									<td class="ctr"><a href="{{ path('workflow_show', {'id': log.workflow.id}) }}">{{ log.workflow.name }}</a></td>
-									<td class="ctr">{{ log.job.id }}</td>
-									<td class="ctr">    {% if log.triggerDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
-									{% else %}
-										<span></span>
-									{% endif %}</td>
-									<td class="ctr">    {% if log.generateDocument is not null %}
-										<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
-									{% else %}
-										<span></span>
-									{% endif %}</td>
-									<td class="ctr">{{ log.createdBy }}</td>
-									<td class="ctr">
-										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
-									</td>
-									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr"><a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a></td>
-									<td class="ctr">{{ log.action.action }}</td>
+						<table class="table">
+							<thead>
+								<tr>
+									<th>{{ 'view_flux.workflow_log.id'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.workflow'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.job'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.trigger_document'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.generate_document'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.created_by'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.status'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.date_created'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.message'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.action_name'|trans }}</th>
+									<th>{{ 'view_flux.workflow_log.action_type'|trans }}</th>
 								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{% for log in workflowLogs %}
+									<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+										<td class="ctr">{{ log.id }}</td>
+										<td class="ctr">
+											<a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a>
+										</td>
+										<td class="ctr">{{ log.job.id }}</td>
+										<td class="ctr">
+											{% if log.triggerDocument is not null %}
+												<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
+											{% else %}
+												<span></span>
+											{% endif %}
+										</td>
+										<td class="ctr">
+											{% if log.generateDocument is not null %}
+												<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
+											{% else %}
+												<span></span>
+											{% endif %}
+										</td>
+										<td class="ctr">{{ log.createdBy }}</td>
+										<td class="ctr">
+											<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+										</td>
+										<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+										<td class="ctr">{{ log.getMessage }}</td>
+										<td class="ctr">
+											<a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>
+										</td>
+										<td class="ctr">{{ log.action.action }}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
 					</div>
 				{% endif %}
 			</div>
 
-			
 
-	<script type="text/javascript">
-		var path_img = "{{ asset('build/images/regle/') }}";
-		var chemin_img = "{{ asset('build/images/regle/') }}";
-		var inputs_flux = "{{ path('flux_save') }}";
-	</script>
-{% endblock %}
+			<script type="text/javascript">
+				var path_img = "{{ asset('build/images/regle/') }}";
+var chemin_img = "{{ asset('build/images/regle/') }}";
+var inputs_flux = "{{ path('flux_save') }}";
+			</script>
+		{% endblock %}

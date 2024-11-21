@@ -224,11 +224,25 @@
         </div>
     </div>
 
-    <div class="input-group mt-2">
+    <div class="input-group">
         {{ form_widget(form.save) }}
-        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2 mb-2" role="button" href="javascript:void(0);" title="">
-            {{'list_flux.btn.exportcsv'|trans}}
-        </a>
+        <a id="exportfluxcsv" class="btn btn-outline-primary ms-2" role="button" href="javascript:void(0);" title="">
+                            {{'list_flux.btn.exportcsv'|trans}}
+                        </a>
+                        <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="{{'list_flux.btn.cancel_tooltip'|trans}}">{{'list_flux.btn.cancel'|trans}}
+                              (<span></span>)
+                              <i class="fa-solid fa-star star-icon"></i>
+                              </a>
+                        <a id="reloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="{{'list_flux.btn.reload_tooltip'|trans}}">{{'list_flux.btn.reload'|trans}}
+                              (<span></span>)
+                              <i class="fa-solid fa-star star-icon"></i>
+                              </a>
+                        {# <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
+                              (<span></span>)</a> #}
+                        <a id="unlockAllFlux" class="btn btn-outline-danger" role="button" href="javascript:void(0);" title="{{'list_flux.btn.unlockall_tooltip'|trans}}">
+                              {{ 'list_flux.btn.unlockall'|trans }} (<span id="countSelected"></span>)
+                              <i class="fa-solid fa-star star-icon"></i>
+                              </a>
     </div>
     {{ form_end(form) }}
             {# <div class="col mt-4">
@@ -239,15 +253,7 @@
             </div> #}
             <div class="px-5 row py-1">
                   <p>
-                        <a id="cancelflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.cancel'|trans}}
-                              (<span></span>)</a>
-                        <a id="reloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reload'|trans}}
-                              (<span></span>)</a>
-                        {# <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
-                              (<span></span>)</a> #}
-                        <a id="unlockAllFlux" class="btn btn-outline-danger" role="button" href="javascript:void(0);" title="">
-                              {{ 'list_flux.btn.unlockall'|trans }} (<span id="countSelected"></span>)
-                        </a>
+                        
                   </p>
             </div>
 </div>
@@ -322,10 +328,10 @@
 								{% endif %}
 							</td>
 							<td>
-								<a href="{{ path('flux_info_page', {'id' : document.id, 'page' : 1, 'logPage' : 1}) }}">{{ document.id }}</a>
+								<a href="{{ path('flux_info_page', {'id' : document.id, 'page' : 1, 'logPage' : 1}) }}" class="help-link all-link">{{ document.id }}</a>
 							</td>
 							<td>
-								<a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="">{{ document.rule_name }}</a>
+								<a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="" class="help-link all-link">{{ document.rule_name }}</a>
 							</td>
 							<td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
 							<td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>

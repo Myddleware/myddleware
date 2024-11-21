@@ -367,15 +367,18 @@ list_flux:
         filter: Filter
         filter_delete: Clear all filters
         cancel: Cancel documents
+        cancel_tooltip: This cancels the documents, they will not be sent.
         reloadcancel: Cancel and rerun documents
         unlockall: Unlock all documents
         mass_unlock_confirm: Unlock the selected documents?
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
+        reload_tooltip: This reloads the documents with the same data and the same id, nothing changes.
         mass_reload_confirm: Reload the selected documents?   
         delete: Delete documents
         mass_delete_confirm: Delete the selected documents?
         exportcsv: Export Documents
+        unlockall_tooltip: If the document are locked by another process, they will be unlocked so they can be accessed again.
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date
@@ -485,6 +488,18 @@ view_flux:
         date_created: Creation date
         type: Type
         msg: Message
+    workflow_log:
+        id: "ID"
+        workflow: "Workflow"
+        job: "Job"
+        trigger_document: "Trigger Document"
+        generate_document: "Generate Document"
+        created_by: "Created By"
+        status: "Status"
+        date_created: "Date Created"
+        message: "Message"
+        action_name: "Action Name"
+        action_type: "Action Type"
 
 list_task:
     total: Total of tasks
@@ -1027,6 +1042,7 @@ install:
     errors_to_do_message: You need to do the following before continuing
     recommendations_to_do_message: Optional recommendations to improve your setup
     note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
+    database_already_exists: A database already exists in the .env.local file. Please remove it to continue the installation.
 crontab:
     title: Jobscheduler with crontab
     title_cron: Crontab

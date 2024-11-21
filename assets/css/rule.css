@@ -113,34 +113,24 @@
 	margin-left: 0;
 }
 
-#rule .btn-opt {
-	color: #555555;
-	font-size: 1.2em;
-}
-
-#rule .btn-opt:hover {
-	color: #0F66A9;
-}
-
-#rule th {
+#rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th {
 	background: #ECECEC;
 	height: 45px;
 	padding: 10px;
 	text-align: center;
 }
 
-#rule tr {
+#rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr, #rulegroups tr {
 	border-bottom: 1px solid #ccc;	
 }
 
-#rule td.lft > a{
+#rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a, #rulegroups td.lft > a{
 	color: black;
 }
 
-#rule .vignette {
+#rule .vignette, #connector .vignette, #jobscheduler .vignette {
 	width: 50px;
 }
-
 
 /* relate */
 
@@ -620,4 +610,62 @@ color: #03c4eb!important;
 .mapping-card-body {
 	display: flex;
 	flex-direction: column;
+}
+
+.edit-button-name-list{
+opacity: 0%;
+}
+
+.col-rule-name:hover .edit-button-name-list{
+	opacity: 100%;
+}
+
+.all-link:hover {
+    color: #0a58ca;
+}
+
+.all-link::after {
+    background-color: #0a58ca;
+}
+
+#deletion-rule-tr-deletion {
+	border-bottom: none !important;
+	border-bottom-width: 0px !important;
+}
+
+#deletion-rule-left-deletion {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-deletion {
+	border-bottom: none !important;
+}
+
+#deletion-rule-tr-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-left-description {
+	border-bottom: none !important;
+}
+
+#description-field-value {
+	padding-left: 1em;
+}
+
+.inner-table-workflow {
+	padding: 0px 0px !important;
+}
+
+.border-bottom-connector-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
+}
+.border-bottom-workflow-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
 }

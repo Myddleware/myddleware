@@ -49,10 +49,12 @@
 	{% endfor %}
 
 	<div id="rule">
-		{% if nb_rule > 0 %} 
-		<form id="rulenamesearchbar" class="m-3" action="{{ path('regle_list') }}" method="get">
-			<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
-		</form>
+		{% if nb_rule > 0 %}
+			<div id="rulesearchbarcontainer">
+			<form id="rulenamesearchbar" class="m-3" action="{{ path('regle_list') }}" method="get">
+				<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
+			</form>
+			</div>
 			<div class="row justify-content-center my-4">
 				<div class="col text-center">
 					<a id="exec_all" class="btn btn-outline-success" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
@@ -73,86 +75,99 @@
 			<p></p>
 			<div class="row justify-content-center">
 				<div class="col" id="rule-list">
-					<div class="table-wrapper-rule">
+					<div class="table-wrapper">
 						<table class="table table-hover align-middle shadow-table">
 							{% if entities is not empty %}
-							<thead>
-								<tr>
-									<th class="rounded-table-up-left">{{'rule.source'|trans}}</th>
-									<th>{{'rule.target'|trans}}</th>
-									<th>{{'list_rule.th.name'|trans}}</th>
-									<th>{{'list_rule.th.active'|trans}}</th>
-									<th>{{'list_rule.th.date_created'|trans}}</th>
-									<th class="rounded-table-up-right">{{'list_rule.th.option'|trans}}</th>
-								</tr>
-							</thead>
-							<tbody id="tbody_rule_list">
-								{% for rule in entities %}
+								<thead>
 									<tr>
-										<td class="solution_block text-center">
-											<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}"/></p>
-											{{rule.lbl_source }}
-										</td>
-										<td class="solution_bloc text-center">
-											<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}"/></p>
-											{{rule.lbl_target }}
-										</td>
-										<td class="text-center">
-											<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}">{{rule.name }}</a>
-										</td>
-										<td class="text-center">
-											<div class="onoffswitch">
-												<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox toggle-switch-rule" id="{{ rule.id }}" {{ (rule.active == true) ? 'checked="checked"' : '' }}/>
-												<label class="onoffswitch-label" for="{{ rule.id }}">
-													<span class="onoffswitch-inner">
-														<span class="onoffswitch-active">
-															<span class="onoffswitch-switch">ON</span>
-														</span>
-														<span class="onoffswitch-inactive">
-															<span class="onoffswitch-switch">OFF</span>
-														</span>
-													</span>
-												</label>
-											</div>
-										</td>
-										<td class="text-center">
-											{{rule.dateCreated|date("d/m/Y") }}
-											{% if app.user.getUsername == 'support' %}
-												<p>
-													<span class="label label-default">{{ rule.createdBy.username }}</span>
-												</p>
-											{% endif %}
-										</td>
-										<td class="text-center">
-											<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="text-decoration-none">
-												<span class="btn-opt">
-													<i class="fa fa-pen" aria-hidden="true"></i>
-												</span>
-											</a>
-											<a class="delete text-decoration-none" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
-												<span class="btn-opt">
-													<i class="fa fa-trash" aria-hidden="true"></i>
-												</span>
-											</a>
-											<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="text-decoration-none">
-												<span class="btn-opt">
-													<i class="fa fa-file" aria-hidden="true"></i>
-												</span>
-											</a>
-										</td>
+										<th class="rounded-table-up-left">{{'rule.source'|trans}}</th>
+										<th>{{'rule.target'|trans}}</th>
+										<th>{{'list_rule.th.name'|trans}}</th>
+										<th>{{'list_rule.th.active'|trans}}</th>
+										<th>{{'list_rule.th.date_created'|trans}}</th>
+										<th class="rounded-table-up-right">{{'list_rule.th.option'|trans}}</th>
 									</tr>
-								{% endfor %}
-								<tr class="invisibele-row-bottom">
-									<th class="rounded-table-down-left">{{'rule.source'|trans}}</th>
-									<th>{{'rule.target'|trans}}</th>
-									<th>{{'list_rule.th.name'|trans}}</th>
-									<th>{{'list_rule.th.active'|trans}}</th>
-									<th>{{'list_rule.th.date_created'|trans}}</th>
-									<th class="rounded-table-down-right">{{'list_rule.th.option'|trans}}</th>
-								</tr>
-							</tbody>
-						{% endif %}
-					</table>
+								</thead>
+								<tbody id="tbody_rule_list">
+									{% for rule in entities %}
+										<tr>
+											<td class="solution_block text-center">
+												<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_source }}.png" alt="{{rule.solution_source }}"/></p>
+												{{rule.lbl_source }}
+											</td>
+											<td class="solution_bloc text-center">
+												<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{rule.solution_target }}.png" alt="{{rule.solution_target }}"/></p>
+												{{rule.lbl_target }}
+											</td>
+											<td class="text-center col-rule-name">
+												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}"  class="rule-name-display help-link all-link">{{rule.name }}</a>
+												<a class="mx-3 edit-button-name-list">
+													<i class="fa fa-pen" aria-hidden="true"></i>
+												</a>
+												<div class="edit-form-container" style="display: none;">
+													<form class="edit-form-name-list" action="{{ path('update_rule_name') }}" method="post">
+														<input type="text" name="ruleName" class="form-control m-2" value="{{ rule.name }}" data-rule-id="{{ rule.id }}"/>
+														<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+														<button type="submit" class="btn btn-success btn-sm">{{ 'Save' | trans }}</button>
+														<button type="button" class="btn btn-danger btn-sm close-button-name-list">
+															<i class="fa fa-times" aria-hidden="true"></i>
+														</button>
+													</form>
+												</div>
+											</td>
+											<td class="text-center">
+												<div class="onoffswitch">
+													<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox toggle-switch-rule" id="{{ rule.id }}" {{ (rule.active == true) ? 'checked="checked"' : '' }}/>
+													<label class="onoffswitch-label" for="{{ rule.id }}">
+														<span class="onoffswitch-inner">
+															<span class="onoffswitch-active">
+																<span class="onoffswitch-switch">ON</span>
+															</span>
+															<span class="onoffswitch-inactive">
+																<span class="onoffswitch-switch">OFF</span>
+															</span>
+														</span>
+													</label>
+												</div>
+											</td>
+											<td class="text-center">
+												{{rule.dateCreated|date("d/m/Y") }}
+												{% if app.user.getUsername == 'support' %}
+													<p>
+														<span class="label label-default">{{ rule.createdBy.username }}</span>
+													</p>
+												{% endif %}
+											</td>
+											<td class="text-center">
+												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="btn btn-sm btn-outline-success">
+													<span class="btn-opt">
+														<i class="fa fa-eye"></i>
+													</span>
+												</a>
+												<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="btn btn-sm btn-outline-primary">
+													<span class="btn-opt">
+														<i class="fa fa-pen" aria-hidden="true"></i>
+													</span>
+												</a>
+												<a class="delete text-decoration-none btn btn-sm btn-outline-danger" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
+													<span class="btn-opt">
+														<i class="fa fa-trash" aria-hidden="true"></i>
+													</span>
+												</a>
+											</td>
+										</tr>
+									{% endfor %}
+									<tr class="invisibele-row-bottom">
+										<th class="rounded-table-down-left">{{'rule.source'|trans}}</th>
+										<th>{{'rule.target'|trans}}</th>
+										<th>{{'list_rule.th.name'|trans}}</th>
+										<th>{{'list_rule.th.active'|trans}}</th>
+										<th>{{'list_rule.th.date_created'|trans}}</th>
+										<th class="rounded-table-down-right">{{'list_rule.th.option'|trans}}</th>
+									</tr>
+								</tbody>
+							{% endif %}
+						</table>
 					</div>
 				</div>
 			</div>
@@ -170,12 +185,12 @@
 
 	</div>
 	<script type="text/javascript">
-
 		var chemin_img = "{{ asset('build/images/regle/') }}";
-var question = "Désirez-vous supprimer cette règle ?";
-var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
-var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
-var regle_list = "{{ path('regle_list') }}";
+		var question = "Désirez-vous supprimer cette règle ?";
+		var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
+		var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
+		var regle_list = "{{ path('regle_list') }}";
+		var checkRuleNameUrlList = "{{ path('check_rule_name') }}";
 	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}

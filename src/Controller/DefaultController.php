@@ -485,7 +485,9 @@ use App\Entity\WorkflowAction;
             foreach ($workflows as $workflow) {
                 $newWorkflow = new Workflow();
                 $newWorkflow->setId(uniqid());
-                $newWorkflow->setName($workflow->getName());
+                $ruleName = substr($newRule->getName(), 0, 5);
+                $workflowName = $workflow->getName();
+                $newWorkflow->setName($workflowName. "-duplicate-".$ruleName);
                 $newWorkflow->setRule($newRule);
                 $newWorkflow->setDeleted(false);
                 $newWorkflow->setCreatedBy($this->getUser());
@@ -2692,7 +2694,6 @@ use App\Entity\WorkflowAction;
 
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
-                'listJobDetail' => $this->jobRepository->listJobDetail(),
                 'nbFlux' => $nbFlux,
                 'solutions' => $lstArray,
                 'locale' => $language,
@@ -3151,7 +3152,27 @@ use App\Entity\WorkflowAction;
         return new Response('Update successful', Response::HTTP_OK);
     }
 
-/**
+    /**
+     * @Route("/check-rule-name", name="check_rule_name", methods={"GET"})
+     */
+    public function checkRuleName(Request $request): JsonResponse
+    {
+        $name = $request->query->get('ruleName');
+        $ruleId = $request->query->get('ruleId');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $ruleRepository = $entityManager->getRepository(Rule::class);
+
+        $existingRule = $ruleRepository->findOneBy(['name' => $name]);
+        
+        if ($existingRule && $existingRule->getId() !== $ruleId) {
+            return new JsonResponse(['exists' => true]);
+        }
+
+        return new JsonResponse(['exists' => false]);
+    }
+
+    /**
      * @Route("/rulefield/{id}/comment", name="rulefield_update_comment", methods={"POST"})
      */
     public function updateComment(RuleField $ruleField, Request $request, EntityManagerInterface $entityManager): Response
@@ -3162,6 +3183,6 @@ use App\Entity\WorkflowAction;
         $entityManager->persist($ruleField);
         $entityManager->flush();
 
-        return $this->redirectToRoute('regle_open', ['id' => $ruleField->getRule()->getId()]);
+        return new Response('Update successful', Response::HTTP_OK);
     }
 }

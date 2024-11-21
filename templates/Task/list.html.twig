@@ -46,7 +46,7 @@
 		</div>
 	{% endfor %}
 			{% if nb > 0 %}
-				<div class="table-wrapper">
+				<div class="table-wrapper table-wrapper-task">
 					<table class="listepager table container shadow-table">
 						{% if entities is not empty %}	
 						<tr>
@@ -78,7 +78,7 @@
 										<button onclick="document.getElementById('param-full-{{ loop.index }}').style.display='none';document.getElementById('param-short-{{ loop.index }}').style.display='block';">Show less</button>
 									</div>
 								{% else %}
-									<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param }}</a>
+									<a href="{{ path('task_view',{'id' : task.id }) }}" class="help-link all-link">{{ task.param }}</a>
 								{% endif %}
 							</td>
 							<td class="ctr">             

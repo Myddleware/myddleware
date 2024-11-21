@@ -38,9 +38,7 @@
 				</div>
 			{% endfor %}
 
-
 			{% if workflow is not null %}
-
 				<div class="workflow-details container mt-4">
 					<div class="card-header mb-4 card-title-workflow">
 						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#workflow-content" aria-expanded="true" aria-controls="workflow-content">
@@ -63,7 +61,7 @@
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.rule'| trans | upper }}</strong>
 								<div>
-									<a href="{{ path('regle_open', {'id': workflow.rule.id}) }}">{{ workflow.rule.name }}</a>
+									<a href="{{ path('regle_open', {'id': workflow.rule.id}) }}" class="help-link all-link">{{ workflow.rule.name }}</a>
 
 								</div>
 							</div>
@@ -120,7 +118,7 @@
 								{% for action in workflow.getWorkflowActions %}
 									<tr>
 										<td>
-											<a href="{{ path('workflow_action_show', {'id': action.id}) }}">{{ action.name }}</a>
+											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" class="help-link all-link">{{ action.name }}</a>
 										</td>
 										<td>{{ action.action }}</td>
 										<td>{{ action.description }}</td>
@@ -128,7 +126,7 @@
 										<td>
 											{% if action.arguments is iterable %}
 												<ul>
-												
+
 													{% for key, argument in action.arguments %}
 														<li>{{ key }}:
 															{% if argument is iterable %}
@@ -149,19 +147,19 @@
 											{% endif %}
 										</td>
 										<td class="CRUD-icons">
-											<a href="{{ path('workflow_action_edit', {'id': action.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}">
+											<a href="{{ path('workflow_action_edit', {'id': action.id}) }}" title="{{ 'list_rule.btn.edit'|trans }}"  class="btn btn-sm btn-outline-primary">
 												<span class="btn-opt">
 													<i class="fa fa-pen" aria-hidden="true"></i>
 												</span>
 											</a>
-											<a class="delete" href="{{ path('workflow_action_delete', {'id': action.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
+											<a class="delete btn btn-sm btn-outline-danger" href="{{ path('workflow_action_delete', {'id': action.id}) }}" onclick="return confirm('Are you sure you want to delete this workflow ?');">
 												<span class="btn-opt">
 													<i class="fa fa-trash" aria-hidden="true"></i>
 												</span>
 											</a>
-											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}">
+											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}"  class="btn btn-sm btn-outline-primary">
 												<span class="btn-opt">
-													<i class="fa fa-file" aria-hidden="true"></i>
+													<i class="fa fa-eye" aria-hidden="true"></i>
 												</span>
 											</a>
 										</td>
@@ -186,7 +184,6 @@
 			{% else %}
 				<p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
 			{% endif %}
-
 
 			<div class="container mt-5">
 				<div class="card-header mb-4 card-title-workflow">
@@ -218,21 +215,21 @@
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 									<td class="ctr">{{ log.id }}</td>
 									<td class="ctr">
-										<a href="{{ path('workflow_show', {'id': log.workflow.id}) }}">{{ log.workflow.name }}</a>
+										<a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a>
 									</td>
 									<td class="ctr">
-										<a href="{{ path('task_view',{'id' : log.job.id }) }}">{{ log.job.id }}</a>
+										<a href="{{ path('task_view',{'id' : log.job.id }) }}" class="help-link all-link">{{ log.job.id }}</a>
 									</td>
 									<td class="ctr">
 										{% if log.triggerDocument is not null %}
-											<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.triggerDocument.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
 										{% else %}
 											<span></span>
 										{% endif %}
 									</td>
 									<td class="ctr">
 										{% if log.generateDocument is not null %}
-											<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}">{{ log.generateDocument.id }}</a>
+											<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
 										{% else %}
 											<span></span>
 										{% endif %}
@@ -244,7 +241,7 @@
 									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
 									<td class="ctr">{{ log.getMessage }}</td>
 									<td class="ctr">
-										<a href="{{ path('workflow_action_show', {'id': log.action.id}) }}">{{ log.action.name }}</a>
+										<a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>
 									</td>
 									<td class="ctr">{{ log.action.action }}</td>
 								</tr>
@@ -252,41 +249,40 @@
 						</tbody>
 					</table>
 
-										{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
-											
-											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
-												<div class="form-group" required style="width: 15em;">
-													<label for="page" class="sr-only">Page</label>
-													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
-												</div>
-												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >Go to page</button>
-											</form>
-										
-											<script>
-											const maxPage = {{ pager.getNbPages() }};
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
 
-												function updateFormAction(event) {
-													event.preventDefault();
-													const page = document.getElementById('page').value;
-													if (page < 1 || page > maxPage) {
-														alert('Please enter a valid page number between 1 and ' + maxPage);
-														return;
-													}
-													const form = document.getElementById('pageForm');
-													const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
-													const action = baseUrl.replace('/page-1', '/page-' + page);
-													form.action = action;
-													form.submit();
-												}
-											</script>
-										{% endif %}
+						<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
+							<div class="form-group" required style="width: 15em;">
+								<label for="page" class="sr-only">Page</label>
+								<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
+							</div>
+							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
+						</form>
 
-		{% block js %}
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
-		{% endblock js %}
+						<script>
+							const maxPage = {{ pager.getNbPages() }};
+							function updateFormAction(event) {
+								event.preventDefault();
+								const page = document.getElementById('page').value;
+								if (page < 1 || page > maxPage) {
+									alert('Please enter a valid page number between 1 and ' + maxPage);
+									return;
+								}
+								const form = document.getElementById('pageForm');
+								const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
+								const action = baseUrl.replace('/page-1', '/page-' + page);
+								form.action = action;
+								form.submit();
+							}
+						</script>
+					{% endif %}
 
-	{% endblock %}
+					{% block js %}
+						<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+						<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+					{% endblock js %}
+
+				{% endblock %}
