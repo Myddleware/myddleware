@@ -35,10 +35,10 @@
 <div class="d-flex justify-content-around align-items-baseline">
 	<div >
 		<div>
-			<button id="logHelloButton" type="button" class="btn btn-secondary">
+			<button id="storeReferenceDateButton" type="button" class="btn btn-secondary mb-2">
 				Store Reference Date
 			</button>
-			<button id="getReferenceDateButton" type="button" class="btn btn-secondary">
+			<button id="getReferenceDateButton" type="button" class="btn btn-secondary mb-2">
 				Get Reference Date
 			</button>
 		</div>
@@ -117,7 +117,7 @@
 	instance = new dtsel.DTS('input[id="datereference"]',  {
 	showTime: true
 		});
-	document.getElementById('logHelloButton').addEventListener('click', function() {
+	document.getElementById('storeReferenceDateButton').addEventListener('click', function() {
 		var dateReferenceValue = document.getElementById('datereference').value;
 		var ruleId = '{{ rule.id }}';
 
