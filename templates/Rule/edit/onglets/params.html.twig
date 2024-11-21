@@ -130,6 +130,16 @@
 
 	document.getElementById('getReferenceDateButton').addEventListener('click', function() {
 		var ruleId = '{{ rule.id }}';
-		console.log('Retrieved date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
+		var storedDateReference = localStorage.getItem('dateReference_' + ruleId);
+
+		if (storedDateReference) {
+			console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
+			// Set the retrieved value to the input field
+			document.getElementById('datereference').value = storedDateReference;
+		} else {
+			console.log('No stored date reference found for rule ' + ruleId);
+		}
 	});
+
+
 </script>
