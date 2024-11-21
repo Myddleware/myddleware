@@ -45,21 +45,18 @@
 		<div id="ruleparams" class="row">
 			{% if params %}
 				{% for c, p in params %}
-					{% if p.type != 'option' %}
-						<p>{{p.label|trans}} : </p><input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" />
-					{% else %}
-						<p> {{p.label|trans}} : </p>
+					<div class="col-md-6 mb-3">
+						<p>{{ p.label|trans }}:</p>
+						{% if p.type != 'option' %}
+							<input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" />
+						{% else %}
 							<select data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
 								{% for opt_value, opt_name in p.option %}
-									{% if opt_value == p.value_bdd %}
-										<option selected="selected" value="{{ opt_value }}">{{ opt_name|trans }}</option>
-									{% else %}
-										<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
-									{% endif %}
+									<option value="{{ opt_value }}" {{ opt_value == p.value_bdd ? 'selected="selected"' : '' }}>{{ opt_name|trans }}</option>
 								{% endfor %}
 							</select>
-					
-					{% endif %}
+						{% endif %}
+					</div>
 				{% endfor %}
 			{% endif %}
 		</div>
