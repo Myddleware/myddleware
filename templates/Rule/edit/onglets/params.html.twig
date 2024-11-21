@@ -34,6 +34,11 @@
 </div>
 <div class="d-flex justify-content-around align-items-baseline">
 	<div >
+		<div>
+			<button id="logHelloButton" type="button" class="btn btn-secondary">
+				Log Hello
+			</button>
+		</div>
 		<div id="ruleparams" class="row">
 			{% if params %}
 				{% for c, p in params %}
@@ -109,4 +114,7 @@
 	instance = new dtsel.DTS('input[id="datereference"]',  {
 	showTime: true
 		});
+	document.getElementById('logHelloButton').addEventListener('click', function() {
+		console.log("hello");
+	});
 </script>
