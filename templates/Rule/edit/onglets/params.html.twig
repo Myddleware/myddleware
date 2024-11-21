@@ -116,6 +116,11 @@
 		});
 	document.getElementById('logHelloButton').addEventListener('click', function() {
 		var dateReferenceValue = document.getElementById('datereference').value;
-		console.log(dateReferenceValue);
+		
+		// Store the value in localStorage
+		localStorage.setItem('dateReference', dateReferenceValue);
+		
+		// Log the stored value to verify
+		console.log('Stored date reference:', localStorage.getItem('dateReference'));
 	});
 </script>
