@@ -144,3 +144,7 @@ button.btn-primary:hover {
 .copy-btn:hover {
     background-color: #e9ecef;
 }
+
+#height-container-fill-vertically {
+    height: 95vh !important;
+}
