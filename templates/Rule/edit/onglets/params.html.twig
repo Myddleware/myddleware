@@ -38,6 +38,9 @@
 			<button id="logHelloButton" type="button" class="btn btn-secondary">
 				Store Reference Date
 			</button>
+			<button id="getReferenceDateButton" type="button" class="btn btn-secondary">
+				Get Reference Date
+			</button>
 		</div>
 		<div id="ruleparams" class="row">
 			{% if params %}
@@ -123,5 +126,10 @@
 		
 		// Log the stored value to verify
 		console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
+	});
+
+	document.getElementById('getReferenceDateButton').addEventListener('click', function() {
+		var ruleId = '{{ rule.id }}';
+		console.log('Retrieved date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
 	});
 </script>
