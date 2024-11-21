@@ -395,3 +395,11 @@ td > a {
 .edit-form-name-rule {
 	position: relative;
 }
+
+
+/* rule parameters tab */
+
+#ruleparams,
+#simuleRuleFluxContainer {
+    border-radius: 15px;
+}
