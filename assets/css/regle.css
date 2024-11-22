@@ -413,3 +413,12 @@ td > a {
 #simuleRuleFluxContainer {
     border-radius: 15px;
 }
+
+#simuleRuleFluxContainer {
+	margin-top: 3em;
+}
+
+#rule-params-container {
+	margin-top: 3em;
+	align-items: flex-start !important;
+}
