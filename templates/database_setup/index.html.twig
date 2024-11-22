@@ -25,9 +25,35 @@
                                     {{ form_row(form.user) }}
                                     {{ form_row(form.password)}}
                                     <div class="d-grid mt-4">
-                                        {{ form_row(form.Save, {'attr': {'class': 'btn btn-primary btn-lg', 'onclick': 'this.form.submit();'}}) }}
+                                        {{ form_row(form.Save, {'attr': {'class': 'btn btn-primary btn-lg', 'onclick': 'validateAndSubmitForm(event)'}}) }}
                                     </div>
                                     {{ form_end(form) }}
+                                    <script>
+                                        function validateAndSubmitForm(event) {
+                                            // Prevent the default form submission
+                                            event.preventDefault();
+
+                                            // Perform basic validation
+                                            const form = event.target.form;
+                                            const requiredFields = ['host', 'port', 'name', 'user', 'password'];
+                                            let isValid = true;
+
+                                            requiredFields.forEach(field => {
+                                                const input = form.querySelector(`[name$="[${field}]"]`);
+                                                if (input && !input.value.trim()) {
+                                                    isValid = false;
+                                                    input.classList.add('is-invalid');
+                                                } else if (input) {
+                                                    input.classList.remove('is-invalid');
+                                                }
+                                            });
+
+                                            // If the form is valid, submit it
+                                            if (isValid) {
+                                                form.submit();
+                                            }
+                                        }
+                                    </script>
                                     {% if submitted %}
                                         <script>
                                             window.location.href = "{{ path('database_connect') }}";
