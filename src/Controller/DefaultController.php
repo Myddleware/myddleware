@@ -485,7 +485,9 @@ use App\Entity\WorkflowAction;
             foreach ($workflows as $workflow) {
                 $newWorkflow = new Workflow();
                 $newWorkflow->setId(uniqid());
-                $newWorkflow->setName($workflow->getName());
+                $ruleName = substr($newRule->getName(), 0, 5);
+                $workflowName = $workflow->getName();
+                $newWorkflow->setName($workflowName. "-duplicate-".$ruleName);
                 $newWorkflow->setRule($newRule);
                 $newWorkflow->setDeleted(false);
                 $newWorkflow->setCreatedBy($this->getUser());
@@ -2682,18 +2684,11 @@ use App\Entity\WorkflowAction;
 
             /** @var User $user */
             $user = $this->getUser();
-            $nbFlux = 0;
-            $listFlux = $this->documentRepository->countTypeDoc($user);
-            foreach ($listFlux as $field => $value) {
-                $nbFlux = $nbFlux + (int) $value['nb'];
-            }
 
             $countNbDocuments = $this->documentRepository->countNbDocuments();
 
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
-                'listJobDetail' => $this->jobRepository->listJobDetail(),
-                'nbFlux' => $nbFlux,
                 'solutions' => $lstArray,
                 'locale' => $language,
                 'countNbDocuments' => $countNbDocuments,
@@ -3095,12 +3090,11 @@ use App\Entity\WorkflowAction;
             'rule' => $ruleId,
             'name' => 'description'
         ]);
-        // if $description is the same as the previous one or is equal to 0 or is empty
+
         if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
             return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
         }
 
-        // Retrieve the RuleParam entity using the ruleId
         $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
 
         if (!$rule) {
@@ -3125,8 +3119,54 @@ use App\Entity\WorkflowAction;
         return new Response('', Response::HTTP_OK);
     }
 
+    /**
+     * @Route("/rule/update_name", name="update_rule_name", methods={"POST"})
+     */
+    public function updateRuleName(Request $request): Response
+    {
+        $ruleId = $request->request->get('ruleId');
+        $name = $request->request->get('ruleName');
+        $entityManager = $this->getDoctrine()->getManager();
+        $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
 
-/**
+        if (!$rule) {
+            throw $this->createNotFoundException('Couldn\'t find specified rule in the database');
+        }
+
+        if ($name === '0' || empty($name) || $name === $rule->getName()) {
+            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
+        }
+
+        $rule->setName($name);
+        $nameSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '_', $name), '_'));
+        $rule->setNameSlug($nameSlug);
+
+        $entityManager->flush();
+
+        return new Response('Update successful', Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/check-rule-name", name="check_rule_name", methods={"GET"})
+     */
+    public function checkRuleName(Request $request): JsonResponse
+    {
+        $name = $request->query->get('ruleName');
+        $ruleId = $request->query->get('ruleId');
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $ruleRepository = $entityManager->getRepository(Rule::class);
+
+        $existingRule = $ruleRepository->findOneBy(['name' => $name]);
+        
+        if ($existingRule && $existingRule->getId() !== $ruleId) {
+            return new JsonResponse(['exists' => true]);
+        }
+
+        return new JsonResponse(['exists' => false]);
+    }
+
+    /**
      * @Route("/rulefield/{id}/comment", name="rulefield_update_comment", methods={"POST"})
      */
     public function updateComment(RuleField $ruleField, Request $request, EntityManagerInterface $entityManager): Response
@@ -3137,6 +3177,6 @@ use App\Entity\WorkflowAction;
         $entityManager->persist($ruleField);
         $entityManager->flush();
 
-        return $this->redirectToRoute('regle_open', ['id' => $ruleField->getRule()->getId()]);
+        return new Response('Update successful', Response::HTTP_OK);
     }
 }

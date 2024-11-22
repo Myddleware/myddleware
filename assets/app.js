@@ -38,7 +38,8 @@ require('./js/task.js')
 require('./js/connector.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
-
+require('./js/historique.js')
+require('./js/mappingRule.js')
 
 
 if (window.location.href.includes('rule/document/list')) {
@@ -71,8 +72,14 @@ if (window.location.href.includes('workflowAction/new') || window.location.href.
     require('./js/workflowActionSearchFields.js')
 }
 
+
 if (!(window.location.href.includes('install'))) {
     require('./js/historique.js')
+}
+
+
+if (window.location.href.includes('flux')) {
+    require('./js/imagemousehoverbutton.js')
 }
 
 // start the Stimulus application

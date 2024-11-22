@@ -364,15 +364,18 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        cancel_tooltip: Cela annule les documents, ils ne seront pas envoyés.
         unlockall: Débloquer les documents
         mass_unlock_confirm: Débloquer les documents sélectionnés ?
         reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
+        reload_tooltip: Cela relance les documents avec les mêmes données et le même identifiant, rien ne change.
         mass_reload_confirm: Relancer les documents selectionnés ?
         delete: Supprimer documents
         mass_delete_confirm: Supprimer les documents sélectionnés ?
         exportcsv: Exporter Documents
+        unlockall_tooltip: Si les documents sont verrouillés par un autre processus, ils seront déverrouillés pour pouvoir être accédés à nouveau.
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
@@ -481,7 +484,20 @@ view_flux:
         job: Job
         date_created: Date de création
         type: Type
-        msg: Message
+        msg: Message    
+    workflow_log:
+        id: Id
+        workflow: Workflow
+        job: Job
+        trigger_document: Document déclencheur
+        generate_document: Document généré
+        created_by: Créé par
+        status: Statut
+        date_created: Date de création
+        message: Message
+        action_name: Nom de l'action
+        action_type: Type d'action
+
 
 list_task:
     total: Total de tâches
@@ -1011,6 +1027,7 @@ install:
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
+    database_already_exists: Une base de données existe déjà dans le fichier .env.local. Veuillez la supprimer pour continuer l'installation.
 
 crontab:
     title: Planificateur de travaux avec crontab

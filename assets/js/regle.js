@@ -1014,9 +1014,7 @@ $.fn.setCursorPosition = function(pos) {
   });
 
   $("#unlockAllFlux").on("click", function () {
-    console.log(mass_unlock);
     if (confirm(confirm_unlock)) {
-      console.log("okkkey");
       $.ajax({
         type: "POST",
         url: mass_unlock,
@@ -1027,12 +1025,9 @@ $.fn.setCursorPosition = function(pos) {
           ids: massFluxTab,
         },
         success: function (data) {
-          console.log(data);
-          console.log("ouiiiii");
           location.reload();
         },
         error: function () {
-          console.log(data);
           alert("Erreur lors de la communication avec le serveur.");
         },
       });

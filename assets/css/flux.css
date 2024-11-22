@@ -234,24 +234,16 @@ li span {
     border-radius: 15px;
     overflow: hidden;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.table-wrapper-task, .table-wrapper-workflow{
     display: inline-block;
     width: auto;
 }
 
-.table-wrapper-connector {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-    display: flex;
-	width: 100%;
-}
-
-.table-wrapper-rule {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-    display: flex;
-	width: 100%;
+.table-wrapper-variable {
+    display: inline-block;
+	width: 70%;
 }
 
 .shadow-table {

@@ -39,26 +39,26 @@
 
 {% block body %}
 
-<div>
-                {% for message in app.flashes('success_rulegroup') %}
-                    <div class="alert alert-success">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-		<a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
-	</div>
-	<div id="rulegroups">
-		<table class="listepager table container">
+<div class="d-flex align-items-center justify-content-center mb-3 mt-3">
+    {% for message in app.flashes('success_rulegroup') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
+</div>
+<div id="rulegroups">
+	<div>
+		<table class="listepager table container table-hover align-middle shadow-table">
 			<thead>
 				<tr>
-					<th>ID</th>
+					<th class="rounded-table-up-left">ID</th>
 					<th>Name</th>
 					<th>Date Created</th>
 					<th>Date Modified</th>
 					<th>Created By</th>
 					<th>Modified By</th>
-					<th>Description</th>
-					<th>Deleted</th>
+					<th class="rounded-table-up-right">Description</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -66,19 +66,19 @@
 					<tr>
 						<td>{{ ruleGroup.id }}</td>
 						<td>
-							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}">{{ ruleGroup.name }}</a>
+							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}" class="help-link all-link">{{ ruleGroup.name }}</a>
 						</td>
 						<td>{{ ruleGroup.dateCreated|date('Y-m-d H:i:s') }}</td>
 						<td>{{ ruleGroup.dateModified|date('Y-m-d H:i:s') }}</td>
 						<td>{{ ruleGroup.createdBy.username }}</td>
 						<td>{{ ruleGroup.modifiedBy.username }}</td>
 						<td>{{ ruleGroup.description }}</td>
-						<td>{{ ruleGroup.deleted ? 'Yes' : 'No' }}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 	</div>
+</div>
 {% endblock %}
 
 {% block cssin %}{% endblock cssin %}

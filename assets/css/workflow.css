@@ -63,3 +63,11 @@
     width: 300px;
 }
 
+.workflow-btn-rule-info{
+    text-align: center;
+}
+
+#workflowTableContainer{
+    display: flex;
+    justify-content: center;
+}

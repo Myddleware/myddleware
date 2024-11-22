@@ -86,6 +86,11 @@ class WorkflowType extends AbstractType
                                         ->atPath('condition')
                                         ->addViolation();
                                 }
+                                if (trim($payload) === '{status} == "' || trim($payload) === '{status}=="') {
+                                    $context->buildViolation('The condition is incomplete. Please add a value to compare with.')
+                                        ->atPath('condition')
+                                        ->addViolation();
+                                }
                             },
                         ]),
                     ],

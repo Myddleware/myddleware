@@ -80,6 +80,13 @@ class InstallRequirementsController extends AbstractController
                     'system_status' => $this->systemStatus,
                 ]);
             } else {
+
+                // if we already have a database section in the .env.local file, deny access and add a flash message
+                if (!empty($_ENV['DATABASE_URL'])) {
+                $this->addFlash('error_install', $translator->trans('install.database_already_exists'));
+                return $this->redirectToRoute('login');
+                }
+
                 // if other error, deny access
                 return $this->redirectToRoute('login');
             }

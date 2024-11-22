@@ -39,18 +39,16 @@
 
 {% block body %}
 	<div id="workflows">
-
-		<div>
-			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
-		</div>
-
-		<div class="link-help-view row text-end mb-4 mx-4">
+		<div class="link-help-view text-end mx-4">
 			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-workflow">
 				<i class="fa fa-info-circle" aria-hidden="true"></i>
 				{{ 'rule.help' | trans }}
 			</a>
 		</div>
 
+		<div>
+			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
+		</div>
 	</div>
 
 	<div>
@@ -67,13 +65,13 @@
 							<div class="col-md-6">
 								<div class="form-floating">
 									<input type="text" name="workflow_name" id="workflow_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Workflow Name" value="{{ app.request.query.get('workflow_name') }}">
-									<label for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
+									<label id="workflow_name_label" for="workflow_name">{{ 'list_workflow.searchName'|trans }}</label>
 								</div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-floating">
 									<input type="text" name="rule_name" id="rule_name" class="form-control form-control-sm shadow-sm" placeholder="Search by Rule Name" value="{{ app.request.query.get('rule_name') }}">
-									<label for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
+									<label id="rule_name_label" for="rule_name">{{ 'list_workflow.searchruleName'|trans }}</label>
 								</div>
 							</div>
 						</div>

@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #}
 
-<div class="link-help-view row text-end mx-4">
+<div class="link-help-view text-end mx-4">
 	<a href="#help-content-mapping">
 		<i class="fa fa-info-circle" aria-hidden="true"></i>
 		{{'rule.help'|trans}}
@@ -88,17 +88,5 @@
 <p>{{'help.viewrule.mapping'|trans|raw}}</p></div>
 
 <script>
-function toggleCommentBox(button) {
-const commentBox = button.nextElementSibling;
-if (commentBox.style.display === "block") {
-commentBox.style.display = "none";
-} else {
-commentBox.style.display = "block";
-}
-}
 
-function closeCommentBox(icon) {
-const commentBox = icon.parentElement;
-commentBox.style.display = "none";
-}
 </script>

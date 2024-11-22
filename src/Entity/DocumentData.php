@@ -93,7 +93,7 @@ class DocumentData
         return $this->doc_id;
     }
 
-    public function setDocId(?Document $doc_id): self
+    public function setDocId(Document $doc_id): self
     {
         $this->doc_id = $doc_id;
 

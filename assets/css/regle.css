@@ -259,7 +259,7 @@ td {
 }
 
 td > a {
-	color: #337ab7!important;
+	color: #337ab7;
 	text-decoration: none;
 }
 
@@ -269,10 +269,6 @@ td > a {
 
 .unlink_rule_from_group:hover {
 	color: white !important;
-}
-
-td > a:hover {
-	text-shadow: 0.3px 0 0 currentColor, -1px 0 0 currentColor;
 }
 
 .title_source_ctr, .title_target_ctr {
@@ -369,4 +365,33 @@ td > a:hover {
 
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front {
 	max-width: 645px;
+}
+
+.close-button-description, .close-button-name-rule  {
+    background: none;
+    color: #dc3545;
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+}
+.close-button-description {
+	top: -41px;
+    right: 10px;
+}
+.close-button-name-rule{  
+    top: -35px;
+    right: 5px;
+}
+
+.close-button-description:hover, .close-button-name-rule:hover {
+    color: #cd2536;
+	transform: scale(1.1);
+}
+
+.edit-form-description-close {
+    position: relative; 
+}
+
+.edit-form-name-rule {
+	position: relative;
 }

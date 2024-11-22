@@ -19,7 +19,7 @@
 			<a href="{{ path('workflow_action_delete', {'id': workflow.id}) }}" onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" class="btn btn-outline-danger m-2">{{ 'view_workflow_action.delete'|trans }}</a>
 		</div>
 
-				<div class="link-help-view row text-end mb-4 mx-4">
+				<div class="link-help-view text-end mb-4 mx-4">
 			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=workflowaction">
 				<i class="fa fa-info-circle" aria-hidden="true"></i>
 				{{ 'rule.help' | trans }}
@@ -50,7 +50,7 @@
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow_action.workflow'|trans|upper }}</strong>
 								<div>
-									<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}">{{ workflow.workflow.name }}</a>
+									<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="help-link all-link">{{ workflow.workflow.name }}</a>
 								</div>
 							</div>
 						</div>
@@ -140,21 +140,21 @@
 									<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 										<td class="ctr">{{ log.id }}</td>
 										<td class="ctr">
-											<a href="{{ path('workflow_list') }}">{{ log.workflow.id }}</a>
+											<a href="{{ path('workflow_list') }}" class="help-link all-link">{{ log.workflow.id }}</a>
 										</td>
 										<td class="ctr">
-											<a href="{{ path('task_view', {'id': log.job.id}) }}">{{ log.job.id }}</a>
+											<a href="{{ path('task_view', {'id': log.job.id}) }}" class="help-link all-link">{{ log.job.id }}</a>
 										</td>
 										<td class="ctr">
 											{% if log.triggerDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.triggerDocument.id }}</a>
+												<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}
 										</td>
 										<td class="ctr">
 											{% if log.generateDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}">{{ log.generateDocument.id }}</a>
+												<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}
