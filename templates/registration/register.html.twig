@@ -5,16 +5,16 @@
 {% endblock %}
 {% block body %}
 <div id="myd_top"></div>
-<div class="container">
-    <div class="row">
+<div class="container-fluid">
+    <div class="row main-requirements-box">
         <div class="col">
             {% for flashError in app.flashes('verify_email_error') %}
                 <div class="alert alert-danger" role="alert">{{ flashError }}</div>
             {% endfor %}
             <div class="row">
                 <div class="col">
-                    <div class="card">
-                        <div id="card-install-blue-like-logo" class="card-header bg-primary text-white">Install step 5 : create your Myddleware account</div>
+                    <div class="text-center main-card">
+                        <h2 class="install-step-title">Install Step 5 : create your Myddleware account</h2>
                         <div class="card-body d-grid justify-content-center">
                             <div class="card register-container">
                                 <div class="card-header">
