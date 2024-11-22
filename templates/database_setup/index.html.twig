@@ -25,21 +25,14 @@
                                     {{ form_row(form.user) }}
                                     {{ form_row(form.password)}}
                                     <div class="d-grid mt-4">
-                                        {{ form_row(form.Save) }}
+                                        {{ form_row(form.Save, {'attr': {'class': 'btn btn-primary btn-lg', 'onclick': 'this.form.submit();'}}) }}
                                     </div>
                                     {{ form_end(form) }}
                                     {% if submitted %}
-                                        <div class="d-grid mt-4 mb-4">
-                                            <a href="{{ path('database_connect') }}" id="test" class="btn btn-primary btn-lg">
-                                                {{'install.next'|trans}} 
-                                                <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
-                                            </a>
-                                        </div>
-                                    {% else %}
-                                        <div class="d-grid mt-4 mb-4">
-                                            <button type="button" class="btn btn-light btn-lg" disabled> {{'install.next'|trans}} </button>
-                                        </div>
-                                    {% endif %} 
+                                        <script>
+                                            window.location.href = "{{ path('database_connect') }}";
+                                        </script>
+                                    {% endif %}
                                     <div>
                                         <a class="card-link" href="{{path('install_requirements')}}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
