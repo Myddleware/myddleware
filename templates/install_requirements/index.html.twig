@@ -80,8 +80,7 @@
                                         </button>
                                         {% if not error_messages %} 
                                         <a id="install-button-next" href="{{path('database_setup')}}" class="btn btn-primary mb-2" role="button">
-                                            {{ 'install.next' | trans }}
-                                            <i id="install-button-next-icon" class="fas fa-arrow-right"></i>
+                                            {{ 'install.setup_database_button' | trans }}
                                         </a>
                                         {% endif %}
                                     </div>
