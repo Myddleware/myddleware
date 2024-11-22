@@ -115,7 +115,8 @@ button.btn-primary:hover {
 }
 
 #install-requirements-checker-title,
-#install-database-information-title {
+#install-database-information-title,
+#register-title {
     font-weight: bold;
     /* background-color: #03c4ebc4 !important; */
     background: linear-gradient(135deg,#2c2c54,#03c4eb);
