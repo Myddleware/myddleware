@@ -146,6 +146,7 @@ button.btn-primary:hover {
     background-color: #e9ecef;
 }
 
-#height-container-fill-vertically {
+#height-container-fill-vertically,
+#register-container-fill-vertically {
     height: 95vh !important;
 }
