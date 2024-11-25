@@ -684,11 +684,14 @@ public function removeFilter(Request $request): JsonResponse
                 !empty($data['rule'])
             OR !empty($data['customWhere']['rule'])
         ) {
+
+            $singleRuleId = $this->getSingleRuleIdFromRuleName($data['rule'] ?? $data['customWhere']['rule']);
+
             if (isset($data['operators']['name'])) {
-                    $where .= " AND rule.name != :ruleName ";
+                    $where .= " AND rule.id != :ruleId ";
                 
             } else {
-                $where .= " AND rule.name = :ruleName ";
+                $where .= " AND rule.id = :ruleId ";
             }
         }
 
@@ -840,8 +843,7 @@ public function removeFilter(Request $request): JsonResponse
                 !empty($data['rule'])
              OR !empty($data['customWhere']['rule'])
          ) {
-            $ruleFilter = trim((!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']));
-            $stmt->bindValue(':ruleName', $ruleFilter);
+            $stmt->bindValue(':ruleId', $singleRuleId);
         }
         // Status
         if (!empty($data['status'])) {
@@ -879,6 +881,12 @@ public function removeFilter(Request $request): JsonResponse
         }
         // Run the query and return the results
         return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
+    public function getSingleRuleIdFromRuleName($ruleName)
+    {
+        $ruleRepository = $this->entityManager->getRepository(Rule::class);
+        return $ruleRepository->findOneBy(['name' => $ruleName])->getId();
     }
 
     //Create pagination using the Pagerfanta Bundle based on a request
