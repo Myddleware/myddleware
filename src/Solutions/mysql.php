@@ -66,6 +66,14 @@ class mysqlcore extends database
     }
 }
 
-class mysql extends mysqlcore
-{
+// Manage custom development
+$file = __DIR__.'/../Custom/Solutions/mysqlcustom.php';
+if(file_exists($file)){
+	require_once($file);
 }
+else {
+	//Sinon on met la classe suivante
+	class mysql extends mysqlcore {
+		
+	}
+} 

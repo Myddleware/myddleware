@@ -4,9 +4,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 
-imports: 
-  - { resource: 'services_custom.yaml' }
-
 parameters:
   locale: 'en'
   env: '%env(APP_ENV)%'
@@ -51,10 +48,6 @@ services:
   App\EventListener\ExceptionListener:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
-
-  App\Manager\SolutionManager:
-    public: false
-    autowire: true
 
   App\DataFixtures\:
     resource: '../src/DataFixtures'

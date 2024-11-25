@@ -27,7 +27,7 @@ namespace App\Manager;
 
 use App\Entity\DocumentRelationship as DocumentRelationship;
 
-class formulafunctioncore
+class FormulaFunctionManager
 {
     protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup'];
     protected string $path = "App\Manager\FormulaFunctionManager::";
@@ -265,8 +265,4 @@ class formulafunctioncore
 		}
 		return $result['record_id'];
     }
-}
-
-class FormulaFunctionManager extends formulafunctioncore
-{
 }

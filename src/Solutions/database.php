@@ -43,6 +43,7 @@ class databasecore extends solution
 
     public function login($paramConnexion)
     {
+echo 'standard mysql'.chr(10);
         parent::login($paramConnexion);
         try {
             try {

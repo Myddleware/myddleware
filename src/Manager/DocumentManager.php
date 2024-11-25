@@ -43,7 +43,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Swift_Mailer;
 use Swift_Message;
 
-class documentcore
+class DocumentManager
 {
     public $id;
 
@@ -183,6 +183,7 @@ class documentcore
 
     public function setDocument($id_doc)
     {
+echo 'Standard'.chr(10);
         try {
             $sqlParams = "	SELECT 
 								document.*, 
@@ -2729,8 +2730,4 @@ class documentcore
         $this->createDocLog();
     }
 	
-}
-
-class DocumentManager extends documentcore
-{
 }

@@ -36,7 +36,7 @@ use Swift_Mailer;
 use Swift_Message;
 use Swift_SmtpTransport;
 
-class toolscore
+class ToolsManager
 {
     protected Connection $connection;
     protected $container;
@@ -260,8 +260,4 @@ class toolscore
 	public function getRulesFromGroup($ruleGroup, $force = false) {
 		return array();
 	}
-}
-
-class ToolsManager extends toolscore
-{
 }

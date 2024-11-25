@@ -46,7 +46,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use PDO;
 
-class jobcore
+class JobManager
 {
     protected $id;
     public string $message = '';
@@ -1529,7 +1529,4 @@ class jobcore
         }
         return true;
     }
-}
-class JobManager extends jobcore
-{
 }

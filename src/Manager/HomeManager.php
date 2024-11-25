@@ -53,33 +53,5 @@ class HomeManager
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
     }
-
-    // public function countTransferHisto(User $user = null): array
-    // {
-    //     try {
-    //         $historic = [];
-    //         // Start date
-    //         $startDate = date('Y-m-d', strtotime('-'.self::historicDays.' days'));
-    //         // End date
-    //         $endDate = date('Y-m-d');
-    //         // Init array
-    //         while (strtotime($startDate) < strtotime($endDate)) {
-    //             $startDateFormat = date($this->historicDateFormat, strtotime('+1 day', strtotime($startDate)));
-    //             $startDate = date('Y-m-d', strtotime('+1 day', strtotime($startDate)));
-    //             $historic[$startDate] = ['date' => $startDateFormat, 'open' => 0, 'error' => 0, 'cancel' => 0, 'close' => 0];
-    //         }
-
-    //         // Select the number of transfers per day
-    //         $result = $this->documentRepository->countTransferHisto($user);
-    //         if (!empty($result)) {
-    //             foreach ($result as $row) {
-    //                 $historic[$row['date']][strtolower($row['globalStatus'])] = $row['nb'];
-    //             }
-    //         }
-    //     } catch (\Exception $e) {
-    //         $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-    //     }
-
-    //     return $historic;
-    // }
+	
 }

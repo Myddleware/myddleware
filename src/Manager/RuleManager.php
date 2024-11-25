@@ -52,7 +52,7 @@ use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
 use App\Manager\NotificationManager;
 
-class rulecore
+class RuleManager
 {
     protected Connection $connection;
     protected LoggerInterface $logger;
@@ -2498,7 +2498,4 @@ class rulecore
             ],
         ];
     }
-}
-class RuleManager extends rulecore
-{
 }
