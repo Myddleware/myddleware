@@ -1512,7 +1512,16 @@ class jobcore
                 $jobManagerChekJob->setId($job['id']);
                 $jobManagerChekJob->closeJob();   
 				$this->setMessage('Task '.$job['id'].' successfully closed. ');
+				// Check running instances on crontab
+				// Get the running instances of the closed job from the crontab if exist
+				// If not equal to 0 then check if other open task are running for this job
+				// Update the numbre of running instances
+					
+				
             }
+			
+			
+			
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
