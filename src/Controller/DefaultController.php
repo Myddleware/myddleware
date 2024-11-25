@@ -2684,17 +2684,11 @@ use App\Entity\WorkflowAction;
 
             /** @var User $user */
             $user = $this->getUser();
-            $nbFlux = 0;
-            $listFlux = $this->documentRepository->countTypeDoc($user);
-            foreach ($listFlux as $field => $value) {
-                $nbFlux = $nbFlux + (int) $value['nb'];
-            }
 
             $countNbDocuments = $this->documentRepository->countNbDocuments();
 
             return $this->render('Home/index.html.twig', [
                 'errorByRule' => $this->ruleRepository->errorByRule($user),
-                'nbFlux' => $nbFlux,
                 'solutions' => $lstArray,
                 'locale' => $language,
                 'countNbDocuments' => $countNbDocuments,

@@ -144,7 +144,7 @@ class Document
     private $logs;
 	
 	/**
-     * @ORM\OneToMany(targetEntity="WorkflowLog", mappedBy="document")
+     * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="triggerDocument")
      */
     private $triggerDocuments;
 	
