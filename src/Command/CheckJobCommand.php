@@ -66,7 +66,7 @@ class CheckJobCommand extends Command
     {
         $period = $input->getArgument('period');
 
-        $data = $this->jobManager->initJob('checkJob');
+        $data = $this->jobManager->initJob('checkJob '.$period);
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
             $this->logger->error($data['message']);

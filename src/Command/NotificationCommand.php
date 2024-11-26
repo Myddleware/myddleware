@@ -77,7 +77,7 @@ class NotificationCommand extends Command
         // Standard notification
         else {
             try {
-                $data = $this->jobManager->initJob('notification');
+                $data = $this->jobManager->initJob('notification '.$input->getArgument('type'));
 
                 if (false === $data['success']) {
                     $output->writeln('0;<error>'.$data['message'].'</error>');

@@ -63,7 +63,7 @@ class PruneDatabaseCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $nbDays = $input->getArgument('nbDays');
-        $data = $this->jobManager->initJob('Prune database');
+        $data = $this->jobManager->initJob('prunedatabase '.$nbDays);
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');

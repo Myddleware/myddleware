@@ -116,7 +116,7 @@ class MassActionCommand extends Command
         // Set the API value
         $this->jobManager->setApi((bool) $api);
 
-        $paramJobString = "Mass $action on data type $dataType";
+        $paramJobString = "massaction $action $dataType $ids $forceAll $fromStatus $toStatus $api";
 
         $data = $this->jobManager->initJob($paramJobString);
 
