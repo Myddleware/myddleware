@@ -291,6 +291,10 @@ public function removeFilter(Request $request): JsonResponse
             
             // If the form is valid, we prepare the search
             if (!$doNotSearch) {
+                // if there is query source_id in the request, then replace any existing source_id in the data with the new one
+                if ($request->query->has('source_id')) {
+                    $data['source_id'] = $request->query->get('source_id');
+                }
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
                 // if $sortField, $sortOrder not null, then sort the documents accordingly
