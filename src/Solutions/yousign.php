@@ -43,7 +43,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
  * and possibly use those instead of datereference as a trigger to read files data (& then download the PDF files)?
  * Or pass updatedAT property from the /files/{id} endpoint while actually targettting /files/{id}/download.
  */
-class yousigncore extends solution
+class yousign extends solution
 {
     protected $callLimit = 10;
     // Enable to read deletion and to delete data
@@ -575,8 +575,4 @@ class yousigncore extends solution
             return false;
         }
     }
-}
-
-class yousign extends yousigncore
-{
 }

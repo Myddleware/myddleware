@@ -33,7 +33,7 @@ use SendinBlue\Client\Model\GetContacts;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sendinbluecore extends solution
+class sendinblue extends solution
 {
     protected $config;
     protected string $baseUrl = 'https://app.sendinblue.com/';
@@ -800,8 +800,4 @@ class sendinbluecore extends solution
 
         return null;
     }
-}
-
-class sendinblue extends sendinbluecore
-{
 }

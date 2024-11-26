@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class mysqlcore extends database
+class mysql extends database
 {
     protected $driver = 'mysql';
 
@@ -65,15 +65,3 @@ class mysqlcore extends database
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
 }
-
-// Manage custom development
-$file = __DIR__.'/../Custom/Solutions/mysqlcustom.php';
-if(file_exists($file)){
-	require_once($file);
-}
-else {
-	//Sinon on met la classe suivante
-	class mysql extends mysqlcore {
-		
-	}
-} 

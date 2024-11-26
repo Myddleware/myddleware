@@ -36,7 +36,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class airtablecore extends solution
+class airtable extends solution
 {
     protected bool $sendDeletion = true;
 
@@ -570,8 +570,4 @@ class airtablecore extends solution
 
         return $dto->format('Y-m-d\TH:i:s');
     }
-}
-
-class airtable extends airtablecore
-{
 }

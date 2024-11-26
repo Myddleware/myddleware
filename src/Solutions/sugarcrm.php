@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class sugarcrmcore extends solution
+class sugarcrm extends solution
 {
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
@@ -716,7 +716,4 @@ class sugarcrmcore extends solution
 
         return $response_obj;
     }
-}
-class sugarcrm extends sugarcrmcore
-{
 }

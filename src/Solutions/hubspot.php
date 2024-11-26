@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Datetime;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class hubspotcore extends solution
+class hubspot extends solution
 {
     protected $hubspot;
     protected $apiCallLimit = 100;
@@ -251,8 +251,4 @@ class hubspotcore extends solution
         return $dto->format('Uv');
     }
 
-}
-
-class hubspot extends hubspotcore
-{
 }

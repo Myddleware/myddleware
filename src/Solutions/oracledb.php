@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class oracledbcore extends database
+class oracledb extends database
 {
     protected $driver = 'oci';
 
@@ -183,8 +183,4 @@ class oracledbcore extends database
 
         return " ROWNUM BETWEEN $param[offset] AND ".($param['limit'] + $param['offset']);
     }
-}
-
-class oracledb extends oracledbcore
-{
 }

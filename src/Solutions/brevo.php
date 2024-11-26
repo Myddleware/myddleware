@@ -25,10 +25,7 @@
 
 namespace App\Solutions;
 
-class brevocore extends sendinblue
+class brevo extends sendinblue
 {
 }
 
-class brevo extends brevocore
-{
-}

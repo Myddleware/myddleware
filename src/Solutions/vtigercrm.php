@@ -29,7 +29,7 @@ use Javanile\VtigerClient\VtigerClient;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class vtigercrmcore extends solution
+class vtigercrm extends solution
 {
     // Enable to delete data
     protected bool $sendDeletion = true;
@@ -732,8 +732,4 @@ class vtigercrmcore extends solution
             return rtrim($url, '/').'/index.php?module='.$module.'&view=Detail&record='.$recordIdArray[1];
         }
     }
-}
-
-class vtigercrm extends vtigercrmcore
-{
 }

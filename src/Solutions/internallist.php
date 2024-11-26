@@ -30,7 +30,7 @@ use App\Entity\InternalList as InternalListEntity;
 use App\Entity\InternalListValue as InternalListValueEntity;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class internallistcore extends solution
+class internallist extends solution
 {
     public function getFieldsLogin(): array
     {
@@ -159,8 +159,4 @@ class internallistcore extends solution
             return ['error' => $error];
         }
     }
-}
-
-class internallist extends internallistcore
-{
 }

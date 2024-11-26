@@ -32,7 +32,7 @@ use App\Solutions\lib\PrestaShopWebserviceException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class prestashopcore extends solution
+class prestashop extends solution
 {
     protected array $required_fields = [
         'default' => ['id', 'date_upd', 'date_add'],
@@ -1084,7 +1084,4 @@ class prestashopcore extends solution
     protected function call($url, $parameters)
     {
     }
-}
-class prestashop extends prestashopcore
-{
 }

@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class suitecrmcore extends solution
+class suitecrm extends solution
 {
     protected int $limitCall = 100;
     protected string $urlSuffix = '/service/v4_1/rest.php';
@@ -999,7 +999,4 @@ class suitecrmcore extends solution
             return false;
         }
     }
-}
-class suitecrm extends suitecrmcore
-{
 }

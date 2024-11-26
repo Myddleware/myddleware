@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class salesforcecore extends solution {
+class salesforce extends solution {
 
 	protected int $limitCall = 100;
 
@@ -967,7 +967,4 @@ class salesforcecore extends solution {
 		return $date;
 	}
     
-}
-
-class salesforce extends salesforcecore {	
 }

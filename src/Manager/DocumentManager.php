@@ -183,7 +183,6 @@ class DocumentManager
 
     public function setDocument($id_doc)
     {
-echo 'Standard'.chr(10);
         try {
             $sqlParams = "	SELECT 
 								document.*, 

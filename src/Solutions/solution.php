@@ -34,7 +34,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class solutioncore
+class solution
 {
     // Permet d'indiquer que la connexion webservice est valide
     public bool $connexion_valide = false;
@@ -1064,7 +1064,4 @@ class solutioncore
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
-}
-class solution extends solutioncore
-{
 }

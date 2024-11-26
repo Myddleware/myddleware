@@ -30,7 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 //use Psr\LoggerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class moodlecore extends solution
+class moodle extends solution
 {
     protected $moodleClient;
     protected array $required_fields = [
@@ -774,8 +774,4 @@ class moodlecore extends solution
 			}
 		}
 	}
-}
-
-class moodle extends moodlecore
-{
 }

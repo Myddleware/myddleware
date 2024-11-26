@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class microsoftsqlcore extends database
+class microsoftsql extends database
 {
     protected $driver;
     protected string $fieldName = 'COLUMN_NAME';
@@ -100,6 +100,3 @@ class microsoftsqlcore extends database
         return parent::get_query_select_header($param, $method);
     }
 }// class microsoftsqlcore
-class microsoftsql extends microsoftsqlcore
-{
-}

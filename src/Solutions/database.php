@@ -31,7 +31,7 @@ use PDO;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class databasecore extends solution
+class database extends solution
 {
     protected $driver;
     protected PDO $pdo;
@@ -43,7 +43,6 @@ class databasecore extends solution
 
     public function login($paramConnexion)
     {
-echo 'standard mysql'.chr(10);
         parent::login($paramConnexion);
         try {
             try {
@@ -790,7 +789,4 @@ echo 'standard mysql'.chr(10);
     {
         return uniqid('', true);
     }
-}
-class database extends databasecore
-{
 }
