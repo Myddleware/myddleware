@@ -189,6 +189,12 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+
+        if ($request->query->has('source_id')) {
+            // set the session service source_id
+            $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
+        }
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
