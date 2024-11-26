@@ -719,7 +719,10 @@ class DocumentManager
 				$docCancel->setParam($paramCancel, true);
 				$docCancel->docIdRefError = $this->id;
 				$docCancel->setMessage('This document is cancelled because a predecessor document has been generated (same source_id for the same rule). ');
-				$docCancel->updateStatus('Cancel');
+				// Set status predecessor_ko if the ref document couldn't be cancelled. 
+				if ($docCancel->updateStatus('Cancel') == false) {
+					throw new \Exception('The cancellation of the document '.$result['id'].' failed.');
+				}
 				// Add an error message to the current document
 				$this->docIdRefError = $result['id'];
 				$this->setMessage('The document in reference has been cancelled to execute the current one. ');
@@ -2274,14 +2277,18 @@ class DocumentManager
 					!in_array($new_status, array('New','No_send'))
 				AND !$workflow
 			) {
-				$this->unsetLock();
+				if ($this->unsetLock() == false) {
+					throw new \Exception('Status has been changed but document has not been unlocked. ');
+				}
 			}
+			return true;
         } catch (\Exception $e) {
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
-        }
+			return false;
+		}
     }
 
     /**
