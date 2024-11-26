@@ -183,14 +183,14 @@
 										<span class="field">{{ key }}</span>
 										<span class="value">
 											{% if value|default('')|replace({'&#039;': "'"}) != value %}
-												{{ value|raw|replace({'&#039;': "'"}) }}
+												{{ value|raw|replace({'&#039;': "'"}) }}<br>
 											{% else %}
-												{{ value }}
+												{{ value }}<br>
 											{% endif %}
 										</span>
 										{% if key and linkedData[key] is defined %}
-											<a href="{{ linkedData[key] }}" title="{{ value }}">Source Record</a>
-											                <a href="{{ path('document_list_page', {'source_id': value}) }}" title="Search Document">Search Document by this id</a>
+											<a href="{{ linkedData[key] }}" title="{{ value }}">Source Record</a><br>
+											<a href="{{ path('document_list_page', {'source_id': value}) }}" title="Search Document">Search Document by this id</a>
 										{% endif %}
 									</li>
 								{% endif %}
