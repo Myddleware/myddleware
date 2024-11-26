@@ -188,6 +188,9 @@
 												{{ value }}
 											{% endif %}
 										</span>
+										{% if key and linkedData[key] is defined %}
+											<a href="{{ linkedData[key] }}" title="{{ value }}">{{ value }}</a>
+										{% endif %}
 									</li>
 								{% endif %}
 							{% endfor %}
