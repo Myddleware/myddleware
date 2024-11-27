@@ -11,6 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Execute the command and capture the output
     $output = shell_exec($command);
 
+    error_log("output:");
+    error_log($output);
+
     // Return the output as JSON
     echo json_encode(['output' => $output]);
 }
