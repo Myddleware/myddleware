@@ -249,21 +249,27 @@ form.submit();
     const toggleButton = document.getElementById('toggle-terminal');
     const term = new Terminal();
 
+    console.log('Terminal initialized');
+
     toggleButton.addEventListener('click', function() {
+        console.log('Toggle button clicked');
         if (terminalContainer.style.display === 'none') {
             terminalContainer.style.display = 'block';
             term.open(terminalContainer);
             term.write('Welcome to the terminal!\r\n');
+            console.log('Terminal opened');
         } else {
             terminalContainer.style.display = 'none';
+            console.log('Terminal closed');
         }
     });
 
     let commandBuffer = '';
 
     term.onData(e => {
+        console.log('Data received:', e);
         if (e.charCodeAt(0) === 13) { // Enter key
-			console.log(window.location.origin);
+            console.log('Enter key pressed, sending command:', commandBuffer);
             fetch('http://localhost/myddleware_normal/public/execute.php', {
                 method: 'POST',
                 headers: {
@@ -271,17 +277,31 @@ form.submit();
                 },
                 body: JSON.stringify({ command: commandBuffer })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response received:', response);
+                return response.text(); // Get the raw text response
+            })
+            .then(text => {
+                console.log('Raw response text:', text);
+                return JSON.parse(text); // Parse the text as JSON
+            })
             .then(data => {
-                term.write('\r\n' + data.output + '\r\n');
+                console.log('Parsed JSON data:', data);
+                if (data.output) {
+                    term.write('\r\n' + data.output + '\r\n');
+                } else {
+                    term.write('\r\nNo output received\r\n');
+                }
                 commandBuffer = ''; // Clear the buffer after execution
             })
             .catch(err => {
+                console.error('Error executing command:', err);
                 term.write('\r\nError executing command\r\n');
             });
         } else {
             term.write(e);
             commandBuffer += e; // Append to command buffer
+            console.log('Command buffer updated:', commandBuffer);
         }
     });
 });
