@@ -288,7 +288,9 @@ form.submit();
             .then(data => {
                 console.log('Parsed JSON data:', data);
                 if (data.output) {
-                    term.write('\r\n' + data.output + '\r\n');
+                    // Replace \n with \r\n for proper line breaks
+                    const formattedOutput = data.output.replace(/\n/g, '\r\n');
+                    term.write('\r\n' + formattedOutput + '\r\n');
                 } else {
                     term.write('\r\nNo output received\r\n');
                 }
