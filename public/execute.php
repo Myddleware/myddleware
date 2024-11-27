@@ -44,6 +44,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $output = shell_exec($command);
     }
 
+    error_log("SHELL:");
+    error_log($SHELL);
+
+    // test for the command
+    // $command = "php /c/laragon/www/myddleware_NORMAL/bin/console cache:clear";
+
+    // Execute the command and capture the output
+   // Specify the full path to PHP and the console script
+   $phpPath = 'C:\\laragon\\bin\\php\\php-8.2.0\\php.exe'; // Update this to the actual path of your PHP executable
+   $consolePath = 'C:\\laragon\\www\\myddleware_NORMAL\\bin\\console';
+
+   // Construct the command
+   $fullCommand = "$phpPath $consolePath cache:clear 2>&1";
+
+    $output = shell_exec($fullCommand);
     error_log("output:");
     error_log($output);
 
