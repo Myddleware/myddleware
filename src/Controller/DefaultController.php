@@ -38,6 +38,7 @@ use App\Entity\RuleParamAudit;
 use App\Entity\RuleRelationShip;
 use App\Entity\Solution;
 use App\Entity\User;
+use App\Entity\Variable;
 use App\Form\ConnectorType;
 use App\Form\DuplicateRuleFormType;
 use App\Manager\DocumentManager;
@@ -1484,6 +1485,16 @@ use App\Entity\WorkflowAction;
 
 								// Add rule id for simulation purpose when using lookup function
 								$this->documentManager->setRuleId($ruleKey);
+								// Add variables for simulation purpose
+								$variablesEntity = $this->entityManager->getRepository(Variable::class)->findAll();
+								if (!empty($variablesEntity)) {
+									foreach ($variablesEntity as $variable) {
+										$variables[$variable->getName()] = $variable->getvalue();
+									}
+									$this->documentManager->setParam(array('variables'=>$variables));
+								}
+								// Fix the document type for the simulation 
+								$this->documentManager->setDocumentType('C');
                                 // Transformation
 								$response = $this->documentManager->getTransformValue($record, $target_fields);
                                 if (!isset($response['message'])) {

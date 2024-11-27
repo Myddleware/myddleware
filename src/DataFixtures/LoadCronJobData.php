@@ -52,35 +52,15 @@ class LoadCronJobData implements FixtureInterface
 
     private function generateEntities()
     {
-        // Get all solutions already in the database
         $cronJobs = $this->manager->getRepository(CronJob::class)->findAll();
-        foreach ($this->cronJobData as $cronJobData) {
-            $foundCronJob = false;
-            if (!empty($cronJobs)) {
-                foreach ($cronJobs as $cronJob) {
-                    if ($cronJob->getCommand() == $cronJobData['command']) {
-                        $foundCronJob = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!$foundCronJob) {
-                $sql = "SELECT * FROM cron_job LIMIT 1";
-                $stmt = $this->manager->getConnection()->executeQuery($sql);
-                $result = $stmt->fetchAllAssociative();
-                if (!empty($result)) {
-                    $foundCronJob = true;
-                }
-            }
-
-            // If we didn't found the solution we create a new one, otherwise we update it
-            if (!$foundCronJob) {
-                $crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);
-                $crontab->setEnable($cronJobData['enable']);
-                $crontab->setDescription($cronJobData['description']);
-                $this->manager->persist($crontab);
-            }
-        }
+		// Do not change cron jobs if at least one already exists
+		if (empty($cronJobs)) {
+			foreach ($this->cronJobData as $cronJobData) {
+				$crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);
+				$crontab->setEnable($cronJobData['enable']);
+				$crontab->setDescription($cronJobData['description']);
+				$this->manager->persist($crontab);
+			}
+		}
     }
 }

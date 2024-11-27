@@ -1478,7 +1478,7 @@ class JobManager
         try {
 			$job = new Job();
 			$job->setId($this->id);
-			$job->setStatus('start');
+			$job->setStatus('Start');
 			$job->setParam($this->paramJob);
 			$job->setBegin(new DateTime());
 			$job->setManual($this->manual);

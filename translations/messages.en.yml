@@ -612,9 +612,10 @@ view_account:
 function:
     all: All
     category:
-        mathematical: Maths
+        mathematical: Function
         text: Text
         date: Date and hour  
+        constant: Constant  
     description:
         text: 
             trim:  Delete the spaces (or other characters) at the beginning and the end of each string 
@@ -641,6 +642,11 @@ function:
             microtime: Return the current Unix timestamp with the microseconds
             changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter
             changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter
+        constant:
+            mdw_no_send_field: Do not send the field
+            mdw_cancel_document: Cancel the document
+            mdw_error_transformed: Set status error transformed
+            mdw_document_type: Document type (C, U ou D)
 
 solution:
     fields:

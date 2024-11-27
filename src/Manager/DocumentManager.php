@@ -181,6 +181,10 @@ class DocumentManager
 		$this->id = $id;
 	}
 
+	public function setDocumentType($documentType) {
+		$this->documentType = $documentType;
+	}
+
     public function setDocument($id_doc)
     {
         try {
@@ -1701,6 +1705,11 @@ class DocumentManager
                         $$fieldNameDyn = $source[$ruleField['source_field_name']]; // Dynamic variable (e.g $name = name)
                     }
                 }
+				// Replace Document type variable 
+				if (str_contains($ruleField['formula'], "mdw_document_type")) {
+					$ruleField['formula'] = str_replace("mdw_document_type", $this->documentType, $ruleField['formula']);
+				}
+
                 // préparation des variables
                 $this->formulaManager->init($ruleField['formula']); // mise en place de la règle dans la classe
                 $this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
