@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Execute the command and capture the output
    // Specify the full path to PHP and the console script
-   $phpPath = 'C:\\laragon\\bin\\php\\php-8.2.0\\php.exe'; // Update this to the actual path of your PHP executable
+   $phpPath = trim(shell_exec('where php'));
 
    // given the script filename "C:/laragon/www/myddleware_NORMAL/public/execute.php" global variable
    $executepath = $_SERVER['SCRIPT_FILENAME'];
