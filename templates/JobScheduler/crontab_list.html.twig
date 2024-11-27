@@ -264,7 +264,7 @@ form.submit();
     term.onData(e => {
         if (e.charCodeAt(0) === 13) { // Enter key
 			console.log(window.location.origin);
-            fetch(window.location.origin + 'myddleware_NORMAL/public/execute.php', {
+            fetch('http://localhost/myddleware_normal/public/execute.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
