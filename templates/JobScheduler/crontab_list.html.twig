@@ -232,4 +232,58 @@ form.submit();
 			</div>
 		</div>
 	</div>
+
+	<!-- Button to toggle terminal -->
+	<button id="toggle-terminal" class="btn btn-secondary mt-3">Toggle Terminal</button>
+
+	<!-- Terminal container -->
+	<div id="terminal-container" style="display: none; height: 300px; width: 100%; margin-top: 20px;"></div>
+
+	<!-- Include xterm.js and its CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/xterm/css/xterm.css" />
+	<script src="https://unpkg.com/xterm/lib/xterm.js"></script>
+
+	<script>
+		   document.addEventListener('DOMContentLoaded', function() {
+    const terminalContainer = document.getElementById('terminal-container');
+    const toggleButton = document.getElementById('toggle-terminal');
+    const term = new Terminal();
+
+    toggleButton.addEventListener('click', function() {
+        if (terminalContainer.style.display === 'none') {
+            terminalContainer.style.display = 'block';
+            term.open(terminalContainer);
+            term.write('Welcome to the terminal!\r\n');
+        } else {
+            terminalContainer.style.display = 'none';
+        }
+    });
+
+    let commandBuffer = '';
+
+    term.onData(e => {
+        if (e.charCodeAt(0) === 13) { // Enter key
+			console.log(window.location.origin);
+            fetch(window.location.origin + 'myddleware_NORMAL/public/execute.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command: commandBuffer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                term.write('\r\n' + data.output + '\r\n');
+                commandBuffer = ''; // Clear the buffer after execution
+            })
+            .catch(err => {
+                term.write('\r\nError executing command\r\n');
+            });
+        } else {
+            term.write(e);
+            commandBuffer += e; // Append to command buffer
+        }
+    });
+});
+	</script>
 {% endblock %}
