@@ -272,7 +272,16 @@ form.submit();
 
         if (charCode === 13) { // Enter key
             console.log('Enter key pressed, sending command:', commandBuffer);
-            fetch('http://localhost/myddleware_normal/public/execute.php', {
+			// console.log the current url
+			console.log('current url:', window.location.href);
+
+			const currentUrl = window.location.href;
+
+			// we take the first part of the url up to public, public included
+			const baseUrl = currentUrl.substring(0, currentUrl.indexOf('public') + 6);
+			console.log('base url:', baseUrl);
+
+            fetch(baseUrl + '/execute.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
