@@ -53,7 +53,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Execute the command and capture the output
    // Specify the full path to PHP and the console script
    $phpPath = 'C:\\laragon\\bin\\php\\php-8.2.0\\php.exe'; // Update this to the actual path of your PHP executable
-   $consolePath = 'C:\\laragon\\www\\myddleware_NORMAL\\bin\\console';
+
+   // given the script filename "C:/laragon/www/myddleware_NORMAL/public/execute.php" global variable
+   $executepath = $_SERVER['SCRIPT_FILENAME'];
+   error_log("executePath:");
+   error_log($executePath);
+   
+//    to get the console path, remove /public/execute.php
+   $cleanPath = str_replace('/public/execute.php', '', $executepath);
+
+   error_log("cleanPath:");
+   error_log($cleanPath);
+
+   $consolePath = $cleanPath . '/bin/console';
+
+   error_log("consolePath:");
+   error_log($consolePath);
 
    // Construct the command
    $fullCommand = "$phpPath $consolePath cache:clear 2>&1";
