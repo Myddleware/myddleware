@@ -268,7 +268,9 @@ form.submit();
 
     term.onData(e => {
         console.log('Data received:', e);
-        if (e.charCodeAt(0) === 13) { // Enter key
+        const charCode = e.charCodeAt(0);
+
+        if (charCode === 13) { // Enter key
             console.log('Enter key pressed, sending command:', commandBuffer);
             fetch('http://localhost/myddleware_normal/public/execute.php', {
                 method: 'POST',
@@ -288,7 +290,6 @@ form.submit();
             .then(data => {
                 console.log('Parsed JSON data:', data);
                 if (data.output) {
-                    // Replace \n with \r\n for proper line breaks
                     const formattedOutput = data.output.replace(/\n/g, '\r\n');
                     term.write('\r\n' + formattedOutput + '\r\n');
                 } else {
@@ -300,6 +301,12 @@ form.submit();
                 console.error('Error executing command:', err);
                 term.write('\r\nError executing command\r\n');
             });
+        } else if (charCode === 127) { // Backspace key
+            if (commandBuffer.length > 0) {
+                commandBuffer = commandBuffer.slice(0, -1); // Remove last character
+                term.write('\b \b'); // Move cursor back, overwrite with space, move back again
+            }
+            console.log('Backspace pressed, command buffer updated:', commandBuffer);
         } else {
             term.write(e);
             commandBuffer += e; // Append to command buffer
