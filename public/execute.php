@@ -56,7 +56,7 @@ if (strpos($command, 'php bin/console') !== false) {
     }
 
     // $output = shell_exec("$composerPath $isolatedCommand");
-    $output = shell_exec("cd C:\\laragon\\www\\myddleware_NORMAL && $composerPath install 2>&1");
+    $output = shell_exec("cd $cleanPath && $composerPath install 2>&1");
 } else {
     $output = shell_exec($command);
 }
