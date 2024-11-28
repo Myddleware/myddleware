@@ -82,6 +82,7 @@ class DocumentManager
     protected $docIdRefError;
 	protected $env;
     protected bool $transformError = false;
+    protected $filterDocRef;
     protected ?ToolsManager $tools;
     protected $api;    // Specify if the class is called by the API
     protected $ruleDocuments;
@@ -366,6 +367,7 @@ class DocumentManager
         $this->jobId = '';
         $this->docIdRefError = '';
         $this->transformError = false;
+        $this->filterDocRef = '';
         $this->api = '';    // Specify if the class is called by the API
         $this->ruleDocuments = [];
     }
@@ -1073,7 +1075,10 @@ class DocumentManager
                         throw new \Exception('The type of this document is Update. The id of the target is missing. This document is queued. ');
                     }
                 }
-            } else {
+			// if the filter status has been forced, we don't set the status Transformed or Error_transformed
+            } elseif(!empty($this->filterDocRef)) {
+				return true;
+			} else {
                 throw new \Exception('Failed to transformed data. This document is queued. ');
             }
             $this->updateStatus('Transformed',$this->workflowAction);
@@ -1590,7 +1595,14 @@ class DocumentManager
                     $value = $this->getTransformValue($this->sourceData, $ruleField);
                     if (!empty($this->transformError)) {
                         throw new \Exception('Failed to transform the field '.$ruleField['target_field_name'].'.');
-                    }
+                    // Force the filter status if requested
+					} elseif (!empty($this->filterDocRef)) {
+						$this->docIdRefError = $this->filterDocRef;
+						$this->typeError = 'W';
+						$this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
+						$this->updateStatus('Filter');
+						return null;
+					}
                     $targetField[$ruleField['target_field_name']] = $value;
 					// If the target value equals mdw_no_send_field, the field isn't sent to the target
                     if ($value === "mdw_no_send_field") {
@@ -1709,7 +1721,7 @@ class DocumentManager
 				if (str_contains($ruleField['formula'], "mdw_document_type")) {
 					$ruleField['formula'] = str_replace("mdw_document_type", $this->documentType, $ruleField['formula']);
 				}
-
+				
                 // préparation des variables
                 $this->formulaManager->init($ruleField['formula']); // mise en place de la règle dans la classe
                 $this->formulaManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
@@ -1791,7 +1803,13 @@ class DocumentManager
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->id.' - '.$this->message);
             // Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
-            $this->transformError = true;
+			// We set the ref id returned in the message (id lenght is 23 characters)
+			if (str_contains($e->getMessage(), 'mdw_set_filter_status')) {
+				$this->filterDocRef = substr($e->getMessage(), -23);
+			// Set the error to true. We can't set a specific value in the return because this function could return any value (even false depending the formula)
+			} else {
+				$this->transformError = true;
+			}
 
             return null;
         }

@@ -235,6 +235,12 @@ class FormulaFunctionManager
 		// Manage error if no result found
 		if (empty($result['record_id'])) {
 			if ($errorIfNotFound) {
+				// If no target id found, we check if the parent has been filtered, in this case we filter the relate document too
+				$documentSearch = self::searchRelateDocumentByStatus($connection, $rule, $field, 'Filter', $direction);
+				if (!empty($documentSearch['id'])) {
+					// Return a code with the parent documcnet id
+					throw new \Exception('mdw_set_filter_status;'.$documentSearch['id']);
+				}
 				throw new \Exception('Failed to retrieve a related document. No data for the field '.$sourceFieldName.'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$field.' in the rule '.$ruleLink['name'].'. This document is queued. ');
 			} else {
 				return '';
@@ -264,5 +270,45 @@ class FormulaFunctionManager
 			}
 		}
 		return $result['record_id'];
+    }
+	
+	// Search relate document by status
+    protected static function searchRelateDocumentByStatus($connection, $ruleRelationship, $record_id, $status, $direction)
+    {
+        try {
+            // We use differents queries depending on the rule 's direction
+            if ('-1' == $direction) {
+                $sqlParams = '	SELECT *								
+								FROM document
+								WHERE  
+										document.rule_id = :ruleRelateId 
+									AND document.target_id = :record_id 
+									AND document.status = :status 
+									AND document.deleted = 0 
+								LIMIT 1';
+            } elseif ('1' == $direction) {
+                $sqlParams = '	SELECT *
+								FROM document 
+								WHERE  
+										document.rule_id = :ruleRelateId 
+									AND document.source_id = :record_id 
+									AND document.status = :status 
+									AND document.deleted = 0 
+								LIMIT 1';
+            } 
+            $stmt = $connection->prepare($sqlParams);
+            $stmt->bindValue(':ruleRelateId', $ruleRelationship);
+            $stmt->bindValue(':record_id', $record_id);
+            $stmt->bindValue(':status', $status);
+            $result = $stmt->executeQuery();
+            $result = $result->fetchAssociative();
+            if (!empty($result['id'])) {
+                return $result;
+            }
+        } catch (\Exception $e) {
+            $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($this->id.' - '.$this->message);
+        }
+        return null;
     }
 }
