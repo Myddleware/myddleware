@@ -77,8 +77,16 @@ if (strpos($command, 'php bin/console') !== false) {
 } elseif (strpos($command, 'composer') !== false) {
     $isolatedCommand = str_replace('composer ', '', $command);
 
-    // $composerPath = trim(shell_exec('which composer'));
-    $composerPath = 'C:\\Users\\AlexisTroïtzky\\AppData\\Local\\ComposerSetup\\bin\\composer';
+    $composerPath = trim(shell_exec('which composer'));
+
+    $isWindowsOrUnix = strpos(PHP_OS, 'WIN') === 0 ? 'win' : 'unix';
+
+    if ($isWindowsOrUnix === 'win') {
+        // convert the composer path to windows format
+        $composerPath = str_replace('/', '\\', $composerPath);
+        // in composer path, replace "\c\ by "C:\"
+        $composerPath = str_replace('\\c\\', 'C:\\', $composerPath);
+    }
 
     // $output = shell_exec("$composerPath $isolatedCommand");
     $output = shell_exec("cd C:\\laragon\\www\\myddleware_NORMAL && $composerPath install 2>&1");
