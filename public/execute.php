@@ -37,10 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    error_log("consolePath:");
    error_log($consolePath);
 
+//    if the command contains php bin/console
+if (strpos($command, 'php bin/console') !== false) {
+    $isolatedCommand = str_replace('php bin/console', '', $command);
+    $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
+} else {
+    $output = shell_exec($command);
+}
+
    // Construct the command
 //    $fullCommand = "$phpPath $consolePath cache:clear 2>&1";
 
-    $output = shell_exec($command);
     error_log("output:");
     error_log($output);
 
