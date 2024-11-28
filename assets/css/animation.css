@@ -480,11 +480,6 @@ h2 { margin-top: 50px;}
     margin-left: 4.9vw !important;
 }
 
-.star-icon-menu-item {
-    margin-left: 10px; /* Adjust horizontal spacing */
-    vertical-align: top; /* Options: baseline, middle, top, bottom */
-}
-
 #dropdown-rulegroup {
     padding: 0.20rem 1rem !important;
 }

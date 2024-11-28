@@ -60,14 +60,12 @@ menu li li, #myd_top li li {
 	background: white;
     text-align: left;
     overflow:hidden;  
-    height: 27px; 	
+    height: 31px; 	
 	padding: 0;
 	padding-left: 10px;
 }
 
-
 /* Dropdown menu */
-
 
 .dropdown-menu{
 	margin-left: -5px !important;
