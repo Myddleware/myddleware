@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    // Construct the command
 //    $fullCommand = "$phpPath $consolePath cache:clear 2>&1";
 
-    $output = shell_exec($fullCommand);
+    $output = shell_exec($command);
     error_log("output:");
     error_log($output);
 
