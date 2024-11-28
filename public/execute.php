@@ -41,6 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (strpos($command, 'php bin/console') !== false) {
     $isolatedCommand = str_replace('php bin/console', '', $command);
     $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
+} elseif (strpos($command, 'composer') !== false) {
+    $isolatedCommand = str_replace('composer ', '', $command);
+
+    // $composerPath = trim(shell_exec('which composer'));
+    $composerPath = 'C:\\Users\\AlexisTroïtzky\\AppData\\Local\\ComposerSetup\\bin\\composer';
+
+    // $output = shell_exec("$composerPath $isolatedCommand");
+    $output = shell_exec("cd C:\\laragon\\www\\myddleware_NORMAL && $composerPath install 2>&1");
 } else {
     $output = shell_exec($command);
 }
