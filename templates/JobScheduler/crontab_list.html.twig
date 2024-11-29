@@ -243,96 +243,90 @@ form.submit();
 	<link rel="stylesheet" href="https://unpkg.com/xterm/css/xterm.css" />
 	<script src="https://unpkg.com/xterm/lib/xterm.js"></script>
 
-	<!-- Button to reset terminal -->
-	<button id="reset-terminal" class="btn btn-secondary mt-3">Reset Terminal</button>
-
 	<script>
-		   document.addEventListener('DOMContentLoaded', function() {
-    const terminalContainer = document.getElementById('terminal-container');
-    const toggleButton = document.getElementById('toggle-terminal');
-    const resetButton = document.getElementById('reset-terminal');
-    const term = new Terminal();
+		document.addEventListener('DOMContentLoaded', function() {
+			const terminalContainer = document.getElementById('terminal-container');
+			const toggleButton = document.getElementById('toggle-terminal');
+			const resetButton = document.getElementById('reset-terminal');
+			let term; // Declare the terminal variable outside
 
-    console.log('Terminal initialized');
+			toggleButton.addEventListener('click', function() {
+				console.log('Toggle button clicked');
+				if (terminalContainer.style.display === 'none') {
+					terminalContainer.style.display = 'block';
+					term = new Terminal(); // Create a new Terminal instance
+					term.open(terminalContainer);
+					term.write('Welcome to the terminal!\r\n');
+					console.log('Terminal opened');
+					setupTerminal(term); // Setup the terminal with event listeners
+				} else {
+					terminalContainer.style.display = 'none';
+					console.log('Terminal closed');
+					if (term) {
+						term.dispose();
+						console.log('Terminal disposed');
+						term = null;
+						commandBuffer = '';
+					}
+				}
+			});
 
-    toggleButton.addEventListener('click', function() {
-        console.log('Toggle button clicked');
-        if (terminalContainer.style.display === 'none') {
-            terminalContainer.style.display = 'block';
-            term.open(terminalContainer);
-            term.write('Welcome to the terminal!\r\n');
-            console.log('Terminal opened');
-        } else {
-            terminalContainer.style.display = 'none';
-            console.log('Terminal closed');
-        }
-    });
 
-    resetButton.addEventListener('click', function() {
-        console.log('Reset button clicked');
-        term.reset(); // Clear the terminal
-        commandBuffer = ''; // Reset the command buffer
-        console.log('Terminal reset');
-    });
+			function setupTerminal(term) {
+				let commandBuffer = '';
 
-    let commandBuffer = '';
+				term.onData(e => {
+					console.log('Data received:', e);
+					const charCode = e.charCodeAt(0);
 
-    term.onData(e => {
-        console.log('Data received:', e);
-        const charCode = e.charCodeAt(0);
+					if (charCode === 13) { // Enter key
+						console.log('Enter key pressed, sending command:', commandBuffer);
+						const currentUrl = window.location.href;
+						const baseUrl = currentUrl.substring(0, currentUrl.indexOf('public') + 6);
+						console.log('base url:', baseUrl);
 
-        if (charCode === 13) { // Enter key
-            console.log('Enter key pressed, sending command:', commandBuffer);
-			// console.log the current url
-			console.log('current url:', window.location.href);
-
-			const currentUrl = window.location.href;
-
-			// we take the first part of the url up to public, public included
-			const baseUrl = currentUrl.substring(0, currentUrl.indexOf('public') + 6);
-			console.log('base url:', baseUrl);
-
-            fetch(baseUrl + '/execute.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ command: commandBuffer })
-            })
-            .then(response => {
-                console.log('Response received:', response);
-                return response.text(); // Get the raw text response
-            })
-            .then(text => {
-                console.log('Raw response text:', text);
-                return JSON.parse(text); // Parse the text as JSON
-            })
-            .then(data => {
-                console.log('Parsed JSON data:', data);
-                if (data.output) {
-                    const formattedOutput = data.output.replace(/\n/g, '\r\n');
-                    term.write('\r\n' + formattedOutput + '\r\n');
-                } else {
-                    term.write('\r\nNo output received\r\n');
-                }
-                commandBuffer = ''; // Clear the buffer after execution
-            })
-            .catch(err => {
-                console.error('Error executing command:', err);
-                term.write('\r\nError executing command\r\n');
-            });
-        } else if (charCode === 127) { // Backspace key
-            if (commandBuffer.length > 0) {
-                commandBuffer = commandBuffer.slice(0, -1); // Remove last character
-                term.write('\b \b'); // Move cursor back, overwrite with space, move back again
-            }
-            console.log('Backspace pressed, command buffer updated:', commandBuffer);
-        } else {
-            term.write(e);
-            commandBuffer += e; // Append to command buffer
-            console.log('Command buffer updated:', commandBuffer);
-        }
-    });
-});
+						fetch(baseUrl + '/execute.php', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ command: commandBuffer })
+						})
+						.then(response => {
+							console.log('Response received:', response);
+							return response.text();
+						})
+						.then(text => {
+							console.log('Raw response text:', text);
+							return JSON.parse(text);
+						})
+						.then(data => {
+							console.log('Parsed JSON data:', data);
+							if (data.output) {
+								const formattedOutput = data.output.replace(/\n/g, '\r\n');
+								term.write('\r\n' + formattedOutput + '\r\n');
+							} else {
+								term.write('\r\nNo output received\r\n');
+							}
+							commandBuffer = ''; // Clear the buffer after execution
+						})
+						.catch(err => {
+							console.error('Error executing command:', err);
+							term.write('\r\nError executing command\r\n');
+						});
+					} else if (charCode === 127) { // Backspace key
+						if (commandBuffer.length > 0) {
+							commandBuffer = commandBuffer.slice(0, -1);
+							term.write('\b \b');
+						}
+						console.log('Backspace pressed, command buffer updated:', commandBuffer);
+					} else {
+						term.write(e);
+						commandBuffer += e;
+						console.log('Command buffer updated:', commandBuffer);
+					}
+				});
+			}
+		});
 	</script>
 {% endblock %}
