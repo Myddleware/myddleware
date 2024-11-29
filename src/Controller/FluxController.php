@@ -834,7 +834,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
             $linkedData = $this->generateLinkToSource($sourceData, $mappedData, $extractedDirectLink);
 
                     // Define the log file path
-$logFile = 'var/log/dev.log';
+                    $logFile = '/home/clients/449288e065b68a74f5cdfd53c83ad702/sites/myddleware33.myddleware.cloud/myddleware/var/log/dev.log';
 
 // The message or variable you want to log
 $message = "This is a log message.";
@@ -900,7 +900,7 @@ file_put_contents($logFile, $logEntry, FILE_APPEND);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
 
                 // Define the log file path
-$logFile = 'var/log/dev.log';
+                $logFile = '/home/clients/449288e065b68a74f5cdfd53c83ad702/sites/myddleware33.myddleware.cloud/myddleware/var/log/dev.log';
 
 // The message or variable you want to log
 $message = "This is a log message.";
@@ -920,7 +920,7 @@ file_put_contents($logFile, $logEntry, FILE_APPEND);
     public function generateLinkToSource($sourceData, $mappedData, $extractedDirectLink): array {
 
         // Define the log file path
-$logFile = 'var/log/dev.log';
+        $logFile = '/home/clients/449288e065b68a74f5cdfd53c83ad702/sites/myddleware33.myddleware.cloud/myddleware/var/log/dev.log';
 
 // The message or variable you want to log
 $message = "This is a log message.";
