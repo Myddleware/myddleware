@@ -224,7 +224,8 @@ class DocumentManager
                 $this->workflowError = $this->document_data['workflow_error'];
 				// A document can be loaded only if there is no lock or if the lock is on the current job.
                 if (
-						!empty($this->jobLock)
+					!empty($this->jobId)
+					AND	!empty($this->jobLock)
 					AND $this->jobLock != $this->jobId
 				) {
 					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
@@ -510,7 +511,7 @@ class DocumentManager
             $documentData = $documentResult->fetchAssociative(); // 1 row
 
             // If document already lock by the current job, we return true;
-            if ($documentData['job_lock'] == $this->jobId) {
+            if ($documentData['job_lock'] == $this->jobLock) {
                 return array('success' => true);
             // If document not locked, we lock it.
             } elseif (empty($documentData['job_lock'])) {
