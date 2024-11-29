@@ -73,10 +73,11 @@
                                             </div>
                                         </div>
                                     </aside>
-                                    {% if env_local_file_rights %}
-                                    <h3>Rights of .env.local file</h3>
-                                    <p>The .env.local file is used to store the database credentials. It must be writable by the web server.</p>
+                                    {% if env_local_file_rights and not env_local_file_writable %}
+                                    <h3 class="alert-danger">Error: your .env.local file is not writable</h3>
+                                    <p>Rights of .env.local file: </p>
                                     <p>{{ env_local_file_rights }}</p>
+                                    <p>The .env.local file is used to store the database credentials. It must be writable by the web server.</p>
                                     {% endif %}
                                     <div class="btn-group">
                                         <button id="install-button-check" class="btn btn-primary mb-2" onClick="window.location.reload()">

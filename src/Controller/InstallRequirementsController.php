@@ -53,6 +53,8 @@ class InstallRequirementsController extends AbstractController
             // once the file is created or already present, we create a variable that contains the rights to the file: it is a string that contains the result of the command ls -alps .env.local
             $envLocalFileRights = shell_exec('ls -alps ' . __DIR__ . '/../../.env.local');
 
+            // create a variable that indicate whether the .env.local file is writable
+            $envLocalFileWritable = is_writable(__DIR__ . '/../../.env.local');
 
             // if we have a database in .env.local but the connection hasn't been made yet
             if ($e instanceof DBALException | $e instanceof PDOException | $e instanceof DoctrineConnectionException | $e instanceof TableNotFoundException) {
@@ -90,6 +92,7 @@ class InstallRequirementsController extends AbstractController
                     'recommendation_messages' => $recommendationMessages,
                     'system_status' => $this->systemStatus,
                     'env_local_file_rights' => $envLocalFileRights,
+                    'env_local_file_writable' => $envLocalFileWritable,
                 ]);
             } else {
 
@@ -138,6 +141,7 @@ class InstallRequirementsController extends AbstractController
             'recommendation_messages' => $recommendationMessages,
             'system_status' => $this->systemStatus,
             'env_local_file_rights' => $envLocalFileRights,
+            'env_local_file_writable' => $envLocalFileWritable,
         ]);
     }
 }
