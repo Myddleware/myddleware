@@ -832,6 +832,21 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
             $mappedData = $this->extractFieldAndRule($lookupData);
             $extractedDirectLink = $this->extractDirectLink($sourceData);
             $linkedData = $this->generateLinkToSource($sourceData, $mappedData, $extractedDirectLink);
+
+                    // Define the log file path
+$logFile = 'var/log/dev.log';
+
+// The message or variable you want to log
+$message = "This is a log message.";
+
+// json encode pretty print the sourcedata
+$variableValue = json_encode($linkedData, JSON_PRETTY_PRINT);
+
+// Format the log entry
+$logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variableValue . PHP_EOL;
+
+// Write the log entry to the file
+file_put_contents($logFile, $logEntry, FILE_APPEND);
            }
 
             // Call the view
@@ -883,10 +898,42 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         $link = $sourceData['direct_link'];
         $extractedLeftPortionOfLink = explode('?', $link);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
+
+                // Define the log file path
+$logFile = 'var/log/dev.log';
+
+// The message or variable you want to log
+$message = "This is a log message.";
+
+// json encode pretty print the updatedLink
+$variableValue = json_encode($updatedLink, JSON_PRETTY_PRINT);
+
+// Format the log entry
+$logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variableValue . PHP_EOL;
+
+// Write the log entry to the file
+file_put_contents($logFile, $logEntry, FILE_APPEND);
+
         return $updatedLink;
     }
 
     public function generateLinkToSource($sourceData, $mappedData, $extractedDirectLink): array {
+
+        // Define the log file path
+$logFile = 'var/log/dev.log';
+
+// The message or variable you want to log
+$message = "This is a log message.";
+
+// json encode pretty print the sourcedata
+$variableValue = json_encode($sourceData, JSON_PRETTY_PRINT);
+
+// Format the log entry
+$logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variableValue . PHP_EOL;
+
+// Write the log entry to the file
+file_put_contents($logFile, $logEntry, FILE_APPEND);
+
         // for each element of the array, we will generate a link to the source record
         // we will use the rule to find the source module
         foreach ($mappedData as $item) {
