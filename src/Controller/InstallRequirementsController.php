@@ -43,6 +43,17 @@ class InstallRequirementsController extends AbstractController
                 }
             }
         } catch (Exception | DBALException | PDOException | DoctrinePDOException | TableNotFoundException $e) {
+
+            // we start by checking if the root folder contains a .env.local file.
+            // if it does, we do nothing. If it doesn't, we create an empty one.
+            if (!file_exists(__DIR__ . '/../../.env.local')) {
+                file_put_contents(__DIR__ . '/../../.env.local', '');
+            }   
+
+            // once the file is created or already present, we create a variable that contains the rights to the file: it is a string that contains the result of the command ls -alps .env.local
+            $envLocalFileRights = shell_exec('ls -alps ' . __DIR__ . '/../../.env.local');
+
+
             // if we have a database in .env.local but the connection hasn't been made yet
             if ($e instanceof DBALException | $e instanceof PDOException | $e instanceof DoctrineConnectionException | $e instanceof TableNotFoundException) {
                 $this->symfonyRequirements = new SymfonyRequirements();
@@ -78,6 +89,7 @@ class InstallRequirementsController extends AbstractController
                     'error_messages' => $requirementsErrorMessages,
                     'recommendation_messages' => $recommendationMessages,
                     'system_status' => $this->systemStatus,
+                    'env_local_file_rights' => $envLocalFileRights,
                 ]);
             } else {
 
@@ -125,6 +137,7 @@ class InstallRequirementsController extends AbstractController
             'error_messages' => $requirementsErrorMessages,
             'recommendation_messages' => $recommendationMessages,
             'system_status' => $this->systemStatus,
+            'env_local_file_rights' => $envLocalFileRights,
         ]);
     }
 }

@@ -73,6 +73,11 @@
                                             </div>
                                         </div>
                                     </aside>
+                                    {% if env_local_file_rights %}
+                                    <h3>Rights of .env.local file</h3>
+                                    <p>The .env.local file is used to store the database credentials. It must be writable by the web server.</p>
+                                    <p>{{ env_local_file_rights }}</p>
+                                    {% endif %}
                                     <div class="btn-group">
                                         <button id="install-button-check" class="btn btn-primary mb-2" onClick="window.location.reload()">
                                             <i id="install-button-check-icon" class="fas fa-sync-alt"></i>
