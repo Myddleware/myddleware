@@ -72,11 +72,15 @@ if (window.location.href.includes('workflowAction/new') || window.location.href.
     require('./js/workflowActionSearchFields.js')
 }
 
-if (window.location.href.includes('flux')) {
-    require('./js/imagemousehoverbutton.js')
+
+if (!(window.location.href.includes('install'))) {
+    require('./js/historique.js')
 }
 
 
+if (window.location.href.includes('flux')) {
+    require('./js/imagemousehoverbutton.js')
+}
 
 // start the Stimulus application
 import './bootstrap';

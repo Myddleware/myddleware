@@ -467,6 +467,11 @@ h2 { margin-top: 50px;}
 	width: 120px;
 }
 
+
+.text-left {
+    text-align: left !important;
+}
+
 #workflow_name_label, #rule_name_label {
     padding-top: 5px;
 }

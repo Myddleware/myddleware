@@ -15,14 +15,32 @@ class DatabaseSetupType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('host')
+            ->add('host', null, [
+                'attr' => [
+                    'placeholder' => 'eg: localhost',
+                ],
+            ])
             ->add('port', IntegerType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => 'eg: 3306',
+                ],
             ])
-            ->add('name')
-            ->add('user')
+            ->add('name', null, [
+                'attr' => [
+                    'placeholder' => 'eg: my_database_name',
+                ],
+            ])
+            ->add('user', null, [
+                'attr' => [
+                    'placeholder' => 'eg: root',
+                ],
+            ])
             ->add('password', PasswordType::class, [
-                'required' => false,          //this field needs to be nullable as localhost is often root with no password
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Database password',
+                ],
             ])
             ->add('Save', SubmitType::class, [
                 'attr' => [

@@ -7,23 +7,24 @@
 {% block body %}
 <div id="myd_top"></div>
 <div class="container-fluid">
-    <div class="row">
+    <div class="row main-requirements-box">
         <div class="col">
-            <p><span id="logo" class="logo-install"></span></p>
             <div class="row">
                 <div class="col">
-                    <div class="card text-center main-card">
-                        <div class="card-header text-center text-white bg-primary"> Install Step 1 : checking Myddleware requirements</div>
+                    <div class="text-center main-card">
+                        <h2 class="install-step-title"> Install Step 1 : checking Myddleware requirements</h2>
                         <div class="card-body d-flex justify-content-center">
                             <article class="card col-6">
-                                <div class="card-header bg-success text-white">
+                                <div id="install-requirements-checker-title" class="card-header bg-success text-white">
                                     <h5 class="card-title">{{ 'install.requirements_checker' | trans }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <p id="install-info">{{ 'install.requirements_info' | trans }}</p>
                                     {% if php_version %}
+                                    <div class="row php-version-row">
                                         <p>PHP version : </p>
-                                        <p class="alert-success">{{ php_version }}</p>
+                                        <p id="install-php-version-value" class="alert-success">{{ php_version }}</p>
+                                    </div>
                                     {% else %}
                                     <p>{{ 'install.php_version_not_found' | trans }}</p>
                                     {% endif %}
@@ -45,23 +46,41 @@
                                         </ul>
                                     {% endif %}
                                     <aside class="card">
-                                        <div class="card-header bg-info text-white">
+                                        <div id="install-note-title" class="card-header bg-info text-white">
                                             <h6 class="card-title">Note</h6>
                                         </div>
                                         <div class="card-body">
                                             <p>{{ 'install.note_message' | trans }} :</p>
-                                            <code>symfony check:requirements</code>
+                                            <div class="command-group">
+                                                <div class="command-line">
+                                                    <code>php bin/console symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="php bin/console symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="command-line">
+                                                    <code>bin/console symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="bin/console symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="command-line">
+                                                    <code>symfony check:requirements</code>
+                                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-command="symfony check:requirements">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </aside>
                                     <div class="btn-group">
-                                        <button class="btn btn-outline-success btn-lg" onClick="window.location.reload()">
-                                            <i class="fas fa-sync-alt"></i>
+                                        <button id="install-button-check" class="btn btn-primary mb-2" onClick="window.location.reload()">
+                                            <i id="install-button-check-icon" class="fas fa-sync-alt"></i>
                                             {{ 'install.check_button' | trans }}
                                         </button>
                                         {% if not error_messages %} 
-                                        <a href="{{path('database_setup')}}" class="btn btn-outline-primary btn-lg" role="button">
-                                            {{ 'install.next' | trans }}
-                                            <i class="fas fa-arrow-right"></i>
+                                        <a id="install-button-next" href="{{path('database_setup')}}" class="btn btn-primary mb-2" role="button">
+                                            {{ 'install.setup_database_button' | trans }}
                                         </a>
                                         {% endif %}
                                     </div>
