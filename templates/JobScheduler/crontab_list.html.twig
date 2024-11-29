@@ -243,10 +243,14 @@ form.submit();
 	<link rel="stylesheet" href="https://unpkg.com/xterm/css/xterm.css" />
 	<script src="https://unpkg.com/xterm/lib/xterm.js"></script>
 
+	<!-- Button to reset terminal -->
+	<button id="reset-terminal" class="btn btn-secondary mt-3">Reset Terminal</button>
+
 	<script>
 		   document.addEventListener('DOMContentLoaded', function() {
     const terminalContainer = document.getElementById('terminal-container');
     const toggleButton = document.getElementById('toggle-terminal');
+    const resetButton = document.getElementById('reset-terminal');
     const term = new Terminal();
 
     console.log('Terminal initialized');
@@ -262,6 +266,13 @@ form.submit();
             terminalContainer.style.display = 'none';
             console.log('Terminal closed');
         }
+    });
+
+    resetButton.addEventListener('click', function() {
+        console.log('Reset button clicked');
+        term.reset(); // Clear the terminal
+        commandBuffer = ''; // Reset the command buffer
+        console.log('Terminal reset');
     });
 
     let commandBuffer = '';
