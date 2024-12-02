@@ -1041,6 +1041,7 @@ install:
     role_admin: Please note that these credentials will have administrator access rights to Myddleware
     check_button: Check now 
     next: Next
+    setup_database_button: Setup database
     previous: Previous
     requirements_info: Let's check whether your server meets the requirements to run a Myddleware project.
     php_ini_error: WARNING ! No configuration file (php.ini) used by PHP!

@@ -19,8 +19,8 @@ code {
     max-width: 75vw;
     margin: auto;
     border: none;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
+
 
 .card .card-body {
     padding: 30px;
@@ -41,6 +41,14 @@ aside {
 /* spread on whole block width as display grid doesn't seem to do the trick here */
 #database_setup_Save {
     width: 100%;
+    background-color: #03c4eb !important;
+  border: none !important;
+  font-size: 18px !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  transition: background-color 0.3s !important;
+  margin: 0px !important;
 }
 
 .logo-myddleware-install-container {
@@ -50,4 +58,96 @@ aside {
 
 #card-install-blue-like-logo{
     background-color: #198bca !important;
+}
+
+/* New install section */
+
+.main-requirements-box {
+    background: linear-gradient(135deg,#2c2c54,#03c4eb);
+}
+
+.install-step-title {
+    background-color: none !important;
+    color: white;
+    font-weight: bold;
+}
+
+button.btn-primary {
+    background-color: #03c4eb !important;
+    border: none !important;
+    font-size: 18px !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    color: #fff !important;
+    transition: background-color 0.3s !important;
+}
+
+.btn {
+    border-radius: 8px !important;
+    margin: 10px !important;
+    /* center the text inside the button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button.btn-primary:hover {
+    background-color: #0284a8;
+}
+
+#install-button-next-icon {
+    margin-left: 10px;
+}
+
+#install-button-check-icon {
+    margin-right: 10px;
+}
+
+#install-php-version-value {
+    font-weight: bold;
+    width: 20%;
+}
+
+.php-version-row {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+#install-requirements-checker-title,
+#install-database-information-title,
+#register-title {
+    font-weight: bold;
+    /* background-color: #03c4ebc4 !important; */
+    background: linear-gradient(135deg,#2c2c54,#03c4eb);
+}
+
+#install-note-title {
+    background: linear-gradient(135deg,#2c2c54,#66e1fa);
+    padding-top: 10px;
+}
+
+.command-group {
+    margin: 10px 0;
+}
+
+.command-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 5px 0;
+}
+
+.copy-btn {
+    padding: 2px 8px;
+}
+
+.copy-btn:hover {
+    background-color: #e9ecef;
+}
+
+#height-container-fill-vertically,
+#register-container-fill-vertically,
+#load-fixtures-container-fill-vertically {
+    height: 95vh !important;
 }

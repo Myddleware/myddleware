@@ -1025,6 +1025,7 @@ install:
     requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
     check_button: Vérifier
     next: Suivant
+    setup_database_button: Configurer la base de données
     previous: Précédent
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     php_ini_error: ATTENTION ! Le fichier de configuration PHP (php.ini) n'a pas été trouvé!
