@@ -166,6 +166,10 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action delete only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -193,6 +197,10 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action active only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -220,6 +228,10 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action active show only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -246,7 +258,11 @@ class WorkflowActionController extends AbstractController
      * @Route("/new/{workflowId}", name="workflow_action_create_with_workflow")
      */
     public function WorkflowCreateActionWithWorkflow(string $workflowId, Request $request)
-    {
+        {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action create with workflow only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
@@ -548,6 +564,10 @@ class WorkflowActionController extends AbstractController
      */
     public function getTargetFields(string $ruleId, EntityManagerInterface $em): JsonResponse
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action get target fields only available with the entreprise package. ");
+        }
+
         $ruleFields = $em->getRepository(RuleField::class)->findBy(['rule' => $ruleId]);
 
         if (!$ruleFields) {
@@ -570,6 +590,10 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionShowAction(string $id, Request $request, int $page): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action show only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
@@ -614,6 +638,10 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionEditAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action edit only available with the entreprise package. ");
+        }
+
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
@@ -915,6 +943,11 @@ class WorkflowActionController extends AbstractController
     // public function to empty the arguments based on the action
     public function emptyArgumentsBasedOnAction($id)
     {
+
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action empty arguments based on action only available with the entreprise package. ");
+        }
+
         $em = $this->getDoctrine()->getManager();
         $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
         $workflowAction = $workflowActionArray[0];
@@ -944,6 +977,10 @@ class WorkflowActionController extends AbstractController
     // public function to save the workflowAudit to the database
     public function saveWorkflowAudit($workflowId)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action save workflow audit only available with the entreprise package. ");
+        }
+
 
         $em = $this->getDoctrine()->getManager();
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
@@ -996,6 +1033,10 @@ class WorkflowActionController extends AbstractController
     #[Route('/workflowAction/toggle/{id}', name: 'workflow_action_toggle', methods: ['POST'])]
     public function toggleWorkflowAction(Request $request, EntityManagerInterface $em, WorkflowActionRepository $workflowActionRepository, string $id): JsonResponse
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow action toggle only available with the entreprise package. ");
+        }
+
         $workflowAction = $workflowActionRepository->find($id);
 
         if (!$workflowAction) {
