@@ -541,6 +541,7 @@ public function removeFilter(Request $request): JsonResponse
             'flux.status.send' => 'Send',
             'flux.status.filter' => 'Filter',
             'flux.status.no_send' => 'No_send',
+            'flux.status.Error_expected' => 'Error_expected',
             'flux.status.cancel' => 'Cancel',
             'flux.status.filter_ko' => 'Filter_KO',
             'flux.status.predecessor_ko' => 'Predecessor_KO',

@@ -157,6 +157,7 @@ class DocumentManager
             'Send' => 'flux.status.send',
             'Filter' => 'flux.status.filter',
             'No_send' => 'flux.status.no_send',
+            'Error_expected' => 'flux.status.Error_expected',
             'Cancel' => 'flux.status.cancel',
             'Create_KO' => 'flux.status.create_ko',
             'Filter_KO' => 'flux.status.filter_ko',

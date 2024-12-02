@@ -433,6 +433,7 @@ flux:
         found: Found
         filter: Filter Cancelled
         no_send: Not sent
+        Error_expected: Erreur expected
         cancel: Sending cancelled
         filter_ko: Filter error
         create_ko: Creation error

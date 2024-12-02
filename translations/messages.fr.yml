@@ -430,6 +430,7 @@ flux:
         found: Trouvé
         filter: Filtre annulé
         no_send: Non envoyé
+        Error_expected: Erreur attendue
         cancel: Envoi annulé
         filter_ko: Filtre en erreur
         create_ko: Création en erreur
