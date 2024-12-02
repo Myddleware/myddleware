@@ -77,4 +77,17 @@ if (strpos($command, 'php bin/console') !== false) {
     // Return the output as JSON
     echo json_encode(['output' => $output]);
 }
+
+function isWindows() {
+    return strpos(PHP_OS, 'WIN') === 0;
+}
+
+function adjustPath($path) {
+    if (isWindows()) {
+        // Convert Unix-style path to Windows-style
+        $path = str_replace('/', '\\', $path);
+        $path = str_replace('\\c\\', 'C:\\', $path);
+    }
+    return $path;
+}
 ?>
