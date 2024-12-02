@@ -38,15 +38,28 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use App\Manager\ToolsManager;
+use Exception;
 class VariableController extends AbstractController
 {
+    protected ToolsManager $tools;
+
+    public function __construct(ToolsManager $tools)
+    {
+        $this->tools = $tools;
+    }
+
     /**
      * @Route("variables", name="variable_list", defaults={"page"=1})
      * @Route("variables/page-{page}", name="variable_list_page", requirements={"page"="\d+"})
      */
     public function listView(int $page = 1, EntityManagerInterface $em, Request $request): Response
     {
+
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Variable list only available with the entreprise package. ");
+        }
+
         try {
             $variables = $em->getRepository(Variable::class)->findBy([], ['id' => 'ASC']);
 
@@ -70,6 +83,10 @@ class VariableController extends AbstractController
      */
     public function create(EntityManagerInterface $em, Request $request, TranslatorInterface $translator): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Variable create only available with the entreprise package. ");
+        }
+
         $variable = new Variable();
 
         $form = $this->createFormBuilder($variable)
@@ -118,6 +135,10 @@ class VariableController extends AbstractController
      */
     public function edit(EntityManagerInterface $em, Request $request, Variable $variable, TranslatorInterface $translator): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Variable edit only available with the entreprise package. ");
+        }
+
         $originalValue = $variable->getValue();
 
         $form = $this->createFormBuilder($variable)
@@ -168,6 +189,10 @@ class VariableController extends AbstractController
      */
     public function delete(EntityManagerInterface $em, Variable $variable): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Variable delete only available with the entreprise package. ");
+        }
+
         // Create an audit entry
         $audit = new VariableAudit();
         $audit->setVariableId($variable->getId());
@@ -189,6 +214,10 @@ class VariableController extends AbstractController
      */
     public function show(Variable $variable): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Variable show only available with the entreprise package. ");
+        }
+
         return $this->render('variable/show.html.twig', [
             'variable' => $variable
         ]);
