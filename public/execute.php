@@ -15,34 +15,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    error_log("command:");
-    error_log($command);
 
-    error_log("SHELL:");
-    error_log($SHELL);
 
-    // test for the command
-    // $command = "php /c/laragon/www/myddleware_NORMAL/bin/console cache:clear";
-
-    // Execute the command and capture the output
-   // Specify the full path to PHP and the console script
    $phpPath = trim(shell_exec('where php'));
 
-   // given the script filename "C:/laragon/www/myddleware_NORMAL/public/execute.php" global variable
    $executepath = $_SERVER['SCRIPT_FILENAME'];
-   error_log("executePath:");
-   error_log($executePath);
    
-//    to get the console path, remove /public/execute.php
    $cleanPath = str_replace('/public/execute.php', '', $executepath);
 
-   error_log("cleanPath:");
-   error_log($cleanPath);
-
    $consolePath = $cleanPath . '/bin/console';
-
-   error_log("consolePath:");
-   error_log($consolePath);
 
 //    if the command contains php bin/console
 if (strpos($command, 'php bin/console') !== false) {
@@ -67,12 +48,6 @@ if (strpos($command, 'php bin/console') !== false) {
 } else {
     $output = shell_exec($command);
 }
-
-   // Construct the command
-//    $fullCommand = "$phpPath $consolePath cache:clear 2>&1";
-
-    error_log("output:");
-    error_log($output);
 
     // Return the output as JSON
     echo json_encode(['output' => $output]);
