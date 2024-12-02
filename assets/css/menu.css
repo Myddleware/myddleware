@@ -185,6 +185,11 @@ header{
     top: 8px;
 }
 
+.star-icon-btn-filter{
+    top: 13px !important;
+    left: 10px;
+}
+
 .title_section_menu:hover .star-icon {
     transform: rotate(20deg) scale(1.5);
 }

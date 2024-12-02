@@ -25,10 +25,10 @@
 {% extends 'base.html.twig' %}
 {% block titlesm %}
 	<div class="homepage_welcome m-3">
-		<span class="typewriter">{{'title.index.panel'|trans }}</span>
+		<span class="typewriter mb-4 mt-5">{{'title.index.panel'|trans }}</span>
 		<p class="homepage_welcome_text mt-4">{{'title.index.text'|trans }}</p>
-		<p class="homepage_welcome_text">{{'title.index.text2'|trans }}</p>
-		<button id="bnt_welcome" class="btn btn-dark text-center mt-4" onclick="window.open('https://myddleware.github.io/myddleware/#/', '_blank')">
+		<p class="homepage_welcome_text mb-5">{{'title.index.text2'|trans }}</p>
+		<button id="bnt_welcome" class="btn btn-dark text-center mt-5" onclick="window.open('https://myddleware.github.io/myddleware/#/', '_blank')">
 			{{ 'title.index.btn'|trans }}
 		</button>
 	</div>
@@ -212,25 +212,36 @@
 					</div>
 				</div>
 				<div class="d-flex justify-content-center my-5">
-					<div class="contact-panel mx-5">
-						<h4>{{'panel.contact.title2'|trans}}</h4>
-						<p>{{'panel.contact.text1'|trans}}</p>
-						<p>{{'panel.contact.text2'|trans}}
-							:
-							<div class="home-contact">support@myddleware.com</div>
-						</p>
-						<p>{{'panel.contact.text3'|trans}}
-							<a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
-						</p>
+					<div class="contact-panel">
+						<div  class="contact-panel-1">
+							<h4 class="mb-4">{{'panel.contact.title2'|trans}}</h4>
+							<p>{{'panel.contact.text1'|trans}}</p>
+							<p>{{'panel.contact.text2'|trans}}
+								:
+								<div class="home-contact">support@myddleware.com</div>
+							</p>
+							<p>{{'panel.contact.text3'|trans}}
+								<a class="home-contact" href="https://github.com/Myddleware/myddleware/issues" target="_blank">GitHub</a>
+							</p>
+						</div>
 					</div>
-					<div class="contact-panel mx-5">
-						<h4>{{'panel.contact.title3'|trans}}</h4>
+					<div class="contact-panel">
+						<h4 class="mb-4">{{'panel.contact.title3'|trans}}</h4>
 						<p>{{'panel.contact.text4'|trans}}</p>
 						<p>{{'panel.contact.text5'|trans}}
 							:
 							<div class="home-contact">romanfaure@myddleware.com</div>
 						</p>
 					</div>
+				</div>
+				<div class="social-bar">
+					<span class="line"></span>
+					<div class="icons">
+						<a href="https://www.facebook.com" target="_blank" class="icon facebook" title="Facebook"></a>
+						<a href="https://www.youtube.com" target="_blank" class="icon youtube" title="YouTube"></a>
+						<a href="https://www.linkedin.com" target="_blank" class="icon linkedin" title="LinkedIn"></a>
+					</div>
+					<span class="line"></span>
 				</div>
 			</section>
 		</div>

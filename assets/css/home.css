@@ -161,20 +161,23 @@
 /* NEW HOME */
 
 #myd_title:has(.homepage_welcome) {
-    height: 300px !important;
+    height: 553px !important;
+    background: linear-gradient(135deg, #2c2c54, #03c4eb) !important;
+    color: white !important;
 }
 
 .homepage_welcome {
     text-align: center;
-    font-size: xx-large;
 }
+ 
 
 .homepage_welcome_text{
     font-size: large;
-    color: #777777;
+    color: #ffffff;
 }
 
 #bnt_welcome{
+    font-size: 1.15em;
     border-radius: 30px !important;
 }
 
@@ -216,11 +219,14 @@
 }
 
 .contact-panel {
+    margin: 0em 10em 0em 10em;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center; 
 }
+
+/* .contact-panel-1{
+    border-right: 1px solid #444446;
+} */
 
 .contact-panel h4 {
     margin-bottom: 10px;
@@ -370,4 +376,52 @@
 
 .icon_history_nav_bar{
     left:200px;
+}
+.social-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.social-bar .line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: #212529;;
+    padding: 1px 300px;
+}
+
+.social-bar .icons {
+    display: flex;
+    gap: 30px;
+}
+
+.social-bar .icon {
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: grayscale(100%);
+    opacity: 0.8;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.social-bar .icon:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.social-bar .facebook {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg');
+}
+
+.social-bar .youtube {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png');
+}
+
+.social-bar .linkedin {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png');
 }
