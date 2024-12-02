@@ -482,18 +482,21 @@ h2 { margin-top: 50px;}
 
 #dropdown-rulegroup {
     padding: 0.20rem 1rem !important;
+    color: #7777;
 }
 #dropdown-rulegroup:hover {
     padding: 0.20rem 1rem !important;
 }
 #dropdown-workflow {
     padding: 0.20rem 1rem !important;
+    color: #7777;
 }
 #dropdown-workflow:hover {
     padding: 0.20rem 1rem !important;
 }
 #dropdown-variables {
     padding: 0.20rem 1rem !important;
+    color: #7777;
 }
 #dropdown-variables:hover {
     padding: 0.20rem 1rem !important;

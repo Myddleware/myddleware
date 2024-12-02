@@ -388,7 +388,7 @@
 .social-bar .line {
     flex-grow: 1;
     height: 1px;
-    background-color: #212529;;
+    background-color: #777777;
     padding: 1px 300px;
 }
 
@@ -424,4 +424,32 @@
 
 .social-bar .linkedin {
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png');
+}
+
+
+@media (min-width: 2000px) {
+	.icon_navbar{
+		margin-left: 220px;
+	}
+
+	.icon_history_nav_bar {
+		left: 305px;
+	}
+    .logo-nav {
+        margin-right: 265px;
+    }
+}
+
+@media (min-width: 2440px) {
+	.icon_navbar{
+		margin-left: 580px;
+	}
+
+	.icon_history_nav_bar {
+		left: 680px;
+	}
+    .logo-nav {
+        margin-right: 557px;
+        margin-left: 70px;
+    }
 }
