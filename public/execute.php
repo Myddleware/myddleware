@@ -8,6 +8,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $command = escapeshellcmd($input['command']); // Sanitize input
 
+    // Check if shell_exec function is disabled
+    if (!function_exists('shell_exec') || in_array('shell_exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
+        // throw new \Exception('The PHP shell_exec() function is disabled. Please enable it in php.ini to run the terminal.');
+        echo json_encode(['output' => 'The PHP shell_exec() function is disabled. Please enable it in php.ini to run the terminal.']);
+        exit;
+    }
+
     error_log("command:");
     error_log($command);
 
