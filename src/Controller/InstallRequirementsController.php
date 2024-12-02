@@ -50,8 +50,11 @@ class InstallRequirementsController extends AbstractController
                 file_put_contents(__DIR__ . '/../../.env.local', '');
             }   
 
-            // once the file is created or already present, we create a variable that contains the rights to the file: it is a string that contains the result of the command ls -alps .env.local
-            $envLocalFileRights = shell_exec('ls -alps ' . __DIR__ . '/../../.env.local');
+            // Get the file permissions in octal format
+            $permissions = fileperms(__DIR__ . '/../../.env.local');
+
+            // Convert the permissions to a human-readable format
+            $envLocalFileRights = substr(sprintf('%o', $permissions), -4);
 
             // create a variable that indicate whether the .env.local file is writable
             $envLocalFileWritable = is_writable(__DIR__ . '/../../.env.local');
