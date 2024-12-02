@@ -232,6 +232,11 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowListByRuleAction(string $ruleId, int $page = 1, Request $request)
     {
+
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow list only available with the entreprise package. ");
+        }
+
         try {
 
 
@@ -265,6 +270,11 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowDeleteAction(string $id, Request $request)
     {
+
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow delete only available with the entreprise package. ");
+        }
+
         try {
 
 
@@ -293,7 +303,9 @@ class WorkflowController extends AbstractController
     public function saveWorkflowAudit($workflowId)
     {
 
-        
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow audit only available with the entreprise package. ");
+        }
 
         $em = $this->getDoctrine()->getManager();
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
@@ -349,6 +361,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowActiveAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow active only available with the entreprise package. ");
+        }
+
         try {
 
             
@@ -377,6 +393,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowActiveShowAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow active show only available with the entreprise package. ");
+        }
+
         try {
 
             
@@ -403,7 +423,9 @@ class WorkflowController extends AbstractController
     #[Route('/workflow/toggle/{id}', name: 'workflow_toggle', methods: ['POST'])]
     public function toggleWorkflow(Request $request, EntityManagerInterface $em, WorkflowRepository $workflowRepository, string $id): JsonResponse
     {
-
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow toggle only available with the entreprise package. ");
+        }
 
         $workflow = $workflowRepository->find($id);
 
@@ -430,6 +452,10 @@ class WorkflowController extends AbstractController
     */
     public function WorkflowCreateFromRuleAction(Request $request, $rule_id)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow create from rule only available with the entreprise package. ");
+        }
+
         try {
 
             $em = $this->getDoctrine()->getManager();
@@ -475,6 +501,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowCreateAction(Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow create only available with the entreprise package. ");
+        }
+
         try {
 
 
@@ -519,6 +549,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowShowAction(string $id, Request $request, int $page): Response
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow show only available with the entreprise package. ");
+        }
+
         try {
 
             
@@ -563,6 +597,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowEditAction(string $id, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow edit only available with the entreprise package. ");
+        }
+
         try {
 
             
