@@ -57,7 +57,7 @@ class VariableController extends AbstractController
     {
 
         if (!$this->tools->isPremium()) {
-            throw new Exception("Variable list only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -84,7 +84,7 @@ class VariableController extends AbstractController
     public function create(EntityManagerInterface $em, Request $request, TranslatorInterface $translator): Response
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Variable create only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $variable = new Variable();
@@ -136,7 +136,7 @@ class VariableController extends AbstractController
     public function edit(EntityManagerInterface $em, Request $request, Variable $variable, TranslatorInterface $translator): Response
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Variable edit only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $originalValue = $variable->getValue();
@@ -190,7 +190,7 @@ class VariableController extends AbstractController
     public function delete(EntityManagerInterface $em, Variable $variable): Response
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Variable delete only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         // Create an audit entry
@@ -215,7 +215,7 @@ class VariableController extends AbstractController
     public function show(Variable $variable): Response
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Variable show only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         return $this->render('variable/show.html.twig', [

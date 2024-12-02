@@ -167,7 +167,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action delete only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -198,7 +198,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action active only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -229,7 +229,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action active show only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -260,7 +260,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowCreateActionWithWorkflow(string $workflowId, Request $request)
         {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action create with workflow only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -565,7 +565,7 @@ class WorkflowActionController extends AbstractController
     public function getTargetFields(string $ruleId, EntityManagerInterface $em): JsonResponse
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action get target fields only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $ruleFields = $em->getRepository(RuleField::class)->findBy(['rule' => $ruleId]);
@@ -591,7 +591,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionShowAction(string $id, Request $request, int $page): Response
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action show only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -639,7 +639,7 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionEditAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action edit only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -945,7 +945,7 @@ class WorkflowActionController extends AbstractController
     {
 
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action empty arguments based on action only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -978,7 +978,7 @@ class WorkflowActionController extends AbstractController
     public function saveWorkflowAudit($workflowId)
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action save workflow audit only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
 
@@ -1034,7 +1034,7 @@ class WorkflowActionController extends AbstractController
     public function toggleWorkflowAction(Request $request, EntityManagerInterface $em, WorkflowActionRepository $workflowActionRepository, string $id): JsonResponse
     {
         if (!$this->tools->isPremium()) {
-            throw new Exception("Workflow action toggle only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $workflowAction = $workflowActionRepository->find($id);

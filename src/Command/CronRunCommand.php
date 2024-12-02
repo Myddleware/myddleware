@@ -56,7 +56,7 @@ final class CronRunCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 		if (!$this->toolsManager->isPremium()) {
-			throw new Exception("Command cronrun only available with the entreprise package. ");
+			return $this->redirectToRoute('premium_list');
 		}
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
