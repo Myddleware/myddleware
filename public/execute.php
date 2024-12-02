@@ -44,57 +44,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $output = shell_exec($command);
     }
 
-
-   $phpPath = trim(shell_exec('where php'));
-
-   if (isWindows()) {
-    $phpPath = adjustPath($phpPath);
-   }
-
-   $executepath = $_SERVER['SCRIPT_FILENAME'];
-
-   if (isWindows()) {
-    $executepath = adjustPath($executepath);
-   }
-   
-   if (isWindows()) {
-    $cleanPath = str_replace('\\public\\execute.php', '', $executepath);
-   } else {
-    $cleanPath = str_replace('/public/execute.php', '', $executepath);
-   }
-
-   if (isWindows()) {
-    $cleanPath = adjustPath($cleanPath);
-   }
-
-   if (isWindows()) {
-    $consolePath = $cleanPath . '\bin\console';
-   } else {
-    $consolePath = $cleanPath . '/bin/console';
-   }
-
-   if (isWindows()) {
-    $consolePath = adjustPath($consolePath);
-   }
-
-//    if the command contains php bin/console
-if (strpos($command, 'php bin/console') !== false) {
-    $isolatedCommand = str_replace('php bin/console', '', $command);
-    $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
-} elseif (strpos($command, 'composer') !== false) {
-    $isolatedCommand = str_replace('composer ', '', $command);
-
-    $composerPath = trim(shell_exec('which composer'));
-
-
+    // Adjust paths for Windows
     if (isWindows()) {
-        $composerPath = adjustPath($composerPath);
+        $phpPath = adjustPath($phpPath);
+        $executepath = adjustPath($executepath);
+        $cleanPath = adjustPath($cleanPath);
+        $consolePath = adjustPath($consolePath);
     }
 
-    $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
-} else {
-    $output = shell_exec($command);
-}
+    // Execute command
+    if (strpos($command, 'php bin/console') !== false) {
+        $isolatedCommand = str_replace('php bin/console', '', $command);
+        $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
+    } elseif (strpos($command, 'composer') !== false) {
+        $isolatedCommand = str_replace('composer ', '', $command);
+        $composerPath = trim(shell_exec(isWindows() ? 'where composer' : 'which composer'));
+
+        if (isWindows()) {
+            $composerPath = adjustPath($composerPath);
+        }
+
+        $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
+    } else {
+        $output = shell_exec($command);
+    }
 
     // Return the output as JSON
     echo json_encode(['output' => $output]);
