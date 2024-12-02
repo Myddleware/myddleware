@@ -34,9 +34,8 @@ if (strpos($command, 'php bin/console') !== false) {
 
     $composerPath = trim(shell_exec('which composer'));
 
-    $isWindowsOrUnix = strpos(PHP_OS, 'WIN') === 0 ? 'win' : 'unix';
 
-    if ($isWindowsOrUnix === 'win') {
+    if (isWindows()) {
         // convert the composer path to windows format
         $composerPath = str_replace('/', '\\', $composerPath);
         // in composer path, replace "\c\ by "C:\"
