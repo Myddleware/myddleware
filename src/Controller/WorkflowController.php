@@ -171,6 +171,10 @@ class WorkflowController extends AbstractController
      */
     public function WorkflowListAction(int $page = 1, Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            throw new Exception("Workflow list only available with the entreprise package. ");
+        }
+
         try {
             
             // Récupérer les filtres depuis la requête
