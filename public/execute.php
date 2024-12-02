@@ -47,11 +47,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
    $phpPath = trim(shell_exec('where php'));
 
-   $executepath = $_SERVER['SCRIPT_FILENAME'];
-   
-   $cleanPath = str_replace('/public/execute.php', '', $executepath);
+   if (isWindows()) {
+    $phpPath = adjustPath($phpPath);
+   }
 
-   $consolePath = $cleanPath . '/bin/console';
+   $executepath = $_SERVER['SCRIPT_FILENAME'];
+
+   if (isWindows()) {
+    $executepath = adjustPath($executepath);
+   }
+   
+   if (isWindows()) {
+    $cleanPath = str_replace('\\public\\execute.php', '', $executepath);
+   } else {
+    $cleanPath = str_replace('/public/execute.php', '', $executepath);
+   }
+
+   if (isWindows()) {
+    $cleanPath = adjustPath($cleanPath);
+   }
+
+   if (isWindows()) {
+    $consolePath = $cleanPath . '\bin\console';
+   } else {
+    $consolePath = $cleanPath . '/bin/console';
+   }
+
+   if (isWindows()) {
+    $consolePath = adjustPath($consolePath);
+   }
 
 //    if the command contains php bin/console
 if (strpos($command, 'php bin/console') !== false) {
@@ -64,13 +88,9 @@ if (strpos($command, 'php bin/console') !== false) {
 
 
     if (isWindows()) {
-        // convert the composer path to windows format
-        $composerPath = str_replace('/', '\\', $composerPath);
-        // in composer path, replace "\c\ by "C:\"
-        $composerPath = str_replace('\\c\\', 'C:\\', $composerPath);
+        $composerPath = adjustPath($composerPath);
     }
 
-    // $output = shell_exec("$composerPath $isolatedCommand");
     $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
 } else {
     $output = shell_exec($command);
