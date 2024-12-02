@@ -175,7 +175,7 @@ class RuleGroupController extends AbstractController
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                throw new Exception("RuleGroup list only available with the entreprise package. ");
+                return $this->redirectToRoute('premium_list');
             }
 
             $rulegroupName = $request->query->get('rulegroup_name');
@@ -264,7 +264,7 @@ class RuleGroupController extends AbstractController
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                throw new Exception("RuleGroup delete only available with the entreprise package. ");
+                return $this->redirectToRoute('premium_list');
             }
 
             $em = $this->getDoctrine()->getManager();
@@ -431,7 +431,7 @@ class RuleGroupController extends AbstractController
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                throw new Exception("RuleGroup create only available with the entreprise package. ");
+                return $this->redirectToRoute('premium_list');
             }
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
@@ -478,7 +478,7 @@ class RuleGroupController extends AbstractController
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                throw new Exception("RuleGroup show only available with the entreprise package. ");
+                return $this->redirectToRoute('premium_list');
             }
 
             $em = $this->getDoctrine()->getManager();
@@ -512,7 +512,7 @@ class RuleGroupController extends AbstractController
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                throw new Exception("RuleGroup edit only available with the entreprise package. ");
+                return $this->redirectToRoute('premium_list');
             }
 
             $em = $this->getDoctrine()->getManager();
@@ -564,7 +564,7 @@ class RuleGroupController extends AbstractController
 
 
         if (!$this->toolsManager->isPremium()) {
-            throw new Exception("RuleGroup remove rule only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $ruleGroup = $entityManager->getRepository(RuleGroup::class)->find($groupId);
@@ -590,7 +590,7 @@ class RuleGroupController extends AbstractController
     {
 
         if (!$this->toolsManager->isPremium()) {
-            throw new Exception("RuleGroup add rule only available with the entreprise package. ");
+            return $this->redirectToRoute('premium_list');
         }
 
         $ruleGroup = $this->entityManager->getRepository(RuleGroup::class)->find($id);
