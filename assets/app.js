@@ -51,7 +51,7 @@ if (window.location.href.includes('workflowAction') || window.location.href.incl
     require('./js/editAction.js')
 }
 
-if (window.location.href.includes('rule/panel')) {
+if (window.location.href.includes('rule/panel') || window.location.href.includes('premium/list')) {
     require('./js/home.js')
 }
 
