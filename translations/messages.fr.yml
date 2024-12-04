@@ -466,6 +466,9 @@ view_flux:
         cancel: Annuler le document 
         readrecord: Lancer la même donnée 
         unlock: Débloquer le document
+        tooltip:
+            reload: Relancer la synchronisation de ce document
+            cancel: Annuler l'exécution de ce document
     header:
         rule: Règle
         statut: Status
