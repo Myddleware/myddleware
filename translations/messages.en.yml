@@ -470,6 +470,9 @@ view_flux:
         cancel: Cancel the document 
         readrecord: Run the same record
         unlock: Unlock the document
+        tooltip:
+            reload: Reload the synchronization of this document
+            cancel: Cancel execution of this document
     header:
         rule: Rule
         statut: Status

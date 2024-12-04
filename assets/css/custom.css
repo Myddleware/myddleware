@@ -251,23 +251,21 @@ menu .caret, #myd_top .caret {
 }
 
 .typewriter {
+    font-size: 3rem;
     display: inline-block;
     overflow: hidden;
     border-right: .15em solid #000;
     white-space: nowrap;
     margin: 0;
     letter-spacing: .15em;
-    animation: 
-      typing 2s steps(40, end),
-      blink-caret .75s step-end infinite 0s,
-      hideCursor 0s step-end forwards 2s;
+    animation: typing 3s steps(28, end), blink-caret 0.75s step-end infinite;
     width: 0;
     animation-fill-mode: forwards;
 }
 
 @keyframes typing {
-    from { width: 0 }
-    to { width: 520px }
+    from { width: 0; }
+    to { width: 28ch; }
 }
 
 @keyframes blink-caret {
