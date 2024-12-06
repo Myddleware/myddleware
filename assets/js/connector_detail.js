@@ -23,7 +23,7 @@
 *********************************************************************************/ 
 const $ = require('jquery');
 
-const listOfFieldKeyWords = ['password', 'token', 'client_id', 'client_secret', 'apikey', 'secret'];
+const listOfFieldKeyWords = sensitiveFields;
 
 $(function () {
     $('#connexion_detail').on('click', function () {

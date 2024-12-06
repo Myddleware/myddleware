@@ -32,6 +32,7 @@
 {% endblock titlesm %}
 
 {% block body %}
+	{% set sensitiveFields = ['password', 'token', 'client_id', 'client_secret', 'apikey', 'secret', 'pwd'] %}
 	<div class="container">
 		<div class="row justify-content-center">
 			<div class="col-md-11">
@@ -54,7 +55,7 @@
 							<tr>
 								<th class="title">{{ key }}</th>
 								 <td class="params" data-param="{{ key }}">
-									{% if key matches '/password|pwd|secret|token/i' and value is not null %}
+									{% if key|lower in sensitiveFields and value is not null %}
 										******************
 									{% else %}
 										{{ value }}
@@ -97,7 +98,7 @@
 	</div>
 
  <script type="text/javascript">
-    {% set sensitiveFields = ['password', 'token', 'client_id', 'client_secret', 'apikey', 'secret'] %}
+    const sensitiveFields = {{ sensitiveFields|json_encode|raw }};
     {% for field in sensitiveFields %}
         {% if paramConnexion[field] is defined and paramConnexion[field] is not empty %}
             var {{ field }} = "{{ paramConnexion[field] }}";
