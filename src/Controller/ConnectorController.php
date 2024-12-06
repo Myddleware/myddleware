@@ -749,6 +749,7 @@ class ConnectorController extends AbstractController
  */
 public function detailAction(int $id)
 {
+    $sensitiveFields = explode(',', $_ENV['SENSITIVE_FIELDS']);
     $connector = $this->entityManager->getRepository(Connector::class)->find($id);
 
     if (!$connector) {
@@ -775,6 +776,7 @@ public function detailAction(int $id)
     return $this->render('Connector/detail/detail.html.twig', [
         'connector' => $connector,
         'paramConnexion' => $paramConnexion, 
+        'sensitiveFields' => $sensitiveFields,
     ]);
 }
 }
