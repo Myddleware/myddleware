@@ -47,8 +47,8 @@ $(function () {
                     	 var dataParam = input.attr('data-param');
 						 var textValue = input.text().trim();
 
-                        if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase().includes(keyword)) && textValue === '******************') {
-                            const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase().includes(keyword));
+                        if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
+                            const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
                             textValue = eval(matchedKeyword);
                         }
 						if (dataParam !== undefined) {
