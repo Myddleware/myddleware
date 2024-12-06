@@ -749,7 +749,8 @@ class ConnectorController extends AbstractController
  */
 public function detailAction(int $id)
 {
-    $sensitiveFields = explode(',', $_ENV['SENSITIVE_FIELDS']);
+    $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
+    
     $connector = $this->entityManager->getRepository(Connector::class)->find($id);
 
     if (!$connector) {
