@@ -171,14 +171,6 @@ use App\Entity\WorkflowAction;
                 'pager' => ''
             ];
 
-            // Get last rule key if exists
-            $key = $this->sessionService->getParamRuleLastKey();
-            if (null != $key && $this->sessionService->isRuleIdExist($key)) {
-                $id = $this->sessionService->getRuleId($key);
-                $this->sessionService->removeRuleId($key);
-                return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
-            }
-
             $this->getInstanceBdd();
             $pager = $this->tools->getParamValue('ruleListPager');
 
