@@ -55,7 +55,7 @@
 								<th class="title">{{ key }}</th>
 								 <td class="params" data-param="{{ key }}">
 									{% if key matches '/password|pwd|secret|token/i' and value is not null %}
-										******
+										******************
 									{% else %}
 										{{ value }}
 									{% endif %}
