@@ -23,6 +23,8 @@
 *********************************************************************************/ 
 const $ = require('jquery');
 
+const listOfFieldKeyWords = ['password', 'token'];
+
 $(function () {
     $('#connexion_detail').on('click', function () {
 
@@ -45,8 +47,9 @@ $(function () {
                     	 var dataParam = input.attr('data-param');
 						 var textValue = input.text().trim();
 
-                        if ($(this).text().toLowerCase().includes('password') && textValue === '******') {
-                            textValue = password; 
+                        if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase().includes(keyword)) && textValue === '******') {
+                            const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase().includes(keyword));
+                            textValue = eval(matchedKeyword);
                         }
 						if (dataParam !== undefined) {
 							datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";

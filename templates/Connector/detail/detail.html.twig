@@ -101,6 +101,9 @@
     {% if paramConnexion['password'] is defined and paramConnexion['password'] is not empty %}
         var password = "{{ paramConnexion['password'] }}";
     {% endif %}
+	{% if paramConnexion['token'] is defined and paramConnexion['token'] is not empty %}
+        var token = "{{ paramConnexion['token'] }}";
+    {% endif %}
 </script>
 {% endblock %}
 
