@@ -97,13 +97,12 @@
 	</div>
 
  <script type="text/javascript">
-
-    {% if paramConnexion['password'] is defined and paramConnexion['password'] is not empty %}
-        var password = "{{ paramConnexion['password'] }}";
-    {% endif %}
-	{% if paramConnexion['token'] is defined and paramConnexion['token'] is not empty %}
-        var token = "{{ paramConnexion['token'] }}";
-    {% endif %}
+    {% set sensitiveFields = ['password', 'token', 'client_id', 'client_secret', 'apikey', 'secret'] %}
+    {% for field in sensitiveFields %}
+        {% if paramConnexion[field] is defined and paramConnexion[field] is not empty %}
+            var {{ field }} = "{{ paramConnexion[field] }}";
+        {% endif %}
+    {% endfor %}
 </script>
 {% endblock %}
 
