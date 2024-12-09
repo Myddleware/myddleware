@@ -935,115 +935,87 @@ public function removeFilter(Request $request): JsonResponse
 
         // fetches the documents from the database
         $documents = $this->entityManager->getRepository(Document::class)->findBy(['id' => $_POST['csvdocumentids']]);
-        $rootPath = $this->getParameter('kernel.project_dir');
-        $envFilePath = $rootPath . '/.env.local';
 
-        // check if te .env.local file exists, if not then use the .env
-        if (!file_exists($envFilePath)) {
-            $envFilePath = $rootPath . '/.env';
-        }
+        // Create a temporary file in memory
+        $fp = fopen('php://temp', 'w+');
 
-        if (file_exists($envFilePath)) {
-            $lines = file($envFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (str_starts_with($line, 'APP_ENV')) {
-                    $env = explode('=', $line, 2)[1] ?? null;
-                    break;
-                }
-            }
-            if (!isset($env)) {
-                throw new Exception('APP_ENV not found in .env.local file');
-            }
+        // creates the header of the csv file
+        $header = [
+            'id',
+            'rule_id',
+            'created_by',
+            'modified_by',
+            'date_created',
+            'date_modified',
+            'status',
+            'source_id',
+            'target_id',
+            'source_date_modified',
+            'mode',
+            'type',
+            'attempt',
+            'global_status',
+            'parent_id',
+            'deleted',
+            'source',
+            'target',
+            'history'
+        ];
 
-            // Define the path of your cache directory
-            $cacheDir = $rootPath . '/var/cache/' . $env;
+        // writes the header in the csv file
+        fputcsv($fp, $header);
 
-            // Check if the cache directory exists, if not, create it
-            if (!is_dir($cacheDir)) {
-                mkdir($cacheDir, 0777, true);  // true means it will create nested directories as needed
-            }
+        // puts the data of each document in the csv file
+        foreach ($documents as $document) {
+            $documentDataSource = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S'])->getData() : '';
+            $documentDataTarget = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T'])->getData() : '';
+            $documentDataHistory = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H'])->getData() : '';
 
-            // Now try to open the file
-            $fp = fopen($cacheDir . '/documents.csv', 'w');
-            if ($fp === false) {
-                throw new Exception('Failed to open file for writing');
-            }
-
-            // creates the header of the csv file according to the following sql of the document table
-
-            $header = [
-                'id',
-                'rule_id',
-                'created_by',
-                'modified_by',
-                'date_created',
-                'date_modified',
-                'status',
-                'source_id',
-                'target_id',
-                'source_date_modified',
-                'mode',
-                'type',
-                'attempt',
-                'global_status',
-                'parent_id',
-                'deleted',
-                'source',
-                'target',
-                'history'
+            $row = [
+                $document->getId(),
+                $document->getRule()->getId(),
+                $document->getCreatedBy(),
+                $document->getModifiedBy(),
+                $document->getDateCreated()->format('Y-m-d H:i:s'),
+                $document->getDateModified()->format('Y-m-d H:i:s'),
+                $document->getStatus(),
+                $document->getSource(),
+                $document->getTarget(),
+                $document->getSourceDateModified()->format('Y-m-d H:i:s'),
+                $document->getMode(),
+                $document->getType(),
+                $document->getAttempt(),
+                $document->getGlobalStatus(),
+                $document->getParentId(),
+                $document->getDeleted(),
+                $documentDataSource,
+                $documentDataTarget,
+                $documentDataHistory
             ];
 
-            // writes the header in the csv file
-            fputcsv($fp, $header);
-            // puts the data of each document in the csv file
-            foreach ($documents as $document) {
-                // Fetch the docmunet data: for each document, we have 3 types of data: source, target and history
-                // We fetch the data of each type and we put it in an string. If there is data, then we put it in the row, otherwise we put an empty string
-
-                $documentDataSource = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S'])->getData() : '';
-                $documentDataTarget = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T'])->getData() : '';
-                $documentDataHistory = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H'])->getData() : '';
-
-                $row = [
-                    $document->getId(),
-                    $document->getRule()->getId(),
-                    $document->getCreatedBy(),
-                    $document->getModifiedBy(),
-                    $document->getDateCreated()->format('Y-m-d H:i:s'),
-                    $document->getDateModified()->format('Y-m-d H:i:s'),
-                    $document->getStatus(),
-                    $document->getSource(),
-                    $document->getTarget(),
-                    $document->getSourceDateModified()->format('Y-m-d H:i:s'),
-                    $document->getMode(),
-                    $document->getType(),
-                    $document->getAttempt(),
-                    $document->getGlobalStatus(),
-                    $document->getParentId(),
-                    $document->getDeleted(),
-                    $documentDataSource,
-                    $documentDataTarget,
-                    $documentDataHistory
-                    // get the document document data if the doc id is the same as the document id and getType() is S, otherwise empty string
-
-                ];
-                try {
-                    fputcsv($fp, $row);
-                } catch (\Throwable $e) {
-                    throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
-                }
+            try {
+                fputcsv($fp, $row);
+            } catch (\Throwable $e) {
+                throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
             }
-
-            // closes the csv file
-            fclose($fp);
-
-            // adds message to the flashbag
-            $this->addFlash('success', 'Documents exported successfully');
-
-            // return response with status ok
-            return new Response('csv exported successfully', Response::HTTP_OK);
-        } else {
-            throw new Exception('.env.local file not found');
         }
+
+        // Reset the file pointer to the beginning
+        rewind($fp);
+        
+        // Get the content of the CSV
+        $content = stream_get_contents($fp);
+        fclose($fp);
+
+        // Create the response with the CSV content
+        $response = new Response($content);
+        
+        // Set headers to force download
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="documents_export_'.date('Y-m-d_His').'.csv"');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        
+        return $response;
     }
 }
