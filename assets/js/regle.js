@@ -1121,24 +1121,37 @@ $.fn.setCursorPosition = function(pos) {
 
 // ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
 
-// Function to export the flux to a csv file when clicking on the button with an id of exportfluxcsv
 $("#exportfluxcsv").on("click", function () {
-  // If the massFluxTab array is not empty
-  // Convert the massFluxTab array to CSV format
-  // const csvContent = arrayToCSV(massFluxTab);
-  // Download the CSV file
-  // downloadCSV(csvContent, 'documents.csv');
-
-  // lanches the php function flux_export_docs_csv with the massFluxTab array as a parameter
   $.ajax({
     type: "POST",
     url: flux_export_docs_csv,
     data: {
       csvdocumentids: csvdocumentids,
     },
-    success: function (data) {
-      // code_html contient le HTML renvoyé
+    xhrFields: {
+      responseType: 'blob' // Set the response type to blob
     },
+    success: function (blob) {
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `documents_export_${new Date().toISOString().slice(0,19).replace(/[:]/g, '')}.csv`;
+      
+      // Append link to body, click it, and remove it
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    },
+    error: function(xhr, status, error) {
+      console.error('Export failed:', error);
+      alert('Failed to export CSV file. Please try again.');
+    }
   });
 });
 
