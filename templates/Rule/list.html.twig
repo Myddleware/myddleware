@@ -50,23 +50,23 @@
 
 	<div id="rule">
 		{% if nb_rule > 0 %}
-			<div id="rulesearchbarcontainer">
-			<form id="rulenamesearchbar" class="m-3" action="{{ path('regle_list') }}" method="get">
-				<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
-			</form>
-			</div>
-			<div class="row justify-content-center my-4">
-				<div class="col text-center">
+			<div class="row justify-content-center align-items-center my-4 me-5 mt-5">
+				<div id="rulesearchbarcontainer" class="col-auto me-5">
+					<form id="rulenamesearchbar" class="d-flex" action="{{ path('regle_list') }}" method="get">
+						<input type="text" id="rule_name" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
+					</form>
+				</div>
+				<div class="col-auto text-center me-5">
 					<a id="exec_all" class="btn btn-outline-success" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
 						{{'view_rule.action.exec_all'|trans}}
 					</a>
 				</div>
-				<div class="col text-center">
+				<div class="col-auto text-center me-5">
 					<a id="exec_error" class="btn btn-warning" href="{{ path('regle_exec',{'id' : 'ERROR' }) }}" title="" role="button">
 						{{'view_rule.action.exec_error'|trans}}
 					</a>
 				</div>
-				<div class="col text-center">
+				<div class="col-auto text-center me-5">
 					<a id="new_rule" class="btn btn-primary" href="{{ path('regle_stepone_animation') }}" title="" role="button">
 						{{'view_rule.action.new_rule'|trans}}
 					</a>
@@ -100,7 +100,7 @@
 												{{rule.lbl_target }}
 											</td>
 											<td class="text-center col-rule-name">
-												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}"  class="rule-name-display help-link all-link">{{rule.name }}</a>
+												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="rule-name-display help-link all-link">{{rule.name }}</a>
 												<a class="mx-3 edit-button-name-list">
 													<i class="fa fa-pen" aria-hidden="true"></i>
 												</a>
@@ -186,11 +186,11 @@
 	</div>
 	<script type="text/javascript">
 		var chemin_img = "{{ asset('build/images/regle/') }}";
-		var question = "Désirez-vous supprimer cette règle ?";
-		var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
-		var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
-		var regle_list = "{{ path('regle_list') }}";
-		var checkRuleNameUrlList = "{{ path('check_rule_name') }}";
+var question = "Désirez-vous supprimer cette règle ?";
+var confirm_exec_all = "{{ 'view_rule.action.confirm_exec_all'|trans }}";
+var confirm_exec_error = "{{ 'view_rule.action.confirm_exec_error'|trans }}";
+var regle_list = "{{ path('regle_list') }}";
+var checkRuleNameUrlList = "{{ path('check_rule_name') }}";
 	</script>
 	{% block javascripts %}
 		{{ encore_entry_script_tags('rulelist') }}
