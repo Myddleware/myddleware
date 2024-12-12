@@ -34,13 +34,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                 <li class="user_info_li">
                     <label>{{ 'view_account.label.language'|trans }}</label>
                     <div class="btn-group" role="group" aria-label="...">
-                        <button class="btn btn-light btn-lg">
+                        <button class="btn btn-light">
                             <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
                                 {{ locales|languages['default']|trans }}
                             </a>
                         </button>
                         {% for locale in locales|languages['other'] %}
-                        <button class="btn btn-primary btn-lg">
+                        <button class="btn btn-primary">
                             <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
                                 {{ locale|trans }}
                             </a>
@@ -84,7 +84,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
         <div class="ms-5 password-reset">
-            <div class="col">
+            <div class="col password-reset-center">
                 <h2 class="display-6">{{'password_reset.title'|trans}}</h2>
                 <a href="{{ path('my_account_reset_password')}}">
                     <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>

@@ -58,22 +58,22 @@
 				{% if doc %}
 					{# If the record has a different status than Cancel or Close #}
 					{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) %}
-						<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}" title="{{'view_flux.btn.reload'|trans}}">
+						<a href="{{ path('flux_rerun',{'id' : doc.getId }) }}">
 							<button type="button" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="{{'view_flux.btn.tooltip.reload'|trans}}">
 								{{'view_flux.btn.reload'|trans}}
 							</button>
 						</a>
 					{% endif %}
 					{% if (doc.getGlobalStatus|lower != 'cancel' and doc.getGlobalStatus|lower != 'close' ) or is_granted('ROLE_SUPER_ADMIN') %}
-						<a class="btn_action_loading" href="{{ path('flux_cancel',{'id' : doc.getId }) }}" title="{{'view_flux.btn.cancel'|trans}}">
+						<a class="btn_action_loading" href="{{ path('flux_cancel',{'id' : doc.getId }) }}">
 							<button type="button" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="{{'view_flux.btn.tooltip.cancel'|trans}}">
 								{{'view_flux.btn.cancel'|trans}}
 							</button>
 						</a>
 					{% endif %}
 					{% if read_record_btn %}
-						<a class="btn_action_loading  hover-button" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}" title="{{'view_flux.btn.readrecord'|trans}}">
-							<button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{'view_flux.btn.readrecord'|trans}}">
+						<a class="btn_action_loading  hover-button" href="{{ path('flux_readrecord',{'id' : doc.getId }) }}">
+							<button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{'view_flux.btn.tooltip.readrecord'|trans}}">
 								{{'view_flux.btn.readrecord'|trans}}
 							</button>
 						</a>
