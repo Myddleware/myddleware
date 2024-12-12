@@ -426,6 +426,9 @@
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png');
 }
 
+.social-bar .twitter {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/cc/X_icon.svg');
+}
 
 @media (min-width: 2000px) {
 	.icon_navbar{
