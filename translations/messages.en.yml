@@ -473,6 +473,7 @@ view_flux:
         tooltip:
             reload: Reload the synchronization of this document
             cancel: Cancel execution of this document
+            readrecord: Re-execute the processing of this document
     header:
         rule: Rule
         statut: Status
