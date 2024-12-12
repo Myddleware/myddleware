@@ -61,10 +61,15 @@
 										{% for connector in entities %}
 											<tr>
 												<td class="solution_block">
-													<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}">
-														<p><img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt="logo solution"/></p>
-														{{connector.0.getName}}
-													</a>
+													<div class="d-flex align-items-center">
+														<img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt="logo solution"/>
+														<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="help-link all-link ms-2">
+															{{connector.0.getName}}
+														</a>
+														<a class="mx-3 edit-button-name-list">
+															<i class="fa fa-pen" aria-hidden="true"></i>
+														</a>
+													</div>
 												</td>
 												<td class="creation-date">
 													{{connector.0.getDateCreated|date("d/m/Y") }}
