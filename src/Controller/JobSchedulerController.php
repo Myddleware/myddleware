@@ -55,7 +55,7 @@ class JobSchedulerController extends AbstractController
     {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
@@ -71,7 +71,7 @@ class JobSchedulerController extends AbstractController
     public function create(Request $request)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = new JobScheduler();
@@ -118,7 +118,7 @@ class JobSchedulerController extends AbstractController
     private function createCreateForm(JobScheduler $entity): FormInterface
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $form = $this->createForm(JobSchedulerType::class, $entity, [
@@ -137,7 +137,7 @@ class JobSchedulerController extends AbstractController
     public function new(): Response
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = new JobScheduler();
@@ -155,7 +155,7 @@ class JobSchedulerController extends AbstractController
     public function show($id): Response
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -181,7 +181,7 @@ class JobSchedulerController extends AbstractController
     public function edit($id): Response
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -205,7 +205,7 @@ class JobSchedulerController extends AbstractController
     private function createEditForm(JobScheduler $entity): FormInterface
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $form = $this->createForm(JobSchedulerType::class, $entity, [
@@ -226,7 +226,7 @@ class JobSchedulerController extends AbstractController
     public function update(Request $request, $id)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -255,7 +255,7 @@ class JobSchedulerController extends AbstractController
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $id = $request->get('id');
@@ -276,7 +276,7 @@ class JobSchedulerController extends AbstractController
     private function createDeleteForm($id): FormInterface
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         return $this->createFormBuilder()
@@ -305,7 +305,7 @@ class JobSchedulerController extends AbstractController
     private function getData($selectName)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $paramsCommand = null;
@@ -326,7 +326,7 @@ class JobSchedulerController extends AbstractController
     public function createActionWithCron(Request $request, TranslatorInterface $translator)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -379,7 +379,7 @@ class JobSchedulerController extends AbstractController
     {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         //Check if crontab is enabled 
@@ -421,7 +421,7 @@ class JobSchedulerController extends AbstractController
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $id = $request->get('id');
@@ -443,7 +443,7 @@ class JobSchedulerController extends AbstractController
     private function createDeleteFormCrontab($id): FormInterface
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         return $this->createFormBuilder()
@@ -459,7 +459,7 @@ class JobSchedulerController extends AbstractController
     public function editCrontab($id): Response
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -481,7 +481,7 @@ class JobSchedulerController extends AbstractController
     private function createEditFormCrontab(CronJob $entity): FormInterface
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         // Field command can't be changed
@@ -501,7 +501,7 @@ class JobSchedulerController extends AbstractController
     public function updateCrontab(Request $request, $id)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -585,7 +585,7 @@ class JobSchedulerController extends AbstractController
     public function showCrontab($id, int $page): Response
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -669,7 +669,7 @@ class JobSchedulerController extends AbstractController
     {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -726,7 +726,7 @@ class JobSchedulerController extends AbstractController
     public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium');
+            return $this->redirectToRoute('premium_list');
         }
 
         $command = $request->request->get('command');
