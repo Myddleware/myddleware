@@ -54,7 +54,9 @@ class JobSchedulerController extends AbstractController
     public function index(): Response
     {
 
-        
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
 
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
 
@@ -68,6 +70,10 @@ class JobSchedulerController extends AbstractController
      */
     public function create(Request $request)
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = new JobScheduler();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -111,6 +117,10 @@ class JobSchedulerController extends AbstractController
 
     private function createCreateForm(JobScheduler $entity): FormInterface
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $form = $this->createForm(JobSchedulerType::class, $entity, [
             'action' => $this->generateUrl('jobscheduler_create'),
             'method' => 'POST',
@@ -126,6 +136,10 @@ class JobSchedulerController extends AbstractController
      */
     public function new(): Response
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = new JobScheduler();
         $form = $this->createCreateForm($entity);
 
@@ -140,6 +154,10 @@ class JobSchedulerController extends AbstractController
      */
     public function show($id): Response
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
@@ -162,6 +180,10 @@ class JobSchedulerController extends AbstractController
      */
     public function edit($id): Response
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
@@ -182,6 +204,10 @@ class JobSchedulerController extends AbstractController
      */
     private function createEditForm(JobScheduler $entity): FormInterface
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $form = $this->createForm(JobSchedulerType::class, $entity, [
             'action' => $this->generateUrl('jobscheduler_update', ['id' => $entity->getId()]),
             'method' => 'POST',
@@ -199,6 +225,10 @@ class JobSchedulerController extends AbstractController
      */
     public function update(Request $request, $id)
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
@@ -224,6 +254,10 @@ class JobSchedulerController extends AbstractController
      */
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $id = $request->get('id');
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
@@ -241,6 +275,10 @@ class JobSchedulerController extends AbstractController
      */
     private function createDeleteForm($id): FormInterface
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('jobscheduler_delete', ['id' => $id]))
             ->setMethod('DELETE')
@@ -266,6 +304,10 @@ class JobSchedulerController extends AbstractController
      */
     private function getData($selectName)
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $paramsCommand = null;
         if (isset($this->jobSchedulerManager->getJobsParams()[$selectName])) {
             $paramsCommand = $this->jobSchedulerManager->getJobsParams()[$selectName];
@@ -283,6 +325,10 @@ class JobSchedulerController extends AbstractController
      */
     public function createActionWithCron(Request $request, TranslatorInterface $translator)
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         try {
             $command = '';
             $period = ' */5 * * * *';
@@ -331,6 +377,11 @@ class JobSchedulerController extends AbstractController
      */
     public function crontabList(int $page): Response
     {
+
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
 		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
@@ -369,6 +420,10 @@ class JobSchedulerController extends AbstractController
      */
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $id = $request->get('id');
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
@@ -387,6 +442,10 @@ class JobSchedulerController extends AbstractController
      */
     private function createDeleteFormCrontab($id): FormInterface
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('crontab_delete', ['id' => $id]))
             ->setMethod('DELETE')
@@ -399,6 +458,10 @@ class JobSchedulerController extends AbstractController
      */
     public function editCrontab($id): Response
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
         if (!$entity) {
@@ -417,6 +480,10 @@ class JobSchedulerController extends AbstractController
 
     private function createEditFormCrontab(CronJob $entity): FormInterface
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         // Field command can't be changed
         return $this->createForm(JobSchedulerCronType::class, $entity, [
                 'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
@@ -433,6 +500,10 @@ class JobSchedulerController extends AbstractController
      */
     public function updateCrontab(Request $request, $id)
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Crontab entity.');
@@ -513,6 +584,10 @@ class JobSchedulerController extends AbstractController
      */
     public function showCrontab($id, int $page): Response
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find crontab entity.');
@@ -592,6 +667,11 @@ class JobSchedulerController extends AbstractController
      */
     public function disableAllCrons(Request $request, TranslatorInterface $translator)
     {
+
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         try {
             $entities = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
             if (!($entities)) {
@@ -645,6 +725,10 @@ class JobSchedulerController extends AbstractController
      */
     public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
     {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium');
+        }
+
         $command = $request->request->get('command');
         
         // If the command starts with "synchro", handle it with SynchroCommand
