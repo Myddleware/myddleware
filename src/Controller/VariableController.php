@@ -50,12 +50,12 @@ class VariableController extends AbstractController
     }
 
     /**
-     * @Route("variables", name="variable_list", defaults={"page"=1})
-     * @Route("variables/page-{page}", name="variable_list_page", requirements={"page"="\d+"})
+     * @return Response
      */
-    public function listView(int $page = 1, EntityManagerInterface $em, Request $request): Response
+    #[Route('variables', name: 'variable_list', defaults: ['page' => 1])]
+    #[Route('variables/page-{page}', name: 'variable_list_page', requirements: ['page' => '\d+'])]
+    public function listView(Request $request, EntityManagerInterface $em, int $page = 1): Response
     {
-
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
         }
