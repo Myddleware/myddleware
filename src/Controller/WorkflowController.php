@@ -165,11 +165,10 @@ class WorkflowController extends AbstractController
      * LISTE DES WORKFLOWs.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/list", name="workflow_list", defaults={"page"=1})
-     * @Route("/list/page-{page}", name="workflow_list_page", requirements={"page"="\d+"})
      */
-    public function WorkflowListAction(int $page = 1, Request $request)
+    #[Route('/list', name: 'workflow_list', defaults: ['page' => 1])]
+    #[Route('/list/page-{page}', name: 'workflow_list_page', requirements: ['page' => '\d+'])]
+    public function WorkflowListAction(Request $request, int $page = 1)
     {
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
