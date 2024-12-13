@@ -155,11 +155,10 @@ use App\Entity\WorkflowAction;
      * LISTE DES REGLES.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/list", name="regle_list", defaults={"page"=1})
-     * @Route("/list/page-{page}", name="regle_list_page", requirements={"page"="\d+"})
      */
-    public function ruleListAction(int $page = 1, Request $request)
+    #[Route('/list', name: 'regle_list', defaults: ['page' => 1])]
+    #[Route('/list/page-{page}', name: 'regle_list_page', requirements: ['page' => '\d+'])]
+    public function ruleListAction(Request $request, int $page = 1)
     {
         try {
             $ruleName = $request->query->get('rule_name');
