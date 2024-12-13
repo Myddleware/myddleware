@@ -56,10 +56,9 @@ class PremiumController extends AbstractController
      * PAGE ACHAT PREMIUM.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/list", name="premium_list", defaults={"page"=1})
      */
-    public function PremiumListAction(int $page = 1, Request $request)
+    #[Route('/list', name: 'premium_list', defaults: ['page' => 1])]
+    public function PremiumListAction(Request $request, int $page = 1)
     {
         try {
             // Si ce n'est pas une requête AJAX, rendre la page complète
