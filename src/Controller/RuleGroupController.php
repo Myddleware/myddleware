@@ -166,11 +166,10 @@ class RuleGroupController extends AbstractController
      * LISTE DES RuleGroups.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/list", name="rulegroup_list", defaults={"page"=1})
-     * @Route("/list/page-{page}", name="rulegroup_list_page", requirements={"page"="\d+"})
      */
-    public function RulegroupListAction(int $page = 1, Request $request)
+    #[Route('/list', name: 'rulegroup_list', defaults: ['page' => 1])]
+    #[Route('/list/page-{page}', name: 'rulegroup_list_page', requirements: ['page' => '\d+'])]
+    public function RulegroupListAction(Request $request, int $page = 1)
     {
         try {
 
