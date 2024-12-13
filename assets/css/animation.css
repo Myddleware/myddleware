@@ -487,6 +487,9 @@ h2 { margin-top: 50px;}
 
 #dropdown-rulegroup {
     padding: 0.20rem 1rem !important;
+}
+#dropdown-rulegroup-grey {
+    padding: 0.20rem 1rem !important;
     color: #7777;
 }
 #dropdown-rulegroup:hover {
@@ -494,12 +497,18 @@ h2 { margin-top: 50px;}
 }
 #dropdown-workflow {
     padding: 0.20rem 1rem !important;
+}
+#dropdown-workflow-grey  {
+    padding: 0.20rem 1rem !important;
     color: #7777;
 }
 #dropdown-workflow:hover {
     padding: 0.20rem 1rem !important;
 }
 #dropdown-variables {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-variables-grey {
     padding: 0.20rem 1rem !important;
     color: #7777;
 }
