@@ -516,6 +516,12 @@ h2 { margin-top: 50px;}
     padding: 0.20rem 1rem !important;
 }
 
+#dropdown-cron {
+}
+#dropdown-cron-grey {
+    color: #7777;
+}
+
 .hover-image {
     display: none; /* Initially hide the image */
     position: absolute; /* Position it as needed */
