@@ -2087,8 +2087,12 @@ use App\Entity\WorkflowAction;
                     }
                 }
 
+                // get the full rule object
+                $rule = $this->entityManager->getRepository(Rule::class)->find($ruleKey);
+
                 //  rev 1.07 --------------------------
                 $result = [
+                    'rule' => $rule,
                     'filters' => $filters,
                     'source' => $source['table'],
                     'cible' => $cible['table'],
