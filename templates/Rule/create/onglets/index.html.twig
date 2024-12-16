@@ -32,13 +32,6 @@
         {{'create_rule.tabs.two'|trans}}
     </button>
 </li>
-{% if rule.relationsShip|length > 0 %}
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-5" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation-5" aria-selected="false">
-        <span class="badge">5</span> {{'create_rule.tabs.five'|trans}}
-    </button>
-</li>
-{% endif %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg active btn-lg fw-bold py-4 tab-3" id="champs-tab" data-bs-toggle="tab" data-bs-target="#champs" type="button" role="tab" aria-controls="champs-3" aria-selected="true" aria-current="page">
         <span class="badge">3</span> {{'create_rule.tabs.three'|trans}}
@@ -49,6 +42,13 @@
         <span class="badge">4</span> {{'create_rule.tabs.four'|trans}}
     </button>
 </li>
+{% if rule.relationsShip|length > 0 %}
+<li class="nav-item d-grid flex-fill" role="presentation">
+    <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-5" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation-5" aria-selected="false">
+        <span class="badge">5</span> {{'create_rule.tabs.five'|trans}}
+    </button>
+</li>
+{% endif %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-6" id="filtertab-tab" data-bs-toggle="tab" data-bs-target="#filtertab" type="button" role="tab" aria-controls="filtertab-6" aria-selected="false">
         <span class="badge">5</span> {{'create_rule.tabs.six'|trans}}
