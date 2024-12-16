@@ -23,7 +23,7 @@
 *********************************************************************************/ 
 const $ = require('jquery');
 
-const listOfFieldKeyWords = sensitiveFields;
+const listOfFieldKeyWords = (typeof sensitiveFields !== 'undefined') ? sensitiveFields : [];
 
 $(function () {
     $('#connexion_detail').on('click', function () {
