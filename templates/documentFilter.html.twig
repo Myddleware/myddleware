@@ -49,7 +49,7 @@
 <div class="px-5 mb-1 py-1 mt-5">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
-    <div class="input-group">
+    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-grey' }}" class="input-group">
         {{ form_widget(formFilter.filter) }}
     </div>
     {{ form_end(formFilter) }}
