@@ -32,11 +32,13 @@
         {{'view_rule.tabs.mapping'|trans}}
     </button>
 </li>
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg btn-lg fw-bold py-4" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation" aria-selected="false">
-        {{'view_rule.tabs.relation'|trans}}
-    </button>
-</li>
+{% if rule.relationsShip|length > 0 %}
+    <li class="nav-item d-grid flex-fill" role="presentation">
+        <button class="nav-link lh-lg btn-lg fw-bold py-4" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation" aria-selected="false">
+            {{'view_rule.tabs.relation'|trans}}
+        </button>
+    </li>
+{% endif %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 " id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="false">
     {{'view_rule.tabs.filter'|trans}}
