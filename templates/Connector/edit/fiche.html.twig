@@ -63,7 +63,7 @@
 
 						{% for key, field in form.connectorParams %}
 							<tr>
-								<th>{{ form_label(field.value) }}</th>
+								<th class="title">{{ form_label(field.value) }}</th>
 								<td>
 									{% if field.vars.value.name != 'wsdl' and field.vars.value.name != 'file' %}
 										{{ form_widget(field.value) }}
