@@ -17,10 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phpPath = trim(shell_exec(isWindows() ? 'where php' : 'which php'));
     $executepath = $_SERVER['SCRIPT_FILENAME'];
     $cleanPath = str_replace(isWindows() ? '\\public\\execute.php' : '/public/execute.php', '', $executepath);
-    $rootpath = str_replace(isWindows() ? '\\public\\execute.php' : '/public/execute.php', '', $executepath);
+    $rootpath = $executepath;
     // if rootpath stils contains public/execute.php, remove it
-    if (strpos($rootpath, 'public/execute.php') !== false) {
-        $rootpath = str_replace('public/execute.php', '', $rootpath);
+    if (strpos($rootpath, '/public/execute.php') !== false) {
+        $rootpath = str_replace('/public/execute.php', '', $rootpath);
+    }
+    if (strpos($rootpath, '\public\execute.php') !== false) {
+        $rootpath = str_replace('\public\execute.php', '', $rootpath);
     }
     $consolePath = $rootpath . (isWindows() ? '\\bin\\console' : '/bin/console');
 
@@ -38,13 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
     } elseif (strpos($command, 'composer') !== false) {
         $isolatedCommand = str_replace('composer ', '', $command);
-        $composerPath = trim(shell_exec(isWindows() ? 'where composer' : 'which composer'));
+        $composerPath = trim(shell_exec('which composer'));
 
         if (isWindows()) {
             $composerPath = adjustPath($composerPath);
         }
 
-        $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
+        $output = shell_exec("cd $rootpath && $composerPath $isolatedCommand 2>&1");
     } else {
         $output = shell_exec($command);
     }
