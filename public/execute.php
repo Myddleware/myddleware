@@ -47,9 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $composerPath = adjustPath($composerPath);
         }
 
+
         $output = shell_exec("cd $rootpath && $composerPath $isolatedCommand 2>&1");
     } else {
-        $output = shell_exec($command);
+
+        if (strpos($command, 'cd ') !== false) {
+            $output = "You cannot use cd in this terminal, execute commands assuming you are in the root directory.";
+        } else {
+            $output = shell_exec("cd $rootpath && $command 2>&1");
+        }
     }
 
     // Return the output as JSON
