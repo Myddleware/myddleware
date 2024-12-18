@@ -63,7 +63,7 @@ class PremiumController extends AbstractController
         try {
             // Si ce n'est pas une requête AJAX, rendre la page complète
             return $this->render(
-                'premium/list.html.twig',
+                'Premium/list.html.twig',
                 [
                     'isPremium' => true,
                 ]
