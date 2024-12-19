@@ -11,7 +11,9 @@ $(document).ready(function() {
         $('#form_subject').val(''); 
         $('#form_to').val('');
         $('#form_message').val('');
-        $('#form_status').val('');
+        if ($(this).val() !== 'updateStatus') {
+            $('#form_status').val('');
+        }
 
         // if the action is changeData, clear the search field and value
         if ($(this).val() === 'changeData') {
