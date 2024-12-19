@@ -758,8 +758,8 @@ class WorkflowActionController extends AbstractController
                         'choices' => $StringStatus,
                         'required' => false
                     ])
-                    ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
-                    ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
+                    ->add('to', TextType::class, ['label' => 'To', 'required' => false])
+                    ->add('subject', TextType::class, ['label' => 'Subject', 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
                     ->add('searchField', ChoiceType::class, [
                         'label' => 'searchField',
