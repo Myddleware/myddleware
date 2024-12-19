@@ -1009,6 +1009,14 @@ public function removeFilter(Request $request): JsonResponse
         // writes the header in the csv file
         fputcsv($fp, $header);
 
+        // the results are serialized, so we need to unserialize them
+        foreach ($results as $row) {
+            $row['source_data'] = unserialize($row['source_data']);
+            $row['target_data'] = unserialize($row['target_data']);
+            $row['history_data'] = unserialize($row['history_data']);
+        }
+
+
         // Write data
         foreach ($results as $row) {
             $csvRow = [
