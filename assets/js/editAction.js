@@ -7,7 +7,7 @@ $(document).ready(function() {
         $('#form_searchField').parent().hide();
         $('#form_searchValue').parent().hide();
         $('#form_rule').parent().hide();
-        $('#form_rerun').parent().hide();
+        $('#form_rerun').parent().show();
         if ($(this).val() !== 'updateStatus') {
             $('#form_status').val('');
         }
@@ -47,7 +47,6 @@ $(document).ready(function() {
             $('#form_searchField').parent().show();
             $('#form_searchValue').parent().show();
             $('#form_rule').parent().show();
-            $('#form_rerun').parent().show();
             $('#form_targetField').parent().hide();
             $('#form_targetFieldValueContainer').hide();
         }
