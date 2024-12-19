@@ -1010,10 +1010,16 @@ public function removeFilter(Request $request): JsonResponse
         fputcsv($fp, $header);
 
         // the results are serialized, so we need to unserialize them
-        foreach ($results as $row) {
-            $row['source_data'] = unserialize($row['source_data']);
-            $row['target_data'] = unserialize($row['target_data']);
-            $row['history_data'] = unserialize($row['history_data']);
+        foreach ($results as $key => $row) {
+            // Unserialize the PHP serialization
+            $sourceData = unserialize($row['source_data']);
+            $targetData = unserialize($row['target_data']); 
+            $historyData = unserialize($row['history_data']);
+            
+            // Remove extra quotes and semicolon that were added during serialization
+            $results[$key]['source_data'] = trim($sourceData, '";');
+            $results[$key]['target_data'] = trim($targetData, '";');
+            $results[$key]['history_data'] = trim($historyData, '";');
         }
 
 
