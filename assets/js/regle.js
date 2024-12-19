@@ -2217,9 +2217,6 @@ $(document).ready(function() {
 		var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
 		// console.log(storedFilters);
 
-		// Remove the filter from the stored filters
-		delete storedFilters[filterClass];
-		// console.log(storedFilters);
 
 		// Save the updated filters back to local storage
 		localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
