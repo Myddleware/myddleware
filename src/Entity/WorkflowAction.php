@@ -104,6 +104,11 @@ class WorkflowAction
      */
     private int $deleted;
 
+    /**
+     * @ORM\Column(name="multipleRuns", type="boolean", options={"default":0})
+     */
+    private int $multipleRuns;
+
     public function getId(): string
     {
         return $this->id;
@@ -257,5 +262,16 @@ class WorkflowAction
     public function getDeleted(): int
     {
         return $this->deleted;
+    }
+
+    public function setMultipleRuns($multipleRuns): self
+    {
+        $this->multipleRuns = $multipleRuns;
+        return $this;
+    }
+
+    public function getMultipleRuns(): int
+    {
+        return $this->multipleRuns;
     }
 }
