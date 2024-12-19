@@ -8,11 +8,14 @@ $(document).ready(function() {
         $('#form_searchValue').parent().hide();
         $('#form_rule').parent().hide();
         $('#form_rerun').parent().hide();
-        $('#form_subject').val(''); 
-        $('#form_to').val('');
-        $('#form_message').val('');
         if ($(this).val() !== 'updateStatus') {
             $('#form_status').val('');
+        }
+
+        if ($(this).val() !== 'sendNotification') {
+            $('#form_subject').val(''); 
+            $('#form_to').val('');
+            $('#form_message').val('');
         }
 
         // if the action is changeData, clear the search field and value
