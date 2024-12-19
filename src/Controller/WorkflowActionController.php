@@ -915,8 +915,8 @@ class WorkflowActionController extends AbstractController
                 }
 
                 $targetFieldsData = [];
-                if (isset($arguments['fields']) && is_array($arguments['fields'])) {
-                    foreach ($arguments['fields'] as $field => $value) {
+                if (!empty($arguments) && count($arguments) > 0) {
+                    foreach ($arguments as $field => $value) {
                         $targetFieldsData[] = [
                             'field' => $field,
                             'value' => $value,
