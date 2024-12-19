@@ -1,0 +1,101 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+{% block body  %}
+	{% form_theme form 'form_div_layout.html.twig' %}
+	<div class="block-btn-infos container">
+		
+	</div>
+	<div class="container">
+		<div class="row justify-content-center pb-5">
+			<div class="col">
+				{{form_start(form)}}
+				{% if error is defined %}
+					<div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
+				{% endif %}
+				<table id="tab_connector" class="table table-hover pt-5">
+					<thead>
+						<tr class="">
+							<th colspan="2" class="display-6">{{'view_connector.info.title'|trans}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="title solution">
+								<label>{{'view_connector.info.solution'|trans}}</label>
+							</td>
+							<td class="value"><p><img class="vignette" src="{{ asset('build/images/solution/' ~connector.solution.name~'.png')}}" alt="{{ connector.solution.name }}" /></p></td>
+						</tr>
+						<tr>
+							<td class="title"><label>{{'create_connector.connexion'|trans}}</label></td>
+							<td class="value">{{form_widget(form.name)}}</td>
+						</tr>		
+						{% for key,field in form.connectorParams %}
+							<tr>
+								<td class="title">{{ form_label(field.value) }}</td>
+								<td class="value">
+									{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
+										{{ form_widget(field.value) }}
+									{% else %}
+										<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
+											{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+										</a>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div class="row">
+					<div class="col">
+						<button type="button" id="connexion" class="btn btn-primary">Test</button>
+						<span id="source_status" class="status ms-4">
+							<img alt="status" src="{{ asset('build/images/status_offline.png') }}">
+						</span>
+					</div>
+					<div class="col">
+						<button id="connector_save" type="submit" class="btn btn-success">{{'view_connector.btn.save'|trans}}</button>
+						<div id="validation"></div>
+					</div>
+					<div class="col">
+						<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
+							<button type="button" class="btn btn-danger">
+								{{'view_connector.btn.delete'|trans}}
+							</button> 
+						</a>
+					</div>
+				</div>
+			
+				<div id="msg_status" class="alert alert-danger" role="alert">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16">
+					<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+					</svg>
+					{{'error.connexion'|trans}} : <span class="error"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% block javascripts %}
+		{{ encore_entry_script_tags('connector') }}
+	{% endblock %}
+{% endblock %}

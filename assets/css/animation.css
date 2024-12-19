@@ -537,3 +537,9 @@ h2 { margin-top: 50px;}
     z-index: 1000; /* Ensure it appears above other elements */
 }
 
+#filter-premium-container-grey {
+    color: #7777;
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.6; /* Optional: makes it look disabled */
+}
