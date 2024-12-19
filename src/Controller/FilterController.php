@@ -930,11 +930,55 @@ public function removeFilter(Request $request): JsonResponse
             throw $this->createNotFoundException('No document selected');
         }
 
-        // converts the string of document ids into an array
-        $_POST['csvdocumentids'] = explode(',', $_POST['csvdocumentids']);
+        // Clean and prepare IDs
+        $documentIds = array_filter(explode(',', $_POST['csvdocumentids']));
+        
+        if (empty($documentIds)) {
+            throw $this->createNotFoundException('No valid document IDs provided');
+        }
 
-        // fetches the documents from the database
-        $documents = $this->entityManager->getRepository(Document::class)->findBy(['id' => $_POST['csvdocumentids']]);
+        // Create placeholders for the IN clause
+        $placeholders = str_repeat('?,', count($documentIds) - 1) . '?';
+
+        // Build query
+        $query = "
+            SELECT 
+                document.id,
+                document.rule_id,
+                document.created_by,
+                document.modified_by, 
+                document.date_created,
+                document.date_modified,
+                document.status,
+                document.source_id,
+                document.target_id,
+                document.source_date_modified,
+                document.mode,
+                document.type,
+                document.attempt,
+                document.global_status,
+                document.parent_id,
+                document.deleted,
+                source_data.data as source_data,
+                target_data.data as target_data,
+                history_data.data as history_data
+            FROM document
+            LEFT JOIN documentdata source_data 
+                ON document.id = source_data.doc_id AND source_data.type = 'S'
+            LEFT JOIN documentdata target_data 
+                ON document.id = target_data.doc_id AND target_data.type = 'T'
+            LEFT JOIN documentdata history_data 
+                ON document.id = history_data.doc_id AND history_data.type = 'H'
+            WHERE document.id IN ($placeholders)";
+
+        $stmt = $this->entityManager->getConnection()->prepare($query);
+        
+        // Bind parameters individually
+        foreach ($documentIds as $index => $id) {
+            $stmt->bindValue($index + 1, $id);
+        }
+        
+        $results = $stmt->executeQuery()->fetchAllAssociative();
 
         // Create a temporary file in memory
         $fp = fopen('php://temp', 'w+');
@@ -965,52 +1009,37 @@ public function removeFilter(Request $request): JsonResponse
         // writes the header in the csv file
         fputcsv($fp, $header);
 
-        // puts the data of each document in the csv file
-        foreach ($documents as $document) {
-            $documentDataSource = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'S'])->getData() : '';
-            $documentDataTarget = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'T'])->getData() : '';
-            $documentDataHistory = $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H']) ? $this->entityManager->getRepository(DocumentData::class)->findOneBy(['doc_id' => $document->getId(), 'type' => 'H'])->getData() : '';
-
-            $row = [
-                $document->getId(),
-                $document->getRule()->getId(),
-                $document->getCreatedBy(),
-                $document->getModifiedBy(),
-                $document->getDateCreated()->format('Y-m-d H:i:s'),
-                $document->getDateModified()->format('Y-m-d H:i:s'),
-                $document->getStatus(),
-                $document->getSource(),
-                $document->getTarget(),
-                $document->getSourceDateModified()->format('Y-m-d H:i:s'),
-                $document->getMode(),
-                $document->getType(),
-                $document->getAttempt(),
-                $document->getGlobalStatus(),
-                $document->getParentId(),
-                $document->getDeleted(),
-                $documentDataSource,
-                $documentDataTarget,
-                $documentDataHistory
+        // Write data
+        foreach ($results as $row) {
+            $csvRow = [
+                $row['id'],
+                $row['rule_id'],
+                $row['created_by'],
+                $row['modified_by'],
+                $row['date_created'],
+                $row['date_modified'],
+                $row['status'],
+                $row['source_id'],
+                $row['target_id'],
+                $row['source_date_modified'],
+                $row['mode'],
+                $row['type'],
+                $row['attempt'],
+                $row['global_status'],
+                $row['parent_id'],
+                $row['deleted'],
+                $row['source_data'] ?? '',
+                $row['target_data'] ?? '',
+                $row['history_data'] ?? ''
             ];
-
-            try {
-                fputcsv($fp, $row);
-            } catch (\Throwable $e) {
-                throw $this->createNotFoundException('Page not found.' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
-            }
+            fputcsv($fp, $csvRow);
         }
 
-        // Reset the file pointer to the beginning
         rewind($fp);
-        
-        // Get the content of the CSV
         $content = stream_get_contents($fp);
         fclose($fp);
 
-        // Create the response with the CSV content
         $response = new Response($content);
-        
-        // Set headers to force download
         $response->headers->set('Content-Type', 'text/csv');
         $response->headers->set('Content-Disposition', 'attachment; filename="documents_export_'.date('Y-m-d_His').'.csv"');
         $response->headers->set('Pragma', 'no-cache');
