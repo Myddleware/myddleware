@@ -49,31 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         $output = shell_exec("cd $rootpath && $composerPath $isolatedCommand 2>&1");
-    }
-
-
-
-    // Adjust paths for Windows
-    if (isWindows()) {
-        $phpPath = adjustPath($phpPath);
-        $executepath = adjustPath($executepath);
-        $cleanPath = adjustPath($cleanPath);
-        $consolePath = adjustPath($consolePath);
-    }
-
-    // Execute command
-    if (strpos($command, 'php bin/console') !== false) {
-        $isolatedCommand = str_replace('php bin/console', '', $command);
-        $output = shell_exec("$phpPath $consolePath $isolatedCommand 2>&1");
-    } elseif (strpos($command, 'composer') !== false) {
-        $isolatedCommand = str_replace('composer ', '', $command);
-        $composerPath = trim(shell_exec(isWindows() ? 'where composer' : 'which composer'));
-
-        if (isWindows()) {
-            $composerPath = adjustPath($composerPath);
-        }
-
-        $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
     } else {
         if (strpos($command, 'cd ') !== false) {
             $output = "You cannot use cd in this terminal, execute commands assuming you are in the root directory.";
