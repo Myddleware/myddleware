@@ -713,7 +713,8 @@ class WorkflowActionController extends AbstractController
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
-                    'rerun' => $arguments['rerun'] ?? 0
+                    'rerun' => $arguments['rerun'] ?? 0,
+                    'multipleRuns' => $workflowAction->getMultipleRuns(),
                     // Add other WorkflowAction fields here as needed
                 ];
 
@@ -822,9 +823,6 @@ class WorkflowActionController extends AbstractController
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-
-
-
                     $workflowAction->setModifiedBy($this->getUser());
 
                     $action = $form->get('action')->getData();
@@ -845,6 +843,8 @@ class WorkflowActionController extends AbstractController
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
+                    $multipleRuns = $form->get('multipleRuns')->getData();
+                    $workflowAction->setMultipleRuns($multipleRuns);
 
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
