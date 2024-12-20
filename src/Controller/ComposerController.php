@@ -26,8 +26,13 @@ class ComposerController extends AbstractController
             ]);
             
             $process->setEnv($env);
-            $process->setTimeout(3600); // Set timeout to 1 hour
-            $process->run();
+            $process->setTimeout(3600);
+            
+            $output = '';
+            // Capture output in real-time
+            $process->run(function ($type, $buffer) use (&$output) {
+                $output .= $buffer;
+            });
 
             if (!$process->isSuccessful()) {
                 throw new \RuntimeException($process->getErrorOutput());
@@ -36,13 +41,13 @@ class ComposerController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Composer install completed successfully',
-                'output' => $process->getOutput()
+                'output' => $output
             ]);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Error running composer install: ' . $e->getMessage(),
-                'output' => $process->getErrorOutput() ?? null
+                'output' => $output ?? $process->getErrorOutput() ?? null
             ], 500);
         }
     }
