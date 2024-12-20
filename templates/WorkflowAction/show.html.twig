@@ -66,6 +66,12 @@
 						</div>
 						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
+								<strong>{{ 'view_workflow.status'|trans|upper }}</strong>
+								<div class="form-check form-switch text-center">
+									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
+								</div>
+							</div>
+							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.arguments'|trans|upper }}</strong>
 								<div>
 									{% if workflow.arguments is iterable %}
@@ -89,12 +95,6 @@
 										{{ workflow.arguments }}
 									{% endif %}
 
-								</div>
-							</div>
-							<div class="workflow-col mb-2">
-								<strong>{{ 'view_workflow.status'|trans|upper }}</strong>
-								<div class="form-check form-switch text-center">
-									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
 								</div>
 							</div>
 						</div>
