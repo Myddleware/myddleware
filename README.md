@@ -1,6 +1,6 @@
 # Myddleware
 
-> Welcome to the Myddleware community and thank you for joining us!
+> Welcome to the Myddleware  community and thank you for joining us!
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b22fda90ea2b4a9a9542b8026734e840)](https://www.codacy.com/gh/Myddleware/myddleware/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Myddleware/myddleware&amp;utm_campaign=Badge_Grade)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Myddleware/myddleware)](https://github.com/Myddleware/myddleware)
