@@ -601,6 +601,9 @@ view_workflow_action:
     order: Order
     back_to_workflow: Back to the workflow
     create: Create a new action
+    multiple_runs: Multiple Runs
+    multiple_runs_yes: Yes
+    multiple_runs_no: No
 view_account:
     title: My account
     user_info: My information
