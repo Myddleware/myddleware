@@ -118,6 +118,16 @@ class WorkflowActionType extends AbstractType
                     'class' => 'form-control',
                     ],
             ])
+            ->add('multipleRuns', ChoiceType::class, [
+                'label' => 'Multiple Runs',
+                'choices' => [
+                    'Yes' => 1,
+                    'No' => 0,
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+            ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save',
                 'attr' => [
