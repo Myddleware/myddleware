@@ -570,7 +570,7 @@ view_workflow:
     description: Description
     rule: Rule
     conditions: Conditions
-    status: Status
+    status: Active
     actions_list: List of Actions
     create_action: Create a new action for this workflow
     name: Name
