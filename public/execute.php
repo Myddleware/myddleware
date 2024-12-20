@@ -49,14 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         $output = shell_exec("cd $rootpath && $composerPath $isolatedCommand 2>&1");
-    } else {
-
-        if (strpos($command, 'cd ') !== false) {
-            $output = "You cannot use cd in this terminal, execute commands assuming you are in the root directory.";
-        } else {
-            $output = shell_exec("cd $rootpath && $command 2>&1");
-        }
     }
+
+
 
     // Adjust paths for Windows
     if (isWindows()) {
@@ -80,7 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $output = shell_exec("cd $cleanPath && $composerPath $isolatedCommand 2>&1");
     } else {
-        $output = shell_exec($command);
+        if (strpos($command, 'cd ') !== false) {
+            $output = "You cannot use cd in this terminal, execute commands assuming you are in the root directory.";
+        } else {
+            $output = shell_exec("cd $rootpath && $command 2>&1");
+        }
     }
 
     // Return the output as JSON
