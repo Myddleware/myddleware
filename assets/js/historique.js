@@ -2,6 +2,12 @@
 function storePageInHistory() {
     let history = JSON.parse(localStorage.getItem('pageHistory')) || [];
     let currentPageTitle = document.title;
+
+    // if the current page title contains the substring document form, remove that substrinhg
+    if (currentPageTitle.includes('document form')) {
+        currentPageTitle = currentPageTitle.replace('document form', '').trim();
+    }
+
     const currentPageURL = window.location.href;
 
     if (currentPageTitle.includes('|')) {
