@@ -83,6 +83,32 @@
 								</div>
 							</div>
 						</div>
+													<div class="workflow-col mb-2">
+								<strong>{{ 'view_workflow.arguments'|trans|upper }}</strong>
+								<div>
+									{% if workflow.arguments is iterable %}
+										<ul>
+											{% for key, argument in workflow.arguments %}
+												<li>{{ key }}:
+													{% if argument is iterable %}
+														<ul>
+															{% for subKey, subArgument in argument %}
+																<li>{{ subKey }}:
+																	{{ subArgument }}</li>
+															{% endfor %}
+														</ul>
+													{% else %}
+														{{ argument }}
+													{% endif %}
+												</li>
+											{% endfor %}
+										</ul>
+									{% else %}
+										{{ workflow.arguments }}
+									{% endif %}
+
+								</div>
+							</div>
 					</div>
 				</div>
 			{% endif %}
