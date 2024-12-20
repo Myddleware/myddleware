@@ -39,7 +39,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql:delegated
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-umyddleware", "-p${mysql_password:-secret}"]
       interval: 10s
       timeout: 5s
       retries: 5
