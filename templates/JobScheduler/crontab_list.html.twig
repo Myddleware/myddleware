@@ -235,6 +235,8 @@ form.submit();
 
 	<!-- Button to toggle terminal -->
 	<button id="toggle-terminal" class="btn btn-secondary mt-3">Toggle Terminal</button>
+	<!-- Composer install button -->
+	<button id="run-composer" class="btn btn-primary mt-3 ml-2">Run Composer Install</button>
 
 	<!-- Terminal container -->
 	<div id="terminal-container" style="display: none; height: 300px; width: 100%; margin-top: 20px;"></div>
@@ -327,6 +329,32 @@ form.submit();
 					}
 				});
 			}
+
+			// Add composer install button functionality
+			const composerButton = document.getElementById('run-composer');
+			composerButton.addEventListener('click', function() {
+				composerButton.disabled = true;
+				composerButton.innerHTML = 'Running...';
+
+				fetch('{{ path('run_composer_install') }}', {
+					method: 'POST',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				})
+				.then(response => response.json())
+				.then(data => {
+					alert(data.message || 'Composer install completed successfully');
+				})
+				.catch(err => {
+					console.error('Error running composer install:', err);
+					alert('Error running composer install');
+				})
+				.finally(() => {
+					composerButton.disabled = false;
+					composerButton.innerHTML = 'Run Composer Install';
+				});
+			});
 		});
 	</script>
 {% endblock %}
