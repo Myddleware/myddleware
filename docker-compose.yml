@@ -12,10 +12,12 @@ services:
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
     volumes:
-      - ./:/var/www/html:cached
-      - ./docker/tmp/composer:/root/.composer:cached
+      - .:/var/www/html:delegated
+      - ./docker/tmp/composer:/root/.composer:delegated
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     restart: always
 
   mysql:
@@ -28,6 +30,20 @@ services:
     command: 
       - --max_allowed_packet=524288000
       - --wait_timeout=100
+      - --innodb_buffer_pool_size=1G
+      - --innodb_flush_method=O_DIRECT
+      - --innodb_flush_log_at_trx_commit=2
+      - --innodb_buffer_pool_instances=4
+      - --innodb_read_io_threads=4
+      - --innodb_write_io_threads=4
     volumes:
-      - ./docker/var/mysql:/var/lib/mysql:rw
+      - mysql_data:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
+
+volumes:
+  mysql_data:
