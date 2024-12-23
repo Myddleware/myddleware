@@ -42,7 +42,7 @@
         <span class="badge">4</span> {{'create_rule.tabs.four'|trans}}
     </button>
 </li>
-{% if rule.relationsShip|length > 0 %}
+{% if rule is defined and rule is not null and rule.relationsShip|default([])|length > 0 %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-5" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation-5" aria-selected="false">
         <span class="badge">5</span> {{'create_rule.tabs.five'|trans}}

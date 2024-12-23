@@ -2160,10 +2160,7 @@ use App\Entity\WorkflowAction;
             } catch (Exception $e) {
                 $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
                 $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
-
-                // return $this->redirect($this->generateUrl('regle_stepone_animation'));
-                // exit;
-                dump($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
+                return $this->redirect($this->generateUrl('regle_stepone_animation'));
             }
         }
 
