@@ -567,7 +567,7 @@ view_workflow:
     description: Description
     rule: Règle
     conditions: Conditions
-    status: Statut
+    status: Actif
     actions_list: Liste des actions
     create_action: Créer une nouvelle action pour ce workflow
     name: Nom
@@ -598,6 +598,9 @@ view_workflow_action:
     order: Ordre
     back_to_workflow: Retour au workflow
     create: Créer une action
+    multiple_runs: Multiple Runs
+    multiple_runs_yes: Oui
+    multiple_runs_no: Non
 view_account:
     title: Mon compte
     user_info: Mes informations

@@ -668,3 +668,13 @@ opacity: 0%;
 	border-bottom: none !important;
 	border-bottom-style: hidden !important;
 }
+
+.name-connector-fit-box {
+	min-width: fit-content;
+}
+
+.link-fit-workflow-name,
+.link-fit-rule-name {
+	display: block;
+	min-width: max-content;
+}

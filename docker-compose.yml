@@ -1,9 +1,10 @@
-version: '3'
+version: '3.8'
 
 services:
-
   myddleware:
-    image: opencrmitalia/myddleware:v3
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - ${myddleware_port:-30080}:80
     environment:
@@ -11,77 +12,38 @@ services:
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
     volumes:
-      - ./:/var/www/html:cached
-      - ./docker/tmp/composer:/root/.composer:cached
-    links:
-      - mysql
+      - .:/var/www/html:delegated
+      - ./docker/tmp/composer:/root/.composer:delegated
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
     restart: always
 
   mysql:
-    image: mysql:5.7.28
+    image: mysql:5.7.33
     environment:
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
       - MYSQL_USER=myddleware
       - MYSQL_PASSWORD=${mysql_password:-secret}
-      - max_allowed_packet=524288000
-      - wait_timeout=100
+    command: 
+      - --max_allowed_packet=524288000
+      - --wait_timeout=100
+      - --innodb_buffer_pool_size=1G
+      - --innodb_flush_method=O_DIRECT
+      - --innodb_flush_log_at_trx_commit=2
+      - --innodb_buffer_pool_instances=4
+      - --innodb_read_io_threads=4
+      - --innodb_write_io_threads=4
     volumes:
-      - ./docker/var/mysql:/var/lib/mysql:rw
+      - mysql_data:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - ${phpmyadmin_port:-30088}:80
-    environment:
-      - PMA_HOST=mysql
-    links:
-      - mysql
-    restart: always
-
-  backup:
-    image: databack/mysql-backup
-    environment:
-      - DB_SERVER=mysql
-      - DB_USER=root
-      - DB_PASS=secret
-      - DB_NAMES=myddleware
-      - DB_DUMP_TARGET=${backup_target:-}
-      - DB_DUMP_FREQ=1440
-      - DB_DUMP_BEGIN=2300
-      - AWS_DEFAULT_REGION=eu-west-1
-      - AWS_ACCESS_KEY_ID=${aws_access_key_id:-}
-      - AWS_SECRET_ACCESS_KEY=${aws_secret_access_key:-}
-    volumes:
-      - ./docker/backup/mysql:/tmp
-    restart: always
-
-#  filebrowser:
-#    image: filebrowser/filebrowser
-#    ports:
-#      - ${filebrowser_port:-30090}:30090
-#    volumes:
-#      - ./src/Myddleware/RegleBundle/Custom:/srv/Custom
-#      - ./src/Myddleware/RegleBundle/Templates:/srv/Templates
-#      - ./var/logs:/srv/Logs
-#      - ./var/vpn:/srv/VPN
-#      - ./var/databases/filebrowser.db:/database.db
-#      - ./.filebrowser.json:/.filebrowser.json
-#    restart: always
-
-  vpn:
-    image: javanile/openvpn:2.4
-    tty: true
-    stdin_open: true
-    environment:
-      - EXTERNAL_PORT=${openvpn_port:-1194}
-      - EXTERNAL_ADDRESS=${external_address:-}
-      - CLIENT_FORWARD=${vpn_client_forward:-}
-    ports:
-      - ${openvpn_port:-1194}:1194/udp
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./docker/etc/openvpn:/etc/openvpn
-    restart: always
+volumes:
+  mysql_data:

@@ -191,5 +191,16 @@ header{
 }
 
 .title_section_menu:hover .star-icon {
-    transform: rotate(20deg) scale(1.5);
+	transform: rotate(20deg) scale(1.5);
+}
+
+.star-cron{
+	font-size: 12px !important;
+	margin-left: -76px !important;
+	top: 7px !important;
+}
+.star-cron:hover{
+	font-size: 12px !important;
+	margin-left: -76px !important;
+	top: 7px !important;
 }

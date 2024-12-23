@@ -63,7 +63,7 @@
 												<td class="solution_block">
 													<div class="d-flex align-items-center">
 														<img class="vignette" src="{{ asset('build/images/solution/'~connector.solution~'.png') }}" alt="logo solution"/>
-														<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="help-link all-link ms-2">
+														<a href="{{ path('connector_detail',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.view'|trans}}" class="help-link all-link ms-2 name-connector">
 															{{connector.0.getName}}
 														</a>
 														<a class="mx-3 edit-button-name-list">
