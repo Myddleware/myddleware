@@ -337,6 +337,7 @@ class JobManager
 			   ->andWhere('c.command LIKE :command')
 			   ->setParameter('enable', '1')
 			   ->setParameter('command', $searchName)
+			   ->setMaxResults(1)
 			   ->getQuery()
 			   ->getOneOrNullResult();
 
