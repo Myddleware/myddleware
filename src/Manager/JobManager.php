@@ -326,29 +326,33 @@ class JobManager
      */
     public function initJob(string $paramJob): array
     {
-        $this->paramJob = $paramJob;
-        $this->id = uniqid('', true);
-        $this->start = microtime(true);
-		// Search if a crontab action has the same name than the current task. If yes, we add its id 
-		$searchName = '%myddleware:'.trim($paramJob).'%';
-		$this->cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
-		   ->where('c.enable = :enable')
-		   ->andWhere('c.command LIKE :command')
-		   ->setParameter('enable', '1')
-		   ->setParameter('command', $searchName)
-		   ->getQuery()
-		   ->getOneOrNullResult();
+		try {
+			$this->paramJob = $paramJob;
+			$this->id = uniqid('', true);
+			$this->start = microtime(true);
+			// Search if a crontab action has the same name than the current task. If yes, we add its id 
+			$searchName = '%myddleware:'.trim($paramJob).'%';
+			$this->cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
+			   ->where('c.enable = :enable')
+			   ->andWhere('c.command LIKE :command')
+			   ->setParameter('enable', '1')
+			   ->setParameter('command', $searchName)
+			   ->getQuery()
+			   ->getOneOrNullResult();
 
-        // Create Job
-        $insertJob = $this->insertJob();
-        if ($insertJob) {
-            $this->createdJob = true;
+			// Create Job
+			$insertJob = $this->insertJob();
+			if ($insertJob) {
+				$this->createdJob = true;
 
-            return ['success' => true, 'message' => ''];
-        } else {
-            $this->message .= 'Failed to create the Job in the database';
+				return ['success' => true, 'message' => ''];
+			} else {
+				$this->message .= 'Failed to create the Job in the database';
 
-            return ['success' => false, 'message' => $this->message];
+				return ['success' => false, 'message' => $this->message];
+			}
+		} catch (Exception $e) {
+            throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 

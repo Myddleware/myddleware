@@ -161,7 +161,7 @@ class SynchroCommand extends Command
 										// Envoi des documents à la cible
 										$this->jobManager->sendDocuments();
 									} catch (\Exception $e) {
-										$this->jobManager->message .= 'Error rule '.$value.' '.$e->getMessage();
+										$this->jobManager->message .= 'Error rule '.$value.' '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
 										// Reset entity manager in case it has been closed by the exception
 										if (!$this->entityManager->isOpen()) {
 											$this->entityManager = $this->registry->resetManager();
@@ -178,7 +178,7 @@ class SynchroCommand extends Command
                 }
             }
         } catch (\Exception $e) {
-            $this->jobManager->message .= $e->getMessage();
+            $this->jobManager->message .= $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         // Close job if it has been created
