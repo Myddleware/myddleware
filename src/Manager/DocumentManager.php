@@ -1330,6 +1330,13 @@ class DocumentManager
             // If one is different we stop the function
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
+					// If one of the field isn't set then we return false
+					if (
+							!isset($history[$field['target_field_name']])
+						 OR !isset($target[$field['target_field_name']]) 
+					){
+						return false;
+					}
                     if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {
                         // Null text is considered as empty for comparaison
 						if ($target[$field['target_field_name']] === 'null') {

@@ -30,7 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class salesforce extends solution {
 
-	protected int $limitCall = 100;
+	protected int $limitCall = 500;
 
 	protected array $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
@@ -72,7 +72,7 @@ class salesforce extends solution {
 										"Case" => array("CaseNumber")
 									);
 									
-	protected string $versionApi = 'v38.0';
+	protected string $versionApi = 'v62.0';
 	
 	protected bool $sendDeletion = true;
 
@@ -342,7 +342,7 @@ class salesforce extends solution {
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function readData($param): array
-    {
+	{
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -355,7 +355,7 @@ class salesforce extends solution {
 		$queryOffset = '';
 		if (empty($param['limit'])) {
 			$param['limit'] = $this->limitCall;
-		} 
+		}
 		if (!isset($param['offset'])) {
 			$param['offset'] = 0;
 		}
@@ -364,45 +364,47 @@ class salesforce extends solution {
 			$param['fields'] = array_unique($param['fields']);
 			$param['fields'] = array_values($param['fields']);
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
+
 			// Ajout des champs obligatoires
 			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
-			
+
 			// Récupération du nom du champ date
 			$DateRefField = $this->getRefFieldName($param);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
-			
+
 			// Gestion du SELECT
-			$querySelect = $this->getSelect($param);	
+			$querySelect = $this->getSelect($param);
 			// Gestion de FROM
 			$queryFrom = $this->getFrom($param);
 			// Gestion du WHERE
-			$queryWhere = $this->getWhere($param);		
+			$queryWhere = $this->getWhere($param);
 			// Gestion du ORDER
-			$queryOrder = $this->getOrder($param);	
+			$queryOrder = $this->getOrder($param);
 
 			// Gstion du LIMIT
 			$queryLimit .= "+LIMIT+" . $param['limit']; // Ajout de la limite souhaitée
 			// On lit les données dans Salesforce
-			do {		
+			do {
 				if(!empty($param['offset'])) {
 					$queryOffset = "+OFFSET+".$param['offset'];
 				}
 				// Appel de la requête
-				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				if (!empty($query_request_data['nextRecordsUrl'])) {
+					$query = $this->instance_url.$query_request_data['nextRecordsUrl'];
+				} else {
+					$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				}
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
-				// Affectation du nombre de résultat à $result['count']
-				if (isset($query_request_data['totalSize'])){
-					$currentCount = $query_request_data['totalSize'];
-					$result['count'] += $currentCount;
+
+				if (!empty($query_request_data['records'])){
+					$i = 0;
 					// Traitement des informations reçues
-					// foreach($query_request_data['records'] as $record){
-					for ($i = 0; $i < $currentCount; $i++) {
-						$record = $query_request_data['records'][$i];							
-						foreach (array_keys($record) as $key) {					
+					foreach($query_request_data['records'] as $record){
+						$record = $query_request_data['records'][$i];
+						foreach (array_keys($record) as $key) {
 							if($key == $DateRefField){
 								$record[$key] = $this->dateTimeToMyddleware($record[$key]);
 								$row['date_modified'] = $record[$key];
@@ -483,38 +485,33 @@ class salesforce extends solution {
 									$MailinAddress = rtrim($MailinAddress,' ');
 									$row[$key] = $MailinAddress;
 								}
-							}	
+							}
 						}
 						$result['date_ref'] = $record[$DateRefField];
 						$result['values'][$record['Id']] = $row;
+						$result['count']++;
+						$i++;
 						$row = array();
 					}
 					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
-					$param['offset'] += $param['limit'];
-					// Récupération de la date de référence de l'avant dernier enregistrement afin de savoir si on doit faire un appel supplémentaire 
-					// currentCount -2 car si 5 résultats dans la tableau alors on veut l'entrée 3 (l'index des tableau commence à 0)
-					$previousRefDate = '';
-					if (!empty($query_request_data['records'][$currentCount-2][$DateRefField])) {
-						$previousRefDate = $this->dateTimeToMyddleware($query_request_data['records'][$currentCount-2][$DateRefField]);
-					}
+					$param['offset'] += $i;
 				}
 				else {
 					$result['error'] = $query_request_data;
 				}
 			}
-			// On continue si : 
-			// 1.	Le nombre de résultat du dernier appel est égal à la limite
-			// 2.	Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement 
+			// On continue si :
+			// 1.   Le nombre de résultat du dernier appel est égal à la limite
+			// 2.   Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement
 			while (
-						$currentCount < $param['limit']
-					&& !empty($previousRefDate)
-					&& $previousRefDate == $result['date_ref']	
+						$result['count'] < $param['limit']
+					&& !$query_request_data['done']
 			);
 		}
 		catch (\Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            $result['error'] = $error;
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($error);
+			$result['error'] = $error;
 		}
 		return $result;
 	}
