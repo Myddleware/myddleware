@@ -330,26 +330,37 @@ class JobManager
 			$this->paramJob = $paramJob;
 			$this->id = uniqid('', true);
 			$this->start = microtime(true);
-			// Search if a crontab action has the same name than the current task. If yes, we add its id 
-			$searchName = '%myddleware:'.trim($paramJob).'%';
-			$this->cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
-			   ->where('c.enable = :enable')
-			   ->andWhere('c.command LIKE :command')
-			   ->setParameter('enable', '1')
-			   ->setParameter('command', $searchName)
-			   ->setMaxResults(1)
-			   ->getQuery()
-			   ->getOneOrNullResult();
+			if ($this->toolsManager->isPremium()) {
+				// Search if a crontab action has the same name than the current task. If yes, we add its id 
+				$searchName = '%myddleware:'.trim($paramJob).'%';
+				$this->cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
+				   ->where('c.enable = :enable')
+				   ->andWhere('c.command LIKE :command')
+				   ->setParameter('enable', '1')
+				   ->setParameter('command', $searchName)
+				   ->setMaxResults(1)
+				   ->getQuery()
+				   ->getOneOrNullResult();
+			} else {
+				// Do not run several job in the same time for non premium version
+				$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+				$stmt = $this->connection->prepare($sqlJobOpen);
+				$result = $stmt->executeQuery();
+				$job = $result->fetchAssociative(); // 1 row
+				// Error if one job is still running
+				if (!empty($job)) {
+					$this->message .= $this->toolsManager->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+					return ['success' => false, 'message' => $this->message];
+				}
+			}
 
 			// Create Job
 			$insertJob = $this->insertJob();
 			if ($insertJob) {
 				$this->createdJob = true;
-
 				return ['success' => true, 'message' => ''];
 			} else {
 				$this->message .= 'Failed to create the Job in the database';
-
 				return ['success' => false, 'message' => $this->message];
 			}
 		} catch (Exception $e) {
