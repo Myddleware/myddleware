@@ -23,10 +23,6 @@ class ManagerCompilerPass implements CompilerPassInterface
 									'UpgradeManager' => 'standard', 
 								);
 
-	protected $solutions = array(
-									'mysql' => 'standard',
-								);
-
     public function process(ContainerBuilder $container)
     {
 		// Manage each manager class depending of its type

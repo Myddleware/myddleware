@@ -496,9 +496,6 @@ class salesforce extends solution {
 					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
 					$param['offset'] += $i;
 				}
-				else {
-					$result['error'] = $query_request_data;
-				}
 			}
 			// On continue si :
 			// 1.   Le nombre de résultat du dernier appel est égal à la limite

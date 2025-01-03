@@ -2305,8 +2305,8 @@ class DocumentManager
 			$this->message = '';
 			$this->docIdRefError = '';
 			// Remove the lock on the document in the class and in the database
-			// Exception : status New because there is no lock on documet for this status, the lock in on the rule
-			// Exception : status No_send because the dcument has already been unlock by the status ready_to_send
+			// Exception : status New because there is no lock on document for this status, the lock in on the rule
+			// Exception : status No_send because the document has already been unlock by the status ready_to_send
 			// Exception : Update status call by a workflow, the lock will be removed only by the main call
 			if (
 					!in_array($new_status, array('New','No_send'))
