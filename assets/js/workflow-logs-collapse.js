@@ -1,23 +1,23 @@
-console.log('workflow-logs-collapse.js');
+// console.log('workflow-logs-collapse.js');
 
 // find the button with the class minus-workflow-logs
 const minusWorkflowLogsButton = document.querySelector('.minus-workflow-logs');
-console.log('minusWorkflowLogsButton', minusWorkflowLogsButton);
+// console.log('minusWorkflowLogsButton', minusWorkflowLogsButton);
 
 // if that button is clicked, toggle the visibility
 minusWorkflowLogsButton.addEventListener('click', function() {
-    console.log('button clicked');
+    // console.log('button clicked');
     // find the tbody with the class workflow-logs-collapse-body
     const workflowLogsCollapseBody = document.querySelector('.workflow-logs-collapse-body');
-    console.log('workflowLogsCollapseBody', workflowLogsCollapseBody);
+    // console.log('workflowLogsCollapseBody', workflowLogsCollapseBody);
 
     // find the icon inside the button
     const icon = minusWorkflowLogsButton.querySelector('svg');
-    console.log('icon', icon);
+    // console.log('icon', icon);
 
     // Check current display state
     const isVisible = workflowLogsCollapseBody.style.display !== 'none';
-    console.log('isVisible', isVisible);
+    // console.log('isVisible', isVisible);
 
     if (isVisible) {
         // If visible, hide it and change to plus
