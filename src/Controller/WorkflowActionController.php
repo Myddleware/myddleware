@@ -481,8 +481,8 @@ class WorkflowActionController extends AbstractController
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-					// $multipleRuns = $form->get('multipleRuns')->getData();
-					// $workflowAction->setMultipleRuns($multipleRuns);
+                    $multipleRuns = $form->get('multipleRuns')->getData();
+                    $workflowAction->setMultipleRuns($multipleRuns ?? 0);
 
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
