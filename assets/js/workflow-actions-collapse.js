@@ -4,21 +4,30 @@ console.log('workflow-actions-collapse.js');
 const minusWorkflowActionsButton = document.querySelector('.minus-workflow-actions');
 console.log('minusWorkflowActionsButton', minusWorkflowActionsButton);
 
-// if that button is clicked, console.log hello
+// if that button is clicked, toggle the visibility
 minusWorkflowActionsButton.addEventListener('click', function() {
-    console.log('hello');
-    // then, findt he tbody with the class workflow-actions-collapse-body
+    console.log('button clicked');
+    // find the tbody with the class workflow-actions-collapse-body
     const workflowActionsCollapseBody = document.querySelector('.workflow-actions-collapse-body');
     console.log('workflowActionsCollapseBody', workflowActionsCollapseBody);
 
-    // then, hide it
-    workflowActionsCollapseBody.style.display = 'none';
-
-    // then, our minus button should be changed to a plus button
-    // in order to do that, we need to find the icon inside the button
+    // find the icon inside the button
     const icon = minusWorkflowActionsButton.querySelector('svg');
     console.log('icon', icon);
-    // then, change the class of the icon to fa-plus
-    icon.classList.remove('fa-minus');
-    icon.classList.add('fa-plus');
+
+    // Check current display state
+    const isVisible = workflowActionsCollapseBody.style.display !== 'none';
+    console.log('isVisible', isVisible);
+
+    if (isVisible) {
+        // If visible, hide it and change to plus
+        workflowActionsCollapseBody.style.display = 'none';
+        icon.classList.remove('fa-minus');
+        icon.classList.add('fa-plus');
+    } else {
+        // If hidden, show it and change to minus
+        workflowActionsCollapseBody.style.display = 'table-row-group';
+        icon.classList.remove('fa-plus');
+        icon.classList.add('fa-minus');
+    }
 });
