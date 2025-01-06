@@ -447,6 +447,14 @@ class WorkflowActionController extends AbstractController
                             'No' => 0,
                         ],
                     ])
+                    ->add('multipleRuns', ChoiceType::class, [
+                        'label' => 'Multiple Runs',
+                        'choices' => [
+                            'Yes' => 1,
+                            'No' => 0,
+                        ],
+                        'required' => false,
+                    ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
                     ->getForm();
                 $form->handleRequest($request);
