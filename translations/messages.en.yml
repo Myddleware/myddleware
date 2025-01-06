@@ -590,6 +590,7 @@ view_workflow:
     action_type: Action Type
     add_action: Add Action
     create_by: Created By
+    cancel_edit: Cancel edit
 view_workflow_action:
     title2: Workflow Action
     title: Workflow Action Details

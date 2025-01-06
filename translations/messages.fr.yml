@@ -587,6 +587,7 @@ view_workflow:
     action_type: Type d'action
     add_action: Ajouter une action
     create_by: Créé par
+    cancel_edit: Annuler l'édition
 view_workflow_action:
     title2: Action du workflow
     title: Détail de l'action du workflow

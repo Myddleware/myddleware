@@ -12,6 +12,10 @@
 	<div class="container mt-5">
 		<div class="text-center m-5">
 
+			<a href="{{ path('workflow_show', {'id': workflow.id}) }}" class="btn btn-outline-primary m-2">
+				{{ 'view_workflow.cancel_edit'| trans }}
+			</a>
+
 			<a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2">
 				{{ 'view_workflow.back'| trans }}</a>
 			<a href="{{ path('workflow_create') }}" class="btn btn-outline-success m-2">{{ 'Create new workflow'| trans }}
