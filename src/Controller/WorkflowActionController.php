@@ -350,6 +350,7 @@ class WorkflowActionController extends AbstractController
                     'rerun' => null,
                     'targetFields' => null,
                     'targetFieldValues' => null,
+                    'multipleRuns' => null,
                     // Add other WorkflowAction fields here as needed
                 ];
 
