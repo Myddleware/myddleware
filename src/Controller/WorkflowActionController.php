@@ -823,20 +823,11 @@ class WorkflowActionController extends AbstractController
                             'No' => 0,
                         ],
                     ])
-					// ->add('multipleRuns', ChoiceType::class, [
-						// 'label' => 'Multiple Runs',
-						// 'choices' => [
-							// 'Yes' => 1,
-							// 'No' => 0,
-						// ],
-					// ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
                     ->getForm();
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-
-
 
                     $workflowAction->setModifiedBy($this->getUser());
 
@@ -858,8 +849,8 @@ class WorkflowActionController extends AbstractController
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-					// $multipleRuns = $form->get('multipleRuns')->getData();
-					// $workflowAction->setMultipleRuns($multipleRuns);
+                    $multipleRuns = $form->get('multipleRuns')->getData();
+                    $workflowAction->setMultipleRuns($multipleRuns ?? 0);
 
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
