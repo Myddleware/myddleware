@@ -602,6 +602,9 @@ view_workflow_action:
     multiple_runs: Multiple Runs
     multiple_runs_yes: Oui
     multiple_runs_no: Non
+    create_new_workflow_action: Créer une nouvelle action de workflow
+    cancel_edit: Annuler l'édition
+    back: Retour au workflow
 view_account:
     title: Mon compte
     user_info: Mes informations

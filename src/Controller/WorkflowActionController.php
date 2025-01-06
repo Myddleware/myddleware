@@ -949,6 +949,7 @@ class WorkflowActionController extends AbstractController
                     [
                         'form' => $form->createView(),
                         'targetFieldsData' => $targetFieldsData,
+                        'workflowAction' => $workflowAction,
                     ]
                 );
             } else {

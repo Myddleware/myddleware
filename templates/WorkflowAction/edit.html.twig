@@ -9,6 +9,26 @@
 {% endblock titlesm %}
 {% block body %}
 	<div class="container mt-5">
+		<div class="text-center m-5">
+			<a href="{{ path('workflow_action_show', {'id': workflowAction.id}) }}" class="btn btn-outline-primary m-2">
+				{{ 'view_workflow_action.cancel_edit'| trans }}
+			</a>
+			
+			<a href="{{ path('workflow_show', {'id': workflowAction.Workflow.id}) }}" class="btn btn-outline-primary m-2">
+				{{ 'view_workflow_action.back'| trans }}
+			</a>
+			
+			<a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflowAction.Workflow.id}) }}" class="btn btn-outline-success m-2">
+				{{ 'Create new workflow action'| trans }}
+			</a>
+			
+			<a href="{{ path('workflow_action_delete', {'id': workflowAction.id}) }}" 
+			   onclick="return confirm('Are you sure you want to delete this workflow action?');" 
+			   class="btn btn-outline-danger m-2">
+				{{ 'view_workflow_action.delete'| trans }}
+			</a>
+		</div>
+
 		{{ form_start(form) }}
 		<div class="card mb-3 pb-3">
 			<div class="card-header">
