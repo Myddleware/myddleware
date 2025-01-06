@@ -430,3 +430,11 @@ td > a {
 #description {
 	margin-top: 77px;
 }
+
+.workflow-name-link-rule {
+	color: #0a58ca !important;
+}
+
+.workflow-name-link-rule:hover {
+	text-decoration: underline !important;
+}
