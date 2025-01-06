@@ -184,7 +184,11 @@
 
 			<div class="container mt-5">
 				<div class="card-header mb-4 card-title-workflow">
-					<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#logs-content" aria-expanded="true" aria-controls="logs-content">
+					<button class="minus-workflow-logs toggle-button btn btn-outline-secondary btn-sm float-end" 
+							data-bs-toggle="collapse" 
+							data-bs-target="#logs-content" 
+							aria-expanded="true" 
+							aria-controls="logs-content">
 						<i class="fa fa-minus"></i>
 					</button>
 					{{ 'view_workflow.logs'|trans | upper }}
@@ -207,7 +211,7 @@
 								<th>{{ 'view_workflow.action_type'|trans }}</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody class="workflow-logs-collapse-body">
 							{% for log in pager.currentPageResults %}
 								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
 									<td class="ctr">{{ log.id }}</td>
