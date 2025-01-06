@@ -35,9 +35,11 @@
 					<div class="col-md-6">
 						{{ form_row(form.order) }}
 					</div>
-					<div class="col-md-6">
-						{{ form_row(form.multipleRuns) }}
-					</div>
+					{% if form.multipleRuns is defined %}
+						<div class="col-md-6">
+							{{ form_row(form.multipleRuns) }}
+						</div>
+					{% endif %}
 					<div class="col-md-6">
 						{{ form_row(form.status) }}
 					</div>
