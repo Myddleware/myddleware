@@ -90,7 +90,7 @@
 				{# LIST ACTION #}
 				<div class="container mt-5">
 					<div class="card-header mb-4 card-title-workflow">
-						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#actions-content" aria-expanded="true" aria-controls="actions-content">
+						<button class="minus-workflow-actions toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#actions-content" aria-expanded="true" aria-controls="actions-content">
 							<i class="fa fa-minus"></i>
 						</button>
 						{{ 'view_workflow.actions_list'| trans | upper }}
@@ -111,7 +111,7 @@
 
 								</tr>
 							</thead>
-							<tbody>
+							<tbody class="workflow-actions-collapse-body">
 								{% for action in workflow.getWorkflowActions %}
 									<tr>
 										<td>
