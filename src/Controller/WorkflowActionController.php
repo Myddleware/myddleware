@@ -725,7 +725,7 @@ class WorkflowActionController extends AbstractController
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
-					// 'multipleRuns' => $workflowAction->getMultipleRuns(),
+                    'multipleRuns' => $workflowAction->getMultipleRuns(),
                     'rerun' => $arguments['rerun'] ?? 0
                     // Add other WorkflowAction fields here as needed
                 ];
