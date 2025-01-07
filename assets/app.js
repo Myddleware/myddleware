@@ -53,6 +53,7 @@ if (window.location.href.includes('workflowAction') || window.location.href.incl
 if (window.location.href.includes('workflow/show')) {
     require('./js/workflow-actions-collapse.js')
     require('./js/workflow-logs-collapse.js')
+    require('./js/workflow-toggle-detail.js')
 }
 
 
