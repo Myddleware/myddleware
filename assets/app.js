@@ -56,6 +56,10 @@ if (window.location.href.includes('workflow/show')) {
     require('./js/workflow-toggle-detail.js')
 }
 
+if (window.location.href.includes('workflow/list')) {
+    require('./js/workflow-toggle-list.js')
+}
+
 
 if (window.location.href.includes('rule/panel') || window.location.href.includes('premium/list')) {
     require('./js/home.js')
