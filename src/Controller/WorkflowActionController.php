@@ -198,27 +198,36 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return new JsonResponse(['error' => 'Premium required'], 403);
         }
 
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-            $workflow = $workflowResult[0];
-
-
-            if ($workflow) {
+            
+            if (!empty($workflowResult)) {
+                $workflow = $workflowResult[0];
                 $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow Action updated successfully');
-            } else {
-                $this->addFlash('error', 'Workflow Action not found');
-            }
-
-            return $this->redirectToRoute('workflow_list');
+                
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Workflow Action updated successfully',
+                    'active' => $workflow->getActive()
+                ]);
+            } 
+            
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Workflow Action not found'
+            ], 404);
+            
         } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
