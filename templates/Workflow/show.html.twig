@@ -286,4 +286,10 @@
 						<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
 					{% endblock js %}
 
+					{% block js_workflow_toggle %}
+						<script type="text/javascript">
+							var pathWorkflowtoggle = "{{ path('workflow_toggle', {'id': workflow.id}) }}";
+						</script>
+					{% endblock js_workflow_toggle %}
+
 				{% endblock %}
