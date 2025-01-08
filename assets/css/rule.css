@@ -684,15 +684,15 @@ opacity: 0%;
         linear-gradient(currentColor, currentColor) 
         0 100% 
         no-repeat;
-    background-size: 0% 1px;
+    background-size: 0% 2px;
     transition: background-size 0.2s;
-    padding-bottom: 1px;  /* Give space for the underline */
+    padding-bottom: 2px;
 }
 
 .link-fit-workflow-name:hover,
 .link-fit-rule-name:hover {
     text-decoration: none;
-    background-size: 100% 1px;
+    background-size: 100% 2px;
 }
 
 /* Remove any previous hover styles */
