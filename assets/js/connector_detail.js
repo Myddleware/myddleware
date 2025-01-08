@@ -49,7 +49,7 @@ $(function () {
 
                         if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
                             const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
-                            textValue = eval(matchedKeyword);
+                            textValue = window[matchedKeyword];
                         }
 						if (dataParam !== undefined) {
 							datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
