@@ -55,6 +55,16 @@ class WorkflowType extends AbstractType
                     'class' => 'form-control',
                     ],
             ]);
+            $builder->add('active', ChoiceType::class, [
+                'label' => 'Active',
+                'choices' => [
+                    'Yes' => 1,
+                    'No' => 0,
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                ],
+            ]);
             $builder->add('order', IntegerType::class, [
                 'label' => 'Order',
                 'constraints' => [
