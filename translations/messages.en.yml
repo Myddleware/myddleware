@@ -609,6 +609,8 @@ view_workflow_action:
     create_new_workflow_action: Create a new workflow action
     cancel_edit: Cancel edit
     back: Back to the workflow
+    save: Save
+    cancel: Cancel
 view_account:
     title: My account
     user_info: My information
