@@ -675,6 +675,35 @@ opacity: 0%;
 
 .link-fit-workflow-name,
 .link-fit-rule-name {
-	display: block;
-	min-width: max-content;
+    display: inline;
+    width: fit-content;
+    white-space: normal;
+    word-break: break-word;
+    text-decoration: none;
+    background: 
+        linear-gradient(currentColor, currentColor) 
+        0 100% 
+        no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.2s;
+    padding-bottom: 1px;  /* Give space for the underline */
+}
+
+.link-fit-workflow-name:hover,
+.link-fit-rule-name:hover {
+    text-decoration: none;
+    background-size: 100% 1px;
+}
+
+/* Remove any previous hover styles */
+.link-fit-workflow-name:hover::after,
+.link-fit-rule-name:hover::after {
+    display: none;
+}
+
+/* Add specific styles for the table cell to handle wrapping */
+td .link-fit-workflow-name,
+td .link-fit-rule-name {
+    display: inline;
+    line-height: 1.5;  /* Adjust line spacing */
 }
