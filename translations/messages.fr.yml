@@ -589,6 +589,7 @@ view_workflow:
     create_by: Créé par
     cancel_edit: Annuler l'édition
     save: Sauvegarder
+    cancel: Annuler
 view_workflow_action:
     title2: Action du workflow
     title: Détail de l'action du workflow
