@@ -40,11 +40,11 @@
 		id="flux" class="pt-4">
 		{# ------------- FLUX ------------- #}
 		<div>
-			{# {% for message in app.flashes('success_unlock') %}
+			{% for message in app.flashes('success_unlock') %}
 							<div class="alert alert-success">
 								{{ message }}
 							</div>
-						{% endfor %} #}
+						{% endfor %}
 			<div class="block-btn-infos d-flex justify-content-around">
 				{% if ctm_btn %}
 					{% for btn in ctm_btn %}
