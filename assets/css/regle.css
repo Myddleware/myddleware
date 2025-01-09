@@ -423,12 +423,10 @@ td > a {
 	align-items: flex-start !important;
 }
 
-#limit {
-	margin-top: 29px;
-}
-
-#description {
-	margin-top: 77px;
+#ruleparams {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 }
 
 .workflow-name-link-rule {
