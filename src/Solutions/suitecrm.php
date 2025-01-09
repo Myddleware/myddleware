@@ -935,6 +935,7 @@ class suitecrm extends solution
     // Get the list of field (name and id) for each custom relationship
     protected function getCustomRelationshipListFields($module): array
     {
+		$result = array();
         $get_module_fields_parameters = [
             'session' => $this->session,
             'module_name' => $module,
