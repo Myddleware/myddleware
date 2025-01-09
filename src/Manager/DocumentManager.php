@@ -228,7 +228,12 @@ class DocumentManager
 						!empty($this->jobLock)
 					AND $this->jobLock != $this->jobId
 				) {
-					throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
+					// First try to unlock the document if it's locked by another task
+					$unlockResult = $this->unsetLock(true);
+					// If unlock failed, then throw the exception
+					if (!$unlockResult) {
+						throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
+					}
 				// No setlock if $this->jobLock == $this->jobId
 				} elseif (!empty($this->jobLock)) {
 					$this->setLock();
@@ -588,6 +593,7 @@ class DocumentManager
 				if (!empty($this->jobId)) {
 					throw new \Exception('This document is locked by the task '.$documentData['job_lock'].' and cannot be unclocked by the task '.$this->jobId.'. ');
 				}
+				return false;
 			}
         } catch (\Exception $e) {
 			$this->message .= 'Failed to unlock the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
