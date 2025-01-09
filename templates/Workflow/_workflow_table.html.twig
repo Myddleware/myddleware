@@ -24,9 +24,8 @@
 						</td>
 						<td style="word-break: keep-all; overflow-wrap: break-word; max-width: 150px;">
 							{% if workflow.description|length > 60 %}
-								{{ workflow.description|slice(0, 30) ~ '...' }}
 								<div id="param-short-{{ loop.index }}">
-									{{ workflow.description|slice(0, 100) ~ '...' }}
+									{{ workflow.description|slice(0, 60) ~ '...' }}
 									<button onclick="document.getElementById('param-short-{{ loop.index }}').style.display='none';document.getElementById('param-full-{{ loop.index }}').style.display='block';">Show more</button>
 								</div>
 								<div id="param-full-{{ loop.index }}" style="display: none;">

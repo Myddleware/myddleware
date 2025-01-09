@@ -422,3 +422,17 @@ td > a {
 	margin-top: 3em;
 	align-items: flex-start !important;
 }
+
+#ruleparams {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.workflow-name-link-rule {
+	color: #0a58ca !important;
+}
+
+.workflow-name-link-rule:hover {
+	text-decoration: underline !important;
+}

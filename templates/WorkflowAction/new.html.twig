@@ -10,9 +10,14 @@
 {% block body %}
 	<div class="container mt-5">
 		{{ form_start(form) }}
+		<div class="text-center mb-4">
+			<button type="submit" name="submit" class="btn btn-primary m-2">{{ 'view_workflow_action.save'|trans }}</button>
+			<a href="{{ path('workflow_list') }}" class="btn btn-warning m-2">{{ 'view_workflow_action.cancel'|trans }}</a>
+		</div>
+
 		<div class="card mb-3 pb-3">
 			<div class="card-header">
-				{{ 'view_workflow.edit'|trans }}
+				{{ 'view_workflow_action.edit'|trans }}
 			</div>
 			<div class="card-body">
 				<div class="row mb-4">
@@ -35,9 +40,11 @@
 					<div class="col-md-6">
 						{{ form_row(form.order) }}
 					</div>
-					<div class="col-md-6">
-						{{ form_row(form.multipleRuns) }}
-					</div>
+					{% if form.multipleRuns is defined %}
+						<div class="col-md-6">
+							{{ form_row(form.multipleRuns) }}
+						</div>
+					{% endif %}
 					<div class="col-md-6">
 						{{ form_row(form.status) }}
 					</div>

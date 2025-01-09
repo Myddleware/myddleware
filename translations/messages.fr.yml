@@ -587,6 +587,9 @@ view_workflow:
     action_type: Type d'action
     add_action: Ajouter une action
     create_by: Créé par
+    cancel_edit: Annuler l'édition
+    save: Sauvegarder
+    cancel: Annuler
 view_workflow_action:
     title2: Action du workflow
     title: Détail de l'action du workflow
@@ -601,6 +604,11 @@ view_workflow_action:
     multiple_runs: Multiple Runs
     multiple_runs_yes: Oui
     multiple_runs_no: Non
+    create_new_workflow_action: Créer une nouvelle action de workflow
+    cancel_edit: Annuler l'édition
+    back: Retour au workflow
+    save: Sauvegarder
+    cancel: Annuler
 view_account:
     title: Mon compte
     user_info: Mes informations

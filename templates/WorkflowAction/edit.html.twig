@@ -9,10 +9,40 @@
 {% endblock titlesm %}
 {% block body %}
 	<div class="container mt-5">
+		<div class="text-center m-5 d-flex justify-content-between align-items-center">
+			<div class="left-buttons">
+				<a href="{{ path('workflow_show', {'id': workflowAction.Workflow.id}) }}" class="btn btn-outline-primary m-2">
+					{{ 'view_workflow_action.back'| trans }}
+				</a>
+			</div>
+
+			<div class="center-buttons">
+				<a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflowAction.Workflow.id}) }}" class="btn btn-outline-success m-2">
+					{{ 'Create new workflow action'| trans }}
+				</a>
+			</div>
+			
+			<div class="right-buttons">
+				<button type="submit" class="btn btn-primary m-2">
+					{{ 'Save'|trans }}
+				</button>
+
+				<a href="{{ path('workflow_action_show', {'id': workflowAction.id}) }}" class="btn btn-warning m-2">
+					{{ 'view_workflow_action.cancel_edit'| trans }}
+				</a>
+				
+				<a href="{{ path('workflow_action_delete', {'id': workflowAction.id}) }}" 
+				   onclick="return confirm('Are you sure you want to delete this workflow action?');" 
+				   class="btn btn-outline-danger m-2">
+					{{ 'view_workflow_action.delete'| trans }}
+				</a>
+			</div>
+		</div>
+
 		{{ form_start(form) }}
 		<div class="card mb-3 pb-3">
 			<div class="card-header">
-				{{ 'view_workflow.edit'|trans }}
+				{{ 'view_workflow_action.edit'|trans }}
 			</div>
 			<div class="card-body">
 				<div class="row mb-4">
@@ -35,9 +65,11 @@
 					<div class="col-md-6">
 						{{ form_row(form.order) }}
 					</div>
-					<div class="col-md-6">
-						{{ form_row(form.multipleRuns) }}
-					</div>
+					{% if form.multipleRuns is defined %}
+						<div class="col-md-6">
+							{{ form_row(form.multipleRuns) }}
+						</div>
+					{% endif %}
 					<div class="col-md-6">
 						{{ form_row(form.status) }}
 					</div>

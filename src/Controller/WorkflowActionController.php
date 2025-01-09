@@ -198,27 +198,36 @@ class WorkflowActionController extends AbstractController
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return new JsonResponse(['error' => 'Premium required'], 403);
         }
 
         try {
             $em = $this->getDoctrine()->getManager();
             $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-            $workflow = $workflowResult[0];
-
-
-            if ($workflow) {
+            
+            if (!empty($workflowResult)) {
+                $workflow = $workflowResult[0];
                 $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow Action updated successfully');
-            } else {
-                $this->addFlash('error', 'Workflow Action not found');
-            }
-
-            return $this->redirectToRoute('workflow_list');
+                
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Workflow Action updated successfully',
+                    'active' => $workflow->getActive()
+                ]);
+            } 
+            
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Workflow Action not found'
+            ], 404);
+            
         } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -350,6 +359,7 @@ class WorkflowActionController extends AbstractController
                     'rerun' => null,
                     'targetFields' => null,
                     'targetFieldValues' => null,
+                    'multipleRuns' => null,
                     // Add other WorkflowAction fields here as needed
                 ];
 
@@ -446,6 +456,14 @@ class WorkflowActionController extends AbstractController
                             'No' => 0,
                         ],
                     ])
+                    ->add('multipleRuns', ChoiceType::class, [
+                        'label' => 'Multiple Runs',
+                        'choices' => [
+                            'Yes' => 1,
+                            'No' => 0,
+                        ],
+                        'required' => false,
+                    ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
                     ->getForm();
                 $form->handleRequest($request);
@@ -472,8 +490,8 @@ class WorkflowActionController extends AbstractController
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-					// $multipleRuns = $form->get('multipleRuns')->getData();
-					// $workflowAction->setMultipleRuns($multipleRuns);
+                    $multipleRuns = $form->get('multipleRuns')->getData();
+                    $workflowAction->setMultipleRuns($multipleRuns ?? 0);
 
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
@@ -716,7 +734,7 @@ class WorkflowActionController extends AbstractController
                     'to' => $arguments['to'] ?? null,
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
-					// 'multipleRuns' => $workflowAction->getMultipleRuns(),
+                    'multipleRuns' => $workflowAction->getMultipleRuns(),
                     'rerun' => $arguments['rerun'] ?? 0
                     // Add other WorkflowAction fields here as needed
                 ];
@@ -814,20 +832,19 @@ class WorkflowActionController extends AbstractController
                             'No' => 0,
                         ],
                     ])
-					// ->add('multipleRuns', ChoiceType::class, [
-						// 'label' => 'Multiple Runs',
-						// 'choices' => [
-							// 'Yes' => 1,
-							// 'No' => 0,
-						// ],
-					// ])
+                    ->add('multipleRuns', ChoiceType::class, [
+                        'label' => 'Multiple Runs',
+                        'choices' => [
+                            'Yes' => 1,
+                            'No' => 0,
+                        ],
+                        'required' => false,
+                    ])
                     ->add('submit', SubmitType::class, ['label' => 'Save'])
                     ->getForm();
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
-
-
 
                     $workflowAction->setModifiedBy($this->getUser());
 
@@ -849,8 +866,8 @@ class WorkflowActionController extends AbstractController
                     $active = $form->get('active')->getData();
                     $workflowAction->setActive($active);
 
-					// $multipleRuns = $form->get('multipleRuns')->getData();
-					// $workflowAction->setMultipleRuns($multipleRuns);
+                    $multipleRuns = $form->get('multipleRuns')->getData();
+                    $workflowAction->setMultipleRuns($multipleRuns ?? 0);
 
                     // get the to, the subject, and the message using getdata
                     $arguments = [];
@@ -941,6 +958,7 @@ class WorkflowActionController extends AbstractController
                     [
                         'form' => $form->createView(),
                         'targetFieldsData' => $targetFieldsData,
+                        'workflowAction' => $workflowAction,
                     ]
                 );
             } else {

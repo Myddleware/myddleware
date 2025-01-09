@@ -38,11 +38,13 @@
 
 
 {% for type, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ type }}" role="alert">
-            {{ message }}
-        </div>
-    {% endfor %}
+    {% if type != 'success_unlock' %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endfor %}
 
 <!-- removeFilterFilter.html.twig -->
