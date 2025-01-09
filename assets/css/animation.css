@@ -478,6 +478,7 @@ h2 { margin-top: 50px;}
 
 #workflow_name, #rule_name {
     height: 35px;
+    min-height: 35px !important;
 }
 
 #rulesearchbarcontainer {
