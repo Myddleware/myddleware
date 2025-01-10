@@ -62,6 +62,7 @@ if (window.location.href.includes('workflowAction/showAction')) {
 
 if (window.location.href.includes('workflow/list')) {
     require('./js/workflow-toggle-list.js')
+    require('./js/workflowsearchworkflowname.js')
 }
 
 
