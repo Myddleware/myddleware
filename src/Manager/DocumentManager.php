@@ -228,12 +228,7 @@ class DocumentManager
 						!empty($this->jobLock)
 					AND $this->jobLock != $this->jobId
 				) {
-					// First try to unlock the document if it's locked by another task
-					$unlockResult = $this->unsetLock(true);
-					// If unlock failed, then throw the exception
-					if (!$unlockResult) {
 						throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
-					}
 				// No setlock if $this->jobLock == $this->jobId
 				} elseif (!empty($this->jobLock)) {
 					$this->setLock();
