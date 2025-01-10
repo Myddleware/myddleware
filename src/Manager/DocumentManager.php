@@ -590,9 +590,7 @@ class DocumentManager
 				return true;
 			} else {
 				// Only throw exception if jobId exists
-				if (!empty($this->jobId)) {
 					throw new \Exception('This document is locked by the task '.$documentData['job_lock'].' and cannot be unclocked by the task '.$this->jobId.'. ');
-				}
 				return false;
 			}
         } catch (\Exception $e) {
