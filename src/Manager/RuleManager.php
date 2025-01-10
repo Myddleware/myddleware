@@ -1245,8 +1245,6 @@ class RuleManager
         if (empty($this->jobId)) {
             if (empty($message)) {
                 $session->set('success', ['Data transfer has been successfully unlocked.']);
-            } elseif ($this->documentManager->getMessage() === 'Document unlocked. ') {
-                $session->set('success', [$this->documentManager->getMessage()]);
             } else {
                 $session->set('error', [$this->documentManager->getMessage()]);
             }
