@@ -45,7 +45,7 @@
 		<div id="ruleparams" class="row">
 			{% if params %}
 				{% for c, p in params %}
-					<div class="col-md-6 mb-3">
+					<div class="col-md-12 mb-3">
 						<p>{{ p.label|trans }}:</p>
 						{% if p.type != 'option' %}
 							<input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" />
