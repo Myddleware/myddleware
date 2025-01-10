@@ -1256,17 +1256,23 @@ class RuleManager
      */
     protected function rerunWorkflowDocument($id_document)
     {
-		$param['id_doc_myddleware'] = $id_document;
-		$param['jobId'] = $this->jobId;
-		$param['api'] = $this->api;
-		$param['ruleWorkflows'] = $this->ruleWorkflows;
-		// Set the param values and clear all document attributes
-		$this->documentManager->setParam($param, true);
-		// Set the message that could be used in workflow
-		if (!empty($param['error'])) {
-			$this->documentManager->setMessage($param['error']);
-		}
-		$this->documentManager->runWorkflow(true);
+		try {
+			$param['id_doc_myddleware'] = $id_document;
+			$param['jobId'] = $this->jobId;
+			$param['api'] = $this->api;
+			$param['ruleWorkflows'] = $this->ruleWorkflows;
+			// Set the param values and clear all document attributes
+			$this->documentManager->setParam($param, true);
+			// Set the message that could be used in workflow
+			if (!empty($param['error'])) {
+				$this->documentManager->setMessage($param['error']);
+			}
+			$this->documentManager->runWorkflow(true);
+			$this->documentManager->updateWorkflowError(0);
+		} catch (\Exception $e) {
+			$this->logger->error('Failed to rerun the workflow : '.$e->getMessage());
+			$this->documentManager->generateDocLog('E','Failed to rerun the workflow : '.$e->getMessage());
+		} 
     }
 
     /**

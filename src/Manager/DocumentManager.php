@@ -870,7 +870,7 @@ class DocumentManager
             return true;
         } catch (\Exception $e) {
             // Reference document id is used to show which document is blocking the current document in Myddleware
-            $this->docIdRefError = ((is_array($result) and !empty($result['id'])) ? $result['id'] : '');
+            $this->docIdRefError = ((!empty($result) and is_array($result) and !empty($result['id'])) ? $result['id'] : '');
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
@@ -2257,6 +2257,7 @@ class DocumentManager
     public function updateStatus($new_status, $workflow = false)
     {
         try {
+			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
             // On ajoute un contôle dans le cas on voudrait changer le statut
             $new_status = $this->beforeStatusChange($new_status);
             $now = gmdate('Y-m-d H:i:s');
@@ -2316,8 +2317,10 @@ class DocumentManager
 					throw new \Exception('Status has been changed but document has not been unlocked. ');
 				}
 			}
+			$this->connection->commit(); // -- COMMIT TRANSACTION
 			return true;
         } catch (\Exception $e) {
+			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->logger->error($this->id.' - '.$this->message);
@@ -2458,11 +2461,40 @@ class DocumentManager
             $this->typeError = 'E';
             $this->logger->error($this->id.' - '.$this->message);
             $this->createDocLog();
-
             return false;
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateWorkflowError($workflowError)
+    {
+        try {
+            $now = gmdate('Y-m-d H:i:s');
+            $query = '	UPDATE document 
+								SET 
+									date_modified = :now,
+									workflow_error = :workflowError
+								WHERE
+									id = :id
+								';
+            // Suppression de la dernière virgule
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindValue(':now', $now);
+            $stmt->bindValue(':workflowError', $workflowError);
+            $stmt->bindValue(':id', $this->id);
+            $result = $stmt->executeQuery();
+            $this->message .= 'Workflow error set to '.$workflowError;
+            $this->createDocLog();
+        } catch (\Exception $e) {
+            $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->typeError = 'E';
+            $this->logger->error($this->id.' - '.$this->message);
+            $this->createDocLog();
+        }
+    }
+	
     // Function to manually edit the data inside a Myddleware Document
     public function updateDocumentData(string $docId, array $newValues, string $dataType, bool $refreshData = false)
     {
@@ -2721,6 +2753,7 @@ class DocumentManager
 	
 	// Premium method
 	public function runWorkflow($rerun=false) {
+		return true;
 	}	
 	
 	// Check the document before an action is executed
