@@ -9,6 +9,7 @@
 {% endblock titlesm %}
 {% block body %}
 	<div class="container mt-5">
+		{{ form_start(form) }}
 		<div class="text-center m-5 d-flex justify-content-between align-items-center">
 			<div class="left-buttons">
 				<a href="{{ path('workflow_show', {'id': workflowAction.Workflow.id}) }}" class="btn btn-outline-primary m-2">
@@ -23,7 +24,7 @@
 			</div>
 			
 			<div class="right-buttons">
-				<button type="submit" class="btn btn-primary m-2">
+				<button type="submit" name="submit" class="btn btn-primary m-2">
 					{{ 'Save'|trans }}
 				</button>
 
@@ -39,7 +40,6 @@
 			</div>
 		</div>
 
-		{{ form_start(form) }}
 		<div class="card mb-3 pb-3">
 			<div class="card-header">
 				{{ 'view_workflow_action.edit'|trans }}
@@ -121,11 +121,12 @@
 			<div class="text-center">
 				{{ form_row(form.submit) }}
 			</div>
-			{{ form_end(form) }}
 		</div>
+		{{ form_end(form) }}
 
 		<script type="text/javascript">
 			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
 			var targetFieldsData = {{ targetFieldsData|json_encode()|raw }};
 		</script>
-	{% endblock %}
+	</div>
+{% endblock %}
