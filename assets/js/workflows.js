@@ -4,8 +4,9 @@ $(document).ready(function () {
   let isEditModeValue = false; 
 
   $('fieldset:has(#form_targetFieldValues)').hide();
+  var selectedAction = $("#form_action").val();
   
-  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0) {
+  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
     targetFieldsData.forEach(function (fieldData) {
       addNewTargetFieldWithValue(fieldData.field, fieldData.value);
     });
