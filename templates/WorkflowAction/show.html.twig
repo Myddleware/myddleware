@@ -78,18 +78,6 @@
 						</div>
 						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
-								{# we put the multiple runs here	 #}
-								<strong>{{ 'view_workflow_action.multiple_runs'|trans|upper }}</strong>
-								<div>
-									{% if workflow.multipleRuns == 1 %}
-										{{ 'view_workflow_action.multiple_runs_yes'|trans }}
-									{% else %}
-										{{ 'view_workflow_action.multiple_runs_no'|trans }}
-									{% endif %}
-								</div>
-							</div>
-						</div>
-							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.arguments'|trans|upper }}</strong>
 								<div>
 									{% if workflow.arguments is iterable %}
@@ -114,6 +102,18 @@
 									{% endif %}
 								</div>
 							</div>
+							<div class="workflow-col mb-2">
+								{# we put the multiple runs here	 #}
+								<strong>{{ 'view_workflow_action.multiple_runs'|trans|upper }}</strong>
+								<div>
+									{% if workflow.multipleRuns == 1 %}
+										{{ 'view_workflow_action.multiple_runs_yes'|trans }}
+									{% else %}
+										{{ 'view_workflow_action.multiple_runs_no'|trans }}
+									{% endif %}
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			{% endif %}
