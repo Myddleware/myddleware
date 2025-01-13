@@ -461,7 +461,8 @@ view_flux:
     nbHistoryDocuments: Historique des documents
     nbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
-    direct_link: Lien direct  
+    direct_link: Lien direct
+    unlocked_successfully: Document déverrouillé avec succès
     btn:
         reload: Relancer le document
         cancel: Annuler le document 
