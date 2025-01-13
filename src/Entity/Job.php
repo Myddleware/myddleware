@@ -112,12 +112,6 @@ class Job
      */
     private $workflowLogs;
 	
-	/**
-     * @ORM\ManyToOne(targetEntity="Shapecode\Bundle\CronBundle\Entity\CronJob", inversedBy="jobs")
-     * @ORM\JoinColumn(name="cron_job_id", referencedColumnName="id", nullable=true)
-     */
-    private CronJob $cronJob;
-	
 
     public function __construct()
     {
@@ -328,17 +322,5 @@ class Job
         }
         return $this;
     }
-	
-	public function setCronJob($cronJob): self
-    {
-		if ($cronJob != null) {
-			$this->cronJob = $cronJob;
-		}
-        return $this;
-    }
 
-    public function getCronJob(): ?bool
-    {
-        return $this->cronJob;
-    }
 }

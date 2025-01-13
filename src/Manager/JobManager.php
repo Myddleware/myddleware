@@ -45,7 +45,6 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use PDO;
-use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use App\Entity\Job;
 
 class JobManager
@@ -63,7 +62,6 @@ class JobManager
     protected $ruleId;
     protected $logData;
     protected $start;
-    protected $cronJob;
     protected $paramJob;
     protected $manual;
     protected int $api = 0; 	// Specify if the class is called by the API
@@ -330,28 +328,16 @@ class JobManager
 			$this->paramJob = $paramJob;
 			$this->id = uniqid('', true);
 			$this->start = microtime(true);
-			if ($this->toolsManager->isPremium()) {
-				// Search if a crontab action has the same name than the current task. If yes, we add its id 
-				$searchName = '%myddleware:'.trim($paramJob).'%';
-				$this->cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
-				   ->where('c.enable = :enable')
-				   ->andWhere('c.command LIKE :command')
-				   ->setParameter('enable', '1')
-				   ->setParameter('command', $searchName)
-				   ->setMaxResults(1)
-				   ->getQuery()
-				   ->getOneOrNullResult();
-			} else {
-				// Do not run several job in the same time for non premium version
-				$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-				$stmt = $this->connection->prepare($sqlJobOpen);
-				$result = $stmt->executeQuery();
-				$job = $result->fetchAssociative(); // 1 row
-				// Error if one job is still running
-				if (!empty($job)) {
-					$this->message .= $this->toolsManager->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
-					return ['success' => false, 'message' => $this->message];
-				}
+			
+			// Do not run several job in the same time for non premium version
+			$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+			$stmt = $this->connection->prepare($sqlJobOpen);
+			$result = $stmt->executeQuery();
+			$job = $result->fetchAssociative(); // 1 row
+			// Error if one job is still running
+			if (!empty($job)) {
+				$this->message .= $this->toolsManager->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+				return ['success' => false, 'message' => $this->message];
 			}
 
 			// Create Job
@@ -1499,7 +1485,6 @@ class JobManager
 			$job->setBegin(new DateTime());
 			$job->setManual($this->manual);
 			$job->setApi($this->api);
-			$job->setCronJob($this->cronJob);
 			$this->entityManager->persist($job);
 			$this->entityManager->flush();
         } catch (Exception $e) {
@@ -1526,8 +1511,7 @@ class JobManager
 				job.begin, 
 				TIMESTAMPDIFF(SECOND,  job.begin, NOW()) diff_job,
 				MAX(log.created) log_created,
-				TIMESTAMPDIFF(SECOND, MAX(log.created), NOW()) diff_log,
-				job.cron_job_id
+				TIMESTAMPDIFF(SECOND, MAX(log.created), NOW()) diff_log
 			FROM job
 				LEFT OUTER JOIN log
 					ON job.id = log.job_id
@@ -1547,22 +1531,6 @@ class JobManager
                 $jobManagerChekJob->setId($job['id']);
                 $jobManagerChekJob->closeJob();   
 				$this->setMessage('Task '.$job['id'].' successfully closed. ');
-				// Check running instances on crontab
-				// Get the running instances of the closed job from the crontab if exist
-				if (!empty($job['cron_job_id'])) {
-					// Get the cronjob
-					$cronJob = $this->entityManager->getRepository(CronJob::class)->createQueryBuilder('c')
-								   ->where('c.id = :id')
-								   ->setParameter('id', $job['cron_job_id'])
-								   ->getQuery()
-								   ->getOneOrNullResult();
-					// Decrease the number of running instances if there is at least one running instance
-					if ($cronJob->getRunningInstances() > 0) {
-						$cronJob->decreaseRunningInstances();
-						$this->entityManager->persist($cronJob);
-						$this->entityManager->flush();
-					}
-				}
             }
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

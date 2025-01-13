@@ -33,14 +33,14 @@ class LoadCronJobData implements FixtureInterface
 {
     private $manager;
     protected array $cronJobData = [
-        ['period' => '*/5 * * * *', 'command' => 'myddleware:synchro ALL', 'enable' => 1, 'description' => 'Run every active rules'],
-        ['period' => '0 * * * *', 'command' => 'myddleware:rerunerror 100 5', 'enable' => 1, 'description' => 'Reload error : 1st level'],
-        ['period' => '0 0 * * *', 'command' => 'myddleware:rerunerror 100 10', 'enable' => 1, 'description' => 'Reload error : 2nd level'],
-        ['period' => '0 * * * *', 'command' => 'myddleware:notification alert', 'enable' => 0, 'description' => 'Alert when a task is blocked'],
-        ['period' => '0 0 * * *', 'command' => 'myddleware:notification ALL', 'enable' => 0, 'description' => 'Send notification every day'],
-        ['period' => '0 0 * * *', 'command' => 'myddleware:cleardata', 'enable' => 0, 'description' => 'Clean data'],
-        ['period' => '0 0 1 * *', 'command' => 'myddleware:prunedatabase', 'enable' => 0, 'description' => 'Delete all rules and document with the flag deleted = 1'],
-        ['period' => '0 0 * * *', 'command' => 'myddleware:checkjob', 'enable' => 1, 'description' => 'Check if a job is not closed after 15 minutes of inactivity.'],
+        ['period' => '*/5 * * * *', 'command' => 'myddleware:synchro ALL', 'enable' => 1, 'description' => 'Run every active rules', 'maxInstances' => 1000],
+        ['period' => '0 * * * *', 'command' => 'myddleware:rerunerror 100 5', 'enable' => 1, 'description' => 'Reload error : 1st level', 'maxInstances' => 1000],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:rerunerror 100 10', 'enable' => 1, 'description' => 'Reload error : 2nd level', 'maxInstances' => 1000],
+        ['period' => '0 * * * *', 'command' => 'myddleware:notification alert', 'enable' => 0, 'description' => 'Alert when a task is blocked', 'maxInstances' => 1000],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:notification ALL', 'enable' => 0, 'description' => 'Send notification every day', 'maxInstances' => 1000],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:cleardata', 'enable' => 0, 'description' => 'Clean data', 'maxInstances' => 1000],
+        ['period' => '0 0 1 * *', 'command' => 'myddleware:prunedatabase', 'enable' => 0, 'description' => 'Delete all rules and document with the flag deleted = 1', 'maxInstances' => 1000],
+        ['period' => '0 0 * * *', 'command' => 'myddleware:checkjob', 'enable' => 1, 'description' => 'Check if a job is not closed after 15 minutes of inactivity.', 'maxInstances' => 1000],
     ];
 
     public function load(ObjectManager $manager)
@@ -59,6 +59,7 @@ class LoadCronJobData implements FixtureInterface
 				$crontab = CronJob::create($cronJobData['command'], $cronJobData['period']);
 				$crontab->setEnable($cronJobData['enable']);
 				$crontab->setDescription($cronJobData['description']);
+				$crontab->setMaxInstances($cronJobData['maxInstances']);
 				$this->manager->persist($crontab);
 			}
 		}
