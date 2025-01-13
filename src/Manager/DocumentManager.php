@@ -111,6 +111,7 @@ class DocumentManager
         'Error_transformed' => 'Error',
         'Error_checking' => 'Error',
         'Error_sending' => 'Error',
+        'Error_expected' => 'Error',
         'Not_found' => 'Error',
     ];
     private array $notSentFields = [];
