@@ -1176,12 +1176,8 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         try{
             $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
 
-            // add traduction
-            $this->addFlash('success_unlock', $this->translator->trans('view_flux.unlocked_successfully'));
             return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
         } catch (Exception $e) {
-            // add traduction
-            $this->addFlash('error_unlock', $this->translator->trans('view_flux.error_unlock'));
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
     }
