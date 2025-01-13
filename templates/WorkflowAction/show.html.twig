@@ -48,10 +48,6 @@
 								<div>{{ workflow.name }}</div>
 							</div>
 							<div class="workflow-col mb-2">
-								<strong>{{ 'view_workflow.description'|trans|upper }}</strong>
-								<div>{{ workflow.description }}</div>
-							</div>
-							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow_action.workflow'|trans|upper }}</strong>
 								<div>
 									<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="help-link all-link">{{ workflow.workflow.name }}</a>
@@ -60,12 +56,12 @@
 						</div>
 						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
-								<strong>{{ 'view_workflow_action.action'|trans|upper }}</strong>
-								<div>{{ workflow.action }}</div>
+								<strong>{{ 'view_workflow.description'|trans|upper }}</strong>
+								<div>{{ workflow.description }}</div>
 							</div>
 							<div class="workflow-col mb-2">
-								<strong>{{ 'view_workflow_action.order'|trans|upper }}</strong>
-								<div>{{ workflow.order }}</div>
+								<strong>{{ 'view_workflow_action.action'|trans|upper }}</strong>
+								<div>{{ workflow.action }}</div>
 							</div>
 						</div>
 						<div class="workflow-row mb-2">
@@ -75,6 +71,12 @@
 									<input class="workflow_status form-check-input workflow-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflowAction" {{ workflow.active ? 'checked' : '' }}>
 								</div>
 							</div>
+							<div class="workflow-col mb-2">
+								<strong>{{ 'view_workflow_action.order'|trans|upper }}</strong>
+								<div>{{ workflow.order }}</div>
+							</div>
+						</div>
+						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
 								{# we put the multiple runs here	 #}
 								<strong>{{ 'view_workflow_action.multiple_runs'|trans|upper }}</strong>
@@ -87,7 +89,7 @@
 								</div>
 							</div>
 						</div>
-													<div class="workflow-col mb-2">
+							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.arguments'|trans|upper }}</strong>
 								<div>
 									{% if workflow.arguments is iterable %}
@@ -110,7 +112,6 @@
 									{% else %}
 										{{ workflow.arguments }}
 									{% endif %}
-
 								</div>
 							</div>
 					</div>
