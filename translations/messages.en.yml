@@ -465,6 +465,7 @@ view_flux:
     nbPostDocuments: Post documents    
     direct_link: Direct link    
     comment: Add log
+    unlocked_successfully: Document unlocked successfully
     btn:
         reload: Reload the document
         cancel: Cancel the document 
