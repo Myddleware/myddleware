@@ -1245,7 +1245,10 @@ class RuleManager
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
         // On affiche alors le message directement dans Myddleware
         if (empty($this->jobId)) {
-            if (empty($message)) {
+            if (
+					empty($message)
+				OR $this->documentManager->getTypeError() == 'S'
+			) {
                 $session->set('success', ['Data transfer has been successfully unlocked.']);
             } else {
                 $session->set('error', [$this->documentManager->getMessage()]);

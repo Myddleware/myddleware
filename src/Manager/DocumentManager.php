@@ -498,6 +498,11 @@ class DocumentManager
         $this->typeError = $typeError;
     }
 
+    public function getTypeError()
+    {
+        return $this->typeError;
+    }
+
     public function setRuleId($ruleId)
     {
         $this->ruleId = $ruleId;
