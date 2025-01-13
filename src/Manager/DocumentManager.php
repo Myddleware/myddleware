@@ -71,6 +71,7 @@ class DocumentManager
     protected bool $jobActive = true;
     protected $attempt;
     protected $jobLock;
+    protected $noLock;
     protected $workflowError = false;
     protected $userId;
     protected $status;
@@ -182,6 +183,10 @@ class DocumentManager
 	public function setId($id) {
 		$this->id = $id;
 	}
+	
+	public function setNoLock($noLock) {
+		$this->noLock = $noLock;
+	}
 
 	public function setDocumentType($documentType) {
 		$this->documentType = $documentType;
@@ -224,14 +229,17 @@ class DocumentManager
                 $this->jobLock = $this->document_data['job_lock'];
                 $this->workflowError = $this->document_data['workflow_error'];
 				// A document can be loaded only if there is no lock or if the lock is on the current job.
-                if (
-						!empty($this->jobLock)
-					AND $this->jobLock != $this->jobId
-				) {
-						throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
-				// No setlock if $this->jobLock == $this->jobId
-				} elseif (!empty($this->jobLock)) {
-					$this->setLock();
+				// Don't do this action if the attribut $noLock is true
+                if (!$this->noLock) {
+					if (
+							!empty($this->jobLock)
+						AND $this->jobLock != $this->jobId
+					) {
+							throw new \Exception('This document is locked by the task '.$this->jobLock.'. ');
+					// No setlock if $this->jobLock == $this->jobId
+					} elseif (!empty($this->jobLock)) {
+						$this->setLock();
+					}
 				}
 				
                 // Get source data and create data attribut
@@ -585,7 +593,7 @@ class DocumentManager
 				return true;
 			} else {
 				// Only throw exception if jobId exists
-					throw new \Exception('This document is locked by the task '.$documentData['job_lock'].' and cannot be unclocked by the task '.$this->jobId.'. ');
+				throw new \Exception('This document is locked by the task '.$documentData['job_lock'].' and cannot be unclocked by the task '.$this->jobId.'. ');
 			}
         } catch (\Exception $e) {
 			$this->message .= 'Failed to unlock the document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
