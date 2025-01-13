@@ -1236,7 +1236,7 @@ class RuleManager
         $param['api'] = $this->api;
         // Set the param values and clear all document attributes
 		// We don't lock the document because the action is : unset the current lock on the document
-        $this->documentManager->setNoLOck(true);
+        $this->documentManager->setNoLock(true);
         $this->documentManager->setParam($param, true);
         $this->documentManager->unsetLock(true);
         $session = new Session();
