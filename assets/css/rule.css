@@ -716,8 +716,20 @@ td .link-fit-rule-name {
     /* Add any other styles you want to override */
 }
 
-#rulenamesearchbar .form-floating > #rule_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:focus ~ #rule_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #rule_name_label::after {
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+}
+.form-floating > #workflow_name_label::after,
+.form-floating > .form-control:focus ~ #workflow_name_label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+    /* Add any other styles you want to override */
+}
+
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
     inset: 0px !important;
 }
