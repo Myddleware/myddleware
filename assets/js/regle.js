@@ -1015,24 +1015,30 @@ $.fn.setCursorPosition = function(pos) {
 
   $("#unlockAllFlux").on("click", function () {
     if (confirm(confirm_unlock)) {
-      $.ajax({
-        type: "POST",
-        url: mass_unlock,
-        beforeSend: function () {
-          btn_action_fct();
-        },
-        data: {
-          ids: massFluxTab,
-        },
-        success: function (data) {
-          location.reload();
-        },
-        error: function () {
-          alert("Erreur lors de la communication avec le serveur.");
-        },
-      });
+        $.ajax({
+            type: "POST",
+            url: mass_unlock,
+            beforeSend: function () {
+                btn_action_fct();
+            },
+            data: {
+                ids: massFluxTab,
+            },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            },
+            error: function (jqXHR) {
+                console.log('Error response:', jqXHR.responseText);
+                alert('An error occurred while unlocking documents.');
+            },
+        });
     }
-  });
+});
 
   $("#reloadflux").on("click", function () {
     console.log(mass_run);

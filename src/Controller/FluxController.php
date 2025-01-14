@@ -1199,13 +1199,13 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 
             $result = $this->jobManager->massAction('unlock', 'document', $ids, false, null, null);
             if (!$result) {
-                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, "Unable to unlock documents.");
+                // Return a success message indicating no documents were unlocked
+                return new JsonResponse(['success' => true, 'message' => 'No documents were unlocked because they were already unlocked.']);
             }
 
-            return new JsonResponse(['success' => true]);
+            return new JsonResponse(['success' => true, 'message' => 'Documents unlocked successfully.']);
 
         } catch (\Exception $e) {
-            throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
