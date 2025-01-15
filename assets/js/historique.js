@@ -33,6 +33,7 @@ function displayHistory() {
         history.forEach(page => {
             const listItem = document.createElement('li');
             listItem.textContent = page.title;
+            listItem.classList.add('history-element-home');
             listItem.onclick = () => window.location.href = page.url;
             historyDropdown.appendChild(listItem);
         });
