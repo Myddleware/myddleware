@@ -25,7 +25,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Rulegroup;
+use App\Entity\RuleGroup;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
