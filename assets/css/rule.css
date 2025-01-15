@@ -504,6 +504,7 @@ color: #03c4eb!important;
 
 #rule_name{
 	padding: 5px;
+	padding-top: 15px !important;
 }
 
 .container_filter_step3{
@@ -706,4 +707,29 @@ td .link-fit-workflow-name,
 td .link-fit-rule-name {
     display: inline;
     line-height: 1.5;  /* Adjust line spacing */
+}
+
+.form-floating > #rule_name_label::after,
+.form-floating > .form-control:focus ~ #rule_name_label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ #rule_name_label::after {
+    inset: 0px !important;
+    /* Add any other styles you want to override */
+}
+
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+}
+.form-floating > #workflow_name_label::after,
+.form-floating > .form-control:focus ~ #workflow_name_label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+    /* Add any other styles you want to override */
+}
+
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
 }

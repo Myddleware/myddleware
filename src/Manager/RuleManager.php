@@ -1396,9 +1396,7 @@ class RuleManager
             // this was originally not handled by the else at the bottom because there was a 1 in the result[0]
             if ($result[0] == '1' && strpos($result[1], 'Failed to create the task because another task is already running') !== false) {
                 $session->set('error', [$result[1].(!empty($result[2]) ? '<a href="'.$this->router->generate('task_view', ['id' => trim($result[2])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>' : '')]);
-            }
-            // Renvoie du message en session
-            if ($result[0]) {
+            }else if ($result[0]) {
                 $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => trim($result[1])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>.']);
             } else {
                 $session->set('error', [$result[1].(!empty($result[2]) ? '<a href="'.$this->router->generate('task_view', ['id' => trim($result[2])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>' : '')]);
