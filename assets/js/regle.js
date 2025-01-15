@@ -64,22 +64,22 @@ $(function () {
   });
 
   $("#rule_previous").on("click", function () {
-    console.log("previous start");
+    // console.log("previous start");
     previous_next(0);
-    console.log("previous end");  
+    // console.log("previous end");  
   });
 
   $("#rule_next").on("click", function () {
-    console.log("next start");
+    // console.log("next start");
     previous_next(1);
-    console.log("next end");
+    // console.log("next end");
   });
 
   $("#tabs", "#rule_mapping").tabs({
     activate: function (event, ui) {
-      console.log("activate rule mapping start");
+      // console.log("activate rule mapping start");
       previous_next(2);
-      console.log("activate rule mapping end");
+      // console.log("activate rule mapping end");
     },
   });
   // rev 1.08 ----------------------------
@@ -372,7 +372,7 @@ $.fn.setCursorPosition = function(pos) {
         var open = pairTypes[t];
         var close = map[open];
 
-        // console.log('Checking pair type:', open+close);
+// console.log('Checking pair type:', open+close);
 
         for (var i = 0; i < formula.length; i++) {
           if (formula[i] === open) {
@@ -382,17 +382,17 @@ $.fn.setCursorPosition = function(pos) {
               position: i,
               pairNum: currentPair,
             });
-            // console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
+// console.log('Found opening symbol at', i, 'Pair Number:', currentPair);
           } else if (formula[i] === close) {
             var last = stack.pop();
 
             if (!last) {
-              // console.log('Found closing symbol without matching opening symbol at', i);
+// console.log('Found closing symbol without matching opening symbol at', i);
               errorAt = i;
               currentPair++;
               break;
             } else {
-              // console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
+// console.log('Found matching closing symbol for pair', last.pairNum, 'at', i);
               if (!pairs.includes(last.pairNum)) {
                 pairs.push(last.pairNum);
               }
@@ -402,7 +402,7 @@ $.fn.setCursorPosition = function(pos) {
 
         // If we still have unclosed brackets at the end of parsing, record an error
         if (stack.length > 0) {
-          // console.log('Found unbalanced pair at the end of the formula');
+// console.log('Found unbalanced pair at the end of the formula');
           var lastUnbalanced = stack.pop();
           errorAt = lastUnbalanced.position;
           currentPair = lastUnbalanced.pairNum;
@@ -416,11 +416,11 @@ $.fn.setCursorPosition = function(pos) {
           pairs.splice(index, 1);
         }
 
-        // console.log('Pair Type:', open + close);
-        // console.log('Status:', status);
-        // console.log('Error Position:', errorAt);
-        // console.log('Unbalanced Pair:', unbalancedPair);
-        // console.log('Balanced Pairs:', pairs);
+// console.log('Pair Type:', open + close);
+// console.log('Status:', status);
+// console.log('Error Position:', errorAt);
+// console.log('Unbalanced Pair:', unbalancedPair);
+// console.log('Balanced Pairs:', pairs);
 
         if (!status) {
           return {
@@ -453,7 +453,7 @@ $.fn.setCursorPosition = function(pos) {
         values.push($(this).val());
       });
 
-      // console.log('these are the values', values);
+// console.log('these are the values', values);
 
       var bracketError = false;
       var emptyBracketError = false;
@@ -592,7 +592,7 @@ $.fn.setCursorPosition = function(pos) {
       // empty the values array
       missingFieldList = [];
       values = [];
-      // console.log('these are the values', values);
+// console.log('these are the values', values);
 
       $.ajax({
         type: "POST",
@@ -835,7 +835,7 @@ $.fn.setCursorPosition = function(pos) {
         },
         statusCode: {
           500: function (e) {
-            console.log(e.responseText);
+            // console.log(e.responseText);
             alert(
               "An error occured. Please check your server logs for more detailed information."
             );
@@ -1039,7 +1039,7 @@ $.fn.setCursorPosition = function(pos) {
                 }
             },
             error: function (jqXHR) {
-                console.log('Error response:', jqXHR.responseText);
+                // console.log('Error response:', jqXHR.responseText);
                 alert('An error occurred while unlocking documents.');
             },
         });
@@ -1047,7 +1047,7 @@ $.fn.setCursorPosition = function(pos) {
 });
 
   $("#reloadflux").on("click", function () {
-    console.log(mass_run);
+    // console.log(mass_run);
     if (confirm(confirm_reload)) {
       // Clic sur OK
       $.ajax({
@@ -1285,68 +1285,68 @@ function fields_target_hover() {
 
 // rev 1.08 ----------------------------
 function previous_next(tab) {
-  console.log("previous_next start inside the function charlie");
-  console.log("tab", tab);
+  // console.log("previous_next start inside the function charlie");
+  // console.log("tab", tab);
   // tab 0 : default
   // tab 1 : plus
   // tab 2 : manual tab
   name_current = $(".active").attr("aria-controls");
-  console.log("Current active tab name:", name_current);
+  // console.log("Current active tab name:", name_current);
   
   number = 0;
   number = name_current.split("-");
   number = parseInt(number[1]);
-  console.log("Parsed tab number:", number);
+  // console.log("Parsed tab number:", number);
 
   $("#rule_previous").show();
   $("#rule_next").show();
 
   if (number == 3) {
-    console.log("Hiding previous button because number is 3");
+    // console.log("Hiding previous button because number is 3");
     $("#rule_previous").hide();
     $("#rule_next").show();
   }
 
   if (number == 7) {
-    console.log("Hiding next button because number is 7");
+    // console.log("Hiding next button because number is 7");
     $("#rule_next").hide();
     $("#rule_previous").show();
   }
 
   if (tab == 1) {
     number_next = number + 1;
-    console.log("Next tab number:", number_next);
+    // console.log("Next tab number:", number_next);
     let nextTab = $(".tab-" + number_next);
     
     // Check if tab-5 exists, if not, skip to tab-6
     if (number_next === 5 && nextTab.length === 0) {
-      console.log("Tab-5 does not exist, skipping to tab-6");
+      // console.log("Tab-5 does not exist, skipping to tab-6");
       number_next = 6;
       nextTab = $(".tab-" + number_next);
     }
 
     if (nextTab.length > 0) {
-      console.log("Next tab exists, triggering click");
+      // console.log("Next tab exists, triggering click");
       nextTab.trigger("click");
     } else {
-      console.log("Next tab does not exist");
+      // console.log("Next tab does not exist");
     }
   } else if (tab == 0) {
     number_previous = number - 1;
-    console.log("Previous tab number:", number_previous);
+    // console.log("Previous tab number:", number_previous);
     
     // Check if tab-5 exists, if not, skip back to tab-4
     if (number_previous === 5 && $(".tab-" + number_previous).length === 0) {
-      console.log("Tab-5 does not exist, skipping back to tab-4");
+      // console.log("Tab-5 does not exist, skipping back to tab-4");
       number_previous = 4;
     }
 
     const previousTab = $(".tab-" + number_previous);
     if (previousTab.length > 0) {
-      console.log("Previous tab exists, triggering click");
+      // console.log("Previous tab exists, triggering click");
       previousTab.trigger("click");
     } else {
-      console.log("Previous tab does not exist");
+      // console.log("Previous tab does not exist");
     }
   }
 }
@@ -2255,20 +2255,20 @@ $(document).ready(function() {
 	$('.removeFilters').click(function() {
 		// Get the class list of the clicked element
 		var classList = $(this).attr('class').split(/\s+/);
-		// console.log(classList);
+// console.log(classList);
 
 		// Find the filter class (it's the last class in the list)
 		var filterClass = classList[classList.length - 1];
-		// console.log(filterClass);
+// console.log(filterClass);
 
 		// Get the stored filters from local storage
 		var storedFilters = JSON.parse(localStorage.getItem('storedFilters'));
-		// console.log(storedFilters);
+// console.log(storedFilters);
 
 
 		// Save the updated filters back to local storage
 		localStorage.setItem('storedFilters', JSON.stringify(storedFilters));
-		// console.log(localStorage.getItem('storedFilters'));
+// console.log(localStorage.getItem('storedFilters'));
 
 		    // Make an AJAX request to the server to remove the filter from the session
 			$.ajax({
@@ -2277,14 +2277,14 @@ $(document).ready(function() {
 				data: { filterName: 'FluxFilter' + toCamelCase(filterClass) },
 				success: function(response) {
 					if (response.status === 'success') {
-						// console.log('Filter successfully removed Argonien');
+// console.log('Filter successfully removed Argonien');
 						
 						// Clear the form field
 						var formFieldName = 'combined_filter[document][' + filterClass + ']';
 						$('input[name="' + formFieldName + '"]').val('');
-						// console.log('Filter input cleared');
+// console.log('Filter input cleared');
 					} else {
-						// console.log('Error removing filter: ' + response.message);
+// console.log('Error removing filter: ' + response.message);
 					}
 				}
 			});
