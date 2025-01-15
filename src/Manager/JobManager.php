@@ -335,7 +335,7 @@ class JobManager
 			$result = $stmt->executeQuery();
 			$job = $result->fetchAssociative(); // 1 row
 			// Error if one job is still running
-			if (!empty($job)) {
+			if (!empty($job) && !($this->toolsManager->isPremium())) {
 				$this->message .= $this->toolsManager->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
 				return ['success' => false, 'message' => $this->message];
 			}
