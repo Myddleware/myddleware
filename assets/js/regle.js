@@ -64,16 +64,22 @@ $(function () {
   });
 
   $("#rule_previous").on("click", function () {
+    console.log("previous start");
     previous_next(0);
+    console.log("previous end");  
   });
 
   $("#rule_next").on("click", function () {
+    console.log("next start");
     previous_next(1);
+    console.log("next end");
   });
 
   $("#tabs", "#rule_mapping").tabs({
     activate: function (event, ui) {
+      console.log("activate rule mapping start");
       previous_next(2);
+      console.log("activate rule mapping end");
     },
   });
   // rev 1.08 ----------------------------
@@ -1279,33 +1285,69 @@ function fields_target_hover() {
 
 // rev 1.08 ----------------------------
 function previous_next(tab) {
+  console.log("previous_next start inside the function charlie");
+  console.log("tab", tab);
   // tab 0 : default
   // tab 1 : plus
   // tab 2 : manual tab
   name_current = $(".active").attr("aria-controls");
+  console.log("Current active tab name:", name_current);
+  
   number = 0;
   number = name_current.split("-");
   number = parseInt(number[1]);
+  console.log("Parsed tab number:", number);
 
   $("#rule_previous").show();
   $("#rule_next").show();
 
   if (number == 3) {
+    console.log("Hiding previous button because number is 3");
     $("#rule_previous").hide();
     $("#rule_next").show();
   }
 
   if (number == 7) {
+    console.log("Hiding next button because number is 7");
     $("#rule_next").hide();
     $("#rule_previous").show();
   }
 
   if (tab == 1) {
     number_next = number + 1;
-    $(".tab-" + number_next).trigger("click");
+    console.log("Next tab number:", number_next);
+    let nextTab = $(".tab-" + number_next);
+    
+    // Check if tab-5 exists, if not, skip to tab-6
+    if (number_next === 5 && nextTab.length === 0) {
+      console.log("Tab-5 does not exist, skipping to tab-6");
+      number_next = 6;
+      nextTab = $(".tab-" + number_next);
+    }
+
+    if (nextTab.length > 0) {
+      console.log("Next tab exists, triggering click");
+      nextTab.trigger("click");
+    } else {
+      console.log("Next tab does not exist");
+    }
   } else if (tab == 0) {
     number_previous = number - 1;
-    $(".tab-" + number_previous).trigger("click");
+    console.log("Previous tab number:", number_previous);
+    
+    // Check if tab-5 exists, if not, skip back to tab-4
+    if (number_previous === 5 && $(".tab-" + number_previous).length === 0) {
+      console.log("Tab-5 does not exist, skipping back to tab-4");
+      number_previous = 4;
+    }
+
+    const previousTab = $(".tab-" + number_previous);
+    if (previousTab.length > 0) {
+      console.log("Previous tab exists, triggering click");
+      previousTab.trigger("click");
+    } else {
+      console.log("Previous tab does not exist");
+    }
   }
 }
 
