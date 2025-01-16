@@ -75,7 +75,7 @@ class RuleGroup
     /**
      * @ORM\Column(name="description", type="text", nullable=true)
      */
-    private string $description;
+    private ?string $description = null;
 	
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
@@ -190,13 +190,13 @@ class RuleGroup
         return $this->name;
     }
 	
-	public function setDescription($description): self
+	public function setDescription(?string $description): self
     {
         $this->description = $description;
         return $this;
     }
 
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
