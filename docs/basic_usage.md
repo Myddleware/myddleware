@@ -51,7 +51,7 @@ A rule is basically a job which sends your data from a module to another module.
 
 To create a rule, log in to your Myddleware instance then click on **Rules** then **Creation** in the navbar.
 
-![Create rule](images/basic_usage/rule/rule1.png)
+![Create rule](images/basic_usage/rule/rule1.PNG)
 
 #### Select connectors 
 
