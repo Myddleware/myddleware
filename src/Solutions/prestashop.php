@@ -32,7 +32,7 @@ use App\Solutions\lib\PrestaShopWebserviceException;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class prestashopcore extends solution
+class prestashop extends solution
 {
     protected array $required_fields = [
         'default' => ['id', 'date_upd', 'date_add'],
@@ -593,7 +593,10 @@ class prestashopcore extends solution
      */
     protected function getReferenceCall($param, $result)
     {
-        // IF the reference is a date
+        // Keep the same date ref if no result
+		if (empty($result['count'])) {
+			return $param['date_ref'];
+		}
         if ($this->referenceIsDate($param['module'])) {
             // Add 1 second to the date ref because the read function is a >= not a >
             $date = new \DateTime(end($result['values'])['date_modified']);
@@ -1081,7 +1084,4 @@ class prestashopcore extends solution
     protected function call($url, $parameters)
     {
     }
-}
-class prestashop extends prestashopcore
-{
 }

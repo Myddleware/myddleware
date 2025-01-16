@@ -28,9 +28,9 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class salesforcecore extends solution {
+class salesforce extends solution {
 
-	protected int $limitCall = 100;
+	protected int $limitCall = 500;
 
 	protected array $required_fields =  array('default' => array('Id','LastModifiedDate', 'CreatedDate'));
 
@@ -72,7 +72,9 @@ class salesforcecore extends solution {
 										"Case" => array("CaseNumber")
 									);
 									
-	protected string $versionApi = 'v38.0';
+	protected string $versionApi = 'v62.0';
+	
+	protected bool $sendDeletion = true;
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
@@ -340,7 +342,7 @@ class salesforcecore extends solution {
 	
 	// Permet de récupérer les enregistrements modifiés depuis la date en entrée dans la solution
 	public function readData($param): array
-    {
+	{
 		$result = array();
 		$result['error'] = '';
 		$result['count'] = 0;
@@ -353,7 +355,7 @@ class salesforcecore extends solution {
 		$queryOffset = '';
 		if (empty($param['limit'])) {
 			$param['limit'] = $this->limitCall;
-		} 
+		}
 		if (!isset($param['offset'])) {
 			$param['offset'] = 0;
 		}
@@ -362,57 +364,114 @@ class salesforcecore extends solution {
 			$param['fields'] = array_unique($param['fields']);
 			$param['fields'] = array_values($param['fields']);
 			$param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-			
+
 			// Ajout des champs obligatoires
 			$param['fields'] = $this->addRequiredField($param['fields'], $param['module'], $param['ruleParams']['mode']);
-			
+
 			// Récupération du nom du champ date
 			$DateRefField = $this->getRefFieldName($param);
 
 			// Construction de la requête pour Salesforce
 			$baseQuery = $this->instance_url."/services/data/".$this->versionApi."/query/?q=";
-			
+
 			// Gestion du SELECT
-			$querySelect = $this->getSelect($param);	
+			$querySelect = $this->getSelect($param);
 			// Gestion de FROM
 			$queryFrom = $this->getFrom($param);
 			// Gestion du WHERE
-			$queryWhere = $this->getWhere($param);		
+			$queryWhere = $this->getWhere($param);
 			// Gestion du ORDER
-			$queryOrder = $this->getOrder($param);	
-		
+			$queryOrder = $this->getOrder($param);
+
 			// Gstion du LIMIT
 			$queryLimit .= "+LIMIT+" . $param['limit']; // Ajout de la limite souhaitée
 			// On lit les données dans Salesforce
-			do {		
+			do {
 				if(!empty($param['offset'])) {
 					$queryOffset = "+OFFSET+".$param['offset'];
 				}
 				// Appel de la requête
-				$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				if (!empty($query_request_data['nextRecordsUrl'])) {
+					$query = $this->instance_url.$query_request_data['nextRecordsUrl'];
+				} else {
+					$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
+				}
 				$query_request_data = $this->call($query, false);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
-			
-				// Affectation du nombre de résultat à $result['count']
-				if (isset($query_request_data['totalSize'])){
-					$currentCount = $query_request_data['totalSize'];
-					$result['count'] += $currentCount;
+
+				if (!empty($query_request_data['records'])){
+					$i = 0;
 					// Traitement des informations reçues
-					// foreach($query_request_data['records'] as $record){
-					for ($i = 0; $i < $currentCount; $i++) {
-						$record = $query_request_data['records'][$i];			
+					foreach($query_request_data['records'] as $record){
+						$record = $query_request_data['records'][$i];
 						foreach (array_keys($record) as $key) {
 							if($key == $DateRefField){
 								$record[$key] = $this->dateTimeToMyddleware($record[$key]);
 								$row['date_modified'] = $record[$key];
 							}
+							// Manage relationship fields stored in a sub array
+							elseif(
+									$key != 'attributes'
+								AND	is_array($record[$key])
+							) {
+								foreach($record[$key] as $fieldKey => $fieldValue) {
+									// Don't save attributes
+									if($fieldKey != 'attributes'){
+										// In case there are 2 levels of relationship (think about a recursive function here) 
+										if(is_array($fieldValue)) {
+											if (!empty($fieldValue)) {
+												foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
+													if($fieldKeyLevel2 != 'attributes'){
+														// In case there are 3 levels of relationship (think about a recursive function here) 
+														if(is_array($fieldValueLevel2)) {
+															if(!empty($fieldValueLevel2)) {
+																foreach($fieldValueLevel2 as $fieldKeyLevel3 => $fieldValueLevel3) {
+																	if($fieldKeyLevel3 != 'attributes'){
+																		$row[mb_strtolower($fieldKeyLevel3)] = $fieldValueLevel3;
+																		$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2.'.'.$fieldKeyLevel3] = $fieldValueLevel3;
+																	}
+																}
+															// If a relationship is empty, we set all field under this relationship to empty
+															} else {
+																foreach($param['fields'] as $field) {
+																	if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2)) {
+																		$row[$field] = '';
+																	}
+																}
+															}
+														}
+														else {
+															$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
+														}
+													}
+												}
+											// If a relationship is empty, we set all field under this relationship to empty
+											} else {
+												foreach($param['fields'] as $field) {
+													if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey)) {
+														$row[$field] = '';
+													}
+												}
+											}
+										}
+										else {
+											$row[$param['module'].'.'.$key.'.'.$fieldKey] = $fieldValue;
+										}
+									}
+								}
+							}
 							// On enlève le tableau "attributes" ajouté par Salesforce afin d'extraire les éléments souhaités
-							else if(!($key == 'attributes')){
+							elseif($key != 'attributes'){
 								if($key == 'Id')
 									$row[mb_strtolower($key)] = $record[$key];
+									// If Id is requested in the field mapping
+									if (!empty($param['fields']['Id'])) {
+										$row[$key] = $record[$key];
+									}
 								else {
-									if($key == 'CreatedDate')
+									if($key == 'CreatedDate') {
 										$record[$key] = $this->dateTimeToMyddleware($record[$key]);
+									}
 									$row[$key] = $record[$key];
 								}
 							}
@@ -430,37 +489,28 @@ class salesforcecore extends solution {
 						}
 						$result['date_ref'] = $record[$DateRefField];
 						$result['values'][$record['Id']] = $row;
+						$result['count']++;
+						$i++;
 						$row = array();
 					}
 					// Préparation de l'offset dans le cas où on ferait un nouvel appel à Salesforce
-					$param['offset'] += $param['limit'];
-					// Récupération de la date de référence de l'avant dernier enregistrement afin de savoir si on doit faire un appel supplémentaire 
-					// currentCount -2 car si 5 résultats dans la tableau alors on veut l'entrée 3 (l'index des tableau commence à 0)
-					$previousRefDate = '';
-					if (!empty($query_request_data['records'][$currentCount-2][$DateRefField])) {
-						$previousRefDate = $this->dateTimeToMyddleware($query_request_data['records'][$currentCount-2][$DateRefField]);
-					}
+					$param['offset'] += $i;
 				}
-				else {
-					$result['error'] = $query_request_data;
-				}					
 			}
-			// On continue si : 
-			// 1.	Le nombre de résultat du dernier appel est égal à la limite
-			// 2.	Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement 
+			// On continue si :
+			// 1.   Le nombre de résultat du dernier appel est égal à la limite
+			// 2.   Et si la date de référence de l’enregistrement précédent est égale à la date de référence du tout dernier enregistrement
 			while (
-						$currentCount < $param['limit']
-					&& !empty($previousRefDate)
-					&& $previousRefDate == $result['date_ref']	
+						$result['count'] < $param['limit']
+					&& !$query_request_data['done']
 			);
-			return $result;
 		}
 		catch (\Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            $result['error'] = $error;
-            return $result;
+			$error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($error);
+			$result['error'] = $error;
 		}
+		return $result;
 	}
 
     /**
@@ -636,14 +686,64 @@ class salesforcecore extends solution {
 				) {
 					$parameters['Pricebook2Id'] = $param['ruleParams']['Pricebook2Id'];
 				}				
-				
+				if (empty($target_id)) {
+					throw new \Exception ('The target id is requiered for an update.');
+				}
 				$parameters = json_encode($parameters);
 				// Appel de la requête				
-                $query_request_data = $this->call($query_url, $parameters, true);             				
+                $query_request_data = $this->call($query_url, $parameters, 'PATCH');             				
 				
 				if ($query_request_data === true) {
 					$result[$idDoc] = array(
 											'id' => $target_id,
+											'error' => false
+									);
+				}
+				else  {
+					$result[$idDoc] = array(
+											'id' => '-1',
+											'error' => 'Failed to update Data in Salesforce : '.print_r($query_request_data['errors'],true),
+									);
+				}
+			}
+			catch (\Exception $e) {
+				$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$result[$idDoc] = array(
+						'id' => '-1',
+						'error' => $error
+				);
+			}
+			// Modification du statut du flux
+			$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+		}			
+		return $result;
+	}
+
+	/**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Exception
+     */
+    public function deleteData($param): array
+    {
+		if(!(isset($param['data']))) {
+			throw new \Exception ('Data missing for update');
+		}
+		foreach($param['data'] as $idDoc => $data) {
+			try{
+				// Check control before update
+				$data = $this->checkDataBeforeDelete($param, $data, $idDoc);
+				// Instanciation de l'URL d'appel	
+				if (empty($data['target_id'])) {
+					throw new \Exception ('The target id is requiered for a deletion.');
+				}			
+				$query_url = $this->instance_url."/services/data/".$this->versionApi."/sobjects/".$param['module'].'/'.$data['target_id'];
+			    
+				// Appel de la requête				
+                $query_request_data = $this->call($query_url, true, 'DELETE');             				
+				
+				if ($query_request_data === true) {
+					$result[$idDoc] = array(
+											'id' => $data['target_id'],
 											'error' => false
 									);
 				}
@@ -698,8 +798,13 @@ class salesforcecore extends solution {
     protected function getWhere($param): string
     {
 		if (!empty($param['query'])) {
+			$queryWhere = "+WHERE+";
 			foreach ($param['query'] as $key => $value) {
-				$queryWhere = "+WHERE+".$key."+=+'".$value."'";
+					$queryWhere .= $key."+=+'".str_replace(' ', '+', $value)."'";
+					// Add the AND if not the last entry of the array
+					if ($key !== array_key_last($param['query'])) {
+							$queryWhere .= "+AND+";
+					}
 			}
 		} else {
 			// On va chercher le nom du champ pour la date de référence: Création ou Modification
@@ -776,44 +881,37 @@ class salesforcecore extends solution {
 		}
 		return "";
 	}
-	
-	// Fonction permettant de faire l'appel REST
 
     /**
      * @throws \Exception
      */
-    protected function call($url, $parameters, $update = false){
+    protected function call($url, $parameters, $method = null){
 		ob_start();
 		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
 		if($parameters === false){ // Si l'appel ne possède pas de paramètres, on exécute un GET en curl
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: OAuth '.$this->access_token));
-		} 
-		elseif ($update === false) { // Si l'appel en revanche possède des paramètres dans $parameters, on exécute un POST en curl
-		    curl_setopt($ch, CURLOPT_URL, $url);
-		    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-			if(!isset($parameters['grant_type'])) // A ne pas ajouter pour la connexion
-		    	curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
-		    curl_setopt($ch, CURLOPT_POST, TRUE);
-		    curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-		}
-		else {
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		} else {
+			// No Authorization in case of login action
+			if(!isset($parameters['grant_type'])) {
+				curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
+			}
+			// PATCH or DELETE
+			if (!empty($method)) { 
+				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			// POST
+			} else {	
+				curl_setopt($ch, CURLOPT_POST, TRUE);
+			}
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // important (testé en Local wamp) afin de ne pas vérifier le certificat SSL
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: OAuth " . $this->access_token, "Content-type: application/json"));
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
 		}
 		
 		$query_request_body = curl_exec($ch);	 
 		// Si on est sur un update et que l'on a un retour 204 on renvoie true
-		if ($update === true) {		
+		if (!empty($method)) {		
 			if(curl_getinfo($ch, CURLINFO_HTTP_CODE) == '204') {
 				return true;
 			}
@@ -863,7 +961,4 @@ class salesforcecore extends solution {
 		return $date;
 	}
     
-}
-
-class salesforce extends salesforcecore {	
 }

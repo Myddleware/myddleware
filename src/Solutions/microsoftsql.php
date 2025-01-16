@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class microsoftsqlcore extends database
+class microsoftsql extends database
 {
     protected $driver;
     protected string $fieldName = 'COLUMN_NAME';
@@ -59,7 +59,7 @@ class microsoftsqlcore extends database
     }
 
     // Query to get all the tables of the database
-    protected function get_query_show_tables(): string
+    protected function get_query_show_tables($type): string
     {
         return 'SELECT table_name FROM information_schema.columns WHERE table_catalog = \''.$this->paramConnexion['database_name'].'\'';
     }
@@ -100,6 +100,3 @@ class microsoftsqlcore extends database
         return parent::get_query_select_header($param, $method);
     }
 }// class microsoftsqlcore
-class microsoftsql extends microsoftsqlcore
-{
-}

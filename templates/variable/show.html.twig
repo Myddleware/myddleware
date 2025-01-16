@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'variable.list_title'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'variable.list_title'|trans }} - {{ variable.name }}
+{% endblock %}
+
+{% block body %}
+    <div id="variables" class="container mt-5">
+        <div>
+            <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2">
+                {{ 'variable.back_to_list'|trans }}
+            </a>
+            <a href="{{ path('variable_edit', {'id': variable.id}) }}" class="btn btn-outline-success m-2">
+                {{ 'variable.btn.edit'|trans }}
+            </a>
+            <a href="{{ path('variable_delete', {'id': variable.id}) }}" 
+               onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');" 
+               class="btn btn-outline-danger m-2">
+                {{ 'variable.btn.delete'|trans }}
+            </a>
+        </div>
+
+        <div class="variable-details container mt-4">
+            <div class="card-header mb-4">
+                {{ variable.name | upper}}
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <strong>{{ 'variable.table_headers.name'|trans|upper }}</strong>
+                    <div>{{ variable.name }}</div>
+                </div>
+                <div class="col-md-6">
+                    <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
+                    <div>{{ variable.value }}</div>
+                </div>
+            </div>
+             <div class="row mb-2">
+                <div class="col-md-6">
+                    <strong>{{ 'variable.table_headers.description'|trans|upper }}</strong>
+                    <div>{{ variable.description }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

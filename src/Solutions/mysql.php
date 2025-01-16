@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class mysqlcore extends database
+class mysql extends database
 {
     protected $driver = 'mysql';
 
@@ -42,9 +42,11 @@ class mysqlcore extends database
     }
 
     // Generate query
-    protected function get_query_show_tables(): string
+    protected function get_query_show_tables($type): string
     {
-        return 'SHOW TABLES FROM '.$this->stringSeparatorOpen.$this->paramConnexion['database_name'].$this->stringSeparatorClose;
+        return 'SHOW FULL TABLES 
+				FROM '.$this->stringSeparatorOpen.$this->paramConnexion['database_name'].$this->stringSeparatorClose 
+				.($type == 'target' ? ' WHERE table_type = "BASE TABLE"' : '');
     }
 
     // Query to get all the flieds of the table
@@ -62,8 +64,4 @@ class mysqlcore extends database
 
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
-}
-
-class mysql extends mysqlcore
-{
 }

@@ -22,9 +22,9 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-menu {
+/* menu {
     margin-top: 40px;
-}
+} */
 
 menu ul, menu li {
 	list-style: none;
@@ -33,9 +33,9 @@ menu ul, menu li {
 menu li {
 	background: #ffffff;	
 	display: inline-block;
-    width: 330px;
-    padding-top: 32px;
-    height: 95px;
+    width: 233px;
+    padding-top: 15px;
+    height: 57px;
     text-align: center;
     font-weight: bold;
 }
@@ -53,25 +53,32 @@ menu .dropdown-menu > li > a {
 }
 
 menu .dropdown-menu > li > a:hover {
-	color: #198BCA;
+	color: #03c4eb;
 }
 
 menu li li, #myd_top li li {
 	background: white;
     text-align: left;
     overflow:hidden;  
-    height: 25px; 	
+    height: 33px; 	
 	padding: 0;
 	padding-left: 10px;
 }
 
+.history-element-home{
+    height: 50px !important;	
+}
+
+.history-element-home-short{
+	height: 30px !important;
+}
 
 /* Dropdown menu */
 
-
 .dropdown-menu{
-	margin-left: -48px!important;
-	margin-top: 19px!important;
+	margin-left: -5px !important;
+    margin-top: 10px !important;
+	border: 0px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 menu li li:hover, #myd_top li li:hover {
@@ -91,15 +98,15 @@ menu li li:hover, #myd_top li li:hover {
 	color: #000000;
 }
 
-menu .nav-pills > li > a, menu .nav-pills > li > a:hover, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
+menu .nav-pills > li > a, menu .nav .open > a, menu .nav .open > a:hover, menu .nav .open > a:focus {
 	color: rgb(0, 0, 0);
 	background-color:transparent;
 	border-radius: none;
+	font-size: smaller;
 }
 
-menu li:hover {
-	background: #198BCA;
-	color:white;
+menu li:hover , menu .nav-pills > li > a:hover {
+	color:#03c4eb !important;
 	cursor:pointer;
 }
 
@@ -138,10 +145,70 @@ menu li a {
 
 .flex-nav{
 	flex-wrap: initial !important;
-	width: 87%;
-  margin-right:auto;
+	width: 92%;
+    margin-right:auto;
 }
 
 header{
 	background-color: #ffffff !important;
+}
+
+
+.dropdown:hover .dropdown-menu {
+	display: block;
+}
+
+.dropdown-toggle::after {
+	display: none;
+}
+
+.title_section_menu.active {
+    color: #03c4eb !important;
+}
+
+.svg_user {
+    min-width: 24px;
+    height: auto;
+}
+
+.sous_menu_navbar{
+    width: 338px !important;
+    padding: 0.5rem 5px !important;
+    font-size: 1rem !important;
+    color: #3a3a3a !important;
+    border-radius: 0.5rem !important;
+}
+
+.icon_navbar {
+	margin-left: 130px;
+    margin-right: -140px;
+}
+
+.star-icon {
+    transition: transform 0.3s ease, font-size 3.3s ease;
+    font-size: 16px;
+    margin-left: -12px;
+    color: gold;
+    position: relative;
+    top: 8px;
+}
+
+.star-icon-btn-filter{
+    top: 13px !important;
+    left: 10px;
+}
+
+.title_section_menu:hover .star-icon {
+	transform: rotate(20deg) scale(1.5);
+}
+
+.star-cron{
+	font-size: 12px !important;
+	margin-left: -76px !important;
+	top: 7px !important;
+}
+.star-cron:hover{
+	font-size: 12px !important;
+	margin-left: -76px !important;
+	top: 7px !important;
 }

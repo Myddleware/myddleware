@@ -30,6 +30,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputArgument;
 
 class ClearDataCommand extends Command
 {
@@ -51,6 +52,7 @@ class ClearDataCommand extends Command
         $this
             ->setName('myddleware:cleardata')
             ->setDescription('SUPPRESSION DES DONNEES DU CLIENT')
+			->addArgument('actvieRule', InputArgument::OPTIONAL, 'Clear only active rule')
         ;
     }
 
@@ -60,7 +62,8 @@ class ClearDataCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
-        $data = $this->jobManager->initJob('cleardata');
+		$actvieRule = $input->getArgument('actvieRule');
+        $data = $this->jobManager->initJob('cleardata '.$actvieRule);
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
@@ -70,7 +73,7 @@ class ClearDataCommand extends Command
         }
 
         // @TODO: this method executes SQL queries but it does not actually return anything at the moment, we need to make it return something if we want to catch this $response['message']
-        $response = $this->jobManager->clearData();
+        $response = $this->jobManager->clearData($actvieRule);
         // Display message on the console
         if (!empty($response['message'])) {
             if ($response['success']) {

@@ -23,47 +23,53 @@
 *********************************************************************************/ #} 
 
 <div class="link-help right">
-	<a href="#help-content-filters">
-		<i class="fa fa-info-circle" aria-hidden="true"></i>
-		{{'rule.help'|trans}}
-	</a>
+    <a href="#help-content-filters">
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        {{'rule.help'|trans}}
+    </a>
 </div>
 <div class="clr"></div>
-<ul id="fieldsfilter">
-{# form widget that uses form_all_related_fields #}
-	<div class="row">
-		<div class="col">
-			{{ form_row(form_all_related_fields.field) }}
-		</div>
-		<div class="col">
-			{{ form_row(form_all_related_fields.another_field) }}
-		</div>
-		<div class="col">
-			{{ form_row(form_all_related_fields.textarea_field) }}
-		</div>
-		<div class="col mt-4">
-			<button id="addFilterStep3" type="button" class="btn btn-primary" disabled><i class="fa fa-plus" aria-hidden="true"></i></button>
-		</div>
-	</div>
-	{% for filter in filters %}
-		<li class="mt-2 d-flex justify-content-evenly align-items-baseline">
-			<span class="name me-2 mt-2">{{ filter.target }}</span> 
-			<a class="fancybox me-2" data-fancybox-type="iframe" href="/index.php/rule/info/source/">
- 				<svg class="svg-inline--fa fa-question-circle fa-w-16" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="question-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
-                    <path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z"></path>
-                </svg>
-			</a>
-			<input type="text" name="fieldsfilter[]['anotherFieldInput']" value="{{ filter.type }}" class="form-control filter-input my-3">
-			<input type="text" name="fieldsfilter[]['textareaFieldInput']" value="{{ filter.value }}" class="form-control filter-input my-3">
-			<button class="btn btn-danger remove-button"> <i class="fa fa-times " aria-hidden="true"></i></button>
-		</li>
-	{% endfor %}
-
-</ul>
+<div class="container_filter_step3">
+    <ul id="fieldsfilter" class="list-unstyled">
+        {# form widget that uses form_all_related_fields #}
+        <div class="row mb-3">
+            <div class="col-md-4">
+                {{ form_row(form_all_related_fields.field) }}
+            </div>
+            <div class="col-md-4">
+                {{ form_row(form_all_related_fields.another_field) }}
+            </div>
+            <div class="col-md-4">
+                {{ form_row(form_all_related_fields.textarea_field) }}
+            </div>
+        </div>
+        {% for filter in filters %}
+            <li class="row align-items-center mb-2">
+                <div class="col-md-3">
+                    <span class="name me-2">{{ filter.target }}</span>
+                    <a class="fancybox me-2" data-fancybox-type="iframe" href="/index.php/rule/info/source/">
+                        <svg class="svg-inline--fa fa-question-circle fa-w-16" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="question-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="">
+                            <path fill="currentColor" d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="fieldsfilter[]['anotherFieldInput']" value="{{ filter.type }}" class="form-control filter-input">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="fieldsfilter[]['textareaFieldInput']" value="{{ filter.value }}" class="form-control filter-input">
+                </div>
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-danger remove-button"> <i class="fa fa-times" aria-hidden="true"></i></button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 <div id="help-content-filters" class="help-content">
-	<h2>
-		{{'help.title'|trans}}
-		<i class="fa fa-info-circle" aria-hidden="true"></i>
-	</h2>
-	<p>{{'help.rule.filter'|trans|raw}}</p>
+    <h2>
+        {{'help.title'|trans}}
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+    </h2>
+    <p>{{'help.rule.filter'|trans|raw}}</p>
 </div>

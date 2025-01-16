@@ -26,7 +26,7 @@
 {% block title %}{{parent()}} | {{'title.task.view'|trans}} {{ task.getId }}{% endblock %}
 {% block titlesm %}
 	<a href="{{ path('task_list') }}">{{'breadcrumb.task_list'|trans}}</a> 
-	<i class="fa fa-chevron-right" aria-hidden="true"></i>
+	<i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
 {{'title.task.view'|trans}} {{ task.getId }}
 {% endblock titlesm %} 
 {% block body %}
@@ -65,7 +65,15 @@
 							<span id="task_status" class="label label-warning" name="{{ task.getStatus }}">{{ task.getStatus }}</span>
 							{% endif %}
 						</td>
-						<td class="ctr">{{ task.getParam }}</td>
+						<td class="ctr">
+						{{ task.getParam|slice(0, 30) ~ '...' }}
+						<div id="param_task_collapse" class="button_param_task_collapse">
+						
+						{{ task.getParam }}
+						</div>
+    					<button onclick="toggleParam()">Toggle Param</button>
+						
+						</td>
 						<td class="ctr">
 							{% if task.getBegin is null %}
 								-
@@ -86,7 +94,17 @@
 						<td class="ctr">{{ task.getError }}</td>
 						<td class="ctr">{{ task.getManual }}</td>
 						<td class="ctr">{{ task.getApi }}</td>
-						<td class="ctr">{{ task.getMessage }}</td>
+						<td class="ctr">
+	{{ task.getMessage|slice(0, 30) ~ '...' }}
+    <div id="message_task_collapse" class="button_message_task_collapse">
+	{# show the first 30 words of the message #}
+
+
+	{{ task.getMessage }}
+	
+	</div>
+    <button onclick="toggleMessage()">Toggle Message</button>
+</td>
 					</tr>
 				</table>
 			{% endif %}
@@ -121,7 +139,7 @@
 						</td>
 						<td>				     		
 							{% if log.getRef is not empty %}	
-									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info', {'id': log.getRef}) }}">
+									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
 									    {{ log.getRef }}
 									</a>
 							{% else %}
@@ -130,7 +148,7 @@
 						</td>	
 						<td>
 							{% if log.getDocument is not empty %}
-								<a href="{{ path('flux_info', {'id': log.getDocument.id}) }}">{{ log.getDocument.id }}</a>
+								<a href="{{ path('flux_info_page', {'id': log.getDocument.id, 'page' : 1, 'logPage' : 1}) }}">{{ log.getDocument.id }}</a>
 							{% endif %}
 						</td>					     					     			     			     	
 						<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
@@ -187,6 +205,30 @@
     <script type="text/javascript">   	
     var path_img = "{{ asset('build/images/regle/') }}";
 	var path_task_stop = "{{ path('task_stop',{'id' : task.getId }) }}";
+	function toggleMessage() {
+		console.log('toggleMessage');
+		var messageDiv = document.getElementById('message_task_collapse');
+		console.log(messageDiv);
+		if (messageDiv.classList.contains('button_message_task_collapse')) {
+			messageDiv.classList.remove('button_message_task_collapse');
+			messageDiv.classList.add('button_message_task_expand');
+		} else {
+			messageDiv.classList.remove('button_message_task_expand');
+			messageDiv.classList.add('button_message_task_collapse');
+		}
+	}
+	function toggleParam() {
+		console.log('toggleParam');
+		var paramDiv = document.getElementById('param_task_collapse');
+		console.log(paramDiv);
+		if (paramDiv.classList.contains('button_param_task_collapse')) {
+			paramDiv.classList.remove('button_param_task_collapse');
+			paramDiv.classList.add('button_param_task_expand');
+		} else {
+			paramDiv.classList.remove('button_param_task_expand');
+			paramDiv.classList.add('button_param_task_collapse');
+		}
+	}
     </script>
     {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}

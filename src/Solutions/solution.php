@@ -34,7 +34,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class solutioncore
+class solution
 {
     // Permet d'indiquer que la connexion webservice est valide
     public bool $connexion_valide = false;
@@ -74,6 +74,7 @@ class solutioncore
     // Specify if the class is called by the API
     protected $api;
     protected $message;
+    protected $documentManager;
     // Instanciation de la classe de génération de log Symfony
     protected Connection $connection;
     protected ParameterBagInterface $parameterBagInterface;
@@ -81,6 +82,7 @@ class solutioncore
     protected DocumentRepository $documentRepository;
     protected RuleRelationShipRepository $ruleRelationshipsRepository;
     protected FormulaManager $formulaManager;
+    protected array $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
 
     public function __construct(
         LoggerInterface $logger,
@@ -142,6 +144,21 @@ class solutioncore
     {
         return $this->connection;
     }
+	
+	protected function setDocumentManager()
+    {
+		// Create new documentManager with a clean entityManager
+		$chlidEntityManager = clone $this->entityManager;
+		$chlidEntityManager->clear();
+		// Call the right class documentManager
+		if (class_exists('App\Custom\Manager\DocumentManagerCustom')) {
+            $this->documentManager = new \App\Custom\Manager\DocumentManagerCustom($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+        }elseif (class_exists('App\Premium\Manager\DocumentManagerPremium')) {
+            $this->documentManager = new \App\Premium\Manager\DocumentManagerPremium($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+        } else {
+            $this->documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+        }
+	}
 
     /**
      * Permet de mettre à jour le statut d'un document après création ou modification dans la cible
@@ -153,11 +170,11 @@ class solutioncore
         try {
             $param['id_doc_myddleware'] = $idDoc;
             $param['api'] = $this->api;
-            $documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
-            $documentManager->setParam($param);
+			$this->setDocumentManager();
+            $this->documentManager->setParam($param);
             // If a message exist, we add it to the document logs
             if (!empty($value['error'])) {
-                $documentManager->setMessage($value['error']);
+                $this->documentManager->setMessage($value['error']);
                 $this->message = '';
             }
             // Mise à jour de la table document avec l'id target comme id de document
@@ -170,11 +187,11 @@ class solutioncore
                 }
                 // In cas of a child document, it is possible to have $value['id'] empty, we just set an error because the document can't be sent again (parent document successfully sent)
                 if (!empty($value['id'])) {
-                    $documentManager->updateTargetId($value['id']);
+                    $this->documentManager->updateTargetId($value['id']);
                 } else {
-                    $documentManager->setMessage('No target ID found in return of the parent document creation. ');
+                    $this->documentManager->setMessage('No target ID found in return of the parent document creation. ');
                 }
-                $documentManager->updateStatus($status);
+                $this->documentManager->updateStatus($status);
                 $response[$idDoc] = true;
             } else {
                 if (empty($forceStatus)) {
@@ -183,18 +200,18 @@ class solutioncore
                     $status = $forceStatus;
                 }
 
-                $documentManager->setMessage('Failed to send document. ');
-                $documentManager->setTypeError('E');
-                $documentManager->updateStatus($status);
+                $this->documentManager->setMessage('Failed to send document. ');
+                $this->documentManager->setTypeError('E');
+                $this->documentManager->updateStatus($status);
                 $response[$idDoc] = false;
             }
             $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (\Exception $e) {
             echo 'Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $documentManager->setTypeError('E');
-            $documentManager->updateStatus('Error_sending');
+            $this->documentManager->setMessage('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->documentManager->setTypeError('E');
+            $this->documentManager->updateStatus('Error_sending');
             $this->logger->error('Failed to send document : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $response[$idDoc] = false;
         }
@@ -296,6 +313,13 @@ class solutioncore
 
             // Read data
             $readResult = $this->read($param);
+			// In case of error in an history call, we return directly the error
+			if (
+					$param['call_type'] == 'history'
+				AND !empty($readResult['error'])
+			) {
+				return $readResult;
+			}
 
             // Save the new rule params into attribut dataSource
             if (!empty($readResult['ruleParams'])) {
@@ -341,19 +365,17 @@ class solutioncore
                         break;
                     }
                 }
-
-                // Calculate the reference call
-                $result['date_ref'] = $this->getReferenceCall($param, $result);
-                if (empty($result['date_ref'])) {
-                    throw new \Exception('Failed to get the reference call.');
-                }
             } else {
                 // Init values if no result
                 $result['count'] = 0;
-                $result['date_ref'] = $param['date_ref'];
             }
+			// Calculate the reference call
+			$result['date_ref'] = $this->getReferenceCall($param, $result);
+			if (empty($result['date_ref'])) {
+				throw new \Exception('Failed to get the reference call.');
+			}
         } catch (\Exception $e) {
-            $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $result['error'] = (!empty($param['rule']['id']) ? 'Error in rule '.$param['rule']['id'].' : ' : 'Error : ').$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
         return $result;
@@ -650,8 +672,11 @@ class solutioncore
 							// Calculation of all target fields where the source field exists
 							if(array_search($field, $fieldsArray) !== false) {
 								$param['id_doc_myddleware'] = $docId;
-								$param['api'] = $this->api;				
-								$documentManager = new DocumentManager($this->logger, $this->connection, $this->entityManager, $this->documentRepository, $this->ruleRelationshipsRepository, $this->formulaManager);
+								$param['api'] = $this->api;	
+								// Create new documentManager with a clean entityManager
+								$chlidEntityManager = clone $this->entityManager;
+								$chlidEntityManager->clear();								
+								$documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager);
 								$documentManager->setParam($param);			
 								$send['data'][$docId][$ruleField['target_field_name']] = $documentManager->getTransformValue($send['source'][$docId], $ruleField);			
 							}
@@ -978,6 +1003,14 @@ class solutioncore
     }
 
     /**
+     * @throws \Exception
+     */
+    public function beforeGetBidirectionalRules($param, $type)
+    {
+        return $param;
+    }
+
+    /**
      * @throws \Doctrine\DBAL\Exception
      * @throws \Exception
      */
@@ -1037,10 +1070,11 @@ class solutioncore
     // Method de find the date ref after a read call
     protected function getReferenceCall($param, $result)
     {
+		// Keep the same date ref if no result
+		if (empty($result['count'])) {
+			return $param['date_ref'];
+		}
         // Result is sorted, the last one is the oldest one
         return end($result['values'])['date_modified'];
     }
-}
-class solution extends solutioncore
-{
 }

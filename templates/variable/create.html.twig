@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ parent() }} | {{ 'variable.create_new'|trans }}{% endblock %}
+
+{% block titlesm %}{{ 'variable.create_new'|trans }}{% endblock titlesm %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="text-center m-5">
+            <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2"> {{ 'variable.back_to_list'|trans }}</a>
+        </div>
+        
+        {{ form_start(form) }}
+        <div class="mb-3">
+            <div class="card-header mb-4">
+                {{ 'variable.create_new'|trans }}
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    {{ form_row(form.name) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.value) }}
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    {{ form_row(form.description) }}
+                </div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

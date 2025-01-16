@@ -35,7 +35,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Entity(repositoryClass="App\Repository\RuleRepository")
  * @ORM\HasLifecycleCallbacks()
  *
- * @ORM\Table(name="rule", indexes={@ORM\Index(name="Krule_name", columns={"name"})})
+ * @ORM\Table(name="rule", indexes={
+ *	 @ORM\Index(name="Krule_name", columns={"name"}),
+ *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"})
+ * })
  */
 class Rule
 {
@@ -152,6 +155,13 @@ class Rule
      */
     private $audits;
 
+     /**
+     * @var Workflow[]
+     *
+     * @ORM\OneToMany(targetEntity="Workflow", mappedBy="rule")
+     */
+    private $workflows;
+
     /**
      * @var Document[]
      *
@@ -159,6 +169,17 @@ class Rule
      * @ORM\OrderBy({"sourceDateModified" : "ASC"})
      */
     private $documents;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="RuleGroup")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=true)
+     */
+    private ?RuleGroup $group = null;
+	
+	/**
+     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
+     */
+    private string $readJobLock;
 
     public function __construct()
     {
@@ -169,6 +190,7 @@ class Rule
         $this->fields = new ArrayCollection();
         $this->audits = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->workflows = new ArrayCollection();
     }
 
     /**
@@ -285,6 +307,20 @@ class Rule
     public function getNameSlug(): string
     {
         return $this->nameSlug;
+    }
+	
+	public function setReadJobLock($readJobLock): self
+    {
+        $this->readJobLock = $readJobLock;
+        return $this;
+    }
+
+    public function getReadJobLock(): string
+    {
+        if (empty($this->readJobLock)) {
+            return '';
+        }
+        return $this->readJobLock;
     }
 
     public function setConnectorSource(Connector $connectorSource): self
@@ -522,6 +558,34 @@ class Rule
         return $this;
     }
 
+	/**
+     * @return Collection|Workflow[]
+     */
+    public function getWorkflows(): Collection
+    {
+        return $this->workflows;
+    }
+
+    public function addWorkflows(Workflow $workflow): self
+    {
+        if (!$this->workflows->contains($workflow)) {
+            $this->workflows[] = $workflow;
+            $workflow->setRule($this);
+        }
+        return $this;
+    }
+
+    public function removeWorkflow(Workflow $workflow): self
+    {
+        if ($this->workflows->removeElement($workflow)) {
+            // set the owning side to null (unless already changed)
+            if ($workflow->getRule() === $this) {
+                $workflow->setRule(null);
+            }
+        }
+        return $this;
+    }
+
     /**
      * @return Collection|Document[]
      */
@@ -675,4 +739,17 @@ class Rule
     {
         return isset($this->moduleTarget);
     }
+	
+	public function setGroup(?RuleGroup $group): self
+    {
+        $this->group = $group;
+
+        return $this;
+    }
+
+    public function getGroup(): ?RuleGroup
+    {
+        return $this->group;
+    }
+
 }

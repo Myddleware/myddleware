@@ -23,8 +23,22 @@
 # *********************************************************************************/
 
 panel:
+    data: Your data
+    features:
+        title: Unlock new featues with Myddleware Premium
+    contact:
+        title: Contact us
+        title2: Need technical assistance
+        text1: For any technical issues, bugs, or development-related inquiries, feel free to contact us through the following channels
+        text2: Technical contact 
+        text3: GitHub Repository, view or report issues directly on our
+        title3: New projects or buisiness opportunities ?
+        text4: To discuss a new project, collaboration, or business opportunities, please reach out to us at the following address
+        text5: Business contact
+    documents:
+        title: Documents sent by Myddleware
     solutions:
-        title: Start by connecting these applications
+        title: Connect your data
         click: Click to see how to create this connector.
     graph_tranfer_rule:
         desc: Documents sent by rule
@@ -182,6 +196,13 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectional
         duplicate_fields: Fields to avoid duplicates
+        read_job_lock: Unlock job
+        read_job_lock_success: The job has been unlocked
+        read_job_lock_error: An error occurred while unlocking the job
+        order: Order
+        status: Status
+        workflows: Workflows
+        workflow_create: Create a new workflow
     connector:
         title: Connector
         solution: Solution
@@ -192,6 +213,9 @@ view_rule:
         formula: Formula
         module_target: Target module
         module_source: Source Module
+        comment: Comment
+        add_comment: Save
+        comment_title: Add/Edit comment
     relate:
         empty: No relation
         solution_source: Source
@@ -214,8 +238,41 @@ rule:
     yourtarget: Your target solution
     help: What should I do ?
 
+rulegroup:
+    list: Rule groups
+    title: Rule groups
+    create: Create a new rule group
+    back: Back to the list
+    title_one: Rule group
+    name: Name
+    description: Description
+    status: Status
+    create_by: Created by
+    modified_by: Modified by
+    delete: Delete
+    edit: Edit
+    updated_successfully: Rule group updated successfully
+    rules: List of rules
+    rule_removed_successfully: Rule removed successfully
+    no_rules: No rules in this group
+    rule:
+        name: Name
+        module_source: Source module
+        module_target: Target module
+        active: Active
+        confirm_remove_rule: Are you sure you want to remove this rule from the group?
+    add_rule: 'Add Rule'
+    select_rule: 'Select Rule'
+    rule_added_successfully: 'Rule added successfully'
+    confirm_transfer_title: 'Confirm Rule Transfer'
+    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
+    confirm_transfer: 'Yes, transfer rule'
+    confirm_transfer_final: 'Confirm and transfer rule'
+    cancel: 'Cancel'
+    no_available_rules: 'No available rules'
+
 list_rule:
-    title: List of rules
+    title: Rules
     total: Number of rules
     empty: You do not have any rules yet !
     delete: Are you sure you want to delete this rule?
@@ -285,6 +342,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Edit
+        back: Back to the list
         save: Save
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
@@ -308,13 +367,18 @@ list_flux:
         filter: Filter
         filter_delete: Clear all filters
         cancel: Cancel documents
+        cancel_tooltip: This cancels the documents, they will not be sent.
         reloadcancel: Cancel and rerun documents
+        unlockall: Unlock all documents
+        mass_unlock_confirm: Unlock the selected documents?
         mass_cancel_confirm: Cancel the selected documents?
         reload: Reload documents
+        reload_tooltip: This reloads the documents with the same data and the same id, nothing changes.
         mass_reload_confirm: Reload the selected documents?   
         delete: Delete documents
         mass_delete_confirm: Delete the selected documents?
         exportcsv: Export Documents
+        unlockall_tooltip: If the document are locked by another process, they will be unlocked so they can be accessed again.
     filter:
         delete_confirm: Are you sure you want to delete the research filters?
         date_created: Creation date
@@ -337,6 +401,7 @@ list_flux:
         module_target: Module target
         module_source: Module source
         reference: Reference
+        message : Log
     tab:
         id: Doc Id
         name: Name
@@ -368,6 +433,7 @@ flux:
         found: Found
         filter: Filter Cancelled
         no_send: Not sent
+        Error_expected: Erreur expected
         cancel: Sending cancelled
         filter_ko: Filter error
         create_ko: Creation error
@@ -377,6 +443,7 @@ flux:
         error_checking: Checking error
         error_sending: Sending error
         not_found: Not found
+        Error_workflow: Workflow error
     type:
         update: Update
         create: Create
@@ -394,12 +461,20 @@ view_flux:
     nbChildDocuments: Child documents
     nbParentDocuments: Parent documents
     nbHistoryDocuments: Documents history
+    nbnbWorflowLogs: Workflow logs
     nbPostDocuments: Post documents    
     direct_link: Direct link    
+    comment: Add log
+    unlocked_successfully: Document unlocked successfully
     btn:
         reload: Reload the document
         cancel: Cancel the document 
         readrecord: Run the same record
+        unlock: Unlock the document
+        tooltip:
+            reload: Reload the synchronization of this document
+            cancel: Cancel execution of this document
+            readrecord: Re-execute the processing of this document
     header:
         rule: Rule
         statut: Status
@@ -419,6 +494,18 @@ view_flux:
         date_created: Creation date
         type: Type
         msg: Message
+    workflow_log:
+        id: "ID"
+        workflow: "Workflow"
+        job: "Job"
+        trigger_document: "Trigger Document"
+        generate_document: "Generate Document"
+        created_by: "Created By"
+        status: "Status"
+        date_created: "Date Created"
+        message: "Message"
+        action_name: "Action Name"
+        action_type: "Action Type"
 
 list_task:
     total: Total of tasks
@@ -437,8 +524,9 @@ list_task:
         api: Api
         error: Error
 
+
 view_task:
-    empty_log: No log  
+    empty_log: No log 
     task_stop: STOP TASK
     refresh: REFRESH
     nblogs: Number of logs  
@@ -456,6 +544,75 @@ view_task:
         type: Type
         msg: Message         
 
+list_workflow:
+    total: Total of workflows
+    empty: No workflows
+    searchruleName: Search by rule name
+    searchName: Search by name
+    th:
+        id: Id
+        ruleName: Rule name
+        name: Name
+        description: Description
+        condition: Condition
+        active: Active
+        actions: Actions
+        order: Order
+        option: Options
+view_workflow:
+    title: Workflow
+    create: Create a new workflow
+    edit: Edit the workflow
+    title2: Condition Field
+    condition: The condition field is automatically generated with the string {status} == ", and the opening parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
+    condition2: In short, all you need is to write the status name and we do the rest !
+    back: Back to the list
+    delete: Delete the workflow
+    description: Description
+    rule: Rule
+    conditions: Conditions
+    status: Active
+    actions_list: List of Actions
+    create_action: Create a new action for this workflow
+    name: Name
+    action: Action
+    order: Order
+    arguments: Arguments
+    logs: Workflow Logs
+    log_id: ID
+    workflow: Workflow
+    job: Job
+    trigger_document: Trigger Document
+    generate_document: Generate Document
+    created_by: Created By
+    date_created: Date Created
+    message: Message
+    action_name: Action Name
+    action_type: Action Type
+    add_action: Add Action
+    create_by: Created By
+    cancel_edit: Cancel edit
+    save: Save
+    cancel: Cancel
+view_workflow_action:
+    title2: Workflow Action
+    title: Workflow Action Details
+    edit: Edit this Action
+    delete: Delete this Action
+    confirm_delete: Are you sure you want to delete this Action?
+    workflow: Workflow
+    action: Action
+    order: Order
+    back_to_workflow: Back to the workflow
+    create: Create a new action
+    multiple_runs: Multiple Runs
+    multiple_runs_yes: Yes
+    multiple_runs_no: No
+    create_new_workflow_action: Create a new workflow action
+    cancel_edit: Cancel edit
+    back: Back to the workflow
+    save: Save
+    cancel: Cancel
 view_account:
     title: My account
     user_info: My information
@@ -472,9 +629,10 @@ view_account:
 function:
     all: All
     category:
-        mathematical: Maths
+        mathematical: Function
         text: Text
         date: Date and hour  
+        constant: Constant  
     description:
         text: 
             trim:  Delete the spaces (or other characters) at the beginning and the end of each string 
@@ -491,6 +649,7 @@ function:
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert all applicable characters to HTML entities
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert special characters to HTML entities
             chr: chr ( int $bytevalue ) Generate a single-byte string from a number
+            lookup: lookup ( string $field, string $rule, <optional> errorIfEmpty (default = false), <optional> errodIfNoFound (default = true)). Search the corresponding value of the $field in the rule $rule. 
         mathematical:
             round: Rounding a floating point number
             ceil: Rounding up
@@ -500,6 +659,11 @@ function:
             microtime: Return the current Unix timestamp with the microseconds
             changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter
             changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter
+        constant:
+            mdw_no_send_field: Do not send the field
+            mdw_cancel_document: Cancel the document
+            mdw_error_transformed: Set status error transformed
+            mdw_document_type: Document type (C, U ou D)
 
 solution:
     fields:
@@ -600,52 +764,69 @@ title:
     account:
         view: My account
     index:
-        panel: Control panel
+        panel: Welcome to Myddleware !
+        text: We're excited to have you on board !
+        text2: Start your project now by giving a look to our documentation.
+        btn: Start now !
     rule:
         create_name: Creation of the rule
         create: Creation of a rule
         edit: Editing the rule
-        list: Rules list
-        view: Rule form
+        list: Rules
+        view: Rule
     connector:
         create: Creation of a connector
         edit: Editing the connector
-        list: Connectors list
+        list: Connectors
     flux: 
-        list: documents list
+        list: Documents
         view: document form
     task:
-        list: Tasks list
+        list: Tasks
         view: The task form
     credit:
         view: Credits purchases
     support:
         view: Interventions purchases
+    workflow:
+        list: Workflows
 
 menu:
     index: Homepage
+    rulegroup:
+        title: Rule groups
+        list: Rule groups
     rule:
         title: Rules
         createv1: Creation (v1)
-        createv2: Creation
-        list: List
+        createv2: Create Rule
+        list: Rules
     connector:
         title: Connectors
-        create: Creation
-        list: List
+        create: Create Connector
+        list: Connectors
     flux:
         title: Documents
-        list: List         
+        list: List    
+    variable:
+        title: Documents
+        list: Variables
     job:
         title: Tasks
         list: List
     support: Support
+    workflow:
+        list: Workflows
+    task:
+        title: Tasks
+        stopall: Stop all tasks
+    nav_history: Navigation History
 
 breadcrumb:
-    rule_list: Rules list
-    transfert_list: Documents list
-    task_list: Tasks list
-    connector_list: Connectors list
+    rule_list: Rules
+    transfert_list: Documents
+    task_list: Tasks
+    connector_list: Connectors
 
 menu_user:
     account: My account
@@ -757,8 +938,23 @@ email_alert:
         %base_uri%</p>
 
         Kind regards,
+email_alert_same_doc_reference:
+    subject: Myddleware alert
+    body: |
+        Hello,
+        <p>There are several documents with the same reference date %reference_date% in the same rule. Please check the rule %rule_id% or the job %job_id%.</p>
+
+        %base_uri%
+
+        Kind regards,
+
 jobscheduler:
+    id: Id
     command: Command
+    output: Output
+    run_at: Run at
+    run_time: Run time
+    status_code: Status code
     date_created: Date created
     active: Active
     list: List
@@ -861,6 +1057,7 @@ install:
     role_admin: Please note that these credentials will have administrator access rights to Myddleware
     check_button: Check now 
     next: Next
+    setup_database_button: Setup database
     previous: Previous
     requirements_info: Let's check whether your server meets the requirements to run a Myddleware project.
     php_ini_error: WARNING ! No configuration file (php.ini) used by PHP!
@@ -869,6 +1066,7 @@ install:
     errors_to_do_message: You need to do the following before continuing
     recommendations_to_do_message: Optional recommendations to improve your setup
     note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
+    database_already_exists: A database already exists in the .env.local file. Please remove it to continue the installation.
 crontab:
     title: Jobscheduler with crontab
     title_cron: Crontab
@@ -888,10 +1086,14 @@ crontab:
     disableAllCrons: Your crontabs have been disabled
     enableAllCrons: Your crontabs have been enable
     create: Create crontab
+    running_instances: Running instances
+    max_instances: Max instances
+    results: Results
     massdisable: Disable all tasks
     massenable: Enable all tasks
     enableCron: On
     disableCron: Off
+    title_cronjobresult: Crontab results
     period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
     max_instance_help: A maximum instance limit for new tasks
     help:  > 
@@ -906,3 +1108,32 @@ duplicate_rule:
     new_rule: New rule
     success_duplicate: Your rule has been well duplicated
 banner: Crontab is disabled
+variable:
+  back_to_list: Back to the list
+  save: Save
+  editing: Editing of a variable
+  total: Total of Variables
+  btn:
+    edit: Edit
+    delete: Delete
+    view: View
+  create_new: Create a new variable
+  list_title: Variables
+  confirm_delete: Are you sure you want to delete this variable?
+  no_variables: No variables found.
+  table_headers:
+    name: Name
+    value: Value
+    actions: Actions
+    description: Description
+premium:
+    upgrade:
+        title_main: "Upgrade to Premium"
+        title: "Unlock Premium Features"
+        description: "Get access to exclusive features and support by upgrading to the premium version of Myddleware."
+        button: "Buy Premium"
+        benefits:
+            title: "Premium Benefits"
+            benefit1: "Benefit 1 description"
+            benefit2: "Benefit 2 description"
+            benefit3: "Benefit 3 description"

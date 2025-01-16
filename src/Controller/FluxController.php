@@ -27,35 +27,40 @@
 namespace App\Controller;
 
 			   
-use App\Entity\Job;					
-use App\Entity\Config;
-use App\Entity\Document;
-use App\Form\Type\DocumentCommentType;							
-use App\Entity\DocumentAudit;
-use App\Entity\DocumentData;
-use App\Entity\DocumentRelationship;
+use Exception;
 use App\Entity\Log;
 use App\Entity\Rule;
-use App\Manager\DocumentManager;
-use App\Manager\JobManager;
-use App\Manager\SolutionManager;
-use App\Repository\DocumentRepository;
-use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Exception\NotValidCurrentPageException;
+use App\Entity\Config;
+use App\Entity\Document;
+use App\Entity\Job;					
 use Pagerfanta\Pagerfanta;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Entity\WorkflowLog;
+use App\Manager\JobManager;
+use App\Entity\DocumentData;
+use App\Entity\DocumentAudit;
+use App\Service\SessionService;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
+use App\Entity\DocumentRelationship;
+use Pagerfanta\Adapter\ArrayAdapter;
+use App\Repository\DocumentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use App\Form\Type\DocumentCommentType;							
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Manager\ToolsManager;
+
 
 /**
  * @Route("/rule")
@@ -69,14 +74,15 @@ class FluxController extends AbstractController
     private JobManager $jobManager;
     private SolutionManager $solutionManager;
     private DocumentRepository $documentRepository;
-
+    private ToolsManager $toolsManager;
     public function __construct(
         SessionService $sessionService,
         TranslatorInterface $translator,
         JobManager $jobManager,
         SolutionManager $solutionManager,
         DocumentRepository $documentRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ToolsManager $toolsManager
     ) {
         $this->sessionService = $sessionService;
         $this->translator = $translator;
@@ -84,6 +90,7 @@ class FluxController extends AbstractController
         $this->solutionManager = $solutionManager;
         $this->documentRepository = $documentRepository;
         $this->entityManager = $entityManager;
+        $this->toolsManager = $toolsManager;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -128,7 +135,7 @@ class FluxController extends AbstractController
             $this->sessionService->removeFluxFilter();
         }
 
-        return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
     }
 
     /**
@@ -504,22 +511,17 @@ class FluxController extends AbstractController
                 document.type, 
                 document.attempt, 
                 document.global_status, 
-                users.username, 
                 rule.name as rule_name, 
                 rule.id as rule_id 
             FROM document 
                 INNER JOIN rule	
-                    ON document.rule_id = rule.id
-                INNER JOIN users
-                    ON document.created_by = users.id "
+                    ON document.rule_id = rule.id "
                 .$join. 
             " WHERE 
                     document.deleted = 0 "
                     .$where.
             " ORDER BY document.date_modified DESC"
             ." LIMIT ". $limit;
-            
-        
         $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content
@@ -597,8 +599,8 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
     {
         try {
 
-            $documentPage = (int)$page;
-            $logPage = (int)$logPage;
+            $documentPage = $request->attributes->get('page', 1);
+            $logPage = $request->attributes->get('logPage', 1);
 
             $session = $request->getSession();
             $em = $this->getDoctrine()->getManager();
@@ -770,48 +772,57 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
 $documentPagination = $this->nav_pagination_documents($docParams, false);
 $logPagination = $this->nav_pagination_logs($logParams, false);
 
-$formComment = $this->createForm(DocumentCommentType::class, null);
+// $formComment = $this->createForm(DocumentCommentType::class, null);
 
 
-            $formComment->handleRequest($request);
-            if ($formComment->isSubmitted() && $formComment->isValid()) {
-                $comment = $formComment->getData()['comment'];
+//             $formComment->handleRequest($request);
+//             if ($formComment->isSubmitted() && $formComment->isValid()) {
+//                 $comment = $formComment->getData()['comment'];
 				
-                // create new job
-                $job = new Job();
-                $job->setBegin(new \DateTime());
-                $job->setEnd(new \DateTime());
-                $job->setParam('notification');
-                $job->setMessage('Comment log created. Comment: '.$comment);
-                $job->setOpen(0);
-                $job->setClose(0);
-                $job->setCancel(0);
-                $job->setManual(1);
-                $job->setApi(0);
-                $job->setError(0);
-                $job->setStatus('End');
-                $job->setId(uniqid(mt_rand(), true));
+//                 // create new job
+//                 $job = new Job();
+//                 $job->setBegin(new \DateTime());
+//                 $job->setEnd(new \DateTime());
+//                 $job->setParam('notification');
+//                 $job->setMessage('Comment log created. Comment: '.$comment);
+//                 $job->setOpen(0);
+//                 $job->setClose(0);
+//                 $job->setCancel(0);
+//                 $job->setManual(1);
+//                 $job->setApi(0);
+//                 $job->setError(0);
+//                 $job->setStatus('End');
+//                 $job->setId(uniqid(mt_rand(), true));
                 
-                $em->persist($job);
-                $em->flush();
+//                 $em->persist($job);
+//                 $em->flush();
                 
-                // Add log to indicate this action
-                $log = new Log();
-                $log->setCreated(new \DateTime());
-                $log->setType('I');
+//                 // Add log to indicate this action
+//                 $log = new Log();
+//                 $log->setCreated(new \DateTime());
+//                 $log->setType('I');
                 
-                $log->setRule($rule);
-                $log->setJob($job);
-                $log->setMessage($comment);
-                $log->setDocument($doc[0]);
-                $em->persist($log);
-                $em->flush();
+//                 $log->setRule($rule);
+//                 $log->setJob($job);
+//                 $log->setMessage($comment);
+//                 $log->setDocument($doc[0]);
+//                 $em->persist($log);
+//                 $em->flush();
                 
-                $this->addFlash('success', 'Comment successfully added !');
+//                 $this->addFlash('success', 'Comment successfully added !');
 
-                // Redirect the route to avoid resubmitting the form according to the PRG pattern
-                return $this->redirectToRoute('flux_info', ['id' => $id]);
-            }
+//                 // Redirect the route to avoid resubmitting the form according to the PRG pattern
+//                 return $this->redirectToRoute('flux_info', ['id' => $id]);
+            // }
+
+            // show the workflows logs from the table workflowlog related this document, we are looking for the field trigger_document_id in the table workflowlog
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['triggerDocument' => $id],
+                ['id' => 'DESC']
+            );
+
+           // $firstParentDocumentId = $parentDocuments[0]->getId();
+
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
@@ -834,17 +845,21 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
                     'parent_documents' => $parentDocuments,
                     'parent_Documents_Rule' => $parentDocumentsRule,
                     'nb_parent_documents' => count($parentDocuments),
+                    //'firstParentDocumentId' => $firstParentDocumentId,
                     'history_documents' => $documentPagination['entities'],
-                    'nb_history_documents' => count($documentPagination['entities']),
+                    'nb_history_documents' => $documentPagination['nb'],
+                    'nb_logs' => $logPagination['nb'],
                     'ctm_btn' => $list_btn,
                     'read_record_btn' => $solution_source->getReadRecord(),
                     'timezone' => $timezone,
-					'formComment' => $formComment->createView(),
+					// 'formComment' => $formComment->createView(),
                     'logs' => $logs,
                     'documentPagination' => $documentPagination,
                     'logPagination' => $logPagination,
                     'documentPage' => $documentPage,
                     'logPage' => $logPage,
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow_logs' => count($workflowLogs),
                 ]
             );
         } catch (Exception $e) {
@@ -975,16 +990,16 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
      */
     public function fluxMassCancelAction()
     {
+
+        // if we are not premium, then return
+        if (!$this->toolsManager->isPremium()) {
+            exit;
+        }
+
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
         }
-																			   
-																	
-														   
-											
-												 
-			 
-		 
+
         exit;
     }
 
@@ -993,6 +1008,11 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
      */
     public function fluxMassRunAction()
     {
+
+        if (!$this->toolsManager->isPremium()) {
+            exit;
+        }
+
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $this->jobManager->actionMassTransfer('rerun', 'document', $_POST['ids']);
         }
@@ -1146,6 +1166,60 @@ $formComment = $this->createForm(DocumentCommentType::class, null);
             return;
         } catch (Exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * @Route("/document/unlock/{id}", name="document_view")
+     */
+    public function unlockDocument($id) {
+        try{
+            $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
+
+            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+        } catch (Exception $e) {
+            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    }
+
+    /**
+     * @Route("/flux/unlock", name="flux_mass_unlock")
+     */
+    public function unlockDocuments(Request $request) {
+        try {
+
+            if (!$this->toolsManager->isPremium()) {
+                exit;
+            }
+
+            $ids = $request->request->get('ids', []);
+            if (empty($ids)) {
+                return new JsonResponse(['error' => 'No documents selected'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $result = $this->jobManager->massAction('unlock', 'document', $ids, false, null, null);
+            if (!$result) {
+                // Return a success message indicating no documents were unlocked
+                return new JsonResponse(['success' => true, 'message' => 'No documents were unlocked because they were already unlocked.']);
+            }
+
+            return new JsonResponse(['success' => true, 'message' => 'Documents unlocked successfully.']);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @Route("/read_job_lock/clear/{id}", name="clear_read_job_lock", methods={"POST"})
+     */
+    public function clearReadJobLock($id) {
+        try {
+            $this->jobManager->clearLock('rule', [$id]);
+
+            return new JsonResponse(['status' => 'success', 'message' => 'Verrouillage effacé avec succès.']);
+        } catch (Exception $e) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
         }
     }
 }

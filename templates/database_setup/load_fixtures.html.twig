@@ -5,17 +5,16 @@
 {% block title %}{% endblock %}
 {% block body %}
 <div id="myd_top"></div>
-<div class="container">
-    <div class="row">
+<div class="container-fluid">
+    <div id="load-fixtures-container-fill-vertically" class="row main-requirements-box">
         <div class="col">
-            <p><span id="logo" class="logo-install"></span></p>
             <div class="row">
                 <div class="col">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white"> Install Step 4 : uploading database tables</div>
+                    <div class="text-center main-card">
+                        <h2 class="install-step-title">Install Step 4 : uploading database tables</h2>
                         <div class="card-body d-flex justify-content-center">
                             <div class="card col-6">
-                                <div class="card-header bg-success text-white">
+                                <div id="install-database-information-title" class="card-header bg-success text-white">
                                     Loading database tables
                                 </div>
                                 <div class="card-body ">
@@ -29,19 +28,16 @@
                                         {% endif %}
                                     {% endif %}
                                     <div class="btn-group d-flex justify-content-center mt-5">
-                                            <a href="{{ path('database_connect') }}" id="previous" role="button" class="btn btn-outline-secondary btn-lg">
-                                                <i class="fas fa-arrow-left"></i>
+                                            <a href="{{ path('database_connect') }}" id="previous" role="button" class="btn btn-secondary btn-lg">
                                                 {{ 'install.previous' | trans }}
                                             </a>
                                         {% if connection_failed_message %}
                                             <button class="btn btn-outline-secondary btn-lg" id="next-btn" disabled>
                                                 {{ 'install.next' | trans }}
-                                                <i class="fas fa-arrow-right"></i>
                                             </button>
                                         {% elseif connection_success_message %}
-                                            <a href="{{ path('app_register') }}" id="next" class="btn btn-outline-primary btn-lg" role="button">
+                                            <a href="{{ path('app_register') }}" id="next" class="btn btn-primary btn-lg" role="button">
                                                 {{ 'install.next' | trans }}
-                                                <i class="fas fa-arrow-right"></i>
                                             </a>
                                         {% endif %}
                                     </div>

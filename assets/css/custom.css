@@ -1,8 +1,8 @@
 #logo {
-    background: url('./../images/template/logo.png') no-repeat;
-    background-size: 158px;
-    height: 113px;
-    width: 160px;
+    background: url('./../images/template/logo.jpg') no-repeat;
+    background-size: 209px;
+    height: 52px;
+    width: 240px;
     display: inline-block;
 }
 menu .caret, #myd_top .caret {
@@ -43,9 +43,11 @@ menu .caret, #myd_top .caret {
 }
 
 #fd-title {
-    background: url('./../images/template/fd-title.png') no-repeat;
-    height: 71px;
-    width: 293px;
+    background-color: #444446;
+    border-radius: 0px 40px 40px 0px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+    height: 66px;
+    width: 233px;
     display: inline-block;
     border: none;
     margin: 20px 20px 20px 0px;
@@ -245,6 +247,50 @@ menu .caret, #myd_top .caret {
 } 
 
 .btn{
-    border-radius: 0% !important;
+    border-radius: 25px !important;
 }
+
+.typewriter {
+    font-size: 3rem;
+    display: inline-block;
+    overflow: hidden;
+    border-right: .15em solid #000;
+    white-space: nowrap;
+    margin: 0;
+    letter-spacing: .15em;
+    animation: typing 3s steps(28, end), blink-caret 0.75s step-end infinite;
+    width: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 28ch; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #000 }
+}
+
+@keyframes hideCursor {
+    to {
+        border-right: transparent;
+    }
+}
+
+.btn {
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+i.fa-sharp.fa-solid.fa-arrow-right.fa-flip.fa-flip {
+    animation-duration: 3s;
+    animation-iteration-count: 2; 
+}
+
 

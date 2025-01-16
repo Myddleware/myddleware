@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class postgresqlcore extends database
+class postgresql extends database
 {
     protected $driver = 'pgsql';
 
@@ -41,12 +41,22 @@ class postgresqlcore extends database
     }
 
     // Generate query
-    protected function get_query_show_tables(): string
+    protected function get_query_show_tables($type): string
     {
-        return "SELECT *
+		// Read tables and views
+        return "SELECT schemaname, tablename
 				FROM pg_catalog.pg_tables
 				WHERE 	schemaname != 'pg_catalog'
-					AND schemaname != 'information_schema'";
+					AND schemaname != 'information_schema'
+				".
+			($type == 'source' ? 
+				"UNION
+					SELECT schemaname, viewname tablename
+					FROM pg_catalog.pg_views
+					WHERE 	schemaname != 'pg_catalog'
+						AND schemaname != 'information_schema'
+					" : 
+			"");
     }
 
     // Get all tables from the database
@@ -55,7 +65,7 @@ class postgresqlcore extends database
         try {
             $modules = [];
             // Send the query to the database
-            $q = $this->pdo->prepare($this->get_query_show_tables());
+            $q = $this->pdo->prepare($this->get_query_show_tables($type));
             $exec = $q->execute();
             // Error management
             if (!$exec) {
@@ -199,8 +209,4 @@ class postgresqlcore extends database
 
         return ' LIMIT '.$param['limit'].' OFFSET '.$param['offset'];
     }
-}
-
-class postgresql extends postgresqlcore
-{
 }

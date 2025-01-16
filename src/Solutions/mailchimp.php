@@ -27,7 +27,7 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-class mailchimpcore extends solution
+class mailchimp extends solution
 {
     protected string $apiEndpoint = 'https://<dc>.api.mailchimp.com/3.0/';
     protected $apiKey;
@@ -291,7 +291,4 @@ class mailchimpcore extends solution
         }
         throw new \Exception('curl extension is missing!');
     }
-}
-class mailchimp extends mailchimpcore
-{
 }

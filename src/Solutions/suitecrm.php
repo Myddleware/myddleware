@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class suitecrmcore extends solution
+class suitecrm extends solution
 {
     protected int $limitCall = 100;
     protected string $urlSuffix = '/service/v4_1/rest.php';
@@ -352,7 +352,17 @@ class suitecrmcore extends solution
                     }
                 }
             }
-
+			// Add field filecontents for notes module
+			if ($module == 'Notes') {
+				$this->moduleFields['filecontents'] = [
+					'label' => 'File contents',
+					'type' => 'text',
+					'type_bdd' => 'text',
+					'required' => 0,
+					'required_relationship' => 0,
+					'relate' => false,
+				];
+			}
             return $this->moduleFields;
         } catch (\Exception $e) {
             return false;
@@ -434,7 +444,6 @@ class suitecrmcore extends solution
                 'link_name_to_fields_array' => $link_name_to_fields_array,
                 'max_results' => $this->limitCall,
                 'deleted' => $deleted,
-                'Favorites' => '',
             ];
             $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
             // Construction des données de sortie
@@ -636,7 +645,7 @@ class suitecrmcore extends solution
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
-                    'name_value_lists' => $dataSugar,
+                    'name_value_list' => $dataSugar,
                 ];
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
 
@@ -775,7 +784,7 @@ class suitecrmcore extends solution
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
-                    'name_value_lists' => $dataSugar,
+                    'name_value_list' => $dataSugar,
                 ];
 
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
@@ -871,7 +880,7 @@ class suitecrmcore extends solution
                     } elseif ('Employees' == $param['module']) {
                         $query .= 'users.'.$key." = '".$value."' ";
                     } else {
-                        $query .= strtolower($param['module']).'.'.$key." = '".$value."' ";
+                        $query .= (substr($key,-2) == '_c' ? strtolower($param['module']).'_cstm' : strtolower($param['module'])).'.'.$key." = '".$value."' ";
                     }
                 }
             }
@@ -926,6 +935,7 @@ class suitecrmcore extends solution
     // Get the list of field (name and id) for each custom relationship
     protected function getCustomRelationshipListFields($module): array
     {
+		$result = array();
         $get_module_fields_parameters = [
             'session' => $this->session,
             'module_name' => $module,
@@ -990,7 +1000,4 @@ class suitecrmcore extends solution
             return false;
         }
     }
-}
-class suitecrm extends suitecrmcore
-{
 }

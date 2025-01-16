@@ -23,8 +23,22 @@
 # *********************************************************************************/
 
 panel:
+    data: Vos données
+    features:
+        title: Débloquer de nouvelles fonctionnalités avec Myddleware Premium
+    contact:
+        title: Contactez-nous
+        title2 : Besoin d'assistance technique
+        text1 : Pour tout problème technique, bogue ou question relative au développement, n'hésitez pas à nous contacter par les canaux suivants
+        text2 : Contact technique 
+        text3 : Dépôt GitHub, voir ou signaler des problèmes directement sur notre GitHub
+        title3 : Nouveaux projets ou opportunités d'affaires ?
+        text4 : Pour discuter d'un nouveau projet, d'une collaboration ou d'une opportunité commerciale, veuillez nous contacter à l'adresse suivante
+        text5 : Contact professionnel
+    documents:
+        title: Documents envoyés par Myddleware
     solutions:
-        title: Connectez dès à présent ces différentes solutions
+        title: Connectez vos données
         click: Cliquez pour savoir comment créer ce connecteur.
     graph_tranfer_rule:
         desc: Documents envoyés par règle
@@ -180,6 +194,13 @@ view_rule:
         mode: Mode
         bidirectional: Bidirectionnelle
         duplicate_fields: Champs de dédoublonnage
+        read_job_lock: DébloquerDébloqué
+        read_job_lock_success: La régle a bien été débloqué
+        read_job_lock_error: Impossible de débloquer la règle
+        order: Ordre
+        status: Statut
+        workflows: Workflows
+        workflow_create: Créer un nouveau workflow
     connector:
         title: Connecteur
         solution: Solution
@@ -190,6 +211,9 @@ view_rule:
         formula: Formule
         module_target: Module Cible
         module_source: Module Source
+        comment: Commentaire
+        add_comment: Sauvegarder
+        comment_title: Ajouter/Modifier le commentaire
     relate:
         empty: Aucune relation
         solution_source: Source
@@ -213,8 +237,40 @@ rule:
     yourtarget: Votre solution cible
     help: Que dois-je faire ?
 
+rulegroup:
+    list: Groupes de règles
+    title: Groupes de règles
+    create: Créer un nouveau groupe de règles
+    back: Retour à la liste
+    title_one: Groupe de règles
+    name: Nom
+    description: Description
+    status: Statut
+    create_by: Créé par
+    modified_by: Modifié par
+    delete: Supprimer
+    edit: Editer
+    updated_successfully: Groupe de règles modifié avec succès
+    rules: Liste des règles
+    rule_removed_successfully: Règle supprimée avec succès
+    no_rules: Aucune règle dans ce groupe
+    rule:
+        name: Nom
+        module_source: Module source
+        module_target: Module cible
+        active: Activation
+        confirm_remove_rule: Êtes-vous sûr de vouloir supprimer cette règle du groupe ?
+    add_rule: Ajouter une règle
+    select_rule: Sélectionner une règle
+    rule_added_successfully: Règle ajoutée avec succès
+    confirm_transfer_title: Confirmer le transfert de la règle
+    confirm_transfer_message: La règle "%rule%" est actuellement dans le groupe "%currentGroup%". Voulez-vous la transférer dans "%newGroup%"?
+    confirm_transfer: Oui, transférer la règle
+    cancel: Annuler
+    no_available_rules: Aucune règle disponible
+    confirm_transfer_final: Confirmer et transférer la règle
 list_rule:
-    title: Liste des règles
+    title: Règles
     total: Nombre de règles
     empty: Vous n'avez pas encore de règle !
     delete: Etes-vous sûr de vouloir supprimer cette règle ?
@@ -284,6 +340,8 @@ list_connector:
 
 view_connector:
     btn:
+        edit: Editer
+        back: Retour
         save: Sauvegarder
         delete: Supprimer
         confirm_delete: Confirmez-vous la suppression de ce connecteur ?
@@ -306,13 +364,18 @@ list_flux:
         filter: Filtrer
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
+        cancel_tooltip: Cela annule les documents, ils ne seront pas envoyés.
+        unlockall: Débloquer les documents
+        mass_unlock_confirm: Débloquer les documents sélectionnés ?
         reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
+        reload_tooltip: Cela relance les documents avec les mêmes données et le même identifiant, rien ne change.
         mass_reload_confirm: Relancer les documents selectionnés ?
         delete: Supprimer documents
         mass_delete_confirm: Supprimer les documents sélectionnés ?
         exportcsv: Exporter Documents
+        unlockall_tooltip: Si les documents sont verrouillés par un autre processus, ils seront déverrouillés pour pouvoir être accédés à nouveau.
     filter:
         delete_confirm: Êtes-vous sûr de vouloir effacer les filtres de recherche ?
         date_created: Date de création
@@ -335,6 +398,7 @@ list_flux:
         module_target: Module cible
         module_source: Module source
         reference: Référence
+        message : Message
     tab:
         id: Doc Id
         name: Nom
@@ -366,6 +430,7 @@ flux:
         found: Trouvé
         filter: Filtre annulé
         no_send: Non envoyé
+        Error_expected: Erreur attendue
         cancel: Envoi annulé
         filter_ko: Filtre en erreur
         create_ko: Création en erreur
@@ -375,6 +440,7 @@ flux:
         error_checking: Vérification en erreur
         error_sending: Envoi en erreur
         Not_found: Non trouvée
+        Error_workflow: Workflow en erreur
     type:
         update: Update
         create: Create
@@ -389,15 +455,23 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
+    comment: Ajouter un journal
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
+    nbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
-    direct_link: Lien direct  
+    direct_link: Lien direct
+    unlocked_successfully: Document déverrouillé avec succès
     btn:
         reload: Relancer le document
         cancel: Annuler le document 
         readrecord: Lancer la même donnée 
+        unlock: Débloquer le document
+        tooltip:
+            reload: Relancer la synchronisation de ce document
+            cancel: Annuler l'exécution de ce document
+            readrecord: Re-execute the processing of this document
     header:
         rule: Règle
         statut: Status
@@ -416,7 +490,20 @@ view_flux:
         job: Job
         date_created: Date de création
         type: Type
-        msg: Message
+        msg: Message    
+    workflow_log:
+        id: Id
+        workflow: Workflow
+        job: Job
+        trigger_document: Document déclencheur
+        generate_document: Document généré
+        created_by: Créé par
+        status: Statut
+        date_created: Date de création
+        message: Message
+        action_name: Nom de l'action
+        action_type: Type d'action
+
 
 list_task:
     total: Total de tâches
@@ -452,8 +539,77 @@ view_task:
         transfer: Document
         date_created: Date de création
         type: Type
-        msg: Message         
+        msg: Message     
 
+list_workflow:
+    total: Total des workflows
+    empty: Pas workflows
+    searchruleName: Rechercher par nom de règle
+    searchName: Rechercher par nom
+    th:
+        id: Id
+        RuleName: Nom de la règle
+        name: Nom
+        description: Description
+        condition: Condition
+        active: Actif
+        actions: Actions
+        order: Ordre
+        option: Options
+view_workflow:
+    title: Workflow
+    create: Créer un workflow
+    edit: Editer un workflow
+    title2: Condition de champs
+    condition: Le champ de condition est automatiquement généré avec la chaîne {état} == « , et la parenthèse ouvrante ainsi que l'opérateur ternaire ?"1":"0") seront ajoutés automatiquement.
+    condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
+    back: Retour
+    delete: Supprimer le workflow
+    description: Description
+    rule: Règle
+    conditions: Conditions
+    status: Actif
+    actions_list: Liste des actions
+    create_action: Créer une nouvelle action pour ce workflow
+    name: Nom
+    action: Action
+    order: Ordre
+    arguments: Arguments
+    logs: Journaux de workflow
+    log_id: ID
+    workflow: Workflow
+    job: Tâche
+    trigger_document: Document déclencheur
+    generate_document: Document généré
+    created_by: Créé par
+    date_created: Date de création
+    message: Message
+    action_name: Nom de l'action
+    action_type: Type d'action
+    add_action: Ajouter une action
+    create_by: Créé par
+    cancel_edit: Annuler l'édition
+    save: Sauvegarder
+    cancel: Annuler
+view_workflow_action:
+    title2: Action du workflow
+    title: Détail de l'action du workflow
+    edit: Editer cette action
+    delete: Supprimer cette action
+    confirm_delete: Êtes-vous sûr de vouloir supprimer cette action ?
+    workflow: Workflow
+    action: Action
+    order: Ordre
+    back_to_workflow: Retour au workflow
+    create: Créer une action
+    multiple_runs: Multiple Runs
+    multiple_runs_yes: Oui
+    multiple_runs_no: Non
+    create_new_workflow_action: Créer une nouvelle action de workflow
+    cancel_edit: Annuler l'édition
+    back: Retour au workflow
+    save: Sauvegarder
+    cancel: Annuler
 view_account:
     title: Mon compte
     user_info: Mes informations
@@ -470,9 +626,10 @@ view_account:
 function:
     all: Toutes
     category:
-        mathematical: Maths
+        mathematical: Fonction
         text: Texte
-        date: Date et heure  
+        date: Date et heure
+        constant: Constante 
     description:
         text: 
             trim:  Supprime les espaces (ou d'autres caractères) en début et fin de chaîne 
@@ -489,6 +646,7 @@ function:
             htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit tous les caractères éligibles en entités HTML
             htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit les caractères spéciaux en entités HTML
             chr: chr ( int $bytevalue ) Générer une chaîne d'un octet à partir d'un nombre
+            lookup: lookup ( string $field, string $rule, <optional> errorIfEmpty (default = false), <optional> errodIfNoFound (default = true)). Cherche la correspondance du champ $field dans la règle $rule. 
         mathematical:
             round: Arrondit un nombre à virgule flottante
             ceil: Arrondit au nombre supérieur
@@ -498,6 +656,11 @@ function:
             microtime: Retourne le timestamp UNIX actuel avec les microsecondes
             changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le fuseau horaire de la date passée en premier paramètre
             changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convertit la date passée en premier paramètre dans le format passé en deuxième paramètre
+        constant:
+            mdw_no_send_field: Ne pas envoyer le champ
+            mdw_cancel_document: Annuler le document
+            mdw_error_transformed: Forcer une erreur de Transformation
+            mdw_document_type: Type de document (C, U ou D)
 
 solution:
     fields:
@@ -598,47 +761,65 @@ title:
     account:
         view: Mon compte
     index:
-        panel: Tableau de bord
+        panel: Bienvenue sur Myddleware !
+        text: Nous sommes ravis de vous compter parmi nous !
+        text2: Démarrez votre projet dès maintenant en consultant notre documentation.
+        btn: Commencer maintenant
     rule:
         create_name: Création de la règle
         create: Création d'une règle
         edit: Edition de la règle
-        list: Liste des règles
+        list: Règles
         view: Fiche de la règle
     connector:
         create: Création d'un connecteur
         edit: Edition du connecteur
-        list: Liste des connecteurs
+        list: Connecteurs
     flux: 
-        list: Liste des documents
+        list: Documents
         view: Fiche du document
     task:
-        list: Liste des tâches
+        list: Tâches
         view: Fiche de la tâche
     credit:
         view: Achats de crédits
     support:
         view: Achats d'interventions
-           
+    workflow:
+        list: Liste des workflows
+
+
 menu:
     index: Accueil
+    rulegroup:
+        title: Groupes de règles
+        list: Groupes de règles
     rule:
         title: Règles
         createv1: Création (v1)
-        createv2: Création
-        list: Liste
+        createv2: Créer une règle
+        list: Règles
     connector:
         title: Connecteurs
-        create: Création
-        list: Liste
+        create: Créer un connecteur
+        list: Connecteurs
     flux:
         title: Documents
-        list: Liste         
+        list: Liste   
+    variable:
+        title: Documents
+        list: Variables      
     job:
         title: Tâches
         list: Liste
     support: Support
         
+    workflow:
+        list: Workflows
+    task:
+        title: Tâches
+        stopall: Arrêter toutes les tâches
+    nav_history: Historique Navigation
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents
@@ -860,6 +1041,7 @@ install:
     requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
     check_button: Vérifier
     next: Suivant
+    setup_database_button: Configurer la base de données
     previous: Précédent
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     php_ini_error: ATTENTION ! Le fichier de configuration PHP (php.ini) n'a pas été trouvé!
@@ -868,6 +1050,7 @@ install:
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
+    database_already_exists: Une base de données existe déjà dans le fichier .env.local. Veuillez la supprimer pour continuer l'installation.
 
 crontab:
     title: Planificateur de travaux avec crontab
@@ -890,6 +1073,7 @@ crontab:
     massdisable: Désactiver toutes les tâches
     massenable: Activer toutes les tâches
     enableCron: On/Off
+    title_cronjobresult: Résultats Crontab
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
     help: > 
@@ -904,3 +1088,21 @@ duplicate_rule:
     new_rule: Nouvelle règle
     success_duplicate: Votre règle a été bien dupliquée
 banner: Crontab est désactivé
+variable:
+  back_to_list: Retour à la liste des variables
+  editing: Modification de la variable
+  save: Enregistrer
+  total: Total des Variables
+  btn:
+    edit: Modifier
+    delete: Supprimer
+    view: Voir
+  create_new: Créer une nouvelle variable
+  list_title: Variables
+  confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
+  no_variables: Aucune variable trouvée.
+  table_headers:
+    name: Nom
+    value: Valeur
+    actions: Actions
+    description: Description

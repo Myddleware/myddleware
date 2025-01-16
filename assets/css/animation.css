@@ -466,3 +466,81 @@ h2 { margin-top: 50px;}
 #form_click_filter {
 	width: 120px;
 }
+
+
+.text-left {
+    text-align: left !important;
+}
+
+#workflow_name_label, #rule_name_label {
+    padding-top: 5px;
+}
+
+#workflow_name, #rule_name {
+    height: 35px;
+    min-height: 35px !important;
+}
+
+#rulesearchbarcontainer {
+    display: flex;
+    margin-left: 4.9vw !important;
+}
+
+#dropdown-rulegroup {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-rulegroup-grey {
+    padding: 0.20rem 1rem !important;
+    color: #7777;
+}
+#dropdown-rulegroup:hover {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-workflow {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-workflow-grey  {
+    padding: 0.20rem 1rem !important;
+    color: #7777;
+}
+#dropdown-workflow:hover {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-variables {
+    padding: 0.20rem 1rem !important;
+}
+#dropdown-variables-grey {
+    padding: 0.20rem 1rem !important;
+    color: #7777;
+}
+#dropdown-variables:hover {
+    padding: 0.20rem 1rem !important;
+}
+
+#cancelflux-grey, #reloadflux-grey, #unlockAllFlux-grey {
+    color: #7777;
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.6; /* Optional: makes it look disabled */
+}
+
+#dropdown-cron {
+}
+#dropdown-cron-grey {
+    color: #7777;
+}
+
+.hover-image {
+    display: none; /* Initially hide the image */
+    position: absolute; /* Position it as needed */
+    top: 50px; /* Adjust based on your layout */
+    left: 50px; /* Adjust based on your layout */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+#filter-premium-container-grey {
+    color: #7777;
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.6; /* Optional: makes it look disabled */
+}

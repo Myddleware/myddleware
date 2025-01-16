@@ -231,13 +231,60 @@ class FormulaManager
         return $error;
     }
 
-    // Détecte si une chaine possède des accents
     private function accent($string): bool
     {
-        if (1 == preg_match('#[áàâäãåçéèêëíìîïñóòôöõúùûüýÿ]#', mb_strtolower($string))) {
-            return true;
+        // Detect encoding and convert to UTF-8 if necessary
+        $encoding = mb_detect_encoding($string);
+        if ($encoding != 'UTF-8') {
+            $string = mb_convert_encoding($string, 'UTF-8');
+        }
+    
+        $lowercaseString = mb_strtolower($string);
+        $iAccents = ["ì", "î",  "ï"];
+        $eAccents = ["è", "é", "ê", "ë"];
+        $cCedille = ["ç"];
+        $aAccents = ["à", "á", "â", "ã", "ä", "å"];
+        $oAccents = ["ò", "ó", "ô", "õ", "ö"];
+        $uAccents = ["ù", "ú", "û", "ü"];
+    
+    
+        // Check for each accent group separately
+        foreach ($iAccents as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
         }
 
+        foreach ($eAccents as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($cCedille as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($aAccents as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($oAccents as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($uAccents as $char) {
+            if (strpos($lowercaseString, $char) !== false) {
+                return true;
+            }
+        }
+    
         return false;
     }
 
@@ -246,7 +293,11 @@ class FormulaManager
     {
         if (count($tabListe) > 0) {
             foreach ($tabListe as $l) {
-                if (preg_match('#[^[:alnum:]_.]#u', $l) || $this->accent($l)) {
+                $pregMatchResult = preg_match('#[^[:alnum:]_.¿]#u', $l);
+                if ($pregMatchResult) {
+                    ++$error;
+                }
+                if ($this->accent($l)) {
                     ++$error;
                 }
             }
@@ -270,7 +321,6 @@ class FormulaManager
 
         // ----------- secure
         $string = trim($string);
-        $string = strip_tags($string);
 
         // ----- remove control characters -----
         $string = str_replace("\r", '', $string);    // --- replace with empty space

@@ -20,74 +20,124 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends "baseone.html.twig" %}
-{% block title %}{{ parent() }} | {{ 'login.title'|trans }}{% endblock %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'login.title'|trans }}
+{% endblock %}
 {% set body_class = 'login' %}
 {% block body %}
-	<div id="myd_connexion">
-		<div class="white">
-			<p class="text-center"><span class="logo"></span></p>
-				<form id="mydlogin" method="post" class="form-inline" role="form" action="{{ path('login') }}">
+	<div
+		id="myd_login-container" class="d-flex">
+		<!-- Partie blanche pour le formulaire de connexion -->
+		<div class="col-md-6 login-box p-5">
+			<div class="login-logo"></div>
+			<h2 class="login-title">Sign in</h2>
+			<form id="myd_login-form" method="post" class="form-inline" role="form" action="{{ path('login') }}">
 				{% if attempt < 6 %}
-				<div class="">
-					<input type="text" autocomplete='off' class="form-control mb-2" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
-					<input type="password" autocomplete='off' class="form-control mb-2" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
-					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
-			
-				{% if error %}
-					<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
-						<i class="fas fa-times"></i>
-						<p class="ms-2">
-							{{ error|trans }} <span> ( {{ attempt }} ) </span>
+					<div class="login-inputs">
+						<input type="text" autocomplete='off' class="form-control mb-2" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
+						<input type="password" autocomplete='off' class="form-control mb-2" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
+						<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+						{% if error %}
+							<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
+								<i class="fas fa-times"></i>
+								<p class="ms-2">{{ error|trans }}
+									<span>
+										(
+										{{ attempt }}
+										)
+									</span>
+								</p>
+							</div>
+						{% else %}
+							<div id="error_message" style="display:none;" class="alert alert-danger" role="alert">
+								<i class="fas fa-times"></i>
+								<div>{{ 'login.error_session'|trans }}</div>
+							</div>
+						{% endif %}
+						<button type="submit" class="btn btn-primary mb-2">{{ 'login.connexion'|trans }}</button>
+						<p>
+							<a class="password-reset-link" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a>
 						</p>
 					</div>
 				{% else %}
-					<div id="_error" style="display:none;" class="alert alert-danger" role="alert">
-						<i class="fas fa-times"></i>
-						<div>
-							{{ 'login.error_session'|trans }}
-						</div>
-					</div>
-				{% endif %}
-				<button type="submit" class="btn btn-success mb-2">{{ 'login.connexion'|trans }}</button>
-				<button style="display:none;" id="_submit" name="_submit" class="btn btn-outline-secondary text-white"></button>
-				<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
-				</div>
-				{% else %}
 					<div class="alert alert-danger" role="alert">
 						<span>
-						<i class="fas fa-times"></i>
-							Please wait :  {{ remaining.minute }}min {{ remaining.second }}s 
-						</span>
+							<i class="fas fa-times"></i>
+							Please wait :
+							{{ remaining.minute }}min
+							{{ remaining.second }}s</span>
 					</div>
-					<p><a class="fancybox" data-fancybox-type="iframe" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a></p>
-			{% endif %}
+					<p>
+						<a class="password-reset-link" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a>
+					</p>
+				{% endif %}
 			</form>
 		</div>
-		<div class="grey">
-			<p>Before trying to log in, please ensure you've completed the installation process</p>
-			<a href="{{ path('install_requirements')}}" role="button" class="btn btn-outline-secondary text-white">
-				Install Myddleware
-			</a>	
-			{% if platform_sh == true %}
-				<p><span class="logo_platform"></span></p>
-			{% else %}
-				<p><span class="logo_empty"></span></p>
-			{% endif %}
-			<p>
-				{% if password_message == true %}
-					<p>{{ 'login.platform.line1'|trans }}</p>
-					<p>{{ 'login.platform.line2'|trans }}</p>
-					<p class="login_warning">{{ 'login.platform.line3'|trans }}</p>
+
+		<!-- Partie grise pour les informations -->
+		<div class="login-info-box p-5">
+			<div class="login-info-content">
+				<p>Before trying to log in, please ensure you've completed the installation process</p>
+							{% for message in app.flashes('error_install') %}
+				<div class="alert alert-danger">
+					{{ message }}
+					</div>
+				{% endfor %}
+				<a href="{{ path('install_requirements') }}" class="btn btn-outline-secondary text-white">Install Myddleware</a>
+				{% if platform_sh %}
+					<p>
+						<span class="platform-logo"></span>
+					</p>
+				{% else %}
+					<p>
+						<span class="empty-logo"></span>
+					</p>
 				{% endif %}
+				<p>
+					{% if password_message %}
+						<p>{{ 'login.platform.line1'|trans }}</p>
+						<p>{{ 'login.platform.line2'|trans }}</p>
+						<p class="warning-message">{{ 'login.platform.line3'|trans }}</p>
+					{% endif %}
+				</p>
 				<p>{{ 'login.text_up_right'|trans }}</p>
-				<a href="http://www.myddleware.com" class="btn-mydinv btn btn-outline-secondary text-white" role="button" target="_blank">{{ 'login.btn.here'|trans }}</a>
-			</p>
+				<a href="https://web.myddleware.com/" class="external-link btn btn-outline-secondary text-white" target="_blank">{{ 'login.btn.here'|trans }}</a>
+			</div>
 		</div>
 	</div>
 	<script type="text/javascript">
 		var path_control = "{#{{ path('login_protect') }}#}";
 	</script>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('mydlogin');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        // Handle enter key in username field
+        usernameInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                passwordInput.focus();
+            }
+        });
+
+        // Handle enter key in password field
+        passwordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitButton.click();
+            }
+        });
+    });
+</script>
 {% endblock %}

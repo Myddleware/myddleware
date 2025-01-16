@@ -47,12 +47,12 @@ class ConnectorParamType extends AbstractType
             }
 
             foreach ($this->_solutionFieldsLogin as $f) {
+                $option['required'] = false;
                 if ($f['name'] == $connectorParam->getName()) {
                     $type = $f['type'];
                     $option['label'] = 'solution.fields.'.$f['name'];
                     if ('Symfony\Component\Form\Extension\Core\Type\PasswordType' == $type) {
                         $option['attr']['autocomplete'] = 'off';
-                        $option['attr']['value'] = $connectorParam->getValue(); // Force value of the password
                     }
                 }
             }

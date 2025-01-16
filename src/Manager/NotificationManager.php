@@ -109,7 +109,7 @@ class NotificationManager
         try {
 
             $this->sendAlertTaskTooLong();
-            $this->sendAlertLimitReached();
+            // $this->sendAlertLimitReached();
 
             return true;
 
@@ -152,6 +152,26 @@ class NotificationManager
         }
     }
 
+    /**
+     * Send alert if a batch of documents has the same reference while having more documents than the limit, which will cause a bottleneck. It takas an array of JobSettings as parameter. It returns true if the alert is sent using the function send() and false if the alert is not sent.
+     *
+     * @throws Exception
+     */
+    public function sendAlertSameDocReference(array $JobSettings): bool
+    {
+        $this->setConfigParam();
+        // we create a text mail with the rule id, the job id and the reference date, they are contained in the JobSettings array
+        $textMail = $this->translator->trans('email_alert_same_doc_reference.body', [
+            '%rule_id%' => $JobSettings['rule_id'],
+            '%job_id%' => $JobSettings['job_id'],
+            '%reference_date%' => $JobSettings['reference_date'],
+            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$JobSettings['job_id'].'/log' : ''),
+        ]);
+
+        return $this->send($textMail, $this->translator->trans('email_alert_same_doc_reference.subject'));
+
+    }
+
 
     /**
      * Send alert if limit reached.
@@ -171,23 +191,23 @@ class NotificationManager
         //Send Alerte
         if (!empty($newErrorLogs)) {
 
-        $textMail = "Des nouveaux logs d'erreur ont été trouvés :\n\n";
+			$textMail = "Des nouveaux logs d'erreur ont été trouvés :\n\n";
 
-        // TODO: à translate
-        foreach ($newErrorLogs as $log) {
-            $textMail .= "Date de création: " . $log['created']->format('Y-m-d H:i:s') . "\n";
-            $textMail .= "Type: " . $log['type'] . "\n";
-            $textMail .= "Message: " . $log['message'] . "\n\n";
-        }
+			// TODO: à translate
+			foreach ($newErrorLogs as $log) {
+				$textMail .= "Date de création: " . $log['created']->format('Y-m-d H:i:s') . "\n";
+				$textMail .= "Type: " . $log['type'] . "\n";
+				$textMail .= "Message: " . $log['message'] . "\n\n";
+			}
 
-        // TODO: check : envoyez l'e-mail
-        $this->send($textMail, "Alerte: Nouveaux logs d'erreur trouvés");
+			// TODO: check : envoyez l'e-mail
+			$this->send($textMail, "Alerte: Nouveaux logs d'erreur trouvés");
         }
         // Update alert_date_ref
         $currentDate = new \DateTime();
         $this->configRepository->setAlertDateRef($currentDate->format('Y-m-d H:i:s'));
 
-        }
+	}
 		
 	protected function send($textMail, $subject) {
 		// Get the email adresses of all ADMIN

@@ -134,43 +134,123 @@ $(function() {
 });
 
 // --For 'description' in the detail view of the rule
-$('.edit-button').on('click', function() {
-	var field = $(this).parent();
-	var editForm = field.find('.edit-form');
-	var valueField = field.find('.value');
-	var newValueField = editForm.find('textarea');
-	var saveButton = editForm.find('button[type="submit"]');
-	// Retrieve the identifier of the rule
-	var ruleId = editForm.find('input[name="ruleId"]').val();
-  
-	valueField.hide();
-	editForm.show();
-	newValueField.val(valueField.text().trim());
-  
-	saveButton.on('click', function(event) {
-	  event.preventDefault();
-  
-	  var newValue = newValueField.val().trim();
-	  var updateUrl = editForm.attr('action');
-  
-	  $.ajax({
-		type: 'POST',
-		url: updateUrl,
-		data: {
-		  ruleId: ruleId,
-		  description: newValue
-		},
-		success: function(response) {
-		  valueField.text(newValue);
-		  valueField.show();
-		  editForm.hide();
-		},
-		error: function(error) {
-		  console.log(error);
-		}
-	  });
-	});
-  });
+$('.edit-button-description').on('click', function () {
+    var field = $(this).closest('tr');
+    var editForm = field.find('.edit-form');
+    var valueField = field.find('.description-field .value');
+    var newValueField = editForm.find('textarea');
+
+    valueField.css('visibility', 'hidden');
+    editForm.show();
+    newValueField.val(valueField.text().trim());
+});
+
+$('.close-button-description').on('click', function () {
+    var editForm = $(this).closest('.edit-form');
+    var field = editForm.closest('tr');
+    var valueField = field.find('.description-field .value');
+
+    editForm.hide();
+    valueField.css('visibility', 'visible');
+});
+
+$('.edit-form').off('submit').on('submit', function (event) {
+    event.preventDefault();
+
+    var editForm = $(this);
+    var field = editForm.closest('tr');
+    var valueField = field.find('.description-field .value');
+    var newValueField = editForm.find('textarea');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
+
+    $.ajax({
+        type: 'POST',
+        url: updateUrl,
+        data: {
+            ruleId: ruleId,
+            description: newValue
+        },
+        success: function (response) {
+            valueField.text(newValue);
+            valueField.css('visibility', 'visible');
+            editForm.hide();
+        },
+        error: function (error) {
+            console.log(error);
+            alert("Une erreur s'est produite lors de la mise à jour.");
+        }
+    });
+});
+
+// --For 'rule name' in the detail view of the rule
+$('.edit-button-name').on('click', function () {
+    var field = $(this).closest('td');
+    var editForm = field.find('.edit-form-name-rule');
+    var valueField = field.find('.detail-rule-name');
+    var newValueField = editForm.find('input[name="ruleName"]');
+
+    editForm.show();
+    newValueField.val(valueField.text().trim());
+});
+
+$('.close-button-name').on('click', function () {
+    var editForm = $(this).closest('.edit-form-name-rule');
+    var valueField = editForm.closest('td').find('.rule-name');
+
+    editForm.hide();
+    valueField.show();
+});
+
+$('.edit-form-name-rule').on('submit', function (event) {
+    event.preventDefault();
+
+    var editForm = $(this);
+    var valueField = editForm.closest('td').find('.detail-rule-name');
+    var newValueField = editForm.find('input[name="ruleName"]');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
+
+    if (newValue === "") {
+        alert("Rule name is empty");
+        return;
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: checkRuleNameUrl,
+        data: {
+            ruleId: ruleId,
+            ruleName: newValue
+        },
+        success: function (response) {
+            if (response.exists) {
+                alert("This rule name already exists. Please choose a different name.");
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: updateUrl,
+                    data: {
+                        ruleId: ruleId,
+                        ruleName: newValue
+                    },
+                    success: function (response) {
+                        valueField.text(newValue);
+                        editForm.hide();
+                    },
+                    error: function (error) {
+                        alert("An error occurred while updating the rule name.");
+                    }
+                });
+            }
+        },
+        error: function (error) {
+            alert("An error occurred while checking the rule name.");
+        }
+    });
+});
 
 // Récupère la liste des params
 function recup_params() {	
@@ -194,4 +274,3 @@ function recup_params() {
 	
 	return params;
 }
-

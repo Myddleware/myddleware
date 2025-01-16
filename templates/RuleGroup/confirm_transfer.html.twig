@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="alert alert-warning">
+        <h4>{{ 'rulegroup.confirm_transfer_title'|trans }}</h4>
+        <p>{{ 'rulegroup.confirm_transfer_message'|trans({
+            '%rule%': rule.name,
+            '%currentGroup%': currentGroup.name,
+            '%newGroup%': newGroup.name
+        }) }}</p>
+        
+        <div class="mt-3">
+            <a href="{{ path('rulegroup_add_rule', {
+                'id': newGroup.id,
+                'confirm': 1,
+                'rule': rule.id
+            }) }}" class="btn btn-warning">
+                {{ 'rulegroup.confirm_transfer'|trans }}
+            </a>
+            
+            <a href="{{ path('rulegroup_show', {'id': newGroup.id}) }}" class="btn btn-secondary">
+                {{ 'rulegroup.cancel'|trans }}
+            </a>
+        </div>
+    </div>
+
+    {{ form(form) }}
+{% endblock %} 

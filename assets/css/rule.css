@@ -113,34 +113,24 @@
 	margin-left: 0;
 }
 
-#rule .btn-opt {
-	color: #555555;
-	font-size: 1.2em;
-}
-
-#rule .btn-opt:hover {
-	color: #0F66A9;
-}
-
-#rule th {
+#rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th {
 	background: #ECECEC;
-	height: 20px;
-	padding: 2px;
+	height: 45px;
+	padding: 10px;
 	text-align: center;
 }
 
-#rule tr {
+#rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr, #rulegroups tr {
 	border-bottom: 1px solid #ccc;	
 }
 
-#rule td.lft > a{
+#rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a, #rulegroups td.lft > a{
 	color: black;
 }
 
-#rule .vignette {
+#rule .vignette, #connector .vignette, #jobscheduler .vignette {
 	width: 50px;
 }
-
 
 /* relate */
 
@@ -486,11 +476,11 @@
 }
 
 .nav-link.active {
-color: #000000!important; 
+color: #03c4eb!important; 
 }
 
 #ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
-	background-color: #ecedee;
+	box-shadow: rgb(248 249 249) 0px -5px 9px -4px inset, rgba(255, 255, 256, 14.5) 20px 1px 2px 0px inset;
 }
 
 .fancybox {
@@ -506,30 +496,240 @@ color: #000000!important;
 }
 
 #rulenamesearchbar {
-	/* center the search bar horizontally */
-	margin: auto;
-	width: 20%;
-	/* put a nice border and a shadow, make it nice to look at */
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
-	/* here is the cool part */
-	/* we use a linear gradient bg which will fall-back to a solid color if needed */
-	background: #f1f1f1;
-	background: linear-gradient(to bottom, #f1f1f1 0%, #e1e1e1 100%);
-	/* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1f1f1', endColorstr='#e1e1e1', GradientType=0); */
-	/* just a small styling */
-	padding: 9px 14px;
-	color: #333;
-	transition: all 0.5s;
-	/* make the search bar responsive */
-	max-width: 400px;
-	/* make sure we can see the search bar above everything else */
-	position: relative;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    transition: all 0.5s;
+    max-width: 400px;
+    position: relative;
+}
+
+#rule_name{
+	padding: 5px;
+	padding-top: 15px !important;
+}
+
+.container_filter_step3{
+	max-width: 1449px;
+}
+
+.form-switch .form-check-input:checked {
+	background-color:  #198BCA !important;
+	border-block-color: #198BCA !important;
+}
+
+.workflow_status.form-check-input:checked {
+    margin-left: 7px !important;
+}
+
+.workflow_status.form-check-input {
+    margin-left: 7px !important;
+}
+
+.tooltip-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px; 
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    color: #0F66A9;
+}
+
+.tooltip-icon i {
+    font-size: 1.5rem;
+}
+
+.tooltip-icon:hover {
+    color: #0c4978; 
+}
+
+.comment-box {
 	z-index: 9999;
+    display: none;
+    position: absolute;
+    bottom: -76px;
+    right: 10px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 10px;
+    width: 200px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
 
-	
+.comment-box::before {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #f1f1f1;
+}
 
-	/* make the search bar form red */
-	/* background-color: #f44336; */
+.comment-box .comment-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+.comment-box .close-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #dc3545;
+}
+
+.comment-box .close-icon:hover {
+    color: #bb2d3b; 
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+}
+
+.comment-outside {
+    display: none;
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 0.85rem;
+    color: #333;
+    z-index: 1000;
+}
+
+.mapping-card-body:hover .comment-outside {
+    display: block;
+}
+
+.mapping-card-body {
+	display: flex;
+	flex-direction: column;
+}
+
+.edit-button-name-list{
+opacity: 0%;
+}
+
+.col-rule-name:hover .edit-button-name-list{
+	opacity: 100%;
+}
+
+.all-link:hover {
+    color: #0a58ca;
+}
+
+.all-link::after {
+    background-color: #0a58ca;
+}
+
+#deletion-rule-tr-deletion {
+	border-bottom: none !important;
+	border-bottom-width: 0px !important;
+}
+
+#deletion-rule-left-deletion {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-deletion {
+	border-bottom: none !important;
+}
+
+#deletion-rule-tr-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-right-description {
+	border-bottom: none !important;
+}
+
+#deletion-rule-left-description {
+	border-bottom: none !important;
+}
+
+#description-field-value {
+	padding-left: 1em;
+}
+
+.inner-table-workflow {
+	padding: 0px 0px !important;
+}
+
+.border-bottom-connector-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
+}
+.border-bottom-workflow-none {
+	border-bottom: none !important;
+	border-bottom-style: hidden !important;
+}
+
+.name-connector-fit-box {
+	min-width: fit-content;
+}
+
+.link-fit-workflow-name,
+.link-fit-rule-name {
+    display: inline;
+    width: fit-content;
+    white-space: normal;
+    word-break: break-word;
+    text-decoration: none;
+    background: 
+        linear-gradient(currentColor, currentColor) 
+        0 100% 
+        no-repeat;
+    background-size: 0% 2px;
+    transition: background-size 0.2s;
+    padding-bottom: 2px;
+}
+
+.link-fit-workflow-name:hover,
+.link-fit-rule-name:hover {
+    text-decoration: none;
+    background-size: 100% 2px;
+}
+
+/* Remove any previous hover styles */
+.link-fit-workflow-name:hover::after,
+.link-fit-rule-name:hover::after {
+    display: none;
+}
+
+/* Add specific styles for the table cell to handle wrapping */
+td .link-fit-workflow-name,
+td .link-fit-rule-name {
+    display: inline;
+    line-height: 1.5;  /* Adjust line spacing */
+}
+
+.form-floating > #rule_name_label::after,
+.form-floating > .form-control:focus ~ #rule_name_label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ #rule_name_label::after {
+    inset: 0px !important;
+    /* Add any other styles you want to override */
+}
+
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+}
+.form-floating > #workflow_name_label::after,
+.form-floating > .form-control:focus ~ #workflow_name_label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
+    /* Add any other styles you want to override */
+}
+
+#rulenamesearchbar .form-floating > #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
+#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
+    inset: 0px !important;
 }

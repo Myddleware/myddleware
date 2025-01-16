@@ -34,13 +34,17 @@ use Exception;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
  * @ORM\Table(name="document", indexes={
- *      @ORM\Index(name="index_ruleid_status", columns={"rule_id","status"}),
- *      @ORM\Index(name="index_parent_id", columns={"parent_id"}),
- *      @ORM\Index(name="global_status", columns={"global_status"}),
- *      @ORM\Index(name="source_id", columns={"source_id"}),
- *      @ORM\Index(name="target_id", columns={"target_id"}),
- *      @ORM\Index(name="rule_id", columns={"rule_id"}),
- *      @ORM\Index(name="date_modified", columns={"date_modified"})
+ *      @ORM\Index(name="index_rule_gbstatus_status", columns={"rule_id","global_status","status","deleted"}),
+ *      @ORM\Index(name="index_gbstatus", columns={"global_status","deleted"}),
+ *      @ORM\Index(name="index_parent_id", columns={"parent_id","deleted"}),
+ *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted"}),
+ *      @ORM\Index(name="index_rule_target", columns={"rule_id","target_id","deleted"}),
+ *      @ORM\Index(name="index_rule_date_modified", columns={"rule_id","date_modified","deleted"}),
+ *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
+ *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
+ *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
+ *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"}),
+ *      @ORM\Index(name="index_job_lock", columns={"job_lock"})
  * })
  */
 class Document
@@ -138,11 +142,27 @@ class Document
      * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
      */
     private $logs;
-
+	
+	/**
+     * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="triggerDocument")
+     */
+    private $triggerDocuments;
+	
+	/**
+     * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
+     */
+    private string $jobLock;
+	
+	/**
+     * @ORM\Column(name="workflow_error", type="boolean", options={"default":0})
+     */
+    private $workflowError;
+	
     public function __construct()
     {
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
+        $this->triggerDocuments = new ArrayCollection();
     }
 
     public function setId($id): self
@@ -442,6 +462,34 @@ class Document
         return $this;
     }
 
+    /**
+     * @return Collection|triggerDocument[]
+     */
+    public function getTriggerDocuments(): Collection
+    {
+        return $this->triggerDocuments;
+    }
+
+    public function addTriggerDocument(Workflowlog $triggerDocuments): self
+    {
+        if (!$this->triggerDocuments->contains($triggerDocument)) {
+            $this->triggerDocuments[] = $triggerDocument;
+            $triggerDocument->setDocument($this);
+        }
+        return $this;
+    }
+
+    public function removeTriggerDocument(Workflowlog $triggerDocument): self
+    {
+        if ($this->triggerDocuments->removeElement($triggerDocument)) {
+            // set the owning side to null (unless already changed)
+            if ($triggerDocument->getDocument() === $this) {
+                $triggerDocument->setDocument(null);
+            }
+        }
+        return $this;
+    }
+
     public function getCreatedBy(): ?User
     {
         return $this->createdBy;
@@ -465,5 +513,26 @@ class Document
 
         return $this;
     }
+	
+	public function setJobLock($jobLock): self
+    {
+        $this->jobLock = $jobLock;
+        return $this;
+    }
+
+    public function getJobLock(): string
+    {
+        return $this->jobLock;
+    }
     
+	public function setWorkflowError($workflowError): self
+    {
+        $this->workflowError = $workflowError;
+        return $this;
+    }
+
+    public function getWorkflowError(): int
+    {
+        return $this->workflowError;
+    }
 }

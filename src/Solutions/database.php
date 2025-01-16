@@ -31,7 +31,7 @@ use PDO;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class databasecore extends solution
+class database extends solution
 {
     protected $driver;
     protected PDO $pdo;
@@ -101,7 +101,7 @@ class databasecore extends solution
             $modules = [];
 
             // Send the query to the database
-            $q = $this->pdo->prepare($this->get_query_show_tables());
+            $q = $this->pdo->prepare($this->get_query_show_tables($type));
             $exec = $q->execute();
             // Error management
             if (!$exec) {
@@ -207,7 +207,6 @@ class databasecore extends solution
     public function readData($param)
     {
         $result = [];
-        $result['date_ref'] = $param['date_ref'];
         // Decode field name (converted in method get_module_fields)
         $param['fields'] = array_map('rawurldecode', $param['fields']);
         try {
@@ -215,6 +214,8 @@ class databasecore extends solution
             if (empty($param['date_ref'])) {
                 $param['date_ref'] = 0;
             }
+			$result['date_ref'] = $param['date_ref'];
+			
             if (empty($param['limit'])) {
                 $param['limit'] = 100;
             }
@@ -343,13 +344,19 @@ class databasecore extends solution
                                 $row['id'] = $value;
                             }
                             if ($key === $param['ruleParams']['fieldDateRef']) {
-                                // If the reference isn't a valid date (it could be an ID in case there is no date in the table) we set the current date
+                                // If the reference is a valid date, we save it
                                 if ((bool) strtotime($value)) {
                                     $row['date_modified'] = $value;
-                                } else {
+									$result['date_ref'] = $row['date_modified'];
+								// If the ref field is a numeric (increment), we transform it to a date (timestamp) to be able to save the corresponding date to the document
+                                } elseif (is_numeric($value)) {
+									$row['date_modified'] = date('Y-m-d H:i:s', $value);
+									$result['date_ref'] = $value;
+								// In all other cases, we set the current date
+								} else {
                                     $row['date_modified'] = date('Y-m-d H:i:s');
+									$result['date_ref'] = $row['date_modified'];
                                 }
-                                $result['date_ref'] = $row['date_modified'];
                             }
                         } elseif ('history' == $param['call_type']) { // Id is fieldId for a history action
                             if ($key === $param['ruleParams']['targetFieldId']) {
@@ -378,7 +385,6 @@ class databasecore extends solution
         } catch (Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-
         return $result;
     }
 
@@ -387,6 +393,13 @@ class databasecore extends solution
      */
     protected function create($param, $record, $idDoc = null)
     {
+        // Add this array at the start of the function
+        $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
         
         // Get the target reference field
         if (!isset($param['ruleParams']['targetFieldId'])) {
@@ -406,7 +419,13 @@ class databasecore extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-            $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+
+            // Check if the field type is in the $ignoreQuotesOnQuery array
+            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+                $values .= ('null' == $value ? 'null,' : $this->escape($value).',');
+            } else {
+                $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+            }
         }
 
         // Remove the last coma
@@ -444,6 +463,14 @@ class databasecore extends solution
      */
     protected function update($param, $record, $idDoc = null)
     {
+            // Add this array at the start of the function
+        $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
+
+        // if we have a class value $ignoreQuotesOnQuery that is inherited from the solution class and the content of the array is different, then we use the one from the solution class
+        if (!empty($this->ignoreQuotesOnQuery) && $this->ignoreQuotesOnQuery != $ignoreQuotesOnQuery) {
+            $ignoreQuotesOnQuery = $this->ignoreQuotesOnQuery;
+        }
+        
         // Query init
         $sql = 'UPDATE '.$this->stringSeparatorOpen.$param['module'].$this->stringSeparatorClose.' SET ';
         // We build the query with every fields
@@ -454,7 +481,13 @@ class databasecore extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+
+            // Check if the field type is in the $ignoreQuotesOnQuery array
+            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : $this->escape($value).',');
+            } else {
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+            }
         }
 
         // Remove the last coma
@@ -756,7 +789,4 @@ class databasecore extends solution
     {
         return uniqid('', true);
     }
-}
-class database extends databasecore
-{
 }

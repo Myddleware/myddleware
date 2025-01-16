@@ -1,0 +1,73 @@
+.workflow_active a {
+    color: rgb(23, 185, 23) !important;
+}
+
+.workflow_inactive a {
+    color: #dc3545 !important;
+}
+
+.workflow_on_off{
+    padding-left: 60px !important;
+}
+
+.conditions {
+    border-left: 3px solid rgba(0, 0, 0, 0.03);
+}
+
+.workflow-details {
+    margin-top: 20px;
+}
+
+.workflow-row {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.workflow-col {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.125);
+    width: 48%;
+    text-align: left;
+}
+
+.workflow-col strong {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.workflow-col div {
+    padding-left: 0;
+}
+
+.toggle-button {
+    font-size: 1rem;
+    padding: 0px 5px 0px 5px !important;
+    cursor: pointer;
+}
+
+.toggle-button .fa {
+    font-size: 1rem;
+}
+
+.card-title-workflow{
+    font-size: x-large;
+    font-weight: 700;
+}
+
+.text-left{
+    text-align: left !important;
+}
+
+.description_workflow_list{
+    width: 300px;
+}
+
+.workflow-btn-rule-info{
+    text-align: center;
+}
+
+#workflowTableContainer{
+    display: flex;
+    justify-content: center;
+}

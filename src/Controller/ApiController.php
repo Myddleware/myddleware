@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Manager\JobManager;
+use App\Manager\FormulaManager;
 use App\Manager\RuleManager;
+use App\Manager\DocumentManager;
+use App\Manager\SolutionManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
@@ -32,6 +35,9 @@ class ApiController extends AbstractController
     private KernelInterface $kernel;
     private LoggerInterface $logger;
     private JobManager $jobManager;
+    private SolutionManager $solutionManager;
+    private DocumentManager $documentManager;
+    private FormulaManager $formulaManager;
     private ParameterBagInterface $parameterBag;
     private EntityManagerInterface $entityManager;
 
@@ -43,12 +49,18 @@ class ApiController extends AbstractController
         JobRepository $jobRepository,
         DocumentRepository $documentRepository,
         ParameterBagInterface $parameterBag,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FormulaManager $formulaManager,
+        DocumentManager $documentManager,
+        SolutionManager $solutionManager
     ) {
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
         $this->jobManager = $jobManager;
+        $this->solutionManager = $solutionManager;
+        $this->formulaManager = $formulaManager;
+        $this->documentManager = $documentManager;
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -67,7 +79,6 @@ class ApiController extends AbstractController
 
             // Get input data
             $data = json_decode($request->getContent(), true);
-            $force = !(('ALL' === $data['rule']));
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -79,7 +90,7 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:synchro',
-                'force' => $force,
+                'force' => (empty($data['force']) ? false : true),
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -104,7 +115,7 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 2, 23);
             $job = $this->jobRepository->find($return['jobId']);
             // Get the job statistics
-            $this->jobManager->setId($job->getId());
+            $this->jobManager->setId($this->jobManager->getId());
             $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
@@ -148,7 +159,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:readrecord',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -176,7 +186,7 @@ class ApiController extends AbstractController
 
             // Get the job statistics
             $job = $this->jobRepository->find($return['jobId']);
-            $this->jobManager->setId($job->getId());
+            $this->jobManager->setId($this->jobManager->getId());
             $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
@@ -196,14 +206,12 @@ class ApiController extends AbstractController
     public function deleteRecordAction(Request $request): JsonResponse
     {
         try {
-            $connection = $this->container->get('database_connection');
-            $connection->beginTransaction(); // -- BEGIN TRANSACTION
-
+			$connection = $this->entityManager->getConnection();
             $return = [];
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['rule'])) {
@@ -213,6 +221,24 @@ class ApiController extends AbstractController
                 throw new Exception('recordId is missing. recordId is the id of the record you want to delete. ');
             }
 
+            // Create job instance
+            $this->jobManager->setApi(1);
+            $this->jobManager->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
+
+            $rule = new RuleManager(
+                $this->logger,
+                $connection,
+                $this->entityManager,
+                $this->parameterBag,
+                $this->formulaManager,
+                $this->solutionManager,
+                $this->documentManager
+            );
+
+			$rule->setJobId($this->jobManager->getId());
+			$rule->setApi(1);
+			$rule->setRule($data['rule']);
+			
             // Set the document values
             foreach ($data as $key => $value) {
                 switch ($key) {
@@ -228,80 +254,73 @@ class ApiController extends AbstractController
                         $docParam['values'][$key] = $value;
                 }
             }
+			
+			// Set all fields not set to empty
+			$sourceFields = $rule->getSourceFields();
+			if (!empty($sourceFields)) {
+				foreach ($sourceFields as $sourceField) {
+					if (!array_key_exists($sourceField, $docParam['values'])) {
+						$docParam['values'][$sourceField] = '';
+					}
+				}
+			}
+
+			// Add deletion flag
             $docParam['values']['myddleware_deletion'] = true; // Force deleted record type
-
-            // Create job instance
-            $job = $this->container->get('myddleware_job.job');
-            $job->setApi(1);
-            $job->initJob('Delete record '.$data['recordId'].' in rule '.$data['rule']);
-
-            // Instantiate the rule
-            $ruleParam['ruleId'] = $data['rule'];
-            $ruleParam['jobId'] = $job->id;
-            $ruleParam['api'] = 1;
-            $rule = new RuleManager(
-                $this->container->get('logger'),
-                $connection,
-                $this->entityManager,
-                $this->parameterBag,
-                // $ruleParam,
-                $this->formulaManager,
-                $this->solutionManager,
-                $this->documentManager
-            );
-
+			
             $document = $rule->generateDocuments($data['recordId'], false, $docParam);
             // Stop the process if error during the data transfer creation as we won't be able to manage it in Myddleware
             if (!empty($document->error)) {
                 throw new Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
             }
-            $connection->commit(); // -- COMMIT TRANSACTION
+            // $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $connection->rollBack(); // -- ROLLBACK TRANSACTION
+            // $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
             // Stop the process if document hasn't been created
             return $this->json($return);
         }
 
-        // Send the document just created
-        try {
-            // db transaction managed into the method actionDocument
-            $errors = $rule->actionDocument($document[0]->id, 'rerun');
-            // Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it.
-            // We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
-            if (!empty($errors)) {
-                throw new Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
-            }
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-            $return['error'] .= $e->getMessage();
-        }
+        // Send the document just created if requested
+		if (empty($data['asynchronousDeletion'])) {
+			try {
+				// db transaction managed into the method actionDocument
+				$errors = $rule->actionDocument($document[0]->id, 'rerun');
+				// Check errors, but in this case the data transfer is created but Myddleware hasn't been able to send it.
+				// We don't roll back the work here as it will be possible to manage the data transfer in Myddleware
+				if (!empty($errors)) {
+					throw new Exception('Document in error (rule '.$data['rule'].')  : '.$errors[0].'. ');
+				}
+			} catch (Exception $e) {
+				$this->logger->error($e->getMessage());
+				$return['error'] .= $e->getMessage();
+			}
+		}
 
         // Close job if it has been created
         try {
-            $connection->beginTransaction(); // -- BEGIN TRANSACTION
-            if (true === $job->createdJob) {
-                $job->closeJob();
+            // $connection->beginTransaction(); // -- BEGIN TRANSACTION
+            if (true === $this->jobManager->createdJob) {
+                $this->jobManager->closeJob();
             }
             // Get the job statistics even if the job has failed
-            if (!empty($job->id)) {
-                $return['jobId'] = $job->id;
-                $jobData = $job->getLogData();
+            if (!empty($this->jobManager->getId())) {
+                $return['jobId'] = $this->jobManager->getId();
+                $jobData = $this->jobManager->getLogData();
                 if (!empty($jobData['jobError'])) {
                     $return['error'] .= $jobData['jobError'];
                 }
                 $return['jobData'] = $jobData;
             }
-            $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to get the job statistics. '.$e->getMessage());
             $return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
         }
         // Send the response
         return $this->json($return);
     }
+
 
     /**
      * @Route("/mass_action", name="mass_action", methods={"POST"})
@@ -313,7 +332,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+			$data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['action'])) {
@@ -331,7 +350,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:massaction',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -361,9 +379,8 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 0, 23);
 
             // Get the job statistics
-            $job = $this->container->get('myddleware_job.job');
-            $job->id = $return['jobId'];
-            $jobData = $job->getLogData();
+            $this->jobManager->id = $return['jobId'];
+            $jobData = $this->jobManager->getLogData();
             if (!empty($jobData['jobError'])) {
                 throw new Exception('Failed to get the job statistics. '.$jobData['jobError']);
             }
@@ -386,7 +403,7 @@ class ApiController extends AbstractController
             $return['error'] = '';
 
             // Get input data
-            $data = $request->request->all();
+            $data = json_decode($request->getContent(), true);
 
             // Check parameter
             if (empty($data['limit'])) {
@@ -401,7 +418,6 @@ class ApiController extends AbstractController
             $application->setAutoExit(false);
             $arguments = [
                 'command' => 'myddleware:rerunerror',
-                'force' => 1,
                 'api' => 1,
                 '--env' => $this->env,
             ];
@@ -427,9 +443,8 @@ class ApiController extends AbstractController
             $return['jobId'] = substr($content, 0, 23);
 
             // Get the job statistics
-            $job = $this->container->get('myddleware_job.job');
-            $job->id = $return['jobId'];
-            $jobData = $job->getLogData();
+            $this->jobManager->id = $return['jobId'];
+            $jobData = $this->jobManager->getLogData();
             $return['jobData'] = $jobData;
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
@@ -439,24 +454,24 @@ class ApiController extends AbstractController
         return $this->json($return);
     }
 
-    /**
-     * @Route("/statistics", name="statistics", methods={"POST"})
-     */
-    public function statisticsAction(Request $request): JsonResponse
-    {
-        try {
-            $return = [];
-            $home = $this->container->get('myddleware.home');
+    // /**
+    //  * @Route("/statistics", name="statistics", methods={"POST"})
+    //  */
+    // public function statisticsAction(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $return = [];
+    //         $home = $this->container->get('myddleware.home');
 
-            $return['errorByRule'] = $this->ruleRepository->errorByRule();
-            $return['countTypeDoc'] = $this->documentRepository->countTypeDoc();
-            $return['listJobDetail'] = $this->jobRepository->listJobDetail();
-            $return['countTransferHisto'] = $home->countTransferHisto();
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-            $return['error'] = $e->getMessage();
-        }
-        // Send the response
-        return $this->json($return);
-    }
+    //         $return['errorByRule'] = $this->ruleRepository->errorByRule();
+    //         $return['countTypeDoc'] = $this->documentRepository->countTypeDoc();
+    //         $return['listJobDetail'] = $this->jobRepository->listJobDetail();
+    //         $return['countTransferHisto'] = $home->countTransferHisto();
+    //     } catch (Exception $e) {
+    //         $this->logger->error($e->getMessage());
+    //         $return['error'] = $e->getMessage();
+    //     }
+    //     // Send the response
+    //     return $this->json($return);
+    // }
 }

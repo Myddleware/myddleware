@@ -5,20 +5,19 @@
 {% endblock %}
 {% block body %}
 <div id="myd_top"></div>
-<div class="container">
-    <div class="row">
+<div class="container-fluid">
+    <div id="register-container-fill-vertically" class="row main-requirements-box">
         <div class="col">
             {% for flashError in app.flashes('verify_email_error') %}
                 <div class="alert alert-danger" role="alert">{{ flashError }}</div>
             {% endfor %}
-            <p class="logo-myddleware-install-container"><span id="logo"></span></p>
             <div class="row">
                 <div class="col">
-                    <div class="card">
-                        <div id="card-install-blue-like-logo" class="card-header bg-primary text-white">Install step 5 : create your Myddleware account</div>
+                    <div class="text-center main-card">
+                        <h2 class="install-step-title">Install Step 5 : create your Myddleware account</h2>
                         <div class="card-body d-grid justify-content-center">
                             <div class="card register-container">
-                                <div class="card-header">
+                                <div  id="register-title" class="card-header bg-success text-white">
                                     Register 
                                 </div>
                                 <div class="card-body">
@@ -39,13 +38,12 @@
                                             {{ form_row(registrationForm.agreeTerms) }}
                                         </div>
                                     <div class="d-grid mt-4">
-                                        <button type="submit" class="btn btn-success">Register</button>
+                                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
                                     </div>
                                     {{ form_end(registrationForm) }}
                                     <div>
                                         <div class="d-grid mt-4">
                                             <a href="{{path('database_fixtures_load')}}" role="button" class="btn btn-outline-primary btn-block">
-                                                <i class="fas fa-arrow-left"></i>
                                                 Go back to database setup
                                             </a>
                                         </div>

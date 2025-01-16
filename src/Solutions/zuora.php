@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class zuoracore extends solution
+class zuora extends solution
 {
     protected $instance;
     protected int $debug = 0;
@@ -560,8 +560,4 @@ class zuoracore extends solution
 
         return $recordsArray;
     }
-}
-
-class zuora extends zuoracore
-{
 }

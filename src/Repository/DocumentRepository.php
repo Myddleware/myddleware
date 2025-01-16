@@ -170,25 +170,6 @@ class DocumentRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function countTransferRule(User $user = null)
-    {
-        $qb = $this->createQueryBuilder('d')
-            ->select('COUNT(d) as nb, rule.name')
-            ->join('d.rule', 'rule')
-            ->andWhere('d.deleted = 0')
-            ->andWhere('d.globalStatus = :close')
-            ->setParameter('close', 'Close')
-            ->groupBy('rule.name')
-            ->orderBy('nb', 'DESC');
-
-        if ($user && !$user->isAdmin()) {
-            $qb->andWhere('d.createdBy = :user')
-                ->setParameter('user', $user);
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
     public function countTransferHisto(User $user = null)
     {
         $qb = $this->createQueryBuilder('d')
@@ -428,5 +409,30 @@ class DocumentRepository extends ServiceEntityRepository
         $curatedResults =  array_column($results, 'status');
         $finalResults = array_flip($curatedResults);
         return $finalResults;
+    }
+	
+    // Remove lock from document using a job id
+	public function removeLock($jobId) {
+		$q = $this->createQueryBuilder('d')
+			->update()
+			->set('d.jobLock', ':empty')
+			->where('d.jobLock = :jobLock')
+			->setParameter('jobLock', $jobId)
+            ->setParameter('empty', '')
+			->getQuery();
+        $q->execute();
+	}
+
+    public function countNbDocuments(): int 
+    {
+
+        $query = "EXPLAIN SELECT * FROM document WHERE deleted = 0;";
+
+        $result = $this->getEntityManager()->getConnection()->executeQuery($query);
+        $result = $result->fetchAllAssociative();
+
+        $rows = $result[0]['rows'];
+
+        return $rows;
     }
 }

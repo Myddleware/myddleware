@@ -15,56 +15,93 @@ $("#rulenamesearchbar").on("submit", function(event) {
     event.preventDefault();
 });
 
-// $('#rule_name').on('keyup', function() {
-//     var ruleName = $(this).val();
-//     console.log('the rule name', ruleName);
-//     var url = $(this).data('url');
-//     console.log('the url', url);
-//     console.log('the url of the function', regle_list);
-
-//     regle_list = 'http://localhost/myddleware_NORMAL/public/rule/list?rule_name=sui';
-
-//     if (ruleName.length >= 3) {
-//         // $.get(url, { rule_name: ruleName }, function(data) {
-//             // console.log(data);
-//             // update the rules table with the new data
-//             console.log('id', ruleName);
-//             $.ajax({
-//                 type: "POST",
-//                 url: regle_list,
-//                 // id: ruleName,						
-//                     success: function(data){
-//                         // location.reload();                 
-//                 }			
-//             });	
-//         // });
-//     }
-// });
-
-
 // save the initial table state somewhere accessible
 var initialTableState = $('#tbody_rule_list').html();
 
 $("#rule_name").on("keyup input", function() {
     var ruleName = $(this).val();
     var url = $(this).data('url');
-
-    if (ruleName.length >= 3) {
+    
+    if (ruleName.length > 0) {
         $.ajax({
             type: "GET",
             url: url,
             data: { rule_name: ruleName },
             success: function(data){
-                // parse the returned data and load it into a jQuery object
                 var html = $(data);
-                // find the tbody element
                 var tbody_html = html.find('#tbody_rule_list').html();
-                // replace the tbody in the current page with the tbody from the returned data
-                $('#tbody_rule_list').html(tbody_html);
+                
+                if ($.trim(tbody_html) === '') {
+                    $('#tbody_rule_list').html('<tr><td colspan="100%" class="text-center">No rules found</td></tr>');
+                } else {
+                    $('#tbody_rule_list').html(tbody_html);
+                }
             }
         });
-    } else if (ruleName.length == 0) {
+    } else {
         // if the search bar is empty, reset the table
         $('#tbody_rule_list').html(initialTableState);
     }
+});
+
+// --For 'rule name' in the list view
+$('.edit-button-name-list').on('click', function () {        
+    var field = $(this).closest('td'); 
+    var editFormContainer = field.find('.edit-form-container'); 
+    editFormContainer.show();
+});
+
+
+$('.close-button-name-list').on('click', function () {
+    var editFormContainer = $(this).closest('.edit-form-container');
+    editFormContainer.css('display', 'none');
+});
+
+$('.edit-form-name-list').on('submit', function (event) {
+    event.preventDefault();
+
+    var editForm = $(this);
+    var displayText = editForm.closest('td').find('.rule-name-display');
+    var newValueField = editForm.find('input[name="ruleName"]');
+    var ruleId = editForm.find('input[name="ruleId"]').val();
+    var newValue = newValueField.val().trim();
+    var updateUrl = editForm.attr('action');
+
+    if (newValue === "") {
+        alert("Rule name is empty");
+        return;
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: checkRuleNameUrlList,
+        data: {
+            ruleId: ruleId,
+            ruleName: newValue
+        },
+        success: function (response) {
+            if (response.exists) {
+                alert("This rule name already exists. Please choose a different name.");
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: updateUrl,
+                    data: {
+                        ruleId: ruleId,
+                        ruleName: newValue
+                    },
+                    success: function (response) {
+                        displayText.text(newValue);
+                        editForm.closest('.edit-form-container').css('display', 'none');
+                    },
+                    error: function (error) {
+                        alert("An error occurred while updating the rule name.");
+                    }
+                });
+            }
+        },
+        error: function (error) {
+            alert("An error occurred while checking the rule name.");
+        }
+    });
 });

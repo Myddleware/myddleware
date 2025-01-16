@@ -246,6 +246,18 @@ class RuleRepository extends ServiceEntityRepository
         return $finalResults;
     }
 
+    public static function findActiveRulesNamesOrdered($entityManager)
+    {
+        $rules = $entityManager->getRepository(Rule::class)->findBy(['active' => true]);
+
+        $rulesNames = [];
+        foreach ($rules as $rule) {
+            $rulesNames[$rule->getName()] = $rule->getId();
+        }
+
+        return $rulesNames;
+    }
+
     public static function findActiveRulesIds(EntityManagerInterface $entityManager)
     {
         $qb = $entityManager->createQueryBuilder();
@@ -304,5 +316,18 @@ class RuleRepository extends ServiceEntityRepository
         $finalResults = array_flip($curatedResults);
         return $finalResults;
     }
+
+    // Remove lock from rule using a job id
+	public function removeLock($jobId) {
+        $empty = null;
+		$qr = $this->createQueryBuilder('r')
+			->update()
+			->set('r.readJobLock', ':empty')
+			->where('r.readJobLock = :readJobLock')
+			->setParameter('readJobLock', $jobId)
+            ->setParameter('empty', $empty)
+			->getQuery();
+        $qr->execute();
+	}
 
 }

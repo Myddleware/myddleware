@@ -32,8 +32,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Yaml\Yaml;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
 
-class toolscore
+class ToolsManager
 {
     protected Connection $connection;
     protected $container;
@@ -215,8 +218,46 @@ class toolscore
         } 
         return null;
     }
-}
-
-class ToolsManager extends toolscore
-{
+	
+	// Send a message using Brevo or SMTP parameters
+	public function sendMessage($to, $subject, $message) {
+		// Use Brevo if the key is set
+		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+            try {
+				$sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+				$apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $sendinblue);
+				$sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
+				$recipients = array();
+				foreach($to as $recipient) {
+					$recipients[] = array('email' => $recipient);
+				}
+				$sendSmtpEmail['to'] = $recipients;
+				$sendSmtpEmail['subject'] = $subject;
+				$sendSmtpEmail['htmlContent'] = $message;
+				$sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');				
+                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+            } catch (Exception $e) {
+                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            }
+        } else {
+            $swiftMessage =
+                    (new Swift_Message($subject))
+                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->setBody($message);
+			// Send message
+			$message->setTo($to);
+			$send = $this->mailer->send($message);
+			if (!$send) {
+				$this->logger->error('Failed to send alert email : '.$message.' to '.$to);
+				throw new Exception('Failed to send alert email : '.$message.' to '.$to);
+			}
+        }
+	}
+	
+	public function isPremium() {
+	}
+	
+	public function getRulesFromGroup($ruleGroup, $force = false) {
+		return array();
+	}
 }

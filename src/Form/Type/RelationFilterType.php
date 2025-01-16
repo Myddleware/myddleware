@@ -20,24 +20,24 @@ class RelationFilterType extends AbstractType
                 ],
                 'empty_data' => null,
                 'choices' => $options['field_choices'],
-                'placeholder' => '- Choose a field -',
+                'placeholder' => '- Field to filter -',
                 'required' => false
             ])
             ->add('another_field', ChoiceType::class, [
-                'label' => 'Another Field',
+                'label' => 'Comparison Operator',
                 'attr' => [
                     'placeholder' => 'Another Field',
                     'id' => 'another_field_filter_rule',
                 ],
                 'empty_data' => null,
                 'choices' => $options['another_field_choices'],
-                'placeholder' => '- Choose another field -',
+                'placeholder' => '- Comparison Operators -',
                 'required' => false
             ])
             ->add('textarea_field', TextType::class, [
-                'label' => 'Your Text',
+                'label' => 'Field Value',
                 'attr' => [
-                    'placeholder' => 'Enter some text here...',
+                    'placeholder' => 'Enter your field value here...',
                     'id' => 'textarea_field_filter_rule',
                 ],
                 'required' => false

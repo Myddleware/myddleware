@@ -22,111 +22,151 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#myd_connexion { 		
-	margin: 100px auto;
-	width: 621px;
-	height: 400px;
-} 
-
-#myd_connexion div {
-	height: 350px;
-	float: left;
-	padding: 20px;	
-}  
-
-#myd_connexion .grey, #myd_connexion .white {
-	-webkit-box-shadow: 1px 1px 9px 0px rgba(50, 50, 50, 0.75);
-	-moz-box-shadow:    1px 1px 9px 0px rgba(50, 50, 50, 0.75);
-	box-shadow:         1px 1px 9px 0px rgba(50, 50, 50, 0.75);
+#myd_login-container {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
 }
 
-#myd_connexion .grey {
-	width: 320px;
-	min-width: 320px;    		
-	background: #404042;
-	color: white;
+.login-box {
+    background-color: #ffffff;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    overflow-y: auto;
 }
 
-#myd_connexion .white {
-	min-width: 300px; 
-	width: 300px;
-	background-color: white;
+.login-logo {
+    background-image: url('../images/template/logo.jpg');
+    width: 236px;
+    height: 96px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: 16px auto 10px;
 }
 
-.white-reset {
-	background-color: white;
-	padding: 20px;
-	margin: auto;
-	margin-top: 100px;
-	box-shadow: 1px 1px 9px 0px rgba(50, 50, 50, 0.75);
-	min-width: 300px; 
-	width: 350px;
+.login-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #484848;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-#myd_connexion .logo {
-	width:160px;
-	height:90px;
-	display:inline-block;
+.login-info-box {
+    background: linear-gradient(135deg, #2c2c54, #03c4eb);
+    color: white;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 67%;
+    text-align: center;
+    height: 100vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-#myd_connexion .logo_platform {
-	width:160px;
-	height:80px;
-	display:inline-block;
+.login-info-box p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    max-width: 600px;
 }
 
-#myd_connexion .logo_empty{
-	width:160px;
-	height:80px;
-	display:inline-block;
+.login-info-box a.btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s;
 }
 
-
-#myd_connexion .alert {
-    height: 30px;
+.login-info-box a.btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
-#myd_connexion .login_warning {
+.login-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-inputs label {
+    font-size: 14px;
+    color: #5a5a5a;
+    font-weight: bold;
+}
+
+.login-inputs input[type="text"],
+.login-inputs input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.login-inputs input[type="text"]:focus,
+.login-inputs input[type="password"]:focus {
+    border-color: #03c4eb;
+    box-shadow: 0 0 0 4px rgba(3, 196, 235, 0.2);
+    outline: none;
+}
+
+button.btn-primary {
+    background-color: #03c4eb;
+    border: none;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 8px;
+    color: #fff;
+    transition: background-color 0.3s;
+}
+
+button.btn-primary:hover {
+    background-color: #0284a8;
+}
+
+.password-reset-link {
+    font-size: 14px;
+    color: #484848;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.password-reset-link:hover {
+    color: #3a3a3a;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.warning-message {
     color: red;
 }
 
-body {
-	background-color: #f7f7f7;
-	overflow-y:hidden;
+.external-link {
+    margin-top: 15px;
+    display: inline-block;
 }
 
-
-#myd_connexion .logo { 
-	
-	background: url('./../images/login/logo.png') no-repeat; 
-	background-size: 158px; 
-}
-
-#myd_connexion .logo {
-	background: url('./../images/login/logo.png') no-repeat; 
-	background-size: 158px;
-}
-	
-#myd_connexion .logo_platform {
-	background: url('./../images/login/logo_platform.png') no-repeat;
-	background-size: 158px;
-}
-	
-#myd_connexion .logo_empty {
-	background: url('./../images/login/logo_empty.png') no-repeat;
-	background-size: 158px; 
-}
-.logo_reset {
-	background: url('./../images/login/logo.png') no-repeat;
-	background-size: 158px; 
-}
-	
-#myd_connexion .load {
-	height: 16px;
-	width: 16px;
-	display: inline-block;
-} 
-
-#reset-password-button-request {
-    margin-top: 10px!important;
-}

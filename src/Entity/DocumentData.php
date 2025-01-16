@@ -45,7 +45,7 @@ class DocumentData
 
     /**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=false)
      */
     private Document $doc_id;
 
@@ -93,7 +93,7 @@ class DocumentData
         return $this->doc_id;
     }
 
-    public function setDocId(?Document $doc_id): self
+    public function setDocId(Document $doc_id): self
     {
         $this->doc_id = $doc_id;
 

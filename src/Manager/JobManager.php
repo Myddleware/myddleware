@@ -45,8 +45,9 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use PDO;
+use App\Entity\Job;
 
-class jobcore
+class JobManager
 {
     protected $id;
     public string $message = '';
@@ -55,7 +56,7 @@ class jobcore
     protected $container;
     protected DriverConnection $connection;
     protected LoggerInterface $logger;
-    protected ToolsManager $tools;
+    protected ToolsManager $toolsManager;
 
     protected RuleManager $ruleManager;
     protected $ruleId;
@@ -99,6 +100,10 @@ class jobcore
 
     private SessionInterface $session;
 
+    private int $nbDays;
+    private string $pruneDatabaseMaxDate;
+
+
     public function __construct(
         LoggerInterface $logger,
         DriverConnection $dbalConnection,
@@ -112,7 +117,7 @@ class jobcore
         LogRepository $logRepository,
         RouterInterface $router,
         SessionInterface $session,
-        ToolsManager $tools,
+        ToolsManager $toolsManager,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
         UpgradeManager $upgrade
@@ -126,7 +131,7 @@ class jobcore
         $this->logRepository = $logRepository;
         $this->router = $router;
         $this->session = $session;
-        $this->tools = $tools;
+        $this->toolsManager = $toolsManager;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
         $this->templateManager = $templateManager;
@@ -206,6 +211,11 @@ class jobcore
             return false;
         }
     }
+	
+	// Unset the lock on the rule 
+	public function unsetRuleLock() {
+		return $this->ruleManager->unsetRuleLock();
+	}
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     public function createDocuments()
@@ -264,9 +274,10 @@ class jobcore
     }
 
     // Ecriture dans le système source et mise à jour de la table document
-    public function runError($limit, $attempt)
+	public function runError($limit, $attempt)
     {
         try {
+			$ruleId = '';
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
             $sqlParams = "	SELECT * 
 							FROM document
@@ -276,62 +287,70 @@ class jobcore
 									global_status = 'Error'
 								AND deleted = 0 
 								AND attempt <= :attempt 
-							ORDER BY ruleorder.order ASC, source_date_modified ASC	
+							ORDER BY ruleorder.order ASC, document.rule_id, source_date_modified ASC	
 							LIMIT $limit";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('attempt', $attempt);
             $result = $stmt->executeQuery();
             $documentsError = $result->fetchAllAssociative();
             if (!empty($documentsError)) {
-                // include_once 'rule.php';
+                $ruleId = null;
+				$this->ruleManager->setJobId($this->id);
+				$this->ruleManager->setManual($this->manual);
+				$this->ruleManager->setApi($this->api);
                 foreach ($documentsError as $documentError) {
-                    $this->ruleManager->setRule($documentError['rule_id']);
-                    $this->ruleManager->setJobId($this->id);
-					$this->ruleManager->setManual($this->manual);
-                    $this->ruleManager->setApi($this->api);
+					// Load the rule only if it has changed
+					if ($ruleId != $documentError['rule_id']) {
+						$this->ruleManager->setRule($documentError['rule_id']);
+						$this->ruleManager->setJobId($this->id);
+						$this->ruleManager->setManual($this->manual);
+						$this->ruleManager->setApi($this->api);
+					}
                     $errorActionDocument = $this->ruleManager->actionDocument($documentError['id'], 'rerun');
                     if (!empty($errorActionDocument)) {
                         $this->message .= print_r($errorActionDocument, true);
                     }
+					$ruleId = $documentError['rule_id'];
                 }
             }
         } catch (Exception $e) {
-            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error('Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            $this->message .= 'Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
     }
 
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function initJob(string $paramJob, bool $force = false): array
+    public function initJob(string $paramJob): array
     {
-        $this->paramJob = $paramJob;
-        $this->id = uniqid('', true);
-        $this->start = microtime(true);
-        // Check if a job is already running except if force = true (api call or manuel call)
-        if (!$force) {
-            $sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
-            $stmt = $this->connection->prepare($sqlJobOpen);
-            $result = $stmt->executeQuery();
-            $job = $result->fetchAssociative(); // 1 row
-            // Error if one job is still running
-            if (!empty($job)) {
-                $this->message .= $this->tools->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+		try {
+			$this->paramJob = $paramJob;
+			$this->id = uniqid('', true);
+			$this->start = microtime(true);
+			
+			// Do not run several job in the same time for non premium version
+			$sqlJobOpen = "SELECT * FROM job WHERE status = 'Start' LIMIT 1";
+			$stmt = $this->connection->prepare($sqlJobOpen);
+			$result = $stmt->executeQuery();
+			$job = $result->fetchAssociative(); // 1 row
+			// Error if one job is still running
+			if (!empty($job) && !($this->toolsManager->isPremium())) {
+				$this->message .= $this->toolsManager->getTranslation(['messages', 'rule', 'another_task_running']).';'.$job['id'];
+				return ['success' => false, 'message' => $this->message];
+			}
 
-                return ['success' => false, 'message' => $this->message];
-            }
-        }
-        // Create Job
-        $insertJob = $this->insertJob();
-        if ($insertJob) {
-            $this->createdJob = true;
-
-            return ['success' => true, 'message' => ''];
-        } else {
-            $this->message .= 'Failed to create the Job in the database';
-
-            return ['success' => false, 'message' => $this->message];
+			// Create Job
+			$insertJob = $this->insertJob();
+			if ($insertJob) {
+				$this->createdJob = true;
+				return ['success' => true, 'message' => ''];
+			} else {
+				$this->message .= 'Failed to create the Job in the database';
+				return ['success' => false, 'message' => $this->message];
+			}
+		} catch (Exception $e) {
+            throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
     }
 
@@ -342,6 +361,13 @@ class jobcore
     {
         // Get job data
         $this->logData = $this->getLogData();
+		
+		// No lock should remain but we check to be sure nothing remains locked
+		// Remove lock on document locked by this job
+		$this->documentRepository->removeLock($this->id);
+
+		// Remove lock (send and read) on rule locked by this job
+		$this->ruleRepository->removeLock($this->id);
 
         // Update table job
         return $this->updateJob();
@@ -356,7 +382,6 @@ class jobcore
             $paramJob[] = $event;
             $paramJob[] = $datatype;
             $paramJob[] = implode(',', $param);
-            $paramJob[] = 1; // Force run even if another task is running
 
             return $this->runBackgroundJob('massaction', $paramJob);
         } else {
@@ -388,7 +413,7 @@ class jobcore
                 }
             }
             // Get the php executable
-            $php = $this->tools->getPhpVersion();
+            $php = $this->toolsManager->getPhpVersion();
 
             //Create your own folder in the cache directory
             $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/job/'.$guid.'.txt';
@@ -398,7 +423,7 @@ class jobcore
             } catch (IOException $e) {
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' 1 --env='.$this->env.'  > '.$fileTmp.' &');
+            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
             while (!file_exists($fileTmp)) {
@@ -427,7 +452,7 @@ class jobcore
 
             // Renvoie du message en session
             $session = new Session();
-            $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->tools->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->tools->getTranslation(['session', 'task', 'msginfo'])]);
+            $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (Exception $e) {
@@ -446,11 +471,23 @@ class jobcore
             if (empty($ids)) {
                 throw new Exception('No ids in the input parameter of the function massAction.');
             }
+			//Check if the parameter is a rule group 
+			if ($this->toolsManager->isPremium()) {
+				// Get the rules from the group
+				$rulesGroup = $this->toolsManager->getRulesFromGroup(implode(',',$ids));
+				if (!empty($rulesGroup)) {
+					// Recalculate the array ids
+					$ids = array();
+					foreach($rulesGroup as $ruleGroup) {
+						$ids[] = $ruleGroup['id'];
+					}
+				}
+			}
+			
             // Build IN parameter
-            // $idsDocArray = explode(',',$ids);
             $queryIn = '(';
-            foreach ($ids as $idDoc) {
-                $queryIn .= "'".$idDoc."',";
+            foreach ($ids as $recordId) {
+                $queryIn .= "'".$recordId."',";
             }
             $queryIn = rtrim($queryIn, ',');
             $queryIn .= ')';
@@ -458,7 +495,7 @@ class jobcore
             // Buid WHERE section
             // Filter on rule or docuement depending on the data type
             $where = ' WHERE ';
-            if ('rule' == $dataType) {
+            if (in_array($dataType, array('rule','group'))) {
                 $where .= " rule.id IN $queryIn ";
             } elseif ('document' == $dataType) {
                 $where .= " document.id IN $queryIn ";
@@ -481,7 +518,16 @@ class jobcore
             if ('changeStatus' == $action) {
                 $where .= " AND document.status = '$fromStatus' ";
             }
-
+            
+			// Filter on document locked
+            if ($action == 'unlock') {
+                $where .= " AND document.job_lock != '' AND document.job_lock IS NOT NULL ";
+            }
+			
+			// Filter on document with workflow in error
+            if ($action == 'rerunWorkflow') {
+                $where .= " AND document.workflow_error = 1 ";
+            }
             // Build the query
             $sqlParams = '	SELECT 
 								document.id,
@@ -491,14 +537,15 @@ class jobcore
 									ON document.rule_id = rule.id'
                             .$where.'
 							ORDER BY rule.id';
+
             $stmt = $this->connection->prepare($sqlParams);
             $result = $stmt->executeQuery();
             $documents = $result->fetchAllAssociative();
 
+            // include_once 'rule.php';
             if (!empty($documents)) {
-                // include_once 'rule.php';
                 $param['ruleId'] = '';
-                foreach ($documents as $document) {
+                foreach ($documents as $document) {  
                     // If new rule, we create a new instance of RuleManager
                     if ($param['ruleId'] != $document['rule_id']) {
                         $this->ruleManager->setApi($this->api);
@@ -509,7 +556,7 @@ class jobcore
                     $error = $this->ruleManager->actionDocument($document['id'], $action, $toStatus);
 					// Save the error if exists
 					if (!empty($error)) {
-						$errors[] = $error[0];
+						$errors[] = current($error);
 					}
                 }
             } else {
@@ -524,17 +571,47 @@ class jobcore
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
-
         return true;
     }
 
-    // Fonction permettant d'annuler massivement des documents
-
-    // In order to add extra components to the function without disturbing its regular use, we added a flag argument.
-    // This $usesDocumentIds flag is either null or 1
-    public function readRecord($ruleId, $filterQuery, $filterValues, $usesDocumentIds = null): bool
+    // Function to clear the unlock on rule
+    public function clearLock($dataType, $ids): bool
     {
         try {
+            if (empty($ids)) {
+                throw new Exception('No ids in the input parameter of the function clearLock.');
+            }
+    
+            $queryIn = '(' . implode(',', array_map(function($id) { return "'" . $id . "'"; }, $ids)) . ')';
+            $where = ' WHERE id IN ' . $queryIn;
+    
+            if ('rule' == $dataType) {
+                $sqlClear = "UPDATE rule SET read_job_lock = '' " . $where;
+                $stmtClear = $this->connection->prepare($sqlClear);
+                $result = $stmtClear->executeQuery();
+            } else {
+                throw new Exception('Unsupported data type for clearLock function.');
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error in clearLock: ' . $e->getMessage());
+            return false;
+        }
+    
+        return true;
+    }
+
+    // Function to create one of several document using a query 
+    public function readRecord($ruleId, $filterQuery, $filterValues): bool
+    {
+        try {
+            $responseFilter = [];
+            $responseCheckPredecessor = [];
+            $responseCheckParent = [];
+            $responseTransform = [];
+            $responseGetTargetData = [];
+            $responseSend = [];
+            $documentIds = [];
+
             // Get the filter values
             $filterValuesArray = explode(',', $filterValues);
             if (empty($filterValuesArray)) {
@@ -557,11 +634,6 @@ class jobcore
 			$this->ruleManager->setManual($this->manual);
             $this->ruleManager->setApi($this->api);
 
-            // We create an array that will match the initial structure of the function
-            if ($usesDocumentIds === 1) {
-                $arrayOfDocumentIds = [];
-            }
-
             // Try to read data for each values
             foreach ($filterValuesArray as $value) {
                 // Generate documents
@@ -569,43 +641,77 @@ class jobcore
                 if (!empty($documents->error)) {
                     throw new Exception($documents->error);
                 }
-
                 // We assign the id to an id section of the array
-                if ($usesDocumentIds === 1 && !empty($documents)) {
-                    $arrayOfDocumentIds[] = $documents[0]->id;
-                    continue;
-                } elseif (!empty($documents)) {
-                    // Run documents
-                    foreach ($documents as $doc) {
-                        $errors = $this->ruleManager->actionDocument($doc->id, 'rerun');
-                        // Check errors
-                        if (!empty($errors)) {
-                            $this->message .= 'Document '.$doc->id.' in error (rule '.$ruleId.')  : '.$errors[0].'. ';
-                        }
-                    }
+                if (!empty($documents[0]->id)) {
+                    $documentIds[]['id'] = $documents[0]->id;
                 }
             }
 
-            // Since the actionDocument takes a string and not an array of ids, we recompose the ids into a string separated by commas
-            if ($usesDocumentIds === 1) {
-                $stringOfDocumentIds = implode(',', $arrayOfDocumentIds);
-                $errors = $this->ruleManager->actionDocument($stringOfDocumentIds, 'rerun');
+            // Filter documents
+            if (!empty($documentIds)) {
+                $responseFilter = $this->ruleManager->filterDocuments($documentIds);
+            }
+
+            // Check predecessor
+            $documentIds = $this->refreshDocumentList($documentIds, $responseFilter);
+            if (!empty($documentIds)) {
+                $responseCheckPredecessor = $this->ruleManager->checkPredecessorDocuments($documentIds);
+            }
+
+            // Check parent
+            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckPredecessor);
+            if (!empty($documentIds)) {
+                $responseCheckParent = $this->ruleManager->checkParentDocuments($documentIds);
+            }
+
+            // Transform document
+            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckParent);
+            if (!empty($documentIds)) {
+                $responseTransform = $this->ruleManager->transformDocuments($documentIds);
+            }
+
+            // Get history
+            $documentIds = $this->refreshDocumentList($documentIds, $responseTransform);
+            if (!empty($documentIds)) {
+                $responseGetTargetData = $this->ruleManager->getTargetDataDocuments($documentIds);
+            }
+
+            // Send document
+            $documentIds = $this->refreshDocumentList($documentIds, $responseGetTargetData);
+            if (!empty($documentIds)) {
+                $responseSend = $this->ruleManager->sendDocuments($documentIds);
             }
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-
             return false;
         }
-
         return true;
     }
 
+    // Remove the document from the list if the retrun value is not true
+    public function refreshDocumentList($documentIds, $response) {
+        $documentListRefresh = [];
+        if (!empty($response)) {
+            foreach($response as $docId => $return) {
+                if ($return == true) {
+                    $documentListRefresh[]['id'] = $docId;
+                }
+            }
+        }
+        return $documentListRefresh;
+    }
+
     // Remove all data flagged deleted in the database
-    public function pruneDatabase(): void
+    public function pruneDatabase($nbDays): void
     {
         $this->noDocumentsTablesToEmptyCounter = 0;
         $this->noRulesTablesToEmptyCounter = 0;
+
+        $date = new DateTime();
+        $date->modify('-' . (int) $nbDays . ' days');
+        $this->pruneDatabaseMaxDate = $date->format('Y-m-d H:i:s');
+
         try {
             $this->processDeletableItems($this->getListOfSqlDocumentParams(), 'document');
             // Start deleteing rules when there is no more documents to delete
@@ -654,29 +760,31 @@ class jobcore
 
     public function getListOfSqlDocumentParams(): array
     {
+
+
         $listOfSqlDocumentParams = [
             "SELECT log.id
         FROM log
         LEFT OUTER JOIN document ON log.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND log.created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
 
         "SELECT documentdata.id
         FROM documentdata
         LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)",
 
         "SELECT documentaudit.id
         FROM documentaudit
         LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentaudit WHERE id IN (%s)",
 
         "SELECT documentrelationship.id
         FROM documentrelationship
         LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
         ];
 
@@ -685,10 +793,11 @@ class jobcore
 
     public function documentSqlParams()
     {
+
         $listOfSqlDocumentParams = [
             "SELECT document.id
         FROM document
-        WHERE document.deleted = 1
+        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
         ];
         return $listOfSqlDocumentParams;
@@ -700,44 +809,44 @@ class jobcore
         "SELECT ruleaudit.id
         FROM ruleaudit
         LEFT OUTER JOIN rule ON ruleaudit.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleaudit WHERE id IN (%s)",
 
         "SELECT rulefield.id
         FROM rulefield
         LEFT OUTER JOIN rule ON rulefield.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefield WHERE id IN (%s)",
 
         "SELECT rulefilter.id
         FROM rulefilter
         LEFT OUTER JOIN rule ON rulefilter.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulefilter WHERE id IN (%s)",
 
         "SELECT ruleorder.rule_id
         FROM ruleorder
         LEFT OUTER JOIN rule ON ruleorder.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleorder WHERE rule_id IN (%s)",
 
         "SELECT rulerelationship.id
         FROM rulerelationship
         LEFT OUTER JOIN rule ON rulerelationship.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rulerelationship WHERE id IN (%s)",
 
         "SELECT ruleparamaudit.id
         FROM ruleparamaudit
         LEFT OUTER JOIN ruleparam ON ruleparamaudit.rule_param_id = ruleparam.id
             LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparamaudit WHERE id IN (%s)",
 
         "SELECT ruleparam.id
         FROM ruleparam
         LEFT OUTER JOIN rule ON ruleparam.rule_id = rule.id
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
         ];
 
@@ -746,10 +855,11 @@ class jobcore
 
     public function ruleSqlParams()
     {
+
         $listOfSqlRuleParams = [
         "SELECT rule.id
         FROM rule
-        WHERE rule.deleted = 1
+        WHERE rule.deleted = 1 AND rule.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
         ];
 
@@ -832,8 +942,11 @@ class jobcore
             // Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
             $sql = "SELECT
 						rule.id,
-						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id
+						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id,
+						GROUP_CONCAT(rulefield.formula SEPARATOR ';') formula
 					FROM rule
+						LEFT OUTER JOIN rulefield
+							ON rule.id = rulefield.rule_id
 						LEFT OUTER JOIN rulerelationship
 							ON rule.id = rulerelationship.rule_id
 					WHERE
@@ -844,6 +957,15 @@ class jobcore
             $rules = $result->fetchAllAssociative();
 
             if (!empty($rules)) {
+				// Add the rule in formula to the list of rules in relationship
+				foreach ($rules as $key => $rule) {
+					$matches = array();
+					// Get the second parameters (rule id) of the lookup functions
+					preg_match_all('/lookup\(\{[^}]+\},"([^"]+)"/', $rule['formula'], $matches);
+					// Transform result and add it to the other rules (old relationships)
+					$rules[$key]['field_id'] .= ';'.implode(';', array_unique($matches[1]));
+					$rules[$key]['field_id'] = trim($rules[$key]['field_id'],';');
+				}
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
                 $ruleKeyValue = [];
                 foreach ($rules as $key => $rule) {
@@ -889,7 +1011,6 @@ class jobcore
                     }
                     $rules = $rulesRef;
                 }
-
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
                 $stmt = $this->connection->prepare($sql);
@@ -910,7 +1031,6 @@ class jobcore
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
-
             return false;
         }
 
@@ -976,8 +1096,12 @@ class jobcore
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function clearData()
+    public function clearData($actvieRule)
     { 	
+		$where = "ruleparam.name = 'delete'";
+		if (!empty($actvieRule)) {
+			$where .= " AND rule.active = '1' ";
+		}
         // Récupération de chaque règle et du paramètre de temps de suppression
         $sqlParams = "	SELECT 
 							rule.id,
@@ -987,8 +1111,7 @@ class jobcore
 						FROM rule
 							INNER JOIN ruleparam
 								ON rule.id = ruleparam.rule_id
-						WHERE
-							ruleparam.name = 'delete'";
+						WHERE ".$where;
         $stmt = $this->connection->prepare($sqlParams);
         $result = $stmt->executeQuery();
         $rules = $result->fetchAllAssociative();
@@ -1312,7 +1435,6 @@ class jobcore
      */
     protected function updateJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -1342,15 +1464,11 @@ class jobcore
             $stmt->bindValue('message', $message);
             $stmt->bindValue('id', $this->id);
             $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
             return false;
         }
-
         return true;
     }
 
@@ -1359,18 +1477,19 @@ class jobcore
      */
     protected function insertJob(): bool
     {
-        $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
-            $now = gmdate('Y-m-d H:i:s');
-            $query_header = "INSERT INTO job (id, begin, status, param, manual, api) VALUES ('$this->id', '$now', 'Start', '$this->paramJob', '$this->manual', '$this->api')";
-            $stmt = $this->connection->prepare($query_header);
-            $result = $stmt->executeQuery();
-            $this->connection->commit(); // -- COMMIT TRANSACTION
+			$job = new Job();
+			$job->setId($this->id);
+			$job->setStatus('Start');
+			$job->setParam($this->paramJob);
+			$job->setBegin(new DateTime());
+			$job->setManual($this->manual);
+			$job->setApi($this->api);
+			$this->entityManager->persist($job);
+			$this->entityManager->flush();
         } catch (Exception $e) {
-            $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error('Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-
             return false;
         }
 
@@ -1384,33 +1503,40 @@ class jobcore
             if (empty($period)) {
                 $period = $this->checkJobPeriod;
             }
-            //Search only jobs with status start
-            $sqlParams = "SELECT DISTINCT job.id
-            FROM job 
-                INNER JOIN log    
-                    ON job.id = log.job_id
-            WHERE
-                    job.status = 'start'
-                AND TIMESTAMPDIFF(SECOND,  log.created, NOW()) > :period;";
+            // Search only jobs with status start and last log created before the limit
+			// We use the begin of teh job if no log
+            $sqlParams = "
+			SELECT 
+				job.id, 
+				job.begin, 
+				TIMESTAMPDIFF(SECOND,  job.begin, NOW()) diff_job,
+				MAX(log.created) log_created,
+				TIMESTAMPDIFF(SECOND, MAX(log.created), NOW()) diff_log
+			FROM job
+				LEFT OUTER JOIN log
+					ON job.id = log.job_id
+			WHERE
+					job.status = 'start'
+			GROUP BY job.id
+			HAVING diff_log > :period OR (diff_job > :period AND log_created IS NULL)
+			";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('period', $period);
 
             $result = $stmt->executeQuery();
             $jobs = $result->fetchAllAssociative();
-
             foreach ($jobs as $job) {
                 //clone because, the job that is not the current job
                 $jobManagerChekJob = clone $this;
                 $jobManagerChekJob->setId($job['id']);
-                $jobManagerChekJob->closeJob();    
+                $jobManagerChekJob->closeJob();   
+				$this->setMessage('Task '.$job['id'].' successfully closed. ');
             }
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             return false;
         }
         return true;
     }
-}
-class JobManager extends jobcore
-{
 }

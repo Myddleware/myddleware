@@ -42,18 +42,20 @@
         <span class="badge">4</span> {{'create_rule.tabs.four'|trans}}
     </button>
 </li>
+{% if rule is defined and rule is not null and rule.relationsShip|default([])|length > 0 %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-5" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation-5" aria-selected="false">
         <span class="badge">5</span> {{'create_rule.tabs.five'|trans}}
     </button>
 </li>
+{% endif %}
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-6" id="filtertab-tab" data-bs-toggle="tab" data-bs-target="#filtertab" type="button" role="tab" aria-controls="filtertab-6" aria-selected="false">
-        <span class="badge">6</span> {{'create_rule.tabs.six'|trans}}
+        <span class="badge">5</span> {{'create_rule.tabs.six'|trans}}
     </button>
 </li>
 <li class="nav-item d-grid flex-fill" role="presentation">
     <button class="nav-link lh-lg btn-lg fw-bold py-4 tab-7" id="params-tab" data-bs-toggle="tab" data-bs-target="#params" type="button" role="tab" aria-controls="params-7" aria-selected="false">
-        <span class="badge">7</span> {{'create_rule.tabs.seven'|trans}}
+        <span class="badge">6</span> {{'create_rule.tabs.seven'|trans}}
     </button>
 </li>

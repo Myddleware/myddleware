@@ -31,6 +31,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputArgument;
 
 class PruneDatabaseCommand extends Command
 {
@@ -52,6 +53,7 @@ class PruneDatabaseCommand extends Command
         $this
             ->setName('myddleware:prunedatabase')
             ->setDescription('Remove all data flagged as deleted in Myddleware')
+            ->addArgument('nbDays', InputArgument::REQUIRED, 'Number of days to prune data for');
         ;
     }
 
@@ -60,7 +62,8 @@ class PruneDatabaseCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $data = $this->jobManager->initJob('Prune database');
+        $nbDays = $input->getArgument('nbDays');
+        $data = $this->jobManager->initJob('prunedatabase '.$nbDays);
 
         if (false === $data['success']) {
             $output->writeln('0;<error>'.$data['message'].'</error>');
@@ -69,20 +72,26 @@ class PruneDatabaseCommand extends Command
             return 0;
         }
 
-        $this->jobManager->pruneDatabase();
+        $this->jobManager->pruneDatabase($nbDays);
 
         $responseCloseJob = $this->jobManager->closeJob();
 
-        if (!empty($responseCloseJob['message'])) {
-            if ($responseCloseJob['success']) {
-                $output->writeln('<info>'.$responseCloseJob['message'].'</info>');
-                $this->logger->info($responseCloseJob['message']);
+        if ($responseCloseJob) {
+            $this->jobManager->setMessage('The database has been pruned successfully');
+        } else {
+            $this->jobManager->setMessage('An error occurred while pruning the database');
+        }
+
+        if (!empty($this->jobManager->getMessage())) {
+            if ($responseCloseJob) {
+                $output->writeln('<info>'.$this->jobManager->getMessage().'</info>');
+                $this->logger->info($this->jobManager->getMessage());
             } else {
-                $output->writeln('<error>'.$responseCloseJob['message'].'</error>');
-                $this->logger->error($responseCloseJob['message']);
+                $output->writeln('<error>'.$this->jobManager->getMessage().'</error>');
+                $this->logger->error($this->jobManager->getMessage());
             }
         }
 
-        return 1;
+        return 0;
     }
 }

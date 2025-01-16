@@ -28,7 +28,7 @@ namespace App\Solutions;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class magentocore extends solution
+class magento extends solution
 {
     protected $token;
 
@@ -829,8 +829,4 @@ class magentocore extends solution
         }
         throw new \Exception('curl extension is missing!');
     }
-}
-
-class magento extends magentocore
-{
 }

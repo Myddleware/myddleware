@@ -743,4 +743,41 @@ class ConnectorController extends AbstractController
 
         return false;
     }
+
+/**
+ * @Route("/connector/{id}/detail", name="connector_detail")
+ */
+public function detailAction(int $id)
+{
+    $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
+    
+    $connector = $this->entityManager->getRepository(Connector::class)->find($id);
+
+    if (!$connector) {
+        throw $this->createNotFoundException('The connector does not exist');
+    }
+
+    $paramConnexion = [];
+   
+    foreach ($connector->getConnectorParams() as $param) {
+        $paramConnexion[$param->getName()] = $param->getValue();
+    }
+    $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
+    foreach ($paramConnexion as $key => $value) {
+        if (is_string($value)) {
+            try {
+                $paramConnexion[$key] = $encrypter->decrypt($value);
+            } catch (\Exception $e) {
+              
+            }
+        }
+    }
+
+    // Passez les paramètres décryptés à la vue
+    return $this->render('Connector/detail/detail.html.twig', [
+        'connector' => $connector,
+        'paramConnexion' => $paramConnexion, 
+        'sensitiveFields' => $sensitiveFields,
+    ]);
+}
 }

@@ -1,54 +1,137 @@
 {% extends 'base.html.twig' %}
-{% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+{% block titlesm %}
+	{{ 'crontab.title'|trans }}
+{% endblock %}
 {% block body %}
-<div class="p-5">
-    <div id="info" class='container'>
-        <div id="jobsceduler_table">
-            <table class="table table-light table-hover">
-                <tbody>
-                <tr>
-                    <td class="title"><label>Id</label></td>
-                    <td class="value">{{ entity.id }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'jobscheduler.date_created'|trans }}</label></td>
-                    <td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'jobscheduler.date_modified'|trans }}</label></td>
-                    <td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'crontab.command'|trans }}</label></td>
-                    <td class="value">{{ entity.command }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'crontab.arguments'|trans }}</label></td>
-                    <td class="value">{{ entity.arguments }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'crontab.description'|trans }}</label></td>
-                    <td class="value">{{ entity.description }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'crontab.running'|trans }}</label></td>>
-                    <td class="value">{{ entity.runningInstances }}</td>
-                </tr>                
-                <tr>
-                    <td class="title"><label>{{ 'crontab.max_instance'|trans }}</label></td>
-                    <td class="value">{{ entity.maxInstances }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'crontab.number'|trans }}</label></td>
-                    <td class="value">{{ entity.number }}</td>
-                </tr>
-                <tr>
-                    <td class="title"><label>{{ 'jobscheduler.active'|trans }}</label></td>
-                    <td class="value">{% if entity.enable %} true {% else %} false {% endif %}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+	<div class="p-5">
+		<div id="info" class='container'>
+			<div id="jobsceduler_table">
+				<table class="table table-light table-hover">
+					<tbody>
+						<tr>
+							<td class="title">
+								<label>Id</label>
+							</td>
+							<td class="value">{{ entity.id }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'jobscheduler.date_created'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'jobscheduler.date_modified'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.command'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.command }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.arguments'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.arguments }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.description'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.description }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.running'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.runningInstances }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.max_instance'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.maxInstances }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'crontab.number'|trans }}</label>
+							</td>
+							<td class="value">{{ entity.number }}</td>
+						</tr>
+						<tr>
+							<td class="title">
+								<label>{{ 'jobscheduler.active'|trans }}</label>
+							</td>
+							<td class="value">
+								{% if entity.enable %}
+									true
+								{% else %}
+									false
+								{% endif %}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div id="jobschedulerresulttable">
+				<h4 class="mt-5">{{ 'crontab.results'|trans }}</h4>
+				<h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
+				<table class="table table-light table-hover" id="myTable">
+					<thead>
+						<tr>
+							<th class="table-head-result">{{ 'jobscheduler.id'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.date_created'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.date_modified'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.output'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.run_at'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.run_time'|trans }}</th>
+							<th class="table-head-result">{{ 'jobscheduler.status_code'|trans }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for result in pager.currentPageResults %}
+							<tr>
+								<td>{{ result.id }}</td>
+								<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.output|raw }}</td>
+								<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.runTime }}</td>
+								<td>{{ result.statusCode }}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% if pager.haveToPaginate %}
+					<nav aria-label="Page navigation">
+						<ul class="pagination">
+							{% if pager.hasPreviousPage %}
+								<li class="page-item">
+									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.previousPage }) }}" aria-label="Previous">
+										<span aria-hidden="true">&laquo;</span>
+									</a>
+								</li>
+							{% endif %}
+							{% for page in 1..pager.nbPages %}
+								<li class="page-item{% if page == pager.currentPage %} active{% endif %}">
+									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': page }) }}">{{ page }}</a>
+								</li>
+							{% endfor %}
+							{% if pager.hasNextPage %}
+								<li class="page-item">
+									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.nextPage }) }}" aria-label="Next">
+										<span aria-hidden="true">&raquo;</span>
+									</a>
+								</li>
+							{% endif %}
+						</ul>
+					</nav>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 {% endblock %}

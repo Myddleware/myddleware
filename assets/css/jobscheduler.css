@@ -1,4 +1,3 @@
-
 #bloc_paramName1,
 #bloc_paramvalue1,
 #bloc_paramName2,
@@ -17,3 +16,47 @@
     color: red;
 }
 
+.button_plus_message {
+  color: white;
+  background-color: #6D6D6E;
+  padding: 0px 7px 3px 7px;
+  border-radius: 50%;
+  font-weight: bold;
+  float: right;
+  margin-right: 10px;
+}
+
+.button_plus_message:hover, .button_minus_message:hover {
+  color: #6D6D6E;
+  background-color: white;
+  border: 1px solid #6D6D6E;
+}
+
+.button_minus_message {
+  color: white;
+  background-color: #6D6D6E;
+  padding: 0px 11px 4px 10px;
+  border-radius: 50%;
+  font-weight: bold;
+  float: right;
+  margin-right: 10px;
+}
+  .bg-danger {
+    background-color: #f2dedf !important; 
+}
+
+.bg-warning {
+    background-color:#FFECCC !important;
+}
+
+.bg-none {
+    background-color: none; 
+}
+
+.icon-danger {
+    color: #dc3545;
+}
+
+.icon-warning {
+    color: #ffc107;
+  }

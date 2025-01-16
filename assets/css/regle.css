@@ -258,8 +258,17 @@ td {
 	text-align: left!important;
 }
 
-td a {
-	color: #337ab7!important;
+td > a {
+	color: #337ab7;
+	text-decoration: none;
+}
+
+.unlink_rule_from_group {
+	color: #dc3545 !important;
+}
+
+.unlink_rule_from_group:hover {
+	color: white !important;
 }
 
 .title_source_ctr, .title_target_ctr {
@@ -275,23 +284,32 @@ td a {
 }
 
 /* Page View Rule : Validation Tab */
-#ruleparams {
-	background: #444446;
-    color: white;
+#ruleparams,
+#simuleRuleFluxContainer {
+	background: rgb(233, 233, 233);
+    color: black;
     margin-bottom: 20px;
     padding: 30px;
 	max-width: 30vw;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#simuleRuleFluxContainer {
-	background: #444446;
-    color: white;
-    margin-bottom: 20px;
-    padding: 30px;
-	min-height: 100px;
-	text-align: justify;
-	max-width: 30vw;
+#ruleparams p,
+#validRuleParams p {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
+
+#ruleparams .form-control, #ruleparams .form-select,
+#validRuleParams .form-control, #validRuleParams .form-select {
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
 
 #simuleRuleFluxError {
 	display:none;
@@ -301,7 +319,8 @@ td a {
 	width: fit-content;
 }
 
-#ruleparams .form-control {
+#ruleparams .form-control,
+#validRuleParams .form-control {
 	max-width: 250px;
 	margin-bottom: 5px;
 }
@@ -356,4 +375,64 @@ td a {
 
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front {
 	max-width: 645px;
+}
+
+.close-button-description, .close-button-name-rule  {
+    background: none;
+    color: #dc3545;
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+}
+.close-button-description {
+	top: -41px;
+    right: 10px;
+}
+.close-button-name-rule{  
+    top: -35px;
+    right: 5px;
+}
+
+.close-button-description:hover, .close-button-name-rule:hover {
+    color: #cd2536;
+	transform: scale(1.1);
+}
+
+.edit-form-description-close {
+    position: relative; 
+}
+
+.edit-form-name-rule {
+	position: relative;
+}
+
+
+/* rule parameters tab */
+
+#ruleparams,
+#simuleRuleFluxContainer {
+    border-radius: 15px;
+}
+
+#simuleRuleFluxContainer {
+	margin-top: 3em;
+}
+
+#rule-params-container {
+	margin-top: 3em;
+	align-items: flex-start !important;
+}
+
+#ruleparams {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.workflow-name-link-rule {
+	color: #0a58ca !important;
+}
+
+.workflow-name-link-rule:hover {
+	text-decoration: underline !important;
 }

@@ -28,6 +28,9 @@
 # Custom directory
 /src/Custom/*
 
+# Premium directory
+/src/Premium/
+
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache

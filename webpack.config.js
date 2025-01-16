@@ -27,6 +27,7 @@ Encore
     .addEntry('rulelist', './assets/js/rulelist.js')
     .addEntry('fiche', './assets/js/fiche.js')
     .addEntry('filter', './assets/js/filter.js')
+    .addEntry('crontab', './assets/js/crontab.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')

@@ -1,0 +1,112 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #}
+{% extends 'base.html.twig' %}
+{% block title %}
+	{{parent()}}
+	|
+	{{'view_connector.info.title'|trans}}
+{% endblock %}
+{% block titlesm %}
+	{{'view_connector.info.title'|trans}}
+{% endblock titlesm %}
+
+{% block body %}
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-11">
+				<h1 class="display-4 mt-3">{{ 'view_connector.info.title'|trans }}</h1>
+
+				<table class="table table-striped mt-3">
+					<tbody>
+						<tr>
+							<th>{{ 'view_connector.info.solution'|trans }}</th>
+							<td>
+								<img class="vignette" src="{{ asset('build/images/solution/' ~ connector.solution.name ~ '.png') }}" alt="{{ connector.solution.name }}">
+								<p>{{ connector.solution.name }}</p>
+							</td>
+						</tr>
+						<tr>
+							<th>{{ 'create_connector.connexion'|trans }}</th>
+							<td>{{ connector.name }}</td>
+						</tr>
+						{% for key, value in paramConnexion %}
+							<tr>
+								<th class="title">{{ key }}</th>
+								 <td class="params" data-param="{{ key }}">
+									{% if key|lower in sensitiveFields and value is not null %}
+										******************
+									{% else %}
+										{{ value }}
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+
+
+					</tbody>
+				</table>
+
+				<div class="mt-4">
+					<button type="button" id="connexion_detail" class="btn btn-primary">Test</button>
+					<span id="source_status" class="status">
+						<img alt="status" src="{{ asset('build/images/status_offline.png') }}">
+					</span>
+					<a href="{{ path('connector_open', { 'id': connector.id }) }}" class="btn btn-success ms-5">
+						{{ 'view_connector.btn.edit'|trans }}
+					</a>
+					<a href="{{ path('regle_connector_list') }}" class="btn btn-outline-primary ms-2">
+						{{ 'view_connector.btn.back'|trans }}
+					</a>
+					<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
+						<button type="button" class="btn btn-danger ms-2">
+							{{'view_connector.btn.delete'|trans}}
+						</button>
+					</a>
+				</div>
+			</div>
+			<div id="msg_status" class="alert alert-danger" role="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
+					<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
+				</svg>
+				{{'error.connexion'|trans}}
+				:
+				<span class="error"></span>
+			</div>
+		</div>
+	</div>
+
+ <script type="text/javascript">
+    const sensitiveFields = {{ sensitiveFields|json_encode|raw }};
+    {% for field in sensitiveFields %}
+        {% if paramConnexion[field] is defined and paramConnexion[field] is not empty %}
+            var {{ field }} = "{{ paramConnexion[field] }}";
+        {% endif %}
+    {% endfor %}
+</script>
+{% endblock %}
+
+
+{% block javascripts %}
+	{{ encore_entry_script_tags('connector') }}
+{% endblock %}

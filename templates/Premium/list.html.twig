@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'premium.upgrade.title_main'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'premium.upgrade.title_main'|trans }}
+{% endblock titlesm %}
+
+{% block body %}
+<div id="premium-upgrade">
+
+    <div class="text-center mt-4">
+        <h1>{{ 'premium.upgrade.title'|trans }}</h1>
+        <p class="lead">{{ 'premium.upgrade.description'|trans }}</p>
+        <a href="https://web.myddleware.com/#pricing" class="btn btn-primary mt-4">{{ 'premium.upgrade.button'|trans }}</a>
+    </div>
+
+    <div class="mt-5">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    {# FEATURES #}
+    <section class="feature_homepage">
+        <div class="col">
+            <div class="d-flex justify-content-center my-4">
+                <h3 class="display-6 title_section_homepage">{{'panel.features.title'|trans}}</h3>
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>Direct job scheduler access in Myddleware</p>
+                        <span class="extra-text" style="display: none;">Control various processes in Myddleware and monitor their progress, have them run automatically at various intervals. Let Myddleware work for you!</span>
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>Workflow</p>
+                        <span class="extra-text" style="display: none;">Let Myddleware execute automatic actions for your documents based on your specific conditions!</span>
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>Document Mass action</p>
+                        <span class="extra-text" style="display: none;">Execute actions, such as reload, cancel or delete on multiple documents at once with a single click!</span>
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>Rule Duplication</p>
+                        <span class="extra-text" style="display: none;">Duplicate a rule if you need to create a new one with similar settings. It won't affect the original rule in any way, and it's so much faster than creating a new rule from scratch! What's more, if you need to test something for a rule, you can duplicate it, and you immediately have your test rule ready to go!</span>
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>More document filters</p>
+                        <span class="extra-text" style="display: none;">Use a wide array of custom filters to refine your search, such as date range, specific document status, document type, document content, etc.</span>
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-dark w-100 toggle-btn-homepage">
+                        <div>
+                            <i class="fa fa-info-circle home_fa_info_circle" aria-hidden="true"></i>
+                        </div>
+                        <p>Variables</p>
+                        <span class="extra-text" style="display: none;">You have a word or a number that is the same across many rules and only changes occasionally ? Use the variables so you don't have to change it everywhere at the same time
+</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+<div class="clr"></div>
+<script type="text/javascript">
+    let trans_click = "{{ 'panel.solutions.click'|trans }}";
+</script>
+{% endblock %}
+
+{% block cssin %}{% endblock cssin %}

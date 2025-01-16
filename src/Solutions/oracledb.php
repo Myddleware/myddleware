@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-class oracledbcore extends database
+class oracledb extends database
 {
     protected $driver = 'oci';
 
@@ -42,7 +42,7 @@ class oracledbcore extends database
     }
 
     // Generate query
-    protected function get_query_show_tables(): string
+    protected function get_query_show_tables($type): string
     {
         return "SELECT * FROM (SELECT CONCAT(CONCAT(owner, '.'), table_name) AS \"TableName\", owner FROM all_tables UNION SELECT CONCAT(CONCAT(owner, '.'), view_name) AS \"ViewName\", owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
         // return "SELECT * FROM (SELECT table_name, owner FROM all_tables UNION SELECT view_name, owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
@@ -183,8 +183,4 @@ class oracledbcore extends database
 
         return " ROWNUM BETWEEN $param[offset] AND ".($param['limit'] + $param['offset']);
     }
-}
-
-class oracledb extends oracledbcore
-{
 }

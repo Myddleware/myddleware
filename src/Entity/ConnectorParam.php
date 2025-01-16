@@ -52,7 +52,7 @@ class ConnectorParam
     private ?string $name;
 
     /**
-     * @ORM\Column(name="value", type="string", length=684)
+     * @ORM\Column(name="value", type="string", length=684, nullable=true)
      */
     private $value;
 

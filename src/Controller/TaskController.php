@@ -28,6 +28,8 @@ namespace App\Controller;
 use App\Entity\Config;
 use App\Entity\Job;
 use App\Entity\Log;
+use App\Entity\Document;
+use App\Entity\Rule;
 use App\Manager\JobManager;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
@@ -73,6 +75,9 @@ class TaskController extends AbstractController
             foreach ($configs as $config) {
                 $this->params[$config->getName()] = $config->getvalue();
             }
+        }
+        if (empty($this->DocumentRepository)) {
+            $this->documentRepository = $this->entityManager->getRepository(Document::class);
         }
     }
 
@@ -170,10 +175,18 @@ class TaskController extends AbstractController
             $log->setMessage('The task has been manually stopped. ');
             $log->setJob($taskStop);
             $em->persist($log);
+
+			// Remove lock on document locked by this job
+			$this->documentRepository->removeLock($taskStop->getId());
+
+            // Remove lock (send and read) on rule locked by this job
+            $ruleRepository = $this->entityManager->getRepository(Rule::class);
+            $ruleRepository->removeLock($taskStop->getId());
             $em->flush();
 
             return $this->redirect($this->generateURL('task_view', ['id' => $taskStop->getId()]));
         } catch (Exception $e) {
+			$this->logger->error('Failed to stop task '.$taskStop->getId().' : '.$e->getMessage().''.$e->getFile().' '.$e->getLine());
             return $this->redirect($this->generateUrl('task_list'));
         }
     }

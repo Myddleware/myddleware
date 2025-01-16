@@ -26,39 +26,44 @@
             {{ encore_entry_link_tags('app') }}
     {% endblock %}
 </head>
-<div class="link-help-view row text-end mb-4">
+<div class="link-help-view text-end mb-4">
 	<a href="#help-content-param">
 		<i class="fa fa-info-circle" aria-hidden="true"></i>
 	{{'rule.help'|trans}}
 	</a>
 </div>
-<div class="d-flex justify-content-around align-items-baseline">
+<div id="rule-params-container" class="d-flex justify-content-around align-items-baseline">
 	<div >
+		{# <div>
+			<button id="storeReferenceDateButton" type="button" class="btn btn-primary mb-2">
+				Store Reference Date
+			</button>
+			<button id="getReferenceDateButton" type="button" class="btn btn-primary mb-2">
+				Get Reference Date
+			</button>
+		</div> #}
 		<div id="ruleparams" class="row">
 			{% if params %}
 				{% for c, p in params %}
-					{% if p.type != 'option' %}
-						<p>{{p.label|trans}} : </p><input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" />
-					{% else %}
-						<p> {{p.label|trans}} : </p>
+					<div class="col-md-12 mb-3">
+						<p>{{ p.label|trans }}:</p>
+						{% if p.type != 'option' %}
+							<input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}" />
+						{% else %}
 							<select data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }} name="{{ p.name }}" id="{{ p.name }}">
 								{% for opt_value, opt_name in p.option %}
-									{% if opt_value == p.value_bdd %}
-										<option selected="selected" value="{{ opt_value }}">{{ opt_name|trans }}</option>
-									{% else %}
-										<option value="{{ opt_value }}">{{ opt_name|trans }}</option>
-									{% endif %}
+									<option value="{{ opt_value }}" {{ opt_value == p.value_bdd ? 'selected="selected"' : '' }}>{{ opt_name|trans }}</option>
 								{% endfor %}
 							</select>
-					
-					{% endif %}
+						{% endif %}
+					</div>
 				{% endfor %}
 			{% endif %}
 		</div>
 
 		<div id="validRuleParams" class="d-flex justify-content-between">
 			<div>
-				<button id="saveRuleParams" type="button" class="btn btn-success btn-lg">
+				<button id="saveRuleParams" type="button" class="btn btn-success">
 					{{'view_rule.params.save'|trans}}
 				</button>
 			</div>
@@ -79,7 +84,7 @@
 		</div>
 		<div id="simuleRuleFluxBtn" class="d-flex justify-content-between">
 			<div >
-				<button id="simuleRuleFluxAction" type="button" class="btn btn-primary btn-lg">
+				<button id="simuleRuleFluxAction" type="button" class="btn btn-success">
 					{{'view_rule.params.simule'|trans}}
 				</button>
 			</div>
@@ -109,4 +114,29 @@
 	instance = new dtsel.DTS('input[id="datereference"]',  {
 	showTime: true
 		});
+	document.getElementById('storeReferenceDateButton').addEventListener('click', function() {
+		var dateReferenceValue = document.getElementById('datereference').value;
+		var ruleId = '{{ rule.id }}';
+
+		// Store the value in localStorage with a key that includes the rule ID
+		localStorage.setItem('dateReference_' + ruleId, dateReferenceValue);
+		
+		// Log the stored value to verify
+		console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
+	});
+
+	document.getElementById('getReferenceDateButton').addEventListener('click', function() {
+		var ruleId = '{{ rule.id }}';
+		var storedDateReference = localStorage.getItem('dateReference_' + ruleId);
+
+		if (storedDateReference) {
+			console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
+			// Set the retrieved value to the input field
+			document.getElementById('datereference').value = storedDateReference;
+		} else {
+			console.log('No stored date reference found for rule ' + ruleId);
+		}
+	});
+
+
 </script>

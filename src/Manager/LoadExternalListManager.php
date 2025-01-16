@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class loadexternallistcore
+class LoadExternalListManager
 {
     /**
      * @var EntityManagerInterface
@@ -110,8 +110,4 @@ class loadexternallistcore
         // ensures that the progress bar is at 100%
         $progressBar->finish();
     }
-}
-
-class LoadExternalListManager extends loadexternallistcore
-{
 }

@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+	{{ parent() }}
+	|
+	{{ 'view_workflow_action.edit'| trans}}
+{% endblock %}
+{% block titlesm %}
+	{{ 'view_workflow_action.edit'| trans}}
+{% endblock titlesm %}
+{% block body %}
+	<div class="container mt-5">
+		{{ form_start(form) }}
+		<div class="text-center m-5 d-flex justify-content-between align-items-center">
+			<div class="left-buttons">
+				<a href="{{ path('workflow_show', {'id': workflowAction.Workflow.id}) }}" class="btn btn-outline-primary m-2">
+					{{ 'view_workflow_action.back'| trans }}
+				</a>
+			</div>
+
+			<div class="center-buttons">
+				<a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflowAction.Workflow.id}) }}" class="btn btn-outline-success m-2">
+					{{ 'Create new workflow action'| trans }}
+				</a>
+			</div>
+			
+			<div class="right-buttons">
+				<button type="submit" name="submit" class="btn btn-primary m-2">
+					{{ 'Save'|trans }}
+				</button>
+
+				<a href="{{ path('workflow_action_show', {'id': workflowAction.id}) }}" class="btn btn-outline-warning m-2">
+					{{ 'view_workflow_action.cancel_edit'| trans }}
+				</a>
+				
+				<a href="{{ path('workflow_action_delete', {'id': workflowAction.id}) }}" 
+				   onclick="return confirm('Are you sure you want to delete this workflow action?');" 
+				   class="btn btn-outline-danger m-2">
+					{{ 'view_workflow_action.delete'| trans }}
+				</a>
+			</div>
+		</div>
+
+		<div class="card mb-3 pb-3">
+			<div class="card-header">
+				{{ 'view_workflow_action.edit'|trans }}
+			</div>
+			<div class="card-body">
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.name) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.Workflow) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.description) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.action) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.order) }}
+					</div>
+					{% if form.multipleRuns is defined %}
+						<div class="col-md-6">
+							{{ form_row(form.multipleRuns) }}
+						</div>
+					{% endif %}
+					<div class="col-md-6">
+						{{ form_row(form.status) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.active) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.subject) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-12">
+						{{ form_row(form.message) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.ruleId) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.searchField) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.searchValue) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.rerun) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.to) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
+						{{ form_row(form.targetFields) }}
+					</div>
+					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+						<label for="form_targetFieldValue">New value</label>
+						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+					</div>
+				</div>
+				<div id="dynamicFieldsContainer"></div>
+				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
+			</div>
+			<div class="text-center">
+				{{ form_row(form.submit) }}
+			</div>
+		</div>
+		{{ form_end(form) }}
+
+		<script type="text/javascript">
+			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+			var targetFieldsData = {{ targetFieldsData|json_encode()|raw }};
+		</script>
+	</div>
+{% endblock %}

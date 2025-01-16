@@ -43,6 +43,22 @@ class InstallRequirementsController extends AbstractController
                 }
             }
         } catch (Exception | DBALException | PDOException | DoctrinePDOException | TableNotFoundException $e) {
+
+            // we start by checking if the root folder contains a .env.local file.
+            // if it does, we do nothing. If it doesn't, we create an empty one.
+            if (!file_exists(__DIR__ . '/../../.env.local')) {
+                file_put_contents(__DIR__ . '/../../.env.local', '');
+            }   
+
+            // Get the file permissions in octal format
+            $permissions = fileperms(__DIR__ . '/../../.env.local');
+
+            // Convert the permissions to a human-readable format
+            $envLocalFileRights = substr(sprintf('%o', $permissions), -4);
+
+            // create a variable that indicate whether the .env.local file is writable
+            $envLocalFileWritable = is_writable(__DIR__ . '/../../.env.local');
+
             // if we have a database in .env.local but the connection hasn't been made yet
             if ($e instanceof DBALException | $e instanceof PDOException | $e instanceof DoctrineConnectionException | $e instanceof TableNotFoundException) {
                 $this->symfonyRequirements = new SymfonyRequirements();
@@ -78,8 +94,17 @@ class InstallRequirementsController extends AbstractController
                     'error_messages' => $requirementsErrorMessages,
                     'recommendation_messages' => $recommendationMessages,
                     'system_status' => $this->systemStatus,
+                    'env_local_file_rights' => $envLocalFileRights,
+                    'env_local_file_writable' => $envLocalFileWritable,
                 ]);
             } else {
+
+                // if we already have a database section in the .env.local file, deny access and add a flash message
+                if (!empty($_ENV['DATABASE_URL'])) {
+                $this->addFlash('error_install', $translator->trans('install.database_already_exists'));
+                return $this->redirectToRoute('login');
+                }
+
                 // if other error, deny access
                 return $this->redirectToRoute('login');
             }
@@ -118,6 +143,8 @@ class InstallRequirementsController extends AbstractController
             'error_messages' => $requirementsErrorMessages,
             'recommendation_messages' => $recommendationMessages,
             'system_status' => $this->systemStatus,
+            'env_local_file_rights' => $envLocalFileRights,
+            'env_local_file_writable' => $envLocalFileWritable,
         ]);
     }
 }

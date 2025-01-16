@@ -30,19 +30,75 @@ require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
 require('./js/lib/jquery_scrollbox/jquery.scrollbox.min.js')
 require('./js/lib/jquery_qtip/jquery.qtip.min.js')
 require('./js/lib/jquery_myddleware/function.js')
-require('./js/regle.js')
 require('./js/account.js')
 require('./js/lib/d3.v2.js')
-require('./js/home.js')
-require('./js/jobscheduler.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
 require('./js/connector.js')
-require('./js/smtp.js')
-require('./js/filter.js')
 require('./js/rule_relation_filter.js')
+require('./js/regle.js')
+require('./js/historique.js')
+require('./js/mappingRule.js')
 
+
+if (window.location.href.includes('rule/document/list')) {
+    require('./js/filter.js');
+}
+
+if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
+    require('./js/workflows.js')
+    require('./js/editAction.js')
+}
+if (window.location.href.includes('workflow/show')) {
+    require('./js/workflow-actions-collapse.js')
+    require('./js/workflow-logs-collapse.js')
+    require('./js/workflow-toggle-detail.js')
+}
+
+if (window.location.href.includes('workflowAction/showAction')) {
+    require('./js/workflow-action-toggle-detail.js')
+}
+
+if (window.location.href.includes('workflow/list')) {
+    require('./js/workflow-toggle-list.js')
+    require('./js/workflowsearchworkflowname.js')
+}
+
+
+if (window.location.href.includes('rule/panel') || window.location.href.includes('premium/list')) {
+    require('./js/home.js')
+}
+
+if (window.location.href.includes('rule/jobscheduler')) {
+require('./js/crontab.js')
+require('./js/jobscheduler.js')
+}
+
+if (window.location.href.includes('rule/managementsmtp')) {
+    require('./js/smtp.js')
+}
+
+if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
+    require('./js/connector_detail.js')
+}
+
+if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
+    require('./js/workflowActionSearchFields.js')
+}
+
+
+if (!(window.location.href.includes('install'))) {
+    require('./js/historique.js')
+}
+
+
+if (window.location.href.includes('flux')) {
+    require('./js/imagemousehoverbutton.js')
+}
 
 // start the Stimulus application
 import './bootstrap';
+import 'select2/dist/css/select2.css';
+import 'select2';
+

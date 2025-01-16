@@ -27,6 +27,7 @@
 namespace App\Manager;
 
 use App\Solutions\airtable;
+use App\Solutions\brevo;
 use App\Solutions\cirrusshield;
 use App\Solutions\erpnext;
 use App\Solutions\eventbrite;
@@ -65,30 +66,43 @@ use Exception;
 class SolutionManager
 {
     private array $classes = [];
+	
+	public static array $solutions = [
+							'erpnext',
+							'hubspot',
+							'zuora',
+							'file',
+							'moodle',
+							'magento',
+							'microsoftsql',
+							'oracledb',
+							'mysql',
+							'vtigercrm',
+							'suitecrm',
+							'mailchimp',
+							'prestashop',
+							'postgresql',
+							'sugarcrm',
+							'salesforce',
+							'airtable',
+							'sendinblue',
+							'internallist',
+							'yousign',
+							'brevo'
+						];
 
     public function __construct(
-        wordpress $wordpress,
-        woocommerce $woocommerce,
-        wooeventmanager $wooeventmanager,
         erpnext $erpnext,
-        facebook $facebook,
-        mautic $mautic,
         hubspot $hubspot,
         zuora $zuora,
-        cirrusshield $cirrusshield,
-        ringcentral $ringcentral,
         file $file,
         moodle $moodle,
         magento $magento,
         microsoftsql $microsoftsql,
         oracledb $oracledb,
         mysql $mysql,
-        sap $sap,
-        sapcrm $sapcrm,
-        sagecrm $sagecrm,
         vtigercrm $vtigercrm,
         suitecrm $suitecrm,
-        eventbrite $eventbrite,
         mailchimp $mailchimp,
         prestashop $prestashop,
         postgresql $postgresql,
@@ -97,41 +111,15 @@ class SolutionManager
         airtable $airtable,
         sendinblue $sendinblue,
         internallist $internallist,
-        yousign $yousign
+        yousign $yousign,
+        brevo $brevo
     ) {
-        $this->classes = [
-            'wordpress' => $wordpress,
-            'wooeventmanager' => $wooeventmanager,
-            'woocommerce' => $woocommerce,
-            'erpnext' => $erpnext,
-            'facebook' => $facebook,
-            'mautic' => $mautic,
-            'hubspot' => $hubspot,
-            'zuora' => $zuora,
-            'cirrusshield' => $cirrusshield,
-            'ringcentral' => $ringcentral,
-            'file' => $file,
-            'moodle' => $moodle,
-            'magento' => $magento,
-            'microsoftsql' => $microsoftsql,
-            'oracledb' => $oracledb,
-            'mysql' => $mysql,
-            'sap' => $sap,
-            'sapcrm' => $sapcrm,
-            'sagecrm' => $sagecrm,
-            'vtigercrm' => $vtigercrm,
-            'suitecrm' => $suitecrm,
-            'eventbrite' => $eventbrite,
-            'mailchimp' => $mailchimp,
-            'prestashop' => $prestashop,
-            'postgresql' => $postgresql,
-            'sugarcrm' => $sugarcrm,
-            'salesforce' => $salesforce,
-            'airtable' => $airtable,
-            'sendinblue' => $sendinblue,
-            'yousign' => $yousign,
-            'internallist' => $internallist,
-        ];
+		// Load the solution classes
+		if (!empty(self::$solutions)) {
+			foreach(self::$solutions as $solution) {
+				$this->classes[$solution] = $$solution;
+			}
+		}
     }
 
     public function get(string $name)

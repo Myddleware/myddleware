@@ -29,11 +29,12 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Shapecode\Bundle\CronBundle\Entity\CronJob;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
  * @ORM\Table(name="job", indexes={
- *  @ORM\Index(name="index_status", columns={"status"})
+ *  @ORM\Index(name="index_status_begin", columns={"status","begin"})
  *})
  */
 class Job
@@ -103,11 +104,20 @@ class Job
      * @ORM\OneToMany(targetEntity="Log", mappedBy="job")
      */
     private $logs;
+	
+	/**
+     * @var WorkflowLog[]
+     *
+     * @ORM\OneToMany(targetEntity="WorkflowLog", mappedBy="job")
+     */
+    private $workflowLogs;
+	
 
     public function __construct()
     {
         $this->begin = new DateTime();
         $this->logs = new ArrayCollection();
+        $this->workflowLogs = new ArrayCollection();
     }
 
     public function setId($id): self
@@ -284,4 +294,33 @@ class Job
 
         return $this;
     }
+	
+	/**
+     * @return Collection|WorkflowLog[]
+     */
+    public function getWorkflowLogs(): Collection
+    {
+        return $this->workflowLogs;
+    }
+
+    public function addWorkflowLogs(WorkflowLog $workflowLog): self
+    {
+        if (!$this->workflowLogs->contains($workflowLog)) {
+            $this->workflowLogs[] = $workflowLog;
+            $job->setJob($this);
+        }
+        return $this;
+    }
+
+    public function removeWorkflowLog(WorkflowLog $workflowLog): self
+    {
+        if ($this->workflowLogs->removeElement($workflowLog)) {
+            // set the owning side to null (unless already changed)
+            if ($workflowLog->getWorkflow() === $this) {
+                $workflowLog->setJob(null);
+            }
+        }
+        return $this;
+    }
+
 }
