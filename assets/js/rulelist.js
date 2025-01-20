@@ -18,7 +18,7 @@ $("#rulenamesearchbar").on("submit", function(event) {
 // save the initial table state somewhere accessible
 var initialTableState = $('#tbody_rule_list').html();
 
-$("#rule_name").on("keyup input", function() {
+$("#rule_name_searchbar").on("keyup input", function() {
     var ruleName = $(this).val();
     var url = $(this).data('url');
     
