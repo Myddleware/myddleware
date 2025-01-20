@@ -34,7 +34,8 @@ function displayHistory() {
             const listItem = document.createElement('li');
             listItem.textContent = page.title;
             var wordcount = page.title.split(' ').length;
-            if (wordcount > 1) {
+            var charactercount = page.title.length;
+            if (wordcount > 1 && charactercount > 19) {
                 listItem.classList.add('history-element-home');
             } else {
                 listItem.classList.add('history-element-home-short');
