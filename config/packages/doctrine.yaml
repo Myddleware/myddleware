@@ -4,11 +4,11 @@ doctrine:
         charset: UTF8
         server_version: 5.6
         driver: 'pdo_mysql'
-        host: '%env(resolve:DATABASE_HOST)%'
-        port: '%env(resolve:DATABASE_PORT)%'
-        dbname: '%env(resolve:DATABASE_NAME)%'
-        user: '%env(resolve:DATABASE_USER)%'
-        password: '%env(resolve:DATABASE_PASSWORD)%'
+        host: '%env(string:default:database_host:DATABASE_HOST)%'
+        port: '%env(int:default:database_port:DATABASE_PORT)%'
+        dbname: '%env(string:default:database_name:DATABASE_NAME)%'
+        user: '%env(string:default:database_user:DATABASE_USER)%'
+        password: '%env(string:default:database_password:DATABASE_PASSWORD)%'
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
@@ -27,3 +27,11 @@ doctrine:
                 utc_timestamp: DoctrineExtensions\Query\Mysql\UtcTimestamp
             string_functions:
                 GROUP_CONCAT: DoctrineExtensions\Query\Mysql\GroupConcat
+
+# Add default parameters that will be used when env vars are missing
+parameters:
+    database_host: '127.0.0.1'
+    database_port: 3306
+    database_name: ''
+    database_user: ''
+    database_password: ''
