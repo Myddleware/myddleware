@@ -114,14 +114,20 @@ class DatabaseSetupController extends AbstractController
             // send database parameters to .env.local
             if ($form->isSubmitted() && $form->isValid()) {
                 $envLocal = __DIR__.'/../../.env.local';
-                // we edit the database connection parameters with form input
-                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                $prodString = 'APP_ENV=prod'.PHP_EOL.'APP_DEBUG=false';
-                // add Symfony secret to .env.local
-                $appSecret = 'APP_SECRET='.$database->getSecret();
-                // write new URL into the .env.local file (EOL ensures it's written on a new line)
-
-                $ok = file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+                // Replace single URL with individual parameters
+                $dbConfig = [
+                    'DATABASE_HOST=' . $database->getHost(),
+                    'DATABASE_PORT=' . $database->getPort(),
+                    'DATABASE_NAME=' . $database->getName(),
+                    'DATABASE_USER=' . $database->getUser(),
+                    'DATABASE_PASSWORD=' . $database->getPassword(),
+                    'APP_ENV=prod',
+                    'APP_DEBUG=false',
+                    'APP_SECRET=' . $database->getSecret()
+                ];
+                
+                // Write each parameter on a new line
+                file_put_contents($envLocal, implode(PHP_EOL, $dbConfig), LOCK_EX);
 
                 // allow to proceed to next step
                 $submitted = true;
@@ -182,12 +188,20 @@ class DatabaseSetupController extends AbstractController
                             // send database parameters to .env.local
                             if ($form->isSubmitted() && $form->isValid()) {
                                 $envLocal = __DIR__.'/../../.env.local';
-                                // we edit the database connection parameters with form input
-                                $newUrl = 'DATABASE_URL="mysql://'.$database->getUser().':'.$database->getPassword().'@'.$database->getHost().':'.$database->getPort().'/'.$database->getName().'?serverVersion=5.7"';
-                                $prodString = 'APP_ENV=prod'.PHP_EOL.'APP_DEBUG=false';
-                                $appSecret = 'APP_SECRET='.$database->getSecret();
-                                // write new URL into the .env.local file (EOL ensures it's written on a new line)
-                                file_put_contents($envLocal, PHP_EOL.$newUrl.PHP_EOL.$prodString.PHP_EOL.$appSecret, LOCK_EX);
+                                // Replace single URL with individual parameters
+                                $dbConfig = [
+                                    'DATABASE_HOST=' . $database->getHost(),
+                                    'DATABASE_PORT=' . $database->getPort(),
+                                    'DATABASE_NAME=' . $database->getName(),
+                                    'DATABASE_USER=' . $database->getUser(),
+                                    'DATABASE_PASSWORD=' . $database->getPassword(),
+                                    'APP_ENV=prod',
+                                    'APP_DEBUG=false',
+                                    'APP_SECRET=' . $database->getSecret()
+                                ];
+                                
+                                // Write each parameter on a new line
+                                file_put_contents($envLocal, implode(PHP_EOL, $dbConfig), LOCK_EX);
 
                                 // allow to proceed to next step
                                 $submitted = true;
