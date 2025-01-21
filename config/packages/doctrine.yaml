@@ -1,9 +1,14 @@
 # Doctrine Configuration
 doctrine:
     dbal:
-        charset:  UTF8
+        charset: UTF8
         server_version: 5.6
-        url: '%env(resolve:DATABASE_URL)%'
+        driver: 'pdo_mysql'
+        host: '%env(resolve:DATABASE_HOST)%'
+        port: '%env(resolve:DATABASE_PORT)%'
+        dbname: '%env(resolve:DATABASE_NAME)%'
+        user: '%env(resolve:DATABASE_USER)%'
+        password: '%env(resolve:DATABASE_PASSWORD)%'
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
