@@ -225,43 +225,6 @@ class WorkflowController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/list/workflow/{ruleId}", name="workflow_list_by_rule", defaults={"page"=1})
-     * @Route("/list/workflow/{ruleId}/page-{page}", name="workflow_list_by_rule_page", requirements={"page"="\d+"})
-     */
-    public function WorkflowListByRuleAction(string $ruleId, int $page = 1, Request $request)
-    {
-
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
-        try {
-
-
-            // Récupération des workflows par règle
-            $workflows = $this->entityManager->getRepository(Workflow::class)->findBy(
-                ['rule' => $ruleId, 'deleted' => 0],
-                ['order' => 'ASC']
-            );
-
-            // Pagination avec ArrayAdapter
-            $adapter = new ArrayAdapter($workflows);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(15);
-            $pager->setCurrentPage($page);
-
-            // Rendu des workflows paginés
-            return $this->render('Workflow/list.html.twig', [
-                'entities' => $pager->getCurrentPageResults(),
-                'nb_workflow' => $pager->getNbResults(),
-                'pager_workflow_list' => $pager,
-            ]);
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
-        }
-    }
-
 
     // public function to delet the workflow by id (set deleted to 1)
     /**
