@@ -140,6 +140,7 @@ class moodle extends solution
                 'manual_enrol_users' => 'Manual enrol users',
                 'manual_unenrol_users' => 'Manual unenrol users',
                 'notes' => 'Notes',
+                'core_user_set_user_preferences' => 'User preferences',
             ];
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -198,6 +199,7 @@ class moodle extends solution
 					$param['call_type'] == 'history'
 				AND (
 						$param['module'] == 'manual_unenrol_users' // Don't want a no_send for manual_unenrol_users
+					OR  $param['module'] == 'core_user_set_user_preferences' 
 					OR (
 							$param['module'] == 'manual_enrol_users'
 						AND (
@@ -354,6 +356,11 @@ class moodle extends solution
                         $params = ['notes' => $notes];
                         $functionname = 'core_notes_create_notes';
                         break;
+					case 'core_user_set_user_preferences':
+                        $preferences = [$obj];
+                        $params = ['preferences' => $preferences];
+                        $functionname = 'core_user_set_user_preferences';
+                        break;
                     default:
                         throw new \Exception('Module unknown. ');
                         break;
@@ -362,7 +369,7 @@ class moodle extends solution
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
                 $response = $this->moodleClient->post($serverurl, $params);
                 $xml = simplexml_load_string($response);
-				
+
 				// Check if there is a warning
 				if (
 						!empty($xml->SINGLE)
@@ -371,8 +378,16 @@ class moodle extends solution
 				) {
 					throw new \Exception('ERROR : '.$xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
 				}
-
 				
+				// Check if there is a warning in the second entry (for function core_user_set_user_preferences for exemple)
+				if (
+						!empty($xml->SINGLE)
+					AND $xml->SINGLE->KEY[1]->attributes()->__toString() == 'warnings'
+					AND !empty($xml->SINGLE->KEY[1]->MULTIPLE->SINGLE->KEY[3])
+				) {
+					throw new \Exception('ERROR : '.$xml->SINGLE->KEY[1]->MULTIPLE->SINGLE->KEY[3]->VALUE.chr(10));
+				}
+
                 // Réponse standard pour les modules avec retours
                 if (
                         !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
@@ -388,6 +403,15 @@ class moodle extends solution
                 ) {
                     $result[$idDoc] = [
                         'id' => $xml->MULTIPLE->SINGLE->KEY[1]->VALUE,
+                        'error' => false,
+                    ];
+				} elseif (
+                        in_array($param['module'], ['core_user_set_user_preferences'])
+					&& !empty($xml->SINGLE)
+					&& $xml->SINGLE->KEY[0]->attributes()->__toString() == 'saved'
+                ) {
+                    $result[$idDoc] = [
+                        'id' => $obj->userid.'_'.$obj->name,
                         'error' => false,
                     ];
                 } elseif (!empty($xml->ERRORCODE)) {
@@ -421,13 +445,15 @@ class moodle extends solution
         return $result;
     }
 
-    // Permet de mettre à jour un enregistrement
-
     /**
      * @throws \Doctrine\DBAL\Exception
      */
     public function updateData($param): array
     {
+		// Preference is always a creation
+		if ($param['module'] == 'core_user_set_user_preferences') {
+			return $this->createData($param);
+		}
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
             try {
