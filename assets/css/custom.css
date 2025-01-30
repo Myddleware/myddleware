@@ -294,3 +294,7 @@ i.fa-sharp.fa-solid.fa-arrow-right.fa-flip.fa-flip {
 }
 
 
+.panel-source-target-modules {
+    width: max-content !important;
+    padding-right: 20px;
+}
