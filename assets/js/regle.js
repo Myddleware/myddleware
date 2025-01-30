@@ -1600,7 +1600,13 @@ function verif(div_clock) {
       .find("input")
       .each(function () {
         if ($(this).val().length == 0) {
-          err++;
+          // Get the data-param value
+          var fieldParam = $(this).attr("data-param");
+
+          // Check if field is in protected fields list loaded from config
+          if (!protectedFields.includes(fieldParam)) {
+            err++;
+          }
         }
       });
 
