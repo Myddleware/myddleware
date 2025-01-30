@@ -547,7 +547,7 @@ class suitecrm extends solution
         }
 
         // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-        return rtrim($url, '/').'/index.php?module='.$module.'&action=DetailView&record='.$recordId;
+        return rtrim($url, '/').'/#/'.$module.'/record/'.$recordId;
     }
 
     protected function readRelationship($param, $dataParent): array
