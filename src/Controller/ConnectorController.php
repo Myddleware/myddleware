@@ -25,30 +25,31 @@
 
 namespace App\Controller;
 
-use App\Entity\Config;
-use App\Entity\Connector;
+use Exception;
 use App\Entity\Rule;
+use App\Entity\Config;
 use App\Entity\Solution;
+use App\Entity\Connector;
+use Pagerfanta\Pagerfanta;
 use App\Form\ConnectorType;
 use App\Manager\permission;
-use App\Manager\SolutionManager;
-use App\Manager\ToolsManager;
-use App\Repository\RuleRepository;
-use App\Service\SessionService;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Exception;
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Exception\NotValidCurrentPageException;
-use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Manager\ToolsManager;
+use App\Service\SessionService;
+use App\Manager\SolutionManager;
+use Symfony\Component\Yaml\Yaml;
+use App\Repository\RuleRepository;
+use Pagerfanta\Adapter\ArrayAdapter;
+use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/rule")
@@ -322,9 +323,20 @@ class ConnectorController extends AbstractController
         $this->sessionService->setConnectorAnimation(false);
         $this->sessionService->setConnectorAddMessage('list');
 
+            // use yaml file which is assets/controller-config.yaml
+            $nonRequiredFields = $this->getNonRequiredFields();
+
         return $this->render('Connector/index.html.twig', [
-            'solutions' => $lst_solution, ]
-        );
+            'solutions' => $lst_solution,
+            'nonRequiredFields' => $nonRequiredFields,
+        ]);
+    }
+
+    private function getNonRequiredFields()
+    {
+        $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
+        $yaml = Yaml::parseFile($yamlFile);
+        return $yaml['non-required-fields'];
     }
 
     /**
