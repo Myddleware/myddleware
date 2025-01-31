@@ -267,10 +267,21 @@ footer {
 	background: #f2dedf;
 }
 
-#notification #zone_notification .success {
-	color: #9aa932;
-	background: white;
+.success {
+	background: #19CA426E !important;
+	display: flex;
 }
+
+.success-custom-adjust {
+	margin-right: 10px;
+	margin-top: 5px;
+}
+
+#notification #zone_notification .success {
+	color: #000;
+	background: #19CA426E;
+}
+
 
 /* help content */
 .help-content {
