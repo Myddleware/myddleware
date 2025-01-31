@@ -324,19 +324,19 @@ class ConnectorController extends AbstractController
         $this->sessionService->setConnectorAddMessage('list');
 
             // use yaml file which is assets/controller-config.yaml
-            $protectedFields = $this->getProtectedFields();
+            $nonRequiredFields = $this->getNonRequiredFields();
 
         return $this->render('Connector/index.html.twig', [
             'solutions' => $lst_solution,
-            'protectedFields' => $protectedFields,
+            'nonRequiredFields' => $nonRequiredFields,
         ]);
     }
 
-    private function getProtectedFields()
+    private function getNonRequiredFields()
     {
-        $yamlFile = __DIR__ . '/../../assets/controller-config.yaml';
+        $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
         $yaml = Yaml::parseFile($yamlFile);
-        return $yaml['protected_fields'];
+        return $yaml['non-required-fields'];
     }
 
     /**

@@ -1603,8 +1603,8 @@ function verif(div_clock) {
           // Get the data-param value
           var fieldParam = $(this).attr("data-param");
 
-          // Check if field is in protected fields list loaded from config
-          if (!protectedFields.includes(fieldParam)) {
+          // Check if field is in non required fields list loaded from config
+          if (!nonRequiredFields.includes(fieldParam)) {
             err++;
           }
         }
