@@ -1149,8 +1149,8 @@ use App\Entity\WorkflowAction;
                             }
                             $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
 
-                            // Vérification du nombre de champs
-                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
+                            // Instead of formerly checking the number of fields, we now check if the login is successful and if there is at least one field, because the number of fields can be different from the number of fields used to login, and we have a yaml file that contains the fields not to be taken into account when checking the number of fields in the frontend
+                            if (isset($param) && (count($param) > 0)) {
                                 $result = $solution->login($param);
                                 $r = $solution->connexion_valide;
 
