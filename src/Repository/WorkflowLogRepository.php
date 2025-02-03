@@ -36,13 +36,18 @@ class WorkflowLogRepository extends ServiceEntityRepository
         parent::__construct($registry, WorkflowLog::class);
     }
 
-    public function findLogsByWorkflowId(string $workflowId)
+    public function findLogsByWorkflowId(string $workflowId, ?int $limit = null)
     {
-        return $this->createQueryBuilder('wl')
+        $qb = $this->createQueryBuilder('wl')
             ->where('wl.workflow = :workflowId')
             ->setParameter('workflowId', $workflowId)
-            ->orderBy('wl.dateCreated', 'DESC')
-            ->getQuery();
+            ->orderBy('wl.dateCreated', 'DESC');
+            
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+        
+        return $qb->getQuery();
     }
 }
 
