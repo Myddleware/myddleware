@@ -539,8 +539,18 @@ class WorkflowController extends AbstractController
 
             $adapter = new ArrayAdapter($results);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+
+            // get the max per page from the config, the parameter name is pager
+            $maxPerPage = $configRepository->findOneBy(['name' => 'pager']);
+
+            if ($maxPerPage && $maxPerPage->getValue() > 0 && !empty($maxPerPage->getValue())) {
+                $pager->setMaxPerPage($maxPerPage->getValue());
+            } else {
+                $pager->setMaxPerPage(10);
+            }
+
             $pager->setCurrentPage($page);
+
 
             if ($workflow[0]) {
                 return $this->render(
