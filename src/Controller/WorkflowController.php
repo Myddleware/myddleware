@@ -521,11 +521,8 @@ class WorkflowController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['workflow' => $id],
-                ['dateCreated' => 'DESC']
-            );
             $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
+
 
             $adapter = new QueryAdapter($query);
             $pager = new Pagerfanta($adapter);
@@ -533,12 +530,11 @@ class WorkflowController extends AbstractController
             $pager->setCurrentPage($page);
 
             if ($workflow[0]) {
-                $nb_workflow = count($workflowLogs);
+                $nb_workflow = $pager->getNbResults();
                 return $this->render(
                     'Workflow/show.html.twig',
                     [
                         'workflow' => $workflow[0],
-                        'workflowLogs' => $workflowLogs,
                         'nb_workflow' => $nb_workflow,
                         'pager' => $pager,
                     ]
