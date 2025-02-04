@@ -634,7 +634,7 @@ $.fn.setCursorPosition = function(pos) {
       var newContent =
         content.substr(0, position) +
         '"' +
-        $.trim($("select", "#target_info").val()) +
+        $.trim($("#target_value_select").val()) +
         '"' +
         content.substr(position);
       $("#area_insert").val(newContent);
