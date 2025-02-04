@@ -203,10 +203,17 @@
 			{% endif %}
 		</div>
 		<div id="target_info">
-			{% if opt_target is not empty %}
+			{% if target_groups is not empty %}
 			<label>{{'rule.target'|trans}} :</label>
-				<select name="target_info">
-					{{ opt_target|raw }}
+				<select name="target_group" id="target_group_select">
+					<option value="">{{'rule.select_group'|trans}}</option>
+					{% for group_id, group_label in target_groups %}
+						<option value="{{ group_id }}">{{ group_label }}</option>
+					{% endfor %}
+				</select>
+				
+				<select name="target_info" id="target_value_select" disabled>
+					<option value="">{{'rule.select_value'|trans}}</option>
 				</select>
 				<button class="btn-mydinv-small">
 					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
@@ -234,34 +241,70 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	const sourceValues = {{ source_values|json_encode|raw }};
-	const groupSelect = document.getElementById('source_group_select');
-	const valueSelect = document.getElementById('source_value_select');
+	// Initialize source dropdowns
+	if ({{ source_groups is defined and source_groups is not empty ? 'true' : 'false' }}) {
+		const sourceValues = {{ source_values|json_encode|raw }};
+		const groupSelect = document.getElementById('source_group_select');
+		const valueSelect = document.getElementById('source_value_select');
+
+		if (groupSelect && valueSelect) {
+			groupSelect.addEventListener('change', function() {
+				const selectedGroup = this.value;
+				valueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
+				
+				if (selectedGroup) {
+					valueSelect.disabled = false;
+					const values = sourceValues[selectedGroup] || {};
+					
+					Object.entries(values).forEach(([value, label]) => {
+						const option = document.createElement('option');
+						option.value = value;
+						option.textContent = label;
+						valueSelect.appendChild(option);
+					});
+				} else {
+					valueSelect.disabled = true;
+				}
+			});
+		}
+	}
+
+	// Initialize target dropdowns
+	if ({{ target_groups is defined and target_groups is not empty ? 'true' : 'false' }}) {
+		const targetValues = {{ target_values|json_encode|raw }};
+		const targetGroupSelect = document.getElementById('target_group_select');
+		const targetValueSelect = document.getElementById('target_value_select');
+
+		if (targetGroupSelect && targetValueSelect) {
+			targetGroupSelect.addEventListener('change', function() {
+				const selectedGroup = this.value;
+				targetValueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
+				
+				if (selectedGroup) {
+					targetValueSelect.disabled = false;
+					const values = targetValues[selectedGroup] || {};
+					
+					Object.entries(values).forEach(([value, label]) => {
+						const option = document.createElement('option');
+						option.value = value;
+						option.textContent = label;
+						targetValueSelect.appendChild(option);
+					});
+				} else {
+					targetValueSelect.disabled = true;
+				}
+			});
+		}
+	}
+
+	// Keep the lookup-related code
 	const lookupgetrule = "{{ path('get_rules_for_lookup') }}";
-	console.log('test lookupgetrule', lookupgetrule)
 	const lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+	console.log('test lookupgetrule', lookupgetrule)
 	console.log('test lookupgetfieldroute', lookupgetfieldroute)
 	const translations = {
 		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
 		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
 	};
-	groupSelect.addEventListener('change', function() {
-		const selectedGroup = this.value;
-		valueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
-		
-		if (selectedGroup) {
-			valueSelect.disabled = false;
-			const values = sourceValues[selectedGroup] || {};
-			
-			Object.entries(values).forEach(([value, label]) => {
-				const option = document.createElement('option');
-				option.value = value;
-				option.textContent = label;
-				valueSelect.appendChild(option);
-			});
-		} else {
-			valueSelect.disabled = true;
-		}
-	});
 });
 </script>
