@@ -571,4 +571,5 @@ h2 { margin-top: 50px;}
 #function-select {
     height: auto;
     margin-bottom: 0;
+    padding-right: 0.25rem;
 }
