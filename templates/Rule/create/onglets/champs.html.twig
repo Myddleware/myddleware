@@ -157,25 +157,28 @@
 			<select class="listarea" id="champs_insert" name="champs_insert" multiple="multiple" size="13"></select>
 		</div>
 		<div class="left wdh">
-			<p>{{ 'create_rule.step3.formula.function'|trans }} :</p>
-			<select class="filter" id="filter" name="filter_functions">
-				<option selected="selected" value="0">- {{ 'function.all' |trans }} -</option>
-
-				{% for t, v in lst_category %}
-					<option data-type="{{ v.getId }}">{{ ('function.category.' ~ v.getName) |trans }}</option>
-				{% endfor %}
-
-			</select>
-
-			<ul class="listarea" id="functions" name="functions">
-
-				{% for t, v in lst_functions %}
-					<li class="func" data-type="{{ v.getCategoryId.getId }}">
-						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
-					</li> 				
-				{% endfor %}
-
-			</ul>
+			<div id="function-wizard">
+				<p>{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
+				<select id="function-select" class="form-select mb-2">
+					<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
+					{% for t, v in lst_functions %}
+						<option value="{{ v.getName }}" data-type="{{ v.getCategoryId.getId }}">
+							{{ v.getName }}
+						</option>
+					{% endfor %}
+				</select>
+				
+				{# Lookup specific dropdowns - initially hidden #}
+				<div id="lookup-options" style="display: none;">
+					<select id="lookup-rule" class="form-select mb-2">
+						<option value="">{{ 'create_rule.step3.formula.select_rule'|trans }}</option>
+					</select>
+					
+					<select id="lookup-field" class="form-select mb-2" disabled>
+						<option value="">{{ 'create_rule.step3.formula.select_field'|trans }}</option>
+					</select>
+				</div>
+			</div>
 		</div>	
 	</div>
 	<div class="clr"></div>	 
@@ -234,7 +237,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	const sourceValues = {{ source_values|json_encode|raw }};
 	const groupSelect = document.getElementById('source_group_select');
 	const valueSelect = document.getElementById('source_value_select');
-
+	const lookupgetrule = "{{ path('get_rules_for_lookup') }}";
+	console.log('test lookupgetrule', lookupgetrule)
+	const lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+	console.log('test lookupgetfieldroute', lookupgetfieldroute)
+	const translations = {
+		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
+		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
+	};
 	groupSelect.addEventListener('change', function() {
 		const selectedGroup = this.value;
 		valueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';

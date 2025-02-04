@@ -87,7 +87,12 @@
 	var path_info_field = "{{ path('path_info_field_not_param') }}";
 	var validation = "{{ path('regle_validation') }}";
 	var return_success = "{{ path('regle_list') }}";
-
+	var lookupgetrule = "{{ path('get_rules_for_lookup') }}";
+	var lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+	const translations = {
+		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
+		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
+	};
 	
 	// RELOAD ----
 	{% if params.reload.fields is defined and params.reload.params is defined %}
