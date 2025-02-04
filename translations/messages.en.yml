@@ -119,6 +119,10 @@ create_rule:
             delete: Delete
             close: Close 
             error: Your rule contains one or more syntax errors
+            function_wizard: Function Wizard
+            select_function: Select a function
+            select_rule: Select a rule
+            select_field: Select a field
         confirm:
             success: Successful registration
             error: An error has occured 
