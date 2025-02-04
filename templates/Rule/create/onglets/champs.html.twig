@@ -160,7 +160,12 @@
 			<div id="function-wizard">
 				<p class="function-wizard-title">{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
 				<div class="function-wizard-select">
-					<p class="function-wizard-title-function-select">{{ 'create_rule.step3.formula.select_function_title'|trans }}</p>
+					<div class="d-flex justify-content-between align-items-center">
+						<p class="function-wizard-title-function-select">{{ 'create_rule.step3.formula.select_function_title'|trans }}</p>
+						<button id="toggle-tooltip" class="btn btn-link" title="{{ 'create_rule.step3.formula.toggle_tooltip'|trans }}">
+							<i class="fas fa-question-circle"></i>
+						</button>
+					</div>
 					<select id="function-select" class="form-select mb-2">
 						<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
 						{% for t, v in lst_functions %}
