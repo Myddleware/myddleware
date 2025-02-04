@@ -93,6 +93,9 @@
 		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
 		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
 	};
+	const targetValues = {{ target_values|json_encode|raw }};
+	const targetGroupSelect = document.getElementById('target_group_select');
+	const targetValueSelect = document.getElementById('target_value_select');
 	
 	// RELOAD ----
 	{% if params.reload.fields is defined and params.reload.params is defined %}
