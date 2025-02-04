@@ -237,6 +237,8 @@ rule:
     yoursource: Your source solution
     yourtarget: Your target solution
     help: What should I do ?
+    select_group: Select a group
+    select_value: Select a value
 
 rulegroup:
     list: Rule groups

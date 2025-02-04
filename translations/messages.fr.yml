@@ -236,6 +236,8 @@ rule:
     yoursource: Votre solution source
     yourtarget: Votre solution cible
     help: Que dois-je faire ?
+    select_group: Choisir un groupe
+    select_value: Choisir une valeur
 
 rulegroup:
     list: Groupes de règles
