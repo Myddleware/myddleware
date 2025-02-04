@@ -2373,8 +2373,22 @@ $(document).ready(function() {
     const lookupRule = $('#lookup-rule');
     const lookupField = $('#lookup-field');
 
-    // When a function is selected
+    // Add tooltip container after the select
+    $('<div id="function-tooltip" class="tooltip-box" style="display:none; padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></div>')
+        .insertAfter(functionSelect);
+
+    // Show tooltip when option changes
     functionSelect.on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const tooltip = selectedOption.data('tooltip');
+        const tooltipBox = $('#function-tooltip');
+        
+        if (tooltip) {
+            tooltipBox.text(tooltip).show();
+        } else {
+            tooltipBox.hide();
+        }
+
         const selectedFunction = $(this).val();
         
         if (selectedFunction === 'lookup') {

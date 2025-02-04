@@ -162,7 +162,9 @@
 				<select id="function-select" class="form-select mb-2">
 					<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
 					{% for t, v in lst_functions %}
-						<option value="{{ v.getName }}" data-type="{{ v.getCategoryId.getId }}">
+						<option value="{{ v.getName }}" 
+								data-type="{{ v.getCategoryId.getId }}"
+								data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
 							{{ v.getName }}
 						</option>
 					{% endfor %}
