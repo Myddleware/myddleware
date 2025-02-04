@@ -1936,7 +1936,6 @@ use App\Entity\WorkflowAction;
                     }
                 }
 
-                error_log(json_encode($html_list_source, JSON_PRETTY_PRINT));
 
                 // -----[ TARGET ]-----
                 if ($this->sessionService->isParamRuleTargetFieldsExist($ruleKey)) {
@@ -3203,5 +3202,44 @@ use App\Entity\WorkflowAction;
         $entityManager->flush();
 
         return new Response('Update successful', Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/rule/get-rules-for-lookup", name="get_rules_for_lookup", methods={"GET"})
+     */
+    public function getRulesForLookup(): JsonResponse
+    {
+        $rules = $this->entityManager->getRepository(Rule::class)
+            ->findBy(['deleted' => 0]);
+            
+        $ruleData = array_map(function($rule) {
+            return [
+                'id' => $rule->getId(),
+                'name' => $rule->getName()
+            ];
+        }, $rules);
+        
+        error_log(json_encode($ruleData, JSON_PRETTY_PRINT));
+
+        return new JsonResponse($ruleData);
+    }
+
+    /**
+     * @Route("/rule/get-fields-for-rule", name="rule_get_fields_for_rule", methods={"GET"})
+     */
+    public function getFieldsForRule(): JsonResponse
+    {
+        $fields = $this->entityManager->getRepository(RuleField::class)->findAll();
+             
+        $fieldData = array_map(function($field) {
+            return [
+                'id' => $field->getId(),
+                'name' => $field->getTarget(),
+                'rule' => $field->getRule()->getName(),
+                'rule_id' => $field->getRule()->getId()
+            ];
+        }, $fields);
+         
+        return new JsonResponse($fieldData);
     }
 }
