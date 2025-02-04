@@ -3260,4 +3260,47 @@ use App\Entity\WorkflowAction;
          
         return new JsonResponse($fieldData);
     }
+
+    /**
+     * Returns field information as JSON
+     * @Route("/api/field-info/{type}/{field}/", name="api_field_info", methods={"GET"})
+     */
+    public function getFieldInfo(Request $request, $field, $type): JsonResponse
+    {
+        $session = $request->getSession();
+        $myddlewareSession = $session->get('myddlewareSession');
+        // We always add data again in session because these data are removed after the call of the get
+        $session->set('myddlewareSession', $myddlewareSession);
+        
+        $fieldInfo = ['field' => '', 'name' => ''];
+        
+        if (isset($field) && !empty($field) && isset($myddlewareSession['param']['rule']) && 'my_value' != $field) {
+            if (isset($myddlewareSession['param']['rule'][0][$type]['fields'][$field])) {
+                $fieldInfo = [
+                    'field' => $myddlewareSession['param']['rule'][0][$type]['fields'][$field],
+                    'name' => htmlentities(trim($field))
+                ];
+            // SuiteCRM connector uses this structure instead
+            } elseif (isset($myddlewareSession['param']['rule']['key'])) {
+                $ruleKey = $myddlewareSession['param']['rule']['key'];
+                $fieldInfo = [
+                    'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
+                    'name' => htmlentities(trim($field))
+                ];
+            } else {
+                // Possibilité de Mutlimodules
+                foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) {
+                    if (isset($subModule[$field])) {
+                        $fieldInfo = [
+                            'field' => $subModule[$field],
+                            'name' => htmlentities(trim($field))
+                        ];
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new JsonResponse($fieldInfo);
+    }
 }
