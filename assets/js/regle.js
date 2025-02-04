@@ -2375,7 +2375,6 @@ $(document).ready(function() {
 
     // When a function is selected
     functionSelect.on('change', function() {
-      console.log('test foun', lookupgetrule)
         const selectedFunction = $(this).val();
         
         if (selectedFunction === 'lookup') {
@@ -2404,7 +2403,6 @@ $(document).ready(function() {
     lookupRule.on('change', function() {
         const selectedRule = $(this).val();
 
-        console.log('testt url', lookupgetfieldroute);
         
         if (selectedRule) {
             // Get fields for selected rule
@@ -2419,9 +2417,6 @@ $(document).ready(function() {
                     filteredFields.forEach(field => {
                         lookupField.append(`<option value="${field.id}">${field.name}</option>`);
                     });
-                    // filteredFields.forEach(field => {
-                    //     lookupField.append(`<option value="${field.id}">${field.name} (${field.rule})</option>`);
-                    // });
                     lookupField.prop('disabled', false);
                 }
             });
