@@ -544,3 +544,8 @@ h2 { margin-top: 50px;}
     cursor: not-allowed;
     opacity: 0.6; /* Optional: makes it look disabled */
 }
+
+
+#area_confirm {
+    margin-top: 35px;
+}
