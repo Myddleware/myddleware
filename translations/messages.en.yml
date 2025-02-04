@@ -121,6 +121,7 @@ create_rule:
             error: Your rule contains one or more syntax errors
             function_wizard: Function Wizard
             select_function: Select a function
+            select_function_title: Function
             select_rule: Select a rule
             select_field: Select a field
         confirm:

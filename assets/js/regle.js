@@ -2409,10 +2409,10 @@ $(document).ready(function() {
     const lookupOptions = $('#lookup-options');
     const lookupRule = $('#lookup-rule');
     const lookupField = $('#lookup-field');
-
+    const flagFunctionWizardEnd = $('#flag-function-wizard-end');
     // Add tooltip container after the select
     $('<div id="function-tooltip" class="tooltip-box" style="display:none; padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></div>')
-        .insertAfter(functionSelect);
+        .insertAfter(flagFunctionWizardEnd);
 
     // Show tooltip when option changes
     functionSelect.on('change', function() {

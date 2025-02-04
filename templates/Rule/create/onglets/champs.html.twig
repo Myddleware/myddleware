@@ -158,10 +158,12 @@
 		</div>
 		<div class="left wdh">
 			<div id="function-wizard">
-				<p>{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
-				<select id="function-select" class="form-select mb-2">
-					<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
-					{% for t, v in lst_functions %}
+				<p class="function-wizard-title">{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
+				<div class="function-wizard-select">
+					<p class="function-wizard-title-function-select">{{ 'create_rule.step3.formula.select_function_title'|trans }}</p>
+					<select id="function-select" class="form-select mb-2">
+						<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
+						{% for t, v in lst_functions %}
 						<option value="{{ v.getName }}" 
 								data-type="{{ v.getCategoryId.getId }}"
 								data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
@@ -169,7 +171,7 @@
 						</option>
 					{% endfor %}
 				</select>
-				
+				</div>
 				{# Lookup specific dropdowns - initially hidden #}
 				<div id="lookup-options" style="display: none;">
 					<select id="lookup-rule" class="form-select mb-2">
@@ -181,6 +183,7 @@
 					</select>
 				</div>
 			</div>
+			<p id="flag-function-wizard-end"></p>
 		</div>	
 	</div>
 	<div class="clr"></div>	 
