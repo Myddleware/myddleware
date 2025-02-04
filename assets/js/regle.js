@@ -2365,3 +2365,98 @@ document.addEventListener('DOMContentLoaded', function () {
       new bootstrap.Tooltip(tooltipTriggerEl);
   });
 });
+
+// Function wizard handling
+$(document).ready(function() {
+    const functionSelect = $('#function-select');
+    const lookupOptions = $('#lookup-options');
+    const lookupRule = $('#lookup-rule');
+    const lookupField = $('#lookup-field');
+
+    // When a function is selected
+    functionSelect.on('change', function() {
+      console.log('test foun', lookupgetrule)
+        const selectedFunction = $(this).val();
+        
+        if (selectedFunction === 'lookup') {
+            lookupOptions.show();
+            
+            // Populate rules dropdown
+            $.ajax({
+                url: lookupgetrule,
+                method: 'GET',
+                success: function(rules) {
+                    lookupRule.empty();
+                    lookupRule.append('<option value="">' + translations.selectRule + '</option>');
+                    rules.forEach(rule => {
+                        lookupRule.append(`<option value="${rule.id}">${rule.name}</option>`);
+                    });
+                    lookupRule.prop('disabled', false);
+                }
+            });
+        } else {
+            lookupOptions.hide();
+            insertFunction(selectedFunction);
+        }
+    });
+
+    // When a rule is selected
+    lookupRule.on('change', function() {
+        const selectedRule = $(this).val();
+
+        console.log('testt url', lookupgetfieldroute);
+        
+        if (selectedRule) {
+            // Get fields for selected rule
+            $.ajax({
+                url: lookupgetfieldroute,
+                method: 'GET',
+                success: function(fields) {
+                    lookupField.empty();
+                    lookupField.append('<option value="">' + translations.selectField + '</option>');
+                    // Filter fields to only show those from the selected rule
+                    const filteredFields = fields.filter(field => field.rule_id === selectedRule);
+                    filteredFields.forEach(field => {
+                        lookupField.append(`<option value="${field.id}">${field.name}</option>`);
+                    });
+                    // filteredFields.forEach(field => {
+                    //     lookupField.append(`<option value="${field.id}">${field.name} (${field.rule})</option>`);
+                    // });
+                    lookupField.prop('disabled', false);
+                }
+            });
+        } else {
+            lookupField.prop('disabled', true);
+        }
+    });
+
+    // When a field is selected
+    lookupField.on('change', function() {
+        if ($(this).val()) {
+            // Get the selected field's name (without the rule part in parentheses)
+            const selectedOption = $(this).find('option:selected');
+            const fieldName = selectedOption.text().split(' (')[0];
+            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}"`;
+            insertFunction(lookupFormula);
+        }
+    });
+
+    function insertFunction(funcText) {
+        const areaInsert = $('#area_insert');
+        const position = areaInsert.getCursorPosition();
+        const content = areaInsert.val();
+        
+        // Add parentheses only if not already part of the funcText
+        const suffix = funcText.endsWith('"') ? ' )' : '( ';
+        
+        const newContent = 
+            content.substr(0, position) +
+            funcText +
+            suffix +
+            content.substr(position);
+            
+        areaInsert.val(newContent);
+        colorationSyntax();
+        theme(style_template);
+    }
+});
