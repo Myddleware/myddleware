@@ -2174,6 +2174,26 @@ use App\Entity\WorkflowAction;
                 // Pass these to the template instead of $html_list_source
                 $result['source_groups'] = $source_groups;
                 $result['source_values'] = $source_values;
+ 
+                // Do the same for target
+                $target_groups = [];
+                $target_values = [];
+                if (isset($formule_list['target'])) {
+                    foreach ($formule_list['target'] as $field => $fields_tab) {
+                        // Store group names
+                        $target_groups[$field] = $field;
+                        
+                        // Store values for each group
+                        $target_values[$field] = [];
+                        foreach ($fields_tab['option'] as $value => $label) {
+                            $target_values[$field][$value] = $label;
+                        }
+                    }
+                }
+ 
+                // Pass target data to template
+                $result['target_groups'] = $target_groups;
+                $result['target_values'] = $target_values;
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2608,7 +2628,6 @@ use App\Entity\WorkflowAction;
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
-                error_log(print_r($request->request->all(), true));
                 $this->jobManager->orderRules();
 
                 // --------------------------------------------------------------------------------------------------
@@ -3205,7 +3224,7 @@ use App\Entity\WorkflowAction;
     }
 
     /**
-     * @Route("/rule/get-rules-for-lookup", name="get_rules_for_lookup", methods={"GET"})
+     * @Route("/get-rules-for-lookup", name="get_rules_for_lookup", methods={"GET"})
      */
     public function getRulesForLookup(): JsonResponse
     {
@@ -3219,13 +3238,12 @@ use App\Entity\WorkflowAction;
             ];
         }, $rules);
         
-        error_log(json_encode($ruleData, JSON_PRETTY_PRINT));
 
         return new JsonResponse($ruleData);
     }
 
     /**
-     * @Route("/rule/get-fields-for-rule", name="rule_get_fields_for_rule", methods={"GET"})
+     * @Route("/get-fields-for-rule", name="rule_get_fields_for_rule", methods={"GET"})
      */
     public function getFieldsForRule(): JsonResponse
     {
