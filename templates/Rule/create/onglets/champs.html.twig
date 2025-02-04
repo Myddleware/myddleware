@@ -181,12 +181,20 @@
 	<div class="clr"></div>	 
 	<div>
 		<div id="source_info">
-			{% if opt_source is not empty %}
-			<label>{{'rule.source'|trans}} :</label>
-				<select name="source_info">
-					{{ opt_source|raw }}
-				</select> 
-					<button class="btn-mydinv-small">
+			{% if source_groups is not empty %}
+				<label>{{'rule.source'|trans}} :</label>
+				<select name="source_group" id="source_group_select">
+					<option value="">{{'rule.select_group'|trans}}</option>
+					{% for group_id, group_label in source_groups %}
+						<option value="{{ group_id }}">{{ group_label }}</option>
+					{% endfor %}
+				</select>
+				
+				<select name="source_info" id="source_value_select" disabled>
+					<option value="">{{'rule.select_value'|trans}}</option>
+				</select>
+				
+				<button class="btn-mydinv-small">
 					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
 				</button>
 			{% endif %}
@@ -220,3 +228,30 @@
 		<input class="btn-mydinv" id="area_quit" type="button" value="{{'create_rule.step3.formula.close'|trans}}"/>
 	</div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const sourceValues = {{ source_values|json_encode|raw }};
+	const groupSelect = document.getElementById('source_group_select');
+	const valueSelect = document.getElementById('source_value_select');
+
+	groupSelect.addEventListener('change', function() {
+		const selectedGroup = this.value;
+		valueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
+		
+		if (selectedGroup) {
+			valueSelect.disabled = false;
+			const values = sourceValues[selectedGroup] || {};
+			
+			Object.entries(values).forEach(([value, label]) => {
+				const option = document.createElement('option');
+				option.value = value;
+				option.textContent = label;
+				valueSelect.appendChild(option);
+			});
+		} else {
+			valueSelect.disabled = true;
+		}
+	});
+});
+</script>

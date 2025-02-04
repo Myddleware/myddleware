@@ -1936,6 +1936,8 @@ use App\Entity\WorkflowAction;
                     }
                 }
 
+                error_log(json_encode($html_list_source, JSON_PRETTY_PRINT));
+
                 // -----[ TARGET ]-----
                 if ($this->sessionService->isParamRuleTargetFieldsExist($ruleKey)) {
                     foreach ($this->sessionService->getParamRuleTargetFields($ruleKey) as $field => $fields_tab) {
@@ -2153,6 +2155,26 @@ use App\Entity\WorkflowAction;
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_errorMissing'] = ToolsManager::composeListHtml($result['lst_errorMissing'], '', '1');
                 $result['lst_errorEmpty'] = ToolsManager::composeListHtml($result['lst_errorEmpty'], '', '0');
+
+                // Modify this section where $html_list_source is built
+                $source_groups = [];
+                $source_values = [];
+                if (isset($formule_list['source'])) {
+                    foreach ($formule_list['source'] as $field => $fields_tab) {
+                        // Store group names
+                        $source_groups[$field] = $field;
+                        
+                        // Store values for each group
+                        $source_values[$field] = [];
+                        foreach ($fields_tab['option'] as $value => $label) {
+                            $source_values[$field][$value] = $label;
+                        }
+                    }
+                }
+
+                // Pass these to the template instead of $html_list_source
+                $result['source_groups'] = $source_groups;
+                $result['source_values'] = $source_values;
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
