@@ -119,6 +119,14 @@ create_rule:
             delete: Delete
             close: Close 
             error: Your rule contains one or more syntax errors
+            function_wizard: Function Wizard
+            select_function: Select a function
+            select_function_title: Function
+            select_rule: Related rule
+            select_rule_title: Select a lookup rule
+            select_field: Related field
+            select_field_title: Select a field for lookup
+            toggle_tooltip: Toggle function description
         confirm:
             success: Successful registration
             error: An error has occured 
@@ -237,6 +245,8 @@ rule:
     yoursource: Your source solution
     yourtarget: Your target solution
     help: What should I do ?
+    select_group: Select a group
+    select_value: Select a value
 
 rulegroup:
     list: Rule groups
@@ -634,31 +644,37 @@ function:
         date: Date and hour  
         constant: Constant  
     description:
-        text: 
-            trim:  Delete the spaces (or other characters) at the beginning and the end of each string 
-            lower: Put all in lower-case characters  
-            upper: Put all in upper-case characters 
-            changeValue: changeValue($var, $arrayKeyToValue) / Replace the value of $var by the corresponding value on the $arrayKeyToValue. Example changeValue( {FIELD},"('A':'1','B':'2')")
-            getValueFromArray: getValueFromArray($key, $array) / Get the value corresponding value to the key in the $array
-            substr: substr( string $string , int $start [, int $length ] ) /  Return part of a string
-            striptags: striptags( string $str [, string $allowable_tags ] ) / Strip HTML and PHP tags from a string
-            htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convert all HTML entities to their applicable characters
-            replace: replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] ) / Replace all occurrences of the search string with the replacement string
-            utf8encode: utf8encode ( string $data ) / Encodes an ISO-8859-1 string to UTF-8
-            utf8decode: utf8decode ( string $data ) / Converts a string with ISO-8859-1 characters encoded with UTF-8 to single-byte ISO-8859-1 
-            htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert all applicable characters to HTML entities
-            htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert special characters to HTML entities
-            chr: chr ( int $bytevalue ) Generate a single-byte string from a number
-            lookup: lookup ( string $field, string $rule, <optional> errorIfEmpty (default = false), <optional> errodIfNoFound (default = true)). Search the corresponding value of the $field in the rule $rule. 
+        text:
+            trim: "trim($string) / Removes whitespace or other specified characters from both ends of a string. Example: trim(' Hello World ') returns 'Hello World'"
+            ltrim: "ltrim($string [, $characters]) / Removes whitespace or specified characters from the beginning of a string. Example: ltrim('   Hello') returns 'Hello'"
+            rtrim: "rtrim($string [, $characters]) / Removes whitespace or specified characters from the end of a string. Example: rtrim('Hello   ') returns 'Hello'"
+            lower: "lower($string) / Converts a string to lowercase. Example: lower('Hello World') returns 'hello world'"
+            upper: "upper($string) / Converts a string to uppercase. Example: upper('Hello World') returns 'HELLO WORLD'"
+            substr: "substr($string, $start [, $length]) / Returns part of a string. Example: substr('Hello World', 0, 5) returns 'Hello'"
+            striptags: "striptags($string [, $allowable_tags]) / Removes HTML and PHP tags from a string. Example: striptags('<p>Hello</p>') returns 'Hello'"
+            changeValue: "changeValue($var, $arrayKeyToValue) / Replaces values using a key-value mapping array. Example: changeValue({status}, '('active':'1', 'inactive':'0')') converts 'active' to '1'"
+            htmlEntityDecode: "htmlEntityDecode($string) / Converts HTML entities to their corresponding characters. Example: htmlEntityDecode('&amp;') returns '&'"
+            replace: "replace($search, $replace, $subject) / Replaces all occurrences of search with replace. Example: replace('world', 'there', 'Hello world') returns 'Hello there'"
+            utf8encode: "utf8encode($string) / Encodes an ISO-8859-1 string to UTF-8. Example: utf8encode('Hello') converts to UTF-8 encoding"
+            utf8decode: "utf8decode($string) / Decodes a UTF-8 encoded string to ISO-8859-1. Example: utf8decode('Hello') converts from UTF-8 encoding"
+            htmlentities: "htmlentities($string) / Converts special characters to HTML entities. Example: htmlentities('<') returns '&lt;'"
+            htmlspecialchars: "htmlspecialchars($string) / Converts special characters to HTML entities while preserving already encoded entities. Example: htmlspecialchars('A & B') returns 'A &amp; B'"
+            strlen: "strlen($string) / Returns the length of a string. Example: strlen('Hello') returns 5"
+            urlencode: "urlencode($string) / Encodes a string for use in a URL. Example: urlencode('Hello World') returns 'Hello%20World'"
+            chr: "chr($ascii) / Returns a character from its ASCII code. Example: chr(65) returns 'A'"
+            json_decode: "json_decode($string) / Decodes a JSON string into a PHP value. Example: json_decode('{\"name\":\"John\"}') returns an object with property 'name'"
+            json_encode: "json_encode($value) / Returns the JSON representation of a value. Example: json_encode(['name' => 'John']) returns '{\"name\":\"John\"}'"
+            getValueFromArray: "getValueFromArray($key, $array) / Gets a value from an array using a key. Example: getValueFromArray('name', '{\"name\":\"John\"}') returns 'John'"
+            lookup: "This is what we now use instead of rule relationship. You get a certain value from a field that belongs to another rule. Example: lookup({name}, '677f9171e6851') returns the value of the field name from a document that was produced by the rule that has an id of 677f9171e6851"
         mathematical:
-            round: Rounding a floating point number
-            ceil: Rounding up
-            abs: Absolute value
+            round: "round($number [, $precision]) / Rounds a floating point number to a specified precision. Example: round(3.14159, 2) returns 3.14"
+            ceil: "ceil($number) / Returns the smallest integer greater than or equal to a number. Example: ceil(3.14) returns 4"
+            abs: "abs($number) / Returns the absolute value of a number. Example: abs(-5) returns 5"
         date:
-            date: Set a date/local time
-            microtime: Return the current Unix timestamp with the microseconds
-            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter
-            changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter
+            date: "Set a date/local time (current date and time). Example: date() returns the current date and time"
+            microtime: "Return the current Unix timestamp with the microseconds. Example: microtime() returns the current Unix timestamp with the microseconds, such as 1717536000.123456"
+            changeTimeZone: "changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter. Example: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') returns '2024-01-01 00:00:00'"
+            changeFormatDate: "changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter. Example: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') returns '2024/01/01'"
         constant:
             mdw_no_send_field: Do not send the field
             mdw_cancel_document: Cancel the document

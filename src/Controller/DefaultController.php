@@ -1936,6 +1936,7 @@ use App\Entity\WorkflowAction;
                     }
                 }
 
+
                 // -----[ TARGET ]-----
                 if ($this->sessionService->isParamRuleTargetFieldsExist($ruleKey)) {
                     foreach ($this->sessionService->getParamRuleTargetFields($ruleKey) as $field => $fields_tab) {
@@ -2153,6 +2154,46 @@ use App\Entity\WorkflowAction;
                 $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
                 $result['lst_errorMissing'] = ToolsManager::composeListHtml($result['lst_errorMissing'], '', '1');
                 $result['lst_errorEmpty'] = ToolsManager::composeListHtml($result['lst_errorEmpty'], '', '0');
+
+                // Modify this section where $html_list_source is built
+                $source_groups = [];
+                $source_values = [];
+                if (isset($formule_list['source'])) {
+                    foreach ($formule_list['source'] as $field => $fields_tab) {
+                        // Store group names
+                        $source_groups[$field] = $field;
+                        
+                        // Store values for each group
+                        $source_values[$field] = [];
+                        foreach ($fields_tab['option'] as $value => $label) {
+                            $source_values[$field][$value] = $label;
+                        }
+                    }
+                }
+
+                // Pass these to the template instead of $html_list_source
+                $result['source_groups'] = $source_groups;
+                $result['source_values'] = $source_values;
+ 
+                // Do the same for target
+                $target_groups = [];
+                $target_values = [];
+                if (isset($formule_list['target'])) {
+                    foreach ($formule_list['target'] as $field => $fields_tab) {
+                        // Store group names
+                        $target_groups[$field] = $field;
+                        
+                        // Store values for each group
+                        $target_values[$field] = [];
+                        foreach ($fields_tab['option'] as $value => $label) {
+                            $target_values[$field][$value] = $label;
+                        }
+                    }
+                }
+ 
+                // Pass target data to template
+                $result['target_groups'] = $target_groups;
+                $result['target_values'] = $target_values;
 
                 return $this->render('Rule/create/step3.html.twig', $result);
 
@@ -2587,7 +2628,6 @@ use App\Entity\WorkflowAction;
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
-                error_log(print_r($request->request->all(), true));
                 $this->jobManager->orderRules();
 
                 // --------------------------------------------------------------------------------------------------
@@ -3181,5 +3221,86 @@ use App\Entity\WorkflowAction;
         $entityManager->flush();
 
         return new Response('Update successful', Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/get-rules-for-lookup", name="get_rules_for_lookup", methods={"GET"})
+     */
+    public function getRulesForLookup(): JsonResponse
+    {
+        $rules = $this->entityManager->getRepository(Rule::class)
+            ->findBy(['deleted' => 0]);
+            
+        $ruleData = array_map(function($rule) {
+            return [
+                'id' => $rule->getId(),
+                'name' => $rule->getName()
+            ];
+        }, $rules);
+        
+
+        return new JsonResponse($ruleData);
+    }
+
+    /**
+     * @Route("/get-fields-for-rule", name="rule_get_fields_for_rule", methods={"GET"})
+     */
+    public function getFieldsForRule(): JsonResponse
+    {
+        $fields = $this->entityManager->getRepository(RuleField::class)->findAll();
+             
+        $fieldData = array_map(function($field) {
+            return [
+                'id' => $field->getId(),
+                'name' => $field->getTarget(),
+                'rule' => $field->getRule()->getName(),
+                'rule_id' => $field->getRule()->getId()
+            ];
+        }, $fields);
+         
+        return new JsonResponse($fieldData);
+    }
+
+    /**
+     * Returns field information as JSON
+     * @Route("/api/field-info/{type}/{field}/", name="api_field_info", methods={"GET"})
+     */
+    public function getFieldInfo(Request $request, $field, $type): JsonResponse
+    {
+        $session = $request->getSession();
+        $myddlewareSession = $session->get('myddlewareSession');
+        // We always add data again in session because these data are removed after the call of the get
+        $session->set('myddlewareSession', $myddlewareSession);
+        
+        $fieldInfo = ['field' => '', 'name' => ''];
+        
+        if (isset($field) && !empty($field) && isset($myddlewareSession['param']['rule']) && 'my_value' != $field) {
+            if (isset($myddlewareSession['param']['rule'][0][$type]['fields'][$field])) {
+                $fieldInfo = [
+                    'field' => $myddlewareSession['param']['rule'][0][$type]['fields'][$field],
+                    'name' => htmlentities(trim($field))
+                ];
+            // SuiteCRM connector uses this structure instead
+            } elseif (isset($myddlewareSession['param']['rule']['key'])) {
+                $ruleKey = $myddlewareSession['param']['rule']['key'];
+                $fieldInfo = [
+                    'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
+                    'name' => htmlentities(trim($field))
+                ];
+            } else {
+                // Possibilité de Mutlimodules
+                foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) {
+                    if (isset($subModule[$field])) {
+                        $fieldInfo = [
+                            'field' => $subModule[$field],
+                            'name' => htmlentities(trim($field))
+                        ];
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new JsonResponse($fieldInfo);
     }
 }
