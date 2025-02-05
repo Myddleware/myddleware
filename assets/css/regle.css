@@ -107,7 +107,7 @@
 	min-width: 155px;
 	text-align: center!important;
 	vertical-align: middle;
-	word-break: break-all;
+	word-break: break-word;
 }
 
 .solution_block {	
