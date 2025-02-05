@@ -450,10 +450,7 @@ $.fn.setCursorPosition = function(pos) {
 
       // champs_insert is the id of the select element, add all the values of the options of the select element to the values array
       $("#champs_insert option").each(function () {
-        var valueOfTheOption = $(this).val();
-        var nameOfTheOption = $(this).text();
-        // concatenate the value of the option with the name of the option
-        values.push($(this).val() + " (" + $(this).text() + ")");
+        values.push($(this).val());
       });
 
 // console.log('these are the values', values);
@@ -1775,48 +1772,14 @@ function openFormula() {
 
     var champ_nom = $(this).parent().parent().parent().find("h1").text(); //nom du champ cible
 
-    var basepathforGetFieldInfo = basepathforGetFieldInfoWithFakeId.replace('fake_id', '');
-
-    var basepathwithouttheextrasource = basepathforGetFieldInfo.replace('/source/', '');
-
-    // remove the space from champ_nom
-    var champ_nom_without_space = champ_nom.replace(/\s+/g, '');
-
-
-    var finalFieldInfoPath = basepathwithouttheextrasource + champ_nom_without_space;
-
-
     $("li.ch", li).each(function () {
-      var fieldValue = $(this).attr("value");
-      var basepathforGetFieldInfo = basepathforGetFieldInfoWithFakeId.replace('fake_id', '');
-
-      var basepathwithouttheextrasource = basepathforGetFieldInfo.replace('/source/', '');
-
-      // remove the space from champ_nom
-      var champ_nom_without_space = champ_nom.replace(/\s+/g, '');
-
-
-      // Modified this line to include both type and field parameters
-      var finalFieldInfoPath = basepathwithouttheextrasource + 'source/' + fieldValue + '/';
-
-
-      $.ajax({
-        url: finalFieldInfoPath,
-        method: 'GET',
-        success: function(response) {
-          var displayName = response.field.label || response.name;
-          $("#champs_insert").append(
-            '<option value="' + fieldValue + '">' +
-              fieldValue + ' (' + displayName + ')</option>'
-          );
-        },
-        error: function() {
-          // Fallback to just the field value if the request fails
-          $("#champs_insert").append(
-            '<option value="' + fieldValue + '">' + fieldValue + '</option>'
-          );
-        }
-      });
+      $("#champs_insert").append(
+        '<option value="' +
+          $(this).attr("value") +
+          '">' +
+          $(this).text() +
+          "</option>"
+      );
     });
 
     // récupération de la formule existante si rééouverture
