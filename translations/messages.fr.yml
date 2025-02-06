@@ -236,6 +236,8 @@ rule:
     yoursource: Votre solution source
     yourtarget: Votre solution cible
     help: Que dois-je faire ?
+    select_group: Choisir un groupe
+    select_value: Choisir une valeur
 
 rulegroup:
     list: Groupes de règles
@@ -632,30 +634,36 @@ function:
         constant: Constante 
     description:
         text: 
-            trim:  Supprime les espaces (ou d'autres caractères) en début et fin de chaîne 
-            lower: Met tous les caractères en minuscules  
-            upper: Met tous les caractères en majuscules 
-            changeValue: changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple changeValue( {FIELD},"('A':'1','B':'2')")
-            getValueFromArray: getValueFromArray($key, $array) / Récupère la valeur correspondant à key dans le tableau array
-            substr: substr ( string $string , int $start [, int $length ] ) /  Retourne un segment de chaîne.
-            striptags: striptags( string $str [, string $allowable_tags ] ) /  Supprime les balises HTML et PHP d'une chaîne
-            htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convertit toutes les entités HTML en caractères normaux
-            replace: replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] ) / Remplace toutes les occurrences dans une chaîne
-            utf8encode: utf8encode ( string $data ) / Convertit une chaîne ISO-8859-1 en UTF-8
-            utf8decode: utf8decode ( string $data ) / Convertit une chaîne UTF-8 en ISO-8859-1
-            htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit tous les caractères éligibles en entités HTML
-            htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convertit les caractères spéciaux en entités HTML
-            chr: chr ( int $bytevalue ) Générer une chaîne d'un octet à partir d'un nombre
-            lookup: lookup ( string $field, string $rule, <optional> errorIfEmpty (default = false), <optional> errodIfNoFound (default = true)). Cherche la correspondance du champ $field dans la règle $rule. 
+            trim:  "Supprime les espaces (ou d'autres caractères) en début et fin de chaîne. Exemple: trim('Hello World') retourne 'Hello World'"
+            ltrim:  "Supprime les espaces (ou d'autres caractères) en début de chaîne. Exemple: ltrim('   Hello') retourne 'Hello'"
+            rtrim:  "Supprime les espaces (ou d'autres caractères) en fin de chaîne. Exemple: rtrim('Hello   ') retourne 'Hello'"
+            lower:  "Met tous les caractères en minuscules. Exemple: lower('Hello World') retourne 'hello world'"
+            upper:  "Met tous les caractères en majuscules. Exemple: upper('Hello World') retourne 'HELLO WORLD'"
+            substr:  "Retourne un segment de chaîne. Exemple: substr('Hello World', 0, 5) retourne 'Hello'"
+            striptags:  "Supprime les balises HTML et PHP d'une chaîne. Exemple: striptags('<p>Hello</p>') retourne 'Hello'"
+            changeValue:  "Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple: changeValue({FIELD}, '('active':'1', 'inactive':'0')') convertit 'active' en '1'"
+            htmlEntityDecode:  "Convertit toutes les entités HTML en caractères normaux. Exemple: htmlEntityDecode('&amp;') retourne '&'"
+            replace:  "Remplace toutes les occurrences dans une chaîne. Exemple: replace('world', 'there', 'Hello world') retourne 'Hello there'"
+            utf8encode:  "Encode une chaîne ISO-8859-1 en UTF-8. Exemple: utf8encode('Hello') convertit en UTF-8"
+            utf8decode:  "Décode une chaîne UTF-8 en ISO-8859-1. Exemple: utf8decode('Hello') convertit en ISO-8859-1"
+            htmlentities:  "Convertit les caractères spéciaux en entités HTML. Exemple: htmlentities('<') retourne '&lt;'"
+            htmlspecialchars:  "Convertit les caractères spéciaux en entités HTML tout en conservant les entités HTML déjà encodées. Exemple: htmlspecialchars('A & B') retourne 'A &amp; B'"
+            strlen:  "Retourne la longueur d'une chaîne. Exemple: strlen('Hello') retourne 5"
+            urlencode:  "Encode une chaîne pour l'utilisation dans une URL. Exemple: urlencode('Hello World') retourne 'Hello%20World'"
+            chr:  "Retourne un caractère à partir de son code ASCII. Exemple: chr(65) retourne 'A'"
+            json_decode:  "Décode une chaîne JSON en une valeur PHP. Exemple: json_decode('{\"name\":\"John\"}') retourne un objet avec la propriété 'name'"
+            json_encode:  "Retourne la représentation JSON d'une valeur. Exemple: json_encode(['name' => 'John']) retourne '{\"name\":\"John\"}'"
+            getValueFromArray:  "Retourne une valeur d'un tableau en utilisant une clé. Exemple: getValueFromArray('name', '{\"name\":\"John\"}') retourne 'John'"
+            lookup: "C'est ce que nous utilisons maintenant à la place de la relation de règle. Vous obtenez une certaine valeur d'un champ qui appartient à une autre règle. Exemple: lookup({name}, '677f9171e6851') retourne la valeur du champ name d'un document produit par la règle qui a un id de 677f9171e6851"
         mathematical:
-            round: Arrondit un nombre à virgule flottante
-            ceil: Arrondit au nombre supérieur
-            abs: Valeur absolue
+            round:  "Arrondit un nombre flottant à une précision spécifiée. Exemple: round(3.14159, 2) retourne 3.14"
+            ceil:  "Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
+            abs:  "Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
         date:
-            date: Formate une date/heure locale
-            microtime: Retourne le timestamp UNIX actuel avec les microsecondes
-            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change le fuseau horaire de la date passée en premier paramètre
-            changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convertit la date passée en premier paramètre dans le format passé en deuxième paramètre
+            date:  "Définit une date/heure (date et heure courante). Exemple: date() retourne la date et l'heure courante"
+            microtime:  "Retourne le timestamp Unix actuel avec les microsecondes. Exemple: microtime() retourne le timestamp Unix actuel avec les microsecondes, tel que 1717536000.123456"
+            changeTimeZone:  "Change le fuseau horaire de la date précédente. Exemple: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') retourne '2024-01-01 00:00:00'"
+            changeFormatDate:  "Convertit la date précédente dans le format spécifié. Exemple: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') retourne '2024/01/01'"
         constant:
             mdw_no_send_field: Ne pas envoyer le champ
             mdw_cancel_document: Annuler le document

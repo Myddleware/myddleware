@@ -544,3 +544,32 @@ h2 { margin-top: 50px;}
     cursor: not-allowed;
     opacity: 0.6; /* Optional: makes it look disabled */
 }
+
+
+#area_confirm {
+    margin-top: 35px;
+}
+
+.function-wizard-title {
+    margin-left: 1em;
+    font-weight: bold;
+}
+
+.function-wizard-select {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.function-wizard-title-function-select {
+    font-weight: bold;
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-bottom: 0;
+}
+
+#function-select {
+    height: auto;
+    margin-bottom: 0;
+    padding-right: 0.25rem;
+}
