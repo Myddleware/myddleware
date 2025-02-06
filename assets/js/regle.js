@@ -2375,8 +2375,8 @@ $(document).ready(function() {
     const flagFunctionWizardEnd = $('#flag-function-wizard-end');
     let tooltipVisible = true;
  
-    // Add tooltip container after the select
-    $('<div id="function-tooltip" class="tooltip-box" style="padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></div>')
+    // Add tooltip container after the select and hide it initially
+    $('<div id="function-tooltip" class="tooltip-box" style="padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; display: none;"></div>')
         .insertAfter(flagFunctionWizardEnd);
  
     // Handle tooltip toggle button
@@ -2386,7 +2386,8 @@ $(document).ready(function() {
         
         if (tooltipVisible) {
             $(this).find('i').removeClass('fa-question').addClass('fa-question-circle');
-            if (functionSelect.val()) { // Only show if a function is selected
+            // Only show if a function is selected AND tooltip is enabled
+            if (functionSelect.val()) {
                 tooltipBox.show();
             }
         } else {
@@ -2401,7 +2402,8 @@ $(document).ready(function() {
         const tooltip = selectedOption.data('tooltip');
         const tooltipBox = $('#function-tooltip');
         
-        if (tooltip && tooltipVisible) {
+        // Only show tooltip if a function is selected AND tooltip is enabled
+        if (tooltip && tooltipVisible && $(this).val()) {
             tooltipBox.text(tooltip).show();
         } else {
             tooltipBox.hide();
