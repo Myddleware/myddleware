@@ -46,6 +46,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use PDO;
 use App\Entity\Job;
+use Shapecode\Bundle\CronBundle\Entity\CronJob;
 
 class JobManager
 {
@@ -160,7 +161,7 @@ class JobManager
 
     public function setMessage($message)
     {
-        $this->message = $message;
+        $this->message .= $message;
     }
 
     // Set the rule data in the current inctance of the rule
@@ -1500,6 +1501,8 @@ class JobManager
     public function checkJob($period)
     {
         try {
+			$jobClosed = false;
+			$openJobs = array();
             if (empty($period)) {
                 $period = $this->checkJobPeriod;
             }
@@ -1522,16 +1525,74 @@ class JobManager
 			";
             $stmt = $this->connection->prepare($sqlParams);
             $stmt->bindValue('period', $period);
-
             $result = $stmt->executeQuery();
             $jobs = $result->fetchAllAssociative();
             foreach ($jobs as $job) {
-                //clone because, the job that is not the current job
+				// We dont close the current job
+				if ($job['id'] == $this->id) {
+					continue;
+				}
+                // We use clone because the job that is not the current job
                 $jobManagerChekJob = clone $this;
                 $jobManagerChekJob->setId($job['id']);
+				$jobManagerChekJob->setMessage('Task successfully closed by task '.$this->id.'. ');
                 $jobManagerChekJob->closeJob();   
 				$this->setMessage('Task '.$job['id'].' successfully closed. ');
+				$jobClosed = true;
             }
+
+			// If a job has been closed, we check every running instance value
+			if ($jobClosed) {
+				// Get all the open job, group and count them
+				$jobs = $this->entityManager->getRepository(Job::class)
+							->createQueryBuilder('j')
+							->select('COUNT(j.id) as job_count, j.param')
+							->where('j.status = :status')
+							->setParameter('status', 'Start')
+							->groupBy('j.param')
+							->getQuery()
+							->getResult();
+				// Format the results
+				if (!empty($jobs)) {
+					foreach($jobs as $job) {
+						$openJobs[strtolower('myddleware:'.trim($job['param']))] = $job['job_count'];
+					}
+				}
+
+				// Get all the cronjob with running instances > 0
+				$cronJobs = $this->entityManager->getRepository(CronJob::class)
+								->createQueryBuilder('c')
+								->where('c.runningInstances > :value')
+								->setParameter('value', 0)
+								->getQuery()
+								->getResult();
+
+				// For each cronjob with running instance > 0
+				if (!empty($cronJobs)) {
+					foreach ($cronJobs as $cronJob) {
+						$newRunningInstances = 0;
+						$searchKey = strtolower(trim($cronJob->getCommand()));
+
+						// No change if the number of running task is the same than the running Instances in cronjob
+						if (
+								!empty($openJobs[$searchKey])
+							AND	$openJobs[$searchKey] == $cronJob->getRunningInstances()
+						) {
+							continue;
+						}
+						// Calculate the new running instances
+						$newRunningInstances = (!empty($openJobs[trim($cronJob->getCommand())]) ? $openJobs[trim($cronJob->getCommand())] : 0);
+
+						// Update the running instance with the new calculated value
+						$this->entityManager->getConnection()->executeQuery(
+								'UPDATE cron_job SET running_instances = :running_instances WHERE id = :id',
+								['running_instances' => $newRunningInstances,'id' => $cronJob->getId()]
+						);
+						$this->entityManager->flush();
+						$this->setMessage('Running instance : set value  '.$newRunningInstances.' to cronjon '.$cronJob->getId().' ('.$cronJob->getCommand().') ');
+					}
+				}
+			}
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
