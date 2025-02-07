@@ -160,22 +160,22 @@
 			<div id="function-wizard">
 				<p class="function-wizard-title">{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
 				<div class="function-wizard-select">
-					<div class="d-flex justify-content-between align-items-center">
-						<p class="function-wizard-title-function-select">{{ 'create_rule.step3.formula.select_function_title'|trans }}</p>
+					<p class="function-wizard-title-function-select">{{ 'create_rule.step3.formula.select_function_title'|trans }}</p>
+					<div class="d-flex align-items-center mb-2">
+						<select id="function-select" class="form-select me-2">
+							<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
+							{% for t, v in lst_functions %}
+								<option value="{{ v.getName }}" 
+										data-type="{{ v.getCategoryId.getId }}"
+										data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
+									{{ v.getName }}
+								</option>
+							{% endfor %}
+						</select>
 						<button id="toggle-tooltip" class="btn btn-link" title="{{ 'create_rule.step3.formula.toggle_tooltip'|trans }}">
 							<i class="fas fa-question-circle"></i>
 						</button>
 					</div>
-					<select id="function-select" class="form-select mb-2">
-						<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
-						{% for t, v in lst_functions %}
-						<option value="{{ v.getName }}" 
-								data-type="{{ v.getCategoryId.getId }}"
-								data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
-							{{ v.getName }}
-						</option>
-					{% endfor %}
-				</select>
 				</div>
 				{# Lookup specific dropdowns - initially hidden #}
 				<div id="lookup-options" style="display: none;">
