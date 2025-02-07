@@ -641,6 +641,19 @@ $.fn.setCursorPosition = function(pos) {
       colorationSyntax();
       theme(style_template);
     });
+    $("button", "#lookup_rules").on("click", function () {
+      var position = $("#area_insert").getCursorPosition();
+      var content = $("#area_insert").val();
+      var newContent =
+        content.substr(0, position) +
+        '"' +
+        $.trim($("select", "#lookup_rules").val()) +
+        '"' +
+        content.substr(position);
+      $("#area_insert").val(newContent);
+      colorationSyntax();
+      theme(style_template);
+    });
   }
   // ---- FORMULE ------------------------------------------------------------
 
