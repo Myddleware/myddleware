@@ -2361,6 +2361,7 @@ $(document).ready(function() {
     const lookupField = $('#lookup-field');
     const flagFunctionWizardEnd = $('#flag-function-wizard-end');
     let tooltipVisible = true;
+    let currentTooltip = ''; // Add this line to store current tooltip text
  
     // Add tooltip container after the select and hide it initially
     $('<div id="function-tooltip" class="tooltip-box" style="padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; display: none;"></div>')
@@ -2373,9 +2374,9 @@ $(document).ready(function() {
         
         if (tooltipVisible) {
             $(this).find('i').removeClass('fa-question').addClass('fa-question-circle');
-            // Only show if a function is selected AND tooltip is enabled
-            if (functionSelect.val()) {
-                tooltipBox.show();
+            // Show current tooltip if a function is selected
+            if (functionSelect.val() && currentTooltip) {
+                tooltipBox.text(currentTooltip).show();
             }
         } else {
             $(this).find('i').removeClass('fa-question-circle').addClass('fa-question');
@@ -2388,6 +2389,9 @@ $(document).ready(function() {
         const selectedOption = $(this).find('option:selected');
         const tooltip = selectedOption.data('tooltip');
         const tooltipBox = $('#function-tooltip');
+        
+        // Always update the current tooltip text
+        currentTooltip = tooltip;
         
         // Only show tooltip if a function is selected AND tooltip is enabled
         if (tooltip && tooltipVisible && $(this).val()) {
