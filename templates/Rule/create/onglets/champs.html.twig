@@ -236,17 +236,6 @@
 				</button>
 			{% endif %}
 		</div>
-		<div id="lookup_rules">
-			{% if html_list_rules is not empty %}
-			<label>{{'Lookup Rules'}} :</label>
-				<select name="lookup_rules">
-					{{ html_list_rules|raw }}
-				</select>
-				<button class="btn-mydinv-small">
-					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
-				</button>
-			{% endif %}
-		</div>
 	</div>
 	<div>
 		<input class="btn-mydinv" id="area_confirm" type="button" value="{{'create_rule.step3.formula.confirm'|trans}}"/>
