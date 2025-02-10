@@ -2502,8 +2502,22 @@ $(document).ready(function() {
             // Get the selected field's name (without the rule part in parentheses)
             const selectedOption = $(this).find('option:selected');
             const fieldName = selectedOption.text().split(' (')[0];
-            const errorEmpty = $('#lookup-error-empty').is(':checked');
-            const errorNotFound = $('#lookup-error-not-found').is(':checked');
+            let errorEmpty = $('#lookup-error-empty').is(':checked');
+            let errorNotFound = $('#lookup-error-not-found').is(':checked');
+
+            // for both errorEmpty and errorNotFound, instead of true or false, it should be 1 or 0
+            if (errorEmpty) {
+                errorEmpty = 1;
+            } else {
+                errorEmpty = 0;
+            } 
+            if (errorNotFound) {
+                errorNotFound = 1;
+            } else {
+                errorNotFound = 0;
+            }
+            
+            
             
             // Construct the lookup formula with the optional parameters
             const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound}`;
