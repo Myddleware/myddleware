@@ -201,6 +201,21 @@
 							<option value="">{{ 'create_rule.step3.formula.select_field'|trans }}</option>
 						</select>
 					</div>
+
+					<div class="mb-2 d-flex align-items-center">
+						<div class="form-check me-3">
+							<input class="form-check-input" type="checkbox" id="lookup-error-empty">
+							<label class="form-check-label" for="lookup-error-empty">
+								Error if empty
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="lookup-error-not-found" checked>
+							<label class="form-check-label" for="lookup-error-not-found">
+								Error if notFound
+							</label>
+						</div>
+					</div>
 				</div>
 			</div>
 			<p id="flag-function-wizard-end"></p>

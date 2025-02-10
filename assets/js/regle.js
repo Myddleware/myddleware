@@ -2502,25 +2502,39 @@ $(document).ready(function() {
             // Get the selected field's name (without the rule part in parentheses)
             const selectedOption = $(this).find('option:selected');
             const fieldName = selectedOption.text().split(' (')[0];
-            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}"`;
+            const errorEmpty = $('#lookup-error-empty').is(':checked');
+            const errorNotFound = $('#lookup-error-not-found').is(':checked');
+            
+            // Construct the lookup formula with the optional parameters
+            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound}`;
+            // console.log("lookup formula", lookupFormula);
+            
             insertFunction(lookupFormula);
         }
     });
 
     function insertFunction(funcText) {
+        // console.log("funcText", funcText);
         const areaInsert = $('#area_insert');
         const position = areaInsert.getCursorPosition();
         const content = areaInsert.val();
+        // console.log("content", content);
         
         // Add parentheses only if not already part of the funcText
-        const suffix = funcText.endsWith('"') ? ' )' : '( ';
-        
+        let suffix = funcText.endsWith('"') ? ' )' : '( ';
+        // console.log("suffix", suffix);
+
+        // if the funcText contains lookup, then the suffix should be ')'
+        if (funcText.includes('lookup')) {
+            suffix = ')';
+        }
+      
         const newContent = 
             content.substr(0, position) +
             funcText +
             suffix +
             content.substr(position);
-            
+        // console.log("new content", newContent);
         areaInsert.val(newContent);
         colorationSyntax();
         theme(style_template);
