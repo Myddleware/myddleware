@@ -2424,6 +2424,9 @@ $(document).ready(function() {
     insertFunctionBtn.on('click', function() {
         if (!selectedFunction) return; // Do nothing if no function is selected
         
+        // Get the function category from the selected option
+        const functionCategory = $('#function-select option:selected').data('type');
+        
         // Special handling for MDW functions
         if (selectedFunction.startsWith('mdw_')) {
             const areaInsert = $('#area_insert');
@@ -2446,10 +2449,23 @@ $(document).ready(function() {
             const position = areaInsert.getCursorPosition();
             const content = areaInsert.val();
             
-            // Create the function call with the parameter
+            // Create the function call based on category
             let functionCall = '';
             if (parameterValue) {
-                functionCall = `${selectedFunction}("${parameterValue}")`;
+                switch(functionCategory) {
+                    case 1: // mathematical
+                        functionCall = `${selectedFunction}(${parameterValue})`; // No quotes for numbers
+                        break;
+                    case 2: // text
+                    case 3: // date
+                        functionCall = `${selectedFunction}("${parameterValue}")`; // Add quotes for text and dates
+                        break;
+                    case 4: // constant
+                        functionCall = `${selectedFunction}()`; // Constants don't need parameters
+                        break;
+                    default:
+                        functionCall = `${selectedFunction}("${parameterValue}")`; // Default to quoted parameter
+                }
             } else {
                 functionCall = `${selectedFunction}()`;
             }
