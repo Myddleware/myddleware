@@ -2360,13 +2360,12 @@ $(document).ready(function() {
     const lookupRule = $('#lookup-rule');
     const lookupField = $('#lookup-field');
     const flagFunctionWizardEnd = $('#flag-function-wizard-end');
+    const functionParameter = $('#function-parameter');
+    const insertFunctionBtn = $('#insert-function-parameter');
     let tooltipVisible = true;
-    let currentTooltip = ''; // Add this line to store current tooltip text
- 
-    // Add tooltip container after the select and hide it initially
-    $('<div id="function-tooltip" class="tooltip-box" style="padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; display: none;"></div>')
-        .insertAfter(flagFunctionWizardEnd);
- 
+    let currentTooltip = '';
+    let selectedFunction = ''; // Add this to store the currently selected function
+    
     // Handle tooltip toggle button
     $('#toggle-tooltip').on('click', function() {
         tooltipVisible = !tooltipVisible;
@@ -2374,7 +2373,6 @@ $(document).ready(function() {
         
         if (tooltipVisible) {
             $(this).find('i').removeClass('fa-question').addClass('fa-question-circle');
-            // Show current tooltip if a function is selected
             if (functionSelect.val() && currentTooltip) {
                 tooltipBox.text(currentTooltip).show();
             }
@@ -2390,20 +2388,18 @@ $(document).ready(function() {
         const tooltip = selectedOption.data('tooltip');
         const tooltipBox = $('#function-tooltip');
         
-        // Always update the current tooltip text
+        selectedFunction = $(this).val(); // Store the selected function
         currentTooltip = tooltip;
         
-        // Only show tooltip if a function is selected AND tooltip is enabled
         if (tooltip && tooltipVisible && $(this).val()) {
             tooltipBox.text(tooltip).show();
         } else {
             tooltipBox.hide();
         }
 
-        const selectedFunction = $(this).val();
-        
         if (selectedFunction === 'lookup') {
             lookupOptions.show();
+            $('#function-parameter-input').hide(); // Hide parameter input for lookup
             
             // Populate rules dropdown
             $.ajax({
@@ -2420,8 +2416,41 @@ $(document).ready(function() {
             });
         } else {
             lookupOptions.hide();
-            insertFunction(selectedFunction);
+            $('#function-parameter-input').show(); // Show parameter input for other functions
         }
+    });
+
+    // Handle parameter insertion
+    insertFunctionBtn.on('click', function() {
+        if (!selectedFunction) return; // Do nothing if no function is selected
+        
+        const parameterValue = functionParameter.val().trim();
+        const areaInsert = $('#area_insert');
+        const position = areaInsert.getCursorPosition();
+        const content = areaInsert.val();
+        
+        // Create the function call with the parameter
+        let functionCall = '';
+        if (parameterValue) {
+            // Add quotes if the parameter is a string (you might want to add more sophisticated type checking later)
+            functionCall = `${selectedFunction}("${parameterValue}")`;
+        } else {
+            functionCall = `${selectedFunction}()`;
+        }
+        
+        const newContent = 
+            content.substr(0, position) +
+            functionCall +
+            content.substr(position);
+            
+        areaInsert.val(newContent);
+        
+        // Clear the parameter input
+        functionParameter.val('');
+        
+        // Update syntax highlighting
+        colorationSyntax();
+        theme(style_template);
     });
 
     // When a rule is selected
