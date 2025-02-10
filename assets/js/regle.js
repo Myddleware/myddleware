@@ -2496,61 +2496,36 @@ $(document).ready(function() {
         }
     });
 
-    // When a field is selected
-    lookupField.on('change', function() {
-        if ($(this).val()) {
-            // Get the selected field's name (without the rule part in parentheses)
-            const selectedOption = $(this).find('option:selected');
-            const fieldName = selectedOption.text().split(' (')[0];
+    // Remove the lookupField.on('change') handler since we don't want automatic insertion
+    lookupField.off('change');
+
+    // Add handler for submit lookup button
+    $('#submit-lookup').on('click', function() {
+        const selectedField = lookupField.find('option:selected');
+        if (selectedField.val()) {
+            const fieldName = selectedField.text().split(' (')[0];
             let errorEmpty = $('#lookup-error-empty').is(':checked');
             let errorNotFound = $('#lookup-error-not-found').is(':checked');
 
-            // for both errorEmpty and errorNotFound, instead of true or false, it should be 1 or 0
-            if (errorEmpty) {
-                errorEmpty = 1;
-            } else {
-                errorEmpty = 0;
-            } 
-            if (errorNotFound) {
-                errorNotFound = 1;
-            } else {
-                errorNotFound = 0;
-            }
+            // Convert boolean to 1/0
+            errorEmpty = errorEmpty ? 1 : 0;
+            errorNotFound = errorNotFound ? 1 : 0;
             
+            // Construct the complete lookup formula
+            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound})`;
             
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
             
-            // Construct the lookup formula with the optional parameters
-            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound}`;
-            // console.log("lookup formula", lookupFormula);
-            
-            insertFunction(lookupFormula);
+            const newContent = 
+                content.substr(0, position) +
+                lookupFormula +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+            colorationSyntax();
+            theme(style_template);
         }
     });
-
-    function insertFunction(funcText) {
-        // console.log("funcText", funcText);
-        const areaInsert = $('#area_insert');
-        const position = areaInsert.getCursorPosition();
-        const content = areaInsert.val();
-        // console.log("content", content);
-        
-        // Add parentheses only if not already part of the funcText
-        let suffix = funcText.endsWith('"') ? ' )' : '( ';
-        // console.log("suffix", suffix);
-
-        // if the funcText contains lookup, then the suffix should be ')'
-        if (funcText.includes('lookup')) {
-            suffix = ')';
-        }
-      
-        const newContent = 
-            content.substr(0, position) +
-            funcText +
-            suffix +
-            content.substr(position);
-        // console.log("new content", newContent);
-        areaInsert.val(newContent);
-        colorationSyntax();
-        theme(style_template);
-    }
 });
