@@ -112,6 +112,7 @@ create_rule:
             fields_title: Required fields
         formula: 
             fields: "Select field(s) for the formula"
+            select_picklist: "Select a picklist value"
             function: Functions
             create: Create a formula
             compose: Compose your formula

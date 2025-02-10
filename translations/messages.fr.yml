@@ -112,6 +112,7 @@ create_rule:
             fields_title: Champs obligatoires
         formula: 
             fields: "Sélectionnez un champ(s) pour la formule"
+            select_picklist: "Sélectionnez une valeur de liste"
             function: Fonctions
             create: Créer une formule
             compose: Composer votre formule
