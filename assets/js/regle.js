@@ -2424,26 +2424,43 @@ $(document).ready(function() {
     insertFunctionBtn.on('click', function() {
         if (!selectedFunction) return; // Do nothing if no function is selected
         
-        const parameterValue = functionParameter.val().trim();
-        const areaInsert = $('#area_insert');
-        const position = areaInsert.getCursorPosition();
-        const content = areaInsert.val();
-        
-        // Create the function call with the parameter
-        let functionCall = '';
-        if (parameterValue) {
-            // Add quotes if the parameter is a string (you might want to add more sophisticated type checking later)
-            functionCall = `${selectedFunction}("${parameterValue}")`;
-        } else {
-            functionCall = `${selectedFunction}()`;
-        }
-        
-        const newContent = 
-            content.substr(0, position) +
-            functionCall +
-            content.substr(position);
+        // Special handling for MDW functions
+        if (selectedFunction.startsWith('mdw_')) {
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
             
-        areaInsert.val(newContent);
+            // For MDW functions, just insert the function name as a string
+            const functionCall = `"${selectedFunction}"`;
+            
+            const newContent = 
+                content.substr(0, position) +
+                functionCall +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+        } else {
+            // Normal function handling
+            const parameterValue = functionParameter.val().trim();
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
+            
+            // Create the function call with the parameter
+            let functionCall = '';
+            if (parameterValue) {
+                functionCall = `${selectedFunction}("${parameterValue}")`;
+            } else {
+                functionCall = `${selectedFunction}()`;
+            }
+            
+            const newContent = 
+                content.substr(0, position) +
+                functionCall +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+        }
         
         // Clear the parameter input
         functionParameter.val('');
