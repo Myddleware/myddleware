@@ -111,7 +111,7 @@ create_rule:
             fields: Il existe des champs obligatoires qui sont actuellement vides. Il vous est possible de renseigner plusieurs champs source vers un champ cible.
             fields_title: Champs obligatoires
         formula: 
-            fields: Champs
+            fields: "Sélectionnez un champ(s) pour la formule"
             function: Fonctions
             create: Créer une formule
             compose: Composer votre formule

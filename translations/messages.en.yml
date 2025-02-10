@@ -111,7 +111,7 @@ create_rule:
             fields: some of the required fields are currently empty. You can fill out several source fields towards a target field.
             fields_title: Required fields
         formula: 
-            fields: Fields
+            fields: "Select field(s) for the formula"
             function: Functions
             create: Create a formula
             compose: Compose your formula
