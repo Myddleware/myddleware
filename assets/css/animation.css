@@ -557,7 +557,7 @@ h2 { margin-top: 50px;}
 
 .function-wizard-select {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
 }
 
