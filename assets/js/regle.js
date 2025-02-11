@@ -2362,9 +2362,9 @@ $(document).ready(function() {
     const flagFunctionWizardEnd = $('#flag-function-wizard-end');
     const functionParameter = $('#function-parameter');
     const insertFunctionBtn = $('#insert-function-parameter');
-    let tooltipVisible = true;
+    let tooltipVisible = false; // Changed to false by default
     let currentTooltip = '';
-    let selectedFunction = ''; // Add this to store the currently selected function
+    let selectedFunction = '';
     
     // Handle tooltip toggle button
     $('#toggle-tooltip').on('click', function() {
@@ -2388,9 +2388,10 @@ $(document).ready(function() {
         const tooltip = selectedOption.data('tooltip');
         const tooltipBox = $('#function-tooltip');
         
-        selectedFunction = $(this).val(); // Store the selected function
+        selectedFunction = $(this).val();
         currentTooltip = tooltip;
         
+        // Only show tooltip if tooltipVisible is true and a function is selected
         if (tooltip && tooltipVisible && $(this).val()) {
             tooltipBox.text(tooltip).show();
         } else {
