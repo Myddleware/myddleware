@@ -2470,6 +2470,9 @@ $(document).ready(function() {
             const areaInsert = $('#area_insert');
             const position = areaInsert.getCursorPosition();
             const content = areaInsert.val();
+
+            // for the mwd function, we need to hide the function-parameter input
+            functionParameter.hide();
             
             // For MDW functions, just insert the function name as a string
             const functionCall = `"${selectedFunction}"`;
