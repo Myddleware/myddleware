@@ -574,3 +574,15 @@ h2 { margin-top: 50px;}
     padding-right: 0.25rem;
     width: 12em;
 }
+
+#lookup-rule, #lookup-field {
+    margin-left: 1.8rem;
+}
+
+#function-parameter {
+    margin-left: -0.35rem;
+}
+
+#round-precision {
+margin-left: -0.5rem;
+}
