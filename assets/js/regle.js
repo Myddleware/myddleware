@@ -2397,6 +2397,12 @@ $(document).ready(function() {
             tooltipBox.hide();
         }
 
+        if (selectedFunction === 'round') {
+          $('#round-precision-input').show();
+      } else {
+          $('#round-precision-input').hide();
+      }
+
         if (selectedFunction === 'lookup') {
             lookupOptions.show();
             $('#function-parameter-input').hide(); // Hide parameter input for lookup
@@ -2426,9 +2432,40 @@ $(document).ready(function() {
         
         // Get the function category from the selected option
         const functionCategory = $('#function-select option:selected').data('type');
+
+        if (selectedFunction === 'round') {
+          const parameterValue = functionParameter.val().trim();
+          const precisionInput = $('#round-precision');
+          const precision = parseInt(precisionInput.val());
+          
+          // Validate precision
+          if (isNaN(precision) || precision < 1 || precision > 100) {
+              precisionInput.addClass('is-invalid');
+              return;
+          }
+          
+          precisionInput.removeClass('is-invalid');
+          
+          const areaInsert = $('#area_insert');
+          const position = areaInsert.getCursorPosition();
+          const content = areaInsert.val();
+          
+          // Construct round function call with precision
+          const functionCall = `round(${parameterValue}, ${precision})`;
+          
+          const newContent = 
+              content.substr(0, position) +
+              functionCall +
+              content.substr(position);
+              
+          areaInsert.val(newContent);
+          
+          // Clear inputs
+          functionParameter.val('');
+          precisionInput.val('');
         
         // Special handling for MDW functions
-        if (selectedFunction.startsWith('mdw_')) {
+        } else if (selectedFunction.startsWith('mdw_')) {
             const areaInsert = $('#area_insert');
             const position = areaInsert.getCursorPosition();
             const content = areaInsert.val();
@@ -2544,4 +2581,25 @@ $(document).ready(function() {
             theme(style_template);
         }
     });
+
+    $('#round-precision').on('input', function() {
+      const value = this.value;
+      
+      // Remove any non-digit characters
+      const sanitizedValue = value.replace(/[^0-9]/g, '');
+      
+      if (sanitizedValue !== value) {
+          this.value = sanitizedValue;
+      }
+      
+      const precision = parseInt(sanitizedValue);
+      
+      if (isNaN(precision) || precision < 1 || precision > 100) {
+          $(this).addClass('is-invalid');
+      } else {
+          $(this).removeClass('is-invalid');
+      }
+  });
+
+  
 });
