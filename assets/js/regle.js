@@ -2390,6 +2390,13 @@ $(document).ready(function() {
         
         selectedFunction = $(this).val();
         currentTooltip = tooltip;
+
+        // if the selected function is a mwd function, we need to hide the function-parameter input, else we need to show it
+        if (selectedFunction.startsWith('mdw_')) {
+            $('#function-parameter').hide();
+        } else {
+            $('#function-parameter').show();
+        }
         
         // Only show tooltip if tooltipVisible is true and a function is selected
         if (tooltip && tooltipVisible && $(this).val()) {
@@ -2471,8 +2478,7 @@ $(document).ready(function() {
             const position = areaInsert.getCursorPosition();
             const content = areaInsert.val();
 
-            // for the mwd function, we need to hide the function-parameter input
-            functionParameter.hide();
+
             
             // For MDW functions, just insert the function name as a string
             const functionCall = `"${selectedFunction}"`;
