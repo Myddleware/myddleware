@@ -120,6 +120,8 @@ create_rule:
             delete: Effacer
             close: Fermer 
             error: Votre règle comporte une ou plusieurs erreurs de syntaxe
+            select_rule: Sélectionnez une règle
+            select_field: Sélectionnez un champ
         confirm:
             success: Enregistrement avec succès
             error: Une erreur est survenue 
