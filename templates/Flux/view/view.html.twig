@@ -188,7 +188,7 @@
 											{% endif %}
 										</span>
 										{% if key and linkedData[key] is defined %}
-											<a href="{{ linkedData[key] }}" title="{{ value }}">Source Record</a><br>
+											<a href="{{ linkedData[key] }}" title="{{ value }}">Lookup Record</a><br>
 											<a href="{{ path('document_list_page', {'source_id': value}) }}" title="Search Document">Search Document by this id</a>
 										{% endif %}
 									</li>

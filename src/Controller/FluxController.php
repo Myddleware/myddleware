@@ -828,7 +828,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
            // $firstParentDocumentId = $parentDocuments[0]->getId();
 
            if ($this->ruleHasLookups($rule)
-        && $rule->getConnectorSource()->getSolution()->getName() == 'SuiteCRM'
+        && $rule->getConnectorSource()->getSolution()->getName() === 'suitecrm'
            ) {
             $lookupData = $this->getLookupData($rule, $sourceData);
             $mappedData = $this->extractFieldAndRule($lookupData);
@@ -902,7 +902,7 @@ file_put_contents($logFile, $logEntry, FILE_APPEND);
             return '';
         }
         $link = $sourceData['direct_link'];
-        $extractedLeftPortionOfLink = explode('?', $link);
+        $extractedLeftPortionOfLink = explode('#', $link);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
 
                 // Define the log file path
