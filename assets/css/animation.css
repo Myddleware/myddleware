@@ -573,16 +573,29 @@ h2 { margin-top: 50px;}
     margin-bottom: 0;
     padding-right: 0.25rem;
     width: 12em;
+    margin-left: -2.5rem;
 }
 
 #lookup-rule, #lookup-field {
-    margin-left: 1.8rem;
+    margin-left: 0.6rem;
 }
 
 #function-parameter {
-    margin-left: -0.35rem;
+    margin-left: -4.80rem;
 }
 
 #round-precision {
 margin-left: -0.5rem;
+}
+
+#insert-function-parameter {
+    margin-left: -4.80rem;
+}
+
+#round-precision-input {
+    margin-left: -4.40rem;
+}
+
+#submit-lookup {
+    margin-left: 0.5rem;
 }
