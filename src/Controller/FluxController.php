@@ -827,7 +827,9 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 
            // $firstParentDocumentId = $parentDocuments[0]->getId();
 
-           if ($this->ruleHasLookups($rule)) {
+           if ($this->ruleHasLookups($rule)
+        && $rule->getConnectorSource()->getSolution()->getName() == 'SuiteCRM'
+           ) {
             $lookupData = $this->getLookupData($rule, $sourceData);
             $mappedData = $this->extractFieldAndRule($lookupData);
             $extractedDirectLink = $this->extractDirectLink($sourceData);
