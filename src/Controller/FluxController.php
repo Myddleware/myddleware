@@ -855,7 +855,7 @@ file_put_contents($logFile, $logEntry, FILE_APPEND);
                 [
                     'current_document' => $id,
                     'source' => $sourceData,
-                    'linkedData' => $linkedData,
+                    'linkedData' => $linkedData ?? null,
                     'target' => $targetData,
                     'history' => $historyData,
                     'doc' => $doc[0],
@@ -895,6 +895,10 @@ file_put_contents($logFile, $logEntry, FILE_APPEND);
     }
 
     public function extractDirectLink($sourceData): string {
+
+        if (!isset($sourceData['direct_link'])) {
+            return '';
+        }
         $link = $sourceData['direct_link'];
         $extractedLeftPortionOfLink = explode('?', $link);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
@@ -933,6 +937,8 @@ $logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variable
 
 // Write the log entry to the file
 file_put_contents($logFile, $logEntry, FILE_APPEND);
+
+$result = [];
 
         // for each element of the array, we will generate a link to the source record
         // we will use the rule to find the source module
