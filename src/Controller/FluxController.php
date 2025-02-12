@@ -958,8 +958,8 @@ $result = [];
     
         foreach ($lookupData as $item) {
             if (isset($item['formula'])) {
-                // Use regex to extract the field and rule from the formula
-                if (preg_match('/lookup\(\{(.+?)\},"(.+?)"\)/', $item['formula'], $matches)) {
+                // Updated regex to handle lookup formulas with optional parameters
+                if (preg_match('/lookup\(\{(.+?)\},\s*"(.+?)"(?:\s*,\s*[^,\)]*)*\)/', $item['formula'], $matches)) {
                     $result[] = [
                         'field' => $matches[1],
                         'rule' => $matches[2]
