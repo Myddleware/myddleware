@@ -117,18 +117,6 @@ class RuleField
         return null;
     }
 
-    public function getTitleFromFormula(): ?string
-    {
-        if ($this->formula) {
-            // first we get the rule id from the formula
-            $ruleId = $this->getRuleidFromFormula();
-            // then we get the rule entity from the rule id
-            
-            return $rule->getName();
-        }
-        return null;
-    }
-
     public function getRule(): ?Rule
     {
         return $this->rule;

@@ -57,7 +57,7 @@
 							{{ f.getFormula }} <br>
 							{% if 'lookup' in f.getFormula %}
 								<a href="{{ path('regle_open', {'id': f.getRuleidFromFormula()}) }}">
-									{{ f.getTitleFromFormula() }}
+									Lookup rule
 								</a>
 							{% endif %}
 						</p>
