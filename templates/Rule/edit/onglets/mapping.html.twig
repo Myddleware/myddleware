@@ -54,11 +54,13 @@
 					{% if f.getFormula %}
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
 							:
-							{{ f.getFormula }} <br>
 							{% if 'lookup' in f.getFormula %}
+							texte
 								<a href="{{ path('regle_open', {'id': f.getRuleidFromFormula()}) }}">
 									{{ render(controller('App\\Controller\\DefaultController::getRuleNameById', {'id': f.getRuleidFromFormula()})) }}
-								</a>
+								</a> texte
+							{% else %}
+								{{ f.getFormula }}
 							{% endif %}
 						</p>
 					{% else %}

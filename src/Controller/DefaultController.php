@@ -960,6 +960,36 @@ use App\Entity\WorkflowAction;
         }
 
         /**
+         * from the formula, we get the first part of the formula
+         * @Route("/get-first-part-of-lookup-formula/{formula}", name="get_first_part_of_lookup_formula")
+         */
+        public function getFirstPartOfLookupFormula($formula): Response
+        {
+            $formula = explode('lookup', $formula);
+            return new Response($formula[0]);
+        }
+
+        /**
+         * from the formula, we get the second part of the formula
+         * @Route("/get-second-part-of-lookup-formula/{formula}", name="get_second_part_of_lookup_formula")
+         */
+        public function getSecondPartOfLookupFormula($formula): Response
+        {
+                // given that the formula is like this
+
+                // lookup({assigned_user_id}, "67acc3f4a9f0c", 0, 1)
+
+                // we would like the first part to be the substring
+
+                // "lookup({assigned_user_id}, "
+
+                // and the second part to be 
+
+                // ", 0, 1)"
+
+        }
+
+        /**
          * FICHE D'UNE REGLE.
          * @Route("/view/{id}", name="regle_open")
          * @throws Exception
