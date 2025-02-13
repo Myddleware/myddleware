@@ -109,6 +109,26 @@ class RuleField
         return $this->formula;
     }
 
+    public function getRuleidFromFormula(): ?string
+    {
+        if ($this->formula) {
+            return preg_match('/lookup\(\{(.+?)\},\s*"(.+?)"(?:\s*,\s*[^,\)]*)*\)/', $this->formula, $matches) ? $matches[2] : null;
+        }
+        return null;
+    }
+
+    public function getTitleFromFormula(): ?string
+    {
+        if ($this->formula) {
+            // first we get the rule id from the formula
+            $ruleId = $this->getRuleidFromFormula();
+            // then we get the rule entity from the rule id
+            
+            return $rule->getName();
+        }
+        return null;
+    }
+
     public function getRule(): ?Rule
     {
         return $this->rule;

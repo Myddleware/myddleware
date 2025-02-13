@@ -54,7 +54,12 @@
 					{% if f.getFormula %}
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
 							:
-							{{ f.getFormula }}
+							{{ f.getFormula }} <br>
+							{% if 'lookup' in f.getFormula %}
+								<a href="{{ path('regle_open', {'id': f.getRuleidFromFormula()}) }}">
+									{{ f.getTitleFromFormula() }}
+								</a>
+							{% endif %}
 						</p>
 					{% else %}
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
