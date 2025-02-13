@@ -965,8 +965,8 @@ use App\Entity\WorkflowAction;
          */
         public function getFirstPartOfLookupFormula($formula): Response
         {
-            // Extract everything up to the first quote mark after the lookup
-            if (preg_match('/lookup\(\{[^}]+\},\s*"/', $formula, $matches)) {
+            // Extract everything up to the first quote mark after the lookup (excluding the quote)
+            if (preg_match('/lookup\(\{[^}]+\},\s*/', $formula, $matches)) {
                 return new Response($matches[0]);
             }
             return new Response('');
