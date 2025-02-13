@@ -835,20 +835,6 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
             $extractedDirectLink = $this->extractDirectLink($sourceData);
             $linkedData = $this->generateLinkToSource($sourceData, $mappedData, $extractedDirectLink);
 
-                    // Define the log file path
-                    $logFile = 'C:\laragon\www\myddleware_NORMAL\var\log\dev.log';
-
-// The message or variable you want to log
-$message = "This is a log message.";
-
-// json encode pretty print the sourcedata
-$variableValue = json_encode($linkedData, JSON_PRETTY_PRINT);
-
-// Format the log entry
-$logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variableValue . PHP_EOL;
-
-// Write the log entry to the file
-file_put_contents($logFile, $logEntry, FILE_APPEND);
            }
 
             // Call the view
