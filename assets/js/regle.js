@@ -2544,8 +2544,7 @@ $(document).ready(function() {
             // Get fields from the existing select element
             $('#champs_insert option').each(function() {
                 const fieldName = $(this).val();
-                const fieldLabel = $(this).text().replace(/\s+/g, '');
-                lookupField.append(`<option value="${fieldName}">${fieldLabel}</option>`);
+                lookupField.append(`<option value="${fieldName}">${fieldName}</option>`);
             });
             
             lookupField.prop('disabled', false);
