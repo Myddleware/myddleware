@@ -2605,5 +2605,18 @@ $(document).ready(function() {
       }
   });
 
-  
+// wait for the press of the close button which is #area_quit
+$('#area_quit').on('click', function() {
+    console.log("close button pressed");
+    resetFunctionWizard();
+});
+
+// function to reset the function wizard
+function resetFunctionWizard() {
+    console.log("resetting function wizard");
+    $('#function-select').val('').trigger('change');
+    $('#lookup-rule').val('').trigger('change');
+    $('#lookup-field').val('').prop('disabled', true);
+}
+
 });
