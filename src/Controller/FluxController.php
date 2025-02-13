@@ -890,22 +890,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         $link = $sourceData['direct_link'];
         $extractedLeftPortionOfLink = explode('#', $link);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
-
-                // Define the log file path
-                $logFile = 'C:\laragon\www\myddleware_NORMAL\var\log\dev.log';
-
-// The message or variable you want to log
-$message = "This is a log message.";
-
-// json encode pretty print the updatedLink
-$variableValue = json_encode($updatedLink, JSON_PRETTY_PRINT);
-
-// Format the log entry
-$logEntry = date('Y-m-d H:i:s') . " - " . $message . " - Variable: " . $variableValue . PHP_EOL;
-
-// Write the log entry to the file
-file_put_contents($logFile, $logEntry, FILE_APPEND);
-
+        
         return $updatedLink;
     }
 
