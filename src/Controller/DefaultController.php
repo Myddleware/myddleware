@@ -950,6 +950,16 @@ use App\Entity\WorkflowAction;
         }
 
         /**
+         * from the id of the rule, we get the name of the rule
+         * @Route("/get-rule-name/{id}", name="get_rule_name")
+         */
+        public function getRuleNameById($id): Response
+        {
+            $rule = $this->entityManager->getRepository(Rule::class)->find($id);
+            return new Response($rule->getName());
+        }
+
+        /**
          * FICHE D'UNE REGLE.
          * @Route("/view/{id}", name="regle_open")
          * @throws Exception
