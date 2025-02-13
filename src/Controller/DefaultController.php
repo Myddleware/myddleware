@@ -965,8 +965,11 @@ use App\Entity\WorkflowAction;
          */
         public function getFirstPartOfLookupFormula($formula): Response
         {
-            $formula = explode('lookup', $formula);
-            return new Response($formula[0]);
+            // Extract everything up to the first quote mark after the lookup
+            if (preg_match('/lookup\(\{[^}]+\},\s*"/', $formula, $matches)) {
+                return new Response($matches[0]);
+            }
+            return new Response('');
         }
 
         /**
@@ -975,18 +978,11 @@ use App\Entity\WorkflowAction;
          */
         public function getSecondPartOfLookupFormula($formula): Response
         {
-                // given that the formula is like this
-
-                // lookup({assigned_user_id}, "67acc3f4a9f0c", 0, 1)
-
-                // we would like the first part to be the substring
-
-                // "lookup({assigned_user_id}, "
-
-                // and the second part to be 
-
-                // ", 0, 1)"
-
+            // Extract everything after the rule ID until the end
+            if (preg_match('/",\s*(.+)\)/', $formula, $matches)) {
+                return new Response(', ' . $matches[1] . ')');
+            }
+            return new Response('');
         }
 
         /**
