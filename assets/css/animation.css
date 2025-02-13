@@ -601,6 +601,7 @@ margin-left: -0.5rem;
     margin-left: 0.5rem;
 }
 
-.sourceIdOfDocument {
+.sourceIdOfDocument,
+.targetIdOfDocument {
     width: 19rem;
 }

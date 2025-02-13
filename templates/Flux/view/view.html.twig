@@ -178,7 +178,7 @@
 						{% if source %}
 							{% for key, value  in source %}
 								{% if value != doc.getId  and key != 'direct_link' %}
-									<li class="{{ key }}">
+									<li class="{{ key }} {{ key == 'id' or key == 'Id' ? 'sourceIdOfDocument' : '' }}">
 										<span class="field">{{ key }}</span>
 										<span class="value">
 											{% if value|default('')|replace({'&#039;': "'"}) != value %}
@@ -230,7 +230,7 @@
 						<p>
 						{% endif %}
 						<ul id="flux_target" data-id="{{doc.getId}}" data-rule="{{ doc.getRule }}">
-							<li>
+							<li class="targetIdOfDocument">
 								<span class="field">{{'view_flux.id'|trans}}
 									:</span>
 								<span>{{ doc.getTarget }}</span>
@@ -238,7 +238,7 @@
 							{% if target %}
 								{% for key, value  in target %}
 									{% if value != doc.getId and key != 'direct_link' %}
-										<li class="{{ key }}">
+										<li class="{{ key }} {{ key == 'id' or key == 'Id' ? 'targetIdOfDocument' : '' }}">
 											<span class="field">{{ key }}</span>
 											<span class="value">
 												{% if value|default('')|replace({'&#039;': "'"}) != value %}
