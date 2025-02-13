@@ -196,10 +196,10 @@
 													</svg>
 													</a>
 													<br>
-													<a class="help-link all-link" href="{{ linkedData[key] }}" title="{{ value }}">Go to record in  {{ rule.getConnectorSource().getSolution().getName()}}
+													{# <a class="help-link all-link" href="{{ linkedData[key] }}" title="{{ value }}">Go to record in  {{ rule.getConnectorSource().getSolution().getName()}}
 													</a>
-													<img class="vignette ms-1" width="32" height="32" src="{{ asset('build/images/solution/') }}{{ rule.getConnectorSource().getSolution().getName() }}.png" alt="{{ rule.getConnectorSource().getSolution().getName() }}"/>
-													<br>
+													<img class="vignette ms-1" width="32" height="32" src="{{ asset('build/images/solution/') }}{{ rule.getConnectorSource().getSolution().getName() }}.png" alt="{{ rule.getConnectorSource().getSolution().getName() }}"/> #}
+													{# <br> #}
 												{% endif %}
 												{% if key and linkedData[key] is not defined %}
 												{{ value }}<br>
