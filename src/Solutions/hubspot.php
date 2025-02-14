@@ -28,6 +28,13 @@ namespace App\Solutions;
 use Datetime;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
+use HubSpot\Factory;
+use HubSpot\Client\Crm\Objects\Emails\ApiException;
+use HubSpot\Client\Crm\Objects\Emails\Model\AssociationSpec;
+use HubSpot\Client\Crm\Objects\Emails\Model\PublicAssociationsForObject;
+use HubSpot\Client\Crm\Objects\Emails\Model\PublicObjectId;
+use HubSpot\Client\Crm\Objects\Emails\Model\SimplePublicObjectInputForCreate;
+	
 class hubspot extends solution
 {
     protected $hubspot;
@@ -65,12 +72,15 @@ class hubspot extends solution
         }
     }
 
-
+	// List modules
     public function get_modules($type = 'source'): array
     {
         $modules = array(
             'contacts' => 'Contacts'
         );
+		if ($type == 'target') {
+			$modules['emails'] = 'Emails';
+		}
         return $modules;
     }
 
@@ -79,7 +89,14 @@ class hubspot extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-            $properties = $this->hubspot->crm()->properties()->coreApi()->getAll('contacts')->getResults();
+			// Use Hubspot metadata
+            require 'lib/hubspot/metadata.php';
+			// If a metadat exists, we return it
+			if (!empty($moduleFields[$module])) {
+				$this->moduleFields = $moduleFields[$module];
+				return $this->moduleFields;
+			}
+            $properties = $this->hubspot->crm()->properties()->coreApi()->getAll($module)->getResults();
             if (!empty($properties)){
                 foreach($properties as $property) {
                     // List value
@@ -111,7 +128,6 @@ class hubspot extends solution
                     }
                 }
             }
-
             return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -211,7 +227,48 @@ class hubspot extends solution
         return $result;
     }
 
-	
+
+	/**
+     * @throws Exception
+     */
+    protected function create($param, $record, $idDoc = null)
+    {
+		// Ony for email creation
+		$associationSpec = new AssociationSpec([
+			'association_category' => $record['associations_category'],
+			'association_type_id' => $record['associations_typeId']
+		]);
+		$to = new PublicObjectId([
+			'id' =>  $record['associations_to_id']
+		]);
+		$publicAssociationsForObject = new PublicAssociationsForObject([
+			'types' => [$associationSpec],
+			'to' => $to
+		]);
+
+		// Build email properties
+		$properties = array();
+		foreach($record as $key => $value) {
+			// Email properties start by hs_
+			if(substr($key,0,3) == 'hs_') {
+				$properties[$key] = $value;
+			}
+		}
+		
+		// Prepare data to be sent
+		$simplePublicObjectInputForCreate = new SimplePublicObjectInputForCreate([
+			'associations' => [$publicAssociationsForObject],
+			'object_write_trace_id' => $record['traceId'],
+			'properties' => $properties,
+		]);
+		// Create the email to Hubspot
+		$apiResponse = $this->hubspot->crm()->objects()->emails()->basicApi()->create($simplePublicObjectInputForCreate);
+		if (!empty($apiResponse->getId())) {
+			return $apiResponse->getId();
+		}
+		return null;        
+    }
+
      /**
      * @throws \Exception
      */
