@@ -52,6 +52,7 @@ use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleParamAudit;
 use App\Entity\WorkflowAction;
+use App\Entity\Config;
 use App\Form\Type\WorkflowType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
@@ -516,30 +517,47 @@ class WorkflowController extends AbstractController
         }
 
         try {
-
-            
             $em = $this->getDoctrine()->getManager();
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['workflow' => $id],
-                ['dateCreated' => 'DESC']
-            );
-            $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
+            $configRepository = $this->entityManager->getRepository(Config::class);
+            $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+            
+            // Set a default limit if none is configured
+            $limit = !empty($searchLimit) ? (int)$searchLimit->getValue() : 100;
 
-            $adapter = new QueryAdapter($query);
+            if ($limit === 0 || $limit === null || $limit < 0) {
+                $limit = 100;
+            }
+            
+
+            // Get all results within the limit
+            $query = $this->workflowLogRepository->findLogsByWorkflowId($id, $limit);
+            $results = $query->getResult();
+            
+            // Use ArrayAdapter instead of QueryAdapter
+
+            $adapter = new ArrayAdapter($results);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+
+            // get the max per page from the config, the parameter name is pager
+            $maxPerPage = $configRepository->findOneBy(['name' => 'pager']);
+
+            if ($maxPerPage && $maxPerPage->getValue() > 0 && !empty($maxPerPage->getValue())) {
+                $pager->setMaxPerPage($maxPerPage->getValue());
+            } else {
+                $pager->setMaxPerPage(10);
+            }
+
             $pager->setCurrentPage($page);
 
+
             if ($workflow[0]) {
-                $nb_workflow = count($workflowLogs);
                 return $this->render(
                     'Workflow/show.html.twig',
                     [
                         'workflow' => $workflow[0],
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
+                        'nb_workflow' => count($results),
                         'pager' => $pager,
                     ]
                 );
