@@ -25,19 +25,17 @@
 
 namespace App\Solutions;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 class acton extends solution
 {
-	protected $proxy = 'http://srvproxy.iruworld.org:8080';
-	protected $token;
+	protected $accessToken;
+	protected $refreshToken;
 	
 	public function getFieldsLogin(): array
     {
         return [
-            [
-                'name' => 'url',
-                'type' => TextType::class,
-                'label' => 'solution.fields.url',
-            ],
 			[
                 'name' => 'login',
                 'type' => TextType::class,
@@ -59,17 +57,16 @@ class acton extends solution
                 'label' => 'solution.fields.clientsecret',
             ],
         ];
-    }
+    } 
 	
+	// Login to Act-On
 	public function login($paramConnexion)
     {
         parent::login($paramConnexion);
         try {
-			
-			
 			$client = new \GuzzleHttp\Client();
-
-			$response = $client->request('POST', 'https://api.actonsoftware.com/token', [
+			// Build parameters
+			$parameters = [
 			  'form_params' => [
 				'grant_type' => 'password',
 				'username' => $this->paramConnexion['login'],
@@ -81,54 +78,22 @@ class acton extends solution
 				'accept' => 'application/json',
 				'content-type' => 'application/x-www-form-urlencoded',
 			  ],
-			]);
-
-			// echo $response->getBody();
-			
-			
-			// $config = [
-				// 'grant_type'      => 'password',
-				// 'username'        => $this->paramConnexion['login'],
-				// 'password'        => $this->paramConnexion['password'],
-				// 'client_id'       => $this->paramConnexion['clientid'],
-				// 'client_secret'   => $this->paramConnexion['clientsecret'],
-			// ];
-
-			// $curl = curl_init();
-			// curl_setopt_array($curl,
-				// [
-					// CURLOPT_URL => $this->paramConnexion['url'] . '/token',
-					// CURLOPT_RETURNTRANSFER => true,
-					// CURLOPT_ENCODING => '',
-					// CURLOPT_MAXREDIRS => 10,
-					// CURLOPT_TIMEOUT => 0,
-					// CURLOPT_FOLLOWLOCATION => true,
-					// CURLOPT_VERBOSE => true,
-					// CURLOPT_PROXY => $this->proxy,
-					// CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-					// CURLOPT_CUSTOMREQUEST => 'POST',
-					// CURLOPT_POSTFIELDS => http_build_query($config),
-				// ]
-			// );
-
-			// $response = json_decode(curl_exec($curl),true);
-
-			
-            if (!empty($response)) {
-                // if (empty($result->id)) {
-                    // throw new \Exception($result->description);
-                // }
-
-                $this->token = $response->getBody()
-                $this->connexion_valide = true;
-            } else {
-                throw new \Exception('Please check url');
-            }
-			curl_close($curl);
+			];
+			// Save tokens
+			$response = $client->request('POST', 'https://api.actonsoftware.com/token', $parameters);
+			$tokens = json_decode($response->getBody());
+			if (!empty($tokens->refresh_token)) {
+				$this->accessToken = $tokens->refresh_token;
+			}
+			if (!empty($tokens->access_token)) {
+				$this->accessToken = $tokens->access_token;
+				$this->connexion_valide = true;
+			} else {
+				throw new \Exception('No exception during the connextion to Act-On but the token is empty.');
+			}
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-
             return ['error' => $error];
         }
     }

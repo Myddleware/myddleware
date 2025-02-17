@@ -114,7 +114,7 @@ class SolutionManager
         sendinblue $sendinblue,
         internallist $internallist,
         yousign $yousign,
-        brevo $brevo
+        brevo $brevo,
         acton $acton
     ) {
 		// Load the solution classes
