@@ -30,8 +30,21 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class acton extends solution
 {
+	protected $client;
 	protected $accessToken;
 	protected $refreshToken;
+	
+	protected $modules = array(
+								'target' => array(
+													'list' => 'List'
+											)
+							);
+
+    protected array $FieldsDuplicate = [
+											'list' => ['name'],
+										];
+	
+	protected array $required_fields = ['default' => ['id', 'tsLastModified']];
 	
 	public function getFieldsLogin(): array
     {
@@ -64,7 +77,7 @@ class acton extends solution
     {
         parent::login($paramConnexion);
         try {
-			$client = new \GuzzleHttp\Client();
+			$this->client = new \GuzzleHttp\Client();
 			// Build parameters
 			$parameters = [
 			  'form_params' => [
@@ -80,7 +93,7 @@ class acton extends solution
 			  ],
 			];
 			// Save tokens
-			$response = $client->request('POST', 'https://api.actonsoftware.com/token', $parameters);
+			$response = $this->client->request('POST', 'https://api.actonsoftware.com/token', $parameters);
 			$tokens = json_decode($response->getBody());
 			if (!empty($tokens->refresh_token)) {
 				$this->accessToken = $tokens->refresh_token;
@@ -98,6 +111,103 @@ class acton extends solution
         }
     }
 	
+	/**
+     * Retrieve the list of modules available to be read or sent.
+     *
+     * @param string $type source|target
+     *
+     * @return array
+	*/
+    public function get_modules($type = 'source'): array
+    {
+        if (!empty($this->modules[$type])) {
+            return $this->modules[$type];
+        }
+        return [];
+    }
 	
+
+    /**
+     * Retrieve the list of fields (metadata) associated to each module.
+     *
+     * @param string $module
+     * @param string $type
+     * @param array  $param
+     *
+     * @return array
+     */
+    public function get_module_fields($module, $type = 'source', $param = null): array
+    {
+        parent::get_module_fields($module, $type);
+        try {
+            // Use Act-on metadata
+            require 'lib/acton/metadata.php';
+            if (!empty($moduleFields[$module])) {
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+            }
+            return $this->moduleFields;
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+	
+	
+ /**
+     * @throws \Exception
+     */
+    public function read($param)
+    {
+		// List can be read only using a query by name
+		if (
+				$param['module'] == 'list'
+			AND empty($param['query']['name'])
+		) {
+			throw new \Exception('You can only search list from ACT-ON. Please add the check duplicate field : name.');
+		}
+		
+        $result = [];
+		$parameters = [
+			'headers' => [
+				'Authorization' => 'Bearer '.$this->accessToken,
+				'accept' => 'application/json',
+			]
+		];
+		
+		$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/?count=1000', $parameters);
+	
+		if (!empty($response)) {
+			$records = json_decode($response->getBody(),1);
+			if (!empty($records['result'])) {
+				if ($param['module'] == 'list') {
+					foreach($records['result'] as $record) {
+						if ($record['name'] == $param['query']['name']) {
+							return array($record);
+						}
+					}
+				}
+			}
+		}
+    }
+	
+	public function getRefFieldName($param): string
+    {
+        return 'tsLastModified';
+    }
+	
+	 public function getRuleMode($module, $type): array
+    {
+        if (
+                $type == 'target'
+            && in_array($module, ['list'])
+        ) {
+            return [
+                'S' => 'search_only',
+            ];
+        }
+
+        return parent::getRuleMode($module, $type);
+    }
 }
 
