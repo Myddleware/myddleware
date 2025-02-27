@@ -36,7 +36,8 @@ class acton extends solution
 	
 	protected $modules = array(
 								'target' => array(
-													'list' => 'List'
+													'list' => 'List',
+													'list_contact' => 'List contact'
 											)
 							);
 
@@ -95,8 +96,9 @@ class acton extends solution
 			// Save tokens
 			$response = $this->client->request('POST', 'https://api.actonsoftware.com/token', $parameters);
 			$tokens = json_decode($response->getBody());
+
 			if (!empty($tokens->refresh_token)) {
-				$this->accessToken = $tokens->refresh_token;
+				$this->refreshToken = $tokens->refresh_token;
 			}
 			if (!empty($tokens->access_token)) {
 				$this->accessToken = $tokens->access_token;
@@ -110,6 +112,7 @@ class acton extends solution
             return ['error' => $error];
         }
     }
+
 	
 	/**
      * Retrieve the list of modules available to be read or sent.
@@ -187,6 +190,76 @@ class acton extends solution
 						}
 					}
 				}
+			}
+		}
+    }
+	
+		
+	protected function create($param, $record, $idDoc = null)
+    {
+		$result = [];
+		// Parameters
+		$parameters = [
+			'headers' => [
+				'Authorization' => 'Bearer '.$this->accessToken,
+				'accept' => 'application/json',
+				'content-type' => 'application/json',
+			]
+		];
+		// For module contact list
+		if ($param['module'] == 'list_contact') {
+			// Check required fields
+			if (empty($record['listid'])) {
+				throw new \Exception('The field listid is required to add a member to a list.');
+			}
+			// Get email address
+			$emailAddress = json_decode($record['body'])->EMAIL;
+			if (empty($emailAddress)) {
+				throw new \Exception('The email address is required to add a member to a list.');
+			}
+			// Send data to Act-on
+			$parameters['body'] = $record['body']; 
+			$response = $this->client->request('POST', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record', $parameters);
+			$responseBody = json_decode($response->getBody()->getContents(), true);
+			if (empty($responseBody['contact_id'])) {
+				throw new \Exception('No contact ID returned.');
+			}
+			return $responseBody['contact_id'];
+		}
+    }
+	
+	protected function update($param, $record, $idDoc = null)
+    {
+		$result = [];
+		// Parameters
+		$parameters = [
+			'headers' => [
+				'Authorization' => 'Bearer '.$this->accessToken,
+				'accept' => 'application/json',
+				'content-type' => 'application/json',
+			]
+		];
+		// For module contact list
+		if ($param['module'] == 'list_contact') {
+			// Check required fields
+			if (empty($record['listid'])) {
+				throw new \Exception('The field listid is required to update a member to a list.');
+			}
+			if (empty($record['target_id'])) {
+				throw new \Exception('The field target_id (contact_id) is required to update a member to a list.');
+			}
+			// Send data to Act-on
+			$parameters['body'] = $record['body']; 
+			$response = $this->client->request('PUT', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record/'.$record['target_id'], $parameters);
+			$responseBody = json_decode($response->getBody()->getContents(), true);
+			// Managed response
+			if (
+					!empty($responseBody['status'])
+				AND $responseBody['status'] == 'success'
+			) {
+				return $record['target_id'];
+			} else {
+				throw new \Exception('Failed to update the contact in the list.');
 			}
 		}
     }

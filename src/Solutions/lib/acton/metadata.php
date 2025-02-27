@@ -28,4 +28,8 @@ $moduleFields = [
 		'id' => ['label' => 'Id', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
 		'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
+	'list_contact' => [
+		'listid' => ['label' => 'List ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'body' => ['label' => 'Body', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+    ],
 ];
