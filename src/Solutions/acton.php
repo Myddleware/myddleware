@@ -34,6 +34,8 @@ class acton extends solution
 	protected $accessToken;
 	protected $refreshToken;
 	
+	protected bool $sendDeletion = true;
+	
 	protected $modules = array(
 								'target' => array(
 													'list' => 'List',
@@ -170,6 +172,7 @@ class acton extends solution
 			throw new \Exception('You can only search list from ACT-ON. Please add the check duplicate field : name.');
 		}
 		
+		// Parameters to read data from Act-on
         $result = [];
 		$parameters = [
 			'headers' => [
@@ -177,9 +180,9 @@ class acton extends solution
 				'accept' => 'application/json',
 			]
 		];
-		
+		// Call act-on
 		$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/?count=1000', $parameters);
-	
+		// Manage response
 		if (!empty($response)) {
 			$records = json_decode($response->getBody(),1);
 			if (!empty($records['result'])) {
@@ -194,7 +197,7 @@ class acton extends solution
 		}
     }
 	
-		
+	// Create record to Act-On
 	protected function create($param, $record, $idDoc = null)
     {
 		$result = [];
@@ -228,6 +231,7 @@ class acton extends solution
 		}
     }
 	
+	// Update a record to Acton
 	protected function update($param, $record, $idDoc = null)
     {
 		$result = [];
@@ -251,6 +255,42 @@ class acton extends solution
 			// Send data to Act-on
 			$parameters['body'] = $record['body']; 
 			$response = $this->client->request('PUT', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record/'.$record['target_id'], $parameters);
+			$responseBody = json_decode($response->getBody()->getContents(), true);
+			// Managed response
+			if (
+					!empty($responseBody['status'])
+				AND $responseBody['status'] == 'success'
+			) {
+				return $record['target_id'];
+			} else {
+				throw new \Exception('Failed to update the contact in the list.');
+			}
+		}
+    }
+	
+	// Delete a record from Acton
+	protected function delete($param, $record, $idDoc = null)
+    {
+		$result = [];
+		// Parameters
+		$parameters = [
+			'headers' => [
+				'Authorization' => 'Bearer '.$this->accessToken,
+				'accept' => 'application/json',
+				'content-type' => 'application/json',
+			]
+		];
+		// For module contact list
+		if ($param['module'] == 'list_contact') {
+			// Check required fields
+			if (empty($record['listid'])) {
+				throw new \Exception('The field listid is required to update a member to a list.');
+			}
+			if (empty($record['target_id'])) {
+				throw new \Exception('The field target_id (contact_id) is required to update a member to a list.');
+			}
+			// Delete data from Act-on
+			$response = $this->client->request('DELETE', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record/'.$record['target_id'], $parameters);
 			$responseBody = json_decode($response->getBody()->getContents(), true);
 			// Managed response
 			if (
