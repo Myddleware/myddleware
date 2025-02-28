@@ -169,7 +169,13 @@ class acton extends solution
 				$param['module'] == 'list'
 			AND empty($param['query']['name'])
 		) {
-			throw new \Exception('You can only search list from ACT-ON. Please add the check duplicate field : name.');
+			throw new \Exception('You can only search list by name. Please add the check duplicate field : name.');
+		}
+		if (
+				$param['module'] == 'list_contact'
+			AND empty($param['query']['id'])
+		) {
+			throw new \Exception('You can only search list member by contact id.');
 		}
 		
 		// Parameters to read data from Act-on
@@ -180,19 +186,50 @@ class acton extends solution
 				'accept' => 'application/json',
 			]
 		];
-		// Call act-on
-		$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/?count=1000', $parameters);
-		// Manage response
-		if (!empty($response)) {
-			$records = json_decode($response->getBody(),1);
-			if (!empty($records['result'])) {
-				if ($param['module'] == 'list') {
-					foreach($records['result'] as $record) {
-						if ($record['name'] == $param['query']['name']) {
-							return array($record);
+		// For list module
+		if ($param['module'] == 'list') {
+			// Call act-on
+			$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/?count=1000', $parameters);
+			// Manage response
+			if (!empty($response)) {
+				$records = json_decode($response->getBody(),1);
+				if (!empty($records['result'])) {
+					if ($param['module'] == 'list') {
+						foreach($records['result'] as $record) {
+							if ($record['name'] == $param['query']['name']) {
+								return array($record);
+							}
 						}
 					}
 				}
+			}
+		}
+		// For module contact list module
+		if ($param['module'] == 'list_contact') {
+			// Get the list id
+			$listId = explode(':',$param['query']['id'])[0];
+			// Get the contacts
+			$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId.'/record/'.$param['query']['id'], $parameters);
+			$responseBodyContact = json_decode($response->getBody()->getContents(), true);
+			if (!empty($responseBodyContact)) {
+				// Get the field list from the Act-on list
+				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId, $parameters);
+				$responseBodyList = json_decode($response->getBody()->getContents(), true);
+
+				// Remove first field that contains the contact id
+				$result['id'] = $responseBodyContact[0];
+				unset($responseBodyContact[0]);
+				$result['listid'] = $listId;
+				// Build body
+				foreach($responseBodyContact as $key => $value) {
+					// Replace the key by the field name in the list
+					if (!empty($responseBodyList['headers'][$key])) {
+						$contact[$responseBodyList['headers'][$key]] = $value;
+					}
+				}				
+				$result['body'] = json_encode($contact);
+				$result['tsLastModified'] = time();
+				return array($result);				
 			}
 		}
     }
