@@ -396,7 +396,7 @@ class WorkflowActionController extends AbstractController
                         'choice_label' => 'name',
                         'choice_value' => 'id',
                         'required' => false,
-                        'label' => 'Rule',
+                        'label' => 'Generating Rule',
                         'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
                     ])
                     ->add('status', ChoiceType::class, [
@@ -408,12 +408,12 @@ class WorkflowActionController extends AbstractController
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
                     ->add('message', TextareaType::class, ['required' => false])
                     ->add('searchField', ChoiceType::class, [
-                        'label' => 'searchField',
+                        'label' => 'Matching Field from Generating Rule',
                         'choices' => $sourceSearchValue,
                         'required' => false
                     ])
                     ->add('searchValue', ChoiceType::class, [
-                        'label' => 'searchValue',
+                        'label' => 'Matching Field from Current Rule',
                         'choices' => $sourceFields,
                         'required' => false
                     ])

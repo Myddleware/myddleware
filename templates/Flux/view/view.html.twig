@@ -163,14 +163,14 @@
 				<p class="ctr">{{'view_flux.source'|trans}}</p>
 				<ul id="flux_source">
 					{% if source.direct_link is defined %}
-						<div class="center">
+						<div class="center direct-link-document">
 							<u>
 								<a href="{{ source.direct_link }}" target="_blank">{{'view_flux.direct_link'|trans}}</a>
 							</u>
 						</div>
 						<p>
 						{% endif %}
-						<li>
+						<li class="sourceIdOfDocument">
 							<span class="field">{{'view_flux.id'|trans}}
 								:</span>
 							<span>{{ doc.getSource }}</span>
@@ -178,13 +178,32 @@
 						{% if source %}
 							{% for key, value  in source %}
 								{% if value != doc.getId  and key != 'direct_link' %}
-									<li class="{{ key }}">
+									<li class="{{ key }} {{ key == 'id' or key == 'Id' ? 'sourceIdOfDocument' : '' }}">
 										<span class="field">{{ key }}</span>
 										<span class="value">
 											{% if value|default('')|replace({'&#039;': "'"}) != value %}
-												{{ value|raw|replace({'&#039;': "'"}) }}
+												{{ value|raw|replace({'&#039;': "'"}) }}<br>
+												{% if key and linkedData[key] is defined %}
+													<a href="{{ linkedData[key] }}" title="{{ value }}">{{ value }}</a><br>
+													<a href="{{ path('document_list_page', {'source_id': value}) }}" title="Search Document">Search Document by this id</a>
+												{% endif %}
 											{% else %}
-												{{ value }}
+												{% if key and linkedData[key] is defined %}
+													<a class="help-link all-link" href="{{ path('document_list_page', {'source_id': value}) }}" title="Search documents by this id">{{ value }}
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+														<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+														<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+													</svg>
+													</a>
+													<br>
+													{# <a class="help-link all-link" href="{{ linkedData[key] }}" title="{{ value }}">Go to record in  {{ rule.getConnectorSource().getSolution().getName()}}
+													</a>
+													<img class="vignette ms-1" width="32" height="32" src="{{ asset('build/images/solution/') }}{{ rule.getConnectorSource().getSolution().getName() }}.png" alt="{{ rule.getConnectorSource().getSolution().getName() }}"/> #}
+													{# <br> #}
+												{% endif %}
+												{% if key and linkedData[key] is not defined %}
+												{{ value }}<br>
+												{% endif %}
 											{% endif %}
 										</span>
 									</li>
@@ -203,7 +222,7 @@
 					<p class="ctr"><img src="{{ asset('build/images/template/target.png') }}" alt="{{'view_rule.relate.solution_source'|trans}}"/></p>
 					<p class="ctr">{{'view_flux.target'|trans}}</p>
 					{% if target.direct_link is defined %}
-						<div class="center">
+						<div class="center direct-link-document direct-link-document-target">
 							<u>
 								<a href="{{ target.direct_link }}" target="_blank">{{'view_flux.direct_link'|trans}}</a>
 							</u>
@@ -211,7 +230,7 @@
 						<p>
 						{% endif %}
 						<ul id="flux_target" data-id="{{doc.getId}}" data-rule="{{ doc.getRule }}">
-							<li>
+							<li class="targetIdOfDocument">
 								<span class="field">{{'view_flux.id'|trans}}
 									:</span>
 								<span>{{ doc.getTarget }}</span>
@@ -219,7 +238,7 @@
 							{% if target %}
 								{% for key, value  in target %}
 									{% if value != doc.getId and key != 'direct_link' %}
-										<li class="{{ key }}">
+										<li class="{{ key }} {{ key == 'id' or key == 'Id' ? 'targetIdOfDocument' : '' }}">
 											<span class="field">{{ key }}</span>
 											<span class="value">
 												{% if value|default('')|replace({'&#039;': "'"}) != value %}

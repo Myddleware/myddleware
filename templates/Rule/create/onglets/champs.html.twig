@@ -157,59 +157,123 @@
 			<select class="listarea" id="champs_insert" name="champs_insert" multiple="multiple" size="13"></select>
 		</div>
 		<div class="left wdh">
-			<p>{{ 'create_rule.step3.formula.function'|trans }} :</p>
-			<select class="filter" id="filter" name="filter_functions">
-				<option selected="selected" value="0">- {{ 'function.all' |trans }} -</option>
+			<div id="function-wizard">
+				<p class="function-wizard-title">{{ 'create_rule.step3.formula.function_wizard'|trans }} :</p>
+				<div class="function-wizard-select">
+					<div class="d-flex align-items-center mb-2">
+						<select id="function-select" class="form-select me-2">
+							<option value="">{{ 'create_rule.step3.formula.select_function'|trans }}</option>
+							{% for t, v in lst_functions %}
+								<option value="{{ v.getName }}" 
+										data-type="{{ v.getCategoryId.getId }}"
+										data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
+									{{ v.getName }}
+								</option>
+							{% endfor %}
+						</select>
+						<button id="toggle-tooltip" class="btn btn-link" title="{{ 'create_rule.step3.formula.toggle_tooltip'|trans }}">
+							<i class="fas fa-question-circle"></i>
+						</button>
+					</div>
+					
+					{# Add the tooltip container here #}
+					<div id="function-tooltip" class="tooltip-box mb-2 ms-2" style="display: none; padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px;"></div>
+					
+					{# Add the parameter input area #}
+					<div id="function-parameter-input" class="mb-2">
+    <textarea id="function-parameter" class="form-control mb-2" rows="3" placeholder="Enter parameter value"></textarea>
+    
+    {# Add the precision input - initially hidden #}
+    <div id="round-precision-input" class="mb-2" style="display: none;">
+        <label for="round-precision" class="form-label">Precision (1-100):</label>
+        <input type="number" 
+               id="round-precision" 
+               class="form-control" 
+               min="1" 
+               max="100" 
+               placeholder="Enter precision (1-100)"
+               style="width: 150px;">
+        <div id="precision-error" class="invalid-feedback">
+            Please enter a number between 1 and 100
+        </div>
+    </div>
+						<button id="insert-function-parameter" class="btn btn-primary">OK</button>
+					</div>
+				</div>
+				{# Lookup specific dropdowns - initially hidden #}
+				<div id="lookup-options" style="display: none;">
+					<div class="mb-2 d-flex align-items-center">
+						{# <label class="function-wizard-title-function-select me-2" style="min-width: 150px;">{{ 'create_rule.step3.formula.select_rule_title'|trans }} :</label> #}
+						<select id="lookup-rule" class="form-select mb-2" style="min-width: 140px;">
+							<option value="">{{ 'create_rule.step3.formula.select_rule'|trans }}</option>
+						</select>
+					</div>
+					
+					<div class="mb-2 d-flex align-items-center">
+						{# <label class="function-wizard-title-function-select me-2" style="min-width: 150px;">{{ 'create_rule.step3.formula.select_field_title'|trans }} :</label> #}
+						<select id="lookup-field" class="form-select mb-2" style="min-width: 140px;">
+							<option value="">{{ 'create_rule.step3.formula.select_field'|trans }}</option>
+						</select>
+					</div>
 
-				{% for t, v in lst_category %}
-					<option data-type="{{ v.getId }}">{{ ('function.category.' ~ v.getName) |trans }}</option>
-				{% endfor %}
+					<div class="mb-2 d-flex align-items-center">
+						<div class="form-check me-3 ms-2">
+							<input class="form-check-input" type="checkbox" id="lookup-error-empty">
+							<label class="form-check-label" for="lookup-error-empty">
+								Error if empty
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="lookup-error-not-found" checked>
+							<label class="form-check-label" for="lookup-error-not-found">
+								Error if notFound
+							</label>
+						</div>
+					</div>
 
-			</select>
-
-			<ul class="listarea" id="functions" name="functions">
-
-				{% for t, v in lst_functions %}
-					<li class="func" data-type="{{ v.getCategoryId.getId }}">
-						<a class="tooltip" title="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">{{ v.getName }}</a>
-					</li> 				
-				{% endfor %}
-
-			</ul>
+					<button id="submit-lookup" class="btn btn-primary">Submit lookup</button>
+				</div>
+			</div>
+			<p id="flag-function-wizard-end"></p>
 		</div>	
 	</div>
 	<div class="clr"></div>	 
 	<div>
 		<div id="source_info">
-			{% if opt_source is not empty %}
-			<label>{{'rule.source'|trans}} :</label>
-				<select name="source_info">
-					{{ opt_source|raw }}
-				</select> 
-					<button class="btn-mydinv-small">
-					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
+			<p class="mb-2 fw-bold fs-7">{{ 'create_rule.step3.formula.select_picklist'|trans }} :</p>
+			{% if source_groups is not empty %}
+				<label>{{'rule.source'|trans}} :</label>
+				<select name="source_group" id="source_group_select">
+					<option value="">{{'rule.select_group'|trans}}</option>
+					{% for group_id, group_label in source_groups %}
+						<option value="{{ group_id }}">{{ group_label }}</option>
+					{% endfor %}
+				</select>
+				
+				<select name="source_info" id="source_value_select" disabled>
+					<option value="">{{'rule.select_value'|trans}}</option>
+				</select>
+				
+				<button class="btn-mydinv-small" style="background: white; border: none; padding: 0;">
+					<i class='fas fa-arrow-circle-up' style='font-size:24px; background: white;'></i>
 				</button>
 			{% endif %}
 		</div>
 		<div id="target_info">
-			{% if opt_target is not empty %}
+			{% if target_groups is not empty %}
 			<label>{{'rule.target'|trans}} :</label>
-				<select name="target_info">
-					{{ opt_target|raw }}
+				<select name="target_group" id="target_group_select">
+					<option value="">{{'rule.select_group'|trans}}</option>
+					{% for group_id, group_label in target_groups %}
+						<option value="{{ group_id }}">{{ group_label }}</option>
+					{% endfor %}
 				</select>
-				<button class="btn-mydinv-small">
-					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
-				</button>
-			{% endif %}
-		</div>
-		<div id="lookup_rules">
-			{% if html_list_rules is not empty %}
-			<label>{{'Lookup Rules'}} :</label>
-				<select name="lookup_rules">
-					{{ html_list_rules|raw }}
+				
+				<select name="target_info" id="target_value_select" disabled>
+					<option value="">{{'rule.select_value'|trans}}</option>
 				</select>
-				<button class="btn-mydinv-small">
-					<i class='far fa-arrow-alt-circle-up' style='font-size:24px'></i>
+				<button class="btn-mydinv-small" style="background: white; border: none; padding: 0;">
+					<i class='fas fa-arrow-circle-up' style='font-size:24px; background: white;'></i>
 				</button>
 			{% endif %}
 		</div>
@@ -220,3 +284,74 @@
 		<input class="btn-mydinv" id="area_quit" type="button" value="{{'create_rule.step3.formula.close'|trans}}"/>
 	</div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	// Initialize source dropdowns
+	if ({{ source_groups is defined and source_groups is not empty ? 'true' : 'false' }}) {
+		const sourceValues = {{ source_values|json_encode|raw }};
+		const groupSelect = document.getElementById('source_group_select');
+		const valueSelect = document.getElementById('source_value_select');
+
+		if (groupSelect && valueSelect) {
+			groupSelect.addEventListener('change', function() {
+				const selectedGroup = this.value;
+				valueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
+				
+				if (selectedGroup) {
+					valueSelect.disabled = false;
+					const values = sourceValues[selectedGroup] || {};
+					
+					Object.entries(values).forEach(([value, label]) => {
+						const option = document.createElement('option');
+						option.value = value;
+						option.textContent = label;
+						valueSelect.appendChild(option);
+					});
+				} else {
+					valueSelect.disabled = true;
+				}
+			});
+		}
+	}
+
+	// Initialize target dropdowns
+	if ({{ target_groups is defined and target_groups is not empty ? 'true' : 'false' }}) {
+		const targetValues = {{ target_values|json_encode|raw }};
+		const targetGroupSelect = document.getElementById('target_group_select');
+		const targetValueSelect = document.getElementById('target_value_select');
+
+		if (targetGroupSelect && targetValueSelect) {
+			targetGroupSelect.addEventListener('change', function() {
+				const selectedGroup = this.value;
+				targetValueSelect.innerHTML = '<option value="">{{'rule.select_value'|trans}}</option>';
+				
+				if (selectedGroup) {
+					targetValueSelect.disabled = false;
+					const values = targetValues[selectedGroup] || {};
+					
+					Object.entries(values).forEach(([value, label]) => {
+						const option = document.createElement('option');
+						option.value = value;
+						option.textContent = label;
+						targetValueSelect.appendChild(option);
+					});
+				} else {
+					targetValueSelect.disabled = true;
+				}
+			});
+		}
+	}
+
+	// Keep the lookup-related code
+	const lookupgetrule = "{{ path('get_rules_for_lookup') }}";
+	const lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+	const basepathforGetFieldInfoWithFakeId = "{{ path('api_field_info', {'type': 'source', 'field': 'fake_id'}) }}";
+	console.log('test lookupgetrule', lookupgetrule)
+	console.log('test lookupgetfieldroute', lookupgetfieldroute)
+	const translations = {
+		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
+		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
+	};
+});
+</script>
