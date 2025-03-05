@@ -2536,24 +2536,18 @@ $(document).ready(function() {
     // When a rule is selected
     lookupRule.on('change', function() {
         const selectedRule = $(this).val();
-
         
         if (selectedRule) {
-            // Get fields for selected rule
-            $.ajax({
-                url: lookupgetfieldroute,
-                method: 'GET',
-                success: function(fields) {
-                    lookupField.empty();
-                    lookupField.append('<option value="">' + translations.selectField + '</option>');
-                    // Filter fields to only show those from the selected rule
-                    const filteredFields = fields.filter(field => field.rule_id === selectedRule);
-                    filteredFields.forEach(field => {
-                        lookupField.append(`<option value="${field.id}">${field.name}</option>`);
-                    });
-                    lookupField.prop('disabled', false);
-                }
+            lookupField.empty();
+            lookupField.append('<option value="">' + translations.selectField + '</option>');
+            
+            // Get fields from the existing select element
+            $('#champs_insert option').each(function() {
+                const fieldName = $(this).val();
+                lookupField.append(`<option value="${fieldName}">${fieldName}</option>`);
             });
+            
+            lookupField.prop('disabled', false);
         } else {
             lookupField.prop('disabled', true);
         }
@@ -2611,5 +2605,18 @@ $(document).ready(function() {
       }
   });
 
-  
+// wait for the press of the close button which is #area_quit
+$('#area_quit').on('click', function() {
+    console.log("close button pressed");
+    resetFunctionWizard();
+});
+
+// function to reset the function wizard
+function resetFunctionWizard() {
+    console.log("resetting function wizard");
+    $('#function-select').val('').trigger('change');
+    $('#lookup-rule').val('').trigger('change');
+    $('#lookup-field').val('').prop('disabled', true);
+}
+
 });

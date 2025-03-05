@@ -571,9 +571,9 @@ h2 { margin-top: 50px;}
 #function-select {
     height: auto;
     margin-bottom: 0;
-    padding-right: 0.25rem;
-    width: 12em;
-    margin-left: -2.5rem;
+    margin-left: -0.5rem;
+    padding-right: .25rem;
+    width: 14em;
 }
 
 #lookup-rule, #lookup-field {
@@ -581,7 +581,8 @@ h2 { margin-top: 50px;}
 }
 
 #function-parameter {
-    margin-left: -4.80rem;
+    margin-left: -3.5rem;
+    width: 14rem
 }
 
 #round-precision {
@@ -589,13 +590,18 @@ margin-left: -0.5rem;
 }
 
 #insert-function-parameter {
-    margin-left: -4.80rem;
+    margin-left: -3.5rem;
 }
 
 #round-precision-input {
-    margin-left: -4.40rem;
+    margin-left: -3rem;
 }
 
 #submit-lookup {
     margin-left: 0.5rem;
+}
+
+.sourceIdOfDocument,
+.targetIdOfDocument {
+    width: 19rem;
 }
