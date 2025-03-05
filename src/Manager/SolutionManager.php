@@ -26,6 +26,7 @@
 
 namespace App\Manager;
 
+use App\Solutions\acton;
 use App\Solutions\airtable;
 use App\Solutions\brevo;
 use App\Solutions\cirrusshield;
@@ -88,7 +89,8 @@ class SolutionManager
 							'sendinblue',
 							'internallist',
 							'yousign',
-							'brevo'
+							'brevo',
+							'acton'
 						];
 
     public function __construct(
@@ -112,7 +114,8 @@ class SolutionManager
         sendinblue $sendinblue,
         internallist $internallist,
         yousign $yousign,
-        brevo $brevo
+        brevo $brevo,
+        acton $acton
     ) {
 		// Load the solution classes
 		if (!empty(self::$solutions)) {

@@ -800,7 +800,7 @@ class salesforce extends solution {
 		if (!empty($param['query'])) {
 			$queryWhere = "+WHERE+";
 			foreach ($param['query'] as $key => $value) {
-					$queryWhere .= $key."+=+'".str_replace(' ', '+', $value)."'";
+					$queryWhere .= $key."+=+'".str_replace(' ', '+', addslashes($value))."'";
 					// Add the AND if not the last entry of the array
 					if ($key !== array_key_last($param['query'])) {
 							$queryWhere .= "+AND+";
