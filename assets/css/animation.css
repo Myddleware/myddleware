@@ -571,18 +571,37 @@ h2 { margin-top: 50px;}
 #function-select {
     height: auto;
     margin-bottom: 0;
-    padding-right: 0.25rem;
-    width: 12em;
+    margin-left: -0.5rem;
+    padding-right: .25rem;
+    width: 14em;
 }
 
 #lookup-rule, #lookup-field {
-    margin-left: 1.8rem;
+    margin-left: 0.6rem;
 }
 
 #function-parameter {
-    margin-left: -0.35rem;
+    margin-left: -3.5rem;
+    width: 14rem
 }
 
 #round-precision {
 margin-left: -0.5rem;
+}
+
+#insert-function-parameter {
+    margin-left: -3.5rem;
+}
+
+#round-precision-input {
+    margin-left: -3rem;
+}
+
+#submit-lookup {
+    margin-left: 0.5rem;
+}
+
+.sourceIdOfDocument,
+.targetIdOfDocument {
+    width: 19rem;
 }

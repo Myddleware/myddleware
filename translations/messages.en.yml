@@ -123,9 +123,9 @@ create_rule:
             function_wizard: Function Wizard
             select_function: Select a function
             select_function_title: Function
-            select_rule: Related rule
+            select_rule: Select related rule
             select_rule_title: Select a lookup rule
-            select_field: Related field
+            select_field: Select related field
             select_field_title: Select a field for lookup
             toggle_tooltip: Toggle function description
         confirm:

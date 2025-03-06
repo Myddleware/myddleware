@@ -128,8 +128,19 @@
 }
 
 #flux .zone .field {
-	color: #0F66A9;
+	color: #6b6b6b;
 	display: block !important;
+	margin-top: 10px;
+    font-size: 15px;
+	margin-left: -0.5rem;
+}
+
+.direct-link-document {
+	margin-left: -0.5rem;
+}
+
+.direct-link-document-target {
+	margin-left: 1.5rem;
 }
 
 #flux #message tr {

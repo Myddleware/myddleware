@@ -950,6 +950,42 @@ use App\Entity\WorkflowAction;
         }
 
         /**
+         * from the id of the rule, we get the name of the rule
+         * @Route("/get-rule-name/{id}", name="get_rule_name")
+         */
+        public function getRuleNameById($id): Response
+        {
+            $rule = $this->entityManager->getRepository(Rule::class)->find($id);
+            return new Response($rule->getName());
+        }
+
+        /**
+         * from the formula, we get the first part of the formula
+         * @Route("/get-first-part-of-lookup-formula/{formula}", name="get_first_part_of_lookup_formula")
+         */
+        public function getFirstPartOfLookupFormula($formula): Response
+        {
+            // Extract everything up to the first quote mark after the lookup (excluding the quote)
+            if (preg_match('/lookup\(\{[^}]+\},\s*/', $formula, $matches)) {
+                return new Response($matches[0]);
+            }
+            return new Response('');
+        }
+
+        /**
+         * from the formula, we get the second part of the formula
+         * @Route("/get-second-part-of-lookup-formula/{formula}", name="get_second_part_of_lookup_formula")
+         */
+        public function getSecondPartOfLookupFormula($formula): Response
+        {
+            // Extract everything after the rule ID until the end
+            if (preg_match('/",\s*(.+)\)/', $formula, $matches)) {
+                return new Response(', ' . $matches[1] . ')');
+            }
+            return new Response('');
+        }
+
+        /**
          * FICHE D'UNE REGLE.
          * @Route("/view/{id}", name="regle_open")
          * @throws Exception

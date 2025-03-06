@@ -109,6 +109,14 @@ class RuleField
         return $this->formula;
     }
 
+    public function getRuleidFromFormula(): ?string
+    {
+        if ($this->formula) {
+            return preg_match('/lookup\(\{(.+?)\},\s*"(.+?)"(?:\s*,\s*[^,\)]*)*\)/', $this->formula, $matches) ? $matches[2] : null;
+        }
+        return null;
+    }
+
     public function getRule(): ?Rule
     {
         return $this->rule;
