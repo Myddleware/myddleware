@@ -97,6 +97,10 @@
 	const targetGroupSelect = document.getElementById('target_group_select');
 	const targetValueSelect = document.getElementById('target_value_select');
 	const basepathforGetFieldInfoWithFakeId = "{{ path('api_field_info', {'type': 'source', 'field': 'fake_id'}) }}";
+
+		// variables to use for the lookup function when we need to select which rules to get for the lookup, only the rules which have the same connector id for the source and target
+	var connectorsourceidlookup = {{ params.connector.source }};
+	var connectortargetidlookup = {{ params.connector.cible }};
 	
 	// RELOAD ----
 	{% if params.reload.fields is defined and params.reload.params is defined %}

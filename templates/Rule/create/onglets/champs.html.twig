@@ -353,5 +353,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
 		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"
 	};
+
+	// variables to use for the lookup function when we need to select which rules to get for the lookup, only the rules which have the same connector id for the source and target
+	var connectorsourceidlookup = {{ params.connector.source }};
+	var connectortargetidlookup = {{ params.connector.cible }};
 });
 </script>
