@@ -97,6 +97,10 @@ if (window.location.href.includes('flux')) {
     require('./js/imagemousehoverbutton.js')
 }
 
+if (window.location.href.includes('rule/flux')) {
+    require('./js/lookup-filter.js')
+}
+
 // start the Stimulus application
 import './bootstrap';
 import 'select2/dist/css/select2.css';
