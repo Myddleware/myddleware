@@ -3346,6 +3346,11 @@ use App\Entity\WorkflowAction;
         // we need to remove the spaces
         $lookupRuleId = trim($lookupRuleId, '"');
 
+        $lookupRuleId = trim($lookupRuleId, ' ');
+
+        // remove the extra double quotes
+        $lookupRuleId = str_replace('"', '', $lookupRuleId);
+
         return $lookupRuleId;
     }
     
