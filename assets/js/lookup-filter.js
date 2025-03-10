@@ -2,20 +2,31 @@ console.log("lookup-filter.js loaded");
 
 // wait until the page is loaded
 $(document).ready(function() {
-  $(".lookup-link-myddleware").on("click", function () {
-    //   console.log("lookup-link-myddleware clicked on " + $(this).attr("class"));
-
+  // Process all lookup links on page load
+  $(".lookup-link-myddleware").each(function() {
     var lookupFieldClassName = $(this).attr("class").split("lookup-link-myddleware-")[1];
-    // console.log('lookupFieldClassName', lookupFieldClassName);
+    console.log('lookupFieldClassName', lookupFieldClassName);
     console.log('this is the current rule', current_rule);
 
-    // wait for the result of the ajax call to continue
+    // Call the lookup function for each link
     var lookupRuleId = getLookupruleFromFieldName(lookupFieldClassName, current_rule);
     console.log('lookupRuleId', lookupRuleId);
-
-
-    // saveFiltersToLocalStorageLookup();
   });
+
+  // Keep the click handler if you still want it to work on clicks as well
+  // $(".lookup-link-myddleware").on("click", function () {
+  //   //   console.log("lookup-link-myddleware clicked on " + $(this).attr("class"));
+
+  //   var lookupFieldClassName = $(this).attr("class").split("lookup-link-myddleware-")[1];
+  //   // console.log('lookupFieldClassName', lookupFieldClassName);
+  //   console.log('this is the current rule', current_rule);
+
+  //   // wait for the result of the ajax call to continue
+  //   var lookupRuleId = getLookupruleFromFieldName(lookupFieldClassName, current_rule);
+  //   console.log('lookupRuleId', lookupRuleId);
+
+  //   // saveFiltersToLocalStorageLookup();
+  // });
 });
 
 
@@ -27,6 +38,7 @@ $(document).ready(function() {
       data: { lookupfieldName: lookupFieldClassName, currentRule: current_rule },
       success: function(response) {
         console.log('response', response);
+        return response;
       }
     });
     }
