@@ -1,29 +1,37 @@
 console.log("lookup-filter.js loaded");
 
-$(".lookup-link-myddleware").on("click", function () {
-    console.log("lookup-link-myddleware clicked on " + $(this).attr("class"));
+// wait until the page is loaded
+$(document).ready(function() {
+  $(".lookup-link-myddleware").on("click", function () {
+    //   console.log("lookup-link-myddleware clicked on " + $(this).attr("class"));
 
     var lookupFieldClassName = $(this).attr("class").split("lookup-link-myddleware-")[1];
-    console.log('lookupFieldClassName', lookupFieldClassName);
+    // console.log('lookupFieldClassName', lookupFieldClassName);
+    console.log('this is the current rule', current_rule);
 
-    var lookupfieldName = getLookupruleFromFieldName(lookupFieldClassName);
-    console.log('lookupfieldName', lookupfieldName);
+    // wait for the result of the ajax call to continue
+    var lookupRuleId = getLookupruleFromFieldName(lookupFieldClassName, current_rule);
+    console.log('lookupRuleId', lookupRuleId);
+
 
     // saveFiltersToLocalStorageLookup();
   });
+});
 
 
-  function getLookupruleFromFieldName(lookupfieldName) {
+  function getLookupruleFromFieldName(lookupFieldClassName, current_rule) {
     // do an ajax call to get the formula for the lookupfieldName
     $.ajax({
-      url: '/get-lookup-rule-from-field-name',
+      url: lookup_rule_url,
       type: 'GET',
-      data: { lookupfieldName: lookupfieldName },
+      data: { lookupfieldName: lookupFieldClassName, currentRule: current_rule },
       success: function(response) {
         console.log('response', response);
       }
     });
-  }
+    }
+
+
 
   // Save filters to localStorage
   function saveFiltersToLocalStorageLookup() {
