@@ -3306,6 +3306,51 @@ use App\Entity\WorkflowAction;
     }
 
     /**
+     * @Route("/get-lookup-rule-from-field-name", name="get_lookup_rule_from_field_name", methods={"GET"})
+     */
+    public function getLookupRuleFromFieldName(Request $request): JsonResponse
+    {
+        $fieldName = $request->query->get('lookupfieldName');
+        $currentRuleId = $request->query->get('currentRule');
+        $entityManager = $this->getDoctrine()->getManager();
+        $currentRule = $entityManager->getRepository(Rule::class)->findOneBy(['id' => $currentRuleId]);
+
+        // from the current rule, get the formulas
+        $formula = $currentRule->getFormulaByFieldName($fieldName);
+
+        if (empty($formula)) {
+            return new JsonResponse(['rule' => '']);
+        }
+
+        // in the formula, we get the lookup rule id
+        $lookupRuleId = $this->getLookupRuleIdFromFormula($formula);
+
+        // from the lookup rule id, we get the lookup rule
+        $lookupRule = $entityManager->getRepository(Rule::class)->findOneBy(['id' => $lookupRuleId]);
+
+        // from the lookup rule, we get the lookup rule name
+        $lookupRuleName = $lookupRule->getName();
+
+        return new JsonResponse(['rule' => $lookupRuleName]);
+    }
+
+    public function getLookupRuleIdFromFormula(string $formula): string
+    {
+        // from the formula, we get the lookup rule id
+
+        // lookup({assigned_user_id}, "67acc3f4a9f0c", 0, 1) this is an example of a formula, from the field name assigned_user_id, we get the lookup rule id which is 67acc3f4a9f0c
+
+        $lookupRuleId = explode(',', $formula)[1];
+
+        // since there can be extra spaces or such, as a result we had " "67acc3f4a9f0c""
+        // we need to remove the spaces
+        $lookupRuleId = trim($lookupRuleId, '"');
+
+        return $lookupRuleId;
+    }
+    
+
+    /**
      * Returns field information as JSON
      * @Route("/api/field-info/{type}/{field}/", name="api_field_info", methods={"GET"})
      */
