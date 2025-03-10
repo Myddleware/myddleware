@@ -8,9 +8,11 @@ $(document).ready(function() {
     console.log('lookupFieldClassName', lookupFieldClassName);
     console.log('this is the current rule', current_rule);
 
-    // Call the lookup function for each link
-    var lookupRuleId = getLookupruleFromFieldName(lookupFieldClassName, current_rule);
-    console.log('lookupRuleId', lookupRuleId);
+    // Call the lookup function for each link and handle the response with a callback
+    getLookupruleFromFieldName(lookupFieldClassName, current_rule, function(response) {
+      console.log('lookupRuleId response:', response);
+      // Do something with the response here
+    });
   });
 
   // Keep the click handler if you still want it to work on clicks as well
@@ -29,33 +31,32 @@ $(document).ready(function() {
   // });
 });
 
-
-  function getLookupruleFromFieldName(lookupFieldClassName, current_rule) {
-    // do an ajax call to get the formula for the lookupfieldName
-    $.ajax({
-      url: lookup_rule_url,
-      type: 'GET',
-      data: { lookupfieldName: lookupFieldClassName, currentRule: current_rule },
-      success: function(response) {
-        console.log('response', response);
-        return response;
+function getLookupruleFromFieldName(lookupFieldClassName, current_rule, callback) {
+  // do an ajax call to get the formula for the lookupfieldName
+  $.ajax({
+    url: lookup_rule_url,
+    type: 'GET',
+    data: { lookupfieldName: lookupFieldClassName, currentRule: current_rule },
+    success: function(response) {
+      console.log('response', response);
+      if (callback) {
+        callback(response);
       }
-    });
     }
+  });
+}
 
-
-
-  // Save filters to localStorage
-  function saveFiltersToLocalStorageLookup() {
-    var storedFilters = {};
-    filters.forEach(function (filter) {
-      storedFilters[filter.name] = {
-        value: $(filter.selector).val(),
-        hidden: $("#" + filter.name).attr("hidden") === "hidden",
-        reverse: $('[name="' + filter.name + '"][type="checkbox"]').prop(
-          "checked"
-        ),
-      };
-    });
-    localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
-  }
+// Save filters to localStorage
+function saveFiltersToLocalStorageLookup() {
+  var storedFilters = {};
+  filters.forEach(function (filter) {
+    storedFilters[filter.name] = {
+      value: $(filter.selector).val(),
+      hidden: $("#" + filter.name).attr("hidden") === "hidden",
+      reverse: $('[name="' + filter.name + '"][type="checkbox"]').prop(
+        "checked"
+      ),
+    };
+  });
+  localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
+}
