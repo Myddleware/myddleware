@@ -3262,19 +3262,27 @@ use App\Entity\WorkflowAction;
     /**
      * @Route("/get-rules-for-lookup", name="get_rules_for_lookup", methods={"GET"})
      */
-    public function getRulesForLookup(): JsonResponse
+    public function getRulesForLookup(Request $request): JsonResponse
     {
+        // Get the arguments from the request
+        $arg1 = $request->query->getInt('arg1', 0);
+        $arg2 = $request->query->getInt('arg2', 0);
+        
+        // Use the arguments in your query
         $rules = $this->entityManager->getRepository(Rule::class)
-            ->findBy(['deleted' => 0]);
-            
-        $ruleData = array_map(function($rule) {
+            ->findBy([
+                'deleted' => 0,
+                'connectorSource' => $arg1, // Using arg1 instead of hardcoded 39
+                'connectorTarget' => $arg2
+            ]);
+        
+        $ruleData = array_map(function($rule) use ($arg2) {
             return [
                 'id' => $rule->getId(),
-                'name' => $rule->getName()
+                'name' => $rule->getName(),
             ];
         }, $rules);
         
-
         return new JsonResponse($ruleData);
     }
 
