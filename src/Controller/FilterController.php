@@ -195,6 +195,10 @@ public function removeFilter(Request $request): JsonResponse
             $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
         }
 
+        if ($request->query->has('lookup-field-rule')){
+            $this->sessionService->setFluxFilterRuleName($request->query->get('lookup-field-rule'));
+        }
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
