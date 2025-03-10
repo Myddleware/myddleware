@@ -51,6 +51,16 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             </ul>
         </div>
     </div>
+    
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
+                <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
+                <p class="ms-2">{{ message }}</p>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
     <div class="d-flex mt-4 edit-profile container">
         <div class="me-5">
             <div class="col">
@@ -82,6 +92,43 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                     </li>
                 </ul>
             </div>
+            
+            <div class="col mt-5">
+                <h2 class="display-6">Two-Factor Authentication</h2>
+                <ul class="mt-4">
+                    <li class="user_info_li">
+                        {{ form_start(twoFactorAuthForm) }}
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
+                                {{ form_label(twoFactorAuthForm.enabled, null, { 'label_attr': {'class': 'form-check-label'} }) }}
+                            </div>
+                            {{ form_errors(twoFactorAuthForm.enabled) }}
+                            <small class="form-text text-muted">
+                                When enabled, you'll be asked to enter a verification code after logging in.
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form_label(twoFactorAuthForm.preferredMethod) }}
+                            {{ form_widget(twoFactorAuthForm.preferredMethod, { 'attr': {'class': 'form-check-inline'} }) }}
+                            {{ form_errors(twoFactorAuthForm.preferredMethod) }}
+                        </div>
+                        
+                        <div class="form-group mb-4" id="phone-number-group">
+                            {{ form_label(twoFactorAuthForm.phoneNumber) }}
+                            {{ form_widget(twoFactorAuthForm.phoneNumber, { 'attr': {'class': 'form-control'} }) }}
+                            {{ form_errors(twoFactorAuthForm.phoneNumber) }}
+                            <small class="form-text text-muted">
+                                Required if you want to use SMS as verification method.
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success mt-4">Save 2FA Settings</button>
+                        {{ form_end(twoFactorAuthForm) }}
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="ms-5 password-reset">
             <div class="col password-reset-center">
@@ -100,7 +147,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
             <div class="row display-logs">
-                            <div class="col">
+                <div class="col">
                     {% if is_granted('ROLE_SUPER_ADMIN') %}
                     <h2>Empty the log file</h2>
                     <a href="{{path('empty_log')}}">
@@ -111,7 +158,47 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
             </div>
         </div>
-
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide phone number field based on preferred method
+        const preferredMethodRadios = document.querySelectorAll('input[name="two_factor_auth_form[preferredMethod]"]');
+        const phoneNumberGroup = document.getElementById('phone-number-group');
+        const enabledCheckbox = document.querySelector('input[name="two_factor_auth_form[enabled]"]');
+        
+        function updatePhoneNumberVisibility() {
+            const selectedMethod = document.querySelector('input[name="two_factor_auth_form[preferredMethod]"]:checked').value;
+            if (selectedMethod === 'sms') {
+                phoneNumberGroup.style.display = 'block';
+            } else {
+                phoneNumberGroup.style.display = 'none';
+            }
+        }
+        
+        function updateFieldsVisibility() {
+            const isEnabled = enabledCheckbox.checked;
+            const methodsContainer = document.querySelector('.form-group:nth-child(2)');
+            
+            if (isEnabled) {
+                methodsContainer.style.display = 'block';
+                updatePhoneNumberVisibility();
+            } else {
+                methodsContainer.style.display = 'none';
+                phoneNumberGroup.style.display = 'none';
+            }
+        }
+        
+        // Initial state
+        updateFieldsVisibility();
+        
+        // Event listeners
+        preferredMethodRadios.forEach(radio => {
+            radio.addEventListener('change', updatePhoneNumberVisibility);
+        });
+        
+        enabledCheckbox.addEventListener('change', updateFieldsVisibility);
+    });
+</script>
 {% endblock %}

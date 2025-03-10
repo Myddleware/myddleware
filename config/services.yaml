@@ -11,6 +11,11 @@ parameters:
   secret: '%env(APP_SECRET)%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
   email_from: '%env(MAILER_FROM)%'
+  mailer_from: '%env(MAILER_FROM)%'
+  sms_provider: '%env(SMS_PROVIDER)%'
+  twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
+  twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
+  twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
 
 services:
   # default configuration for services in *this* file
@@ -48,6 +53,10 @@ services:
   App\EventListener\ExceptionListener:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
+
+  App\EventListener\TwoFactorAuthListener:
+    tags:
+      - { name: kernel.event_subscriber }
 
   App\DataFixtures\:
     resource: '../src/DataFixtures'

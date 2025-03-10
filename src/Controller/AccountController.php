@@ -28,8 +28,10 @@ use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\ResetPasswordType;
+use App\Form\Type\TwoFactorAuthFormType;
 use App\Service\UserManagerInterface;
 use App\Service\AlertBootstrapInterface;
+use App\Service\TwoFactorAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -83,6 +85,11 @@ class AccountController extends AbstractController
      */
     private $alert;
 
+    /**
+     * @var TwoFactorAuthService
+     */
+    private $twoFactorAuthService;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
@@ -90,7 +97,8 @@ class AccountController extends AbstractController
         ParameterBagInterface $params,
         TranslatorInterface $translator,
         ToolsManager $toolsManager,
-        AlertBootstrapInterface $alert
+        AlertBootstrapInterface $alert,
+        TwoFactorAuthService $twoFactorAuthService
     ) {
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -100,6 +108,7 @@ class AccountController extends AbstractController
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
+        $this->twoFactorAuthService = $twoFactorAuthService;
     }
 
     /**
@@ -122,16 +131,30 @@ class AccountController extends AbstractController
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
         $timezone = $user->getTimezone();
+        
+        // Get or create the 2FA record for this user
+        $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
+        $twoFactorAuthForm = $this->createForm(TwoFactorAuthFormType::class, $twoFactorAuth);
+        $twoFactorAuthForm->handleRequest($request);
+        
         if ($form->isSubmitted() && $form->isValid()) {
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
 
             return $this->redirectToRoute('my_account');
         }
+        
+        if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
+            
+            return $this->redirectToRoute('my_account');
+        }
 
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
+            'twoFactorAuthForm' => $twoFactorAuthForm->createView(),
         ]);
     }
 
