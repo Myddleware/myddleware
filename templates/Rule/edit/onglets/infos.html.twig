@@ -79,18 +79,11 @@
 					<tr>
 						<td class="title">{{ 'view_rule.infos.active' | trans }}</td>
 						<td class="value">
-							<div class="onoffswitch">
-								<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="activerule" {{ (rule.GetActive == true) ? 'checked="checked"' : '' }}/>
-								<label class="onoffswitch-label" for="activerule">
-									<span class="onoffswitch-inner">
-										<span class="onoffswitch-active">
-											<span class="onoffswitch-switch">ON</span>
-										</span>
-										<span class="onoffswitch-inactive">
-											<span class="onoffswitch-switch">OFF</span>
-										</span>
-									</span>
-								</label>
+							<div class="form-check form-switch">
+								<input class="form-check-input toggle-switch-rule" 
+									   type="checkbox" 
+									   id="activerule"
+									   {{ rule.GetActive ? 'checked' : '' }}>
 							</div>
 						</td>
 					</tr>

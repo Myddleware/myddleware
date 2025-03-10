@@ -116,18 +116,12 @@
 												</div>
 											</td>
 											<td class="text-center">
-												<div class="onoffswitch">
-													<input title="{{ path('regle_update',{'id' : rule.id }) }}" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox toggle-switch-rule" id="{{ rule.id }}" {{ (rule.active == true) ? 'checked="checked"' : '' }}/>
-													<label class="onoffswitch-label" for="{{ rule.id }}">
-														<span class="onoffswitch-inner">
-															<span class="onoffswitch-active">
-																<span class="onoffswitch-switch">ON</span>
-															</span>
-															<span class="onoffswitch-inactive">
-																<span class="onoffswitch-switch">OFF</span>
-															</span>
-														</span>
-													</label>
+												<div class="form-check form-switch">
+													<input class="form-check-input toggle-switch-rule" 
+														   type="checkbox" 
+														   id="{{ rule.id }}"
+														   title="{{ path('regle_update',{'id' : rule.id }) }}"
+														   {{ rule.active ? 'checked' : '' }}>
 												</div>
 											</td>
 											<td class="text-center">

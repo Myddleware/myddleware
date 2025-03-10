@@ -2419,6 +2419,10 @@ $(document).ready(function() {
             $.ajax({
                 url: lookupgetrule,
                 method: 'GET',
+                data: {
+                    arg1: connectorsourceidlookup,
+                    arg2: connectortargetidlookup
+                },
                 success: function(rules) {
                     lookupRule.empty();
                     lookupRule.append('<option value="">' + translations.selectRule + '</option>');
