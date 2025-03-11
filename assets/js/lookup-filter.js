@@ -77,12 +77,9 @@ $(document).ready(function() {
       });
     });
 
-    // Keep the click handler if you still want it to work on clicks as well
-    $(".lookup-link-myddleware").on("click", function(event) {
-      // Prevent default behavior temporarily
-      event.preventDefault();
-      
-      var $link = $(this); // Store reference to the current link element
+    // Replace the click handler with a mousedown handler
+    $(".lookup-link-myddleware").on("mousedown", function(event) {
+      var $link = $(this);
       var lookupFieldClassName = $(this).attr("class").split("lookup-link-myddleware-")[1];
       console.log('lookupFieldClassName godzilla', lookupFieldClassName);
 
@@ -96,8 +93,8 @@ $(document).ready(function() {
       // Save to localStorage
       saveFiltersToLocalStorageLookup(lookupRuleName, $link);
       
-      // Now manually navigate to the link's destination
-      window.location.href = $link.attr("href");
+      // Don't prevent default - let the browser handle the click normally
+      // This works for left-click, middle-click (new tab), and right-click (context menu)
     });
   });
 });
