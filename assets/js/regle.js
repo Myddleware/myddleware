@@ -1060,7 +1060,6 @@ $.fn.setCursorPosition = function(pos) {
   });
 
   $("#flux_target").on("dblclick", "li", function () {
-    console.log("double clicked on the element ariel sirene ");
   if (
     $("#gblstatus").attr("data-gbl") == "error" ||
     $("#gblstatus").attr("data-gbl") == "open"
@@ -1073,16 +1072,12 @@ $.fn.setCursorPosition = function(pos) {
       typeof verif !== "undefined" &&
       ((first === "undefined") != classe) !== "undefined"
     ) {
-      console.log('kangourou');
       // Check if an input element already exists
       if ($(this).find('input').length > 0) {
-        console.log('moriarty');
         // If it does, show an alert to the user
         alert('Please close the first one before adding a new one.');
       } else {
-        console.log('dinojunior');
         value = $(this).find(".value").text().trim();
-        console.log('value maia abeille', value);
         $(this).find(".value").remove();
         newElement = $(this).append(
           '<input id="' +
@@ -1093,7 +1088,6 @@ $.fn.setCursorPosition = function(pos) {
             classe +
             '" class="btn-group btn-group-xs load"><i class="fa fa-check-circle"></i ></button> '
         );
-        console.log('caverne');
         $(this).append(newElement);
       }
     }
@@ -1102,8 +1096,6 @@ $.fn.setCursorPosition = function(pos) {
 
   // If the div in flux_target is clicked, then wec call the saveInputFlux function
   $("#flux_target").on("click", ".load", function () {
-    console.log("click of change input flux bisounours");
-    console.log("clayton", $(this));
     saveInputFlux($(this), inputs_flux);
   });
 
@@ -2336,19 +2328,14 @@ function toCamelCase(str) {
 
 // Save the modified field data by using an ajax request
 function saveInputFlux(div, link) {
-    console.log("click of change input flux zelda");
     // Trim the field name to remove any trailing spaces
     fields = div.attr('data-value').trim();
-    console.log("fields ganon", fields);
-    console.log("link soul calibur", link);
     
     // Get the input element - look for it within the parent li element
     var inputElement = div.closest('li').find('input');
-    console.log("input element:", inputElement);
     
     // Get the value from the input element
     var inputValue = inputElement.val();
-    console.log("input value:", inputValue);
 
     // Ajax request to save the data in the database
     $.ajax({
@@ -2367,12 +2354,6 @@ function saveInputFlux(div, link) {
         }
     });
 
-    console.log("All form data:", {
-        flux: $('#flux_target').attr('data-id'),
-        rule: $('#flux_target').attr('data-rule'),
-        fields: fields,
-        value: inputValue
-    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2646,7 +2627,6 @@ $('#area_quit').on('click', function() {
 
 // function to reset the function wizard
 function resetFunctionWizard() {
-    console.log("resetting function wizard");
     $('#function-select').val('').trigger('change');
     $('#lookup-rule').val('').trigger('change');
     $('#lookup-field').val('').prop('disabled', true);
