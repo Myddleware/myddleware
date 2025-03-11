@@ -1075,4 +1075,13 @@ public function removeFilter(Request $request): JsonResponse
         
         return $response;
     }
+
+    /**
+     * @Route("/rule/lookup/names", name="rule_lookup_names")
+     */
+    public function getRuleNames(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $ruleNames = RuleRepository::findActiveRulesNames($entityManager, true);
+        return new JsonResponse($ruleNames);
+    }
 }
