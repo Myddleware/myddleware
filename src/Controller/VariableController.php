@@ -114,7 +114,7 @@ class VariableController extends AbstractController
             $name = $variable->getName();
             $variableExists = $this->verifyIfVariableNameExists($em, $name);
             if ($variableExists) {
-                $this->addFlash('error', 'variable.name_already_exists');
+                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_create');
             }
 
@@ -179,7 +179,7 @@ class VariableController extends AbstractController
             $name = $variable->getName();
             $variableExists = $this->verifyIfVariableNameExists($em, $name);
             if ($variableExists) {
-                $this->addFlash('error', 'variable.name_already_exists');
+                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
             }
 
