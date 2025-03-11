@@ -2621,7 +2621,6 @@ $(document).ready(function() {
 
 // wait for the press of the close button which is #area_quit
 $('#area_quit').on('click', function() {
-    console.log("close button pressed");
     resetFunctionWizard();
 });
 
