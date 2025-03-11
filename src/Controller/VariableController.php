@@ -109,6 +109,10 @@ class VariableController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
+
+            // replace the spaces in the name of the variable with underscores
+            $variable->setName(str_replace(' ', '_', $variable->getName()));
+
             $em->persist($variable);
             $em->flush();
 
@@ -162,6 +166,8 @@ class VariableController extends AbstractController
 
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
+            // replace the spaces in the name of the variable with underscores
+            $variable->setName(str_replace(' ', '_', $variable->getName()));
             // Create an audit entry
             $audit = new VariableAudit();
             $audit->setVariableId($variable->getId());
