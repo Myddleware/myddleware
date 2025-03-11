@@ -191,7 +191,7 @@ function saveFiltersToLocalStorageLookup(lookupRuleName, $link) {
   
   console.log('Final rule index for ' + lookupRuleName + ':', ruleIndex);
   
-  // Get existing filters from localStorage
+  // Get existing filters from localStorage to preserve their visibility state
   var storedFilters = {};
   var existingFilters = localStorage.getItem("storedFilters");
   
@@ -219,6 +219,20 @@ function saveFiltersToLocalStorageLookup(lookupRuleName, $link) {
       reverse: false
     };
   }
+  
+  // Empty all other filters but keep their visibility state
+  filters.forEach(function(filter) {
+    if (filter.name !== "name" && filter.name !== "sourceId") {
+      // If the filter already exists in storedFilters, keep its hidden state
+      var hidden = storedFilters[filter.name] ? storedFilters[filter.name].hidden : false;
+      
+      storedFilters[filter.name] = {
+        value: "", // Empty the value
+        hidden: hidden, // Keep the existing hidden state
+        reverse: false // Reset reverse to false
+      };
+    }
+  });
   
   console.log('Storing updated filters in localStorage:', storedFilters);
   localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
