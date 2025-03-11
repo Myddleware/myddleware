@@ -182,30 +182,26 @@ function saveFiltersToLocalStorageLookup(lookupRuleName) {
   
   console.log('Final rule index for ' + lookupRuleName + ':', ruleIndex);
   
+  // Get existing filters from localStorage
   var storedFilters = {};
+  var existingFilters = localStorage.getItem("storedFilters");
+  
+  if (existingFilters) {
+    try {
+      storedFilters = JSON.parse(existingFilters);
+      console.log('Loaded existing filters from localStorage:', storedFilters);
+    } catch (e) {
+      console.error('Error parsing existing filters:', e);
+    }
+  }
 
-  // Store the rule index under the "name" key with proper structure
+  // Only update the "name" filter, leave all others unchanged
   storedFilters["name"] = {
     value: ruleIndex !== undefined ? ruleIndex : lookupRuleName, // Fallback to name if index not found
     hidden: false,
     reverse: false
   };
   
-  // Clear other filters
-  storedFilters["reference"] = { value: "", hidden: true, reverse: false };
-  storedFilters["moduleSource"] = { value: "", hidden: true, reverse: false };
-  storedFilters["moduleTarget"] = { value: "", hidden: true, reverse: false };
-  storedFilters["status"] = { value: "", hidden: true, reverse: false };
-  storedFilters["globalStatus"] = { value: "", hidden: true, reverse: false };
-  storedFilters["sourceId"] = { value: "", hidden: true, reverse: false };
-  storedFilters["target"] = { value: "", hidden: true, reverse: false };
-  storedFilters["type"] = { value: "", hidden: true, reverse: false };
-  storedFilters["message"] = { value: "", hidden: true, reverse: false };
-  storedFilters["date_modif_start"] = { value: "", hidden: true, reverse: false };
-  storedFilters["date_modif_end"] = { value: "", hidden: true, reverse: false };
-  storedFilters["sourceContent"] = { value: "", hidden: true, reverse: false };
-  storedFilters["targetContent"] = { value: "", hidden: true, reverse: false };
-
-  console.log('Storing filters in localStorage:', storedFilters);
+  console.log('Storing updated filters in localStorage:', storedFilters);
   localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
 }
