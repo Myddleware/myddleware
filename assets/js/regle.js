@@ -609,6 +609,11 @@ $.fn.setCursorPosition = function(pos) {
             $("#formule").dialog("close"); // Aucune erreur
           } else {
             alert(formula_error);
+            // we alert but close anyway and validate the formula anyway
+            zone = $.trim(zone);
+            $("#formule_" + zone + " li").remove();
+            $("#formule_" + zone).append("<li>" + myFormula + "</li>");
+            $("#formule").dialog("close");
           }
         },
       });
