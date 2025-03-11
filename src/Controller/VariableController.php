@@ -110,6 +110,14 @@ class VariableController extends AbstractController
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
 
+            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
+            $name = $variable->getName();
+            $variableExists = $this->verifyIfVariableNameExists($em, $name);
+            if ($variableExists) {
+                $this->addFlash('error', 'variable.name_already_exists');
+                return $this->redirectToRoute('variable_create');
+            }
+
             // replace the spaces in the name of the variable with underscores
             $variable->setName(str_replace(' ', '_', $variable->getName()));
 
@@ -166,6 +174,15 @@ class VariableController extends AbstractController
 
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
+
+            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
+            $name = $variable->getName();
+            $variableExists = $this->verifyIfVariableNameExists($em, $name);
+            if ($variableExists) {
+                $this->addFlash('error', 'variable.name_already_exists');
+                return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
+            }
+
             // replace the spaces in the name of the variable with underscores
             $variable->setName(str_replace(' ', '_', $variable->getName()));
             // Create an audit entry
@@ -188,6 +205,18 @@ class VariableController extends AbstractController
             'form' => $form->createView(),
             'variable' => $variable,
         ]);
+    }
+
+    /**
+     * @Route("/variables/verify-name", name="variable_verify_name")
+     */
+    public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name): bool
+    {
+        $variable = $em->getRepository(Variable::class)->findOneByName($name);
+        if ($variable) {
+            return true;
+        }
+        return false;
     }
 
     /**
