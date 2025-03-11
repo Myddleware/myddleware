@@ -81,7 +81,8 @@ $(document).ready(function() {
     $(".lookup-link-myddleware").on("click", function(event) {
       // prevent default behavior of the link
       event.preventDefault();
-
+      
+      var $link = $(this); // Store reference to the current link element
       var lookupFieldClassName = $(this).attr("class").split("lookup-link-myddleware-")[1];
       console.log('lookupFieldClassName godzilla', lookupFieldClassName);
 
@@ -92,8 +93,8 @@ $(document).ready(function() {
       var lookupRuleName = decodeURIComponent(urlencodedLookupRuleId);
       console.log('lookupRuleName godzilla', lookupRuleName);
 
-      // Get the index from the mapping
-      saveFiltersToLocalStorageLookup(lookupRuleName);
+      // Pass both the rule name and the link element
+      saveFiltersToLocalStorageLookup(lookupRuleName, $link);
     });
   });
 });
@@ -147,17 +148,22 @@ function getLookupruleFromFieldName(lookupFieldClassName, current_rule, callback
   ];
 
 // Save filters to localStorage
-function saveFiltersToLocalStorageLookup(lookupRuleName) {
+function saveFiltersToLocalStorageLookup(lookupRuleName, $link) {
   console.log('lookupRuleName volund', lookupRuleName);
   console.log('Current ruleNameToIndexMap:', ruleNameToIndexMap);
   
-  // Log all keys in the mapping to help debug
-  console.log('All rule names in mapping:');
-  Object.keys(ruleNameToIndexMap).forEach(function(key) {
-    console.log('- "' + key + '"');
-  });
+  // Extract source_id from the link URL
+  var href = $link.attr("href");
+  var sourceId = "";
   
-  // Check for exact match
+  // Extract source_id using regex to handle different URL formats
+  var sourceIdMatch = href.match(/[?&]source_id=([^&]*)/);
+  if (sourceIdMatch && sourceIdMatch[1]) {
+    sourceId = decodeURIComponent(sourceIdMatch[1]);
+    console.log('Extracted source_id:', sourceId);
+  }
+  
+  // Check for exact match for rule name
   var ruleIndex = ruleNameToIndexMap[lookupRuleName];
   console.log('Direct lookup result for "' + lookupRuleName + '":', ruleIndex);
   
@@ -195,12 +201,21 @@ function saveFiltersToLocalStorageLookup(lookupRuleName) {
     }
   }
 
-  // Only update the "name" filter, leave all others unchanged
+  // Update the "name" filter with the rule index
   storedFilters["name"] = {
     value: ruleIndex !== undefined ? ruleIndex : lookupRuleName, // Fallback to name if index not found
     hidden: false,
     reverse: false
   };
+  
+  // Update the "sourceId" filter with the extracted source_id
+  if (sourceId) {
+    storedFilters["sourceId"] = {
+      value: sourceId,
+      hidden: false,
+      reverse: false
+    };
+  }
   
   console.log('Storing updated filters in localStorage:', storedFilters);
   localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
