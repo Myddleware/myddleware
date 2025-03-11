@@ -79,7 +79,7 @@ $(document).ready(function() {
 
     // Keep the click handler if you still want it to work on clicks as well
     $(".lookup-link-myddleware").on("click", function(event) {
-      // prevent default behavior of the link
+      // Prevent default behavior temporarily
       event.preventDefault();
       
       var $link = $(this); // Store reference to the current link element
@@ -93,8 +93,11 @@ $(document).ready(function() {
       var lookupRuleName = decodeURIComponent(urlencodedLookupRuleId);
       console.log('lookupRuleName godzilla', lookupRuleName);
 
-      // Pass both the rule name and the link element
+      // Save to localStorage
       saveFiltersToLocalStorageLookup(lookupRuleName, $link);
+      
+      // Now manually navigate to the link's destination
+      window.location.href = $link.attr("href");
     });
   });
 });
