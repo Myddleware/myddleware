@@ -44,6 +44,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Dotenv\Dotenv;
 
 
 /**
@@ -137,6 +138,16 @@ class AccountController extends AbstractController
         $twoFactorAuthForm = $this->createForm(TwoFactorAuthFormType::class, $twoFactorAuth);
         $twoFactorAuthForm->handleRequest($request);
         
+        // Check if SMTP is configured
+        $smtpConfigured = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $mailerUrl = $_ENV['MAILER_URL'] ?? null;
+            if (isset($mailerUrl) && $mailerUrl !== '' && $mailerUrl !== 'null://localhost' && $mailerUrl !== false) {
+                $smtpConfigured = true;
+            }
+        }
+        
         if ($form->isSubmitted() && $form->isValid()) {
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
@@ -145,9 +156,15 @@ class AccountController extends AbstractController
         }
         
         if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
-            $this->entityManager->flush();
-            $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
+            // If SMTP is not configured, disable 2FA
+            if (!$smtpConfigured && $twoFactorAuth->isEnabled()) {
+                $twoFactorAuth->setEnabled(false);
+                $this->addFlash('error', 'Two-factor authentication cannot be enabled without SMTP configuration. Please configure SMTP settings first.');
+            } else {
+                $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
+            }
             
+            $this->entityManager->flush();
             return $this->redirectToRoute('my_account');
         }
 
@@ -155,6 +172,7 @@ class AccountController extends AbstractController
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
             'twoFactorAuthForm' => $twoFactorAuthForm->createView(),
+            'smtpConfigured' => $smtpConfigured,
         ]);
     }
 

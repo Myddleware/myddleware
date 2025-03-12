@@ -100,7 +100,15 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                         {{ form_start(twoFactorAuthForm) }}
                         <div class="form-group mb-4">
                             <div class="form-check">
-                                {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
+                                {% if not smtpConfigured %}
+                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input', 'disabled': 'disabled'} }) }}
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span class="ms-2">Two-factor authentication cannot be enabled without SMTP configuration. Please configure SMTP settings first in the <a href="{{ path('management_smtp_index') }}">SMTP Management</a> page.</span>
+                                    </div>
+                                {% else %}
+                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
+                                {% endif %}
                                 {{ form_label(twoFactorAuthForm.enabled, null, { 'label_attr': {'class': 'form-check-label'} }) }}
                             </div>
                             {{ form_errors(twoFactorAuthForm.enabled) }}
