@@ -177,7 +177,7 @@ class VariableController extends AbstractController
 
             // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
             $name = $variable->getName();
-            $variableExists = $this->verifyIfVariableNameExists($em, $name);
+            $variableExists = $this->verifyIfVariableNameExists($em, $name, $variable->getId());
             if ($variableExists) {
                 $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
@@ -210,17 +210,18 @@ class VariableController extends AbstractController
     /**
      * @Route("/variables/verify-name", name="variable_verify_name")
      */
-    public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name): bool
+    public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name, ?int $excludeId = null): bool
     {
+        // First check with the exact name
         $variable = $em->getRepository(Variable::class)->findOneByName($name);
-        if ($variable) {
+        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
             return true;
         }
 
-        // second test that is a bit more complex. Assuming the variable name of another variable is mdwvar_test_myddleware, and we enter test myddleware, we should return true, that means we should replace all spaces with underscores
+        // Second test with spaces replaced by underscores
         $nameForBetterTesting = str_replace(' ', '_', $name);
         $variable = $em->getRepository(Variable::class)->findOneByName($nameForBetterTesting);
-        if ($variable) {
+        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
             return true;
         }
 
