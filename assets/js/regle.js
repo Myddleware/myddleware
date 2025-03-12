@@ -609,6 +609,11 @@ $.fn.setCursorPosition = function(pos) {
             $("#formule").dialog("close"); // Aucune erreur
           } else {
             alert(formula_error);
+            // we alert but close anyway and validate the formula anyway
+            zone = $.trim(zone);
+            $("#formule_" + zone + " li").remove();
+            $("#formule_" + zone).append("<li>" + myFormula + "</li>");
+            $("#formule").dialog("close");
           }
         },
       });
@@ -1072,7 +1077,7 @@ $.fn.setCursorPosition = function(pos) {
         // If it does, show an alert to the user
         alert('Please close the first one before adding a new one.');
       } else {
-        value = $(this).find(".value").text();
+        value = $(this).find(".value").text().trim();
         $(this).find(".value").remove();
         newElement = $(this).append(
           '<input id="' +
@@ -2323,27 +2328,33 @@ function toCamelCase(str) {
 
 // Save the modified field data by using an ajax request
 function saveInputFlux(div, link) {
+    // Trim the field name to remove any trailing spaces
+    fields = div.attr('data-value').trim();
+    
+    // Get the input element - look for it within the parent li element
+    var inputElement = div.closest('li').find('input');
+    
+    // Get the value from the input element
+    var inputValue = inputElement.val();
 
-	fields = div.attr('data-value');
-	div.attr('data-value');
-	value = $('#' + fields);
+    // Ajax request to save the data in the database
+    $.ajax({
+        type: "POST",
+        url: link,
+        data: {
+            flux: $('#flux_target').attr('data-id'),
+            rule: $('#flux_target').attr('data-rule'),
+            fields: fields,
+            value: inputValue
+        },
+        success: function (val) {
+            // Add the 'value' class to the span so it can be found for future edits
+            div.parent().append('<span class="value">' + val + '</span>');
+            div.remove();
+            inputElement.remove();
+        }
+    });
 
-	// Ajax request to save the data in the database
-	$.ajax({
-		type: "POST",
-		url: link,
-		data: {
-			flux: $('#flux_target').attr('data-id'),
-			rule: $('#flux_target').attr('data-rule'),
-			fields: fields,
-			value: value.val()
-		},
-		success: function (val) {
-			div.parent().append('<span>' + val + '</span>');
-			div.remove();
-			value.remove();
-		}
-	});
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2611,13 +2622,11 @@ $(document).ready(function() {
 
 // wait for the press of the close button which is #area_quit
 $('#area_quit').on('click', function() {
-    console.log("close button pressed");
     resetFunctionWizard();
 });
 
 // function to reset the function wizard
 function resetFunctionWizard() {
-    console.log("resetting function wizard");
     $('#function-select').val('').trigger('change');
     $('#lookup-rule').val('').trigger('change');
     $('#lookup-field').val('').prop('disabled', true);

@@ -195,6 +195,31 @@ public function removeFilter(Request $request): JsonResponse
             $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
         }
 
+        // this is the case where the user clicks on a lookup link, we only keep the rule name and the source id
+        if ($request->query->has('lookup-field-rule')){
+            
+            // empty all the other filters
+            $this->sessionService->removeFluxFilterReference();
+            $this->sessionService->removeFluxFilterOperators();
+            $this->sessionService->removeFluxFilterSourceContent();
+            $this->sessionService->removeFluxFilterTargetContent();
+            $this->sessionService->removeFluxFilterDateModifStart();
+            $this->sessionService->removeFluxFilterDateModifEnd();
+            $this->sessionService->removeFluxFilterStatus();
+            $this->sessionService->removeFluxFilterGlobalStatus();
+            $this->sessionService->removeFluxFilterType();
+            $this->sessionService->removeFluxFilterTargetId();
+            $this->sessionService->removeFluxFilterModuleSource();
+            $this->sessionService->removeFluxFilterModuleTarget();
+            $this->sessionService->removeFluxFilterSortField();
+            $this->sessionService->removeFluxFilterSortOrder();
+
+            // also reset the source id with the one from the request
+            $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
+
+            $this->sessionService->setFluxFilterRuleName($request->query->get('lookup-field-rule'));
+        }
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
@@ -1070,5 +1095,14 @@ public function removeFilter(Request $request): JsonResponse
         $response->headers->set('Expires', '0');
         
         return $response;
+    }
+
+    /**
+     * @Route("/rule/lookup/names", name="rule_lookup_names")
+     */
+    public function getRuleNames(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $ruleNames = RuleRepository::findActiveRulesNames($entityManager, true);
+        return new JsonResponse($ruleNames);
     }
 }

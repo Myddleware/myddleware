@@ -168,6 +168,9 @@ $(function () {
         ),
       };
     });
+
+    console.log('storedFilters filter.js', storedFilters);
+
     localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
   }
 

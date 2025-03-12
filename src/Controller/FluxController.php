@@ -982,7 +982,7 @@ $result = [];
     {
         if ('POST' == $request->getMethod()) {
             // Get the field and value from the request
-            $fields = strip_tags($request->request->get('fields'));
+            $fields = trim(strip_tags($request->request->get('fields')));
             $value = strip_tags($request->request->get('value'));
 
             if (isset($value)) {

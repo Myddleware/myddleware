@@ -362,6 +362,17 @@ class Rule
         return $return;
     }
 
+    public function getFormulaByFieldName(string $fieldName): string
+    {
+        $formula = "";
+        foreach ($this->getFields() as $ruleField) {
+            if ($ruleField->getSource() === $fieldName) {
+                $formula = $ruleField->getFormula();
+            }
+        }
+        return $formula;
+    }
+
     public function getParamByName(string $name): ?RuleParam
     {
         $ruleParam = $this->getParams()->filter(function (RuleParam $ruleParam) use ($name) {

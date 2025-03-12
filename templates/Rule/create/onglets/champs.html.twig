@@ -347,8 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	const lookupgetrule = "{{ path('get_rules_for_lookup') }}";
 	const lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
 	const basepathforGetFieldInfoWithFakeId = "{{ path('api_field_info', {'type': 'source', 'field': 'fake_id'}) }}";
-	console.log('test lookupgetrule', lookupgetrule)
-	console.log('test lookupgetfieldroute', lookupgetfieldroute)
 	const translations = {
 		selectRule: "{{ 'create_rule.step3.formula.select_rule'|trans }}",
 		selectField: "{{ 'create_rule.step3.formula.select_field'|trans }}"

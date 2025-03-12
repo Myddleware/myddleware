@@ -1100,6 +1100,7 @@ duplicate_rule:
     success_duplicate: Votre règle a été bien dupliquée
 banner: Crontab est désactivé
 variable:
+  name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   back_to_list: Retour à la liste des variables
   editing: Modification de la variable
   save: Enregistrer

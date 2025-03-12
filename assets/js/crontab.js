@@ -1,7 +1,6 @@
 // Creates a function that will be called when a button with the class crontab_class
 // is clicked. The function will send a request to the server for the function with the following name crontab_show
 
-// console.log('crontabbou.js');
 
 // if an element with the class table-head-result is clicked, then call the function sortTable with the id of the element as an argument
 $(document).on('click', '.table-head-result', function() {
@@ -11,9 +10,7 @@ $(document).on('click', '.table-head-result', function() {
     sortTable(id);
 });
 
-// console.log('coucou camille');
 function sortTable(n) {
-    console.log('inside function sortTable');
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById("myTable");
     switching = true;
