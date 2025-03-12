@@ -216,6 +216,14 @@ class VariableController extends AbstractController
         if ($variable) {
             return true;
         }
+
+        // second test that is a bit more complex. Assuming the variable name of another variable is mdwvar_test_myddleware, and we enter test myddleware, we should return true, that means we should replace all spaces with underscores
+        $nameForBetterTesting = str_replace(' ', '_', $name);
+        $variable = $em->getRepository(Variable::class)->findOneByName($nameForBetterTesting);
+        if ($variable) {
+            return true;
+        }
+
         return false;
     }
 
