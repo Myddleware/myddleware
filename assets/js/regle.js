@@ -2348,7 +2348,8 @@ function saveInputFlux(div, link) {
             value: inputValue
         },
         success: function (val) {
-            div.parent().append('<span>' + val + '</span>');
+            // Add the 'value' class to the span so it can be found for future edits
+            div.parent().append('<span class="value">' + val + '</span>');
             div.remove();
             inputElement.remove();
         }
