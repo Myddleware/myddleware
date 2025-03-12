@@ -94,16 +94,9 @@ class TwoFactorAuthService
         
         $this->entityManager->flush();
         
-        $method = $twoFactorAuth->getPreferredMethod();
-        
+        // Always use email method regardless of the preferredMethod setting
         try {
-            if ($method === 'email') {
-                return $this->sendEmailCode($user, $code);
-            } elseif ($method === 'sms') {
-                return $this->sendSmsCode($twoFactorAuth, $code);
-            }
-            
-            return false;
+            return $this->sendEmailCode($user, $code);
         } catch (\Exception $e) {
             $this->logger->error('Failed to send verification code: ' . $e->getMessage());
             return false;

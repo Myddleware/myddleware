@@ -44,27 +44,17 @@ class TwoFactorAuthFormType extends AbstractType
                 'required' => false,
             ])
             ->add('preferredMethod', ChoiceType::class, [
-                'label' => 'Preferred Verification Method',
+                'label' => 'Verification Method',
                 'choices' => [
                     'Email' => 'email',
-                    'SMS' => 'sms',
+                    // 'SMS' => 'sms', // SMS option removed
                 ],
                 'expanded' => true,
                 'multiple' => false,
-            ])
-            ->add('phoneNumber', TelType::class, [
-                'label' => 'Phone Number (with country code)',
-                'required' => false,
-                'constraints' => [
-                    new Regex([
-                        'pattern' => '/^\+[1-9]\d{1,14}$/',
-                        'message' => 'Please enter a valid phone number with country code (e.g. +1234567890)',
-                    ]),
-                ],
-                'attr' => [
-                    'placeholder' => '+1234567890',
-                ],
+                'data' => 'email', // Default to email
             ]);
+            
+        // Phone number field removed
     }
 
     public function configureOptions(OptionsResolver $resolver)

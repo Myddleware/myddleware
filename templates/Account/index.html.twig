@@ -113,23 +113,13 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                             </div>
                             {{ form_errors(twoFactorAuthForm.enabled) }}
                             <small class="form-text text-muted">
-                                When enabled, you'll be asked to enter a verification code after logging in.
+                                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
                             </small>
                         </div>
                         
-                        <div class="form-group mb-4">
-                            {{ form_label(twoFactorAuthForm.preferredMethod) }}
-                            {{ form_widget(twoFactorAuthForm.preferredMethod, { 'attr': {'class': 'form-check-inline'} }) }}
-                            {{ form_errors(twoFactorAuthForm.preferredMethod) }}
-                        </div>
-                        
-                        <div class="form-group mb-4" id="phone-number-group">
-                            {{ form_label(twoFactorAuthForm.phoneNumber) }}
-                            {{ form_widget(twoFactorAuthForm.phoneNumber, { 'attr': {'class': 'form-control'} }) }}
-                            {{ form_errors(twoFactorAuthForm.phoneNumber) }}
-                            <small class="form-text text-muted">
-                                Required if you want to use SMS as verification method.
-                            </small>
+                        {# Hide the preferredMethod field since we're only using email #}
+                        <div style="display: none;">
+                            {{ form_widget(twoFactorAuthForm.preferredMethod) }}
                         </div>
                         
                         <button type="submit" class="btn btn-success mt-4">Save 2FA Settings</button>
@@ -171,41 +161,17 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Show/hide phone number field based on preferred method
-        const preferredMethodRadios = document.querySelectorAll('input[name="two_factor_auth_form[preferredMethod]"]');
-        const phoneNumberGroup = document.getElementById('phone-number-group');
+        // We don't need the phone number visibility logic anymore since we're only using email
         const enabledCheckbox = document.querySelector('input[name="two_factor_auth_form[enabled]"]');
         
-        function updatePhoneNumberVisibility() {
-            const selectedMethod = document.querySelector('input[name="two_factor_auth_form[preferredMethod]"]:checked').value;
-            if (selectedMethod === 'sms') {
-                phoneNumberGroup.style.display = 'block';
-            } else {
-                phoneNumberGroup.style.display = 'none';
-            }
-        }
-        
         function updateFieldsVisibility() {
-            const isEnabled = enabledCheckbox.checked;
-            const methodsContainer = document.querySelector('.form-group:nth-child(2)');
-            
-            if (isEnabled) {
-                methodsContainer.style.display = 'block';
-                updatePhoneNumberVisibility();
-            } else {
-                methodsContainer.style.display = 'none';
-                phoneNumberGroup.style.display = 'none';
-            }
+            // Nothing to update since we've hidden the preferredMethod field
         }
         
         // Initial state
         updateFieldsVisibility();
         
         // Event listeners
-        preferredMethodRadios.forEach(radio => {
-            radio.addEventListener('change', updatePhoneNumberVisibility);
-        });
-        
         enabledCheckbox.addEventListener('change', updateFieldsVisibility);
     });
 </script>
