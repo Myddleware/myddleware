@@ -30,11 +30,11 @@ use App\Repository\TwoFactorAuthRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Swift_Mailer;
+use Swift_Message;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class TwoFactorAuthService
@@ -42,7 +42,7 @@ class TwoFactorAuthService
     private EntityManagerInterface $entityManager;
     private TwoFactorAuthRepository $twoFactorAuthRepository;
     private LoggerInterface $logger;
-    private MailerInterface $mailer;
+    private Swift_Mailer $mailer;
     private ParameterBagInterface $params;
     private SmsService $smsService;
 
@@ -50,7 +50,7 @@ class TwoFactorAuthService
         EntityManagerInterface $entityManager,
         TwoFactorAuthRepository $twoFactorAuthRepository,
         LoggerInterface $logger,
-        MailerInterface $mailer,
+        Swift_Mailer $mailer,
         ParameterBagInterface $params,
         SmsService $smsService
     ) {
@@ -112,18 +112,23 @@ class TwoFactorAuthService
 
     private function sendEmailCode(User $user, string $code): bool
     {
-        $email = (new Email())
-            ->from($this->params->get('mailer_from'))
-            ->to($user->getEmail())
-            ->subject('Myddleware - Your verification code')
-            ->html(
+        $message = (new Swift_Message('Myddleware - Your verification code'))
+            ->setFrom($this->params->get('email_from', 'no-reply@myddleware.com'))
+            ->setTo($user->getEmail())
+            ->setBody(
                 '<p>Hello ' . $user->getUsername() . ',</p>' .
                 '<p>Your verification code is: <strong>' . $code . '</strong></p>' .
                 '<p>This code will expire in 1 minute.</p>' .
-                '<p>If you did not request this code, please ignore this email.</p>'
+                '<p>If you did not request this code, please ignore this email.</p>',
+                'text/html'
             );
-
-        $this->mailer->send($email);
+        
+        $result = $this->mailer->send($message);
+        
+        if ($result === 0) {
+            $this->logger->error('Failed to send verification email to ' . $user->getEmail());
+            return false;
+        }
         
         return true;
     }

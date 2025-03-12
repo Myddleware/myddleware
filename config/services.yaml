@@ -58,6 +58,10 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
+  App\Service\TwoFactorAuthService:
+    arguments:
+      $mailer: '@swiftmailer.mailer.default'
+
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
