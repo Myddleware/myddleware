@@ -77,6 +77,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Form\Type\RelationFilterType;
 use App\Entity\Workflow;
 use App\Entity\WorkflowAction;
+use App\Service\TwoFactorAuthService;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
     /**
      * @Route("/rule")
      */
@@ -103,6 +105,8 @@ use App\Entity\WorkflowAction;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
         private ConfigRepository $configRepository;
+        private TwoFactorAuthService $twoFactorAuthService;
+        private SessionInterface $session;
 
         public function __construct(
             LoggerInterface $logger,
@@ -122,7 +126,9 @@ use App\Entity\WorkflowAction;
             ToolsManager $tools,
             JobManager $jobManager,
             TemplateManager $template,
-            ParameterBagInterface $params
+            ParameterBagInterface $params,
+            TwoFactorAuthService $twoFactorAuthService,
+            SessionInterface $session
         ) {
             $this->logger = $logger;
             $this->ruleManager = $ruleManager;
@@ -141,6 +147,8 @@ use App\Entity\WorkflowAction;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
+            $this->twoFactorAuthService = $twoFactorAuthService;
+            $this->session = $session;
         }
 
         protected function getInstanceBdd()
@@ -2749,6 +2757,27 @@ use App\Entity\WorkflowAction;
          */
         public function panel(Request $request): Response
         {
+            // Check if the user has completed 2FA
+            $user = $this->getUser();
+            $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
+            
+            $this->logger->debug('User authenticated, checking 2FA status in panel method');
+            if ($twoFactorAuth->isEnabled() && !$this->session->get('two_factor_auth_complete', false)) {
+                $this->logger->debug('2FA is enabled for user and not completed');
+                
+                // Check if the user has a remember cookie
+                $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
+                if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
+                    // If the user has a valid remember cookie, mark as complete
+                    $this->session->set('two_factor_auth_complete', true);
+                    $this->logger->debug('User has valid remember cookie, marking 2FA as complete');
+                } else {
+                    // Otherwise, redirect to verification
+                    $this->logger->debug('Redirecting to verification page');
+                    return $this->redirectToRoute('two_factor_auth_verify');
+                }
+            }
+
             $language = $request->getLocale();
 
             $this->getInstanceBdd();
