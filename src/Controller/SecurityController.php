@@ -8,7 +8,6 @@ use App\Form\Type\UserForgotPasswordType;
 use App\Manager\NotificationManager;
 use App\Repository\UserRepository;
 use App\Service\SecurityService;
-use App\Service\TwoFactorAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +19,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class SecurityController extends AbstractController
 {
@@ -30,8 +28,6 @@ class SecurityController extends AbstractController
     private EntityManagerInterface $entityManager;
     private NotificationManager $notificationManager;
     private SecurityService $securityService;
-    private TwoFactorAuthService $twoFactorAuthService;
-    private SessionInterface $session;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
@@ -39,9 +35,7 @@ class SecurityController extends AbstractController
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
-        SecurityService $securityService,
-        TwoFactorAuthService $twoFactorAuthService,
-        SessionInterface $session
+        SecurityService $securityService
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->encoder = $encoder;
@@ -49,35 +43,15 @@ class SecurityController extends AbstractController
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
         $this->securityService = $securityService;
-        $this->twoFactorAuthService = $twoFactorAuthService;
-        $this->session = $session;
     }
 
     /**
      * @Route("/", name="login")
      * @Route("/login")
      */
-    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // Check if the user is already authenticated
         if ($this->getUser() instanceof User) {
-            // Check if the user has completed 2FA
-            $user = $this->getUser();
-            $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
-            
-            // If 2FA is enabled and not completed, redirect to verification
-            if ($twoFactorAuth->isEnabled() && !$this->session->get('two_factor_auth_complete', false)) {
-                // Check if the user has a remember cookie
-                $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
-                if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
-                    // If the user has a valid remember cookie, mark as complete and redirect
-                    $this->session->set('two_factor_auth_complete', true);
-                } else {
-                    // Otherwise, redirect to verification
-                    return $this->redirectToRoute('two_factor_auth_verify');
-                }
-            }
-            
             return $this->redirectToRoute('regle_panel');
         }
 
@@ -125,9 +99,6 @@ class SecurityController extends AbstractController
      */
     public function logout(): Response
     {
-        // Clear the 2FA session flag
-        $this->session->remove('two_factor_auth_complete');
-        
         // Ignored by the system of logout @see security.yaml
         return $this->redirectToRoute('login');
     }
