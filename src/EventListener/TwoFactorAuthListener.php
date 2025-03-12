@@ -34,6 +34,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Security;
+use Psr\Log\LoggerInterface;
 
 class TwoFactorAuthListener implements EventSubscriberInterface
 {
@@ -42,19 +43,22 @@ class TwoFactorAuthListener implements EventSubscriberInterface
     private SessionInterface $session;
     private UrlGeneratorInterface $urlGenerator;
     private Security $security;
+    private LoggerInterface $logger;
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
         TwoFactorAuthService $twoFactorAuthService,
         SessionInterface $session,
         UrlGeneratorInterface $urlGenerator,
-        Security $security
+        Security $security,
+        LoggerInterface $logger
     ) {
         $this->tokenStorage = $tokenStorage;
         $this->twoFactorAuthService = $twoFactorAuthService;
         $this->session = $session;
         $this->urlGenerator = $urlGenerator;
         $this->security = $security;
+        $this->logger = $logger;
     }
 
     public static function getSubscribedEvents(): array
@@ -73,14 +77,18 @@ class TwoFactorAuthListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
+        $this->logger->debug('TwoFactorAuthListener: Checking path: ' . $path);
+
         // Skip for login, verification, and public routes
         if ($this->isPublicRoute($path)) {
+            $this->logger->debug('TwoFactorAuthListener: Skipping public route');
             return;
         }
 
         // Check if the user is authenticated
         $user = $this->security->getUser();
         if (!$user instanceof User) {
+            $this->logger->debug('TwoFactorAuthListener: No authenticated user');
             return;
         }
 
@@ -89,11 +97,13 @@ class TwoFactorAuthListener implements EventSubscriberInterface
 
         // If 2FA is not enabled, we're done
         if (!$twoFactorAuth->isEnabled()) {
+            $this->logger->debug('TwoFactorAuthListener: 2FA not enabled for user');
             return;
         }
 
         // Check if the user has completed 2FA
         if ($this->session->get('two_factor_auth_complete', false)) {
+            $this->logger->debug('TwoFactorAuthListener: 2FA already completed');
             return;
         }
 
@@ -102,10 +112,12 @@ class TwoFactorAuthListener implements EventSubscriberInterface
         if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
             // If the user has a valid remember cookie, mark as complete
             $this->session->set('two_factor_auth_complete', true);
+            $this->logger->debug('TwoFactorAuthListener: Valid remember cookie found, marking 2FA as complete');
             return;
         }
 
         // Redirect to verification
+        $this->logger->debug('TwoFactorAuthListener: Redirecting to verification page');
         $verifyUrl = $this->urlGenerator->generate('two_factor_auth_verify');
         $event->setResponse(new RedirectResponse($verifyUrl));
     }
