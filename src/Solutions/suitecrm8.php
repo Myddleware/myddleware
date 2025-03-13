@@ -30,13 +30,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class suitecrm8 extends solution
 {
+	protected $accessToken;
+	protected $baseUrl;
+	protected $componentUrl = '/Api/';
+	
 	public function login($paramConnexion)
     {
         parent::login($paramConnexion);
         try {
-			$token_url = rtrim($this->paramConnexion['url'], '/').'/Api/access_token';
-			// $token_url = rtrim($this->paramConnexion['url'], '/').'/Api/Oauth/access_token';
-
+			$this->baseUrl = rtrim($this->paramConnexion['url'], '/').$this->componentUrl;
 			// Authentication - Begin
 			$ch = curl_init();
 			$header = array(
@@ -47,29 +49,30 @@ class suitecrm8 extends solution
 				'grant_type' => 'client_credentials',
 				'client_id' => $this->paramConnexion['clientid'],
 				'client_secret' => $this->paramConnexion['clientsecret'],
-				'username'=> $this->paramConnexion['login'],
-				'password' => $this->paramConnexion['password']
 			));
-			curl_setopt($ch, CURLOPT_URL, $token_url);
+			curl_setopt($ch, CURLOPT_URL, $this->baseUrl.'access_token');
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 			$output = curl_exec($ch);
-			$auth_out = json_decode($output,true);
-// if (curl_errno($ch)) {
-    // throw new \Exception('cURL error: ' . curl_error($ch));
-// }
-			// print_r ($output); // For debug purposes
-			// print_r ($auth_out); // For debug purposes
-			// throw new \Exception('test : '.print_r($output,1));
-			// throw new \Exception('test : '.print_r($postStr,1));
-			throw new \Exception('test : '.$token_url.' : '.print_r($output,1));
-
+			$authOut = json_decode($output,true);
+			// Manage return : token or error
+			if (curl_errno($ch)) {
+				throw new \Exception('cURL error: ' . curl_error($ch));
+			}
+			if (!empty($authOut['message'])) {
+				throw new \Exception($authOut['message']);
+			}
+			if (!empty($authOut['access_token'])) {
+				$this->accessToken = $authOut['access_token'];
+				$this->connexion_valide = true;
+			} else {
+				throw new \Exception('Failed to connect to SuiteCRM. No error message returned.');
+			}
         } catch (\Exception $e) {
             $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
-
             return ['error' => $error];
         }
     }
@@ -83,16 +86,6 @@ class suitecrm8 extends solution
                 'label' => 'solution.fields.url',
             ],
             [
-                'name' => 'login',
-                'type' => TextType::class,
-                'label' => 'solution.fields.login',
-            ],
-            [
-                'name' => 'password',
-                'type' => PasswordType::class,
-                'label' => 'solution.fields.password',
-            ],
-            [
                 'name' => 'clientid',
                 'type' => TextType::class,
                 'label' => 'solution.fields.clientid',
@@ -104,4 +97,55 @@ class suitecrm8 extends solution
             ],
         ];
     }
+	
+	
+    // Permet de récupérer tous les modules accessibles à l'utilisateur
+    public function get_modules($type = 'source')
+    {
+        try {
+			$moduleData = $this->call('GET', 'V8/meta/modules'); 
+// $moduleData = $this->call('GET', 'V8/module/ProspectLists'); 
+// return $moduleData;
+			if (!empty($moduleData['data']['attributes'])) {
+				foreach($moduleData['data']['attributes'] as $key => $module) {
+					$modules[$key] = $module['label'];
+				}
+			}
+			return (isset($modules)) ? $modules : false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+	
+	// Call to SuiteCRM API
+	protected function call($method, $suffixUrl, $parameters=array())
+    {
+        try {
+			$ch = curl_init();
+			$header = array(
+				'Accept: application/vnd.api+json',
+				'authorization: Bearer '.$this->accessToken,
+				'Content-type: application/vnd.api+json'
+			);
+			
+			curl_setopt($ch, CURLOPT_URL, $this->baseUrl.$suffixUrl);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			if (!empty($parameters)) {
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+			}
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+			
+			if (curl_errno($ch)) {
+				throw new \Exception('cURL error: ' . curl_error($ch));
+			}
+			$output = curl_exec($ch);
+			$response = json_decode($output,true);
+			
+			return $response;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
 }
