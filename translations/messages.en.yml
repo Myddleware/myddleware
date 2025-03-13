@@ -111,7 +111,8 @@ create_rule:
             fields: some of the required fields are currently empty. You can fill out several source fields towards a target field.
             fields_title: Required fields
         formula: 
-            fields: Fields
+            fields: "Select field(s) for the formula"
+            select_picklist: "Select a picklist value"
             function: Functions
             create: Create a formula
             compose: Compose your formula
@@ -119,6 +120,14 @@ create_rule:
             delete: Delete
             close: Close 
             error: Your rule contains one or more syntax errors
+            function_wizard: Function Wizard
+            select_function: Select a function
+            select_function_title: Function
+            select_rule: Select related rule
+            select_rule_title: Select a lookup rule
+            select_field: Select related field
+            select_field_title: Select a field for lookup
+            toggle_tooltip: Toggle function description
         confirm:
             success: Successful registration
             error: An error has occured 
@@ -237,6 +246,8 @@ rule:
     yoursource: Your source solution
     yourtarget: Your target solution
     help: What should I do ?
+    select_group: Select a group
+    select_value: Select a value
 
 rulegroup:
     list: Rule groups
@@ -304,7 +315,7 @@ animate:
         description: Description 
         empty: No template for these solutions, if you want a template, please contact us via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
     tutoriel:
-        link: https://myddleware.github.io/myddleware-docs/#/basic_usage
+        link: https://myddleware.github.io/myddleware/#/basic_usage
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
@@ -355,7 +366,7 @@ view_connector:
         help: Assistance
         link_help: Click here to have more information on this connector
     help:
-        link: https://myddleware.github.io/myddleware-docs/#/connectors_credentials?id=
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
 
 list_flux:
     start: Start
@@ -634,31 +645,37 @@ function:
         date: Date and hour  
         constant: Constant  
     description:
-        text: 
-            trim:  Delete the spaces (or other characters) at the beginning and the end of each string 
-            lower: Put all in lower-case characters  
-            upper: Put all in upper-case characters 
-            changeValue: changeValue($var, $arrayKeyToValue) / Replace the value of $var by the corresponding value on the $arrayKeyToValue. Example changeValue( {FIELD},"('A':'1','B':'2')")
-            getValueFromArray: getValueFromArray($key, $array) / Get the value corresponding value to the key in the $array
-            substr: substr( string $string , int $start [, int $length ] ) /  Return part of a string
-            striptags: striptags( string $str [, string $allowable_tags ] ) / Strip HTML and PHP tags from a string
-            htmlEntityDecode: htmlEntityDecode ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") ]] )/ Convert all HTML entities to their applicable characters
-            replace: replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] ) / Replace all occurrences of the search string with the replacement string
-            utf8encode: utf8encode ( string $data ) / Encodes an ISO-8859-1 string to UTF-8
-            utf8decode: utf8decode ( string $data ) / Converts a string with ISO-8859-1 characters encoded with UTF-8 to single-byte ISO-8859-1 
-            htmlentities: htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert all applicable characters to HTML entities
-            htmlspecialchars: htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] ) / Convert special characters to HTML entities
-            chr: chr ( int $bytevalue ) Generate a single-byte string from a number
-            lookup: lookup ( string $field, string $rule, <optional> errorIfEmpty (default = false), <optional> errodIfNoFound (default = true)). Search the corresponding value of the $field in the rule $rule. 
+        text:
+            trim: "trim($string) / Removes whitespace or other specified characters from both ends of a string. Example: trim(' Hello World ') returns 'Hello World'"
+            ltrim: "ltrim($string [, $characters]) / Removes whitespace or specified characters from the beginning of a string. Example: ltrim('   Hello') returns 'Hello'"
+            rtrim: "rtrim($string [, $characters]) / Removes whitespace or specified characters from the end of a string. Example: rtrim('Hello   ') returns 'Hello'"
+            lower: "lower($string) / Converts a string to lowercase. Example: lower('Hello World') returns 'hello world'"
+            upper: "upper($string) / Converts a string to uppercase. Example: upper('Hello World') returns 'HELLO WORLD'"
+            substr: "substr($string, $start [, $length]) / Returns part of a string. Example: substr('Hello World', 0, 5) returns 'Hello'"
+            striptags: "striptags($string [, $allowable_tags]) / Removes HTML and PHP tags from a string. Example: striptags('<p>Hello</p>') returns 'Hello'"
+            changeValue: "changeValue($var, $arrayKeyToValue) / Replaces values using a key-value mapping array. Example: changeValue({status}, '('active':'1', 'inactive':'0')') converts 'active' to '1'"
+            htmlEntityDecode: "htmlEntityDecode($string) / Converts HTML entities to their corresponding characters. Example: htmlEntityDecode('&amp;') returns '&'"
+            replace: "replace($search, $replace, $subject) / Replaces all occurrences of search with replace. Example: replace('world', 'there', 'Hello world') returns 'Hello there'"
+            utf8encode: "utf8encode($string) / Encodes an ISO-8859-1 string to UTF-8. Example: utf8encode('Hello') converts to UTF-8 encoding"
+            utf8decode: "utf8decode($string) / Decodes a UTF-8 encoded string to ISO-8859-1. Example: utf8decode('Hello') converts from UTF-8 encoding"
+            htmlentities: "htmlentities($string) / Converts special characters to HTML entities. Example: htmlentities('<') returns '&lt;'"
+            htmlspecialchars: "htmlspecialchars($string) / Converts special characters to HTML entities while preserving already encoded entities. Example: htmlspecialchars('A & B') returns 'A &amp; B'"
+            strlen: "strlen($string) / Returns the length of a string. Example: strlen('Hello') returns 5"
+            urlencode: "urlencode($string) / Encodes a string for use in a URL. Example: urlencode('Hello World') returns 'Hello%20World'"
+            chr: "chr($ascii) / Returns a character from its ASCII code. Example: chr(65) returns 'A'"
+            json_decode: "json_decode($string) / Decodes a JSON string into a PHP value. Example: json_decode('{\"name\":\"John\"}') returns an object with property 'name'"
+            json_encode: "json_encode($value) / Returns the JSON representation of a value. Example: json_encode(['name' => 'John']) returns '{\"name\":\"John\"}'"
+            getValueFromArray: "getValueFromArray($key, $array) / Gets a value from an array using a key. Example: getValueFromArray('name', '{\"name\":\"John\"}') returns 'John'"
+            lookup: "This is what we now use instead of rule relationship. You get a certain value from a field that belongs to another rule. Example: lookup({name}, '677f9171e6851') returns the value of the field name from a document that was produced by the rule that has an id of 677f9171e6851"
         mathematical:
-            round: Rounding a floating point number
-            ceil: Rounding up
-            abs: Absolute value
+            round: "round($number [, $precision]) / Rounds a floating point number to a specified precision. Example: round(3.14159, 2) returns 3.14"
+            ceil: "ceil($number) / Returns the smallest integer greater than or equal to a number. Example: ceil(3.14) returns 4"
+            abs: "abs($number) / Returns the absolute value of a number. Example: abs(-5) returns 5"
         date:
-            date: Set a date/local time
-            microtime: Return the current Unix timestamp with the microseconds
-            changeTimeZone: changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter
-            changeFormatDate: changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter
+            date: "Set a date/local time (current date and time). Example: date() returns the current date and time"
+            microtime: "Return the current Unix timestamp with the microseconds. Example: microtime() returns the current Unix timestamp with the microseconds, such as 1717536000.123456"
+            changeTimeZone: "changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter. Example: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') returns '2024-01-01 00:00:00'"
+            changeFormatDate: "changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter. Example: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') returns '2024/01/01'"
         constant:
             mdw_no_send_field: Do not send the field
             mdw_cancel_document: Cancel the document
@@ -844,9 +861,9 @@ help:
                 To change more parameters in your rule, go to the tab "parameter" on this page.
         mapping: >
                 On this page you will find all the fields of your source and target applications used in your rule. You will also find the formulas for data transformation. 
-                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
+                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
         relate: >
-                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         param: >
                 The reference date shows which data will be read in your source system. Only data that were created or modified after that date will be read and sent to the target system.
                 Therefore if you want to migrate your old data, you need to take a date in the past. If you only want to transfer the new data, then leave the day's date.
@@ -857,7 +874,7 @@ help:
                 For example, you can choose to put the name of a Sugar contact in the name of a Salesforce account, 
                 for that, just drag the field "name" of your source module and drop it in the field "name" of your target solution. 
                 To delete a field that was already placed, just double click on it. 
-                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
+                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
                 For more information or personalised assistance, feel free to contact us.
         simulate: >
                 Here you can simulate the result of the rules you have implemented in the previous stage. 
@@ -865,11 +882,11 @@ help:
         relate: >
                 This tab allows you to define the relations you want to implement in your interface. That way you can link several rules together. 
                 For example, it is possible to transfer the relation between a contact and an account so that they will also be linked in the target solution.
-                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         filter: >
                 This tab allows you to filter the fields of your source application at play
                 For example, you can choose to take all the contacts whose country is "France".
-                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
+                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
         validate: >
                 The last stage, if the target application of your rule allows it, you can choose a de-duplication key. To be used in de-duplication, a field must be selected in the tab "field"of the rule. 
                 For example, for a CRM application, you can de-duplicate all the contacts by their mail. Myddleware will check if the recording already exist in your target solution, before creating it. If it does not existe, Myddleware will create it.Otherwise it will just update it.
@@ -978,7 +995,7 @@ jobscheduler:
     view:
         show : View details
     description:
-        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware-docs/#/cron_jobs" target=_blank>More information here.</a>
+        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>More information here.</a>
         bottom : > 
                 Add this task in your Linux or Windows task scheduler : php bin/console myddleware:jobScheduler --env=background <BR>
                 For example with Linux, add this command in your crontab if you want to run Myddleware scheduler every 5 minutes : <BR>
@@ -1109,6 +1126,7 @@ duplicate_rule:
     success_duplicate: Your rule has been well duplicated
 banner: Crontab is disabled
 variable:
+  name_already_exists: The name of the variable already exists. Please choose another name.
   back_to_list: Back to the list
   save: Save
   editing: Editing of a variable

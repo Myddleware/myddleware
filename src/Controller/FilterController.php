@@ -189,6 +189,37 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+
+        if ($request->query->has('source_id')) {
+            // set the session service source_id
+            $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
+        }
+
+        // this is the case where the user clicks on a lookup link, we only keep the rule name and the source id
+        if ($request->query->has('lookup-field-rule')){
+            
+            // empty all the other filters
+            $this->sessionService->removeFluxFilterReference();
+            $this->sessionService->removeFluxFilterOperators();
+            $this->sessionService->removeFluxFilterSourceContent();
+            $this->sessionService->removeFluxFilterTargetContent();
+            $this->sessionService->removeFluxFilterDateModifStart();
+            $this->sessionService->removeFluxFilterDateModifEnd();
+            $this->sessionService->removeFluxFilterStatus();
+            $this->sessionService->removeFluxFilterGlobalStatus();
+            $this->sessionService->removeFluxFilterType();
+            $this->sessionService->removeFluxFilterTargetId();
+            $this->sessionService->removeFluxFilterModuleSource();
+            $this->sessionService->removeFluxFilterModuleTarget();
+            $this->sessionService->removeFluxFilterSortField();
+            $this->sessionService->removeFluxFilterSortOrder();
+
+            // also reset the source id with the one from the request
+            $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
+
+            $this->sessionService->setFluxFilterRuleName($request->query->get('lookup-field-rule'));
+        }
+
         $formFilter = $this->createForm(FilterType::class, null);
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
@@ -291,6 +322,10 @@ public function removeFilter(Request $request): JsonResponse
             
             // If the form is valid, we prepare the search
             if (!$doNotSearch) {
+                // if there is query source_id in the request, then replace any existing source_id in the data with the new one
+                if ($request->query->has('source_id')) {
+                    $data['source_id'] = $request->query->get('source_id');
+                }
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
                 // if $sortField, $sortOrder not null, then sort the documents accordingly
@@ -1060,5 +1095,14 @@ public function removeFilter(Request $request): JsonResponse
         $response->headers->set('Expires', '0');
         
         return $response;
+    }
+
+    /**
+     * @Route("/rule/lookup/names", name="rule_lookup_names")
+     */
+    public function getRuleNames(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $ruleNames = RuleRepository::findActiveRulesNames($entityManager, true);
+        return new JsonResponse($ruleNames);
     }
 }

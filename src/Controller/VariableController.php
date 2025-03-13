@@ -109,6 +109,18 @@ class VariableController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
+
+            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
+            $name = $variable->getName();
+            $variableExists = $this->verifyIfVariableNameExists($em, $name);
+            if ($variableExists) {
+                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
+                return $this->redirectToRoute('variable_create');
+            }
+
+            // replace the spaces in the name of the variable with underscores
+            $variable->setName(str_replace(' ', '_', $variable->getName()));
+
             $em->persist($variable);
             $em->flush();
 
@@ -162,6 +174,17 @@ class VariableController extends AbstractController
 
             $variable->setCreatedBy($this->getUser());
             $variable->setModifiedBy($this->getUser());
+
+            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
+            $name = $variable->getName();
+            $variableExists = $this->verifyIfVariableNameExists($em, $name, $variable->getId());
+            if ($variableExists) {
+                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
+                return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
+            }
+
+            // replace the spaces in the name of the variable with underscores
+            $variable->setName(str_replace(' ', '_', $variable->getName()));
             // Create an audit entry
             $audit = new VariableAudit();
             $audit->setVariableId($variable->getId());
@@ -182,6 +205,27 @@ class VariableController extends AbstractController
             'form' => $form->createView(),
             'variable' => $variable,
         ]);
+    }
+
+    /**
+     * @Route("/variables/verify-name", name="variable_verify_name")
+     */
+    public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name, ?int $excludeId = null): bool
+    {
+        // First check with the exact name
+        $variable = $em->getRepository(Variable::class)->findOneByName($name);
+        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
+            return true;
+        }
+
+        // Second test with spaces replaced by underscores
+        $nameForBetterTesting = str_replace(' ', '_', $name);
+        $variable = $em->getRepository(Variable::class)->findOneByName($nameForBetterTesting);
+        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

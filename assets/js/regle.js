@@ -609,6 +609,11 @@ $.fn.setCursorPosition = function(pos) {
             $("#formule").dialog("close"); // Aucune erreur
           } else {
             alert(formula_error);
+            // we alert but close anyway and validate the formula anyway
+            zone = $.trim(zone);
+            $("#formule_" + zone + " li").remove();
+            $("#formule_" + zone).append("<li>" + myFormula + "</li>");
+            $("#formule").dialog("close");
           }
         },
       });
@@ -620,7 +625,7 @@ $.fn.setCursorPosition = function(pos) {
       var newContent =
         content.substr(0, position) +
         '"' +
-        $.trim($("select", "#source_info").val()) +
+        $.trim($("#source_value_select").val()) +
         '"' +
         content.substr(position);
       $("#area_insert").val(newContent);
@@ -634,20 +639,7 @@ $.fn.setCursorPosition = function(pos) {
       var newContent =
         content.substr(0, position) +
         '"' +
-        $.trim($("select", "#target_info").val()) +
-        '"' +
-        content.substr(position);
-      $("#area_insert").val(newContent);
-      colorationSyntax();
-      theme(style_template);
-    });
-    $("button", "#lookup_rules").on("click", function () {
-      var position = $("#area_insert").getCursorPosition();
-      var content = $("#area_insert").val();
-      var newContent =
-        content.substr(0, position) +
-        '"' +
-        $.trim($("select", "#lookup_rules").val()) +
+        $.trim($("#target_value_select").val()) +
         '"' +
         content.substr(position);
       $("#area_insert").val(newContent);
@@ -1085,7 +1077,7 @@ $.fn.setCursorPosition = function(pos) {
         // If it does, show an alert to the user
         alert('Please close the first one before adding a new one.');
       } else {
-        value = $(this).find(".value").text();
+        value = $(this).find(".value").text().trim();
         $(this).find(".value").remove();
         newElement = $(this).append(
           '<input id="' +
@@ -1600,13 +1592,7 @@ function verif(div_clock) {
       .find("input")
       .each(function () {
         if ($(this).val().length == 0) {
-          // Get the data-param value
-          var fieldParam = $(this).attr("data-param");
-
-          // Check if field is in non required fields list loaded from config
-          if (!nonRequiredFields.includes(fieldParam)) {
-            err++;
-          }
+          err++;
         }
       });
 
@@ -2342,27 +2328,33 @@ function toCamelCase(str) {
 
 // Save the modified field data by using an ajax request
 function saveInputFlux(div, link) {
+    // Trim the field name to remove any trailing spaces
+    fields = div.attr('data-value').trim();
+    
+    // Get the input element - look for it within the parent li element
+    var inputElement = div.closest('li').find('input');
+    
+    // Get the value from the input element
+    var inputValue = inputElement.val();
 
-	fields = div.attr('data-value');
-	div.attr('data-value');
-	value = $('#' + fields);
+    // Ajax request to save the data in the database
+    $.ajax({
+        type: "POST",
+        url: link,
+        data: {
+            flux: $('#flux_target').attr('data-id'),
+            rule: $('#flux_target').attr('data-rule'),
+            fields: fields,
+            value: inputValue
+        },
+        success: function (val) {
+            // Add the 'value' class to the span so it can be found for future edits
+            div.parent().append('<span class="value">' + val + '</span>');
+            div.remove();
+            inputElement.remove();
+        }
+    });
 
-	// Ajax request to save the data in the database
-	$.ajax({
-		type: "POST",
-		url: link,
-		data: {
-			flux: $('#flux_target').attr('data-id'),
-			rule: $('#flux_target').attr('data-rule'),
-			fields: fields,
-			value: value.val()
-		},
-		success: function (val) {
-			div.parent().append('<span>' + val + '</span>');
-			div.remove();
-			value.remove();
-		}
-	});
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2370,4 +2362,274 @@ document.addEventListener('DOMContentLoaded', function () {
   tooltipTriggerList.forEach(tooltipTriggerEl => {
       new bootstrap.Tooltip(tooltipTriggerEl);
   });
+});
+
+// Function wizard handling
+$(document).ready(function() {
+    const functionSelect = $('#function-select');
+    const lookupOptions = $('#lookup-options');
+    const lookupRule = $('#lookup-rule');
+    const lookupField = $('#lookup-field');
+    const flagFunctionWizardEnd = $('#flag-function-wizard-end');
+    const functionParameter = $('#function-parameter');
+    const insertFunctionBtn = $('#insert-function-parameter');
+    let tooltipVisible = false; // Changed to false by default
+    let currentTooltip = '';
+    let selectedFunction = '';
+    
+    // Handle tooltip toggle button
+    $('#toggle-tooltip').on('click', function() {
+        tooltipVisible = !tooltipVisible;
+        const tooltipBox = $('#function-tooltip');
+        
+        if (tooltipVisible) {
+            $(this).find('i').removeClass('fa-question').addClass('fa-question-circle');
+            if (functionSelect.val() && currentTooltip) {
+                tooltipBox.text(currentTooltip).show();
+            }
+        } else {
+            $(this).find('i').removeClass('fa-question-circle').addClass('fa-question');
+            tooltipBox.hide();
+        }
+    });
+
+    // Show tooltip when option changes
+    functionSelect.on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const tooltip = selectedOption.data('tooltip');
+        const tooltipBox = $('#function-tooltip');
+        
+        selectedFunction = $(this).val();
+        currentTooltip = tooltip;
+
+        // if the selected function is a mwd function, we need to hide the function-parameter input, else we need to show it
+        if (selectedFunction.startsWith('mdw_')) {
+            $('#function-parameter').hide();
+        } else {
+            $('#function-parameter').show();
+        }
+        
+        // Only show tooltip if tooltipVisible is true and a function is selected
+        if (tooltip && tooltipVisible && $(this).val()) {
+            tooltipBox.text(tooltip).show();
+        } else {
+            tooltipBox.hide();
+        }
+
+        if (selectedFunction === 'round') {
+          $('#round-precision-input').show();
+      } else {
+          $('#round-precision-input').hide();
+      }
+
+        if (selectedFunction === 'lookup') {
+            lookupOptions.show();
+            $('#function-parameter-input').hide(); // Hide parameter input for lookup
+            
+            // Populate rules dropdown
+            $.ajax({
+                url: lookupgetrule,
+                method: 'GET',
+                data: {
+                    arg1: connectorsourceidlookup,
+                    arg2: connectortargetidlookup
+                },
+                success: function(rules) {
+                    lookupRule.empty();
+                    lookupRule.append('<option value="">' + translations.selectRule + '</option>');
+                    rules.forEach(rule => {
+                        lookupRule.append(`<option value="${rule.id}">${rule.name}</option>`);
+                    });
+                    lookupRule.prop('disabled', false);
+                }
+            });
+        } else {
+            lookupOptions.hide();
+            $('#function-parameter-input').show(); // Show parameter input for other functions
+        }
+    });
+
+    // Handle parameter insertion
+    insertFunctionBtn.on('click', function() {
+        if (!selectedFunction) return; // Do nothing if no function is selected
+        
+        // Get the function category from the selected option
+        const functionCategory = $('#function-select option:selected').data('type');
+
+        if (selectedFunction === 'round') {
+          const parameterValue = functionParameter.val().trim();
+          const precisionInput = $('#round-precision');
+          const precision = parseInt(precisionInput.val());
+          
+          // Validate precision
+          if (isNaN(precision) || precision < 1 || precision > 100) {
+              precisionInput.addClass('is-invalid');
+              return;
+          }
+          
+          precisionInput.removeClass('is-invalid');
+          
+          const areaInsert = $('#area_insert');
+          const position = areaInsert.getCursorPosition();
+          const content = areaInsert.val();
+          
+          // Construct round function call with precision
+          const functionCall = `round(${parameterValue}, ${precision})`;
+          
+          const newContent = 
+              content.substr(0, position) +
+              functionCall +
+              content.substr(position);
+              
+          areaInsert.val(newContent);
+          
+          // Clear inputs
+          functionParameter.val('');
+          precisionInput.val('');
+        
+        // Special handling for MDW functions
+        } else if (selectedFunction.startsWith('mdw_')) {
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
+
+
+            
+            // For MDW functions, just insert the function name as a string
+            const functionCall = `"${selectedFunction}"`;
+            
+            const newContent = 
+                content.substr(0, position) +
+                functionCall +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+        } else {
+            // Normal function handling
+            const parameterValue = functionParameter.val().trim();
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
+            
+            // Create the function call based on category
+            let functionCall = '';
+            if (parameterValue) {
+                switch(functionCategory) {
+                    case 1: // mathematical
+                        functionCall = `${selectedFunction}(${parameterValue})`; // No quotes for numbers
+                        break;
+                    case 2: // text
+                    case 3: // date
+                        functionCall = `${selectedFunction}("${parameterValue}")`; // Add quotes for text and dates
+                        break;
+                    case 4: // constant
+                        functionCall = `${selectedFunction}()`; // Constants don't need parameters
+                        break;
+                    default:
+                        functionCall = `${selectedFunction}("${parameterValue}")`; // Default to quoted parameter
+                }
+            } else {
+                functionCall = `${selectedFunction}()`;
+            }
+            
+            const newContent = 
+                content.substr(0, position) +
+                functionCall +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+        }
+        
+        // Clear the parameter input
+        functionParameter.val('');
+        
+        // Update syntax highlighting
+        colorationSyntax();
+        theme(style_template);
+    });
+
+    // When a rule is selected
+    lookupRule.on('change', function() {
+        const selectedRule = $(this).val();
+        
+        if (selectedRule) {
+            lookupField.empty();
+            lookupField.append('<option value="">' + translations.selectField + '</option>');
+            
+            // Get fields from the existing select element
+            $('#champs_insert option').each(function() {
+                const fieldName = $(this).val();
+                lookupField.append(`<option value="${fieldName}">${fieldName}</option>`);
+            });
+            
+            lookupField.prop('disabled', false);
+        } else {
+            lookupField.prop('disabled', true);
+        }
+    });
+
+    // Remove the lookupField.on('change') handler since we don't want automatic insertion
+    lookupField.off('change');
+
+    // Add handler for submit lookup button
+    $('#submit-lookup').on('click', function() {
+        const selectedField = lookupField.find('option:selected');
+        if (selectedField.val()) {
+            const fieldName = selectedField.text().split(' (')[0];
+            let errorEmpty = $('#lookup-error-empty').is(':checked');
+            let errorNotFound = $('#lookup-error-not-found').is(':checked');
+
+            // Convert boolean to 1/0
+            errorEmpty = errorEmpty ? 1 : 0;
+            errorNotFound = errorNotFound ? 1 : 0;
+            
+            // Construct the complete lookup formula
+            const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound})`;
+            
+            const areaInsert = $('#area_insert');
+            const position = areaInsert.getCursorPosition();
+            const content = areaInsert.val();
+            
+            const newContent = 
+                content.substr(0, position) +
+                lookupFormula +
+                content.substr(position);
+                
+            areaInsert.val(newContent);
+            colorationSyntax();
+            theme(style_template);
+        }
+    });
+
+    $('#round-precision').on('input', function() {
+      const value = this.value;
+      
+      // Remove any non-digit characters
+      const sanitizedValue = value.replace(/[^0-9]/g, '');
+      
+      if (sanitizedValue !== value) {
+          this.value = sanitizedValue;
+      }
+      
+      const precision = parseInt(sanitizedValue);
+      
+      if (isNaN(precision) || precision < 1 || precision > 100) {
+          $(this).addClass('is-invalid');
+      } else {
+          $(this).removeClass('is-invalid');
+      }
+  });
+
+// wait for the press of the close button which is #area_quit
+$('#area_quit').on('click', function() {
+    resetFunctionWizard();
+});
+
+// function to reset the function wizard
+function resetFunctionWizard() {
+    $('#function-select').val('').trigger('change');
+    $('#lookup-rule').val('').trigger('change');
+    $('#lookup-field').val('').prop('disabled', true);
+}
+
 });

@@ -60,6 +60,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
+use Doctrine\DBAL\Connection;
 
 
 /**
@@ -67,6 +68,7 @@ use App\Manager\ToolsManager;
  */
 class FluxController extends AbstractController
 {
+    protected Connection $connection;
     protected $params;
     private SessionService $sessionService;
     private TranslatorInterface $translator;
@@ -82,7 +84,8 @@ class FluxController extends AbstractController
         SolutionManager $solutionManager,
         DocumentRepository $documentRepository,
         EntityManagerInterface $entityManager,
-        ToolsManager $toolsManager
+        ToolsManager $toolsManager,
+        Connection $connection
     ) {
         $this->sessionService = $sessionService;
         $this->translator = $translator;
@@ -91,6 +94,7 @@ class FluxController extends AbstractController
         $this->documentRepository = $documentRepository;
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
+        $this->connection = $connection;
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -823,12 +827,23 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
 
            // $firstParentDocumentId = $parentDocuments[0]->getId();
 
+           if ($this->ruleHasLookups($rule)
+        && $rule->getConnectorSource()->getSolution()->getName() === 'suitecrm'
+           ) {
+            $lookupData = $this->getLookupData($rule, $sourceData);
+            $mappedData = $this->extractFieldAndRule($lookupData);
+            $extractedDirectLink = $this->extractDirectLink($sourceData);
+            $linkedData = $this->generateLinkToSource($sourceData, $mappedData, $extractedDirectLink);
+
+           }
+
             // Call the view
             return $this->render(
                 'Flux/view/view.html.twig',
                 [
                     'current_document' => $id,
                     'source' => $sourceData,
+                    'linkedData' => $linkedData ?? null,
                     'target' => $targetData,
                     'history' => $historyData,
                     'doc' => $doc[0],
@@ -867,6 +882,99 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         }
     }
 
+    public function extractDirectLink($sourceData): string {
+
+        if (!isset($sourceData['direct_link'])) {
+            return '';
+        }
+        $link = $sourceData['direct_link'];
+        $extractedLeftPortionOfLink = explode('#', $link);
+        $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
+
+        return $updatedLink;
+    }
+
+    public function generateLinkToSource($sourceData, $mappedData, $extractedDirectLink): array {
+
+$result = [];
+
+        // for each element of the array, we will generate a link to the source record
+        // we will use the rule to find the source module
+        foreach ($mappedData as $item) {
+            // get the rule of the item
+            $rule = $this->getDoctrine()->getRepository(Rule::class)->find($item['rule']);
+            $module = strtolower($rule->getModuleSource());
+            $link = $extractedDirectLink . "#/" .$module.'/record/'. $sourceData[$item['field']];
+            $result[$item['field']] = $link;
+        }
+
+        return $result;
+    }
+
+    function extractFieldAndRule($lookupData) {
+        $result = [];
+    
+        foreach ($lookupData as $item) {
+            if (isset($item['formula'])) {
+                // Updated regex to handle lookup formulas with optional parameters
+                if (preg_match('/lookup\(\{(.+?)\},\s*"(.+?)"(?:\s*,\s*[^,\)]*)*\)/', $item['formula'], $matches)) {
+                    $result[] = [
+                        'field' => $matches[1],
+                        'rule' => $matches[2]
+                    ];
+                }
+            }
+        }
+    
+        return $result;
+    }
+    
+
+    public function ruleHasLookups($rule): bool {
+        // Prepare the SQL query to fetch rows from rulefield where rule_id matches
+        $sql = 'SELECT formula FROM rulefield WHERE rule_id = :rule_id';
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':rule_id', $rule->getId());
+        $result = $stmt->executeQuery();
+        
+        // Fetch all results
+        $results = $result->fetchAllAssociative();
+        
+        // Check if any formula contains the string "lookup"
+        foreach ($results as $result) {
+            if (!empty($result['formula']) && strpos($result['formula'], 'lookup') !== false) {
+                return true;
+            }
+        }
+        
+        // Return false if no formula contains "lookup"
+        return false;
+    }
+
+    public function getLookupData($rule, $sourceData): array {
+        // in this function, we will want to obtain a link that leads to the actual data in the source solution
+        // for instance, if we have a lookup on the field assigned_user_id, we will want to get a link to the user record in SuiteCRM following the formula lookup({assigned_user_id},"66b3539fde732")
+        // it will be the module user because we will find in the rule 66b3539fde732 the associated module
+        // Users
+
+        // we start by getting the formula of the rule
+        $sql = 'SELECT formula FROM rulefield WHERE rule_id = :rule_id';
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':rule_id', $rule->getId());
+        $result = $stmt->executeQuery();
+        
+        // Fetch all results
+        $results = $result->fetchAllAssociative();
+        $resultsNonEmpty = [];
+        foreach ($results as $result) {
+            if (!empty($result['formula'])) {
+                $resultsNonEmpty[] = $result;
+            }
+        }
+
+        return $resultsNonEmpty;
+    }
+
     /**
      * @Route("/flux/save", name="flux_save")
      */
@@ -874,7 +982,7 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
     {
         if ('POST' == $request->getMethod()) {
             // Get the field and value from the request
-            $fields = strip_tags($request->request->get('fields'));
+            $fields = trim(strip_tags($request->request->get('fields')));
             $value = strip_tags($request->request->get('value'));
 
             if (isset($value)) {

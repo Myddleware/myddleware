@@ -172,15 +172,6 @@
     "gedmo/doctrine-extensions": {
         "version": "v3.2.0"
     },
-    "guzzlehttp/guzzle": {
-        "version": "6.5.5"
-    },
-    "guzzlehttp/promises": {
-        "version": "1.5.1"
-    },
-    "guzzlehttp/psr7": {
-        "version": "1.8.3"
-    },
     "hautelook/alice-bundle": {
         "version": "2.9",
         "recipe": {
@@ -205,9 +196,6 @@
     },
     "incenteev/composer-parameter-handler": {
         "version": "v2.1.4"
-    },
-    "javanile/vtiger-client": {
-        "version": "0.0.13"
     },
     "jetbrains/phpstorm-stubs": {
         "version": "v2019.3"
@@ -373,17 +361,11 @@
     "psr/container": {
         "version": "1.1.2"
     },
-    "psr/http-message": {
-        "version": "1.0.1"
-    },
     "psr/link": {
         "version": "1.0.0"
     },
     "psr/log": {
         "version": "1.1.4"
-    },
-    "ralouphie/getallheaders": {
-        "version": "3.0.3"
     },
     "roave/better-reflection": {
         "version": "4.12.2"
@@ -441,9 +423,6 @@
     },
     "sebastian/version": {
         "version": "3.0.2"
-    },
-    "sendinblue/api-v3-sdk": {
-        "version": "v7.4.4"
     },
     "sensio/framework-extra-bundle": {
         "version": "5.6",
