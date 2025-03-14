@@ -2752,9 +2752,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
         /**
          * TABLEAU DE BORD.
-         *
-         * @Route("/panel", name="regle_panel")
          */
+        #[Route('/panel', name: 'regle_panel')]
         public function panel(Request $request): Response
         {
             // Check if the user has completed 2FA
