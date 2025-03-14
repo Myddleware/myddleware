@@ -1,5 +1,5 @@
 security:
-    encoders:
+    password_hashers:
         App\Entity\User:
             algorithm: auto
 
@@ -20,25 +20,23 @@ security:
         api:
             pattern:   ^/api
             stateless: true
-            guard:
-                authenticators:
-                    - lexik_jwt_authentication.jwt_token_authenticator
+            jwt: ~
         dev:
             pattern: ^/(_(profiler|wdt))/
             security: false
         main:
             pattern: .*
             provider: username_provider
-            guard:
-                authenticators:
-                    - App\Security\SecurityAuthenticator
+            custom_authenticators:
+                - App\Security\SecurityAuthenticator
             remember_me:
                 secret:    "%secret%"
                 lifetime:  30000000
                 path:      /
                 domain:    ~
-            logout:        true
-            anonymous:     true
+            logout:
+                path: app_logout
+            lazy: true
             form_login:
                 use_referer: true
     role_hierarchy:
