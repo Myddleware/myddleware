@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Manages Myddleware Session ( Refactoring since the Controllers ).
@@ -12,22 +12,23 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class SessionService
 {
     const MYDDLEWARE_SESSION_INDEX = 'myddlewareSession';
-    private SessionInterface $_session;
+    private RequestStack $_requestStack;
 
     const ERROR_CREATE_RULE_INDEX = 'create_rule';
 
-    public function __construct(SessionInterface $session)
+    public function __construct(RequestStack $requestStack)
     {
-        $this->_session = $session;
+        $this->_requestStack = $requestStack;
     }
 
     public function getMyddlewareSession()
     {
-        if (!$this->_session->has(self::MYDDLEWARE_SESSION_INDEX)) {
-            $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, []);
+        $session = $this->_requestStack->getSession();
+        if (!$session->has(self::MYDDLEWARE_SESSION_INDEX)) {
+            $session->set(self::MYDDLEWARE_SESSION_INDEX, []);
         }
 
-        return $this->_session->get(self::MYDDLEWARE_SESSION_INDEX);
+        return $session->get(self::MYDDLEWARE_SESSION_INDEX);
     }
 
     //############ SOLUTION ###################
@@ -37,7 +38,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['solution']['callback'] = $solutionName;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getSolutionName()
@@ -81,7 +83,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['upload']['name'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function removeUpload()
@@ -89,7 +92,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['myddleware']['upload']);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getUploadError()
@@ -104,7 +108,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['upload']['error'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function isUploadNameExist(): bool
@@ -144,7 +149,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['animation'] = $bool;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function setParamConnectorAddType($value)
@@ -152,7 +158,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['add']['type'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorAddType()
@@ -167,7 +174,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['add']['message'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getConnectorAddMessage()
@@ -190,7 +198,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['connector']['source'] = $source;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorSource()
@@ -240,7 +249,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['connector']['source']['token'] = $token;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorSourceToken()
@@ -262,7 +272,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['connector']['source']['refreshToken'] = $refreshToken;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorSourceRefreshToken()
@@ -284,7 +295,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector'][$key]['solution']['source'] = json_encode($source);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorSolutionSource($key)
@@ -299,7 +311,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector'][$key]['solution']['target'] = json_encode($target);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorSolutionTarget($key)
@@ -314,7 +327,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['connector'][$parent][$type] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorParentType($parent, $type)
@@ -336,7 +350,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['connector']); //L391 in ConnectorController
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function removeMyddlewareConnector()
@@ -344,7 +359,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['myddleware']['connector']);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function removeConnectorAdd()
@@ -352,7 +368,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['myddleware']['connector']['add']);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function removeConnectorValues()
@@ -360,7 +377,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['myddleware']['connector']['values']);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamConnectorValues()
@@ -375,7 +393,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['values'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function isConnectorValuesExist(): bool
@@ -394,7 +413,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['myddleware']['connector']['mailchimp'][$redirectUri]['paramConnexion'] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getMailchimpParamConnexion($redirectUri)
@@ -413,7 +433,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['rule'][$key]);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function removeParamParentRule($key, $parent)
@@ -421,7 +442,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         unset($myddlewareSession['param']['rule'][$key][$parent]);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function setParamParentRule($key, $parent, $value)
@@ -429,7 +451,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key][$parent] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamParentRule($key, $parent)
@@ -444,7 +467,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['connector'][$parent] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleConnectorParent($key, $parent)
@@ -459,7 +483,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key][$parent][$name] = $value;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleParentName($key, $parent, $name)
@@ -481,7 +506,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['rulename_valide'] = $isValid;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleNameValid($key): bool
@@ -496,7 +522,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['rulename'] = $ruleName;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleName($key)
@@ -525,7 +552,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['connector']['source'] = $connectorSouceId;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleConnectorSourceId($key)
@@ -540,7 +568,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['connector']['cible'] = $connectorCibleId;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleConnectorCibleId($key)
@@ -564,7 +593,8 @@ class SessionService
             $myddlewareSession['param']['rule']['key'] = $key;
         }
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function setParamRuleLastId($key, $id)
@@ -572,7 +602,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['last_version_id'] = $id;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleLastId($key)
@@ -601,7 +632,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['source']['solution'] = $solutionName;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleSourceSolution($key)
@@ -623,7 +655,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['source'][$connectorName] = $connectorValue;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleSourceConnector($key, $connectorName)
@@ -638,7 +671,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['cible']['solution'] = $solutionName;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleCibleSolution($key)
@@ -653,7 +687,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['cible'][$connectorName] = $connectorValue;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleCibleConnector($key, $connectorName)
@@ -675,7 +710,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['reload']['params'] = json_encode($params);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleReloadParams($key)
@@ -690,7 +726,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['reload']['fields'] = json_encode($fields);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleReloadRelate($key)
@@ -705,7 +742,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['reload']['relate'] = json_encode($value);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleReloadFields($key)
@@ -720,7 +758,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['reload']['filter'] = json_encode($filter);
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleReloadFilter($key)
@@ -735,7 +774,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['source']['module'] = $moduleSource;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleSourceModule($key)
@@ -750,7 +790,8 @@ class SessionService
         $myddlewareSession = $this->getMyddlewareSession();
         $myddlewareSession['param']['rule'][$key]['source']['datereference'] = $dateReferenceSource;
 
-        $this->_session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+        $session = $this->_requestStack->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
     public function getParamRuleSourceDateReference($key)

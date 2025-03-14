@@ -13,8 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -37,13 +37,20 @@ class ManagementSMTPController extends AbstractController
     private LoggerInterface $logger;
     private TranslatorInterface $translator;
     private UserRepository $userRepository;
+    private RequestStack $requestStack;
 
 
-    public function __construct(LoggerInterface $logger, TranslatorInterface $translator, UserRepository $userRepository)
+    public function __construct(
+        LoggerInterface $logger, 
+        TranslatorInterface $translator, 
+        UserRepository $userRepository,
+        RequestStack $requestStack
+    )
     {
         $this->logger = $logger;
         $this->translator = $translator;
         $this->userRepository = $userRepository;
+        $this->requestStack = $requestStack;
     }
 
     // Function that loads the main smtp page, check for the api key and the mailer url when the user loads the page. 
@@ -309,53 +316,49 @@ class ManagementSMTPController extends AbstractController
     protected function parseYamlConfigToLocalEnv($form)
     {
         try {
-            $swiftParams = [
-                'transport' => $form->get('transport')->getData(),
-                'host' => $form->get('host')->getData(),
-                'port' => $form->get('port')->getData(),
-                'auth_mode' => $form->get('auth_mode')->getData(),
-                'encryption' => $form->get('encryption')->getData(),
-                'user' => $form->get('user')->getData(),
-                'password' => $form->get('password')->getData(),
-            ];
+            $swiftParams = [];
+            $swiftParams['transport'] = $form->get('transport')->getData();
+            $swiftParams['host'] = $form->get('host')->getData();
+            $swiftParams['port'] = $form->get('port')->getData();
+            $swiftParams['encryption'] = $form->get('encryption')->getData();
+            $swiftParams['auth_mode'] = $form->get('auth_mode')->getData();
+            $swiftParams['user'] = $form->get('user')->getData();
+            $swiftParams['password'] = $form->get('password')->getData();
+            $swiftParams['spool'] = ['type' => 'memory'];
+            $swiftParams['delivery_addresses'] = null;
+            $swiftParams['disable_delivery'] = false;
 
-            $transport = isset($swiftParams['transport']) ? $swiftParams['transport'] : null;
-            $host = isset($swiftParams['host']) ? $swiftParams['host'] : null;
-            $port = isset($swiftParams['port']) ? $swiftParams['port'] : null;
-            $auth_mode = isset($swiftParams['auth_mode']) ? $swiftParams['auth_mode'] : null;
-            $encryption = isset($swiftParams['encryption']) ? $swiftParams['encryption'] : null;
-            $user = isset($swiftParams['user']) ? $swiftParams['user'] : null;
-            $password = isset($swiftParams['password']) ? $swiftParams['password'] : null;
-            $mailerUrl = "MAILER_URL=$transport://$host:$port?encryption=$encryption&auth_mode=$auth_mode&username=$user&password=$password";
-
-            // If the mailer url is already present and identical, we do not add the line
-            $mailerUrlWithoutTitle = str_replace("MAILER_URL=", "", $mailerUrl);
-            $mailerInEnv = $this->checkIfmailerUrlInEnv();
-
-            // Put the content if the mailer is not present in the .env
-            if ($mailerInEnv === false) {
-                $currentContent = file_get_contents(self::LOCAL_ENV_FILE);
-                // Check if the last character(s) is/are PHP_EOL, if not, append it
-                if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
-                    file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
+            $mailerUrl = $swiftParams['transport'] . '://';
+            if ($swiftParams['user'] !== null && $swiftParams['user'] !== '') {
+                $mailerUrl .= $swiftParams['user'];
+                if ($swiftParams['password'] !== null && $swiftParams['password'] !== '') {
+                    $mailerUrl .= ':' . $swiftParams['password'];
                 }
-                file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl . PHP_EOL, FILE_APPEND | LOCK_EX);
+                $mailerUrl .= '@';
+            }
+            $mailerUrl .= $swiftParams['host'];
+            if ($swiftParams['port'] !== null && $swiftParams['port'] !== '') {
+                $mailerUrl .= ':' . $swiftParams['port'];
+            }
+            if ($swiftParams['encryption'] !== null && $swiftParams['encryption'] !== '') {
+                $mailerUrl .= '?encryption=' . $swiftParams['encryption'];
+            }
+            if ($swiftParams['auth_mode'] !== null && $swiftParams['auth_mode'] !== '') {
+                $mailerUrl .= '&auth_mode=' . $swiftParams['auth_mode'];
             }
 
-            // Put the content if there is already a mailer url but it is different from the current one
-            if ($mailerInEnv !== false && $mailerInEnv !== $mailerUrlWithoutTitle) {
-                $this->EmptyMailerUrlEnv();
-                $currentContent = file_get_contents(self::LOCAL_ENV_FILE);
-                // Check if the last character(s) is/are PHP_EOL, if not, append it
-                if (substr($currentContent, -strlen(PHP_EOL)) !== PHP_EOL) {
-                    file_put_contents(self::LOCAL_ENV_FILE, PHP_EOL, FILE_APPEND | LOCK_EX);
-                }
-                file_put_contents(self::LOCAL_ENV_FILE, $mailerUrl . PHP_EOL, FILE_APPEND | LOCK_EX);
-            }
+            $this->EmptyMailerUrlEnv();
+            $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+            $envFile .= "\nMAILER_URL=" . $mailerUrl;
+            file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+
+            $this->resetSwiftmailerYaml();
+            $session = $this->requestStack->getSession();
+            $session->set('success', [$this->translator->trans('management_smtp.success')]);
         } catch (Exception $e) {
-            $this->logger->error("Unable to write MAILER_URL in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
-            $session = new Session();
-            $session->set('error', [$e]);
+            $session = $this->requestStack->getSession();
+            $session->set('error', [$this->translator->trans('management_smtp.error')]);
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
@@ -365,19 +368,18 @@ class ManagementSMTPController extends AbstractController
     protected function parseApiKeyYamlConfigToLocalEnv(array $swiftParams)
     {
         try {
-            $apiKey = isset($swiftParams['ApiKey']) ? $swiftParams['ApiKey'] : null;
-            $apiKeyEnv = "SENDINBLUE_APIKEY=$apiKey";
-
-            // If the api key is already present and identical, we do not add the line
-            $apiKeyWithoutTitle = str_replace("SENDINBLUE_APIKEY=", "", $apiKeyEnv);
-            $apiKeyInEnv = $this->checkIfApiKeyInEnv();
-            if ($apiKeyInEnv === false || $apiKeyInEnv !== $apiKeyWithoutTitle) {
-                file_put_contents(self::LOCAL_ENV_FILE, $apiKeyEnv . PHP_EOL, FILE_APPEND | LOCK_EX);
-            }
+            $apiKey = $swiftParams['ApiKey'];
+            $this->EmptyApiKeyEnv();
+            $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+            $envFile .= "\nSENDINBLUE_APIKEY=" . $apiKey;
+            file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+            $this->resetSwiftmailerYaml();
+            $session = $this->requestStack->getSession();
+            $session->set('success', [$this->translator->trans('management_smtp.success')]);
         } catch (Exception $e) {
-            $this->logger->error("Unable to write SENDINBLUE_APIKEY in .env.local file : $e->getMessage() on file $e->getFile() line $e->getLine()");
-            $session = new Session();
-            $session->set('error', [$e]);
+            $session = $this->requestStack->getSession();
+            $session->set('error', [$this->translator->trans('management_smtp.error')]);
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
 
@@ -442,7 +444,7 @@ class ManagementSMTPController extends AbstractController
                 }
             } catch (Exception $e) {
                 $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-                $session = new Session();
+                $session = $this->requestStack->getSession();
                 $session->set('error', [$error]);
             }
         }
@@ -497,32 +499,38 @@ class ManagementSMTPController extends AbstractController
 
     protected function sendinblueSendMailByApiKey($textMail)
     {
-        // Get the email adresses of all ADMIN
-        $this->setEmailAddresses();
-        // Check that we have at least one email address
-        if (empty($this->emailAddresses)) {
-            throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
-        }
-        $apiKey = $textMail->get('ApiKey')->getData();
-        $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
-            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
-            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
-            foreach ($this->emailAddresses as $emailAddress) {
-                $sendSmtpEmailTo[] = array('email' => $emailAddress);
-            }
-            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $this->translator->trans('email_sendinblue.subject');
-            $sendSmtpEmail['htmlContent'] = $this->translator->trans('email_sendinblue.content');
-            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
-
-            try {
-                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
-            } catch (Exception $e) {
+        try {
+            $apiKey = $this->checkIfApiKeyInEnv();
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://api.sendinblue.com/v3/smtp/email",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => $textMail,
+                CURLOPT_HTTPHEADER => [
+                    "accept: application/json",
+                    "api-key: " . $apiKey,
+                    "content-type: application/json"
+                ],
+            ]);
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+            if ($err) {
+                $session = $this->requestStack->getSession();
+                $session->set('error', [$this->translator->trans('management_smtp.error')]);
                 return false;
+            } else {
+                return true;
             }
-
-        
-        return true;
+        } catch (Exception $e) {
+            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            return false;
+        }
     }
 
     // Add every admin email in the notification list

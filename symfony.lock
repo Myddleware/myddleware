@@ -136,9 +136,6 @@
     "fakerphp/faker": {
         "version": "v1.19.0"
     },
-    "felixfbecker/advanced-json-rpc": {
-        "version": "v3.2.1"
-    },
     "fig/link-util": {
         "version": "1.1.2"
     },
@@ -242,9 +239,6 @@
     "mautic/api-library": {
         "version": "2.16.1"
     },
-    "microsoft/tolerant-php-parser": {
-        "version": "v0.1.1"
-    },
     "monolog/monolog": {
         "version": "1.26.1"
     },
@@ -278,29 +272,17 @@
             "./config/packages/nelmio_cors.yaml"
         ]
     },
-    "netresearch/jsonmapper": {
-        "version": "v4.0.0"
-    },
     "nikic/php-parser": {
         "version": "v4.13.2"
     },
     "pagerfanta/pagerfanta": {
         "version": "v3.5.2"
     },
-    "paragonie/random_compat": {
-        "version": "v2.0.21"
-    },
-    "phan/phan": {
-        "version": "4.1.0"
-    },
     "phar-io/manifest": {
         "version": "2.0.3"
     },
     "phar-io/version": {
         "version": "3.1.1"
-    },
-    "php-cs-fixer/diff": {
-        "version": "v1.3.1"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.2.0"
@@ -369,12 +351,6 @@
     },
     "roave/better-reflection": {
         "version": "4.12.2"
-    },
-    "roave/signature": {
-        "version": "1.5.0"
-    },
-    "sabre/event": {
-        "version": "5.1.4"
     },
     "sebastian/cli-parser": {
         "version": "1.0.1"
@@ -453,9 +429,6 @@
     },
     "sugarcrm/rest-php-client": {
         "version": "V1.4.5"
-    },
-    "swiftmailer/swiftmailer": {
-        "version": "v6.3.0"
     },
     "symfony/console": {
         "version": "5.4",
@@ -563,9 +536,6 @@
     "symfony/polyfill-ctype": {
         "version": "v1.24.0"
     },
-    "symfony/polyfill-iconv": {
-        "version": "v1.24.0"
-    },
     "symfony/polyfill-intl-icu": {
         "version": "v1.24.0"
     },
@@ -581,13 +551,7 @@
     "symfony/polyfill-php56": {
         "version": "v1.20.0"
     },
-    "symfony/polyfill-php70": {
-        "version": "v1.20.0"
-    },
     "symfony/polyfill-php72": {
-        "version": "v1.24.0"
-    },
-    "symfony/polyfill-php73": {
         "version": "v1.24.0"
     },
     "symfony/polyfill-php80": {
@@ -628,20 +592,6 @@
         },
         "files": [
             "./config/packages/security.yaml"
-        ]
-    },
-    "symfony/swiftmailer-bundle": {
-        "version": "3.5",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "2.5",
-            "ref": "f0b2fccdca2dfd97dc2fd5ad216d5e27c4f895ac"
-        },
-        "files": [
-            "./config/packages/dev/swiftmailer.yaml",
-            "./config/packages/swiftmailer.yaml",
-            "./config/packages/test/swiftmailer.yaml"
         ]
     },
     "symfony/translation": {
