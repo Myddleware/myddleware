@@ -2744,9 +2744,8 @@ use App\Entity\WorkflowAction;
 
         /**
          * TABLEAU DE BORD.
-         *
-         * @Route("/panel", name="regle_panel")
          */
+        #[Route('/panel', name: 'regle_panel')]
         public function panel(Request $request): Response
         {
             $language = $request->getLocale();
