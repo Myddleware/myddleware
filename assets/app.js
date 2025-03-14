@@ -41,6 +41,9 @@ require('./js/regle.js')
 require('./js/historique.js')
 require('./js/mappingRule.js')
 
+if (window.location.href.includes('rule/list')) {
+    require('./js/rule-list.js');
+}
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');

@@ -27,24 +27,6 @@ global.path_img = '../../build/images/';
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
   $(window).on("load", function () {
-    // Bouton action "Exécuter règles actives"
-    $("#exec_all", "#rule").on("click", function (e) {
-      if (confirm(confirm_exec_all)) {
-        // Clic sur OK
-        btn_action_fct();
-      } else {
-        e.preventDefault();
-      }
-    });
-    // Bouton action "Relancer les erreurs"
-    $("#exec_error", "#rule").on("click", function (e) {
-      if (confirm(confirm_exec_error)) {
-        // Clic sur OK
-        btn_action_fct();
-      } else {
-        e.preventDefault();
-      }
-    });
     // ----------------------------- Boutons d'actions (affichage d'un loading)
     // Appelé pour: "Annuler transfert" et "Exécuter la règle"
     $(".btn_action_loading").on("click", function (e) {
