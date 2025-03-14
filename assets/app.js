@@ -55,6 +55,7 @@ if (window.location.href.includes('rule/create/step3')) {
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
+    require('./js/export-documents-csv.js');
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
