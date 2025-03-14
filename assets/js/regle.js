@@ -24,6 +24,8 @@
 
 global.path_img = '../../build/images/';
 
+console.log('loaded regle.js');
+
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
   $(window).on("load", function () {
@@ -69,18 +71,6 @@ $(function () {
   $(".tooltip").qtip(); // Infobulle
 
   notification();
-
-  // ----------------------------- List rule
-  if (typeof question !== "undefined" && question) {
-    $("#listrule .delete").on("click", function () {
-      var answer = confirm(question);
-      if (answer) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  }
 
   // ----------------------------- Step
   if (typeof onglets !== "undefined" && onglets) {

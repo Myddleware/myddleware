@@ -1,4 +1,5 @@
 global.path_img = '../../build/images/';
+console.log("rule-list.js loaded");
 
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
