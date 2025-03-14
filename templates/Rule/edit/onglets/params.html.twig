@@ -114,29 +114,38 @@
 	instance = new dtsel.DTS('input[id="datereference"]',  {
 	showTime: true
 		});
-	document.getElementById('storeReferenceDateButton').addEventListener('click', function() {
-		var dateReferenceValue = document.getElementById('datereference').value;
-		var ruleId = '{{ rule.id }}';
 
-		// Store the value in localStorage with a key that includes the rule ID
-		localStorage.setItem('dateReference_' + ruleId, dateReferenceValue);
-		
-		// Log the stored value to verify
-		console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
-	});
+	// Check if elements exist before adding event listeners
+	var storeButton = document.getElementById('storeReferenceDateButton');
+	var getButton = document.getElementById('getReferenceDateButton');
 
-	document.getElementById('getReferenceDateButton').addEventListener('click', function() {
-		var ruleId = '{{ rule.id }}';
-		var storedDateReference = localStorage.getItem('dateReference_' + ruleId);
+	if (storeButton) {
+		storeButton.addEventListener('click', function() {
+			var dateReferenceValue = document.getElementById('datereference').value;
+			var ruleId = '{{ rule.id }}';
 
-		if (storedDateReference) {
-			console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
-			// Set the retrieved value to the input field
-			document.getElementById('datereference').value = storedDateReference;
-		} else {
-			console.log('No stored date reference found for rule ' + ruleId);
-		}
-	});
+			// Store the value in localStorage with a key that includes the rule ID
+			localStorage.setItem('dateReference_' + ruleId, dateReferenceValue);
+			
+			// Log the stored value to verify
+			console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
+		});
+	}
+
+	if (getButton) {
+		getButton.addEventListener('click', function() {
+			var ruleId = '{{ rule.id }}';
+			var storedDateReference = localStorage.getItem('dateReference_' + ruleId);
+
+			if (storedDateReference) {
+				console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
+				// Set the retrieved value to the input field
+				document.getElementById('datereference').value = storedDateReference;
+			} else {
+				console.log('No stored date reference found for rule ' + ruleId);
+			}
+		});
+	}
 
 
 </script>
