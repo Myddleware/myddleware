@@ -24,27 +24,11 @@
 
 global.path_img = '../../build/images/';
 
+console.log('loaded regle.js');
+
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
   $(window).on("load", function () {
-    // Bouton action "Exécuter règles actives"
-    $("#exec_all", "#rule").on("click", function (e) {
-      if (confirm(confirm_exec_all)) {
-        // Clic sur OK
-        btn_action_fct();
-      } else {
-        e.preventDefault();
-      }
-    });
-    // Bouton action "Relancer les erreurs"
-    $("#exec_error", "#rule").on("click", function (e) {
-      if (confirm(confirm_exec_error)) {
-        // Clic sur OK
-        btn_action_fct();
-      } else {
-        e.preventDefault();
-      }
-    });
     // ----------------------------- Boutons d'actions (affichage d'un loading)
     // Appelé pour: "Annuler transfert" et "Exécuter la règle"
     $(".btn_action_loading").on("click", function (e) {
@@ -87,18 +71,6 @@ $(function () {
   $(".tooltip").qtip(); // Infobulle
 
   notification();
-
-  // ----------------------------- List rule
-  if (typeof question !== "undefined" && question) {
-    $("#listrule .delete").on("click", function () {
-      var answer = confirm(question);
-      if (answer) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  }
 
   // ----------------------------- Step
   if (typeof onglets !== "undefined" && onglets) {
@@ -1122,44 +1094,6 @@ $.fn.setCursorPosition = function(pos) {
     closeClick: true,
   });
 });
-
-// ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
-
-$("#exportfluxcsv").on("click", function () {
-  $.ajax({
-    type: "POST",
-    url: flux_export_docs_csv,
-    data: {
-      csvdocumentids: csvdocumentids,
-    },
-    xhrFields: {
-      responseType: 'blob' // Set the response type to blob
-    },
-    success: function (blob) {
-      // Create a temporary URL for the blob
-      const url = window.URL.createObjectURL(blob);
-      
-      // Create a temporary link element
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `documents_export_${new Date().toISOString().slice(0,19).replace(/[:]/g, '')}.csv`;
-      
-      // Append link to body, click it, and remove it
-      document.body.appendChild(a);
-      a.click();
-      
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    },
-    error: function(xhr, status, error) {
-      console.error('Export failed:', error);
-      alert('Failed to export CSV file. Please try again.');
-    }
-  });
-});
-
-// ---- EXPORT DOCUMENTS TO CSV  --------------------------------------------------------------------------
 
 function name_file_upload() {
   $.ajax({

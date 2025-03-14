@@ -41,9 +41,17 @@ require('./js/regle.js')
 require('./js/historique.js')
 require('./js/mappingRule.js')
 
+if (window.location.href.includes('rule/list')) {
+    require('./js/rule-list.js');
+}
+
+if (window.location.href.includes('rule/view')) {
+    require('./js/rule-detail.js');
+}
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
+    require('./js/export-documents-csv.js');
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
