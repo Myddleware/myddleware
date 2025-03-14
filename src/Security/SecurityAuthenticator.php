@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -28,7 +28,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class SecurityAuthenticator extends AbstractAuthenticator
+class SecurityAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
@@ -53,12 +53,6 @@ class SecurityAuthenticator extends AbstractAuthenticator
         $this->securityService = $securityService;
         $this->env = $kernel->getEnvironment();
         $this->translator = $translator;
-    }
-
-    public function supports(Request $request): ?bool
-    {
-        return 'login' === $request->attributes->get('_route')
-            && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport
@@ -103,12 +97,19 @@ class SecurityAuthenticator extends AbstractAuthenticator
         return new RedirectResponse($this->urlGenerator->generate('regle_panel'));
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         if ($request->hasSession()) {
             $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
         }
 
-        return new RedirectResponse($this->urlGenerator->generate('login'));
+        // Instead of redirecting, return to the login page
+        $url = $this->urlGenerator->generate('login');
+        return new RedirectResponse($url);
+    }
+
+    protected function getLoginUrl(Request $request): string
+    {
+        return $this->urlGenerator->generate('login');
     }
 }
