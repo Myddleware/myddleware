@@ -131,7 +131,7 @@ class Document
     /**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private int $deleted;
+    private bool $deleted;
 
     /**
      * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="doc_id")
@@ -328,14 +328,17 @@ class Document
         return $this->parentId;
     }
 
+    /**
+     * @param bool $deleted
+     */
     public function setDeleted($deleted): self
     {
-        $this->deleted = $deleted;
+        $this->deleted = (bool)$deleted;
 
         return $this;
     }
 
-    public function getDeleted(): int
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
