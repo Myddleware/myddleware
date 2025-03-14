@@ -40,7 +40,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -64,7 +63,7 @@ class TemplateManager
     private string $projectDir;
     private SolutionManager $solutionManager;
     private RuleManager $ruleManager;
-    private SessionInterface $session;
+    private RequestStack $requestStack;
     private TranslatorInterface $translator;
 
     public function __construct(
@@ -73,9 +72,8 @@ class TemplateManager
         KernelInterface $kernel,
         SolutionManager $solutionManager,
         RuleManager $ruleManager,
-        SessionInterface $session,
-        TranslatorInterface $translator,
         RequestStack $requestStack,
+        TranslatorInterface $translator,
         DriverConnection $dbalConnection
     ) {
         $this->logger = $logger;
@@ -83,7 +81,7 @@ class TemplateManager
         $this->connection = $dbalConnection;
         $this->solutionManager = $solutionManager;
         $this->ruleManager = $ruleManager;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->translator = $translator;
         $this->projectDir = $kernel->getProjectDir();
         $this->templateDir = $this->projectDir.'/src/Templates/';
@@ -438,11 +436,11 @@ class TemplateManager
             $this->entityManager->flush();
             $this->entityManager->getConnection()->commit(); // -- COMMIT TRANSACTION
             // Set the message in Myddleware UI
-            $this->session->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
+            $this->requestStack->getSession()->set('info', [$this->translator->trans('messages.template.nb_rule').$nbRule, $this->translator->trans('messages.template.help')]);
         } catch (Exception $e) {
             // Rollback in case of error
             $this->entityManager->getConnection()->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->session->set('error', [$this->translator->trans('error.template.creation'), $e->getMessage()]);
+            $this->requestStack->getSession()->set('error', [$this->translator->trans('error.template.creation'), $e->getMessage()]);
             $error = 'Failed to generate rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
