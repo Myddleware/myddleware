@@ -45,10 +45,8 @@ class SecurityController extends AbstractController
         $this->securityService = $securityService;
     }
 
-    /**
-     * @Route("/", name="login")
-     * @Route("/login")
-     */
+    #[Route('/', name: 'login')]
+    #[Route('/login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser() instanceof User) {
@@ -94,15 +92,6 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/logout", name="logout")
-     */
-    public function logout(): Response
-    {
-        // Ignored by the system of logout @see security.yaml
-        return $this->redirectToRoute('login');
-    }
-
     private function calculBan($lastUsername)
     {
         if (isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
@@ -134,6 +123,7 @@ class SecurityController extends AbstractController
         }
     }
 
+    #[Route('/verifAccount', name: 'verif_account', methods: ['POST'])]
     public function verifAccount(Request $request): Response
     {
         try {
@@ -166,11 +156,7 @@ class SecurityController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
-     *
-     * @throws Exception
-     */
+    #[Route('/resetting/{token}', name: 'resetting_request', defaults: ['token' => null])]
     public function reset(Request $request, $token, UserPasswordHasherInterface $passwordHasher)
     {
         if (!$token) {
