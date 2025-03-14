@@ -67,3 +67,8 @@ services:
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
+
+  # Update JobManager to use RequestStack instead of SessionInterface
+  App\Manager\JobManager:
+    arguments:
+      $requestStack: '@request_stack'
