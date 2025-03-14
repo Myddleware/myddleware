@@ -49,6 +49,10 @@ if (window.location.href.includes('rule/view')) {
     require('./js/rule-detail.js');
 }
 
+if (window.location.href.includes('rule/create/step3')) {
+    require('./js/formula-wizard.js');
+}
+
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
 }
