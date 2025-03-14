@@ -14,31 +14,31 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
     protected AuthorizationCheckerInterface $authorizationChecker;
     private UserRepository $userRepository;
-    private EncoderFactoryInterface $encoder;
+    private PasswordHasherFactoryInterface $passwordHasherFactory;
     private EntityManagerInterface $entityManager;
     private NotificationManager $notificationManager;
     private SecurityService $securityService;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
-        EncoderFactoryInterface $encoder,
+        PasswordHasherFactoryInterface $passwordHasherFactory,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
         SecurityService $securityService
     ) {
         $this->authorizationChecker = $authorizationChecker;
-        $this->encoder = $encoder;
+        $this->passwordHasherFactory = $passwordHasherFactory;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
@@ -76,9 +76,9 @@ class SecurityController extends AbstractController
             // Get the admin user
             $userAdmin = $this->userRepository->loadUserByUsername('admin');
             if (!empty($userAdmin)) {
-                $encoder = $this->encoder->getEncoder($userAdmin);
+                $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($userAdmin);
                 // Compare password with admin encoded
-                if ($encoder->encodePassword('admin', $userAdmin->getSalt()) == $userAdmin->getPassword()) {
+                if ($passwordHasher->verify($userAdmin->getPassword(), 'admin')) {
                     $passwordMessage = true;
                 }
             }
@@ -171,7 +171,7 @@ class SecurityController extends AbstractController
      *
      * @throws Exception
      */
-    public function reset(Request $request, $token, UserPasswordEncoderInterface $encoder)
+    public function reset(Request $request, $token, UserPasswordHasherInterface $passwordHasher)
     {
         if (!$token) {
             $form = $this->createForm(UserForgotPasswordType::class);
@@ -213,8 +213,10 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($newEncodedPassword);
+            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+            if ($passwordHasher->isPasswordValid($user, $oldPassword)) {
+                $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
+                $user->setPassword($newHashedPassword);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 
