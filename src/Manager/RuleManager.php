@@ -1097,9 +1097,13 @@ class RuleManager
 
         $messages = array_merge($messagesSource, $messagesTarget);
         $data['testMessage'] = '';
+        
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
+        
         // Affichage des messages
         if (!empty($messages)) {
-            $session = new Session();
             foreach ($messages as $message) {
                 if ('error' == $message['type']) {
                     $errorMessages[] = $message['message'];
@@ -1109,10 +1113,10 @@ class RuleManager
                 $data['testMessage'] .= $message['type'].' : '.$message['message'].chr(10);
             }
             if (!empty($errorMessages)) {
-                $session->set('error', $errorMessages);
+                $session->getFlashBag()->set('error', $errorMessages);
             }
             if (!empty($successMessages)) {
-                $session->set('success', $successMessages);
+                $session->getFlashBag()->set('success', $successMessages);
             }
         }
     }
