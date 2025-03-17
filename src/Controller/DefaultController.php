@@ -726,8 +726,7 @@ use App\Entity\WorkflowAction;
                 $solution_source_nom = $rule->getConnectorSource()->getSolution()->getName();
 
                 // Connector source -------------------
-                $connectorParamsSource = $this->getDoctrine()
-                                                ->getManager()
+                $connectorParamsSource = $this->entityManager
                                                 ->getRepository(ConnectorParam::class)
                                                 ->findBy(['connector' => $rule->getConnectorSource()]);
                 $connectorSource['solution'] = $rule->getConnectorSource()->getSolution()->getName();
