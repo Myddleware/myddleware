@@ -1349,7 +1349,10 @@ class RuleManager
                 throw new \Exception('The PHP exec() function is disabled. Please enable it in php.ini to run background jobs.');
             }
 
-            $session = new Session();
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+            
             // create temp file
             $guid = uniqid();
 
@@ -1418,8 +1421,11 @@ class RuleManager
 
             return $result[0];
         } catch (\Exception $e) {
-            $session = new Session();
-            $session->set('error', [$e->getMessage()]);
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+            
+            $session->getFlashBag()->set('error', [$e->getMessage()]);
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return false;
