@@ -105,7 +105,7 @@ class RuleManager
         DocumentRepository $documentRepository = null,
         RouterInterface $router = null,
         KernelInterface $kernel = null,
-        SessionInterface $session = null,
+        RequestStack $requestStack = null,
         ToolsManager $tools = null,
         NotificationManager $notificationManager = null
     ) {
