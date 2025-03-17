@@ -1245,7 +1245,11 @@ class RuleManager
         $this->documentManager->setNoLock(true);
         $this->documentManager->setParam($param, true);
         $this->documentManager->unsetLock(true);
-        $session = new Session();
+        
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
+
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1255,9 +1259,9 @@ class RuleManager
 					empty($message)
 				OR $this->documentManager->getTypeError() == 'S'
 			) {
-                $session->set('success', ['Data transfer has been successfully unlocked.']);
+                $session->getFlashBag()->set('success', ['Data transfer has been successfully unlocked.']);
             } else {
-                $session->set('error', [$this->documentManager->getMessage()]);
+                $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
     }
