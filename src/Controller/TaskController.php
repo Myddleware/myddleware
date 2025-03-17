@@ -117,7 +117,7 @@ class TaskController extends AbstractController
     public function viewTask(Job $task, $page)
     {
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $task = $this->jobRepository->find($task);
             $taskId = $task->getId();
             $compact = $this->nav_pagination([
@@ -153,7 +153,7 @@ class TaskController extends AbstractController
     public function stopTask(Job $taskStop): RedirectResponse
     {
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
 
             // Get job detail
             $this->jobManager->setId($taskStop->getId());
