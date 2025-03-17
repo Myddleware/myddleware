@@ -118,7 +118,7 @@ class RuleManager
         $this->documentRepository = $documentRepository;
         $this->tools = $tools;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
