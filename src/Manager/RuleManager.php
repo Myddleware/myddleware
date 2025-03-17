@@ -86,7 +86,7 @@ class RuleManager
     protected ?SolutionManager $solutionManager;
     private ?DocumentRepository $documentRepository;
     private ?RuleOrderRepository $ruleOrderRepository;
-    private ?SessionInterface $session;
+    private ?RequestStack $requestStack;
     protected FormulaManager $formulaManager;
     private $dataSource;
     private ?NotificationManager $notificationManager;
