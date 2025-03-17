@@ -1215,16 +1215,19 @@ class RuleManager
 		// TO BE TESTED and REPLACE the 4 lines above
 		// $this->documentManager->setId($id_document);
         $this->documentManager->documentCancel();
-        $session = new Session();
+
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
         // On affiche alors le message directement dans Myddleware
         if (empty($this->jobId)) {
             if (empty($message)) {
-                $session->set('success', ['Data transfer has been successfully cancelled.']);
+                $session->getFlashBag()->set('success', ['Data transfer has been successfully cancelled.']);
             } else {
-                $session->set('error', [$this->documentManager->getMessage()]);
+                $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
     }
