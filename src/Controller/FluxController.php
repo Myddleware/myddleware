@@ -176,8 +176,7 @@ class FluxController extends AbstractController
         $em = $this->entityManager;
 
         if ($this->getUser()->isAdmin()) {
-            $rule = $this->getDoctrine()
-                ->getManager()
+            $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findBy(['deleted' => 0]);
         } else {
@@ -902,7 +901,7 @@ $result = [];
         // we will use the rule to find the source module
         foreach ($mappedData as $item) {
             // get the rule of the item
-            $rule = $this->getDoctrine()->getRepository(Rule::class)->find($item['rule']);
+            $rule = $this->entityManager->getRepository(Rule::class)->find($item['rule']);
             $module = strtolower($rule->getModuleSource());
             $link = $extractedDirectLink . "#/" .$module.'/record/'. $sourceData[$item['field']];
             $result[$item['field']] = $link;
