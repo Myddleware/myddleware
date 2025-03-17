@@ -1440,7 +1440,11 @@ class RuleManager
     protected function rerun($id_document): array
     {
 		try {
-			$session = new Session();
+			
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+
 			$msg_error = [];
 			$msg_success = [];
 			$msg_info = [];
@@ -1551,13 +1555,13 @@ class RuleManager
 			// If the job is manual, we display error in the UI
 			if ($this->manual) {
 				if (!empty($msg_error)) {
-					$session->set('error', $msg_error);
+					$session->getFlashBag()->set('error', $msg_error);
 				}
 				if (!empty($msg_success)) {
-					$session->set('success', $msg_success);
+					$session->getFlashBag()->set('success', $msg_success);
 				}
 				if (!empty($msg_info)) {
-					$session->set('info', $msg_info);
+					$session->getFlashBag()->set('info', $msg_info);
 				}
 			}
 		} catch (Exception $e) {
