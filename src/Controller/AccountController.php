@@ -195,7 +195,7 @@ class AccountController extends AbstractController
      */
     public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $user = $this->getUser();
         $form = $this->createForm(UpdatePasswordType::class, $user);
         $form->handleRequest($request);

@@ -240,7 +240,7 @@ class WorkflowController extends AbstractController
         try {
 
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowSearchResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowSearchResult[0];
 
@@ -269,7 +269,7 @@ class WorkflowController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
         $workflow = $workflowArray[0];
 
@@ -330,7 +330,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
 
@@ -362,7 +362,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
 
@@ -420,7 +420,7 @@ class WorkflowController extends AbstractController
 
         try {
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = new Workflow();
             $workflow->setId(uniqid());
             // set rule to the workflow
@@ -472,7 +472,7 @@ class WorkflowController extends AbstractController
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = new Workflow();
             $workflow->setId(uniqid());
             $form = $this->createForm(WorkflowType::class, $workflow, [
@@ -518,7 +518,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
@@ -566,7 +566,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowArray[0];
 

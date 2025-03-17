@@ -1454,7 +1454,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
                 // Add rule param if exist (the aren't exist in rule creation)
                 $ruleParams = [];
-                $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
+                $ruleParamsResult = $this->entityManager->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
                 if (!empty($ruleParamsResult)) {
                     foreach ($ruleParamsResult as $ruleParamsObj) {
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
@@ -1843,7 +1843,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
                 // -- Relation
                 // Rule list with the same connectors (both directions) to get the relate ones
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2097,7 +2097,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                         ->findBy(['rule' => $ruleKey]);
 
                 // we want to make a request that fetches all the rule names and ids, so we can display them in the form
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2655,7 +2655,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
               
                   $this->entityManager->flush();
               }
-                    // $this->getDoctrine()->getManager()->flush();
+                    // $this->entityManager->flush();
                 // }
                 // if (!empty($request->request->get('filter'))) {
                 //     foreach ($request->request->get('filter') as $filter) {
@@ -3191,7 +3191,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
             'rule' => $ruleId,
             'name' => 'description'
@@ -3232,7 +3232,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $ruleId = $request->request->get('ruleId');
         $name = $request->request->get('ruleName');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
 
         if (!$rule) {
@@ -3259,7 +3259,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $name = $request->query->get('ruleName');
         $ruleId = $request->query->get('ruleId');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
 
         $ruleRepository = $entityManager->getRepository(Rule::class);
 
@@ -3339,7 +3339,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $fieldName = $request->query->get('lookupfieldName');
         $currentRuleId = $request->query->get('currentRule');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $currentRule = $entityManager->getRepository(Rule::class)->findOneBy(['id' => $currentRuleId]);
 
         // from the current rule, get the formulas

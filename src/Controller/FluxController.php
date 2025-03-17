@@ -114,7 +114,7 @@ class FluxController extends AbstractController
      */
     public function fluxErrorByRule($id): RedirectResponse
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
 
         if ($this->getUser()->isAdmin()) {
             $list_fields_sql =
@@ -173,7 +173,7 @@ class FluxController extends AbstractController
         }
         //---
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
 
         if ($this->getUser()->isAdmin()) {
             $rule = $this->getDoctrine()
@@ -291,7 +291,7 @@ class FluxController extends AbstractController
         }
 
         // Get the limit parameter
-        $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+        $configRepository = $this->entityManager->getRepository(Config::class);
         $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
         if (!empty($searchLimit)) {
             $limit = $searchLimit->getValue();
@@ -526,7 +526,7 @@ class FluxController extends AbstractController
                     .$where.
             " ORDER BY document.date_modified DESC"
             ." LIMIT ". $limit;
-        $stmt = $this->getDoctrine()->getManager()->getConnection()->prepare($query);
+        $stmt = $this->entityManager->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content
         if (!empty($data['source_content'])) {
@@ -607,7 +607,7 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
             $logPage = $request->attributes->get('logPage', 1);
 
             $session = $request->getSession();
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
 
             $list_fields_sql = ['id' => $id];
 
@@ -987,7 +987,7 @@ $result = [];
 
             if (isset($value)) {
                 // get the EntityManager
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->entityManager;
                 // Get target data for the document
                 $documentDataEntity = $em->getRepository(DocumentData::class)
                     ->findOneBy(
@@ -1062,7 +1062,7 @@ $result = [];
         try {
             if (!empty($id)) {
                 // Get the rule id and the source_id from the document id
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->entityManager;
                 $doc = $em->getRepository(Document::class)->find($id);
                 if (!empty($doc)) {
                     if (!empty($doc->getSource())) {
@@ -1250,7 +1250,7 @@ $result = [];
     {
         try {
             // Get document data
-            $documentDataEntity = $this->getDoctrine()->getManager()->getRepository(DocumentData::class)
+            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
                 ->findOneBy(
                     [
                         'doc_id' => $id,
