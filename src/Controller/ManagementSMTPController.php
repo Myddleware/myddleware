@@ -5,9 +5,6 @@ namespace App\Controller;
 use App\Form\ManagementSMTPType;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Swift_Mailer;
-use Swift_SendmailTransport;
-use Swift_SmtpTransport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Dotenv\Dotenv;
@@ -21,17 +18,16 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Repository\UserRepository;
 
-use Swift_Message;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
 
 /**
  * @Route("/rule")
  */
 class ManagementSMTPController extends AbstractController
 {
-    const PATH = './../config/swiftmailer.yaml';
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
-    const PATHNOTIFICATION = './../config/packages/swiftmailer.yaml';
-
 
     protected $tools;
     private LoggerInterface $logger;
@@ -89,7 +85,7 @@ class ManagementSMTPController extends AbstractController
                 $this->envMailerUrlVsApiKey($form);
             }
             if ($form->isValid() && $form->isSubmitted()) {
-                $this->putParamsInSwiftMailerYaml($form);
+                $this->putMailerConfig($form);
                 if (!empty($isMailSent)) {
                     if ($isMailSent === true) {
                         $success = $this->translator->trans('email_validation.success');
@@ -143,21 +139,18 @@ class ManagementSMTPController extends AbstractController
     // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
     public function EmptyMailerUrlEnv()
     {
-        // Finds the api key and removes it
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $linesEnv = explode("\n", $envFile);
         $lineCounter = 0;
         foreach ($linesEnv as $line) {
-            if (strpos($line, "MAILER_URL") !== false) {
+            if (strpos($line, "MAILER_DSN") !== false) {
                 unset($linesEnv[$lineCounter]);
             }
             $lineCounter++;
         }
         $envFileFinal = implode("\n", $linesEnv);
-        // Clears the .env
         $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
         fclose($clearContentOfDotEnv);
-        // Refills the content with everythintg but the api key
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
     // Function to create the mail mailing form.
@@ -197,7 +190,7 @@ class ManagementSMTPController extends AbstractController
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
         }
-        $mailerUrlEnv = getenv('MAILER_URL');
+        $mailerUrlEnv = getenv('MAILER_DSN');
         if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
 
             $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
@@ -244,57 +237,106 @@ class ManagementSMTPController extends AbstractController
         return $form;
     }
 
-    // Takes MAILER_URL and turns it into an array with all parameters
+    // Takes MAILER_DSN and turns it into an array with all parameters
     public function envMailerUrlToArray(string $envString): array
     {
-        $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
-        $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
-        $envArrayBeforeSplitHostPort = explode($delimiters[0], $envStringQuestionMarks);
-        $noTsplitHostPort = $envArrayBeforeSplitHostPort[0];
-        $splitHostPort = explode(':', $noTsplitHostPort);
-        $port = $splitHostPort[2];
-        $hostWithSlashes = $splitHostPort[1];
-        $hostWithoutSlashes = substr($hostWithSlashes, 2);
-        $hostAndPort = [$hostWithoutSlashes, $port];
-
-        $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
-        $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
-        return $envArray;
+        try {
+            // Initialize default values
+            $result = [
+                '', // host
+                '', // port
+                '', // encryption
+                '', // auth_mode
+                '', // username
+                ''  // password
+            ];
+            
+            // Remove the transport prefix (smtp://, sendmail://, etc.)
+            $withoutTransport = preg_replace('#^[^:]+://#', '', $envString);
+            
+            // Split credentials and host
+            if (strpos($withoutTransport, '@') !== false) {
+                list($credentials, $hostPart) = explode('@', $withoutTransport);
+                
+                // Parse credentials
+                if (strpos($credentials, ':') !== false) {
+                    list($username, $password) = explode(':', $credentials);
+                    $result[4] = urldecode($username); // username
+                    $result[5] = urldecode($password); // password
+                } else {
+                    $result[4] = urldecode($credentials); // username only
+                }
+            } else {
+                $hostPart = $withoutTransport;
+            }
+            
+            // Parse host and port
+            if (strpos($hostPart, ':') !== false) {
+                list($host, $portAndParams) = explode(':', $hostPart, 2);
+                $result[0] = $host; // host
+                
+                // Split port and parameters
+                if (strpos($portAndParams, '?') !== false) {
+                    list($port, $params) = explode('?', $portAndParams, 2);
+                    $result[1] = $port; // port
+                    
+                    // Parse parameters
+                    $parameters = [];
+                    parse_str($params, $parameters);
+                    
+                    if (isset($parameters['encryption'])) {
+                        $result[2] = $parameters['encryption']; // encryption
+                    }
+                    if (isset($parameters['auth_mode'])) {
+                        $result[3] = $parameters['auth_mode']; // auth_mode
+                    }
+                } else {
+                    $result[1] = $portAndParams; // port only
+                }
+            } else {
+                $result[0] = $hostPart; // host only
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            $this->logger->error('Error parsing DSN: ' . $e->getMessage());
+            // Return array with empty values to prevent undefined index errors
+            return ['', '', '', '', '', ''];
+        }
     }
 
     /**
      * set data form from files parameter_stml.yml. - this is for Myddleware 2.
      */
-    private function putParamsInSwiftMailerYaml($form)
+    private function putMailerConfig($form)
     {
         $transport = $form->get('transport')->getData();
         if ($transport == 'sendinblue') {
             $transport = 'smtp';
         }
-        $array = ['swiftmailer' => [
-            'transport' => $transport,
-            'host' => $form->get('host')->getData(),
-            'port' => $form->get('port')->getData(),
-            'auth_mode' => $form->get('auth_mode')->getData(),
-            'encryption' => $form->get('encryption')->getData(),
-            'user' => $form->get('user')->getData(),
-            'password' => $form->get('password')->getData(),
-        ]];
-        $yaml = Yaml::dump($array);
-        file_put_contents(self::PATH, $yaml);
 
-        // Exports config data to notification config file
-        $arrayNotification = ['swiftmailer' => [
-            'transport' => $transport,
-            'host' => $form->get('host')->getData(),
-            'port' => $form->get('port')->getData(),
-            'auth_mode' => $form->get('auth_mode')->getData(),
-            'encryption' => $form->get('encryption')->getData(),
-            'username' => $form->get('user')->getData(),
-            'password' => $form->get('password')->getData(),
-        ]];
-        $yamlNotification = Yaml::dump($arrayNotification);
-        file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
+        // Create DSN string
+        $dsn = sprintf(
+            '%s://%s%s@%s:%d',
+            $transport,
+            urlencode($form->get('user')->getData()),
+            $form->get('password')->getData() ? ':' . urlencode($form->get('password')->getData()) : '',
+            $form->get('host')->getData(),
+            $form->get('port')->getData()
+        );
+
+        if ($form->get('encryption')->getData()) {
+            $dsn .= '?encryption=' . $form->get('encryption')->getData();
+        }
+        if ($form->get('auth_mode')->getData()) {
+            $dsn .= ($form->get('encryption')->getData() ? '&' : '?') . 'auth_mode=' . $form->get('auth_mode')->getData();
+        }
+
+        // Update .env.local file
+        $this->EmptyMailerUrlEnv();
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        $envFile .= "\nMAILER_DSN=" . $dsn;
+        file_put_contents(self::LOCAL_ENV_FILE, $envFile);
     }
 
     // If there is no api key in the .env, takes data from swiftmailer and puts it in the .env as MAILER_URL
@@ -349,10 +391,9 @@ class ManagementSMTPController extends AbstractController
 
             $this->EmptyMailerUrlEnv();
             $envFile = file_get_contents(self::LOCAL_ENV_FILE);
-            $envFile .= "\nMAILER_URL=" . $mailerUrl;
+            $envFile .= "\nMAILER_DSN=" . $mailerUrl;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
 
-            $this->resetSwiftmailerYaml();
             $session = $this->requestStack->getSession();
             $session->set('success', [$this->translator->trans('management_smtp.success')]);
         } catch (Exception $e) {
@@ -373,7 +414,6 @@ class ManagementSMTPController extends AbstractController
             $envFile = file_get_contents(self::LOCAL_ENV_FILE);
             $envFile .= "\nSENDINBLUE_APIKEY=" . $apiKey;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
-            $this->resetSwiftmailerYaml();
             $session = $this->requestStack->getSession();
             $session->set('success', [$this->translator->trans('management_smtp.success')]);
         } catch (Exception $e) {
@@ -392,7 +432,7 @@ class ManagementSMTPController extends AbstractController
     {
         if ($form->get('transport')->getData() === "sendinblue") {
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
-        }else {
+        } else {
             // Standard email
             $host = $form->get('host')->getData();
             $port = $form->get('port')->getData();
@@ -401,71 +441,72 @@ class ManagementSMTPController extends AbstractController
             $encryption = $form->get('encryption')->getData();
             $password = $form->get('password')->getData();
             $user_email = $this->getUser()->getEmail();
-            if ('sendmail' == $form->get('transport')->getData()) {
-                // Create the Transport for sendmail
-                $transport = new Swift_SendmailTransport();
-            } else {
-                // Create the Transport for gmail and smtp
-                $transport = new Swift_SmtpTransport($host, $port);
-                if (!empty($user)) {
-                    $transport->setUsername($user);
-                    $transport->setPassword($password);
-                }
-                if (!empty($auth_mode)) {
-                    $transport->setAuthMode($auth_mode);
-                }
-                if (!empty($encryption)) {
-                    $transport->setEncryption($encryption);
-                }
-            }
 
-            // Create the Mailer using your created Transport
-            $mailer = new Swift_Mailer($transport);
-            $subject = $this->translator->trans('management_smtp_sendmail.subject');
             try {
+                // Create DSN
+                $dsn = sprintf(
+                    '%s://%s%s@%s:%d',
+                    $form->get('transport')->getData(),
+                    urlencode($user),
+                    $password ? ':' . urlencode($password) : '',
+                    $host,
+                    $port
+                );
+
+                if ($encryption) {
+                    $dsn .= '?encryption=' . $encryption;
+                }
+                if ($auth_mode) {
+                    $dsn .= ($encryption ? '&' : '?') . 'auth_mode=' . $auth_mode;
+                }
+
+                // Create the Transport
+                $transport = Transport::fromDsn($dsn);
+                
+                // Create the Mailer
+                $mailer = new Mailer($transport);
+
                 // Check that we have at least one email address
                 if (empty($user_email)) {
                     throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
                 }
-                $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . chr(10);
-                $textMail .= $this->translator->trans('email_notification.best_regards') . chr(10) . $this->translator->trans('email_notification.signature');
-                $message = (new \Swift_Message($subject));
-                $message
-                    ->setFrom((!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'))
-                    ->setBody($textMail);
-                $message->setTo($user_email);
-                $send = $mailer->send($message);
-                $this->resetSwiftmailerYaml();
-                if (!$send) {
-                    $this->logger->error('Failed to send email : ' . $textMail . ' to ' . $user_email);
-                    throw new Exception('Failed to send email : ' . $textMail . ' to ' . $user_email);
-                } else {
-                    $isRegularEmailSent = true;
-                }
+
+                $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . "\n";
+                $textMail .= $this->translator->trans('email_notification.best_regards') . "\n" . $this->translator->trans('email_notification.signature');
+
+                // Create the email
+                $email = (new Email())
+                    ->from(!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com')
+                    ->to($user_email)
+                    ->subject($this->translator->trans('management_smtp_sendmail.subject'))
+                    ->text($textMail);
+
+                // Send the email
+                $mailer->send($email);
+                $isRegularEmailSent = true;
+
             } catch (Exception $e) {
                 $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
                 $session = $this->requestStack->getSession();
                 $session->set('error', [$error]);
+                $isRegularEmailSent = false;
             }
         }
 
-
-    // Error message if the api mail didn't work    
-    if (isset($isApiEmailSent)) {
-        if ($isApiEmailSent === false) {
-            $failed = $this->translator->trans('email_validation.error');
-            $this->addFlash('error', $failed);
+        // Error message if the api mail didn't work    
+        if (isset($isApiEmailSent)) {
+            if ($isApiEmailSent === false) {
+                $failed = $this->translator->trans('email_validation.error');
+                $this->addFlash('error', $failed);
+            }
         }
-    }
 
-    if (isset($isRegularEmailSent)) {
-        if ($isRegularEmailSent === false) {
-            $failed = $this->translator->trans('email_validation.error');
-            $this->addFlash('error', $failed);
+        if (isset($isRegularEmailSent)) {
+            if ($isRegularEmailSent === false) {
+                $failed = $this->translator->trans('email_validation.error');
+                $this->addFlash('error', $failed);
+            }
         }
-    }
-
-
 
         // Adds a return value to the function to allow the index to display the success and error message.
         $isFinalEmailSent = false;
@@ -547,7 +588,7 @@ class ManagementSMTPController extends AbstractController
         $mailerUrlEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $mailerUrlEnv = $_ENV['MAILER_URL'];
+            $mailerUrlEnv = $_ENV['MAILER_DSN'];
             if (!(isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false)) {
                 $mailerUrlEnv = false;
             }
@@ -566,36 +607,5 @@ class ManagementSMTPController extends AbstractController
             }
         }
         return $apiKeyEnv;
-    }
-
-    /**
-     * set data form from files parameter_stml.yml. - this is for Myddleware 2.
-     */
-    private function resetSwiftmailerYaml()
-    {
-        $array = ['swiftmailer' => [
-            'transport' => "gmail",
-            'host' => "smtp.gmail.com",
-            'port' => 465,
-            'auth_mode' => "login",
-            'encryption' => "ssl",
-            'user' => null,
-            'password' => null,
-        ]];
-        $yaml = Yaml::dump($array);
-        file_put_contents(self::PATH, $yaml);
-
-        // Exports config data to notification config file
-        $arrayNotification = ['swiftmailer' => [
-            'transport' => "gmail",
-            'host' => "smtp.gmail.com",
-            'port' => 465,
-            'auth_mode' => "login",
-            'encryption' => "ssl",
-            'username' => null,
-            'password' => null,
-        ]];
-        $yamlNotification = Yaml::dump($arrayNotification);
-        file_put_contents(self::PATHNOTIFICATION, $yamlNotification);
     }
 }
