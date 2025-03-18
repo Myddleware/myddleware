@@ -54,15 +54,7 @@
 					{% if f.getFormula %}
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
 							:
-							{% if 'lookup' in f.getFormula and f.getFormula|length <= 50 %}
-								{{ render(controller('App\\Controller\\DefaultController::getFirstPartOfLookupFormula', {'formula': f.getFormula})) }}
-								<a href="{{ path('regle_open', {'id': f.getRuleidFromFormula()}) }}">
-									{{ render(controller('App\\Controller\\DefaultController::getRuleNameById', {'id': f.getRuleidFromFormula()})) }}
-								</a>
-								{{ render(controller('App\\Controller\\DefaultController::getSecondPartOfLookupFormula', {'formula': f.getFormula})) }}
-							{% else %}
-								{{ f.getFormula }}
-							{% endif %}
+							{{ f.getFormula }}
 						</p>
 					{% else %}
 						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
