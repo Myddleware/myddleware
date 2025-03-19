@@ -40,7 +40,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 
@@ -115,7 +115,7 @@ class AccountController extends AbstractController
     /**
      * @Route("/account", name="my_account")
      */
-    public function myAccount(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
+    public function myAccount(Request $request, UserPasswordHasherInterface $hasher, UserManagerInterface $userManager): Response
     {
         $user = $this->getUser();
         $em = $this->entityManager;
@@ -140,7 +140,7 @@ class AccountController extends AbstractController
      *
      * @Route("/account/reset-password", name="my_account_reset_password")
      */
-    public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
+    public function resetPasswordAction(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
         $em = $this->entityManager;
         $user = $this->getUser();
@@ -149,9 +149,9 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $oldPassword = $request->request->get('reset_password')['oldPassword'];
             // first we test whether the old password input is correct
-            if ($encoder->isPasswordValid($user, $oldPassword)) {
-                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($newEncodedPassword);
+            if ($hasher->isPasswordValid($user, $oldPassword)) {
+                $newHashedPassword = $hasher->hashPassword($user, $user->getPlainPassword());
+                $user->setPassword($newHashedPassword);
                 $em->persist($user);
                 $em->flush();
                 $success = $translator->trans('password_reset.success');
