@@ -34,6 +34,17 @@ class suitecrm8 extends solution
 	protected $baseUrl;
 	protected $componentUrl = '/Api/';
 	
+	protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+		
+	protected array $FieldsDuplicate = [
+		'Contacts' => ['email1', 'last_name'],
+		'Accounts' => ['email1', 'name'],
+		'Users' => ['email1', 'last_name'],
+		'Leads' => ['email1', 'last_name'],
+		'Prospects' => ['email1', 'name'],
+		'default' => ['name'],
+    ];
+	
 	public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -98,14 +109,11 @@ class suitecrm8 extends solution
         ];
     }
 	
-	
-    // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
+	// Get the module list
+	public function get_modules($type = 'source')
     {
         try {
 			$moduleData = $this->call('GET', 'V8/meta/modules'); 
-// $moduleData = $this->call('GET', 'V8/module/ProspectLists'); 
-// return $moduleData;
 			if (!empty($moduleData['data']['attributes'])) {
 				foreach($moduleData['data']['attributes'] as $key => $module) {
 					$modules[$key] = $module['label'];
@@ -117,6 +125,161 @@ class suitecrm8 extends solution
         }
     }
 	
+	// Get the field of the module in input
+    public function get_module_fields($module, $type = 'source', $param = null): array
+    {
+        parent::get_module_fields($module, $type);
+        try {
+			$fields = $this->call('GET', 'V8/meta/fields/'.$module); 
+			if (!empty($fields['data']['attributes'])) {
+				foreach($fields['data']['attributes'] as $key => $field) {
+					$this->moduleFields[$key] = [
+							'label' => $key,
+							'type' => 'varchar(255)',
+							'type_bdd' => 'varchar(255)',
+							'required' => (!empty($field['required']) ? 1 : 0),
+							'relate' => (!empty($field['relationship']) ? 1 : 0),
+						];
+				}
+			}
+            return $this->moduleFields;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+	
+	public function read($param)
+    {
+        try {
+			$result = array();
+			// Generate the URL
+			// Get a specific record
+            if (!empty($param['query']['id'])) {
+                $url = 'V8/module/'.$param['module'].'/'.$param['query']['id'];		
+			// Search records with orther filters
+            } elseif (!empty($param['query'])) {
+				$filter = '';
+				foreach($param['query'] as $key => $value) {
+					$filter .= 'filter['.$key.'][eq]='.$value.'&and&';
+				}
+				$filter = rtrim($filter, '&and&');
+                $url = 'V8/module/'.$param['module'].'?'.$filter;	
+			// Search by date ref
+            } else { 
+				$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+				$dateRefField = $this->getRefFieldName($param);
+				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef;	
+			}
+			$readSuite = $this->call('GET', $url); 
+			if (!empty($readSuite['data'])) {
+				// Add a dimension in case we search by id (the response is diffrent from SuiteCRM)
+				if (!empty($param['query']['id'])) {
+					$records[0] = $readSuite['data'];
+				} else {
+					$records = $readSuite['data'];
+				}
+				foreach ($records as $record) {
+					foreach($param['fields'] as $fieldName) {
+						$result[$record['id']][$fieldName] = (!empty($record['attributes'][$fieldName]) ? $record['attributes'][$fieldName] : '');
+					}
+					$result[$record['id']]['id'] = $record['id'];
+				}
+			}
+        } catch (\Exception $e) {
+            $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
+        }
+        return $result;
+    }	
+	
+	protected function create($param, $record, $idDoc = null)
+    {    
+		try {
+			// Build creation parameters
+			$parameter['data']['type']=$param['module'];
+			$parameter['data']['attributes']=$record;
+			$url = 'V8/module';
+			// Call to suiteCRM
+			$createSuite = $this->call('POST', $url, json_encode($parameter)); 
+			if (!empty($createSuite['data']['id'])) {
+				return $createSuite['data']['id'];
+			}
+			throw new \Exception('No id returned.');
+		} catch (\Exception $e) {
+            throw new \Exception('Exception during creation call: '.$e->getMessage());
+        }
+    }
+	
+	protected function update($param, $record, $idDoc = null)
+    {    
+		try {
+			// Build update parameters
+			$parameter['data']['type'] = $param['module'];
+			$parameter['data']['id'] = $record['target_id'];
+			unset($record['target_id']);
+			$parameter['data']['attributes'] = $record;
+			$url = 'V8/module';
+			// Call to suiteCRM
+			$createSuite = $this->call('PATCH', $url, json_encode($parameter)); 
+			if (!empty($createSuite['data']['id'])) {
+				return $createSuite['data']['id'];
+			}
+			throw new \Exception('No id returned.');
+		} catch (\Exception $e) {
+            throw new \Exception('Exception during update call: '.$e->getMessage());
+        }
+    }
+	
+	protected function delete($param, $record)
+    {    
+		try {
+			$url = 'V8/module/'.$param['module'].'/'.$record['target_id'];
+			// Call to suiteCRM
+			$deleteSuite = $this->call('DELETE', $url); 
+			if (!empty($deleteSuite['errors'])) {
+				throw new \Exception($deleteSuite['errors']['detail']);
+			}
+			if (array_key_exists('data',$deleteSuite)) {
+				return $record['target_id'];
+			}
+		} catch (\Exception $e) {
+            throw new \Exception('Exception during deletion call: '.$e->getMessage());
+        }
+    }
+	
+	public function getRefFieldName($param): string
+    {
+        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'])) {
+            return 'date_modified';
+        } elseif ('C' == $param['ruleParams']['mode']) {
+            return 'date_entered';
+        }
+        throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
+    }
+
+	// Convert date to Myddleware format
+    // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
+    /**
+     * @throws \Exception
+     */
+    protected function dateTimeToMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+        // We save the UTC date in Myddleware
+        $dto->setTimezone(new \DateTimeZone('UTC'));
+
+        return $dto->format('Y-m-d H:i:s');
+    }
+
+    // Convert date to SugarCRM format
+    /**
+     * @throws \Exception
+     */
+    protected function dateTimeFromMyddleware($dateTime)
+    {
+        $dto = new \DateTime($dateTime);
+        // Return date to UTC timezone
+        return $dto->format('Y-m-d\TH:i:s+00:00');
+    }	
 	// Call to SuiteCRM API
 	protected function call($method, $suffixUrl, $parameters=array())
     {
