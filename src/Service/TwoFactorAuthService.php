@@ -37,6 +37,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Dotenv\Dotenv;
+use SendinBlue\Client\Api\TransactionalEmailsApi;
+use SendinBlue\Client\Configuration;
+use GuzzleHttp\Client;
 
 class TwoFactorAuthService
 {
@@ -46,7 +49,7 @@ class TwoFactorAuthService
     private Swift_Mailer $mailer;
     private ParameterBagInterface $params;
     private SmsService $smsService;
-    private $sendinblue;
+    private ?TransactionalEmailsApi $sendinblue = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -54,7 +57,8 @@ class TwoFactorAuthService
         LoggerInterface $logger,
         Swift_Mailer $mailer,
         ParameterBagInterface $params,
-        SmsService $smsService
+        SmsService $smsService,
+        string $sendinblueApiKey = null
     ) {
         $this->entityManager = $entityManager;
         $this->twoFactorAuthRepository = $twoFactorAuthRepository;
@@ -63,12 +67,14 @@ class TwoFactorAuthService
         $this->params = $params;
         $this->smsService = $smsService;
         
-        // Initialize Sendinblue configuration if API key exists
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $apiKey = getenv('SENDINBLUE_APIKEY');
-            if ($apiKey) {
-                $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
+        // Initialize Sendinblue client if API key exists
+        if ($sendinblueApiKey) {
+            try {
+                $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $sendinblueApiKey);
+                $this->sendinblue = new TransactionalEmailsApi(new Client(), $config);
+                $this->logger->info('Sendinblue client initialized successfully');
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to initialize Sendinblue client: ' . $e->getMessage());
             }
         }
     }
@@ -117,13 +123,8 @@ class TwoFactorAuthService
     private function sendEmailCode(User $user, string $code): bool
     {
         // Check if Sendinblue API is configured
-        if ($this->sendinblue) {
+        if ($this->sendinblue instanceof TransactionalEmailsApi) {
             try {
-                $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(
-                    new \GuzzleHttp\Client(),
-                    $this->sendinblue
-                );
-                
                 $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
                 $sendSmtpEmail['to'] = [['email' => $user->getEmail()]];
                 $sendSmtpEmail['subject'] = 'Myddleware - Your verification code';
@@ -133,7 +134,7 @@ class TwoFactorAuthService
                     '<p>If you did not request this code, please ignore this email.</p>';
                 $sendSmtpEmail['sender'] = ['email' => $this->params->get('email_from', 'no-reply@myddleware.com')];
 
-                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+                $result = $this->sendinblue->sendTransacEmail($sendSmtpEmail);
                 return true;
             } catch (\Exception $e) {
                 $this->logger->error('Failed to send verification email via Sendinblue: ' . $e->getMessage());
