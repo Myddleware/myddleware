@@ -268,7 +268,7 @@ class ConnectorController extends AbstractController
                 $this->sessionService->setUploadError($error);
             } else {
                 // A list of permitted file extensions
-                $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+                $configRepository = $this->entityManager->getRepository(Config::class);
                 $extensionAllowed = $configRepository->findOneBy(['name' => 'extension_allowed']);
                 if (!empty($extensionAllowed)) {
                     $allowedJson = $extensionAllowed->getValue();
@@ -503,7 +503,7 @@ class ConnectorController extends AbstractController
             }
             try {
                 /** @var RuleRepository $ruleRepository */
-                $ruleRepository = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepository = $this->entityManager->getRepository(Rule::class);
                 // Check if a rule uses this connector (source and target)
                 $rule = $ruleRepository->findOneBy([
                     'connectorTarget' => $connector,
@@ -521,8 +521,8 @@ class ConnectorController extends AbstractController
                 } else {
                     // Flag the connector as deleted
                     $connector->setDeleted(1);
-                    $this->getDoctrine()->getManager()->persist($connector);
-                    $this->getDoctrine()->getManager()->flush();
+                    $this->entityManager->persist($connector);
+                    $this->entityManager->flush();
                 }
             } catch (\Doctrine\DBAL\DBALException $e) {
                 $session->set('error', [$e->getPrevious()->getMessage()]);

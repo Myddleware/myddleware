@@ -414,7 +414,7 @@ public function removeFilter(Request $request): JsonResponse
     {
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
 
         // Retrieve the RuleParam entity using the ruleId
         $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);

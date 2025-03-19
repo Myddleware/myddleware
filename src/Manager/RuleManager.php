@@ -46,8 +46,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
 use App\Manager\NotificationManager;
@@ -87,7 +86,7 @@ class RuleManager
     protected ?SolutionManager $solutionManager;
     private ?DocumentRepository $documentRepository;
     private ?RuleOrderRepository $ruleOrderRepository;
-    private ?SessionInterface $session;
+    private ?RequestStack $requestStack;
     protected FormulaManager $formulaManager;
     private $dataSource;
     private ?NotificationManager $notificationManager;
@@ -106,7 +105,7 @@ class RuleManager
         DocumentRepository $documentRepository = null,
         RouterInterface $router = null,
         KernelInterface $kernel = null,
-        SessionInterface $session = null,
+        RequestStack $requestStack = null,
         ToolsManager $tools = null,
         NotificationManager $notificationManager = null
     ) {
@@ -119,7 +118,7 @@ class RuleManager
         $this->documentRepository = $documentRepository;
         $this->tools = $tools;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
         $this->parameterBagInterface = $parameterBagInterface;
@@ -1098,9 +1097,13 @@ class RuleManager
 
         $messages = array_merge($messagesSource, $messagesTarget);
         $data['testMessage'] = '';
+        
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
+        
         // Affichage des messages
         if (!empty($messages)) {
-            $session = new Session();
             foreach ($messages as $message) {
                 if ('error' == $message['type']) {
                     $errorMessages[] = $message['message'];
@@ -1110,10 +1113,10 @@ class RuleManager
                 $data['testMessage'] .= $message['type'].' : '.$message['message'].chr(10);
             }
             if (!empty($errorMessages)) {
-                $session->set('error', $errorMessages);
+                $session->getFlashBag()->set('error', $errorMessages);
             }
             if (!empty($successMessages)) {
-                $session->set('success', $successMessages);
+                $session->getFlashBag()->set('success', $successMessages);
             }
         }
     }
@@ -1212,16 +1215,19 @@ class RuleManager
 		// TO BE TESTED and REPLACE the 4 lines above
 		// $this->documentManager->setId($id_document);
         $this->documentManager->documentCancel();
-        $session = new Session();
+
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
         // On affiche alors le message directement dans Myddleware
         if (empty($this->jobId)) {
             if (empty($message)) {
-                $session->set('success', ['Data transfer has been successfully cancelled.']);
+                $session->getFlashBag()->set('success', ['Data transfer has been successfully cancelled.']);
             } else {
-                $session->set('error', [$this->documentManager->getMessage()]);
+                $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
     }
@@ -1239,7 +1245,11 @@ class RuleManager
         $this->documentManager->setNoLock(true);
         $this->documentManager->setParam($param, true);
         $this->documentManager->unsetLock(true);
-        $session = new Session();
+        
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
+
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1249,9 +1259,9 @@ class RuleManager
 					empty($message)
 				OR $this->documentManager->getTypeError() == 'S'
 			) {
-                $session->set('success', ['Data transfer has been successfully unlocked.']);
+                $session->getFlashBag()->set('success', ['Data transfer has been successfully unlocked.']);
             } else {
-                $session->set('error', [$this->documentManager->getMessage()]);
+                $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
     }
@@ -1291,16 +1301,20 @@ class RuleManager
         // Set the param values and clear all document attributes
         $this->documentManager->setParam($param, true);
         $this->documentManager->changeDeleteFlag($deleteFlag);
-        $session = new Session();
+        
+        // Get the request from RequestStack
+        $requestStack = $solutionManager->getContainer()->get('request_stack');
+        $session = $requestStack->getSession();
+        
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
         // On affiche alors le message directement dans Myddleware
         if (empty($this->jobId)) {
             if (empty($message)) {
-                $session->set('success', ['Data transfer has been successfully removed.']);
+                $session->getFlashBag()->set('success', ['Data transfer has been successfully removed.']);
             } else {
-                $session->set('error', [$this->documentManager->getMessage()]);
+                $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
     }
@@ -1335,7 +1349,10 @@ class RuleManager
                 throw new \Exception('The PHP exec() function is disabled. Please enable it in php.ini to run background jobs.');
             }
 
-            $session = new Session();
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+            
             // create temp file
             $guid = uniqid();
 
@@ -1404,8 +1421,11 @@ class RuleManager
 
             return $result[0];
         } catch (\Exception $e) {
-            $session = new Session();
-            $session->set('error', [$e->getMessage()]);
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+            
+            $session->getFlashBag()->set('error', [$e->getMessage()]);
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return false;
@@ -1420,7 +1440,11 @@ class RuleManager
     protected function rerun($id_document): array
     {
 		try {
-			$session = new Session();
+			
+            // Get the request from RequestStack
+            $requestStack = $solutionManager->getContainer()->get('request_stack');
+            $session = $requestStack->getSession();
+
 			$msg_error = [];
 			$msg_success = [];
 			$msg_info = [];
@@ -1531,13 +1555,13 @@ class RuleManager
 			// If the job is manual, we display error in the UI
 			if ($this->manual) {
 				if (!empty($msg_error)) {
-					$session->set('error', $msg_error);
+					$session->getFlashBag()->set('error', $msg_error);
 				}
 				if (!empty($msg_success)) {
-					$session->set('success', $msg_success);
+					$session->getFlashBag()->set('success', $msg_success);
 				}
 				if (!empty($msg_info)) {
-					$session->set('info', $msg_info);
+					$session->getFlashBag()->set('info', $msg_info);
 				}
 			}
 		} catch (Exception $e) {
