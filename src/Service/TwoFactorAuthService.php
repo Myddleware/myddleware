@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Dotenv\Dotenv;
 
 class TwoFactorAuthService
 {
@@ -45,6 +46,7 @@ class TwoFactorAuthService
     private Swift_Mailer $mailer;
     private ParameterBagInterface $params;
     private SmsService $smsService;
+    private $sendinblue;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -60,6 +62,15 @@ class TwoFactorAuthService
         $this->mailer = $mailer;
         $this->params = $params;
         $this->smsService = $smsService;
+        
+        // Initialize Sendinblue configuration if API key exists
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $apiKey = getenv('SENDINBLUE_APIKEY');
+            if ($apiKey) {
+                $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $apiKey);
+            }
+        }
     }
 
     public function getOrCreateTwoFactorAuth(User $user): TwoFactorAuth
@@ -105,25 +116,56 @@ class TwoFactorAuthService
 
     private function sendEmailCode(User $user, string $code): bool
     {
-        $message = (new Swift_Message('Myddleware - Your verification code'))
-            ->setFrom($this->params->get('email_from', 'no-reply@myddleware.com'))
-            ->setTo($user->getEmail())
-            ->setBody(
-                '<p>Hello ' . $user->getUsername() . ',</p>' .
-                '<p>Your verification code is: <strong>' . $code . '</strong></p>' .
-                '<p>This code will expire in 1 minute.</p>' .
-                '<p>If you did not request this code, please ignore this email.</p>',
-                'text/html'
-            );
-        
-        $result = $this->mailer->send($message);
-        
-        if ($result === 0) {
-            $this->logger->error('Failed to send verification email to ' . $user->getEmail());
+        // Check if Sendinblue API is configured
+        if ($this->sendinblue) {
+            try {
+                $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(
+                    new \GuzzleHttp\Client(),
+                    $this->sendinblue
+                );
+                
+                $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
+                $sendSmtpEmail['to'] = [['email' => $user->getEmail()]];
+                $sendSmtpEmail['subject'] = 'Myddleware - Your verification code';
+                $sendSmtpEmail['htmlContent'] = '<p>Hello ' . $user->getUsername() . ',</p>' .
+                    '<p>Your verification code is: <strong>' . $code . '</strong></p>' .
+                    '<p>This code will expire in 1 minute.</p>' .
+                    '<p>If you did not request this code, please ignore this email.</p>';
+                $sendSmtpEmail['sender'] = ['email' => $this->params->get('email_from', 'no-reply@myddleware.com')];
+
+                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+                return true;
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to send verification email via Sendinblue: ' . $e->getMessage());
+                return false;
+            }
+        }
+
+        // Fallback to Swift_Mailer if Sendinblue is not configured
+        try {
+            $message = (new Swift_Message('Myddleware - Your verification code'))
+                ->setFrom($this->params->get('email_from', 'no-reply@myddleware.com'))
+                ->setTo($user->getEmail())
+                ->setBody(
+                    '<p>Hello ' . $user->getUsername() . ',</p>' .
+                    '<p>Your verification code is: <strong>' . $code . '</strong></p>' .
+                    '<p>This code will expire in 1 minute.</p>' .
+                    '<p>If you did not request this code, please ignore this email.</p>',
+                    'text/html'
+                );
+            
+            $result = $this->mailer->send($message);
+            
+            if ($result === 0) {
+                $this->logger->error('Failed to send verification email to ' . $user->getEmail());
+                return false;
+            }
+            
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send verification email: ' . $e->getMessage());
             return false;
         }
-        
-        return true;
     }
 
     private function sendSmsCode(TwoFactorAuth $twoFactorAuth, string $code): bool
