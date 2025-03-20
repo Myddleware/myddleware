@@ -61,6 +61,7 @@ class suitecrm8 extends solution
 				'client_id' => $this->paramConnexion['clientid'],
 				'client_secret' => $this->paramConnexion['clientsecret'],
 			));
+			// Call to SuiteCRM
 			curl_setopt($ch, CURLOPT_URL, $this->baseUrl.'access_token');
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
@@ -88,6 +89,7 @@ class suitecrm8 extends solution
         }
     }
 
+	// Get the field used to login into SuiteCRM
 	public function getFieldsLogin(): array
     {
         return [
@@ -147,10 +149,10 @@ class suitecrm8 extends solution
             return false;
         }
     }
-	
+
 	public function read($param)
     {
-        try {
+        try {			
 			$result = array();
 			// Generate the URL
 			// Get a specific record
@@ -310,5 +312,4 @@ class suitecrm8 extends solution
             return false;
         }
     }
-
 }
