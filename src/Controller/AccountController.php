@@ -142,8 +142,16 @@ class AccountController extends AbstractController
         $smtpConfigured = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            
+            // Check for MAILER_URL configuration
             $mailerUrl = $_ENV['MAILER_URL'] ?? null;
             if (isset($mailerUrl) && $mailerUrl !== '' && $mailerUrl !== 'null://localhost' && $mailerUrl !== false) {
+                $smtpConfigured = true;
+            }
+            
+            // Check for Sendinblue API key
+            $sendinblueApiKey = $_ENV['SENDINBLUE_APIKEY'] ?? null;
+            if (isset($sendinblueApiKey) && $sendinblueApiKey !== '') {
                 $smtpConfigured = true;
             }
         }
