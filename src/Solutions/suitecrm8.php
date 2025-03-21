@@ -34,7 +34,8 @@ class suitecrm8 extends solution
 	protected $baseUrl;
 	protected $componentUrl = '/Api/';
 	
-	protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered']];
+	
+	protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered','deleted']];
 		
 	protected array $FieldsDuplicate = [
 		'Contacts' => ['email1', 'last_name'],
