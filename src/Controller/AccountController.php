@@ -141,18 +141,22 @@ class AccountController extends AbstractController
         // Check if SMTP is configured
         $smtpConfigured = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            
-            // Check for MAILER_URL configuration
-            $mailerUrl = $_ENV['MAILER_URL'] ?? null;
-            if (isset($mailerUrl) && $mailerUrl !== '' && $mailerUrl !== 'null://localhost' && $mailerUrl !== false) {
-                $smtpConfigured = true;
-            }
-            
-            // Check for Sendinblue API key
-            $sendinblueApiKey = $_ENV['SENDINBLUE_APIKEY'] ?? null;
-            if (isset($sendinblueApiKey) && $sendinblueApiKey !== '') {
-                $smtpConfigured = true;
+            try {
+                (new Dotenv())->load(__DIR__ . '/../../.env.local');
+                
+                // Check for MAILER_URL configuration
+                $mailerUrl = $_ENV['MAILER_URL'] ?? null;
+                if (isset($mailerUrl) && $mailerUrl !== '' && $mailerUrl !== 'null://localhost' && $mailerUrl !== false) {
+                    $smtpConfigured = true;
+                }
+                
+                // Check for Sendinblue API key
+                $sendinblueApiKey = $_ENV['SENDINBLUE_APIKEY'] ?? null;
+                if (!empty($sendinblueApiKey)) {
+                    $smtpConfigured = true;
+                }
+            } catch (\Exception $e) {
+                $this->logger->warning('Error loading environment variables: ' . $e->getMessage());
             }
         }
         
@@ -167,7 +171,7 @@ class AccountController extends AbstractController
             // If SMTP is not configured, disable 2FA
             if (!$smtpConfigured && $twoFactorAuth->isEnabled()) {
                 $twoFactorAuth->setEnabled(false);
-                $this->addFlash('error', 'Two-factor authentication cannot be enabled without SMTP configuration. Please configure SMTP settings first.');
+                $this->addFlash('error', 'Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key first.');
             } else {
                 $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
             }

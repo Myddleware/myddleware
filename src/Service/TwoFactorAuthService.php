@@ -58,7 +58,7 @@ class TwoFactorAuthService
         Swift_Mailer $mailer,
         ParameterBagInterface $params,
         SmsService $smsService,
-        string $sendinblueApiKey = null
+        ?string $sendinblueApiKey = null
     ) {
         $this->entityManager = $entityManager;
         $this->twoFactorAuthRepository = $twoFactorAuthRepository;
@@ -67,8 +67,8 @@ class TwoFactorAuthService
         $this->params = $params;
         $this->smsService = $smsService;
         
-        // Initialize Sendinblue client if API key exists
-        if ($sendinblueApiKey) {
+        // Initialize Sendinblue client if API key exists and is not empty
+        if (!empty($sendinblueApiKey)) {
             try {
                 $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $sendinblueApiKey);
                 $this->sendinblue = new TransactionalEmailsApi(new Client(), $config);

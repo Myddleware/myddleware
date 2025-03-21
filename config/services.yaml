@@ -16,7 +16,7 @@ parameters:
   twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
   twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
   twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
-  sendinblue_api_key: '%env(SENDINBLUE_APIKEY)%'
+  sendinblue_api_key: '%env(default::SENDINBLUE_APIKEY)%'
 
 services:
   # default configuration for services in *this* file
