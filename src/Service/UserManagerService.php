@@ -3,21 +3,21 @@
 namespace App\Service;
 
 use Exception;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserManagerService implements UserManagerInterface
 {
-    private UserPasswordEncoderInterface $encoder;
+    private UserPasswordHasherInterface $encoder;
 
-    public function __construct(UserPasswordEncoderInterface $encoder)
+    public function __construct(UserPasswordHasherInterface $encoder)
     {
         $this->encoder = $encoder;
     }
 
     public function encodePassword(UserInterface $user, string $plainPassword): string
     {
-        return $this->encoder->encodePassword($user, $plainPassword);
+        return $this->encoder->hashPassword($user, $plainPassword);
     }
 
     public function checkPassword(UserInterface $user, string $raw): bool

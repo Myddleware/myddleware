@@ -234,8 +234,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             $session = $request->getSession();
 
             // First, checking that the rule has document not deleted
-            $docClose = $this->getDoctrine()
-                ->getManager()
+            $docClose = $this->entityManager
                 ->getRepository(Document::class)
                 ->findOneBy([
                     'rule' => $id,
@@ -250,8 +249,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             }
 
             // Then, checking that the rule has no document open or in error
-            $docErrorOpen = $this->getDoctrine()
-                ->getManager()
+            $docErrorOpen = $this->entityManager
                 ->getRepository(Document::class)
                 ->findOneBy([
                     'rule' => $id,
@@ -267,8 +265,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             }
 
             // Checking if the rule is linked to an other one
-            $ruleRelationships = $this->getDoctrine()
-                ->getManager()
+            $ruleRelationships = $this->entityManager
                 ->getRepository(RuleRelationShip::class)
                 ->findBy(['fieldId' => $id]);
 
@@ -298,8 +295,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
             if (isset($id)) {
                 // Récupère la règle en fonction de son id
-                $rule = $this->getDoctrine()
-                    ->getManager()
+                $rule = $this->entityManager
                     ->getRepository(Rule::class)
                     ->findBy($list_fields_sql);
 
@@ -314,8 +310,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 $this->getInstanceBdd();
 
                 // Remove the rule relationships
-                $ruleRelationships = $this->getDoctrine()
-                    ->getManager()
+                $ruleRelationships = $this->entityManager
                     ->getRepository(RuleRelationShip::class)
                     ->findBy(['rule' => $id]);
 
@@ -341,8 +336,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
          */
         public function displayFlux($id): RedirectResponse
         {
-            $rule = $this->getDoctrine()
-                ->getManager()
+            $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -361,8 +355,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
         public function duplicateRule($id, Request $request, TranslatorInterface $translator)
         {
             try {
-                $rule = $this->getDoctrine()
-                ->getManager()
+                $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -471,8 +464,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
         public function duplicateWorkflows($id, Rule $newRule)
         {
             // start by getting the rule fromthe id
-            $rule = $this->getDoctrine()
-                ->getManager()
+            $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -544,8 +536,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 // On récupére l'EntityManager
                 $this->getInstanceBdd();
 
-                $rule = $this->getDoctrine()
-                    ->getManager()
+                $rule = $this->entityManager
                     ->getRepository(Rule::class)
                     ->find($id);
 
@@ -659,8 +650,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                         // In a few case, the parameter could not exist, in this case we create it
                         if (empty($param)) {
                             // Create rule entity
-                            $rule = $this->getDoctrine()
-                                            ->getManager()
+                            $rule = $this->entityManager
                                             ->getRepository(Rule::class)
                                             ->findOneBy([
                                                 'id' => $id,
@@ -734,8 +724,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 $solution_source_nom = $rule->getConnectorSource()->getSolution()->getName();
 
                 // Connector source -------------------
-                $connectorParamsSource = $this->getDoctrine()
-                                                ->getManager()
+                $connectorParamsSource = $this->entityManager
                                                 ->getRepository(ConnectorParam::class)
                                                 ->findBy(['connector' => $rule->getConnectorSource()]);
                 $connectorSource['solution'] = $rule->getConnectorSource()->getSolution()->getName();
@@ -782,8 +771,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
             try {
                 // First, checking that the rule has no document open or in error
-                $docErrorOpen = $this->getDoctrine()
-                    ->getManager()
+                $docErrorOpen = $this->entityManager
                     ->getRepository(Document::class)
                     ->findOneBy([
                         'rule' => $rule,
@@ -824,8 +812,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 $this->sessionService->setParamRuleLastId($key, $rule->getId());
 
                 // Connector source -------------------
-                $connectorParamsSource = $this->getDoctrine()
-                    ->getManager()
+                $connectorParamsSource = $this->entityManager
                     ->getRepository(ConnectorParam::class)
                     ->findByConnector([$rule->getConnectorSource()]);
 
@@ -837,8 +824,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 // Connector source -------------------
 
                 // Connector target -------------------
-                $connectorParamsTarget = $this->getDoctrine()
-                    ->getManager()
+                $connectorParamsTarget = $this->entityManager
                     ->getRepository(ConnectorParam::class)
                     ->findByConnector([$rule->getConnectorTarget()]);
 
@@ -1223,13 +1209,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                             $classe = strtolower($params[0]);
                             $solution = $this->solutionManager->get($classe);
 
-                            $connector = $this->getDoctrine()
-                                ->getManager()
+                            $connector = $this->entityManager
                                 ->getRepository(Connector::class)
                                 ->find($params[1]);
 
-                            $connector_params = $this->getDoctrine()
-                                ->getManager()
+                            $connector_params = $this->entityManager
                                 ->getRepository(ConnectorParam::class)
                                 ->findBy(['connector' => $connector]);
 
@@ -1455,7 +1439,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
                 // Add rule param if exist (the aren't exist in rule creation)
                 $ruleParams = [];
-                $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
+                $ruleParamsResult = $this->entityManager->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
                 if (!empty($ruleParamsResult)) {
                     foreach ($ruleParamsResult as $ruleParamsObj) {
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
@@ -1774,8 +1758,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
                 // On ajoute des champs personnalisés à notre mapping
                 if ($fieldMappingAdd && $this->sessionService->isParamRuleLastVersionIdExist($ruleKey)) {
-                    $ruleFields = $this->getDoctrine()
-                        ->getManager()
+                    $ruleFields = $this->entityManager
                         ->getRepository(RuleField::class)
                         ->findBy(['rule' => $this->sessionService->getParamRuleLastId($ruleKey)]);
 
@@ -1844,7 +1827,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
                 // -- Relation
                 // Rule list with the same connectors (both directions) to get the relate ones
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2098,7 +2081,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                         ->findBy(['rule' => $ruleKey]);
 
                 // we want to make a request that fetches all the rule names and ids, so we can display them in the form
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2362,13 +2345,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 }
 
                 //------------ Create rule
-                $connector_source = $this->getDoctrine()
-                    ->getManager()
+                $connector_source = $this->entityManager
                     ->getRepository(Connector::class)
                     ->find($this->sessionService->getParamRuleConnectorSourceId($ruleKey));
 
-                $connector_target = $this->getDoctrine()
-                    ->getManager()
+                $connector_target = $this->entityManager
                     ->getRepository(Connector::class)
                     ->find($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
 
@@ -2656,7 +2637,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
               
                   $this->entityManager->flush();
               }
-                    // $this->getDoctrine()->getManager()->flush();
+                    // $this->entityManager->flush();
                 // }
                 // if (!empty($request->request->get('filter'))) {
                 //     foreach ($request->request->get('filter') as $filter) {
@@ -2752,9 +2733,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
         /**
          * TABLEAU DE BORD.
-         *
-         * @Route("/panel", name="regle_panel")
          */
+        #[Route('/panel', name: 'regle_panel')]
         public function panel(Request $request): Response
         {
             // Check if the user has completed 2FA
@@ -3193,7 +3173,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
             'rule' => $ruleId,
             'name' => 'description'
@@ -3234,7 +3214,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $ruleId = $request->request->get('ruleId');
         $name = $request->request->get('ruleName');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
 
         if (!$rule) {
@@ -3261,7 +3241,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $name = $request->query->get('ruleName');
         $ruleId = $request->query->get('ruleId');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
 
         $ruleRepository = $entityManager->getRepository(Rule::class);
 
@@ -3341,7 +3321,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
     {
         $fieldName = $request->query->get('lookupfieldName');
         $currentRuleId = $request->query->get('currentRule');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $currentRule = $entityManager->getRepository(Rule::class)->findOneBy(['id' => $currentRuleId]);
 
         // from the current rule, get the formulas

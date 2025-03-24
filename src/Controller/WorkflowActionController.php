@@ -171,7 +171,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionResult[0];
 
@@ -202,7 +202,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             
             if (!empty($workflowResult)) {
@@ -242,7 +242,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionResult[0];
 
@@ -273,7 +273,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
 
             if (!$workflow) {
@@ -616,7 +616,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
             if (!$workflow) {
@@ -664,7 +664,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionArray[0];
 
@@ -979,7 +979,7 @@ class WorkflowActionController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
         $workflowAction = $workflowActionArray[0];
 
@@ -1013,7 +1013,7 @@ class WorkflowActionController extends AbstractController
         }
 
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
         $workflow = $workflowArray[0];
 

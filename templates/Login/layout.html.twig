@@ -3,7 +3,7 @@
     <div>
         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             {{ 'layout.logged_in_as'|trans({'%username%': app.user.username}) }} |
-            <a href="{{ path('logout') }}">
+            <a href="{{ path('app_logout') }}">
                 {{ 'layout.logout'|trans() }}
             </a>
         {% endif %}
