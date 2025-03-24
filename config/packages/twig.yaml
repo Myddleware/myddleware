@@ -6,5 +6,11 @@ twig:
         locales: '%fallbacks%'
         entityBanner: '@App\Twig\BannerExtention'
     form_themes:
+        - '@FOSCKEditor/Form/ckeditor_widget.html.twig'
+        - 'form_div_layout.html.twig'
+        - '@EasyAdmin/crud/form_theme.html.twig'
+        - '@Recaptcha/Form/recaptcha_widget.html.twig'
+        - '@VichUploader/Form/fields.html.twig'
+        - '@TetranzSelect2Entity/Form/fields.html.twig'
         - 'bootstrap_5_layout.html.twig'
     exception_controller: null
