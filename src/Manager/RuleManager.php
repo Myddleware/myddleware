@@ -1086,7 +1086,7 @@ class RuleManager
 
     // Permet d'effectuer une action après la sauvegarde de la règle dans Myddleqare
     // Mêmes paramètres en entrée que pour la fonction beforeSave sauf que l'on a ajouté les entrées ruleId et date de référence au tableau
-    public static function afterSave($solutionManager, $data)
+    public static function afterSave($solutionManager, $data, RequestStack $requestStack)
     {
         // Contrôle sur la solution source
         $solutionSource = $solutionManager->get($data['module']['source']['solution']);
@@ -1099,7 +1099,6 @@ class RuleManager
         $data['testMessage'] = '';
         
         // Get the request from RequestStack
-        $requestStack = $solutionManager->getContainer()->get('request_stack');
         $session = $requestStack->getSession();
         
         // Affichage des messages
