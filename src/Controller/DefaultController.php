@@ -2312,12 +2312,14 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             $this->getInstanceBdd();
             $this->entityManager->getConnection()->beginTransaction();
             try {
-                /*
-                 * get rule id in the params in regle.js. In creation, regleId = 0
-                 */
-                if (!empty($request->request->get('params'))) {
-                    foreach ($request->request->get('params') as $searchRuleId) {
-                        if ('regleId' == $searchRuleId['name']) {
+                // Decode the JSON params from the request
+                $paramsRaw = $request->request->get('params');
+                $params = json_decode($paramsRaw, true); // true = associative array
+
+                // Get rule id from params
+                if (!empty($params)) {
+                    foreach ($params as $searchRuleId) {
+                        if ('regleId' === $searchRuleId['name']) {
                             $ruleKey = $searchRuleId['value'];
                             break;
                         }
@@ -2328,9 +2330,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 $tab_new_rule = $this->createListeParamsRule(
                     $request->request->get('champs'), // Fields
                     $request->request->get('formules'), // Formula
-                    $request->request->get('params') // Params
+                    $params // Decoded params
                 );
-                unset($tab_new_rule['params']['regleId']); // delete  id regle for gestion session
+                unset($tab_new_rule['params']['regleId']); // delete id regle for gestion session
 
                 // fields relate
                 if (!empty($request->request->get('duplicate'))) {
@@ -2606,50 +2608,20 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                     }
                 }
 
-                // $form = $this->createForm(RelationFilterType::class);
-                // $form->handleRequest($request);
                 //------------------------------- RuleFilter ------------------------
-                // $form->handleRequest($request);
-              //------------------------------- RuleFilter ------------------------
-              $filters = $request->request->get('filter');
+                $filters = $request->request->get('filter');
 
-              if (!empty($filters)) {
-                  foreach ($filters as $filterData) {
-                      // $filterData est un tableau contenant les valeurs des champs pour chaque élément de liste <li>
-              
-                      // Accès aux valeurs des champs individuels
-                      $fieldInput = $filterData['target'];
-                      $anotherFieldInput = $filterData['filter'];
-                      $textareaFieldInput = $filterData['value'];
-
-              
-                      // Maintenant, vous pouvez utiliser ces valeurs comme vous le souhaitez, par exemple, pour créer un objet RuleFilter
-                      $oneRuleFilter = new RuleFilter();
-                      $oneRuleFilter->setTarget($fieldInput);
-                      $oneRuleFilter->setRule($oneRule);
-              
-                      $oneRuleFilter->setType($anotherFieldInput);
-                      $oneRuleFilter->setValue($textareaFieldInput);
-              
-                      // Enregistrez votre objet RuleFilter dans la base de données
-                      $this->entityManager->persist($oneRuleFilter);
-                  }
-              
-                  $this->entityManager->flush();
-              }
-                    // $this->entityManager->flush();
-                // }
-                // if (!empty($request->request->get('filter'))) {
-                //     foreach ($request->request->get('filter') as $filter) {
-                //         $oneRuleFilter = new RuleFilter();
-                //         $oneRuleFilter->setTarget($filter['target']);
-                //         $oneRuleFilter->setRule($oneRule);
-                //         $oneRuleFilter->setType($filter['filter']);
-                //         $oneRuleFilter->setValue($filter['value']);
-                //         $this->entityManager->persist($oneRuleFilter);
-                //         $this->entityManager->flush();
-                //     }
-                // }
+                if (!empty($filters)) {
+                    foreach ($filters as $filterData) {
+                        $oneRuleFilter = new RuleFilter();
+                        $oneRuleFilter->setTarget($filterData['target']);
+                        $oneRuleFilter->setRule($oneRule);
+                        $oneRuleFilter->setType($filterData['filter']);
+                        $oneRuleFilter->setValue($filterData['value']);
+                        $this->entityManager->persist($oneRuleFilter);
+                    }
+                    $this->entityManager->flush();
+                }
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
@@ -2710,7 +2682,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                                                             'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
                                                         ],
                                                     ],
-                                                ]
+                                                ],
+                                                $this->requestStack
                 );
                 if ($this->sessionService->isParamRuleExist($ruleKey)) {
                     $this->sessionService->removeParamRule($ruleKey);
@@ -2719,7 +2692,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 
                 $rule_id = $oneRule->getId();
                 $response = ['status' => 1, 'id' => $rule_id];
-                //$response = 1;
+
             } catch (Exception $e) {
                 $this->entityManager->getConnection()->rollBack();
                 $this->logger->error('2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')'));
@@ -2727,7 +2700,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             }
 
             $this->entityManager->close();
-
             return new JsonResponse($response);
         }
 
