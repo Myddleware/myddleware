@@ -53,6 +53,7 @@ use App\Solutions\sapcrm;
 use App\Solutions\sendinblue;
 use App\Solutions\sugarcrm;
 use App\Solutions\suitecrm;
+use App\Solutions\suitecrm8;
 use App\Solutions\vtigercrm;
 use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
@@ -80,6 +81,7 @@ class SolutionManager
 							'mysql',
 							'vtigercrm',
 							'suitecrm',
+							'suitecrm8',
 							'mailchimp',
 							'prestashop',
 							'postgresql',
@@ -105,6 +107,7 @@ class SolutionManager
         mysql $mysql,
         vtigercrm $vtigercrm,
         suitecrm $suitecrm,
+        suitecrm8 $suitecrm8,
         mailchimp $mailchimp,
         prestashop $prestashop,
         postgresql $postgresql,
