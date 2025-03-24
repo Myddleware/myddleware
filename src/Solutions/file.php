@@ -299,8 +299,6 @@ class file extends solution
             if (!empty($param['ruleParams'][$file])) {
                 $offset = $param['ruleParams'][$file];
             }
-
-
 			
             // Open the file
             $sftp = ssh2_sftp($this->sshconnection);
@@ -308,12 +306,6 @@ class file extends solution
             $header = $this->getFileHeader($stream, $param);
 
             $nbCountHeader = count($header);
-
-            // set the field id to avoid error by having myddleware element id
-            if ($nbCountHeader > 0) {
-                // Set fieldId to the first field in the header
-                $param['ruleParams']['fieldId'] = $header[0];
-            }
 
             $allRuleField = $param['fields'];
             // Adding id fields "fieldId" and "fieldDateRef" of the array $param
@@ -374,7 +366,6 @@ class file extends solution
                 }
 
                 $rowFile = $this->transformRow($buffer, $param);
-
                 $checkRow = $this->checkRow($rowFile, $param);
                 if (false == $checkRow) {
                     ++$this->lineNumber;
