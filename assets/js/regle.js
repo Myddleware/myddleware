@@ -781,70 +781,108 @@ $.fn.setCursorPosition = function(pos) {
     recup_fields_relate();
   });
 
-  // Validation et vérification de l'ensemble du formulaire
-  $("#validation").on("click", function () {
-    before = $("#validation").attr("value");
+// Validation and form check
+$("#validation").on("click", function () {
+  console.log("[🔵 CLICK] Validation button clicked");
 
-    if (
-      require() &&
-      require_params() &&
-      require_relate() &&
-      duplicate_fields_error()
-    ) {
-      $.ajax({
-        type: "POST",
-        url: path_validation,
-        data: {
-          champs: recup_champs(),
-          formules: recup_formule(),
-          params: recup_params(),
-          relations: recup_relation(),
-          duplicate: recup_fields_relate(),
-          filter: recup_filter(),
-        },
-        beforeSend: function () {
-          $("#validation").attr("value", save_wait);
-        },
-        success: function (data) {
-          if (data.status == 1) {
-            alert(confirm_success);
+  let before = $("#validation").attr("value");
+  console.log("[ℹ️ BEFORE] Button value before request:", before);
 
-            var path_template = $("#validation").data("url");
-            var path_view_detail = path_template.replace(
-              "placeholder_id",
-              data.id
-            );
-            $(location).attr("href", path_view_detail);
+  // Call each validation function and log their results
+  let isRequireValid = require();
+  let isParamsValid = require_params();
+  let isRelateValid = require_relate();
+  let isDuplicateValid = duplicate_fields_error();
+
+  console.log("[✅ CHECK] require() →", isRequireValid);
+  console.log("[✅ CHECK] require_params() →", isParamsValid);
+  console.log("[✅ CHECK] require_relate() →", isRelateValid);
+  console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
+
+  if (isRequireValid && isParamsValid && isRelateValid && isDuplicateValid) {
+    let champs = recup_champs();
+    let formules = recup_formule();
+    let params = JSON.stringify(recup_params());
+    let relations = recup_relation();
+    let duplicate = recup_fields_relate();
+    let filter = recup_filter();
+
+    console.log("[📦 DATA] champs →", champs);
+    console.log("[📦 DATA] formules →", formules);
+    console.log("[📦 DATA] params →", params);
+    console.log("[📦 DATA] relations →", relations);
+    console.log("[📦 DATA] duplicate →", duplicate);
+    console.log("[📦 DATA] filter →", filter);
+
+    $.ajax({
+      type: "POST",
+      url: path_validation,
+      data: {
+        champs: champs,
+        formules: formules,
+        params: params,
+        relations: relations,
+        duplicate: duplicate,
+        filter: filter,
+      },
+      beforeSend: function () {
+        console.log("[🚀 AJAX] Sending data to", path_validation);
+        $("#validation").attr("value", save_wait);
+      },
+      success: function (data) {
+        console.log("[✅ SUCCESS] Response received:", data);
+
+        if (data.status == 1) {
+          console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
+
+          alert(confirm_success);
+
+          var path_template = $("#validation").data("url");
+          var path_view_detail = path_template.replace(
+            "placeholder_id",
+            data.id
+          );
+
+          console.log("[🔁 REDIRECT] To:", path_view_detail);
+          $(location).attr("href", path_view_detail);
+        } else {
+          console.warn("[⚠️ VALIDATION ERROR] Raw response:", data);
+          data = data.split(";");
+          if (data[0] == 2) {
+            alert(data[1]);
+            console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
           } else {
-            data = data.split(";");
-            if (data[0] == 2) {
-              alert(data[1]);
-            } else {
-              alert(confirm_error);
-            }
-            $("#validation").attr("value", before);
+            alert(confirm_error);
+            console.error("[❌ ERROR] General form validation error");
           }
+          $("#validation").attr("value", before);
+        }
+      },
+      statusCode: {
+        500: function (e) {
+          console.error("[🔥 SERVER ERROR 500]", e.responseText);
+          alert("An error occurred. Please check your server logs for more detailed information.");
+          $("#validation").attr("value", before);
         },
-        statusCode: {
-          500: function (e) {
-            // console.log(e.responseText);
-            alert(
-              "An error occured. Please check your server logs for more detailed information."
-            );
-            $("#validation").attr("value", before);
-          },
-        },
-      });
-    } else {
-      $("#dialog").dialog({
-        draggable: false,
-        modal: true,
-        resizable: false,
-      });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("[❌ AJAX ERROR]", textStatus, errorThrown);
+        $("#validation").attr("value", before);
+      },
+    });
+  } else {
+    console.warn("[❌ VALIDATION FAILED] At least one requirement not met");
 
-      $("#validation").attr("value", before);
-    }
-  });
+    $("#dialog").dialog({
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+
+    $("#validation").attr("value", before);
+  }
+});
+
 
   // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
 
