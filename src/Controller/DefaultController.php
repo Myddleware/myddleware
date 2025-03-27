@@ -2609,7 +2609,12 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                 }
 
                 //------------------------------- RuleFilter ------------------------
-                $filters = $request->request->get('filter');
+                // Get all request data and extract the filter
+                $requestData = $request->request->all();
+                $filtersRaw = $requestData['filter'] ?? null;
+
+                // Handle both JSON string and array cases
+                $filters = is_string($filtersRaw) ? json_decode($filtersRaw, true) : $filtersRaw;
 
                 if (!empty($filters)) {
                     foreach ($filters as $filterData) {
@@ -2636,7 +2641,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
                         'limit' => $limit,
                         'datereference' => $date_reference,
                         'content' => $tab_new_rule,
-                        'filters' => $request->request->get('filter'),
+                        'filters' => $filters,
                         'relationships' => $relationshipsBeforeSave,
                     ]
                 );
