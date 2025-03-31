@@ -27,7 +27,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
-use App\Form\Type\ResetPasswordType;
+use App\Form\Type\UpdatePasswordType;
 use App\Form\Type\TwoFactorAuthFormType;
 use App\Service\UserManagerInterface;
 use App\Service\AlertBootstrapInterface;
@@ -197,10 +197,16 @@ class AccountController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $user = $this->getUser();
-        $form = $this->createForm(ResetPasswordType::class, $user);
+        $form = $this->createForm(UpdatePasswordType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+
+            // start by getting the request all
+            $requestData = $request->request->all();
+
+            // then get the old password from the request data
+            $oldPassword = $requestData['update_password']['oldPassword'];
+
             // first we test whether the old password input is correct
             if ($encoder->isPasswordValid($user, $oldPassword)) {
                 $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
