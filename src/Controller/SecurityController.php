@@ -213,8 +213,6 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $oldPassword = $request->request->get('reset_password')['oldPassword'];
-            if ($encoder->isPasswordValid($user, $oldPassword)) {
                 $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
                 $user->setPassword($newEncodedPassword);
                 $this->entityManager->persist($user);
@@ -222,9 +220,6 @@ class SecurityController extends AbstractController
 
                 $this->addFlash('success', 'Password has been successfully reset.');
                 return $this->redirectToRoute('regle_panel');
-            } else {
-                $this->addFlash('danger', 'The old password is incorrect.');
-            }
         }
 
         return $this->render('Login/reset.html.twig', [
