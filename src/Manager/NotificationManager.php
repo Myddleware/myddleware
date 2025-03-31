@@ -355,35 +355,57 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
-        // Get the mailerurl from the .env.local to send the mail to reset the password
-        $mailerUrlEnv = $_ENV["MAILER_URL"];
-        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
-            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+        // Set all config parameters
+        $this->setConfigParam();
 
-            $host = $mailerUrlArray[0];
-            $port = $mailerUrlArray[1];
-            $hostUser = $mailerUrlArray[4];
-            $hostPassword = $mailerUrlArray[5];
-            $auth_mode = $mailerUrlArray[3];
-            $encryption = $mailerUrlArray[2];
-            $transport = new Swift_SmtpTransport($host, $port);
-            $transport->setUsername($hostUser);
-            $transport->setPassword($hostPassword);
-            $transport->setAuthMode($auth_mode);
-            $transport->setEncryption($encryption);
+        // Check if Sendinblue API key is set
+        if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
+            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
+            
+            $sendSmtpEmail['to'] = [['email' => $user->getEmail()]];
+            $sendSmtpEmail['subject'] = 'Initialisation du mot de passe';
+            $sendSmtpEmail['htmlContent'] = $this->twig->render('Email/reset_password.html.twig', ['user' => $user]);
+            $sendSmtpEmail['sender'] = ['email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com'];
 
-            $mailer = new Swift_Mailer($transport);
-            $message = (new \Swift_Message('Initialisation du mot de passe'))
-            ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-            ->setTo($user->getEmail())
-                ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
-            $send = $mailer->send($message);
-            if (!$send) {
-                $this->logger->error('Failed to send email');
-                throw new Exception('Failed to send email');
+            try {
+                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+            } catch (Exception $e) {
+                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             }
         } else {
-            throw new Exception('There is no MAILER_URL in the .env.local !');
+            // Get the mailerurl from the .env.local to send the mail to reset the password
+            $mailerUrlEnv = $_ENV["MAILER_URL"];
+
+            if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
+                $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
+
+                $host = $mailerUrlArray[0];
+                $port = $mailerUrlArray[1];
+                $hostUser = $mailerUrlArray[4];
+                $hostPassword = $mailerUrlArray[5];
+                $auth_mode = $mailerUrlArray[3];
+                $encryption = $mailerUrlArray[2];
+                $transport = new Swift_SmtpTransport($host, $port);
+                $transport->setUsername($hostUser);
+                $transport->setPassword($hostPassword);
+                $transport->setAuthMode($auth_mode);
+                $transport->setEncryption($encryption);
+
+                $mailer = new Swift_Mailer($transport);
+                $message = (new \Swift_Message('Initialisation du mot de passe'))
+                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->setTo($user->getEmail())
+                    ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
+                $send = $mailer->send($message);
+                if (!$send) {
+                    $this->logger->error('Failed to send email');
+                    throw new Exception('Failed to send email');
+                }
+            } else {
+                throw new Exception('There is no MAILER_URL in the .env.local !');
+            }
         }
     }
 
