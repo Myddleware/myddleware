@@ -340,8 +340,7 @@ class ConnectorController extends AbstractController
     {
         $type = '';
 
-        $solution = $this->getDoctrine()
-                            ->getManager()
+        $solution = $this->entityManager
                             ->getRepository(Solution::class)
                             ->findOneBy(['name' => $this->sessionService->getParamConnectorSourceSolution()]);
 
@@ -362,7 +361,13 @@ class ConnectorController extends AbstractController
         if ('POST' == $request->getMethod() && $this->sessionService->isParamConnectorExist()) {
             try {
                 $form->handleRequest($request);
-                $form->submit($request->request->get($form->getName()));
+
+                // start by getting all the data from the request
+                $data = $request->request->all();
+
+                $formName = $form->getName();
+
+                $form->submit($data[$formName]);
                 if ($form->isValid()) {
                     $solution = $connector->getSolution();
                     $multi = $solution->getSource() + $solution->getTarget();
@@ -493,8 +498,7 @@ class ConnectorController extends AbstractController
             }
 
             // Get the connector using its id
-            $connector = $this->getDoctrine()
-                        ->getManager()
+            $connector = $this->entityManager
                         ->getRepository(Connector::class)
                         ->findOneBy($list_fields_sql);
 
