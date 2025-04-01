@@ -451,12 +451,18 @@ class JobManager
             }
 
             // Renvoie du message en session
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
             $session = $this->requestStack->getSession();
+        }
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (Exception $e) {
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
             $session = $this->requestStack->getSession();
+        }
             $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
 
             return false;
