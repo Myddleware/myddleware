@@ -1216,7 +1216,10 @@ class RuleManager
         $this->documentManager->documentCancel();
 
         // Get the request from RequestStack
-        $session = $this->requestStack->getSession();
+        if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
+            $session = $this->requestStack->getSession();
+        }
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1245,7 +1248,10 @@ class RuleManager
         $this->documentManager->unsetLock(true);
         
         // Get the request from RequestStack
-        $session = $this->requestStack->getSession();
+        if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
+            $session = $this->requestStack->getSession();
+        }
 
         $message = $this->documentManager->getMessage();
 
@@ -1299,9 +1305,10 @@ class RuleManager
         $this->documentManager->setParam($param, true);
         $this->documentManager->changeDeleteFlag($deleteFlag);
         
-        // Get the request from RequestStack
-        $session = $this->requestStack->getSession();
-        
+        if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
+            $session = $this->requestStack->getSession();
+        }
         $message = $this->documentManager->getMessage();
 
         // Si on a pas de jobId cela signifie que l'opération n'est pas massive mais sur un seul document
@@ -1345,7 +1352,10 @@ class RuleManager
                 throw new \Exception('The PHP exec() function is disabled. Please enable it in php.ini to run background jobs.');
             }
 
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
             $session = $this->requestStack->getSession();
+        }
             
             // create temp file
             $guid = uniqid();
@@ -1416,9 +1426,12 @@ class RuleManager
             return $result[0];
         } catch (\Exception $e) {
             // Get the request from RequestStack
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
             $session = $this->requestStack->getSession();
             
             $session->getFlashBag()->set('error', [$e->getMessage()]);
+        }
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
             return false;
@@ -1435,7 +1448,10 @@ class RuleManager
 		try {
 			
             // Get the request from RequestStack
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
             $session = $this->requestStack->getSession();
+        }
 
 			$msg_error = [];
 			$msg_success = [];
