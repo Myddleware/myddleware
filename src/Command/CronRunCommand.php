@@ -56,8 +56,10 @@ final class CronRunCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 		if (!$this->toolsManager->isPremium()) {
-			return $this->redirectToRoute('premium_list');
-		}
+            $style = new CronStyle($input, $output);
+            $style->error('This feature is only available in the premium version.');
+            return CronJobResult::EXIT_CODE_FAILED;
+        }
         $jobRepo = $this->getCronJobRepository();
         $style = new CronStyle($input, $output);
         //Check if crontab is enabled
