@@ -57,7 +57,7 @@ final class CronRunCommand extends BaseCommand
     {
 		if (!$this->toolsManager->isPremium()) {
             $style = new CronStyle($input, $output);
-            $style->error('This feature is only available in the premium version.');
+            $style->error('This feature is only available in the premium version. However you can use your linux crontab to run command like synchro or rerunerror.');
             return CronJobResult::EXIT_CODE_FAILED;
         }
         $jobRepo = $this->getCronJobRepository();
