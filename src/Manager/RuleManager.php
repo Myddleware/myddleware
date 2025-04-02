@@ -1448,10 +1448,8 @@ class RuleManager
 		try {
 			
             // Get the request from RequestStack
-            if (!empty($this->requestStack->getCurrentRequest())) {
-            // Get the request from RequestStack
-            $session = $this->requestStack->getSession();
-        }
+            $session = new Session();
+    
 
 			$msg_error = [];
 			$msg_success = [];
