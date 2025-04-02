@@ -50,6 +50,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
 use App\Manager\NotificationManager;
+use Symfony\Component\HttpFoundation\Session\Session;
+
 
 class RuleManager
 {
