@@ -982,7 +982,7 @@ class JobManager
                         $rules[$key]['rule_order'] = 99;
                     }
                     $ruleKeyValue[$rule['id']] = $rules[$key]['rule_order'];
-                    $rulesRef[$rule['id']] = $rules[$key];
+                    $rulesRef[$rule['id']] = $rule;
                 }
 
                 // On calcule les priorité tant que l'on a encore des priorité 99
