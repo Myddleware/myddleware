@@ -538,10 +538,28 @@ class ManagementSMTPController extends AbstractController
         $mailer->send($message);
     }
 
-    protected function sendinblueSendMailByApiKey($textMail)
+    protected function sendinblueSendMailByApiKey($form)
     {
         try {
             $apiKey = $this->checkIfApiKeyInEnv();
+            $user_email = $this->getUser()->getEmail();
+
+            // Prepare the email data
+            $emailData = [
+                'sender' => [
+                    'email' => !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'
+                ],
+                'to' => [
+                    [
+                        'email' => $user_email
+                    ]
+                ],
+                'subject' => $this->translator->trans('management_smtp_sendmail.subject'),
+                'htmlContent' => $this->translator->trans('management_smtp_sendmail.textMail') . "\n" .
+                               $this->translator->trans('email_notification.best_regards') . "\n" .
+                               $this->translator->trans('email_notification.signature')
+            ];
+
             $curl = curl_init();
             curl_setopt_array($curl, [
                 CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
@@ -551,7 +569,7 @@ class ManagementSMTPController extends AbstractController
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => $textMail,
+                CURLOPT_POSTFIELDS => json_encode($emailData),
                 CURLOPT_HTTPHEADER => [
                     "accept: application/json",
                     "api-key: " . $apiKey,
