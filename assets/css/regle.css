@@ -452,7 +452,7 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 /* workflow action fields */
 
 input#form_name,
-input#form_description,
+textarea#form_description,
 input#form_order,
 input#form_multipleRuns,
 input#form_status,
