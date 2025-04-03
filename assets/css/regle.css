@@ -440,7 +440,7 @@ td > a {
 /* connector parameters input */
 
 input[id^="connector_connectorParams_"][id$="_value"] {
-    border: 1px solid black;
+    border: 1px solid #dfdddd;
     border-radius: 4px;
 	margin-bottom: 3px;
 }
