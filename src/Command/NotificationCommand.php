@@ -66,34 +66,35 @@ class NotificationCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // We don't create job for alert
-        if ('alert' == $input->getArgument('type')) {
-            try {
+        try {
+            // We don't create job for alert
+            if ('alert' == $input->getArgument('type')) {
+                $output->writeln('<info>Sending alert notification...</info>');
                 $this->notificationManager->sendAlert();
-            } catch (\Exception $e) {
-                $output->writeln('<error>'.$e->getMessage().'</error>');
+                $output->writeln('<info>Alert notification sent successfully!</info>');
             }
-        }
-        // Standard notification
-        else {
-            try {
+            // Standard notification
+            else {
+                $output->writeln('<info>Initializing notification job...</info>');
                 $data = $this->jobManager->initJob('notification '.$input->getArgument('type'));
 
                 if (false === $data['success']) {
-                    $output->writeln('0;<error>'.$data['message'].'</error>');
-
-                    return 0;
+                    $output->writeln('<error>'.$data['message'].'</error>');
+                    return Command::FAILURE;
                 }
 
+                $output->writeln('<info>Sending notification...</info>');
                 $this->notificationManager->sendNotification();
-            } catch (\Exception $e) {
-                $message = $e->getMessage();
-                $output->writeln('<error>'.$message.'</error>');
+                // Close job if it has been created
+                $this->jobManager->closeJob();
+                $output->writeln('<info>Notification sent successfully!</info>');
             }
-            // Close job if it has been created
-            $this->jobManager->closeJob();
-        }
 
-        return 1;
+            return Command::SUCCESS;
+
+        } catch (\Exception $e) {
+            $output->writeln('<error>'.$e->getMessage().'</error>');
+            return Command::FAILURE;
+        }
     }
 }
