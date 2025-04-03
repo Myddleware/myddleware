@@ -69,6 +69,13 @@
 							{{ form_row(form.active) }}
 						</div>
 					</div>
+					<div class="row mb-4">
+						<div class="col-md-6">
+							<div class="workflow-field-container form-group-workflow-action" id="to-container">
+								{{ form_row(form.to) }}
+							</div>
+						</div>
+					</div>
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="subject-container">
 							{{ form_row(form.subject) }}
@@ -119,13 +126,6 @@
 				</div>
 				<div id="dynamicFieldsContainer"></div>
 				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="to-container">
-							{{ form_row(form.to) }}
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 		<div class="text-center">
