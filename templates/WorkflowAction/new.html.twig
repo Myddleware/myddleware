@@ -22,96 +22,96 @@
 			<div class="card-body">
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="name-container">
+						<div class="workflow-field-container form-group-workflow-action" id="name-container">
 							{{ form_row(form.name) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="workflow-container">
+						<div class="workflow-field-container form-group-workflow-action" id="workflow-container">
 							{{ form_row(form.Workflow) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="description-container">
+						<div class="workflow-field-container form-group-workflow-action" id="description-container">
 							{{ form_row(form.description) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="action-container">
+						<div class="workflow-field-container form-group-workflow-action" id="action-container">
 							{{ form_row(form.action) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="order-container">
+						<div class="workflow-field-container form-group-workflow-action" id="order-container">
 							{{ form_row(form.order) }}
 						</div>
 					</div>
 					{% if form.multipleRuns is defined %}
 						<div class="col-md-6">
-							<div class="workflow-field-container" id="multiple-runs-container">
+							<div class="workflow-field-container form-group-workflow-action" id="multiple-runs-container">
 								{{ form_row(form.multipleRuns) }}
 							</div>
 						</div>
 					{% endif %}
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="status-container">
+						<div class="workflow-field-container form-group-workflow-action" id="status-container">
 							{{ form_row(form.status) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="active-container">
+						<div class="workflow-field-container form-group-workflow-action" id="active-container">
 							{{ form_row(form.active) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="subject-container">
+						<div class="workflow-field-container form-group-workflow-action" id="subject-container">
 							{{ form_row(form.subject) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-12">
-						<div class="workflow-field-container" id="message-container">
+						<div class="workflow-field-container form-group-workflow-action" id="message-container">
 							{{ form_row(form.message) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="rule-container">
+						<div class="workflow-field-container form-group-workflow-action" id="rule-container">
 							{{ form_row(form.ruleId) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="search-field-container">
+						<div class="workflow-field-container form-group-workflow-action" id="search-field-container">
 							{{ form_row(form.searchField) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="search-value-container">
+						<div class="workflow-field-container form-group-workflow-action" id="search-value-container">
 							{{ form_row(form.searchValue) }}
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="rerun-container">
+						<div class="workflow-field-container form-group-workflow-action" id="rerun-container">
 							{{ form_row(form.rerun) }}
 						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6" id="targetFieldContainer">
-						<div class="workflow-field-container">
+						<div class="workflow-field-container form-group-workflow-action">
 							{{ form_row(form.targetField) }}
 						</div>
 					</div>
 					<div class="col-md-6" id="targetFieldValueContainer">
-						<div class="workflow-field-container">
+						<div class="workflow-field-container form-group-workflow-action">
 							<label for="form_targetFieldValue">New value</label>
 							<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
 						</div>
@@ -121,7 +121,7 @@
 				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container" id="to-container">
+						<div class="workflow-field-container form-group-workflow-action" id="to-container">
 							{{ form_row(form.to) }}
 						</div>
 					</div>
