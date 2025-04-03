@@ -488,3 +488,44 @@ select#form_searchValue {
 	margin-bottom: 3px;
 	margin-left: 10px;
 }
+
+  .form-group-workflow-action {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .form-group-workflow-action label {
+    font-weight: 600;
+  }
+
+  .form-group-workflow-action input,
+  .form-group-workflow-action select,
+  .form-group-workflow-action textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .form-group-workflow-action label {
+	margin-bottom: 0.4rem;
+	font-weight: 600;
+	/* 👇 This aligns label start with input */
+	padding-left: 10px;
+  }
+
+  .form-actions-workflow-action {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .form-actions-workflow-action button {
+    padding: 8px 16px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
+
