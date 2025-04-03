@@ -23,10 +23,9 @@
     "ext-pdo": "*",
     "ext-simplexml": "*",
     "api-platform/core": "^2.7.18",
-    "automattic/woocommerce": "3.1.*",
+    "automattic/woocommerce": "^3.1",
     "babdev/pagerfanta-bundle": "^3.7",
-    "beberlei/doctrineextensions": "1.3.*",
-    "composer/package-versions-deprecated": "1.11.99.*",
+    "beberlei/doctrineextensions": "^1.3",
     "doctrine/annotations": "^1.13",
     "doctrine/cache": "^1.13",
     "doctrine/doctrine-bundle": "^2.7",
@@ -39,12 +38,9 @@
     "illuminate/encryption": "^10.0",
     "incenteev/composer-parameter-handler": "2.1.*",
     "javanile/vtiger-client": "^0.1.0",
-    "jquery/jquery": "^3.5.1",
-    "jquery/jquery_ui": "^1.11.1",
     "laminas/laminas-code": "4.8.0",
     "laminas/laminas-hydrator": "4.12.0",
     "laminas/laminas-stdlib": "3.16.1",
-    "leafo/lessphp": "0.4.0",
     "lexik/form-filter-bundle": "^7.0",
     "lexik/jwt-authentication-bundle": "^2.16",
     "mautic/api-library": "^2.15",
@@ -88,28 +84,6 @@
     "twig/twig": "^3.4"
   },
     "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "jquery/jquery",
-                "version": "3.5.1",
-                "dist": {
-                    "url": "https://code.jquery.com/jquery-3.5.1.min.js",
-                    "type": "file"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "jquery/jquery_ui",
-                "version": "1.11.1",
-                "dist": {
-                    "url": "https://code.jquery.com/ui/1.11.1/jquery-ui.min.js",
-                    "type": "file"
-                }
-            }
-        }
     ],
     "require-dev": {
       "doctrine/doctrine-fixtures-bundle": "^3.4",
