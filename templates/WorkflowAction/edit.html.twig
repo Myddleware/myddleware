@@ -46,39 +46,39 @@
 			</div>
 			<div class="card-body">
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.name) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.Workflow) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.description) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.action) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.order) }}
 					</div>
 					{% if form.multipleRuns is defined %}
-						<div class="col-md-6">
+						<div class="col-md-6 form-group-workflow-action">
 							{{ form_row(form.multipleRuns) }}
 						</div>
 					{% endif %}
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.status) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.active) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.subject) }}
 					</div>
 				</div>
@@ -86,31 +86,31 @@
 					<div class="col-md-12">
 						{{ form_row(form.message) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.ruleId) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.searchField) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.searchValue) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.rerun) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action">
 						{{ form_row(form.to) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
+					<div class="col-md-6 form-group-workflow-action" id="targetFieldContainer" style="display: none;">
 						{{ form_row(form.targetFields) }}
 					</div>
-					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+					<div class="col-md-6 form-group-workflow-action" id="targetFieldValueContainer" style="display: none;">
 						<label for="form_targetFieldValue">New value</label>
 						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
 					</div>
