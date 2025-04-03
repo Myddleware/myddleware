@@ -42,7 +42,13 @@ class WorkflowType extends AbstractType
                     'class' => 'form-control',
                     ],
             ]);
-            $builder->add('description', TextType::class, ['label' => 'Description']);
+            $builder->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 3  // This will make the textarea 3 rows tall
+                ]
+            ]);
             $builder->add('Rule', EntityType::class, [
                 'class' => Rule::class,
                 'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['deleted' => 0]),
