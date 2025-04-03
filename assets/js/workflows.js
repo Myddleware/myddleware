@@ -1,24 +1,161 @@
 $(document).ready(function () {
 
   let isEditMode = $("#form_ruleId").val() !== '';
-  let isEditModeValue = false; 
+  let isEditModeValue = false;
+  let workflowActionFields = null; // Initialize at the top level
 
   $('fieldset:has(#form_targetFieldValues)').hide();
   var selectedAction = $("#form_action").val();
   
-  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
-    // Clear any existing fields
-    dynamicFieldsContainer.innerHTML = '';
-    
-    // Show the container
-    dynamicFieldsContainer.style.display = "block";
-    addFieldButton.style.display = "block";
-    
-    // Add each field
-    targetFieldsData.forEach(function (fieldData) {
-        addNewTargetFieldWithValue(fieldData.field, fieldData.value);
-    });
+  // All possible fields we want to track
+  const ALL_FIELDS = [
+    'Status',
+    'Rule',
+    'SearchField',
+    'SearchValue',
+    'Subject',
+    'Message',
+    'To',
+    'Rerun',
+    'Multiple run',
+    'Active',
+    'Target Field',
+    'New Value'
+  ];
+
+  // Function to get field configuration for an action
+  function getFieldConfig(actionName) {
+    // Default configuration if JSON hasn't loaded yet or action not found
+    const defaultConfig = {
+      Action: actionName,
+      Status: 'No',
+      Rule: 'No',
+      SearchField: 'No',
+      SearchValue: 'No',
+      Subject: 'No',
+      Message: 'No',
+      To: 'No',
+      'Target Field': 'No',
+      'New Value': 'No',
+      Rerun: 'No',
+      'Multiple run': 'Yes',
+      Active: 'Yes'
+    };
+
+    if (!workflowActionFields) {
+      console.log('Warning: Using default configuration as workflow action fields have not loaded yet');
+      return defaultConfig;
+    }
+
+    return workflowActionFields.find(config => config.Action === actionName) || defaultConfig;
   }
+
+  // Function to get field ID from field name
+  function getFieldId(field) {
+    switch(field) {
+      case 'Status': return '#form_status';
+      case 'Rule': return '#form_ruleId';
+      case 'SearchField': return '#form_searchField';
+      case 'SearchValue': return '#form_searchValue';
+      case 'Subject': return '#form_subject';
+      case 'Message': return '#form_message';
+      case 'To': return '#form_to';
+      case 'Rerun': return '#form_rerun';
+      case 'Multiple run': return '#form_multipleRuns';
+      case 'Active': return '#form_active';
+      case 'Target Field': return '#targetFieldContainer';
+      case 'New Value': return '#targetFieldValueContainer';
+      default: return null;
+    }
+  }
+
+  // Function to log field visibility
+  function logFieldVisibility(field, shouldShow, fieldId) {
+    console.log(`Field: ${field.padEnd(15)} | Status: ${shouldShow ? 'SHOWING' : 'HIDDEN '.padEnd(7)} | ID: ${fieldId}`);
+  }
+
+  // Function to toggle field visibility based on configuration
+  function toggleFieldVisibility(actionConfig) {
+    console.log('\n=== Field Visibility for Action: ' + actionConfig.Action + ' ===');
+    console.log('Field'.padEnd(15) + ' | Status  | ID');
+    console.log('─'.repeat(50));
+
+    // Log visibility for all possible fields
+    ALL_FIELDS.forEach(field => {
+      const fieldId = getFieldId(field);
+      if (fieldId) {
+        const shouldShow = actionConfig[field] === 'Yes';
+        const formGroup = $(fieldId).closest('.form-group');
+        
+        // Log the status regardless of whether we found the element
+        logFieldVisibility(field, shouldShow, fieldId);
+        
+        // Toggle visibility if element exists
+        if (formGroup.length) {
+          formGroup.toggle(shouldShow);
+        }
+      }
+    });
+
+    // Special handling for Target Field and New Value in changeData action
+    const isChangeData = actionConfig.Action === 'changeData';
+    $('#addFieldButton').toggle(isChangeData);
+    $('#dynamicFieldsContainer').toggle(isChangeData);
+
+    console.log('─'.repeat(50));
+    console.log('Dynamic Fields  | Status  | Container');
+    console.log('─'.repeat(50));
+    console.log(`Add Button      | ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #addFieldButton`);
+    console.log(`Fields Container| ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #dynamicFieldsContainer`);
+    
+    if (!isChangeData) {
+      $('#dynamicFieldsContainer').empty();
+    }
+  }
+
+  // Load the workflow action fields configuration from the JSON file
+  $.ajax({
+    url: window.location.origin + '/build/workflow-action-fields.json', // Updated path
+    dataType: 'json',
+    success: function(data) {
+      console.log('Successfully loaded workflow action fields configuration');
+      workflowActionFields = data;
+      
+      // Handle initial load after JSON is loaded
+      const selectedAction = $("#form_action").val();
+      console.log('\n=== INITIAL PAGE LOAD ===');
+      console.log('Selected Action:', selectedAction);
+      const initialConfig = getFieldConfig(selectedAction);
+      toggleFieldVisibility(initialConfig);
+
+      // Handle target fields data in edit mode
+      if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
+        dynamicFieldsContainer.innerHTML = '';
+        dynamicFieldsContainer.style.display = "block";
+        addFieldButton.style.display = "block";
+        console.log('\n=== Loading Edit Mode Target Fields ===');
+        targetFieldsData.forEach(function (fieldData, index) {
+          console.log(`Target Field ${index + 1}: ${fieldData.field} = ${fieldData.value}`);
+          addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+        });
+      }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to load workflow action fields configuration:', {
+        status: textStatus,
+        error: errorThrown,
+        url: this.url
+      });
+      console.log('Using default field configuration');
+      
+      // Still initialize the page with default configuration
+      const selectedAction = $("#form_action").val();
+      console.log('\n=== INITIAL PAGE LOAD (with defaults) ===');
+      console.log('Selected Action:', selectedAction);
+      const initialConfig = getFieldConfig(selectedAction);
+      toggleFieldVisibility(initialConfig);
+    }
+  });
 
   function addNewTargetFieldWithValue(fieldName, fieldValue) {
   
@@ -83,34 +220,19 @@ $(document).ready(function () {
     document.getElementById("targetFieldValueContainer").style.display = 'none';
   }
   
-  // Function to hide or show the Rule field
-  function toggleRuleField() {
-    var actionValue = $("#form_action").val();
+  // Handle action change
+  $("#form_action").on("change", function () {
+    const actionValue = $(this).val();
+    console.log('\n=== ACTION CHANGED ===');
+    console.log('New Action:', actionValue);
+    const config = getFieldConfig(actionValue);
+    toggleFieldVisibility(config);
+    
     if (!isEditMode || isEditModeValue) {
       $("#form_ruleId").val('');
-  }
-
-  isEditModeValue = true;
-
-    if (
-      actionValue === "transformDocument" ||
-      actionValue === "rerun" ||
-      actionValue === "sendNotification" ||
-      actionValue === "updateStatus"
-    ) {
-      $("#form_ruleId").closest(".form-group").hide();
-    } else {
-      $("#form_ruleId").closest(".form-group").show();
     }
-
-  }
-
-
-  $("#form_action").on("change", function () {
-    toggleRuleField();
-
+    isEditModeValue = true;
   });
-
 
 });
 
