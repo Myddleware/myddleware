@@ -221,13 +221,23 @@ class NotificationManager
             $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
             $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail();
             
+            // Create sender object
+            $sender = new \Brevo\Client\Model\SendSmtpEmailSender();
+            $sender->setEmail($this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+            
+            // Create recipients array
+            $recipients = [];
             foreach ($this->emailAddresses as $emailAddress) {
-                $sendSmtpEmailTo[] = array('email' => $emailAddress);
+                $recipient = new \Brevo\Client\Model\SendSmtpEmailTo();
+                $recipient->setEmail($emailAddress);
+                $recipients[] = $recipient;
             }
-            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $subject;
-            $sendSmtpEmail['htmlContent'] = $textMail;
-            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+            
+            // Set up the email
+            $sendSmtpEmail->setSender($sender);
+            $sendSmtpEmail->setTo($recipients);
+            $sendSmtpEmail->setSubject($subject);
+            $sendSmtpEmail->setHtmlContent($textMail);
 
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
