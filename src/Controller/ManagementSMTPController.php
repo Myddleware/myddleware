@@ -124,7 +124,7 @@ class ManagementSMTPController extends AbstractController
         $linesEnv = explode("\n", $envFile);
         $lineCounter = 0;
         foreach ($linesEnv as $line) {
-            if (strpos($line, "SENDINBLUE_APIKEY") !== false) {
+            if (strpos($line, "BREVO_APIKEY") !== false) {
                 unset($linesEnv[$lineCounter]);
             }
             $lineCounter++;
@@ -412,7 +412,7 @@ class ManagementSMTPController extends AbstractController
             $apiKey = $swiftParams['ApiKey'];
             $this->EmptyApiKeyEnv();
             $envFile = file_get_contents(self::LOCAL_ENV_FILE);
-            $envFile .= "\nSENDINBLUE_APIKEY=" . $apiKey;
+            $envFile .= "\nBREVO_APIKEY=" . $apiKey;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
             $session = $this->requestStack->getSession();
             $session->set('success', [$this->translator->trans('management_smtp.success')]);
@@ -544,7 +544,7 @@ class ManagementSMTPController extends AbstractController
             $apiKey = $this->checkIfApiKeyInEnv();
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => "https://api.sendinblue.com/v3/smtp/email",
+                CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -601,9 +601,14 @@ class ManagementSMTPController extends AbstractController
         $apiKeyEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $apiKeyEnv = getenv('SENDINBLUE_APIKEY');
+            $apiKeyEnv = getenv('BREVO_APIKEY');
             if (!(isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false)) {
-                $apiKeyEnv = false;
+                // as a fallback, check if the global variable $_ENV['BREVO_APIKEY'] is set
+                if (isset($_ENV['BREVO_APIKEY'])) {
+                    $apiKeyEnv = $_ENV['BREVO_APIKEY'];
+                } else {
+                    $apiKeyEnv = false;
+                }
             }
         }
         return $apiKeyEnv;

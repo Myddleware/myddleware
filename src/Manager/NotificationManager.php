@@ -216,10 +216,11 @@ class NotificationManager
 			throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
 		}
 		
-		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
-            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
-            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
-            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
+		if (!empty($_ENV['BREVO_APIKEY'])) {
+            $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_APIKEY']);
+            $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
+            $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail();
+            
             foreach ($this->emailAddresses as $emailAddress) {
                 $sendSmtpEmailTo[] = array('email' => $emailAddress);
             }
