@@ -368,7 +368,7 @@ class WorkflowActionController extends AbstractController
                         'label' => 'Action Name',
                         'required' => true,
                     ])
-                    ->add('description', TextType::class, ['label' => 'Description'])
+                    ->add('description', TextareaType::class, ['label' => 'Description'])
                     ->add('Workflow', EntityType::class, [
                         'class' => Workflow::class,
                         'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
@@ -464,7 +464,7 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false,
                     ])
-                    ->add('submit', SubmitType::class, ['label' => 'Save'])
+                    ->add('submit', SubmitType::class, ['label' => 'Save', 'attr' => ['class' => 'btn btn-success mt-2']])
                     ->getForm();
                 $form->handleRequest($request);
 
