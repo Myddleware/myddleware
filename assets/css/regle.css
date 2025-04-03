@@ -436,3 +436,15 @@ td > a {
 .workflow-name-link-rule:hover {
 	text-decoration: underline !important;
 }
+
+/* connector parameters input */
+
+input[id^="connector_connectorParams_"][id$="_value"] {
+    border: 1px solid black;
+    border-radius: 4px;
+	margin-bottom: 3px;
+}
+
+label[for^="connector_connectorParams_"][for$="_value"] {
+    margin-bottom: 3px;
+}
