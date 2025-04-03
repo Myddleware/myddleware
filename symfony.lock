@@ -25,9 +25,6 @@
     "behat/transliterator": {
         "version": "v1.3.0"
     },
-    "composer/package-versions-deprecated": {
-        "version": "1.11.99.5"
-    },
     "composer/pcre": {
         "version": "1.0.1"
     },
@@ -197,12 +194,6 @@
     "jetbrains/phpstorm-stubs": {
         "version": "v2019.3"
     },
-    "jquery/jquery": {
-        "version": "3.5.1"
-    },
-    "jquery/jquery_ui": {
-        "version": "1.11.1"
-    },
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
@@ -217,9 +208,6 @@
     },
     "lcobucci/jwt": {
         "version": "4.1.5"
-    },
-    "leafo/lessphp": {
-        "version": "v0.4.0"
     },
     "lexik/form-filter-bundle": {
         "version": "v7.0.3"
