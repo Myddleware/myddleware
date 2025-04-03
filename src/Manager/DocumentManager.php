@@ -1756,6 +1756,7 @@ class DocumentManager
 						$currentRule = $this->ruleId;
 						$connection = $this->connection;
 						$entityManager = $this->entityManager;
+						$solutionManager = $this->solutionManager;
 						$myddlewareUserId = $this->userId;
 						$sourceFieldName = $ruleField['source_field_name'];
 						$docId = $this->id;
@@ -1764,6 +1765,10 @@ class DocumentManager
 					// Manage lookup formula by adding parameters
 					if (strpos($f, 'lookup') !== false ) {
 						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
+					}
+					// Manage getRecord formula by adding parameters
+					if (strpos($f, 'getRecord') !== false ) {
+						$f = str_replace('getRecord(', 'getRecord($entityManager, $connection, $solutionManager, ', $f);
 					}
                     try {
                         // Trigger to redefine formula
@@ -1840,7 +1845,10 @@ class DocumentManager
 
 	// Function to check if a formula require variables
 	protected function isVariableRequested($formula) {
-		if (strpos($formula, 'lookup') !== false ) {
+		if (
+				strpos($formula, 'lookup') !== false
+			 or strpos($formula, 'getRecord') !== false
+		) {
 			return true;
 		}
 		return false;
