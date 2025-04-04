@@ -61,8 +61,8 @@ services:
 
   App\Service\TwoFactorAuthService:
     arguments:
-      $mailer: '@swiftmailer.mailer.default'
-      $sendinblueApiKey: '%sendinblue_api_key%'
+      $mailer: '@mailer.mailer'
+      $brevoApiKey: '%brevo_api_key%'
 
   App\DataFixtures\:
     resource: '../src/DataFixtures'
