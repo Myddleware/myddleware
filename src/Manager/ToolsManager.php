@@ -222,9 +222,9 @@ class ToolsManager
 	// Send a message using Brevo or SMTP parameters
 	public function sendMessage($to, $subject, $message) {
 		// Use Brevo if the key is set
-		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+		if (!empty($_ENV['BREVO_APIKEY'])) {
             try {
-				$sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
+				$sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_APIKEY']);
 				$apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $sendinblue);
 				$sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
 				$recipients = array();
