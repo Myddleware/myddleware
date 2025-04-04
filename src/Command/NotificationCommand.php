@@ -86,7 +86,6 @@ class NotificationCommand extends Command
                 $output->writeln('<info>Sending notification...</info>');
                 $this->notificationManager->sendNotification();
                 // Close job if it has been created
-                $this->jobManager->closeJob();
                 $output->writeln('<info>Notification sent successfully!</info>');
             }
 
@@ -95,6 +94,9 @@ class NotificationCommand extends Command
         } catch (\Exception $e) {
             $output->writeln('<error>'.$e->getMessage().'</error>');
             return Command::FAILURE;
+        } finally {
+            $this->jobManager->closeJob();
+            $output->writeln('<info>Notification job closed successfully!</info>');
         }
     }
 }
