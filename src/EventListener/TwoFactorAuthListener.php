@@ -28,7 +28,7 @@ use App\Entity\User;
 use App\Service\TwoFactorAuthService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -40,7 +40,7 @@ class TwoFactorAuthListener implements EventSubscriberInterface
 {
     private TokenStorageInterface $tokenStorage;
     private TwoFactorAuthService $twoFactorAuthService;
-    private SessionInterface $session;
+    private RequestStack $requestStack;
     private UrlGeneratorInterface $urlGenerator;
     private Security $security;
     private LoggerInterface $logger;
@@ -48,14 +48,14 @@ class TwoFactorAuthListener implements EventSubscriberInterface
     public function __construct(
         TokenStorageInterface $tokenStorage,
         TwoFactorAuthService $twoFactorAuthService,
-        SessionInterface $session,
+        RequestStack $requestStack,
         UrlGeneratorInterface $urlGenerator,
         Security $security,
         LoggerInterface $logger
     ) {
         $this->tokenStorage = $tokenStorage;
         $this->twoFactorAuthService = $twoFactorAuthService;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->urlGenerator = $urlGenerator;
         $this->security = $security;
         $this->logger = $logger;
