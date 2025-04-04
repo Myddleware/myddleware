@@ -62,7 +62,7 @@ class VerificationCodeFormType extends AbstractType
                 ],
             ])
             ->add('rememberDevice', CheckboxType::class, [
-                'label' => 'Don\'t ask me again on this device',
+                'label' => 'Don’ask me again on this device',
                 'required' => false,
             ]);
     }
