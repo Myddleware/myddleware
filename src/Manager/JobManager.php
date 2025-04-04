@@ -1532,6 +1532,39 @@ class JobManager
                 $jobManagerChekJob->closeJob();   
 				$this->setMessage('Task '.$job['id'].' successfully closed. ');
             }
+					
+			// Check running instance
+			// Select all cron job with running instances not null
+			$sqlRunning = "SELECT *	FROM cron_job WHERE running_instances > 0";
+            $stmt = $this->connection->prepare($sqlRunning);
+            $resultRunning = $stmt->executeQuery();
+			$cronJobs = $resultRunning->fetchAllAssociative();
+			if (!empty($cronJobs)) {
+				foreach ($cronJobs as $cronJob) {
+					// Get the job name by removing the command prefix myddleware:
+					$jobName = str_replace('myddleware:', '', $cronJob['command']);
+					// Check if the remaining instance is equal to the open task
+					$sqlOpenJob = " 
+						SELECT count(*) as nb
+						FROM job
+						WHERE 
+								status = 'start'
+							AND param = :jobName
+					";
+					$stmt = $this->connection->prepare($sqlOpenJob);
+					$stmt->bindValue('jobName', $jobName);
+					$resultOpenJob = $stmt->executeQuery();
+					$openJob = $resultOpenJob->fetchAssociative();
+					// If the number of open job isn't the same than the running instance, we change the running instance	
+					if ($openJob['nb'] != $cronJob['running_instances']) {
+						$query = 'UPDATE cron_job SET running_instances = :runningInstances WHERE id = :cronJobId';
+						$stmt = $this->connection->prepare($query);
+						$stmt->bindValue(':cronJobId', $cronJob['id']);
+						$stmt->bindValue(':runningInstances', $openJob['nb']);
+						$result = $stmt->executeQuery();
+					}
+				}
+			}
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

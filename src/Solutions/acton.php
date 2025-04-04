@@ -252,11 +252,6 @@ class acton extends solution
 			if (empty($record['listid'])) {
 				throw new \Exception('The field listid is required to add a member to a list.');
 			}
-			// Get email address
-			$emailAddress = json_decode($record['body'])->EMAIL;
-			if (empty($emailAddress)) {
-				throw new \Exception('The email address is required to add a member to a list.');
-			}
 			// Send data to Act-on
 			$parameters['body'] = $record['body']; 
 			$response = $this->client->request('POST', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record', $parameters);
