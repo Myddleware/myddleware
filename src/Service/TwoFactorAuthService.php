@@ -30,15 +30,15 @@ use App\Repository\TwoFactorAuthRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Swift_Mailer;
-use Swift_Message;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Dotenv\Dotenv;
-use SendinBlue\Client\Api\TransactionalEmailsApi;
-use SendinBlue\Client\Configuration;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Brevo\Client\Api\TransactionalEmailsApi;
+use Brevo\Client\Configuration;
 use GuzzleHttp\Client;
 
 class TwoFactorAuthService
@@ -46,19 +46,19 @@ class TwoFactorAuthService
     private EntityManagerInterface $entityManager;
     private TwoFactorAuthRepository $twoFactorAuthRepository;
     private LoggerInterface $logger;
-    private Swift_Mailer $mailer;
+    private MailerInterface $mailer;
     private ParameterBagInterface $params;
     private SmsService $smsService;
-    private ?TransactionalEmailsApi $sendinblue = null;
+    private ?TransactionalEmailsApi $brevo = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         TwoFactorAuthRepository $twoFactorAuthRepository,
         LoggerInterface $logger,
-        Swift_Mailer $mailer,
+        MailerInterface $mailer,
         ParameterBagInterface $params,
         SmsService $smsService,
-        ?string $sendinblueApiKey = null
+        ?string $brevoApiKey = null
     ) {
         $this->entityManager = $entityManager;
         $this->twoFactorAuthRepository = $twoFactorAuthRepository;
@@ -67,14 +67,14 @@ class TwoFactorAuthService
         $this->params = $params;
         $this->smsService = $smsService;
         
-        // Initialize Sendinblue client if API key exists and is not empty
-        if (!empty($sendinblueApiKey)) {
+        // Initialize Brevo client if API key exists and is not empty
+        if (!empty($brevoApiKey)) {
             try {
-                $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $sendinblueApiKey);
-                $this->sendinblue = new TransactionalEmailsApi(new Client(), $config);
-                $this->logger->info('Sendinblue client initialized successfully');
+                $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $brevoApiKey);
+                $this->brevo = new TransactionalEmailsApi(new Client(), $config);
+                $this->logger->info('Brevo client initialized successfully');
             } catch (\Exception $e) {
-                $this->logger->error('Failed to initialize Sendinblue client: ' . $e->getMessage());
+                $this->logger->error('Failed to initialize Brevo client: ' . $e->getMessage());
             }
         }
     }
@@ -122,10 +122,10 @@ class TwoFactorAuthService
 
     private function sendEmailCode(User $user, string $code): bool
     {
-        // Check if Sendinblue API is configured
-        if ($this->sendinblue instanceof TransactionalEmailsApi) {
+        // Check if Brevo API is configured
+        if ($this->brevo instanceof TransactionalEmailsApi) {
             try {
-                $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
+                $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail();
                 $sendSmtpEmail['to'] = [['email' => $user->getEmail()]];
                 $sendSmtpEmail['subject'] = 'Myddleware - Your verification code';
                 $sendSmtpEmail['htmlContent'] = '<p>Hello ' . $user->getUsername() . ',</p>' .
@@ -134,35 +134,30 @@ class TwoFactorAuthService
                     '<p>If you did not request this code, please ignore this email.</p>';
                 $sendSmtpEmail['sender'] = ['email' => $this->params->get('email_from', 'no-reply@myddleware.com')];
 
-                $result = $this->sendinblue->sendTransacEmail($sendSmtpEmail);
+                $result = $this->brevo->sendTransacEmail($sendSmtpEmail);
                 return true;
             } catch (\Exception $e) {
-                $this->logger->error('Failed to send verification email via Sendinblue: ' . $e->getMessage());
+                $this->logger->error('Failed to send verification email via Brevo: ' . $e->getMessage());
                 return false;
             }
         }
 
-        // Fallback to Swift_Mailer if Sendinblue is not configured
+        // Fallback to Symfony Mailer if Brevo is not configured
         try {
-            $message = (new Swift_Message('Myddleware - Your verification code'))
-                ->setFrom($this->params->get('email_from', 'no-reply@myddleware.com'))
-                ->setTo($user->getEmail())
-                ->setBody(
+            $email = (new Email())
+                ->from($this->params->get('email_from', 'no-reply@myddleware.com'))
+                ->to($user->getEmail())
+                ->subject('Myddleware - Your verification code')
+                ->html(
                     '<p>Hello ' . $user->getUsername() . ',</p>' .
                     '<p>Your verification code is: <strong>' . $code . '</strong></p>' .
                     '<p>This code will expire in 1 minute.</p>' .
-                    '<p>If you did not request this code, please ignore this email.</p>',
-                    'text/html'
+                    '<p>If you did not request this code, please ignore this email.</p>'
                 );
             
-            $result = $this->mailer->send($message);
-            
-            if ($result === 0) {
-                $this->logger->error('Failed to send verification email to ' . $user->getEmail());
-                return false;
-            }
-            
+            $this->mailer->send($email);
             return true;
+            
         } catch (\Exception $e) {
             $this->logger->error('Failed to send verification email: ' . $e->getMessage());
             return false;
