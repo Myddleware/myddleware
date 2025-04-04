@@ -55,8 +55,11 @@ class TwoFactorAuthController extends AbstractController
      */
     public function verify(Request $request): Response
     {
+
+        $session = $request->getSession();
+        
         // Check if the user is already authenticated with 2FA
-        if ($this->session->get('two_factor_auth_complete', false)) {
+        if ($session->get('two_factor_auth_complete', false)) {
             return $this->redirectToRoute('regle_panel');
         }
 
@@ -77,7 +80,7 @@ class TwoFactorAuthController extends AbstractController
         // Check if 2FA is enabled for this user
         if (!$twoFactorAuth->isEnabled()) {
             // If 2FA is not enabled, mark as complete and redirect
-            $this->session->set('two_factor_auth_complete', true);
+            $session->set('two_factor_auth_complete', true);
             return $this->redirectToRoute('regle_panel');
         }
 
@@ -85,7 +88,7 @@ class TwoFactorAuthController extends AbstractController
         $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
         if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
             // If the user has a valid remember cookie, mark as complete and redirect
-            $this->session->set('two_factor_auth_complete', true);
+            $session->set('two_factor_auth_complete', true);
             return $this->redirectToRoute('regle_panel');
         }
 
@@ -102,7 +105,7 @@ class TwoFactorAuthController extends AbstractController
             // Verify the code
             if ($this->twoFactorAuthService->verifyCode($twoFactorAuth, $code)) {
                 // Code is valid, mark as complete
-                $this->session->set('two_factor_auth_complete', true);
+                $session->set('two_factor_auth_complete', true);
 
                 // Handle remember device option
                 if ($rememberDevice) {

@@ -2712,19 +2712,22 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
         #[Route('/panel', name: 'regle_panel')]
         public function panel(Request $request): Response
         {
+
+            $session = $request->getSession();
+
             // Check if the user has completed 2FA
             $user = $this->getUser();
             $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
             
             $this->logger->debug('User authenticated, checking 2FA status in panel method');
-            if ($twoFactorAuth->isEnabled() && !$this->session->get('two_factor_auth_complete', false)) {
+            if ($twoFactorAuth->isEnabled() && !$session->get('two_factor_auth_complete', false)) {
                 $this->logger->debug('2FA is enabled for user and not completed');
                 
                 // Check if the user has a remember cookie
                 $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
                 if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
                     // If the user has a valid remember cookie, mark as complete
-                    $this->session->set('two_factor_auth_complete', true);
+                    $session->set('two_factor_auth_complete', true);
                     $this->logger->debug('User has valid remember cookie, marking 2FA as complete');
                 } else {
                     // Otherwise, redirect to verification
