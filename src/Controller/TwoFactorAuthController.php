@@ -30,7 +30,7 @@ use App\Service\TwoFactorAuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -38,16 +38,16 @@ class TwoFactorAuthController extends AbstractController
 {
     private TwoFactorAuthService $twoFactorAuthService;
     private TokenStorageInterface $tokenStorage;
-    private SessionInterface $session;
+    private RequestStack $requestStack;
 
     public function __construct(
         TwoFactorAuthService $twoFactorAuthService,
         TokenStorageInterface $tokenStorage,
-        SessionInterface $session
+        RequestStack $requestStack
     ) {
         $this->twoFactorAuthService = $twoFactorAuthService;
         $this->tokenStorage = $tokenStorage;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
     }
 
     /**
