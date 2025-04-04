@@ -150,9 +150,9 @@ class AccountController extends AbstractController
                     $smtpConfigured = true;
                 }
                 
-                // Check for Sendinblue API key
-                $sendinblueApiKey = $_ENV['SENDINBLUE_APIKEY'] ?? null;
-                if (!empty($sendinblueApiKey)) {
+                // Check for Brevo API key
+                $brevoApiKey = $_ENV['BREVO_APIKEY'] ?? null;
+                if (!empty($brevoApiKey)) {
                     $smtpConfigured = true;
                 }
             } catch (\Exception $e) {
