@@ -78,7 +78,8 @@ use App\Form\Type\RelationFilterType;
 use App\Entity\Workflow;
 use App\Entity\WorkflowAction;
 use App\Service\TwoFactorAuthService;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+
     /**
      * @Route("/rule")
      */
