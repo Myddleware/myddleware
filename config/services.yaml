@@ -16,7 +16,7 @@ parameters:
   twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
   twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
   twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
-  sendinblue_api_key: '%env(default::SENDINBLUE_APIKEY)%'
+  brevo_api_key: '%env(default::BREVO_APIKEY)%'
 
 services:
   # default configuration for services in *this* file
@@ -61,9 +61,14 @@ services:
 
   App\Service\TwoFactorAuthService:
     arguments:
-      $mailer: '@swiftmailer.mailer.default'
-      $sendinblueApiKey: '%sendinblue_api_key%'
+      $mailer: '@mailer.mailer'
+      $brevoApiKey: '%brevo_api_key%'
 
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
+
+  # Update JobManager to use RequestStack instead of SessionInterface
+  App\Manager\JobManager:
+    arguments:
+      $requestStack: '@request_stack'

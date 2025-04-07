@@ -266,7 +266,7 @@ class RuleGroupController extends AbstractController
                 return $this->redirectToRoute('premium_list');
             }
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $rulegroupSearchResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
             $rulegroup = $rulegroupSearchResult[0];
 
@@ -292,7 +292,7 @@ class RuleGroupController extends AbstractController
 
         
 
-    //     $em = $this->getDoctrine()->getManager();
+    //     $em = $this->entityManager;
     //     $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $rulegroupId, 'deleted' => 0]);
     //     $rulegroup = $rulegroupArray[0];
 
@@ -349,7 +349,7 @@ class RuleGroupController extends AbstractController
     //     try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
+    //         $em = $this->entityManager;
     //         $rulegroupResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
     //         $rulegroup = $rulegroupResult[0];
 
@@ -377,7 +377,7 @@ class RuleGroupController extends AbstractController
     //     try {
 
             
-    //         $em = $this->getDoctrine()->getManager();
+    //         $em = $this->entityManager;
     //         $rulegroupResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
     //         $rulegroup = $rulegroupResult[0];
 
@@ -435,7 +435,7 @@ class RuleGroupController extends AbstractController
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $rulegroup = new Rulegroup();
             $rulegroup->setId(uniqid());
             $form = $this->createForm(RuleGroupType::class, $rulegroup, [
@@ -480,7 +480,7 @@ class RuleGroupController extends AbstractController
                 return $this->redirectToRoute('premium_list');
             }
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $rulegroup = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
 
 
@@ -514,7 +514,7 @@ class RuleGroupController extends AbstractController
                 return $this->redirectToRoute('premium_list');
             }
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
             $rulegroup = $rulegroupArray[0];
 

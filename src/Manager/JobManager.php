@@ -38,8 +38,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -99,7 +98,7 @@ class JobManager
 
     private LogRepository $logRepository;
 
-    private SessionInterface $session;
+    private ?RequestStack $requestStack;
 
     private int $nbDays;
     private string $pruneDatabaseMaxDate;
@@ -117,7 +116,7 @@ class JobManager
         RuleRepository $ruleRepository,
         LogRepository $logRepository,
         RouterInterface $router,
-        SessionInterface $session,
+        ?RequestStack $requestStack,
         ToolsManager $toolsManager,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
@@ -131,7 +130,7 @@ class JobManager
         $this->ruleRepository = $ruleRepository;
         $this->logRepository = $logRepository;
         $this->router = $router;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->toolsManager = $toolsManager;
         $this->ruleManager = $ruleManager;
         $this->upgrade = $upgrade;
@@ -452,12 +451,18 @@ class JobManager
             }
 
             // Renvoie du message en session
-            $session = new Session();
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
+            $session = $this->requestStack->getSession();
+        }
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
 
             return $idJob;
         } catch (Exception $e) {
-            $session = new Session();
+            if (!empty($this->requestStack->getCurrentRequest())) {
+            // Get the request from RequestStack
+            $session = $this->requestStack->getSession();
+        }
             $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
 
             return false;

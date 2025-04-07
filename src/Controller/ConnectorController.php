@@ -268,7 +268,7 @@ class ConnectorController extends AbstractController
                 $this->sessionService->setUploadError($error);
             } else {
                 // A list of permitted file extensions
-                $configRepository = $this->getDoctrine()->getManager()->getRepository(Config::class);
+                $configRepository = $this->entityManager->getRepository(Config::class);
                 $extensionAllowed = $configRepository->findOneBy(['name' => 'extension_allowed']);
                 if (!empty($extensionAllowed)) {
                     $allowedJson = $extensionAllowed->getValue();
@@ -340,8 +340,7 @@ class ConnectorController extends AbstractController
     {
         $type = '';
 
-        $solution = $this->getDoctrine()
-                            ->getManager()
+        $solution = $this->entityManager
                             ->getRepository(Solution::class)
                             ->findOneBy(['name' => $this->sessionService->getParamConnectorSourceSolution()]);
 
@@ -362,7 +361,13 @@ class ConnectorController extends AbstractController
         if ('POST' == $request->getMethod() && $this->sessionService->isParamConnectorExist()) {
             try {
                 $form->handleRequest($request);
-                $form->submit($request->request->get($form->getName()));
+
+                // start by getting all the data from the request
+                $data = $request->request->all();
+
+                $formName = $form->getName();
+
+                $form->submit($data[$formName]);
                 if ($form->isValid()) {
                     $solution = $connector->getSolution();
                     $multi = $solution->getSource() + $solution->getTarget();
@@ -493,8 +498,7 @@ class ConnectorController extends AbstractController
             }
 
             // Get the connector using its id
-            $connector = $this->getDoctrine()
-                        ->getManager()
+            $connector = $this->entityManager
                         ->getRepository(Connector::class)
                         ->findOneBy($list_fields_sql);
 
@@ -503,7 +507,7 @@ class ConnectorController extends AbstractController
             }
             try {
                 /** @var RuleRepository $ruleRepository */
-                $ruleRepository = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepository = $this->entityManager->getRepository(Rule::class);
                 // Check if a rule uses this connector (source and target)
                 $rule = $ruleRepository->findOneBy([
                     'connectorTarget' => $connector,
@@ -521,8 +525,8 @@ class ConnectorController extends AbstractController
                 } else {
                     // Flag the connector as deleted
                     $connector->setDeleted(1);
-                    $this->getDoctrine()->getManager()->persist($connector);
-                    $this->getDoctrine()->getManager()->flush();
+                    $this->entityManager->persist($connector);
+                    $this->entityManager->flush();
                 }
             } catch (\Doctrine\DBAL\DBALException $e) {
                 $session->set('error', [$e->getPrevious()->getMessage()]);

@@ -171,7 +171,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionResult[0];
 
@@ -202,7 +202,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             
             if (!empty($workflowResult)) {
@@ -242,7 +242,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionResult[0];
 
@@ -273,7 +273,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
 
             if (!$workflow) {
@@ -368,7 +368,7 @@ class WorkflowActionController extends AbstractController
                         'label' => 'Action Name',
                         'required' => true,
                     ])
-                    ->add('description', TextType::class, ['label' => 'Description'])
+                    ->add('description', TextareaType::class, ['label' => 'Description'])
                     ->add('Workflow', EntityType::class, [
                         'class' => Workflow::class,
                         'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
@@ -464,7 +464,7 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false,
                     ])
-                    ->add('submit', SubmitType::class, ['label' => 'Save'])
+                    ->add('submit', SubmitType::class, ['label' => 'Save', 'attr' => ['class' => 'btn btn-success mt-2']])
                     ->getForm();
                 $form->handleRequest($request);
 
@@ -616,7 +616,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
             if (!$workflow) {
@@ -664,7 +664,7 @@ class WorkflowActionController extends AbstractController
         }
 
         try {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionArray[0];
 
@@ -744,7 +744,7 @@ class WorkflowActionController extends AbstractController
                         'label' => 'Action Name',
                         'required' => true,
                     ])
-                    ->add('description', TextType::class, ['label' => 'Description'])
+                    ->add('description', TextareaType::class, ['label' => 'Description'])
                     ->add('Workflow', EntityType::class, [
                         'class' => Workflow::class,
                         'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
@@ -780,9 +780,10 @@ class WorkflowActionController extends AbstractController
                         'choices' => $StringStatus,
                         'required' => false
                     ])
-                    ->add('to', TextType::class, ['label' => 'To', 'required' => false])
+                    ->add('to', TextareaType::class, ['label' => 'To', 'required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 7]])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'required' => false])
-                    ->add('message', TextareaType::class, ['required' => false])
+                    // make a large default area for the message
+                    ->add('message', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 5]])
                     ->add('searchField', ChoiceType::class, [
                         'label' => 'searchField',
                         'choices' => $sourceSearchValue,
@@ -840,7 +841,7 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false,
                     ])
-                    ->add('submit', SubmitType::class, ['label' => 'Save'])
+                    ->add('submit', SubmitType::class, ['label' => 'Save', 'attr' => ['class' => 'btn btn-success mt-2']])
                     ->getForm();
                 $form->handleRequest($request);
 
@@ -946,11 +947,14 @@ class WorkflowActionController extends AbstractController
 
                 $targetFieldsData = [];
                 if (!empty($arguments) && count($arguments) > 0) {
-                    foreach ($arguments as $field => $value) {
-                        $targetFieldsData[] = [
-                            'field' => $field,
-                            'value' => $value,
-                        ];
+                    // Handle fields property specifically
+                    if (isset($arguments['fields']) && is_array($arguments['fields'])) {
+                        foreach ($arguments['fields'] as $field => $value) {
+                            $targetFieldsData[] = [
+                                'field' => $field,
+                                'value' => $value,
+                            ];
+                        }
                     }
                 }
                 return $this->render(
@@ -979,7 +983,7 @@ class WorkflowActionController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
         $workflowAction = $workflowActionArray[0];
 
@@ -1013,7 +1017,7 @@ class WorkflowActionController extends AbstractController
         }
 
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
         $workflow = $workflowArray[0];
 

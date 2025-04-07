@@ -1,16 +1,255 @@
 $(document).ready(function () {
 
   let isEditMode = $("#form_ruleId").val() !== '';
-  let isEditModeValue = false; 
+  let isEditModeValue = false;
+  let workflowActionFields = null;
 
   $('fieldset:has(#form_targetFieldValues)').hide();
   var selectedAction = $("#form_action").val();
   
-  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
-    targetFieldsData.forEach(function (fieldData) {
-      addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+  // All possible fields we want to track
+  const ALL_FIELDS = [
+    'Status',
+    'Rule',
+    'SearchField',
+    'SearchValue',
+    'Subject',
+    'Message',
+    'To',
+    'Rerun',
+    'Multiple run',
+    'Active',
+    'Target Field',
+    'New Value'
+  ];
+
+  // Function to get field configuration for an action
+  function getFieldConfig(actionName) {
+    // Default configurations for each action type
+    const defaultConfigs = {
+      updateStatus: {
+        Action: 'updateStatus',
+        Status: 'Yes',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      },
+      generateDocument: {
+        Action: 'generateDocument',
+        Status: 'No',
+        Rule: 'Yes',
+        SearchField: 'Yes',
+        SearchValue: 'Yes',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'Yes',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      },
+      sendNotification: {
+        Action: 'sendNotification',
+        Status: 'No',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'Yes',
+        Message: 'Yes',
+        To: 'Yes',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      },
+      transformDocument: {
+        Action: 'transformDocument',
+        Status: 'No',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      },
+      rerun: {
+        Action: 'rerun',
+        Status: 'No',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      },
+      changeData: {
+        Action: 'changeData',
+        Status: 'No',
+        Rule: 'Yes',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'Yes',
+        'New Value': 'Yes',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes'
+      }
+    };
+
+    if (!workflowActionFields) {
+      console.log('Using default configuration for action:', actionName);
+      return defaultConfigs[actionName] || defaultConfigs.updateStatus;
+    }
+
+    return workflowActionFields.find(config => config.Action === actionName) || defaultConfigs[actionName] || defaultConfigs.updateStatus;
+  }
+
+  // Function to get field container ID from field name
+  function getContainerId(field) {
+    switch(field) {
+      case 'Status': return '#status-container';
+      case 'Rule': return '#rule-container';
+      case 'SearchField': return '#search-field-container';
+      case 'SearchValue': return '#search-value-container';
+      case 'Subject': return '#subject-container';
+      case 'Message': return '#message-container';
+      case 'To': return '#to-container';
+      case 'Rerun': return '#rerun-container';
+      case 'Multiple run': return '#multiple-runs-container';
+      case 'Active': return '#active-container';
+      case 'Target Field': return '#targetFieldContainer';
+      case 'New Value': return '#targetFieldValueContainer';
+      default: return null;
+    }
+  }
+
+  // Function to log field visibility
+  function logFieldVisibility(field, shouldShow, containerId) {
+    console.log(`Field: ${field.padEnd(15)} | Status: ${shouldShow ? 'SHOWING' : 'HIDDEN '.padEnd(7)} | Container: ${containerId}`);
+  }
+
+  // Function to toggle field visibility based on configuration
+  function toggleFieldVisibility(actionConfig) {
+    console.log('\n=== Field Visibility for Action: ' + actionConfig.Action + ' ===');
+    console.log('Field'.padEnd(15) + ' | Status  | Container');
+    console.log('─'.repeat(50));
+
+    // Log visibility for all possible fields
+    ALL_FIELDS.forEach(field => {
+      const containerId = getContainerId(field);
+      if (containerId) {
+        const shouldShow = actionConfig[field] === 'Yes';
+        const container = $(containerId);
+        
+        // Log the status regardless of whether we found the element
+        logFieldVisibility(field, shouldShow, containerId);
+        
+        // Toggle visibility if element exists
+        if (container.length) {
+          if (shouldShow) {
+            container.show();
+          } else {
+            container.hide();
+          }
+        } else {
+          console.log(`Warning: Container not found for ${field} (${containerId})`);
+        }
+      }
+    });
+
+    // Special handling for Target Field and New Value in changeData action
+    const isChangeData = actionConfig.Action === 'changeData';
+    
+    // Handle the add field button visibility
+    $('#addFieldButton').toggle(isChangeData);
+    
+    // Handle the dynamic fields container visibility
+    const dynamicContainer = $('#dynamicFieldsContainer');
+    if (isChangeData) {
+      dynamicContainer.show();
+    } else {
+      dynamicContainer.hide().empty();
+    }
+
+    console.log('─'.repeat(50));
+    console.log('Dynamic Fields  | Status  | Container');
+    console.log('─'.repeat(50));
+    console.log(`Add Button      | ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #addFieldButton`);
+    console.log(`Fields Container| ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #dynamicFieldsContainer`);
+  }
+
+  // Try multiple possible paths for the JSON file
+  const possiblePaths = [
+    '/build/workflow-action-fields.json',
+    '/assets/js/workflow-action-fields.json',
+    '/workflow-action-fields.json'
+  ];
+
+  function tryLoadConfig(paths) {
+    if (paths.length === 0) {
+      console.warn('Could not load configuration from any path, using defaults');
+      return;
+    }
+
+    const path = paths[0];
+    $.ajax({
+      url: window.location.origin + path,
+      dataType: 'json',
+      success: function(data) {
+        console.log('Successfully loaded workflow action fields configuration from:', path);
+        workflowActionFields = data;
+        
+        // Handle initial load after JSON is loaded
+        const selectedAction = $("#form_action").val();
+        console.log('\n=== INITIAL PAGE LOAD ===');
+        console.log('Selected Action:', selectedAction);
+        const initialConfig = getFieldConfig(selectedAction);
+        toggleFieldVisibility(initialConfig);
+
+        // Handle target fields data in edit mode
+        if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
+          dynamicFieldsContainer.innerHTML = '';
+          dynamicContainer.style.display = "block";
+          addFieldButton.style.display = "block";
+          console.log('\n=== Loading Edit Mode Target Fields ===');
+          targetFieldsData.forEach(function (fieldData, index) {
+            console.log(`Target Field ${index + 1}: ${fieldData.field} = ${fieldData.value}`);
+            addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+          });
+        }
+      },
+      error: function() {
+        console.log('Failed to load from:', path);
+        tryLoadConfig(paths.slice(1));
+      }
     });
   }
+
+  // Start trying to load the configuration
+  tryLoadConfig(possiblePaths);
 
   function addNewTargetFieldWithValue(fieldName, fieldValue) {
   
@@ -75,34 +314,19 @@ $(document).ready(function () {
     document.getElementById("targetFieldValueContainer").style.display = 'none';
   }
   
-  // Function to hide or show the Rule field
-  function toggleRuleField() {
-    var actionValue = $("#form_action").val();
+  // Handle action change
+  $("#form_action").on("change", function () {
+    const actionValue = $(this).val();
+    console.log('\n=== ACTION CHANGED ===');
+    console.log('New Action:', actionValue);
+    const config = getFieldConfig(actionValue);
+    toggleFieldVisibility(config);
+    
     if (!isEditMode || isEditModeValue) {
       $("#form_ruleId").val('');
-  }
-
-  isEditModeValue = true;
-
-    if (
-      actionValue === "transformDocument" ||
-      actionValue === "rerun" ||
-      actionValue === "sendNotification" ||
-      actionValue === "updateStatus"
-    ) {
-      $("#form_ruleId").closest(".form-group").hide();
-    } else {
-      $("#form_ruleId").closest(".form-group").show();
     }
-
-  }
-
-
-  $("#form_action").on("change", function () {
-    toggleRuleField();
-
+    isEditModeValue = true;
   });
-
 
 });
 
@@ -185,16 +409,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const actionValue = formAction.value;
 
     if (actionValue === "changeData") {
-      addFieldButton.style.display = "none";
-      dynamicFieldsContainer.style.display = "none";
-      targetFieldContainer.style.display = "none";
-      targetFieldValueContainer.style.display = "none";
+        // Show the add button and container for changeData action
+        addFieldButton.style.display = "block";
+        dynamicFieldsContainer.style.display = "block";
     } else {
-      targetFieldContainer.style.display = "none";
-      targetFieldValueContainer.style.display = "none";
-      addFieldButton.style.display = "none";
-      dynamicFieldsContainer.style.display = "none";
-      dynamicFieldsContainer.innerHTML = '';
+        // Hide for other actions
+        targetFieldContainer.style.display = "none";
+        targetFieldValueContainer.style.display = "none";
+        addFieldButton.style.display = "none";
+        dynamicFieldsContainer.style.display = "none";
+        dynamicFieldsContainer.innerHTML = '';
     }
   }
 

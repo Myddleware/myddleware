@@ -28,13 +28,10 @@ namespace App\Manager;
 
 use DateTime;
 use Exception;
-use Swift_Mailer;
-use Swift_Message;
 use App\Entity\User;
 
 use Twig\Environment;
 use App\Entity\Config;
-use Swift_SmtpTransport;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
 use Psr\Log\LoggerInterface;
@@ -46,6 +43,8 @@ use App\Repository\RuleRepository;
 use App\Repository\UserRepository;
 use App\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -59,7 +58,7 @@ class NotificationManager
     private LoggerInterface $logger;
     private ParameterBagInterface $params;
     private Connection $connection;
-    private Swift_Mailer $mailer;
+    private MailerInterface $mailer;
     private UserRepository $userRepository;
     private TranslatorInterface $translator;
     private JobRepository $jobRepository;
@@ -77,7 +76,7 @@ class NotificationManager
         UserRepository $userRepository,
         JobRepository $jobRepository,
         RuleRepository $ruleRepository,
-        Swift_Mailer $mailer,
+        MailerInterface $mailer,
         ToolsManager $tools,
         ParameterBagInterface $params,
         Environment $twig,
@@ -217,17 +216,28 @@ class NotificationManager
 			throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
 		}
 		
-		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
-            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
-            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
-            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
+		if (!empty($_ENV['BREVO_APIKEY'])) {
+            $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_APIKEY']);
+            $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
+            $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail();
+            
+            // Create sender object
+            $sender = new \Brevo\Client\Model\SendSmtpEmailSender();
+            $sender->setEmail($this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+            
+            // Create recipients array
+            $recipients = [];
             foreach ($this->emailAddresses as $emailAddress) {
-                $sendSmtpEmailTo[] = array('email' => $emailAddress);
+                $recipient = new \Brevo\Client\Model\SendSmtpEmailTo();
+                $recipient->setEmail($emailAddress);
+                $recipients[] = $recipient;
             }
-            $sendSmtpEmail['to'] = $sendSmtpEmailTo;
-            $sendSmtpEmail['subject'] = $subject;
-            $sendSmtpEmail['htmlContent'] = $textMail;
-            $sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+            
+            // Set up the email
+            $sendSmtpEmail->setSender($sender);
+            $sendSmtpEmail->setTo($recipients);
+            $sendSmtpEmail->setSubject($subject);
+            $sendSmtpEmail->setHtmlContent($textMail);
 
             try {
                 $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
@@ -235,15 +245,17 @@ class NotificationManager
                 throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             }
         } else {
-            $message =
-                    (new Swift_Message($subject))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setBody($textMail);
             // Send the message to all admins
             foreach ($this->emailAddresses as $emailAddress) {
-                $message->setTo($emailAddress);
-                $send = $this->mailer->send($message);
-                if (!$send) {
+                $email = (new Email())
+                    ->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->to($emailAddress)
+                    ->subject($subject)
+                    ->html($textMail);
+                
+                try {
+                    $this->mailer->send($email);
+                } catch (Exception $e) {
                     $this->logger->error('Failed to send alert email : '.$textMail.' to '.$emailAddress);
                     throw new Exception('Failed to send alert email : '.$textMail.' to '.$emailAddress);
                 }
@@ -355,57 +367,24 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
-        // Set all config parameters
-        $this->setConfigParam();
+        try {
+            $this->setConfigParam();
+            $template = $this->twig->load('Email/reset_password.html.twig');
+            $content = $template->render([
+                'user' => $user,
+                'base_uri' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'] : ''),
+            ]);
 
-        // Check if Sendinblue API key is set
-        if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
-            $this->sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
-            $apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $this->sendinblue);
-            $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
+            $email = (new Email())
+                ->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('email_reset_password.subject'))
+                ->html($content);
             
-            $sendSmtpEmail['to'] = [['email' => $user->getEmail()]];
-            $sendSmtpEmail['subject'] = 'Initialisation du mot de passe';
-            $sendSmtpEmail['htmlContent'] = $this->twig->render('Email/reset_password.html.twig', ['user' => $user]);
-            $sendSmtpEmail['sender'] = ['email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com'];
-
-            try {
-                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
-            } catch (Exception $e) {
-                throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            }
-        } else {
-            // Get the mailerurl from the .env.local to send the mail to reset the password
-            $mailerUrlEnv = $_ENV["MAILER_URL"];
-
-            if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
-                $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
-
-                $host = $mailerUrlArray[0];
-                $port = $mailerUrlArray[1];
-                $hostUser = $mailerUrlArray[4];
-                $hostPassword = $mailerUrlArray[5];
-                $auth_mode = $mailerUrlArray[3];
-                $encryption = $mailerUrlArray[2];
-                $transport = new Swift_SmtpTransport($host, $port);
-                $transport->setUsername($hostUser);
-                $transport->setPassword($hostPassword);
-                $transport->setAuthMode($auth_mode);
-                $transport->setEncryption($encryption);
-
-                $mailer = new Swift_Mailer($transport);
-                $message = (new \Swift_Message('Initialisation du mot de passe'))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setTo($user->getEmail())
-                    ->setBody($this->twig->render('Email/reset_password.html.twig', ['user' => $user]));
-                $send = $mailer->send($message);
-                if (!$send) {
-                    $this->logger->error('Failed to send email');
-                    throw new Exception('Failed to send email');
-                }
-            } else {
-                throw new Exception('There is no MAILER_URL in the .env.local !');
-            }
+            $this->mailer->send($email);
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('Failed to send reset password email : '.$e->getMessage());
         }
     }
 

@@ -436,3 +436,96 @@ td > a {
 .workflow-name-link-rule:hover {
 	text-decoration: underline !important;
 }
+
+/* connector parameters input */
+
+input[id^="connector_connectorParams_"][id$="_value"] {
+    border: 1px solid #dfdddd;
+    border-radius: 4px;
+	margin-bottom: 3px;
+}
+
+label[for^="connector_connectorParams_"][for$="_value"] {
+    margin-bottom: 3px;
+}
+
+/* workflow action fields */
+
+input#form_name,
+textarea#form_description,
+input#form_order,
+input#form_multipleRuns,
+input#form_status,
+input#form_active,
+input#form_subject,
+input#form_message,
+input#form_to,
+input#form_targetField,
+input#form_targetFieldValue,
+input#form_rerun,
+input#form_ruleId,
+input#form_searchField,
+input#form_searchValue,
+select#form_name,
+select#form_Workflow,
+select#form_description,
+select#form_action,
+select#form_order,
+select#form_multipleRuns,
+select#form_status,
+select#form_active,
+select#form_subject,
+select#form_message,
+select#form_to,
+select#form_targetField,
+select#form_targetFieldValue,
+select#form_rerun,
+select#form_ruleId,
+select#form_searchField,
+select#form_searchValue {
+	border: 1px solid #dfdddd;
+    border-radius: 4px;
+	margin-bottom: 3px;
+	margin-left: 10px;
+}
+
+  .form-group-workflow-action {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .form-group-workflow-action label {
+    font-weight: 600;
+  }
+
+  .form-group-workflow-action input,
+  .form-group-workflow-action select,
+  .form-group-workflow-action textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .form-group-workflow-action label {
+	margin-bottom: 0.4rem;
+	font-weight: 600;
+	/* 👇 This aligns label start with input */
+	padding-left: 10px;
+  }
+
+  .form-actions-workflow-action {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .form-actions-workflow-action button {
+    padding: 8px 16px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
+
