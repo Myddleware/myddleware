@@ -199,18 +199,14 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $oldPassword = $request->request->get('reset_password')['oldPassword'];
-            if ($passwordHasher->isPasswordValid($user, $oldPassword)) {
-                $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
-                $user->setPassword($newHashedPassword);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
+            $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
+            $user->setPassword($newHashedPassword);
+            $user->setConfirmationToken(null); // Clear the token after successful reset
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
-                $this->addFlash('success', 'Password has been successfully reset.');
-                return $this->redirectToRoute('regle_panel');
-            } else {
-                $form->get('oldPassword')->addError(new FormError('Invalid current password.'));
-            }
+            $this->addFlash('success', 'Password has been successfully reset.');
+            return $this->redirectToRoute('login');
         }
 
         return $this->render('Login/reset.html.twig', [
