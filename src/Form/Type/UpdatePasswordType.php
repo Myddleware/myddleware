@@ -21,7 +21,15 @@ class UpdatePasswordType extends AbstractType
             'invalid_message' => 'Passwords must be identical',
             'options' => [
                 'attr' => [
-                    'class' => 'password-field',
+                    'class' => 'password-field white-reset',
+                    'style' => ' background-color: #fafafa;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                    max-width: 500px;
+                    width: 100%;
+                    text-align: center;
+                    font-family: Arial, sans-serif; border: 1px solid #dcdcdc'  
                 ],
             ],
             'first_options' => [
@@ -36,10 +44,22 @@ class UpdatePasswordType extends AbstractType
             'mapped' => false,
             'required' => true,
             'label' => 'password_reset.old_password',
+            'attr' => [
+                'class' => 'password-field white-reset',
+                'style' => ' background-color: #fafafa;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 15px #fafafa;
+                    padding: 10px;
+                    max-width: 500px;
+                    width: 100%;
+                    text-align: center;
+                    font-family: Arial, sans-serif; border: 1px solid #dcdcdc'
+            ],
         ])
         ->add('submit', SubmitType::class, [
             'attr' => [
-                'class' => 'btn btn-success mt-3 btn-lg',
+                'class' => 'mt-3 btn-lg',
+                'style' => 'background-color: #03c4eb; border: none; font-size: 18px; padding: 12px; border-radius: 8px; color: #fff; transition: background-color 0.3s; ',
             ],
             'label' => 'password_reset.submit',
         ])
