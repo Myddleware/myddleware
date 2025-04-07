@@ -2336,10 +2336,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
                 );
                 unset($tab_new_rule['params']['regleId']); // delete id regle for gestion session
 
+                $requestAll = $request->request->all();
+
+                $duplicate = $requestAll['duplicate'];
+
                 // fields relate
-                if (!empty($request->request->get('duplicate'))) {
+                if (!empty($duplicate)) {
                     // fix : Put the duplicate fields values in the old $tab_new_rule array
-                    $duplicateArray = implode(';', $request->request->get('duplicate'));
+                    $duplicateArray = implode(';', $duplicate);
                     $tab_new_rule['params']['rule']['duplicate_fields'] = $duplicateArray;
                     $this->sessionService->setParamParentRule($ruleKey, 'duplicate_fields', $duplicateArray);
                 }
