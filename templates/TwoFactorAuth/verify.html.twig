@@ -76,9 +76,10 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                     
                     <div class="form-group mb-3">
-                        <p>Don’t ask me again on this device</p>
-                        {{ form_widget(form.rememberDevice) }}
-                        {{ form_label(form.rememberDevice) }}
+                        <div class="d-flex align-items-center gap-2">
+                            {{ form_widget(form.rememberDevice) }}
+                            <p class="mb-0">Don't ask me again on this device</p>
+                        </div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary mb-2">Verify</button>
