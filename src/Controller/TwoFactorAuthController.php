@@ -55,9 +55,14 @@ class TwoFactorAuthController extends AbstractController
      */
     public function verify(Request $request): Response
     {
-
         $session = $request->getSession();
         
+        // Check if we have an active session with initial authentication
+        if (!$session->has('_security_main')) {
+            // Session expired or no initial authentication, redirect to login
+            return $this->redirectToRoute('login');
+        }
+
         // Check if the user is already authenticated with 2FA
         if ($session->get('two_factor_auth_complete', false)) {
             return $this->redirectToRoute('regle_panel');
@@ -141,6 +146,12 @@ class TwoFactorAuthController extends AbstractController
      */
     public function resend(Request $request): Response
     {
+        // Check if we have an active session with initial authentication
+        if (!$request->getSession()->has('_security_main')) {
+            // Session expired or no initial authentication, redirect to login
+            return $this->redirectToRoute('login');
+        }
+
         // Get the user from the token
         $token = $this->tokenStorage->getToken();
         if (!$token) {
@@ -176,6 +187,12 @@ class TwoFactorAuthController extends AbstractController
      */
     public function switchMethod(string $method, Request $request): Response
     {
+        // Check if we have an active session with initial authentication
+        if (!$request->getSession()->has('_security_main')) {
+            // Session expired or no initial authentication, redirect to login
+            return $this->redirectToRoute('login');
+        }
+
         // Get the user from the token
         $token = $this->tokenStorage->getToken();
         if (!$token) {
