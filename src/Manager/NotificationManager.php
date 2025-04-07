@@ -375,13 +375,39 @@ class NotificationManager
                 'base_uri' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'] : ''),
             ]);
 
-            $email = (new Email())
-                ->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                ->to($user->getEmail())
-                ->subject($this->translator->trans('email_reset_password.subject'))
-                ->html($content);
-            
-            $this->mailer->send($email);
+            if (!empty($_ENV['BREVO_APIKEY'])) {
+                $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_APIKEY']);
+                $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
+                $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail();
+                
+                // Create sender object
+                $sender = new \Brevo\Client\Model\SendSmtpEmailSender();
+                $sender->setEmail($this->configParams['email_from'] ?? 'no-reply@myddleware.com');
+                
+                // Create recipient
+                $recipient = new \Brevo\Client\Model\SendSmtpEmailTo();
+                $recipient->setEmail($user->getEmail());
+                
+                // Set up the email
+                $sendSmtpEmail->setSender($sender);
+                $sendSmtpEmail->setTo([$recipient]);
+                $sendSmtpEmail->setSubject($this->translator->trans('email_reset_password.subject'));
+                $sendSmtpEmail->setHtmlContent($content);
+
+                try {
+                    $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+                } catch (Exception $e) {
+                    throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+                }
+            } else {
+                $email = (new Email())
+                    ->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->to($user->getEmail())
+                    ->subject($this->translator->trans('email_reset_password.subject'))
+                    ->html($content);
+                
+                $this->mailer->send($email);
+            }
             return true;
         } catch (Exception $e) {
             throw new Exception('Failed to send reset password email : '.$e->getMessage());
