@@ -208,6 +208,9 @@ class SecurityController extends AbstractController
 
                 $this->addFlash('success', 'Password has been successfully reset.');
                 return $this->redirectToRoute('regle_panel');
+            } else {
+                $form->get('oldPassword')->addError(new FormError('Invalid current password.'));
+            }
         }
 
         return $this->render('Login/reset.html.twig', [
@@ -215,7 +218,4 @@ class SecurityController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
-}
-
 }
