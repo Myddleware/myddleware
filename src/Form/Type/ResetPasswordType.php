@@ -34,7 +34,7 @@ class ResetPasswordType extends AbstractType
         ])
         ->add('submit', SubmitType::class, [
             'attr' => [
-                'class' => 'btn btn-success mt-3 btn-lg',
+                'class' => 'btn mt-3 btn-lg',
             ],
             'label' => 'password_reset.submit',
         ])
