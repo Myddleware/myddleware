@@ -107,6 +107,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
         private ConfigRepository $configRepository;
         private TwoFactorAuthService $twoFactorAuthService;
 
+        private RequestStack $requestStack;
 
         public function __construct(
             LoggerInterface $logger,
@@ -127,7 +128,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             JobManager $jobManager,
             TemplateManager $template,
             ParameterBagInterface $params,
-            TwoFactorAuthService $twoFactorAuthService
+            TwoFactorAuthService $twoFactorAuthService,
+            RequestStack $requestStack
         ) {
             $this->logger = $logger;
             $this->ruleManager = $ruleManager;
@@ -147,6 +149,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
             $this->jobManager = $jobManager;
             $this->template = $template;
             $this->twoFactorAuthService = $twoFactorAuthService;
+            $this->requestStack = $requestStack;
         }
 
         protected function getInstanceBdd()
