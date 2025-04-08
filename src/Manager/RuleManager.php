@@ -2536,14 +2536,7 @@ class RuleManager
                                 '60' => 'solution.params.60_day',
                                 '90' => 'solution.params.90_day',
                             ],
-            ],
-            [
-                'id' => 'description',
-                'name' => 'description',
-                'required' => true,
-                'type' => TextareaType::class,
-                'label' => 'solution.params.description',
-            ],
+            ]
         ];
     }
 }
