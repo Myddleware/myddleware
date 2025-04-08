@@ -27,22 +27,24 @@
 {% set body_class = 'login' %}
 
 {% block body %}
-	<div class="white-reset">		
-    	<p class="text-center"><span class="logo_reset"></span></p>
-		{{ form_start(form) }}
-		{{ form_start(form, {'attr': {'class': 'form-inline'}}) }}
-			<div class="row" style="height: auto;">
-				<div class="col-lg-12" style="height: auto;">
-				{{ form_label(form.plainPassword.first) }}
-				{{ form_widget(form.plainPassword.first) }}
+	<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+		<div class="white-reset">		
+			<p class="text-center"><span class="logo_reset"></span></p>
+			{{ form_start(form) }}
+			{{ form_start(form, {'attr': {'class': 'form-inline'}}) }}
+				<div class="row" style="height: auto;">
+					<div class="col-lg-12" style="height: auto;">
+					{{ form_label(form.plainPassword.first) }}
+					{{ form_widget(form.plainPassword.first) }}
+					</div>
 				</div>
-			</div>
-			<div class="row" style="height: auto;">
-				<div class="col-lg-12" style="height: auto;">
-					{{ form_label(form.plainPassword.second) }}
-					{{ form_widget(form.plainPassword.second) }}
+				<div class="row" style="height: auto;">
+					<div class="col-lg-12" style="height: auto;">
+						{{ form_label(form.plainPassword.second) }}
+						{{ form_widget(form.plainPassword.second) }}
+					</div>
 				</div>
-			</div>
-		{{ form_end(form) }}
+			{{ form_end(form) }}
+		</div>
 	</div>
 {% endblock %}
