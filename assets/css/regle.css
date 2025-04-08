@@ -536,3 +536,6 @@ select#form_searchValue {
     justify-content: center !important;
 }
 
+.flex-center-rule-name {
+	margin-left: 4rem;
+}
