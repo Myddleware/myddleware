@@ -553,11 +553,20 @@ select#form_searchValue {
 .workflow-action-new-searchfield div #form_searchField,
 .workflow-action-edit-searchfield div #form_searchField,
 .workflow-action-new-searchvalue div #form_searchValue,
-.workflow-action-edit-searchvalue div #form_searchValue {
+.workflow-action-edit-searchvalue div #form_searchValue,
+.workflow-action-new-to div #form_to,
+.workflow-action-edit-to div #form_to,
+.workflow-action-new-subject div #form_subject,
+.workflow-action-edit-subject div #form_subject {
 	width: 200%;
 }
 
 .workflow-action-new-description div #form_description,
 .workflow-action-edit-description div #form_description {
 	width: 350%;
+}
+
+.workflow-action-new-message div #form_message,
+.workflow-action-edit-message div #form_message {
+	width: 400% !important;
 }

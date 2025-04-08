@@ -78,13 +78,15 @@
 					<div class="col-md-6 form-group-workflow-action" id="active-container">
 						{{ form_row(form.active) }}
 					</div>
-					<div class="col-md-6 form-group-workflow-action" id="subject-container">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-subject" id="subject-container">
 						{{ form_row(form.subject) }}
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-12" id="message-container">
-						{{ form_row(form.message) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-edit-message">
+							{{ form_row(form.message) }}
+						</div>
 					</div>
 					<div class="col-md-6 form-group-workflow-action workflow-action-edit-rule" id="rule-container">
 						{{ form_row(form.ruleId) }}
@@ -102,7 +104,7 @@
 					<div class="col-md-6 form-group-workflow-action" id="rerun-container">
 						{{ form_row(form.rerun) }}
 					</div>
-					<div class="col-md-6 form-group-workflow-action" id="to-container">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-to" id="to-container">
 						{{ form_row(form.to) }}
 					</div>
 				</div>
