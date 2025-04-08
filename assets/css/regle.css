@@ -444,6 +444,7 @@ input#connector_name {
     border: 1px solid #dfdddd;
     border-radius: 4px;
 	margin-bottom: 3px;
+	min-width: 410px;
 }
 
 label[for^="connector_connectorParams_"][for$="_value"] {
