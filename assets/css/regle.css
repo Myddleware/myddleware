@@ -548,3 +548,8 @@ select#form_searchValue {
 .workflow-action-edit-action div #form_action {
 	width: 200%;
 }
+
+.workflow-action-new-description div #form_description,
+.workflow-action-edit-description div #form_description {
+	width: 300%;
+}
