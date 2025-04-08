@@ -25,11 +25,12 @@ class UpdatePasswordType extends AbstractType
                     'style' => ' background-color: #fafafa;
                     border-radius: 4px;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
+                    padding: 10px;
                     max-width: 500px;
                     width: 100%;
                     text-align: center;
-                    font-family: Arial, sans-serif; border: 1px solid #dcdcdc'  
+                    font-family: Arial, sans-serif; border: 1px solid #dcdcdc;
+                    margin-top: 2px;'
                 ],
             ],
             'first_options' => [
@@ -59,7 +60,7 @@ class UpdatePasswordType extends AbstractType
         ->add('submit', SubmitType::class, [
             'attr' => [
                 'class' => 'mt-3 btn-lg',
-                'style' => 'background-color: #03c4eb; border: none; font-size: 18px; padding: 12px; border-radius: 8px; color: #fff; transition: background-color 0.3s; ',
+                'style' => 'background-color: #03c4eb; border: none; font-size: 18px; padding: 12px; border-radius: 8px; color: #fff; transition: background-color 0.3s; display: block; margin: 0 auto;',
             ],
             'label' => 'password_reset.submit',
         ])
