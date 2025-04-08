@@ -115,6 +115,7 @@ footer {
 }
 
 .help-link-update-password {
+	color: #03c4eb;
     text-decoration: none;
     position: relative;
     transition: color 0.3s ease;
