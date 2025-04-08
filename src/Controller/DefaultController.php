@@ -79,6 +79,7 @@ use App\Entity\Workflow;
 use App\Entity\WorkflowAction;
 use App\Service\TwoFactorAuthService;
 use Symfony\Component\HttpFoundation\RequestStack;
+use App\Entity\RuleGroup;
 
     /**
      * @Route("/rule")
@@ -323,6 +324,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
                     }
                 }
 
+                $this->removeThisRuleItsRuleGroup($rule);
+                $this->deleteWorflowsFromThisRule($rule);
+
                 $rule->setDeleted(1);
                 $rule->setActive(0);
                 $this->entityManager->persist($rule);
@@ -331,6 +335,49 @@ use Symfony\Component\HttpFoundation\RequestStack;
                 return $this->redirect($this->generateUrl('regle_list'));
             }
             return $this->redirect($this->generateUrl('regle_list'));
+        }
+
+        public function removeThisRuleItsRuleGroup(Rule $rule)
+        {
+            $ruleGroup = $rule->getGroup();
+            if ($ruleGroup) {
+                $ruleGroup->removeRule($rule);
+                $this->entityManager->persist($ruleGroup);
+                $this->entityManager->flush();
+            }
+        }
+
+        public function deleteWorflowsFromThisRule($id)
+        {
+            $workflows = $this->entityManager
+                ->getRepository(Workflow::class)
+                ->findBy(['rule' => $id]);
+
+            foreach ($workflows as $workflow) {
+
+                $workflow->setActive(0);
+                $this->deleteWorkflowActionsFromThisWorkflow($workflow->getId());
+
+                $workflow->setDeleted(1);
+                $this->entityManager->persist($workflow);
+            }
+
+            $this->entityManager->flush();
+        }
+
+        public function deleteWorkflowActionsFromThisWorkflow($id)
+        {
+            $workflowActions = $this->entityManager
+                ->getRepository(WorkflowAction::class)
+                ->findBy(['workflow' => $id]);
+                
+            foreach ($workflowActions as $workflowAction) {
+                $workflowAction->setActive(0);
+                $workflowAction->setDeleted(1);
+                $this->entityManager->persist($workflowAction);
+            }
+
+            $this->entityManager->flush();
         }
 
         /**
