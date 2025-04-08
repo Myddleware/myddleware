@@ -3165,7 +3165,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
             'name' => 'description'
         ]);
 
-        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
+        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue() || $description === '    ') {
             return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
         }
 

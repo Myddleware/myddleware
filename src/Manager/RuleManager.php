@@ -2498,6 +2498,7 @@ class RuleManager
                 'limit' => '100',
                 'delete' => '60',
                 'datereference' => date('Y-m-d').' 00:00:00',
+                'description' => '    ',
             ],
         ];
     }
