@@ -531,3 +531,8 @@ select#form_searchValue {
     margin: 0 8px;
   }
 
+.form-check.form-switch {
+    display: flex !important;
+    justify-content: center !important;
+}
+
