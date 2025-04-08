@@ -605,3 +605,13 @@ margin-left: -0.5rem;
 .targetIdOfDocument {
     width: 19rem;
 }
+
+#relation_filter_field,
+#relation_filter_another_field,
+#relation_filter_textarea_field {
+    border: 1px solid #ccc;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
