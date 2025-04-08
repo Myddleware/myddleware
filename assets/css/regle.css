@@ -545,7 +545,10 @@ select#form_searchValue {
 .workflow-action-new-workflow div #form_Workflow,
 .workflow-action-edit-workflow div #form_Workflow,
 .workflow-action-new-action div #form_action,
-.workflow-action-edit-action div #form_action {
+.workflow-action-edit-action div #form_action,
+.workflow-action-edit-status div #form_status,
+.workflow-action-new-status div #form_status
+ {
 	width: 200%;
 }
 
