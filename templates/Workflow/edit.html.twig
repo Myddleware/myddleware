@@ -75,19 +75,6 @@
 			</div>
 		</div>
 		{{ form_end(form) }}
-		<div>
-			<div class="card-header">
-				{{ 'view_workflow.action'| trans }}
-			</div>
-
-			<div class="card-body text-center m-4">
-
-				<a href="{{ path('workflow_action_create_with_workflow', {'workflowId': workflow.id}) }}" class="btn btn-primary mb-3">
-
-					<i class="fa fa-plus" aria-hidden="true"></i>
-					{{ 'view_workflow.add_action'| trans }}</a>
-			</div>
-		</div>
 	</div>
 
 {% endblock %}
