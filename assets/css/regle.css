@@ -539,3 +539,8 @@ select#form_searchValue {
 .flex-center-rule-name {
 	margin-left: 4rem;
 }
+
+.workflow-action-new-name div #form_name,
+.workflow-action-edit-name div #form_name {
+	width: 200%;
+}
