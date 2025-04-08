@@ -439,7 +439,8 @@ td > a {
 
 /* connector parameters input */
 
-input[id^="connector_connectorParams_"][id$="_value"] {
+input[id^="connector_connectorParams_"][id$="_value"],
+input#connector_name {
     border: 1px solid #dfdddd;
     border-radius: 4px;
 	margin-bottom: 3px;
