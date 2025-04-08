@@ -109,13 +109,13 @@ footer {
     transition: transform 0.3s ease;
 }
 
-.help-content-link:hover {
-    color: #03c4eb;
+.help-link:hover::after {
+	transform: scaleX(1);
+	transform-origin: bottom left;
 }
 
-.help-link:hover::after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
+.help-content-link:hover {
+    color: #03c4eb;
 }
 
 .clr {
