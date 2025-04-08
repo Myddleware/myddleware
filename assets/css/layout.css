@@ -114,6 +114,29 @@ footer {
 	transform-origin: bottom left;
 }
 
+.help-link-update-password {
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.help-link-update-password::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
+}
+
+.help-link-update-password:hover::after {
+	transform: scaleX(1);
+	transform-origin: bottom left;
+}
+
 .help-content-link:hover {
     color: #03c4eb;
 }
