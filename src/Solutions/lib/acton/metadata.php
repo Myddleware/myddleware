@@ -31,5 +31,6 @@ $moduleFields = [
 	'list_contact' => [
 		'listid' => ['label' => 'List ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
 		'body' => ['label' => 'Body', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'EMAIL' => ['label' => 'Email for duplicate search only', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
 ];

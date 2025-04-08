@@ -45,6 +45,7 @@ class acton extends solution
 
     protected array $FieldsDuplicate = [
 											'list' => ['name'],
+											'list_contact' => ['EMAIL','listid'],
 										];
 	
 	protected array $required_fields = ['default' => ['id', 'tsLastModified']];
@@ -174,8 +175,16 @@ class acton extends solution
 		if (
 				$param['module'] == 'list_contact'
 			AND empty($param['query']['id'])
+			AND empty($param['query']['EMAIL'])
 		) {
-			throw new \Exception('You can only search list member by contact id.');
+			throw new \Exception('You can only search list member by contact id or EMAIL.');
+		}
+		if (
+				$param['module'] == 'list_contact'
+			AND !empty($param['query']['EMAIL'])
+			AND empty($param['query']['listid'])
+		) {
+			throw new \Exception('For duplicate check by EMAIL, please add the listid in duplicate check too. Thanks.');
 		}
 		
 		// Parameters to read data from Act-on
@@ -207,29 +216,45 @@ class acton extends solution
 		// For module contact list module
 		if ($param['module'] == 'list_contact') {
 			// Get the list id
-			$listId = explode(':',$param['query']['id'])[0];
-			// Get the contacts
-			$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId.'/record/'.$param['query']['id'], $parameters);
-			$responseBodyContact = json_decode($response->getBody()->getContents(), true);
-			if (!empty($responseBodyContact)) {
-				// Get the field list from the Act-on list
-				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId, $parameters);
-				$responseBodyList = json_decode($response->getBody()->getContents(), true);
-
-				// Remove first field that contains the contact id
-				$result['id'] = $responseBodyContact[0];
-				unset($responseBodyContact[0]);
+			// Get the contacts (search by EMAIL or id)
+			if (!empty($param['query']['EMAIL'])) {
+				$listId = $param['query']['listid'];
+				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/lookup/'.$listId.'?email='.$param['query']['EMAIL'], $parameters);
+				$responseBodyContact = json_decode($response->getBody()->getContents(), true);
+				// Add the id with key 0 to alugn with search by id
+				if (empty($responseBodyContact['contactID'])) {
+					return array();
+				}
+				$result['id'] = $responseBodyContact['contactID'];
+				unset($responseBodyContact['contactID']);
+				$result['body'] = json_encode($responseBodyContact);
 				$result['listid'] = $listId;
-				// Build body
-				foreach($responseBodyContact as $key => $value) {
-					// Replace the key by the field name in the list
-					if (!empty($responseBodyList['headers'][$key])) {
-						$contact[$responseBodyList['headers'][$key]] = $value;
-					}
-				}				
-				$result['body'] = json_encode($contact);
 				$result['tsLastModified'] = time();
-				return array($result);				
+				return array($result);
+			} else {	
+				$listId = explode(':',$param['query']['id'])[0];
+				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId.'/record/'.$param['query']['id'], $parameters);
+				$responseBodyContact = json_decode($response->getBody()->getContents(), true);
+				if (!empty($responseBodyContact)) {
+					// Get the field list from the Act-on list
+					$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId, $parameters);
+					$responseBodyList = json_decode($response->getBody()->getContents(), true);
+
+					// Remove first field that contains the contact id
+					$result['id'] = $responseBodyContact[0];
+					unset($responseBodyContact[0]);
+					$result['listid'] = $listId;
+					// Build body
+					foreach($responseBodyContact as $key => $value) {
+						// Replace the key by the field name in the list
+						if (!empty($responseBodyList['headers'][$key])) {
+							$contact[$responseBodyList['headers'][$key]] = $value;
+						}
+					}				
+					$result['body'] = json_encode($contact);
+					$result['tsLastModified'] = time();
+					return array($result);				
+				}
 			}
 		}
     }
