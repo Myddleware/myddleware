@@ -128,13 +128,13 @@ footer {
     bottom: -2px;
     left: 0;
     transform: scaleX(0);
-    transform-origin: bottom right;
+    transform-origin: bottom left;
     transition: transform 0.3s ease;
 }
 
 .help-link-update-password:hover::after {
 	transform: scaleX(1);
-	transform-origin: bottom left;
+	transform-origin: bottom right;
 }
 
 .help-content-link:hover {
