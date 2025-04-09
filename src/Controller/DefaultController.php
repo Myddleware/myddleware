@@ -2363,17 +2363,26 @@ use App\Entity\RuleGroup;
             try {
                 // Decode the JSON params from the request
                 $paramsRaw = $request->request->get('params');
-                $params = json_decode($paramsRaw, true); // true = associative array
-
+                $decodedParams = json_decode($paramsRaw, true); // or directly use if already an array
                 // Get rule id from params
-                if (!empty($params)) {
-                    foreach ($params as $searchRuleId) {
+                if (!empty($decodedParams)) {
+                    foreach ($decodedParams as $searchRuleId) {
                         if ('regleId' === $searchRuleId['name']) {
                             $ruleKey = $searchRuleId['value'];
                             break;
                         }
                     }
                 }
+                $formattedParams = [];
+                
+                foreach ($decodedParams as $item) {
+                    if (isset($item['name']) && isset($item['value'])) {
+                        $formattedParams[$item['name']] = is_numeric($item['value']) ? (int)$item['value'] : $item['value'];
+                    }
+                }
+
+                $params = $formattedParams;
+                
 
                 // retourne un tableau prêt à l'emploi
                 $tab_new_rule = $this->createListeParamsRule(
@@ -2385,7 +2394,7 @@ use App\Entity\RuleGroup;
 
                 $requestAll = $request->request->all();
 
-                $duplicate = $requestAll['duplicate'];
+                $duplicate = $requestAll['duplicate'] ?? [];
 
                 // fields relate
                 if (!empty($duplicate)) {
@@ -2409,6 +2418,11 @@ use App\Entity\RuleGroup;
                     ->find($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
 
                 $param = RuleManager::getFieldsParamDefault();
+
+                // unset description from param['RuleParam'] if it not a new rule
+                if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
+                    unset($param['RuleParam']['description']);
+                }
 
                 // Get the id of the rule if we edit a rule
                 // Generate Rule object (create a new one or instanciate the existing one
@@ -3090,7 +3104,7 @@ use App\Entity\RuleGroup;
             // PARAMS -----------------------------------------
             if ($params) {
                 foreach ($params as $k => $p) {
-                    $tab['params'][$p['name']] = $p['value'];
+                    $tab['params'][$k] = $p;
                 }
             }
 
