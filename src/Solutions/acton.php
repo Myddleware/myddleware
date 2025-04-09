@@ -219,8 +219,13 @@ class acton extends solution
 			// Get the contacts (search by EMAIL or id)
 			if (!empty($param['query']['EMAIL'])) {
 				$listId = $param['query']['listid'];
-				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/lookup/'.$listId.'?email='.$param['query']['EMAIL'], $parameters);
-				$responseBodyContact = json_decode($response->getBody()->getContents(), true);
+				// If no data found, Act-On return an exception
+				try {
+					$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/lookup/'.$listId.'?email='.$param['query']['EMAIL'], $parameters);
+					$responseBodyContact = json_decode($response->getBody()->getContents(), true);
+				} catch (\Exception $e) {
+					return array();
+				}
 				// Add the id with key 0 to alugn with search by id
 				if (empty($responseBodyContact['contactID'])) {
 					return array();
@@ -276,11 +281,6 @@ class acton extends solution
 			// Check required fields
 			if (empty($record['listid'])) {
 				throw new \Exception('The field listid is required to add a member to a list.');
-			}
-			// Get email address
-			$emailAddress = json_decode($record['body'])->EMAIL;
-			if (empty($emailAddress)) {
-				throw new \Exception('The email address is required to add a member to a list.');
 			}
 			// Send data to Act-on
 			$parameters['body'] = $record['body']; 

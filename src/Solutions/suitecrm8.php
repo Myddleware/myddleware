@@ -133,7 +133,7 @@ class suitecrm8 extends solution
     {
         parent::get_module_fields($module, $type);
         try {
-			$fields = $this->call('GET', 'V8/meta/fields/'.$module); 
+			$fields = $this->call('GET', 'V8/meta/fields/'.$module);
 			if (!empty($fields['data']['attributes'])) {
 				foreach($fields['data']['attributes'] as $key => $field) {
 					$this->moduleFields[$key] = [
