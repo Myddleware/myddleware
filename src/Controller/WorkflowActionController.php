@@ -785,12 +785,12 @@ class WorkflowActionController extends AbstractController
                     // make a large default area for the message
                     ->add('message', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 5]])
                     ->add('searchField', ChoiceType::class, [
-                        'label' => 'searchField',
+                        'label' => 'Matching Field from Generating Rule',
                         'choices' => $sourceSearchValue,
                         'required' => false
                     ])
                     ->add('searchValue', ChoiceType::class, [
-                        'label' => 'searchValue',
+                        'label' => 'Matching field From Current Rule',
                         'choices' => $sourceFields,
                         'required' => false
                     ])
