@@ -780,7 +780,7 @@ class WorkflowActionController extends AbstractController
                         'choices' => $StringStatus,
                         'required' => false
                     ])
-                    ->add('to', TextareaType::class, ['label' => 'To', 'required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 7]])
+                    ->add('to', TextareaType::class, ['label' => 'To', 'required' => false, 'attr' => ['class' => 'form-control', 'rows' => 1, 'cols' => 7]])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'required' => false])
                     // make a large default area for the message
                     ->add('message', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 5]])
