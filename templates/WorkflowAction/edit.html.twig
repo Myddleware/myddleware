@@ -128,7 +128,7 @@
 				{{ form_row(form.submit) }}
 			</div>
 		</div>
-		{{ form_end(form) }}
+		{{ form_end(form, {'render_rest': false}) }}
 
 		<script type="text/javascript">
 			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";

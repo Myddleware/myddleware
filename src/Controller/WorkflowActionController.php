@@ -468,7 +468,7 @@ class WorkflowActionController extends AbstractController
                     ->getForm();
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
+                if ($form->isSubmitted()) {
 
                     $workflowAction->setModifiedBy($this->getUser());
 
@@ -845,7 +845,7 @@ class WorkflowActionController extends AbstractController
                     ->getForm();
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
+                if ($form->isSubmitted()) {
 
                     $workflowAction->setModifiedBy($this->getUser());
 
