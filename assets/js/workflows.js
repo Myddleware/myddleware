@@ -7,6 +7,20 @@ $(document).ready(function () {
   $('fieldset:has(#form_targetFieldValues)').hide();
   var selectedAction = $("#form_action").val();
   
+  // Handle target fields data in edit mode - moved from tryLoadConfig
+  if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
+    const dynamicFieldsContainer = document.getElementById("dynamicFieldsContainer");
+    const addFieldButton = document.getElementById("addFieldButton");
+    
+    dynamicFieldsContainer.innerHTML = '';
+    dynamicFieldsContainer.style.display = "block";
+    addFieldButton.style.display = "block";
+    
+    targetFieldsData.forEach(function (fieldData) {
+      addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+    });
+  }
+  
   // All possible fields we want to track
   const ALL_FIELDS = [
     'Status',
@@ -228,18 +242,6 @@ $(document).ready(function () {
         console.log('Selected Action:', selectedAction);
         const initialConfig = getFieldConfig(selectedAction);
         toggleFieldVisibility(initialConfig);
-
-        // Handle target fields data in edit mode
-        if (isEditMode && typeof targetFieldsData !== 'undefined' && targetFieldsData && targetFieldsData.length > 0 && selectedAction === "changeData") {
-          dynamicFieldsContainer.innerHTML = '';
-          dynamicContainer.style.display = "block";
-          addFieldButton.style.display = "block";
-          console.log('\n=== Loading Edit Mode Target Fields ===');
-          targetFieldsData.forEach(function (fieldData, index) {
-            console.log(`Target Field ${index + 1}: ${fieldData.field} = ${fieldData.value}`);
-            addNewTargetFieldWithValue(fieldData.field, fieldData.value);
-          });
-        }
       },
       error: function() {
         console.log('Failed to load from:', path);
