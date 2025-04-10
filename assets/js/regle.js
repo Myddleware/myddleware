@@ -1294,19 +1294,52 @@ function fields_target_hover() {
 
 
 function btn_action_fct() {
+  console.log('[🚀 btn_action_fct] Function started');
+  
+  // First, clean up any existing loading overlays to prevent duplicates
+  $('.myd_div_loading').remove();
+  $('body').css('overflow', '');
+  console.log('[🧹 Cleanup] Removed any existing loading overlays');
+
+  // Log window dimensions and scroll position
+  console.log('[📏 Dimensions] Window:', {
+    width: $(window).width(),
+    height: $(window).height(),
+    scrollTop: $(window).scrollTop()
+  });
+
   // IMPORTANT
   $(window).scrollTop(0);
+  console.log('[⬆️ Scroll] Window scrolled to top');
+
+  // Log body overflow state before and after change
+  console.log('[💫 Overflow] Body overflow before:', $("body").css("overflow"));
   $("body").css("overflow", "hidden");
+  console.log('[💫 Overflow] Body overflow after:', $("body").css("overflow"));
+
   var ww = $(window).width() / 2 - 33 + "px";
   var wh = $(window).height() / 2 - 33 + "px";
+  console.log('[📐 Calculated] Center positions:', { width: ww, height: wh });
+
+  // Log rule div detection
   var divrule = $("#rule");
+  console.log('[🔍 Rule Div] Initial #rule element found:', divrule.length > 0);
+  
   if (!divrule.length) {
-    var divrule = $("#flux");
+    divrule = $("#flux");
+    console.log('[🔍 Rule Div] Fallback to #flux element:', divrule.length > 0);
   }
+
+  // Create and configure loading div
   var loading = $("<div></div>");
-  loading.empty(); // on le vide
+  loading.empty();
   loading.attr("id", "myd_loading");
-  loading.css({
+  
+  // Log loading div creation
+  console.log('[📦 Loading Div] Created with ID:', loading.attr("id"));
+
+  // Apply and log CSS properties
+  var loadingCSS = {
     position: "absolute",
     display: "block",
     top: 0,
@@ -1316,32 +1349,120 @@ function btn_action_fct() {
     "background-color": "white",
     "text-align": "center",
     "z-index": 100,
-  });
-  loading.attr("class", "myd_div_loading");
+  };
+  
+  loading.css(loadingCSS);
+  console.log('[🎨 Loading CSS] Applied styles:', loadingCSS);
 
+  loading.attr("class", "myd_div_loading");
+  console.log('[🏷️ Class] Added class:', loading.attr("class"));
+
+  // Create and configure message paragraph
   var p = $("<p>Please wait. This can take a few minutes.</p>");
-  p.css({
+  var pCSS = {
     position: "absolute",
     top: $(window).height() / 2 - 100,
     left: $(window).width() / 2 - 65,
     width: "130px",
     height: "60px",
     "font-weight": "bold",
+  };
+  
+  p.css(pCSS);
+  console.log('[📝 Message] Created and styled paragraph:', {
+    text: p.text(),
+    styles: pCSS
   });
-  loading.append(p);
 
+  loading.append(p);
+  console.log('[➕ Append] Added message to loading div');
+
+  // Create and configure logo div
   var img = $("<div></div>");
   img.attr("class", "myd_div_loading_logo");
-  img.css({
+  var imgCSS = {
     position: "absolute",
     top: "5px",
     left: "5px",
     height: "150px",
     width: "150px",
+  };
+  
+  img.css(imgCSS);
+  console.log('[🖼️ Logo] Created and styled logo div:', {
+    class: img.attr("class"),
+    styles: imgCSS
   });
+
   loading.append(img);
+  console.log('[➕ Append] Added logo to loading div');
+
+  // Final append to container
   divrule.append(loading);
+  console.log('[✅ Complete] Loading overlay appended to container');
+  
+  // Multiple event handlers for cleanup
+  
+  // 1. Browser back/forward navigation
+  $(window).on('popstate.myddleware', function(event) {
+    console.log('[⚡ Navigation] Browser navigation detected');
+    cleanupLoading();
+  });
+
+  // 2. History change detection
+  var currentPath = window.location.pathname;
+  var checkInterval = setInterval(function() {
+    if (window.location.pathname !== currentPath) {
+      console.log('[🔄 Path Change] URL changed from', currentPath, 'to', window.location.pathname);
+      cleanupLoading();
+      clearInterval(checkInterval);
+    }
+  }, 100);
+
+  // 3. Page unload
+  $(window).on('unload.myddleware', function() {
+    console.log('[📤 Unload] Page unloading');
+    cleanupLoading();
+  });
+
+  // 4. Safety timeout (30 seconds)
+  setTimeout(function() {
+    if ($('#myd_loading').length > 0) {
+      console.warn('[⚠️ Timeout] Loading overlay forcefully removed after 30 seconds');
+      cleanupLoading();
+    }
+  }, 30000);
+
+  // Cleanup function
+  function cleanupLoading() {
+    console.log('[🧹 Cleanup] Starting cleanup process');
+    
+    // Remove event handlers
+    $(window).off('popstate.myddleware');
+    $(window).off('unload.myddleware');
+    
+    // Remove loading overlay
+    $('#myd_loading').fadeOut(300, function() {
+      $(this).remove();
+      console.log('[🗑️ Removed] Loading overlay');
+    });
+    
+    // Restore body overflow
+    $('body').css('overflow', '');
+    console.log('[↩️ Restored] Body overflow');
+  }
 }
+
+// Ensure cleanup happens if the script is re-run
+$(document).ready(function() {
+  // Clean up any existing handlers
+  $(window).off('popstate.myddleware');
+  $(window).off('unload.myddleware');
+  
+  // Clean up any existing loading overlays
+  $('.myd_div_loading').remove();
+  $('body').css('overflow', '');
+});
 
 function notification() {
   var notification = $.trim($("#zone_notification", "#notification").html());
