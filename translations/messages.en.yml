@@ -359,7 +359,7 @@ view_connector:
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
     info:
-        title: Connection parameters
+        title: Connectors
         solution: solution
     tabs: 
         info: Information
