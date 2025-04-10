@@ -108,7 +108,7 @@ $(function () {
                                             var timer = setInterval(function () {
                                                 if (win.closed) {
                                                     clearInterval(timer);
-                                                    console.log('Popup window closed');
+                                                    // console.log('Popup window closed');
                                                     if (confirm("Reconnect")) {
                                                         $('#connexion_detail').trigger();
                                                     }

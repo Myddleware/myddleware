@@ -1,4 +1,4 @@
-console.log("workflowActionSearchFields.js loaded");
+// console.log("workflowActionSearchFields.js loaded");
 
 $(document).ready(function () {
     // Function to filter search fields based on selected rule
