@@ -20,10 +20,16 @@ class RuleGroupType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Rule Group Name',
                 'required' => true,
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('description', TextType::class, [
                 'label' => 'Description',
                 'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save',
