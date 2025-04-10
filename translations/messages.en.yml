@@ -1127,6 +1127,7 @@ duplicate_rule:
 banner: Crontab is disabled
 variable:
   name_already_exists: The name of the variable already exists. Please choose another name.
+  edit: Editing of a variable
   back_to_list: Back to the list
   save: Save
   editing: Editing of a variable
