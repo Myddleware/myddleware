@@ -762,10 +762,10 @@ $.fn.setCursorPosition = function(pos) {
 
 // Validation and form check
 $("#validation").on("click", function () {
-  console.log("[🔵 CLICK] Validation button clicked");
+  // console.log("[🔵 CLICK] Validation button clicked");
 
   let before = $("#validation").attr("value");
-  console.log("[ℹ️ BEFORE] Button value before request:", before);
+  // console.log("[ℹ️ BEFORE] Button value before request:", before);
 
   // Call each validation function and log their results
   let isRequireValid = require();
@@ -773,10 +773,10 @@ $("#validation").on("click", function () {
   let isRelateValid = require_relate();
   let isDuplicateValid = duplicate_fields_error();
 
-  console.log("[✅ CHECK] require() →", isRequireValid);
-  console.log("[✅ CHECK] require_params() →", isParamsValid);
-  console.log("[✅ CHECK] require_relate() →", isRelateValid);
-  console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
+  // console.log("[✅ CHECK] require() →", isRequireValid);
+  // console.log("[✅ CHECK] require_params() →", isParamsValid);
+  // console.log("[✅ CHECK] require_relate() →", isRelateValid);
+  // console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
 
   if (isRequireValid && isParamsValid && isRelateValid && isDuplicateValid) {
     let champs = recup_champs();
@@ -786,12 +786,12 @@ $("#validation").on("click", function () {
     let duplicate = recup_fields_relate();
     let filter = recup_filter();
 
-    console.log("[📦 DATA] champs →", champs);
-    console.log("[📦 DATA] formules →", formules);
-    console.log("[📦 DATA] params →", params);
-    console.log("[📦 DATA] relations →", relations);
-    console.log("[📦 DATA] duplicate →", duplicate);
-    console.log("[📦 DATA] filter →", filter);
+    // console.log("[📦 DATA] champs →", champs);
+    // console.log("[📦 DATA] formules →", formules);
+    // console.log("[📦 DATA] params →", params);
+    // console.log("[📦 DATA] relations →", relations);
+    // console.log("[📦 DATA] duplicate →", duplicate);
+    // console.log("[📦 DATA] filter →", filter);
 
     $.ajax({
       type: "POST",
@@ -805,14 +805,14 @@ $("#validation").on("click", function () {
         filter: filter,
       },
       beforeSend: function () {
-        console.log("[🚀 AJAX] Sending data to", path_validation);
+        // console.log("[🚀 AJAX] Sending data to", path_validation);
         $("#validation").attr("value", save_wait);
       },
       success: function (data) {
-        console.log("[✅ SUCCESS] Response received:", data);
+        // console.log("[✅ SUCCESS] Response received:", data);
 
         if (data.status == 1) {
-          console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
+          // console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
 
           alert(confirm_success);
 
@@ -822,14 +822,14 @@ $("#validation").on("click", function () {
             data.id
           );
 
-          console.log("[🔁 REDIRECT] To:", path_view_detail);
+          // console.log("[🔁 REDIRECT] To:", path_view_detail);
           $(location).attr("href", path_view_detail);
         } else {
           console.warn("[⚠️ VALIDATION ERROR] Raw response:", data);
           data = data.split(";");
           if (data[0] == 2) {
             alert(data[1]);
-            console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
+            // console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
           } else {
             alert(confirm_error);
             console.error("[❌ ERROR] General form validation error");
@@ -1048,7 +1048,7 @@ $("#validation").on("click", function () {
                 }
             },
             error: function (jqXHR) {
-                // console.log('Error response:', jqXHR.responseText);
+// console.log('Error response:', jqXHR.responseText);
                 alert('An error occurred while unlocking documents.');
             },
         });
@@ -1056,7 +1056,7 @@ $("#validation").on("click", function () {
 });
 
   $("#reloadflux").on("click", function () {
-    // console.log(mass_run);
+// console.log(mass_run);
     if (confirm(confirm_reload)) {
       // Clic sur OK
       $.ajax({
