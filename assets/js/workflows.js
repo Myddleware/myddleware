@@ -134,7 +134,7 @@ $(document).ready(function () {
     };
 
     if (!workflowActionFields) {
-      console.log('Using default configuration for action:', actionName);
+// console.log('Using default configuration for action:', actionName);
       return defaultConfigs[actionName] || defaultConfigs.updateStatus;
     }
 
@@ -162,14 +162,14 @@ $(document).ready(function () {
 
   // Function to log field visibility
   function logFieldVisibility(field, shouldShow, containerId) {
-    console.log(`Field: ${field.padEnd(15)} | Status: ${shouldShow ? 'SHOWING' : 'HIDDEN '.padEnd(7)} | Container: ${containerId}`);
+// console.log(`Field: ${field.padEnd(15)} | Status: ${shouldShow ? 'SHOWING' : 'HIDDEN '.padEnd(7)} | Container: ${containerId}`);
   }
 
   // Function to toggle field visibility based on configuration
   function toggleFieldVisibility(actionConfig) {
-    console.log('\n=== Field Visibility for Action: ' + actionConfig.Action + ' ===');
-    console.log('Field'.padEnd(15) + ' | Status  | Container');
-    console.log('─'.repeat(50));
+// console.log('\n=== Field Visibility for Action: ' + actionConfig.Action + ' ===');
+// console.log('Field'.padEnd(15) + ' | Status  | Container');
+// console.log('─'.repeat(50));
 
     // Log visibility for all possible fields
     ALL_FIELDS.forEach(field => {
@@ -189,7 +189,7 @@ $(document).ready(function () {
             container.hide();
           }
         } else {
-          console.log(`Warning: Container not found for ${field} (${containerId})`);
+// console.log(`Warning: Container not found for ${field} (${containerId})`);
         }
       }
     });
@@ -208,11 +208,11 @@ $(document).ready(function () {
       dynamicContainer.hide().empty();
     }
 
-    console.log('─'.repeat(50));
-    console.log('Dynamic Fields  | Status  | Container');
-    console.log('─'.repeat(50));
-    console.log(`Add Button      | ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #addFieldButton`);
-    console.log(`Fields Container| ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #dynamicFieldsContainer`);
+// console.log('─'.repeat(50));
+// console.log('Dynamic Fields  | Status  | Container');
+// console.log('─'.repeat(50));
+// console.log(`Add Button      | ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #addFieldButton`);
+// console.log(`Fields Container| ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #dynamicFieldsContainer`);
   }
 
   // Try multiple possible paths for the JSON file
@@ -233,18 +233,18 @@ $(document).ready(function () {
       url: window.location.origin + path,
       dataType: 'json',
       success: function(data) {
-        console.log('Successfully loaded workflow action fields configuration from:', path);
+// console.log('Successfully loaded workflow action fields configuration from:', path);
         workflowActionFields = data;
         
         // Handle initial load after JSON is loaded
         const selectedAction = $("#form_action").val();
-        console.log('\n=== INITIAL PAGE LOAD ===');
-        console.log('Selected Action:', selectedAction);
+// console.log('\n=== INITIAL PAGE LOAD ===');
+// console.log('Selected Action:', selectedAction);
         const initialConfig = getFieldConfig(selectedAction);
         toggleFieldVisibility(initialConfig);
       },
       error: function() {
-        console.log('Failed to load from:', path);
+// console.log('Failed to load from:', path);
         tryLoadConfig(paths.slice(1));
       }
     });
@@ -319,8 +319,8 @@ $(document).ready(function () {
   // Handle action change
   $("#form_action").on("change", function () {
     const actionValue = $(this).val();
-    console.log('\n=== ACTION CHANGED ===');
-    console.log('New Action:', actionValue);
+// console.log('\n=== ACTION CHANGED ===');
+// console.log('New Action:', actionValue);
     const config = getFieldConfig(actionValue);
     toggleFieldVisibility(config);
     
