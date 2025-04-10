@@ -762,10 +762,10 @@ $.fn.setCursorPosition = function(pos) {
 
 // Validation and form check
 $("#validation").on("click", function () {
-  // console.log("[🔵 CLICK] Validation button clicked");
+// console.log("[🔵 CLICK] Validation button clicked");
 
   let before = $("#validation").attr("value");
-  // console.log("[ℹ️ BEFORE] Button value before request:", before);
+// console.log("[ℹ️ BEFORE] Button value before request:", before);
 
   // Call each validation function and log their results
   let isRequireValid = require();
@@ -773,10 +773,10 @@ $("#validation").on("click", function () {
   let isRelateValid = require_relate();
   let isDuplicateValid = duplicate_fields_error();
 
-  // console.log("[✅ CHECK] require() →", isRequireValid);
-  // console.log("[✅ CHECK] require_params() →", isParamsValid);
-  // console.log("[✅ CHECK] require_relate() →", isRelateValid);
-  // console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
+// console.log("[✅ CHECK] require() →", isRequireValid);
+// console.log("[✅ CHECK] require_params() →", isParamsValid);
+// console.log("[✅ CHECK] require_relate() →", isRelateValid);
+// console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
 
   if (isRequireValid && isParamsValid && isRelateValid && isDuplicateValid) {
     let champs = recup_champs();
@@ -786,12 +786,12 @@ $("#validation").on("click", function () {
     let duplicate = recup_fields_relate();
     let filter = recup_filter();
 
-    // console.log("[📦 DATA] champs →", champs);
-    // console.log("[📦 DATA] formules →", formules);
-    // console.log("[📦 DATA] params →", params);
-    // console.log("[📦 DATA] relations →", relations);
-    // console.log("[📦 DATA] duplicate →", duplicate);
-    // console.log("[📦 DATA] filter →", filter);
+// console.log("[📦 DATA] champs →", champs);
+// console.log("[📦 DATA] formules →", formules);
+// console.log("[📦 DATA] params →", params);
+// console.log("[📦 DATA] relations →", relations);
+// console.log("[📦 DATA] duplicate →", duplicate);
+// console.log("[📦 DATA] filter →", filter);
 
     $.ajax({
       type: "POST",
@@ -805,14 +805,14 @@ $("#validation").on("click", function () {
         filter: filter,
       },
       beforeSend: function () {
-        // console.log("[🚀 AJAX] Sending data to", path_validation);
+// console.log("[🚀 AJAX] Sending data to", path_validation);
         $("#validation").attr("value", save_wait);
       },
       success: function (data) {
-        // console.log("[✅ SUCCESS] Response received:", data);
+// console.log("[✅ SUCCESS] Response received:", data);
 
         if (data.status == 1) {
-          // console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
+// console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
 
           alert(confirm_success);
 
@@ -822,14 +822,14 @@ $("#validation").on("click", function () {
             data.id
           );
 
-          // console.log("[🔁 REDIRECT] To:", path_view_detail);
+// console.log("[🔁 REDIRECT] To:", path_view_detail);
           $(location).attr("href", path_view_detail);
         } else {
           console.warn("[⚠️ VALIDATION ERROR] Raw response:", data);
           data = data.split(";");
           if (data[0] == 2) {
             alert(data[1]);
-            // console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
+// console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
           } else {
             alert(confirm_error);
             console.error("[❌ ERROR] General form validation error");
@@ -1294,40 +1294,40 @@ function fields_target_hover() {
 
 
 function btn_action_fct() {
-  console.log('[🚀 btn_action_fct] Function started');
+  // console.log('[🚀 btn_action_fct] Function started');
   
   // First, clean up any existing loading overlays to prevent duplicates
   $('.myd_div_loading').remove();
   $('body').css('overflow', '');
-  console.log('[🧹 Cleanup] Removed any existing loading overlays');
+  // console.log('[🧹 Cleanup] Removed any existing loading overlays');
 
   // Log window dimensions and scroll position
-  console.log('[📏 Dimensions] Window:', {
-    width: $(window).width(),
-    height: $(window).height(),
-    scrollTop: $(window).scrollTop()
-  });
+  // console.log('[📏 Dimensions] Window:', {
+    // width: $(window).width(),
+    // height: $(window).height(),
+    // scrollTop: $(window).scrollTop()
+  // });
 
   // IMPORTANT
   $(window).scrollTop(0);
-  console.log('[⬆️ Scroll] Window scrolled to top');
+  // console.log('[⬆️ Scroll] Window scrolled to top');
 
   // Log body overflow state before and after change
-  console.log('[💫 Overflow] Body overflow before:', $("body").css("overflow"));
+  // console.log('[💫 Overflow] Body overflow before:', $("body").css("overflow"));
   $("body").css("overflow", "hidden");
-  console.log('[💫 Overflow] Body overflow after:', $("body").css("overflow"));
+  // console.log('[💫 Overflow] Body overflow after:', $("body").css("overflow"));
 
   var ww = $(window).width() / 2 - 33 + "px";
   var wh = $(window).height() / 2 - 33 + "px";
-  console.log('[📐 Calculated] Center positions:', { width: ww, height: wh });
+  // console.log('[📐 Calculated] Center positions:', { width: ww, height: wh });
 
   // Log rule div detection
   var divrule = $("#rule");
-  console.log('[🔍 Rule Div] Initial #rule element found:', divrule.length > 0);
+  // console.log('[🔍 Rule Div] Initial #rule element found:', divrule.length > 0);
   
   if (!divrule.length) {
     divrule = $("#flux");
-    console.log('[🔍 Rule Div] Fallback to #flux element:', divrule.length > 0);
+    // console.log('[🔍 Rule Div] Fallback to #flux element:', divrule.length > 0);
   }
 
   // Create and configure loading div
@@ -1336,7 +1336,7 @@ function btn_action_fct() {
   loading.attr("id", "myd_loading");
   
   // Log loading div creation
-  console.log('[📦 Loading Div] Created with ID:', loading.attr("id"));
+  // console.log('[📦 Loading Div] Created with ID:', loading.attr("id"));
 
   // Apply and log CSS properties
   var loadingCSS = {
@@ -1352,10 +1352,10 @@ function btn_action_fct() {
   };
   
   loading.css(loadingCSS);
-  console.log('[🎨 Loading CSS] Applied styles:', loadingCSS);
+  // console.log('[🎨 Loading CSS] Applied styles:', loadingCSS);
 
   loading.attr("class", "myd_div_loading");
-  console.log('[🏷️ Class] Added class:', loading.attr("class"));
+  // console.log('[🏷️ Class] Added class:', loading.attr("class"));
 
   // Create and configure message paragraph
   var p = $("<p>Please wait. This can take a few minutes.</p>");
@@ -1369,13 +1369,13 @@ function btn_action_fct() {
   };
   
   p.css(pCSS);
-  console.log('[📝 Message] Created and styled paragraph:', {
-    text: p.text(),
-    styles: pCSS
-  });
+  // console.log('[📝 Message] Created and styled paragraph:', {
+    // text: p.text(),
+    // styles: pCSS
+  // });
 
   loading.append(p);
-  console.log('[➕ Append] Added message to loading div');
+  // console.log('[➕ Append] Added message to loading div');
 
   // Create and configure logo div
   var img = $("<div></div>");
@@ -1389,23 +1389,23 @@ function btn_action_fct() {
   };
   
   img.css(imgCSS);
-  console.log('[🖼️ Logo] Created and styled logo div:', {
-    class: img.attr("class"),
-    styles: imgCSS
-  });
+  // console.log('[🖼️ Logo] Created and styled logo div:', {
+    // class: img.attr("class"),
+    // styles: imgCSS
+  // });
 
   loading.append(img);
-  console.log('[➕ Append] Added logo to loading div');
+  // console.log('[➕ Append] Added logo to loading div');
 
   // Final append to container
   divrule.append(loading);
-  console.log('[✅ Complete] Loading overlay appended to container');
+  // console.log('[✅ Complete] Loading overlay appended to container');
   
   // Multiple event handlers for cleanup
   
   // 1. Browser back/forward navigation
   $(window).on('popstate.myddleware', function(event) {
-    console.log('[⚡ Navigation] Browser navigation detected');
+    // console.log('[⚡ Navigation] Browser navigation detected');
     cleanupLoading();
   });
 
@@ -1413,7 +1413,7 @@ function btn_action_fct() {
   var currentPath = window.location.pathname;
   var checkInterval = setInterval(function() {
     if (window.location.pathname !== currentPath) {
-      console.log('[🔄 Path Change] URL changed from', currentPath, 'to', window.location.pathname);
+      // console.log('[🔄 Path Change] URL changed from', currentPath, 'to', window.location.pathname);
       cleanupLoading();
       clearInterval(checkInterval);
     }
@@ -1421,7 +1421,7 @@ function btn_action_fct() {
 
   // 3. Page unload
   $(window).on('unload.myddleware', function() {
-    console.log('[📤 Unload] Page unloading');
+    // console.log('[📤 Unload] Page unloading');
     cleanupLoading();
   });
 
@@ -1435,7 +1435,7 @@ function btn_action_fct() {
 
   // Cleanup function
   function cleanupLoading() {
-    console.log('[🧹 Cleanup] Starting cleanup process');
+    // console.log('[🧹 Cleanup] Starting cleanup process');
     
     // Remove event handlers
     $(window).off('popstate.myddleware');
@@ -1444,12 +1444,12 @@ function btn_action_fct() {
     // Remove loading overlay
     $('#myd_loading').fadeOut(300, function() {
       $(this).remove();
-      console.log('[🗑️ Removed] Loading overlay');
+      // console.log('[🗑️ Removed] Loading overlay');
     });
     
     // Restore body overflow
     $('body').css('overflow', '');
-    console.log('[↩️ Restored] Body overflow');
+    // console.log('[↩️ Restored] Body overflow');
   }
 }
 
