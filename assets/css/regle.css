@@ -531,7 +531,7 @@ select#form_searchValue {
     margin: 0 8px;
   }
 
-.form-check.form-switch {
+.rule-list-activation-switch {
     display: flex !important;
     justify-content: center !important;
 }
