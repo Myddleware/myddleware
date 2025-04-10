@@ -786,7 +786,7 @@ title:
         text2: Start your project now by giving a look to our documentation.
         btn: Start now !
     rule:
-        create_name: Creation of the rule
+        create_name: Editing of the rule
         create: Creation of a rule
         edit: Editing the rule
         list: Rules
