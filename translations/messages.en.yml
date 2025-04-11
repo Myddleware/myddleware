@@ -261,7 +261,7 @@ rulegroup:
     create_by: Created by
     modified_by: Modified by
     delete: Delete
-    edit: Edit
+    edit: Editing of a Rule Group
     updated_successfully: Rule group updated successfully
     rules: List of rules
     rule_removed_successfully: Rule removed successfully

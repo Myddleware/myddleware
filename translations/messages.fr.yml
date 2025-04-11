@@ -254,7 +254,7 @@ rulegroup:
     create_by: Créé par
     modified_by: Modifié par
     delete: Supprimer
-    edit: Editer
+    edit: Édition d'un groupe de règles
     updated_successfully: Groupe de règles modifié avec succès
     rules: Liste des règles
     rule_removed_successfully: Règle supprimée avec succès
