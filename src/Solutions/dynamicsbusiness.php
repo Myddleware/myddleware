@@ -33,6 +33,7 @@ class dynamicsbusiness extends solution
 {
     protected $token;
     public bool $connexion_valide = false;
+    protected array $moduleFields = [];
 
     public function login($paramConnexion)
     {
@@ -67,12 +68,28 @@ class dynamicsbusiness extends solution
     public function getFieldsLogin(): array
     {
         return [
-            ['name' => 'tenant_id', 'type' => PasswordType::class, 'label' => 'Tenant ID'],
-            ['name' => 'client_id', 'type' => PasswordType::class, 'label' => 'Client ID'],
-            ['name' => 'client_secret', 'type' => PasswordType::class, 'label' => 'Client Secret'],
-            ['name' => 'company_id', 'type' => PasswordType::class, 'label' => 'Company ID'],
+            ['name' => 'tenant_id', 'type' => TextType::class, 'label' => 'Tenant ID'],
+            ['name' => 'client_id', 'type' => TextType::class, 'label' => 'Client ID'],
+            ['name' => 'client_secret', 'type' => TextType::class, 'label' => 'Client Secret'],
+            ['name' => 'company_id', 'type' => TextType::class, 'label' => 'Company ID'],
             ['name' => 'environment', 'type' => TextType::class, 'label' => 'Environment'],
         ];
+    }
+
+    public function get_module_fields($module, $type = 'source', $param = null): array
+    {
+        parent::get_module_fields($module, $type);
+        try {
+            require 'lib/dynamicsbusiness/metadata.php';
+            if (!empty($moduleFields[$module])) {
+                $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
+            }
+            return $this->moduleFields;
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
     }
 
     public function getObjects()
@@ -95,6 +112,12 @@ class dynamicsbusiness extends solution
         return $data['value'];
     }
 
+    // Permet de récupérer tous les modules accessibles à l'utilisateur
+    public function get_modules($type = 'source')
+    {
+        return ['customers' => 'Customers'];
+    }
+
     public function read($param)
     {
         $client = new \GuzzleHttp\Client();
@@ -112,8 +135,17 @@ class dynamicsbusiness extends solution
         if ($module === 'customers') {
             $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/customers";
 
-            $response = $client->get($url, ['headers' => $headers]);
-            $data = json_decode($response->getBody(), true);
+            if (isset($param['query']['id'])) {
+                $url .= "({$param['query']['id']})";
+            }
+
+            try {
+                $response = $client->get($url, ['headers' => $headers]);
+                $data = json_decode($response->getBody(), true);
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage());
+                return [];
+            }
 
             $results = [];
             foreach ($data['value'] as $item) {
