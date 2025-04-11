@@ -148,14 +148,36 @@ class dynamicsbusiness extends solution
             }
 
             $results = [];
-            foreach ($data['value'] as $item) {
-                $results[] = [
-                    'id' => $item['id'],
-                    'displayName' => $item['displayName']
-                ];
-            }
+            $result = [];
 
-            return $results;
+            try {
+            
+            // Dynamically map fields based on $param['fields']
+            if (isset($param['fields']) && is_array($param['fields'])) {
+                foreach ($param['fields'] as $field) {
+                    // Check if the field exists in the data
+                    if (isset($data[$field])) {
+                        $result[$field] = $data[$field];
+                    } else {
+                        // If field doesn't exist, set a default value or null
+                        $result[$field] = null;
+                    }
+                }
+
+                // convert "lastModifiedDateTime": "2025-03-24T02:05:51Z" to a string in this format: 2025-04-02 09:28:27
+                $result['date_modified'] = date('Y-m-d H:i:s', strtotime($data['lastModifiedDateTime']));
+            } else {
+                // Fallback to default fields if $param['fields'] is not set
+                $result['id'] = $data['id'] ?? null;
+                    $result['displayName'] = $data['displayName'] ?? null;
+                }
+                
+                $results[] = $result;
+                return $results;
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage());
+                return [];
+            }
         }
 
         throw new \Exception("Unknown object type: " . $objectName);
