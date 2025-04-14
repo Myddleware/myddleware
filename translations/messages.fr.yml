@@ -596,6 +596,8 @@ view_workflow:
     cancel_edit: Annuler l'édition
     save: Sauvegarder
     cancel: Annuler
+edit_workflow:
+    name_already_exists: Le nom du workflow existe déjà
 view_workflow_action:
     title2: Action du workflow
     title: Détail de l'action du workflow

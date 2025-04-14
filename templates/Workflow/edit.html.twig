@@ -10,6 +10,13 @@
 
 {% block body %}
 	<div class="container mt-5">
+		{% if app.session.flashBag.has('error_workflow_name') %}
+			<div class="alert alert-danger">
+				{% for message in app.session.flashBag.get('error_workflow_name') %}
+					{{ message }}
+				{% endfor %}
+			</div>
+		{% endif %}
 		{{ form_start(form) }}
 		<div class="text-center m-5 d-flex justify-content-between align-items-center">
 			<div class="left-buttons">
