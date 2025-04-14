@@ -2401,7 +2401,7 @@ class RuleManager
     }
 
     // Delete a document data
-    protected function deleteDocumentData($documentId, $type): bool
+    public function deleteDocumentData($documentId, $type): bool
     {
         try {
             $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
