@@ -615,3 +615,8 @@ margin-left: -0.5rem;
     border-radius: 4px;
     font-size: 14px;
 }
+
+/* in the document filter view (list of documents), reduce the width of the global status filter CONTAINER */
+.global-status-reduced-width {
+    width: 20rem !important;
+}
