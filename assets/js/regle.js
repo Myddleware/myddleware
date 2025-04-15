@@ -1663,7 +1663,13 @@ function verif(div_clock) {
       .find("input")
       .each(function () {
         if ($(this).val().length == 0) {
-          err++;
+          // Get the data-param value
+          var fieldParam = $(this).attr("data-param");
+
+          // Check if field is in non required fields list loaded from config
+          if (!nonRequiredFields.includes(fieldParam)) {
+            err++;
+          }
         }
       });
 

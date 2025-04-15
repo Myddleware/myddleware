@@ -49,6 +49,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Route("/rule")
@@ -322,9 +323,20 @@ class ConnectorController extends AbstractController
         $this->sessionService->setConnectorAnimation(false);
         $this->sessionService->setConnectorAddMessage('list');
 
+            // use yaml file which is assets/controller-config.yaml
+            $nonRequiredFields = $this->getNonRequiredFields();
+
         return $this->render('Connector/index.html.twig', [
-            'solutions' => $lst_solution, ]
-        );
+            'solutions' => $lst_solution,
+            'nonRequiredFields' => $nonRequiredFields,
+        ]);
+    }
+
+    private function getNonRequiredFields()
+    {
+        $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
+        $yaml = Yaml::parseFile($yamlFile);
+        return $yaml['non-required-fields'];
     }
 
     /**
