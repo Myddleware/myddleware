@@ -620,3 +620,8 @@ margin-left: -0.5rem;
 .global-status-reduced-width {
     width: 20rem !important;
 }
+
+/* reduce the width of the filter-premium-container-reduced-width to 94rem to match the end of the source id filter */
+.filter-premium-container-reduced-width {
+    width: 94rem !important;
+}
