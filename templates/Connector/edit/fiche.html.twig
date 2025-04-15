@@ -27,10 +27,13 @@
 {% block titlesm %}<a href="{{ path('regle_connector_list') }}">{{'breadcrumb.connector_list'|trans}}</a>
 	{{'title.connector.edit'|trans}} <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i> {{ connector_name }} {% endblock titlesm %} 
 {% block body %}
+<div class="link-help-view text-end mx-4">
+			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-workflow">
+				<i class="fa fa-info-circle" aria-hidden="true"></i>
+				{{ 'rule.help' | trans }}
+			</a>
+		</div>
     <div id="connector">
-		<ul class="nav nav-tabs" role="tablist" id="connectorTabs">
-			{% include "Connector/edit/onglets/index.html.twig" %}
-		</ul>
 		<div class="tab-content" id="connectorTabsContent">	 
 			<div id="infos" class="tab-pane fade show active mt-4"  role="tabpanel" aria-labelledby="infos-tab">
 				{# ------------- INFOS ------------- #}
