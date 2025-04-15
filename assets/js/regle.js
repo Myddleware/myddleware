@@ -165,17 +165,6 @@ $(function () {
           );
       }
 
-      $(this)
-        .parent()
-        .find(".help")
-        .append(
-          '<i class="fas fa-info-circle"></i> <a href="' +
-            path_link_fr +
-            solution +
-            '" target="_blank"> ' +
-            help_connector +
-            "</a>"
-        );
 
       if ($.isNumeric(val2[1])) {
         $.ajax({
