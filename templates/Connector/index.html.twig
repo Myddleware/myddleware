@@ -31,6 +31,12 @@
 		<ul class="nav nav-tabs" role="tablist" id="connectorCreateTabs">
 			{% include "Connector/create.html.twig" %}
 		</ul>
+		<div class="link-help-view text-end mx-4">
+			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=create-a-workflow">
+				<i class="fa fa-info-circle" aria-hidden="true"></i>
+				{{ 'rule.help' | trans }}
+			</a>
+		</div>
 			<div id="connexion_connector" class="tab-content pt-4">
 				{% include "Connector/connexion.html.twig" with{'solutions':solutions} only %}
 			</div>
