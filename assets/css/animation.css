@@ -623,5 +623,6 @@ margin-left: -0.5rem;
 
 /* reduce the width of the filter-premium-container-reduced-width to 94rem to match the end of the source id filter */
 .filter-premium-container-reduced-width {
-    width: 94rem !important;
+    width: 100%;
+    max-width: 1520px;
 }
