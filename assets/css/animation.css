@@ -626,3 +626,8 @@ margin-left: -0.5rem;
     width: 100%;
     max-width: 1520px;
 }
+
+/* set the margin left of the button active of the workflow action list inside the workflow show page */
+.workflow-action-list-inside-workflow-show {
+    margin-left: -2.25em !important;
+}

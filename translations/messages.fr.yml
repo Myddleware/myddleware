@@ -561,6 +561,7 @@ list_workflow:
         actions: Actions
         order: Ordre
         option: Options
+        status: Statut
 view_workflow:
     title: Workflow
     create: Créer un workflow

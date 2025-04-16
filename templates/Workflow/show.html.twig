@@ -106,8 +106,8 @@
 									<th>{{ 'view_workflow.description'|trans }}</th>
 									<th>{{ 'view_workflow.order'|trans }}</th>
 									<th>{{ 'view_workflow.arguments'|trans }}</th>
+									<th>{{'list_workflow.th.status'|trans}}</th>
 									<th>{{'list_workflow.th.option'|trans}}</th>
-
 
 								</tr>
 							</thead>
@@ -142,6 +142,13 @@
 											{% else %}
 												{{ action.arguments }}
 											{% endif %}
+										</td>
+										<td class="value workflow_on_off">
+											<div class="mb-2">
+								<div class="form-check form-switch">
+									<input class="form-check-input workflow-check-input workflow-action-list-inside-workflow-show" type="checkbox" id="activeWorkflowAction_{{ action.id }}" data-id="{{ action.id }}" data-type="workflowAction" {{ action.active ? 'checked' : '' }}>
+								</div>
+							</div>
 										</td>
 										<td class="CRUD-icons text-center">
 											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}"  class="btn btn-sm btn-outline-success">
