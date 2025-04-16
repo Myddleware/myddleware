@@ -312,35 +312,49 @@ class FormulaFunctionManager
         return null;
     }
 	
-	public static function getRecord($entityManager, $connection, $solutionManager, $connectorId, $module, $recordId, $fields, $searchField = 'id')
+	public static function getRecord($entityManager, $connection, $solutionManager, $connectorId, $module, $fields, $searchValue, $searchField = 'id', $errorIgnore = false)
 	{
 		try {
 			// Connect to the application using the connector
 			$connectionSolution = self::connectionSolution($entityManager, $connection, $solutionManager, $connectorId);
 			if (empty($connectionSolution['connexion_valide'])) {
-				throw new \Exception('getRecord : Failed to connect to the solution to read record '.$module.' id '.$recordId.'.');
+				throw new \Exception('getRecord : Failed to connect to the solution to read record '.$module.' with value '.$searchValue.'.');
 			}
 			// Prepare parameters t read the data
 			$read['module'] = $module;
 			$read['fields'] = explode(',',$fields);
-			$read['fields'][] = $searchField;
 			$read['offset'] = 0;
 			$read['limit'] = 1;
-			$read['query'] = [$searchField => $recordId];
+			// Get all the searchFields and searchValues (we can have several search filter separated by commas)
+			$searchFields = explode(',',$searchField);
+			$searchValues = explode(',',$searchValue);
+			// Error if the number of filters is different than the number od values
+			if (count($searchFields) != count($searchValues)) {
+				throw new \Exception('Number of search fields and search values has to be the same. You have '.count($searchFields).' searchFields and '.count($searchValues).' searchValues.');
+			}
+			// Build the query criteria
+			if (!empty($searchFields)) {
+				foreach($searchFields as $key => $field) {
+					$read['query'][$field] = $searchValues[$key];				
+				}
+			}
+			$read['fields'] = array_unique(array_merge($read['fields'], $searchFields));
 			$read['call_type'] = 'getRecord';
 			$read['ruleParams']['mode'] = '0';
-			$read['ruleParams']['fieldId'] = $searchField;
+			$read['ruleParams']['fieldId'] = $searchField[0];
 			// Not used because query is used but required for some solutions 
-			$read['ruleParams']['fieldDateRef'] = $searchField; 
+			$read['ruleParams']['fieldDateRef'] = $searchField[0]; 
 			// Read data from the solution
 			$data = $connectionSolution['solution']->readData($read);
 			if (empty($data['values'])) {
-				throw new \Exception('getRecord : Failed to find the record id '.$recordId.' in the module '.$module.'.');
+				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
 			}
-			return json_encode($data['values'][$recordId]);
+			return json_encode(current($data['values']));
         } catch (\Exception $e) {
-			throw new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->logger->error('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			if (!$errorIgnore) {
+				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			}
         }
 		return null;
 	}
