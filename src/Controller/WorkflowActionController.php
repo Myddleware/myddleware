@@ -1065,32 +1065,6 @@ class WorkflowActionController extends AbstractController
         $this->entityManager->flush();
     }
 
-    #[Route('/workflowAction/toggle/{id}', name: 'workflow_action_toggle', methods: ['POST'])]
-    public function toggleWorkflowAction(Request $request, EntityManagerInterface $em, WorkflowActionRepository $workflowActionRepository, string $id): JsonResponse
-    {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
-        $workflowAction = $workflowActionRepository->find($id);
-
-        if (!$workflowAction) {
-            return new JsonResponse(['status' => 'error', 'message' => 'Workflow action not found'], 404);
-        }
-
-        $workflowAction->setActive(!$workflowAction->getActive());
-        $workflowAction->setDateModified(new \DateTime());
-
-        try {
-            $em->persist($workflowAction);
-            $em->flush();
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la sauvegarde du workflow action'], 500);
-        }
-
-        return new JsonResponse(['status' => 'success', 'active' => $workflowAction->getActive()]);
-    }
-
     // /**
     //  * @Route("/update-field-value", name="update_field_value", methods={"POST"})
     //  */
