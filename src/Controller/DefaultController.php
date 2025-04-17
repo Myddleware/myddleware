@@ -80,6 +80,7 @@ use App\Entity\WorkflowAction;
 use App\Service\TwoFactorAuthService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\RuleGroup;
+use Symfony\Component\Yaml\Yaml;
 
     /**
      * @Route("/rule")
@@ -1228,8 +1229,11 @@ use App\Entity\RuleGroup;
                             }
                             $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
 
+                            // before checking the number with get fields login, we need to check the difference between the number of fields login and the number of non required fields for the solution
+                            $nonRequiredFields = $this->getNonRequiredFields();
+
                             // Vérification du nombre de champs
-                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
+                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()) || count($param) == count($solution->getFieldsLogin()) - count($nonRequiredFields))) {
                                 $result = $solution->login($param);
                                 $r = $solution->connexion_valide;
 
@@ -1303,6 +1307,13 @@ use App\Entity\RuleGroup;
             } catch (Exception $e) {
                 return new JsonResponse(['success' => false, 'message' => $e->getMessage().' '.$e->getLine().' '.$e->getFile()]);
             }
+        }
+
+        private function getNonRequiredFields()
+        {
+            $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
+            $yaml = Yaml::parseFile($yamlFile);
+            return $yaml['non-required-fields'];
         }
 
         /**
