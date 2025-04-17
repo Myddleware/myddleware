@@ -1,5 +1,5 @@
 
-console.log("workflow-action-label-rule-change.js loaded");
+// console.log("workflow-action-label-rule-change.js loaded");
 document.addEventListener('DOMContentLoaded', function() {
     // Get the action select element
     const actionSelect = document.querySelector('select[name$="[action]"]');

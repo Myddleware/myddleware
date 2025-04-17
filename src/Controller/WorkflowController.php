@@ -240,7 +240,7 @@ class WorkflowController extends AbstractController
         try {
 
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowSearchResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowSearchResult[0];
 
@@ -269,7 +269,7 @@ class WorkflowController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $workflowId, 'deleted' => 0]);
         $workflow = $workflowArray[0];
 
@@ -330,7 +330,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
 
@@ -362,7 +362,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowResult = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowResult[0];
 
@@ -412,7 +412,7 @@ class WorkflowController extends AbstractController
     /**
     * @Route("/new/{rule_id}", name="workflow_create_from_rule")
     */
-    public function WorkflowCreateFromRuleAction(Request $request, $rule_id)
+    public function WorkflowCreateFromRuleAction(Request $request, $rule_id, TranslatorInterface $translator)
     {
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
@@ -420,7 +420,7 @@ class WorkflowController extends AbstractController
 
         try {
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = new Workflow();
             $workflow->setId(uniqid());
             // set rule to the workflow
@@ -432,6 +432,15 @@ class WorkflowController extends AbstractController
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+
+                // get the workflow name
+                $workflowName = $workflow->getName();
+                // check if the workflow name already exists
+                $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
+                if ($workflowExists) {
+                    $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                    return $this->redirectToRoute('workflow_create_from_rule', ['rule_id' => $rule_id]);
+                }
                 $workflow->setCreatedBy($this->getUser());
                 $workflow->setModifiedBy($this->getUser());
                 $em->persist($workflow);
@@ -461,18 +470,16 @@ class WorkflowController extends AbstractController
     /**
      * @Route("/new", name="workflow_create")
      */
-    public function WorkflowCreateAction(Request $request)
+    public function WorkflowCreateAction(Request $request, TranslatorInterface $translator)
     {
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
         }
 
         try {
-
-
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = new Workflow();
             $workflow->setId(uniqid());
             $form = $this->createForm(WorkflowType::class, $workflow, [
@@ -481,6 +488,14 @@ class WorkflowController extends AbstractController
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+                // get the workflow name
+                $workflowName = $workflow->getName();
+                // check if the workflow name already exists
+                $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
+                if ($workflowExists) {
+                    $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                    return $this->redirectToRoute('workflow_create');
+                }
                 $workflow->setCreatedBy($this->getUser());
                 $workflow->setModifiedBy($this->getUser());
                 $em->persist($workflow);
@@ -518,7 +533,7 @@ class WorkflowController extends AbstractController
         try {
 
             
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
@@ -557,7 +572,7 @@ class WorkflowController extends AbstractController
     /**
      * @Route("/edit/{id}", name="workflow_edit")
      */
-    public function WorkflowEditAction(string $id, Request $request)
+    public function WorkflowEditAction(string $id, Request $request, TranslatorInterface $translator)
     {
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
@@ -565,8 +580,7 @@ class WorkflowController extends AbstractController
 
         try {
 
-            
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->entityManager;
             $workflowArray = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflow = $workflowArray[0];
 
@@ -578,7 +592,19 @@ class WorkflowController extends AbstractController
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted() && $form->isValid()) {
+                    // get the workflow name
+                    $workflowName = $workflow->getName();
+                    // check if any OTHER workflow has this name (different ID)
+                    $workflowExists = $em->getRepository(Workflow::class)->findOneBy([
+                        'name' => $workflowName,
+                        'deleted' => 0
+                    ]);
+                    if ($workflowExists && $workflowExists->getId() !== $id) {
+                        $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                        return $this->redirectToRoute('workflow_edit', ['id' => $id]);
+                    }
                     $workflow->setModifiedBy($this->getUser());
+                    $workflow->setDateModified(new \DateTime());
                     $em->persist($workflow);
                     $em->flush();
                     $this->addFlash('success', 'Workflow updated successfully');

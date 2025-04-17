@@ -1,4 +1,4 @@
-console.log('imagemousehoverbutton');
+// console.log('imagemousehoverbutton');
 
 
 document.addEventListener('DOMContentLoaded', function() {

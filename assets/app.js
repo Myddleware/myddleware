@@ -54,6 +54,7 @@ if (window.location.href.includes('workflow/show')) {
     require('./js/workflow-actions-collapse.js')
     require('./js/workflow-logs-collapse.js')
     require('./js/workflow-toggle-detail.js')
+    require('./js/workflow-action-toggle-list-inside-workflow-show.js')
 }
 
 if (window.location.href.includes('workflowAction/showAction')) {
@@ -63,6 +64,10 @@ if (window.location.href.includes('workflowAction/showAction')) {
 if (window.location.href.includes('workflow/list')) {
     require('./js/workflow-toggle-list.js')
     require('./js/workflowsearchworkflowname.js')
+}
+
+if (window.location.href.includes('rule/view')) {
+    require('./js/workflow-toggle-list.js')
 }
 
 
@@ -96,6 +101,10 @@ if (!(window.location.href.includes('install'))) {
 
 if (window.location.href.includes('flux')) {
     require('./js/imagemousehoverbutton.js')
+}
+
+if (window.location.href.includes('rule/flux')) {
+    require('./js/lookup-filter.js')
 }
 
 // start the Stimulus application

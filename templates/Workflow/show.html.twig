@@ -106,21 +106,21 @@
 									<th>{{ 'view_workflow.description'|trans }}</th>
 									<th>{{ 'view_workflow.order'|trans }}</th>
 									<th>{{ 'view_workflow.arguments'|trans }}</th>
+									<th>{{'list_workflow.th.status'|trans}}</th>
 									<th>{{'list_workflow.th.option'|trans}}</th>
-
 
 								</tr>
 							</thead>
 							<tbody class="workflow-actions-collapse-body">
 								{% for action in workflow.getWorkflowActions %}
 									<tr>
-										<td>
+										<td class="text-center">
 											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" class="help-link all-link">{{ action.name }}</a>
 										</td>
-										<td>{{ action.action }}</td>
-										<td>{{ action.description }}</td>
-										<td>{{ action.order }}</td>
-										<td>
+										<td class="text-center">{{ action.action }}</td>
+										<td class="text-center">{{ action.description }}</td>
+										<td class="text-center">{{ action.order }}</td>
+										<td class="text-center">
 											{% if action.arguments is iterable %}
 												<ul>
 
@@ -143,7 +143,14 @@
 												{{ action.arguments }}
 											{% endif %}
 										</td>
-										<td class="CRUD-icons">
+										<td class="value workflow_on_off">
+											<div class="mb-2">
+								<div class="form-check form-switch">
+									<input class="form-check-input workflow-check-input workflow-action-list-inside-workflow-show" type="checkbox" id="activeWorkflowAction_{{ action.id }}" data-id="{{ action.id }}" data-type="workflowAction" {{ action.active ? 'checked' : '' }}>
+								</div>
+							</div>
+										</td>
+										<td class="CRUD-icons text-center">
 											<a href="{{ path('workflow_action_show', {'id': action.id}) }}" title="{{ 'list_rule.btn.view'|trans }}"  class="btn btn-sm btn-outline-success">
 												<span class="btn-opt">
 													<i class="fa fa-eye" aria-hidden="true"></i>

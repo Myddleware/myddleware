@@ -27,9 +27,11 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
-use App\Form\Type\ResetPasswordType;
+use App\Form\Type\UpdatePasswordType;
+use App\Form\Type\TwoFactorAuthFormType;
 use App\Service\UserManagerInterface;
 use App\Service\AlertBootstrapInterface;
+use App\Service\TwoFactorAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,8 +42,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Dotenv\Dotenv;
 
 
 /**
@@ -83,6 +86,11 @@ class AccountController extends AbstractController
      */
     private $alert;
 
+    /**
+     * @var TwoFactorAuthService
+     */
+    private $twoFactorAuthService;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $logger,
@@ -90,7 +98,8 @@ class AccountController extends AbstractController
         ParameterBagInterface $params,
         TranslatorInterface $translator,
         ToolsManager $toolsManager,
-        AlertBootstrapInterface $alert
+        AlertBootstrapInterface $alert,
+        TwoFactorAuthService $twoFactorAuthService
     ) {
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -100,6 +109,7 @@ class AccountController extends AbstractController
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
+        $this->twoFactorAuthService = $twoFactorAuthService;
     }
 
     /**
@@ -115,23 +125,66 @@ class AccountController extends AbstractController
     /**
      * @Route("/account", name="my_account")
      */
-    public function myAccount(Request $request, UserPasswordEncoderInterface $encoder, UserManagerInterface $userManager): Response
+    public function myAccount(Request $request, UserPasswordHasherInterface $hasher, UserManagerInterface $userManager): Response
     {
         $user = $this->getUser();
         $em = $this->entityManager;
         $form = $this->createForm(ProfileFormType::class, $user);
         $form->handleRequest($request);
         $timezone = $user->getTimezone();
+        
+        // Get or create the 2FA record for this user
+        $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
+        $twoFactorAuthForm = $this->createForm(TwoFactorAuthFormType::class, $twoFactorAuth);
+        $twoFactorAuthForm->handleRequest($request);
+        
+        // Check if SMTP is configured
+        $smtpConfigured = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            try {
+                (new Dotenv())->load(__DIR__ . '/../../.env.local');
+                
+                // Check for MAILER_URL configuration
+                $mailerUrl = $_ENV['MAILER_URL'] ?? null;
+                if (isset($mailerUrl) && $mailerUrl !== '' && $mailerUrl !== 'null://localhost' && $mailerUrl !== false) {
+                    $smtpConfigured = true;
+                }
+                
+                // Check for Brevo API key
+                $brevoApiKey = $_ENV['BREVO_APIKEY'] ?? null;
+                if (!empty($brevoApiKey)) {
+                    $smtpConfigured = true;
+                }
+            } catch (\Exception $e) {
+                $this->logger->warning('Error loading environment variables: ' . $e->getMessage());
+            }
+        }
+        
         if ($form->isSubmitted() && $form->isValid()) {
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
 
             return $this->redirectToRoute('my_account');
         }
+        
+        if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
+            // If SMTP is not configured, disable 2FA
+            if (!$smtpConfigured && $twoFactorAuth->isEnabled()) {
+                $twoFactorAuth->setEnabled(false);
+                $this->addFlash('error', 'Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key first.');
+            } else {
+                $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
+            }
+            
+            $this->entityManager->flush();
+            return $this->redirectToRoute('my_account');
+        }
 
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
+            'twoFactorAuthForm' => $twoFactorAuthForm->createView(),
+            'smtpConfigured' => $smtpConfigured,
         ]);
     }
 
@@ -140,18 +193,24 @@ class AccountController extends AbstractController
      *
      * @Route("/account/reset-password", name="my_account_reset_password")
      */
-    public function resetPasswordAction(Request $request, UserPasswordEncoderInterface $encoder, TranslatorInterface $translator)
+    public function resetPasswordAction(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->entityManager;
         $user = $this->getUser();
-        $form = $this->createForm(ResetPasswordType::class, $user);
+        $form = $this->createForm(UpdatePasswordType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $oldPassword = $request->request->get('reset_password')['oldPassword'];
+
+            // start by getting the request all
+            $requestData = $request->request->all();
+
+            // then get the old password from the request data
+            $oldPassword = $requestData['update_password']['oldPassword'];
+
             // first we test whether the old password input is correct
-            if ($encoder->isPasswordValid($user, $oldPassword)) {
-                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($newEncodedPassword);
+            if ($hasher->isPasswordValid($user, $oldPassword)) {
+                $newHashedPassword = $hasher->hashPassword($user, $user->getPlainPassword());
+                $user->setPassword($newHashedPassword);
                 $em->persist($user);
                 $em->flush();
                 $success = $translator->trans('password_reset.success');

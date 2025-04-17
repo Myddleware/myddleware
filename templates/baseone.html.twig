@@ -29,6 +29,7 @@
         <title>{% block title %}Myddleware{% endblock %}</title>
         {% block stylesheets %}
             {{ encore_entry_link_tags('login') }}
+            <link rel="stylesheet" href="{{ asset('css/two-factor-auth.css') }}">
         {% endblock %}
             {% block css %}{% endblock css %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />

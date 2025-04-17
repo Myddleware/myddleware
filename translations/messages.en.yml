@@ -261,7 +261,7 @@ rulegroup:
     create_by: Created by
     modified_by: Modified by
     delete: Delete
-    edit: Edit
+    edit: Editing of a Rule Group
     updated_successfully: Rule group updated successfully
     rules: List of rules
     rule_removed_successfully: Rule removed successfully
@@ -359,7 +359,7 @@ view_connector:
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
     info:
-        title: Connection parameters
+        title: Connectors
         solution: solution
     tabs: 
         info: Information
@@ -570,6 +570,7 @@ list_workflow:
         actions: Actions
         order: Order
         option: Options
+        status: Status
 view_workflow:
     title: Workflow
     create: Create a new workflow
@@ -605,6 +606,8 @@ view_workflow:
     cancel_edit: Cancel edit
     save: Save
     cancel: Cancel
+edit_workflow:
+    name_already_exists: Workflow name already exists
 view_workflow_action:
     title2: Workflow Action
     title: Workflow Action Details
@@ -786,7 +789,7 @@ title:
         text2: Start your project now by giving a look to our documentation.
         btn: Start now !
     rule:
-        create_name: Creation of the rule
+        create_name: Editing of the rule
         create: Creation of a rule
         edit: Editing the rule
         list: Rules
@@ -1127,6 +1130,7 @@ duplicate_rule:
 banner: Crontab is disabled
 variable:
   name_already_exists: The name of the variable already exists. Please choose another name.
+  edit: Editing of a variable
   back_to_list: Back to the list
   save: Save
   editing: Editing of a variable

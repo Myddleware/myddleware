@@ -77,6 +77,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Form\Type\RelationFilterType;
 use App\Entity\Workflow;
 use App\Entity\WorkflowAction;
+use App\Service\TwoFactorAuthService;
+use Symfony\Component\HttpFoundation\RequestStack;
+use App\Entity\RuleGroup;
+use Symfony\Component\Yaml\Yaml;
+
     /**
      * @Route("/rule")
      */
@@ -103,6 +108,9 @@ use App\Entity\WorkflowAction;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
         private ConfigRepository $configRepository;
+        private TwoFactorAuthService $twoFactorAuthService;
+
+        private RequestStack $requestStack;
 
         public function __construct(
             LoggerInterface $logger,
@@ -122,7 +130,9 @@ use App\Entity\WorkflowAction;
             ToolsManager $tools,
             JobManager $jobManager,
             TemplateManager $template,
-            ParameterBagInterface $params
+            ParameterBagInterface $params,
+            TwoFactorAuthService $twoFactorAuthService,
+            RequestStack $requestStack
         ) {
             $this->logger = $logger;
             $this->ruleManager = $ruleManager;
@@ -141,6 +151,8 @@ use App\Entity\WorkflowAction;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
             $this->template = $template;
+            $this->twoFactorAuthService = $twoFactorAuthService;
+            $this->requestStack = $requestStack;
         }
 
         protected function getInstanceBdd()
@@ -226,8 +238,7 @@ use App\Entity\WorkflowAction;
             $session = $request->getSession();
 
             // First, checking that the rule has document not deleted
-            $docClose = $this->getDoctrine()
-                ->getManager()
+            $docClose = $this->entityManager
                 ->getRepository(Document::class)
                 ->findOneBy([
                     'rule' => $id,
@@ -242,8 +253,7 @@ use App\Entity\WorkflowAction;
             }
 
             // Then, checking that the rule has no document open or in error
-            $docErrorOpen = $this->getDoctrine()
-                ->getManager()
+            $docErrorOpen = $this->entityManager
                 ->getRepository(Document::class)
                 ->findOneBy([
                     'rule' => $id,
@@ -259,8 +269,7 @@ use App\Entity\WorkflowAction;
             }
 
             // Checking if the rule is linked to an other one
-            $ruleRelationships = $this->getDoctrine()
-                ->getManager()
+            $ruleRelationships = $this->entityManager
                 ->getRepository(RuleRelationShip::class)
                 ->findBy(['fieldId' => $id]);
 
@@ -290,8 +299,7 @@ use App\Entity\WorkflowAction;
 
             if (isset($id)) {
                 // Récupère la règle en fonction de son id
-                $rule = $this->getDoctrine()
-                    ->getManager()
+                $rule = $this->entityManager
                     ->getRepository(Rule::class)
                     ->findBy($list_fields_sql);
 
@@ -306,8 +314,7 @@ use App\Entity\WorkflowAction;
                 $this->getInstanceBdd();
 
                 // Remove the rule relationships
-                $ruleRelationships = $this->getDoctrine()
-                    ->getManager()
+                $ruleRelationships = $this->entityManager
                     ->getRepository(RuleRelationShip::class)
                     ->findBy(['rule' => $id]);
 
@@ -317,6 +324,9 @@ use App\Entity\WorkflowAction;
                         $this->entityManager->persist($ruleRelationship);
                     }
                 }
+
+                $this->removeThisRuleItsRuleGroup($rule);
+                $this->deleteWorflowsFromThisRule($rule);
 
                 $rule->setDeleted(1);
                 $rule->setActive(0);
@@ -328,13 +338,55 @@ use App\Entity\WorkflowAction;
             return $this->redirect($this->generateUrl('regle_list'));
         }
 
+        public function removeThisRuleItsRuleGroup(Rule $rule)
+        {
+            $ruleGroup = $rule->getGroup();
+            if ($ruleGroup) {
+                $ruleGroup->removeRule($rule);
+                $this->entityManager->persist($ruleGroup);
+                $this->entityManager->flush();
+            }
+        }
+
+        public function deleteWorflowsFromThisRule($id)
+        {
+            $workflows = $this->entityManager
+                ->getRepository(Workflow::class)
+                ->findBy(['rule' => $id]);
+
+            foreach ($workflows as $workflow) {
+
+                $workflow->setActive(0);
+                $this->deleteWorkflowActionsFromThisWorkflow($workflow->getId());
+
+                $workflow->setDeleted(1);
+                $this->entityManager->persist($workflow);
+            }
+
+            $this->entityManager->flush();
+        }
+
+        public function deleteWorkflowActionsFromThisWorkflow($id)
+        {
+            $workflowActions = $this->entityManager
+                ->getRepository(WorkflowAction::class)
+                ->findBy(['workflow' => $id]);
+                
+            foreach ($workflowActions as $workflowAction) {
+                $workflowAction->setActive(0);
+                $workflowAction->setDeleted(1);
+                $this->entityManager->persist($workflowAction);
+            }
+
+            $this->entityManager->flush();
+        }
+
         /**
          * @Route("/displayflux/{id}", name="regle_displayflux")
          */
         public function displayFlux($id): RedirectResponse
         {
-            $rule = $this->getDoctrine()
-                ->getManager()
+            $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -353,8 +405,7 @@ use App\Entity\WorkflowAction;
         public function duplicateRule($id, Request $request, TranslatorInterface $translator)
         {
             try {
-                $rule = $this->getDoctrine()
-                ->getManager()
+                $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -463,8 +514,7 @@ use App\Entity\WorkflowAction;
         public function duplicateWorkflows($id, Rule $newRule)
         {
             // start by getting the rule fromthe id
-            $rule = $this->getDoctrine()
-                ->getManager()
+            $rule = $this->entityManager
                 ->getRepository(Rule::class)
                 ->findOneBy([
                     'id' => $id,
@@ -536,8 +586,7 @@ use App\Entity\WorkflowAction;
                 // On récupére l'EntityManager
                 $this->getInstanceBdd();
 
-                $rule = $this->getDoctrine()
-                    ->getManager()
+                $rule = $this->entityManager
                     ->getRepository(Rule::class)
                     ->find($id);
 
@@ -651,8 +700,7 @@ use App\Entity\WorkflowAction;
                         // In a few case, the parameter could not exist, in this case we create it
                         if (empty($param)) {
                             // Create rule entity
-                            $rule = $this->getDoctrine()
-                                            ->getManager()
+                            $rule = $this->entityManager
                                             ->getRepository(Rule::class)
                                             ->findOneBy([
                                                 'id' => $id,
@@ -726,8 +774,7 @@ use App\Entity\WorkflowAction;
                 $solution_source_nom = $rule->getConnectorSource()->getSolution()->getName();
 
                 // Connector source -------------------
-                $connectorParamsSource = $this->getDoctrine()
-                                                ->getManager()
+                $connectorParamsSource = $this->entityManager
                                                 ->getRepository(ConnectorParam::class)
                                                 ->findBy(['connector' => $rule->getConnectorSource()]);
                 $connectorSource['solution'] = $rule->getConnectorSource()->getSolution()->getName();
@@ -774,8 +821,7 @@ use App\Entity\WorkflowAction;
 
             try {
                 // First, checking that the rule has no document open or in error
-                $docErrorOpen = $this->getDoctrine()
-                    ->getManager()
+                $docErrorOpen = $this->entityManager
                     ->getRepository(Document::class)
                     ->findOneBy([
                         'rule' => $rule,
@@ -816,8 +862,7 @@ use App\Entity\WorkflowAction;
                 $this->sessionService->setParamRuleLastId($key, $rule->getId());
 
                 // Connector source -------------------
-                $connectorParamsSource = $this->getDoctrine()
-                    ->getManager()
+                $connectorParamsSource = $this->entityManager
                     ->getRepository(ConnectorParam::class)
                     ->findByConnector([$rule->getConnectorSource()]);
 
@@ -829,8 +874,7 @@ use App\Entity\WorkflowAction;
                 // Connector source -------------------
 
                 // Connector target -------------------
-                $connectorParamsTarget = $this->getDoctrine()
-                    ->getManager()
+                $connectorParamsTarget = $this->entityManager
                     ->getRepository(ConnectorParam::class)
                     ->findByConnector([$rule->getConnectorTarget()]);
 
@@ -1185,8 +1229,11 @@ use App\Entity\WorkflowAction;
                             }
                             $this->sessionService->setParamConnectorParentType($request->request->get('parent'), 'solution', $classe);
 
+                            // before checking the number with get fields login, we need to check the difference between the number of fields login and the number of non required fields for the solution
+                            $nonRequiredFields = $this->getNonRequiredFields();
+
                             // Vérification du nombre de champs
-                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()))) {
+                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()) || count($param) == count($solution->getFieldsLogin()) - count($nonRequiredFields))) {
                                 $result = $solution->login($param);
                                 $r = $solution->connexion_valide;
 
@@ -1215,13 +1262,11 @@ use App\Entity\WorkflowAction;
                             $classe = strtolower($params[0]);
                             $solution = $this->solutionManager->get($classe);
 
-                            $connector = $this->getDoctrine()
-                                ->getManager()
+                            $connector = $this->entityManager
                                 ->getRepository(Connector::class)
                                 ->find($params[1]);
 
-                            $connector_params = $this->getDoctrine()
-                                ->getManager()
+                            $connector_params = $this->entityManager
                                 ->getRepository(ConnectorParam::class)
                                 ->findBy(['connector' => $connector]);
 
@@ -1262,6 +1307,13 @@ use App\Entity\WorkflowAction;
             } catch (Exception $e) {
                 return new JsonResponse(['success' => false, 'message' => $e->getMessage().' '.$e->getLine().' '.$e->getFile()]);
             }
+        }
+
+        private function getNonRequiredFields()
+        {
+            $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
+            $yaml = Yaml::parseFile($yamlFile);
+            return $yaml['non-required-fields'];
         }
 
         /**
@@ -1447,7 +1499,7 @@ use App\Entity\WorkflowAction;
 
                 // Add rule param if exist (the aren't exist in rule creation)
                 $ruleParams = [];
-                $ruleParamsResult = $this->getDoctrine()->getManager()->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
+                $ruleParamsResult = $this->entityManager->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
                 if (!empty($ruleParamsResult)) {
                     foreach ($ruleParamsResult as $ruleParamsObj) {
                         $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
@@ -1766,8 +1818,7 @@ use App\Entity\WorkflowAction;
 
                 // On ajoute des champs personnalisés à notre mapping
                 if ($fieldMappingAdd && $this->sessionService->isParamRuleLastVersionIdExist($ruleKey)) {
-                    $ruleFields = $this->getDoctrine()
-                        ->getManager()
+                    $ruleFields = $this->entityManager
                         ->getRepository(RuleField::class)
                         ->findBy(['rule' => $this->sessionService->getParamRuleLastId($ruleKey)]);
 
@@ -1836,7 +1887,7 @@ use App\Entity\WorkflowAction;
 
                 // -- Relation
                 // Rule list with the same connectors (both directions) to get the relate ones
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2090,7 +2141,7 @@ use App\Entity\WorkflowAction;
                         ->findBy(['rule' => $ruleKey]);
 
                 // we want to make a request that fetches all the rule names and ids, so we can display them in the form
-                $ruleRepo = $this->getDoctrine()->getManager()->getRepository(Rule::class);
+                $ruleRepo = $this->entityManager->getRepository(Rule::class);
                 $ruleListRelation = $ruleRepo->createQueryBuilder('r')
                     ->select('r.id, r.name, r.moduleSource')
                     ->where('(
@@ -2321,30 +2372,45 @@ use App\Entity\WorkflowAction;
             $this->getInstanceBdd();
             $this->entityManager->getConnection()->beginTransaction();
             try {
-                /*
-                 * get rule id in the params in regle.js. In creation, regleId = 0
-                 */
-                if (!empty($request->request->get('params'))) {
-                    foreach ($request->request->get('params') as $searchRuleId) {
-                        if ('regleId' == $searchRuleId['name']) {
+                // Decode the JSON params from the request
+                $paramsRaw = $request->request->get('params');
+                $decodedParams = json_decode($paramsRaw, true); // or directly use if already an array
+                // Get rule id from params
+                if (!empty($decodedParams)) {
+                    foreach ($decodedParams as $searchRuleId) {
+                        if ('regleId' === $searchRuleId['name']) {
                             $ruleKey = $searchRuleId['value'];
                             break;
                         }
                     }
                 }
+                $formattedParams = [];
+                
+                foreach ($decodedParams as $item) {
+                    if (isset($item['name']) && isset($item['value'])) {
+                        $formattedParams[$item['name']] = is_numeric($item['value']) ? (int)$item['value'] : $item['value'];
+                    }
+                }
+
+                $params = $formattedParams;
+                
 
                 // retourne un tableau prêt à l'emploi
                 $tab_new_rule = $this->createListeParamsRule(
                     $request->request->get('champs'), // Fields
                     $request->request->get('formules'), // Formula
-                    $request->request->get('params') // Params
+                    $params // Decoded params
                 );
-                unset($tab_new_rule['params']['regleId']); // delete  id regle for gestion session
+                unset($tab_new_rule['params']['regleId']); // delete id regle for gestion session
+
+                $requestAll = $request->request->all();
+
+                $duplicate = $requestAll['duplicate'] ?? [];
 
                 // fields relate
-                if (!empty($request->request->get('duplicate'))) {
+                if (!empty($duplicate)) {
                     // fix : Put the duplicate fields values in the old $tab_new_rule array
-                    $duplicateArray = implode(';', $request->request->get('duplicate'));
+                    $duplicateArray = implode(';', $duplicate);
                     $tab_new_rule['params']['rule']['duplicate_fields'] = $duplicateArray;
                     $this->sessionService->setParamParentRule($ruleKey, 'duplicate_fields', $duplicateArray);
                 }
@@ -2354,17 +2420,20 @@ use App\Entity\WorkflowAction;
                 }
 
                 //------------ Create rule
-                $connector_source = $this->getDoctrine()
-                    ->getManager()
+                $connector_source = $this->entityManager
                     ->getRepository(Connector::class)
                     ->find($this->sessionService->getParamRuleConnectorSourceId($ruleKey));
 
-                $connector_target = $this->getDoctrine()
-                    ->getManager()
+                $connector_target = $this->entityManager
                     ->getRepository(Connector::class)
                     ->find($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
 
                 $param = RuleManager::getFieldsParamDefault();
+
+                // unset description from param['RuleParam'] if it not a new rule
+                if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
+                    unset($param['RuleParam']['description']);
+                }
 
                 // Get the id of the rule if we edit a rule
                 // Generate Rule object (create a new one or instanciate the existing one
@@ -2617,50 +2686,25 @@ use App\Entity\WorkflowAction;
                     }
                 }
 
-                // $form = $this->createForm(RelationFilterType::class);
-                // $form->handleRequest($request);
                 //------------------------------- RuleFilter ------------------------
-                // $form->handleRequest($request);
-              //------------------------------- RuleFilter ------------------------
-              $filters = $request->request->get('filter');
+                // Get all request data and extract the filter
+                $requestData = $request->request->all();
+                $filtersRaw = $requestData['filter'] ?? null;
 
-              if (!empty($filters)) {
-                  foreach ($filters as $filterData) {
-                      // $filterData est un tableau contenant les valeurs des champs pour chaque élément de liste <li>
-              
-                      // Accès aux valeurs des champs individuels
-                      $fieldInput = $filterData['target'];
-                      $anotherFieldInput = $filterData['filter'];
-                      $textareaFieldInput = $filterData['value'];
+                // Handle both JSON string and array cases
+                $filters = is_string($filtersRaw) ? json_decode($filtersRaw, true) : $filtersRaw;
 
-              
-                      // Maintenant, vous pouvez utiliser ces valeurs comme vous le souhaitez, par exemple, pour créer un objet RuleFilter
-                      $oneRuleFilter = new RuleFilter();
-                      $oneRuleFilter->setTarget($fieldInput);
-                      $oneRuleFilter->setRule($oneRule);
-              
-                      $oneRuleFilter->setType($anotherFieldInput);
-                      $oneRuleFilter->setValue($textareaFieldInput);
-              
-                      // Enregistrez votre objet RuleFilter dans la base de données
-                      $this->entityManager->persist($oneRuleFilter);
-                  }
-              
-                  $this->entityManager->flush();
-              }
-                    // $this->getDoctrine()->getManager()->flush();
-                // }
-                // if (!empty($request->request->get('filter'))) {
-                //     foreach ($request->request->get('filter') as $filter) {
-                //         $oneRuleFilter = new RuleFilter();
-                //         $oneRuleFilter->setTarget($filter['target']);
-                //         $oneRuleFilter->setRule($oneRule);
-                //         $oneRuleFilter->setType($filter['filter']);
-                //         $oneRuleFilter->setValue($filter['value']);
-                //         $this->entityManager->persist($oneRuleFilter);
-                //         $this->entityManager->flush();
-                //     }
-                // }
+                if (!empty($filters)) {
+                    foreach ($filters as $filterData) {
+                        $oneRuleFilter = new RuleFilter();
+                        $oneRuleFilter->setTarget($filterData['target']);
+                        $oneRuleFilter->setRule($oneRule);
+                        $oneRuleFilter->setType($filterData['filter']);
+                        $oneRuleFilter->setValue($filterData['value']);
+                        $this->entityManager->persist($oneRuleFilter);
+                    }
+                    $this->entityManager->flush();
+                }
 
                 // --------------------------------------------------------------------------------------------------
                 // Order all rules
@@ -2675,7 +2719,7 @@ use App\Entity\WorkflowAction;
                         'limit' => $limit,
                         'datereference' => $date_reference,
                         'content' => $tab_new_rule,
-                        'filters' => $request->request->get('filter'),
+                        'filters' => $filters,
                         'relationships' => $relationshipsBeforeSave,
                     ]
                 );
@@ -2721,7 +2765,8 @@ use App\Entity\WorkflowAction;
                                                             'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
                                                         ],
                                                     ],
-                                                ]
+                                                ],
+                                                $this->requestStack
                 );
                 if ($this->sessionService->isParamRuleExist($ruleKey)) {
                     $this->sessionService->removeParamRule($ruleKey);
@@ -2730,7 +2775,7 @@ use App\Entity\WorkflowAction;
                 
                 $rule_id = $oneRule->getId();
                 $response = ['status' => 1, 'id' => $rule_id];
-                //$response = 1;
+
             } catch (Exception $e) {
                 $this->entityManager->getConnection()->rollBack();
                 $this->logger->error('2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')'));
@@ -2738,17 +2783,39 @@ use App\Entity\WorkflowAction;
             }
 
             $this->entityManager->close();
-
             return new JsonResponse($response);
         }
 
         /**
          * TABLEAU DE BORD.
-         *
-         * @Route("/panel", name="regle_panel")
          */
+        #[Route('/panel', name: 'regle_panel')]
         public function panel(Request $request): Response
         {
+
+            $session = $request->getSession();
+
+            // Check if the user has completed 2FA
+            $user = $this->getUser();
+            $twoFactorAuth = $this->twoFactorAuthService->getOrCreateTwoFactorAuth($user);
+            
+            $this->logger->debug('User authenticated, checking 2FA status in panel method');
+            if ($twoFactorAuth->isEnabled() && !$session->get('two_factor_auth_complete', false)) {
+                $this->logger->debug('2FA is enabled for user and not completed');
+                
+                // Check if the user has a remember cookie
+                $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
+                if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
+                    // If the user has a valid remember cookie, mark as complete
+                    $session->set('two_factor_auth_complete', true);
+                    $this->logger->debug('User has valid remember cookie, marking 2FA as complete');
+                } else {
+                    // Otherwise, redirect to verification
+                    $this->logger->debug('Redirecting to verification page');
+                    return $this->redirectToRoute('two_factor_auth_verify');
+                }
+            }
+
             $language = $request->getLocale();
 
             $this->getInstanceBdd();
@@ -3048,7 +3115,7 @@ use App\Entity\WorkflowAction;
             // PARAMS -----------------------------------------
             if ($params) {
                 foreach ($params as $k => $p) {
-                    $tab['params'][$p['name']] = $p['value'];
+                    $tab['params'][$k] = $p;
                 }
             }
 
@@ -3164,13 +3231,13 @@ use App\Entity\WorkflowAction;
     {
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
             'rule' => $ruleId,
             'name' => 'description'
         ]);
 
-        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue()) {
+        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue() || $description === '    ') {
             return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
         }
 
@@ -3205,7 +3272,7 @@ use App\Entity\WorkflowAction;
     {
         $ruleId = $request->request->get('ruleId');
         $name = $request->request->get('ruleName');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $rule = $entityManager->getRepository(Rule::class)->find($ruleId);
 
         if (!$rule) {
@@ -3232,7 +3299,7 @@ use App\Entity\WorkflowAction;
     {
         $name = $request->query->get('ruleName');
         $ruleId = $request->query->get('ruleId');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
 
         $ruleRepository = $entityManager->getRepository(Rule::class);
 
@@ -3312,7 +3379,7 @@ use App\Entity\WorkflowAction;
     {
         $fieldName = $request->query->get('lookupfieldName');
         $currentRuleId = $request->query->get('currentRule');
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->entityManager;
         $currentRule = $entityManager->getRepository(Rule::class)->findOneBy(['id' => $currentRuleId]);
 
         // from the current rule, get the formulas

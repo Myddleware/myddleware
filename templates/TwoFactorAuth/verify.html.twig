@@ -1,0 +1,142 @@
+{#/*********************************************************************************
+* This file is part of Myddleware.
+
+* @package Myddleware
+* @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+* @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+* @link http://www.myddleware.com
+
+This file is part of Myddleware.
+
+Myddleware is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Myddleware is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #}
+
+{% extends "baseone.html.twig" %}
+{% block title %}
+    {{ parent() }}
+    |
+    Two-Factor Authentication
+{% endblock %}
+{% set body_class = 'login' %}
+{% block body %}
+    <div id="myd_login-container" class="d-flex">
+        <!-- Verification form -->
+        <div class="col-md-6 login-box p-5">
+            <div class="login-logo"></div>
+            <h2 class="login-title">Verification Required</h2>
+            
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
+                        <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
+                        <p class="ms-2">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            
+            <div class="verification-method mb-3">
+                <p>A verification code has been sent to your 
+                {% if twoFactorAuth.preferredMethod == 'email' %}
+                    email address.
+                {% else %}
+                    phone number.
+                {% endif %}
+                </p>
+                
+                <div class="method-switch">
+                    {% if twoFactorAuth.preferredMethod == 'email' and twoFactorAuth.phoneNumber %}
+                        <a href="{{ path('two_factor_auth_switch_method', {'method': 'sms'}) }}" class="btn btn-outline-secondary btn-sm">
+                            Switch to SMS
+                        </a>
+                    {% elseif twoFactorAuth.preferredMethod == 'sms' %}
+                        <a href="{{ path('two_factor_auth_switch_method', {'method': 'email'}) }}" class="btn btn-outline-secondary btn-sm">
+                            Switch to Email
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {{ form_start(form, {'attr': {'id': 'verification-form'}}) }}
+                <div class="verification-inputs">
+                    <div class="form-group mb-3">
+                        {{ form_label(form.code) }}
+                        {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.code) }}
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            {{ form_widget(form.rememberDevice) }}
+                            <p class="mb-0">Don't ask me again on this device</p>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mb-2">Verify</button>
+                    
+                    <div class="resend-code mt-2">
+                        <a href="{{ path('two_factor_auth_resend') }}" class="text-decoration-none">
+                            Didn't receive a code? Send again
+                        </a>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+
+        <!-- Info box -->
+        <div class="login-info-box p-5">
+            <div class="login-info-content">
+                <h3>Two-Factor Authentication</h3>
+                <p>For your security, we need to verify your identity.</p>
+                <p>We've sent a verification code to your 
+                {% if twoFactorAuth.preferredMethod == 'email' %}
+                    email address.
+                {% else %}
+                    phone number.
+                {% endif %}
+                </p>
+                <p>The code will expire in 1 minute.</p>
+                <p>If you don't receive the code, you can:</p>
+                <ul>
+                    <li>Check your spam folder</li>
+                    <li>Click "Send again" to request a new code</li>
+                    <li>Switch to another verification method</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Countdown timer for code expiration
+        document.addEventListener('DOMContentLoaded', function() {
+            let countdownElement = document.createElement('div');
+            countdownElement.className = 'countdown-timer mt-2 text-center';
+            document.querySelector('.verification-inputs').appendChild(countdownElement);
+            
+            let timeLeft = 60; // 1 minute in seconds
+            
+            function updateCountdown() {
+                if (timeLeft <= 0) {
+                    countdownElement.innerHTML = 'Code expired. <a href="{{ path('two_factor_auth_resend') }}">Send a new code</a>';
+                    return;
+                }
+                
+                countdownElement.textContent = `Code expires in ${timeLeft} seconds`;
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            }
+            
+            updateCountdown();
+        });
+    </script>
+{% endblock %} 

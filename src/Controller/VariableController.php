@@ -92,15 +92,27 @@ class VariableController extends AbstractController
         $form = $this->createFormBuilder($variable)
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.description'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('value', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.value'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('save', SubmitType::class, [
                 'label' => $translator->trans('variable.save'),
+                'attr' => [
+                    'class' => 'btn btn-primary',
+                ],
             ])
             ->getForm();
 
@@ -156,15 +168,27 @@ class VariableController extends AbstractController
         $form = $this->createFormBuilder($variable)
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.description'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('value', TextareaType::class, [
                 'label' => $translator->trans('variable.table_headers.value'),
+                'attr' => [
+                    'class' => 'form-control',
+                ],
             ])
             ->add('save', SubmitType::class, [
                 'label' => $translator->trans('variable.save'),
+                'attr' => [
+                    'class' => 'btn btn-primary',
+                ],
             ])
             ->getForm();
 

@@ -14,41 +14,39 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
     protected AuthorizationCheckerInterface $authorizationChecker;
     private UserRepository $userRepository;
-    private EncoderFactoryInterface $encoder;
+    private PasswordHasherFactoryInterface $passwordHasherFactory;
     private EntityManagerInterface $entityManager;
     private NotificationManager $notificationManager;
     private SecurityService $securityService;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
-        EncoderFactoryInterface $encoder,
+        PasswordHasherFactoryInterface $passwordHasherFactory,
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
         SecurityService $securityService
     ) {
         $this->authorizationChecker = $authorizationChecker;
-        $this->encoder = $encoder;
+        $this->passwordHasherFactory = $passwordHasherFactory;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
         $this->securityService = $securityService;
     }
 
-    /**
-     * @Route("/", name="login")
-     * @Route("/login")
-     */
+    #[Route('/', name: 'login')]
+    #[Route('/login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser() instanceof User) {
@@ -76,9 +74,9 @@ class SecurityController extends AbstractController
             // Get the admin user
             $userAdmin = $this->userRepository->loadUserByUsername('admin');
             if (!empty($userAdmin)) {
-                $encoder = $this->encoder->getEncoder($userAdmin);
+                $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($userAdmin);
                 // Compare password with admin encoded
-                if ($encoder->encodePassword('admin', $userAdmin->getSalt()) == $userAdmin->getPassword()) {
+                if ($passwordHasher->verify($userAdmin->getPassword(), 'admin')) {
                     $passwordMessage = true;
                 }
             }
@@ -92,15 +90,6 @@ class SecurityController extends AbstractController
             'password_message' => $passwordMessage,
             'platform_sh' => $platformSh,
         ]);
-    }
-
-    /**
-     * @Route("/logout", name="logout")
-     */
-    public function logout(): Response
-    {
-        // Ignored by the system of logout @see security.yaml
-        return $this->redirectToRoute('login');
     }
 
     private function calculBan($lastUsername)
@@ -134,6 +123,7 @@ class SecurityController extends AbstractController
         }
     }
 
+    #[Route('/verifAccount', name: 'verif_account', methods: ['POST'])]
     public function verifAccount(Request $request): Response
     {
         try {
@@ -166,12 +156,8 @@ class SecurityController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/resetting/{token}", name="resetting_request", defaults={"token"=null})
-     *
-     * @throws Exception
-     */
-    public function reset(Request $request, $token, UserPasswordEncoderInterface $encoder)
+    #[Route('/resetting/{token}', name: 'resetting_request', defaults: ['token' => null])]
+    public function reset(Request $request, $token, UserPasswordHasherInterface $passwordHasher)
     {
         if (!$token) {
             $form = $this->createForm(UserForgotPasswordType::class);
@@ -213,18 +199,14 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $oldPassword = $request->request->get('reset_password')['oldPassword'];
-            if ($encoder->isPasswordValid($user, $oldPassword)) {
-                $newEncodedPassword = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($newEncodedPassword);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
+            $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
+            $user->setPassword($newHashedPassword);
+            $user->setConfirmationToken(null); // Clear the token after successful reset
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
-                $this->addFlash('success', 'Password has been successfully reset.');
-                return $this->redirectToRoute('regle_panel');
-            } else {
-                $this->addFlash('danger', 'The old password is incorrect.');
-            }
+            $this->addFlash('success', 'Password has been successfully reset.');
+            return $this->redirectToRoute('login');
         }
 
         return $this->render('Login/reset.html.twig', [
@@ -232,5 +214,4 @@ class SecurityController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 }

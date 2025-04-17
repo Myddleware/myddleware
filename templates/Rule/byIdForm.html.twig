@@ -1,6 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block titlesm %} {{ 'crontab.title'|trans }}{% endblock %}
+
+{% form_theme formIdBatch 'bootstrap_5_layout.html.twig' %}
+
 {% block body %}
 
 <h1>execute a rule by id</h1>
@@ -8,8 +11,12 @@
 
 <div class="container-fluid p-3">
     {{ form_start(formIdBatch) }}
-    {{ form_row(formIdBatch.id, {'attr' : {'placeholder': "separate the ids with comas, no space"}}) }}
-    <button type='submit' class='btn btn-success' >Run the rule with these ids</button>
+    <div class="mb-3">
+        {{ form_label(formIdBatch.id) }}
+        {{ form_widget(formIdBatch.id, {'attr' : {'placeholder': "separate the ids with comas, no space", 'class': 'form-control'}}) }}
+        {{ form_errors(formIdBatch.id) }}
+    </div>
+    <button type='submit' class='btn btn-success'>Run the rule with these ids</button>
     {{ form_end(formIdBatch) }}
 </div>
 

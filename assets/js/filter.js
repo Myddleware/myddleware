@@ -169,7 +169,7 @@ $(function () {
       };
     });
 
-    console.log('storedFilters filter.js', storedFilters);
+    // console.log('storedFilters filter.js', storedFilters);
 
     localStorage.setItem("storedFilters", JSON.stringify(storedFilters));
   }
