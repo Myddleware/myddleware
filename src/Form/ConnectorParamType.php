@@ -11,6 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Yaml\Yaml;
 
 class ConnectorParamType extends AbstractType
 {
@@ -59,8 +60,19 @@ class ConnectorParamType extends AbstractType
             $form->add('value', $type, $option);
             if (null == $connectorParam->getValue()) {
                 $form->add('name', HiddenType::class, ['data' => $name]);
+                $nonRequiredFields = $this->getNonRequiredFields();
+                if (in_array($name, $nonRequiredFields) && $id != null) {
+                    $form->remove('name');
+                }
             }
         });
+    }
+
+    private function getNonRequiredFields()
+    {
+        $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
+        $yaml = Yaml::parseFile($yamlFile);
+        return $yaml['non-required-fields'];
     }
 
     public function configureOptions(OptionsResolver $resolver)
