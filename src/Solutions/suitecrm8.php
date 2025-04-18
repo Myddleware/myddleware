@@ -163,9 +163,9 @@ class suitecrm8 extends solution
             } elseif (!empty($param['query'])) {
 				$filter = '';
 				foreach($param['query'] as $key => $value) {
-					$filter .= 'filter['.$key.'][eq]='.$value.'&and&';
+					$filter .= 'filter['.$key.'][eq]='.urlencode($value).'&';
 				}
-				$filter = rtrim($filter, '&and&');
+				$filter = rtrim($filter, '&');
                 $url = 'V8/module/'.$param['module'].'?'.$filter;	
 			// Search by date ref
             } else { 

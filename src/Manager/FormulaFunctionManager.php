@@ -307,7 +307,6 @@ class FormulaFunctionManager
             }
         } catch (\Exception $e) {
             throw new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $this->logger->error($this->id.' - '.$this->message);
         }
         return null;
     }
@@ -349,9 +348,8 @@ class FormulaFunctionManager
 			if (empty($data['values'])) {
 				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
 			}
-			return json_encode(current($data['values']));
+			return (object)(current($data['values']));
         } catch (\Exception $e) {
-            $this->logger->error('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			if (!$errorIgnore) {
 				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			}
@@ -400,7 +398,6 @@ class FormulaFunctionManager
 			return array('connexion_valide' => $c, 'solution' => $solution);	 
 		} catch (\Exception $e) {
 			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$this->logger->error($error);
 			throw new \Exception($error);
 		}	
 		return $connexion_valide;		
