@@ -2324,8 +2324,9 @@ class DocumentManager
 			// Exception : status New because there is no lock on document for this status, the lock in on the rule
 			// Exception : status No_send because the document has already been unlock by the status ready_to_send
 			// Exception : Update status call by a workflow, the lock will be removed only by the main call
+            // Exception : Status Cancel, we should be able to unlock the document
 			if (
-					!in_array($new_status, array('New','No_send'))
+					!in_array($new_status, array('New','No_send', "Cancel"))
 				AND !$workflow
 			) {
 				if ($this->unsetLock() == false) {
