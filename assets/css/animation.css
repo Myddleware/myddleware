@@ -631,3 +631,20 @@ margin-left: -0.5rem;
 .workflow-action-list-inside-workflow-show {
     margin-left: -2.25em !important;
 }
+
+/* update password form in the account page */
+
+/* selector is a label with the for update_password_plainPassword_first */
+label[for="update_password_plainPassword_first"] {
+    font-weight: 600 !important;
+}
+
+/* selector is a label with the for update_password_plainPassword_second */
+label[for="update_password_plainPassword_second"] {
+    font-weight: 600 !important;
+}
+
+/* selector is a label with the for update_password_oldPassword */
+label[for="update_password_oldPassword"] {
+    font-weight: 600 !important;
+}
