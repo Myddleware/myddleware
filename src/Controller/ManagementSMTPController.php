@@ -622,14 +622,6 @@ class ManagementSMTPController extends AbstractController
         }
     }
 
-    // Add every admin email in the notification list
-    protected function setEmailAddresses()
-    {
-        $users = $this->userRepository->findEmailsToNotification();
-        foreach ($users as $user) {
-            $this->emailAddresses[] = $user['email'];
-        }
-    }
 
     public function checkIfmailerUrlInEnv()
     {
