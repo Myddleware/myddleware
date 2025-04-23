@@ -333,27 +333,57 @@ class ManagementSMTPController extends AbstractController
             return;
         }
 
+        // Initialize fallback password variable
+        $passwordToBeAddedIntoTheEnv = ''; // Default to empty string
+
+        // If the password is empty in the form but present in the existing dsn in the .env, use the existing one
+        $existingDsn = $this->checkIfmailerDsnInEnv();
+        if ($existingDsn !== false) {
+            $existingDsnArray = $this->envMailerDsnToArray($existingDsn);
+            // Check if password exists in the parsed DSN array
+            if (isset($existingDsnArray[5]) && $existingDsnArray[5] !== '') {
+                $passwordToBeAddedIntoTheEnv = $existingDsnArray[5];
+            }
+        }
+
+        // Determine the password to use: prioritize form data, then fallback
+        $formPassword = $form->get('password')->getData();
+        $chosenPassword = !empty($formPassword) ? $formPassword : $passwordToBeAddedIntoTheEnv;
+
+        // Create the password part for the DSN string (e.g., ":urlencodedpass" or "")
+        $passwordDsnPart = !empty($chosenPassword) ? ':' . urlencode($chosenPassword) : '';
+
         // Create DSN string
         $dsn = sprintf(
             '%s://%s%s@%s:%d',
             $transport,
-            urlencode($form->get('user')->getData()),
-            $form->get('password')->getData() ? ':' . urlencode($form->get('password')->getData()) : '',
+            urlencode((string)$form->get('user')->getData()), // Ensure user is string before urlencode
+            $passwordDsnPart, // Use the pre-calculated password part
             $form->get('host')->getData(),
             $form->get('port')->getData()
         );
 
-        if ($form->get('encryption')->getData()) {
-            $dsn .= '?encryption=' . $form->get('encryption')->getData();
+        // Append query parameters if they exist (also urlencode them)
+        $queryParams = [];
+        if ($encryption = $form->get('encryption')->getData()) {
+            $queryParams['encryption'] = $encryption;
         }
-        if ($form->get('auth_mode')->getData()) {
-            $dsn .= ($form->get('encryption')->getData() ? '&' : '?') . 'auth_mode=' . $form->get('auth_mode')->getData();
+        if ($auth_mode = $form->get('auth_mode')->getData()) {
+            $queryParams['auth_mode'] = $auth_mode;
         }
+        if (!empty($queryParams)) {
+             $dsn .= '?' . http_build_query($queryParams);
+        }
+
 
         // Update .env.local file
         $this->EmptyMailerDsnEnv();
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
-        $envFile .= "\nMAILER_DSN=" . $dsn;
+        // Ensure a newline separates the existing content (if any) and the new DSN line
+        if (!empty($envFile) && substr($envFile, -1) !== "\n") {
+            $envFile .= "\n";
+        }
+        $envFile .= "MAILER_DSN=" . $dsn;
         file_put_contents(self::LOCAL_ENV_FILE, $envFile);
     }
 
