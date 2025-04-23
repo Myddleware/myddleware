@@ -1011,6 +1011,7 @@ management_smtp:
     sendtestmail: Send test mail
     success: SMTP config saved successfully
     error: Failed to save SMTP config
+    api_key_already_in_env: This API key is already in the .env file.
 
 management_smtp_sendmail:
     subject: Myddleware - email configuration test

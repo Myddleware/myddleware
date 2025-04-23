@@ -173,12 +173,17 @@ class ManagementSMTPController extends AbstractController
             $apiKeyFromTheForm = $form->get('ApiKey')->getData();
             $isLenOfApiKeyFromTheFormOver70chars = strlen($apiKeyFromTheForm) > 70;
             $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+            if ($apiKeyFromEnv === $apiKeyFromTheForm) {
+                // put a message in the session to inform the user that the api key is already in the .env
+                $this->addFlash('success', $this->translator->trans('management_smtp.api_key_already_in_env'));
+                return;
+            }
             if ($apiKeyFromEnv !== $apiKeyFromTheForm && $isLenOfApiKeyFromTheFormOver70chars) {
                 $this->EmptyApiKeyEnv();
                 $this->putApiKeyInDotEnv($form);
             }
         } else {
-            $this->parseYamlConfigToLocalEnv($form);
+            $this->putRegularSmtpConfigToLocalEnv($form);
         }
     }
 
@@ -360,10 +365,8 @@ class ManagementSMTPController extends AbstractController
     }
 
 
-    /**
-     * Retrieve Swiftmailer config & pass it to MAILER_URL env variable in .env.local file.
-     */
-    protected function parseYamlConfigToLocalEnv($form)
+    // 
+    protected function putRegularSmtpConfigToLocalEnv($form)
     {
         try {
             $swiftParams = [];
