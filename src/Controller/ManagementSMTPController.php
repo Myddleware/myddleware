@@ -170,7 +170,10 @@ class ManagementSMTPController extends AbstractController
     public function envMailerDsnVsApiKey($form)
     {
         if ($form->get('transport')->getData() === 'sendinblue') {
-            if ($this->checkIfApiKeyInEnv() !== $form->get('ApiKey')->getData()) {
+            $apiKeyFromTheForm = $form->get('ApiKey')->getData();
+            $isLenOfApiKeyFromTheFormOver70chars = strlen($apiKeyFromTheForm) > 70;
+            $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+            if ($apiKeyFromEnv !== $apiKeyFromTheForm && $isLenOfApiKeyFromTheFormOver70chars) {
                 $this->EmptyApiKeyEnv();
                 $this->putApiKeyInDotEnv($form);
             }
