@@ -73,6 +73,39 @@ class ManagementSMTPController extends AbstractController
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
+    public function checkIfmailerDsnInEnv()
+    {
+        error_log('checkIfmailerDsnInEnv');
+        $mailerDsnEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $mailerDsnEnv = $_ENV['MAILER_DSN'] ?? false;
+            if (!(isset($mailerDsnEnv) && $mailerDsnEnv !== '' && $mailerDsnEnv !== 'null://localhost' && $mailerDsnEnv !== false)) {
+                $mailerDsnEnv = false;
+            }
+        }
+        return $mailerDsnEnv;
+    }
+
+    public function checkIfApiKeyInEnv()
+    {
+        error_log('checkIfApiKeyInEnv');
+        $apiKeyEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $apiKeyEnv = getenv('BREVO_APIKEY');
+            if (!(isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false)) {
+                // as a fallback, check if the global variable $_ENV['BREVO_APIKEY'] is set
+                if (isset($_ENV['BREVO_APIKEY'])) {
+                    $apiKeyEnv = $_ENV['BREVO_APIKEY'];
+                } else {
+                    $apiKeyEnv = false;
+                }
+            }
+        }
+        return $apiKeyEnv;
+    }
+
     // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
     // Is called if you click on the Save SMTP config button OR the Send test mail button.
 
@@ -590,37 +623,5 @@ class ManagementSMTPController extends AbstractController
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             return false;
         }
-    }
-
-
-    public function checkIfmailerDsnInEnv()
-    {
-        $mailerDsnEnv = false;
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $mailerDsnEnv = $_ENV['MAILER_DSN'] ?? false;
-            if (!(isset($mailerDsnEnv) && $mailerDsnEnv !== '' && $mailerDsnEnv !== 'null://localhost' && $mailerDsnEnv !== false)) {
-                $mailerDsnEnv = false;
-            }
-        }
-        return $mailerDsnEnv;
-    }
-
-    public function checkIfApiKeyInEnv()
-    {
-        $apiKeyEnv = false;
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $apiKeyEnv = getenv('BREVO_APIKEY');
-            if (!(isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false)) {
-                // as a fallback, check if the global variable $_ENV['BREVO_APIKEY'] is set
-                if (isset($_ENV['BREVO_APIKEY'])) {
-                    $apiKeyEnv = $_ENV['BREVO_APIKEY'];
-                } else {
-                    $apiKeyEnv = false;
-                }
-            }
-        }
-        return $apiKeyEnv;
     }
 }
