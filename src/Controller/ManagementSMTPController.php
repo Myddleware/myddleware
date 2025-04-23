@@ -430,6 +430,9 @@ class ManagementSMTPController extends AbstractController
      */
     public function testMailConfiguration($form): bool
     {
+        $isApiEmailSent = null; // Initialize to null
+        $isRegularEmailSent = null; // Initialize to null
+
         if ($form->get('transport')->getData() === "sendinblue") {
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
         } else {
