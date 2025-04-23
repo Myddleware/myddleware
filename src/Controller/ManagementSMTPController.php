@@ -59,11 +59,18 @@ class ManagementSMTPController extends AbstractController
     public function index(): Response
     {
         $form = $this->createCreateForm();
-        $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
+
+        // we prioritize the api key, so we start by checking if it's present
+        $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+        if ($apiKeyFromEnv !== false) {
+            $form = $this->getParametersFromApiKey($form, $apiKeyFromEnv);
+        } else {
+            $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
         if ($mailerUrlFromEnv !== false) {
             $form = $this->getParametersFromMailerUrl($form, $mailerUrlFromEnv);
         } else {
-            $form = $this->getParametersFromSwiftmailerYaml($form);
+                $form = $this->getParametersFromSwiftmailerYaml($form);
+            }
         }
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
