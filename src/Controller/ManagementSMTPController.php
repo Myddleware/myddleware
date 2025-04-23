@@ -436,14 +436,13 @@ class ManagementSMTPController extends AbstractController
         if ($form->get('transport')->getData() === "sendinblue") {
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
         } else {
-            // Standard email
-            $host = $form->get('host')->getData();
-            $port = $form->get('port')->getData();
-            $user = $form->get('user')->getData();
-            $auth_mode = $form->get('auth_mode')->getData();
-            $encryption = $form->get('encryption')->getData();
-            $password = $form->get('password')->getData();
-            $user_email = $this->getUser()->getEmail();
+            $user_email = null;
+            $user = $this->getUser();
+            // Ensure we have the correct user type before getting email
+            if ($user instanceof \App\Entity\User) { 
+                 $user_email = $user->getEmail();
+            }
+            // Use null-safe operator and check below
 
             try {
                 // Create DSN
