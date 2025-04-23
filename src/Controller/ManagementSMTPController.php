@@ -141,6 +141,31 @@ class ManagementSMTPController extends AbstractController
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
+    // Function to create the mail mailing form.
+    // Is called once when you go to the smtp page.
+    // Is called twice when you click on Save SMTP config.
+    // Is called twice when you click on Send test mail.
+    private function createCreateForm(): \Symfony\Component\Form\FormInterface
+    {
+        error_log('createCreateForm');
+        $form = $this->createForm(ManagementSMTPType::class, null, [
+            'action' => $this->generateUrl('management_smtp_create'),
+        ]);
+        $form->add('submit', SubmitType::class, [
+            'label' => 'management_smtp.submit',
+            'attr' => [
+                'class' => 'btn btn-outline-primary mb-2',
+            ],
+        ]);
+        $form->add('submit_test', SubmitType::class, [
+            'label' => 'management_smtp.sendtestmail',
+            'attr' => [
+                'class' => 'btn btn-outline-primary mb-2',
+            ],
+        ]);
+        return $form;
+    }
+    
     // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer url
     public function envMailerDsnVsApiKey($form)
     {
@@ -193,29 +218,6 @@ class ManagementSMTPController extends AbstractController
     }
 
 
-    // Function to create the mail mailing form.
-    // Is called once when you go to the smtp page.
-    // Is called twice when you click on Save SMTP config.
-    // Is called twice when you click on Send test mail.
-    private function createCreateForm(): \Symfony\Component\Form\FormInterface
-    {
-        $form = $this->createForm(ManagementSMTPType::class, null, [
-            'action' => $this->generateUrl('management_smtp_create'),
-        ]);
-        $form->add('submit', SubmitType::class, [
-            'label' => 'management_smtp.submit',
-            'attr' => [
-                'class' => 'btn btn-outline-primary mb-2',
-            ],
-        ]);
-        $form->add('submit_test', SubmitType::class, [
-            'label' => 'management_smtp.sendtestmail',
-            'attr' => [
-                'class' => 'btn btn-outline-primary mb-2',
-            ],
-        ]);
-        return $form;
-    }
 
 
     // Function to obtain parameters from the MAILER_DSN in .env and puts it in the form.
