@@ -324,13 +324,13 @@ class ManagementSMTPController extends AbstractController
     }
 
     /**
-     * set data form from files parameter_stml.yml. - this is for Myddleware 2.
+     *  Write the MAILER_DSN in the .env.local file.
      */
     private function putMailerConfig($form)
     {
         $transport = $form->get('transport')->getData();
         if ($transport == 'sendinblue') {
-            $transport = 'smtp';
+            return;
         }
 
         // Create DSN string
