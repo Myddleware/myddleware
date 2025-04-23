@@ -558,21 +558,6 @@ class ManagementSMTPController extends AbstractController
         return ($isApiEmailSent === true || $isRegularEmailSent === true);
     }
 
-    /**
-     * TODO: refactor so that the sendmail code from the above function
-     *  is decoupled from the config part.
-     *
-     * @return void
-     */
-    public function sendEmail($name, Swift_Mailer $mailer)
-    {
-        $message = (new \Swift_Message('Hello Email'))
-            ->setFrom('send@example.com')
-            ->setTo('recipient@example.com')
-            ->setBody('You should see me from the profiler!');
-        $mailer->send($message);
-    }
-
     protected function sendinblueSendMailByApiKey($form)
     {
         try {
