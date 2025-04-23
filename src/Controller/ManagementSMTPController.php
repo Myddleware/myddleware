@@ -619,7 +619,7 @@ class ManagementSMTPController extends AbstractController
         $mailerUrlEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $mailerUrlEnv = $_ENV['MAILER_DSN'];
+            $mailerUrlEnv = $_ENV['MAILER_DSN'] ?? false;
             if (!(isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false)) {
                 $mailerUrlEnv = false;
             }
