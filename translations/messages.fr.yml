@@ -79,7 +79,7 @@ create_rule:
         valid: Envoyer
     step3:
         filter: Filtre
-        filter_choice: n’a pas de filtre
+        filter_choice: n'a pas de filtre
         filter_fields: Rechercher un champ...
         empty_fields_target: Aucun champ trouvé dans cible
         empty_simulate: Attention il n'existe pas de donnée dans le serveur source ou de champs dans la solution cible
@@ -156,7 +156,7 @@ filter:
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules
-    notin: n’est pas compris dans le tableau suivant séparé par des points virgules
+    notin: n'est pas compris dans le tableau suivant séparé par des points virgules
 
 behavior_filters:
     error_missing: Erreur si non trouvé
@@ -630,6 +630,40 @@ view_account:
         language: Langue
     popup:
         locale: Changement de la langue en cours, merci de bien vouloir patienter. Vous allez être redirigé(e) vers la page d'authentification.
+    tabs:
+        general: Général
+        security: Sécurité
+    sections:
+        personal_info: Informations personnelles
+        language_preferences: Préférences de langue
+        logs: Logs
+        password: Mot de passe
+        twofa: Double authentification
+    fields:
+        language: Langue
+        timezone: Fuseau horaire
+        date_format: Format de date
+        export_separator: Séparateur d'exportation
+        charset: Encodage
+        auth_method: Méthode d'authentification
+    placeholder:
+        disabled_option: Option désactivée pour le moment
+    button:
+        save: Sauvegarder
+        download_logs: Télécharger les derniers logs
+        empty_logs: Vider le fichier de logs
+        reset_password: Réinitialiser le mot de passe
+        save_2fa: Enregistrer les paramètres 2FA
+    tooltip:
+        disabled_option: Option désactivée pour le moment
+        download_logs: Télécharger les fichiers de logs les plus récents
+        empty_logs: Supprimer le contenu du fichier de logs actuel
+        choose_language: Choisissez votre langue
+    info:
+        password_description: Modifiez votre mot de passe pour renforcer la sécurité de votre compte.
+        twofa_description: When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+    confirm:
+        empty_logs: Êtes-vous sûr de vouloir vider le fichier de logs ? Cette action est irréversible.
 
 function:
     all: Toutes

@@ -629,16 +629,50 @@ view_workflow_action:
     cancel: Cancel
 view_account:
     title: My account
-    user_info: My information
-    change_password : Change password
+    user_info: My Information
+    change_password: Change password
     profile_edit: Edit my profile
     support:
-        enabled: Support enabled 
+        enabled: Support enabled
         disabled: Support disabled
     label:
         language: Language
     popup:
-        locale: Please wait, the change of your language is under process. You will be redirected to the login page.
+        locale: Language change in progress, please wait. You will be redirected to the authentication page.
+    tabs:
+        general: General
+        security: Security
+    sections:
+        personal_info: Personal Information
+        language_preferences: Language Preferences
+        logs: Logs
+        password: Password
+        twofa: Two-Factor Authentication
+    fields:
+        language: Language
+        timezone: Time Zone
+        date_format: Date Format
+        export_separator: Export Separator
+        charset: Charset
+        auth_method: Authentication Method
+    placeholder:
+        disabled_option: Option currently disabled
+    button:
+        save: Save
+        download_logs: Download Latest Logs
+        empty_logs: Empty Log File
+        reset_password: Reset Password
+        save_2fa: Save 2FA Settings
+    tooltip:
+        disabled_option: Option currently disabled
+        download_logs: Download the most recent log files
+        empty_logs: Delete the contents of the current log file
+        choose_language: Choose your language
+    info:
+        password_description: Change your password to enhance your account security.
+        twofa_description: When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+    confirm:
+        empty_logs: Are you sure you want to empty the log file? This action cannot be undone.
 
 function:
     all: All
@@ -1012,7 +1046,7 @@ management_smtp:
     success: SMTP config saved successfully
     error: Failed to save SMTP config
     api_key_already_in_env: This API key is already in the .env file.
-    api_key_too_short: The API key is too short. Are you sure it’s an BREVO API key in the form ? Be careful about your browser autofilling.
+    api_key_too_short: The API key is too short. Are you sure it's an BREVO API key in the form ? Be careful about your browser autofilling.
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
