@@ -165,8 +165,8 @@ class ManagementSMTPController extends AbstractController
         ]);
         return $form;
     }
-    
-    // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer url
+
+    // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer dsn
     public function envMailerDsnVsApiKey($form)
     {
         if ($form->get('transport')->getData() === 'sendinblue') {

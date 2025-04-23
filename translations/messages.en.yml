@@ -1009,6 +1009,8 @@ management_smtp:
     title : SMTP Management
     description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
     sendtestmail: Send test mail
+    success: SMTP config saved successfully
+    error: Failed to save SMTP config
 
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
