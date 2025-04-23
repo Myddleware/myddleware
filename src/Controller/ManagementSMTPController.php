@@ -68,9 +68,7 @@ class ManagementSMTPController extends AbstractController
             $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
         if ($mailerUrlFromEnv !== false) {
             $form = $this->getParametersFromMailerUrl($form, $mailerUrlFromEnv);
-        } else {
-                $form = $this->getParametersFromSwiftmailerYaml($form);
-            }
+        }
         }
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
@@ -181,34 +179,6 @@ class ManagementSMTPController extends AbstractController
                 'class' => 'btn btn-outline-primary mb-2',
             ],
         ]);
-        return $form;
-    }
-
-    // Function to obtain parameters from the yaml file and puts it in the form.
-    // Is called once when you go to the smtp page.
-    // Is called once when you click on Save SMTP config.
-    // Is called once when you click on Send test mail.
-
-    /***
-     * get data for file parameters_smtp.yml - this is for Myddleware 2
-     */
-    private function getParametersFromSwiftmailerYaml($form)
-    {
-        if (file_exists(__DIR__ . '/../../.env.local')) {
-            (new Dotenv())->load(__DIR__ . '/../../.env.local');
-        }
-        $mailerUrlEnv = getenv('MAILER_DSN');
-        if (isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false) {
-
-            $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlEnv);
-            $form->get('transport')->setData('smtp');
-            $form->get('host')->setData($mailerUrlArray[0]);
-            $form->get('port')->setData($mailerUrlArray[1]);
-            $form->get('auth_mode')->setData($mailerUrlArray[3]);
-            $form->get('encryption')->setData($mailerUrlArray[2]);
-            $form->get('user')->setData($mailerUrlArray[4]);
-            $form->get('password')->setData($mailerUrlArray[5]);
-        }
         return $form;
     }
 
