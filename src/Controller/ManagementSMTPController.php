@@ -445,40 +445,76 @@ class ManagementSMTPController extends AbstractController
             // Use null-safe operator and check below
 
             try {
-                // Create DSN
-                $dsn = sprintf(
-                    '%s://%s%s@%s:%d',
-                    $form->get('transport')->getData(),
-                    urlencode($user),
-                    $password ? ':' . urlencode($password) : '',
-                    $host,
-                    $port
-                );
-
-                if ($encryption) {
-                    $dsn .= '?encryption=' . $encryption;
-                }
-                if ($auth_mode) {
-                    $dsn .= ($encryption ? '&' : '?') . 'auth_mode=' . $auth_mode;
+                // Check if a user email is available
+                if (empty($user_email)) {
+                    throw new Exception('No email address found for the current user to send the test email.');
                 }
 
-                // Create the Transport
+                // 1. Try to get DSN from environment first
+                $dsn = $this->checkIfmailerUrlInEnv();
+
+                // 2. If no DSN in env, build it from the form (allows testing unsaved config)
+                if ($dsn === false) {
+                    $host = $form->get('host')->getData();
+                    $port = $form->get('port')->getData();
+                    $user = $form->get('user')->getData();
+                    $auth_mode = $form->get('auth_mode')->getData();
+                    $encryption = $form->get('encryption')->getData();
+                    // IMPORTANT: Get password from form ONLY if building DSN from form
+                    $password = $form->get('password')->getData(); 
+                    $transportType = $form->get('transport')->getData();
+
+                    // Basic check for essential parts if building from form
+                    if (empty($transportType) || empty($host)) {
+                         throw new Exception('Transport and Host are required to build a test DSN from the form.');
+                    }
+
+                    $dsn = sprintf(
+                        '%s://%s%s@%s%s', // Removed port initially
+                        $transportType,
+                        urlencode((string)$user),
+                        $password ? ':' . urlencode($password) : '',
+                        $host,
+                        $port ? ':' . $port : '' // Add port only if specified
+                    );
+
+                    $queryParams = [];
+                    if ($encryption) {
+                        $queryParams['encryption'] = $encryption;
+                    }
+                    if ($auth_mode) {
+                        $queryParams['auth_mode'] = $auth_mode;
+                    }
+                    if (!empty($queryParams)) {
+                        $dsn .= '?' . http_build_query($queryParams);
+                    }
+                }
+
+                // Ensure DSN is valid before proceeding
+                 if (empty($dsn) || $dsn === false) {
+                     throw new Exception('Could not determine a valid Mailer DSN for testing.');
+                 }
+
+
+                // Create the Transport using the determined DSN
                 $transport = Transport::fromDsn($dsn);
-                
+
                 // Create the Mailer
                 $mailer = new Mailer($transport);
-
-                // Check that we have at least one email address
-                if (empty($user_email)) {
-                    throw new Exception('No email address found to send notification. You should have at least one admin user with an email address.');
-                }
 
                 $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . "\n";
                 $textMail .= $this->translator->trans('email_notification.best_regards') . "\n" . $this->translator->trans('email_notification.signature');
 
+                // Determine 'from' address
+                $emailFrom = $this->getParameter('email_from'); // Use getParameter which handles default/null
+                 if (empty($emailFrom)) {
+                     $emailFrom = 'no-reply@myddleware.com'; // Default fallback
+                 }
+
+
                 // Create the email
                 $email = (new Email())
-                    ->from(!empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com')
+                    ->from($emailFrom)
                     ->to($user_email)
                     ->subject($this->translator->trans('management_smtp_sendmail.subject'))
                     ->text($textMail);
