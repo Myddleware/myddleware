@@ -524,41 +524,33 @@ class ManagementSMTPController extends AbstractController
                 $isRegularEmailSent = true;
 
             } catch (Exception $e) {
-                $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
-                $session = $this->requestStack->getSession();
-                $session->set('error', [$error]);
+                // Log the detailed error for debugging
+                 $this->logger->error('Email Test Error: ' . $e->getMessage() . ' DSN used: ' . (is_string($dsn) ? $dsn : 'N/A') . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+
+                // Set a user-friendly error message using the controller's flash message helper
+                $error = $this->translator->trans('management_smtp.sendtestmail_error') . ' (' . $e->getMessage() . ')';
+                $this->addFlash('error', $error);
+                
                 $isRegularEmailSent = false;
             }
         }
 
-        // Error message if the api mail didn't work    
-        if (isset($isApiEmailSent)) {
-            if ($isApiEmailSent === false) {
-                $failed = $this->translator->trans('email_validation.error');
-                $this->addFlash('error', $failed);
-            }
+        // Flash messages handled here based on results
+        if ($isApiEmailSent === true || $isRegularEmailSent === true) {
+             $success = $this->translator->trans('email_validation.success');
+             $this->addFlash('success', $success);
+        } elseif ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
+             // Error flash for API was likely added in sendinblueSendMailByApiKey or caught above
+             // If not, add a generic one:
+             // $failed = $this->translator->trans('email_validation.error');
+             // $this->addFlash('error', $failed);
+        } elseif ($isRegularEmailSent === false && $form->get('transport')->getData() !== "sendinblue") {
+            // Error flash for regular SMTP was added in the catch block above
         }
 
-        if (isset($isRegularEmailSent)) {
-            if ($isRegularEmailSent === false) {
-                $failed = $this->translator->trans('email_validation.error');
-                $this->addFlash('error', $failed);
-            }
-        }
 
-        // Adds a return value to the function to allow the index to display the success and error message.
-        $isFinalEmailSent = false;
-        if (!empty($isApiEmailSent)) {
-            if ($isApiEmailSent === true) {
-                $isFinalEmailSent = true;
-            }
-        }
-        if (!empty($isRegularEmailSent)) {
-            if ($isRegularEmailSent === true) {
-                $isFinalEmailSent = true;
-            }
-        }
-        return $isFinalEmailSent;
+        // Return overall success status
+        return ($isApiEmailSent === true || $isRegularEmailSent === true);
     }
 
     /**
