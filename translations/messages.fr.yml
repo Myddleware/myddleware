@@ -989,7 +989,7 @@ management_smtp:
     success: Configuration SMTP enregistrée avec succès
     error: Impossible d'enregistrer la configuration SMTP
     api_key_already_in_env: Cette clé API est déjà dans le fichier .env
-
+    api_key_too_short: La clé API est trop courte. Est-ce bien une clé API BREVO ? Attention au remplissage automatique de votre navigateur.
 management_smtp_sendmail:
     subject: Myddleware - Test de configuration email
     textMail: Ce message de test a été envoyé par Myddleware. 

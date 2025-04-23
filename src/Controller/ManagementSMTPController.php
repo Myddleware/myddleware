@@ -173,6 +173,11 @@ class ManagementSMTPController extends AbstractController
             $apiKeyFromTheForm = $form->get('ApiKey')->getData();
             $isLenOfApiKeyFromTheFormOver70chars = strlen($apiKeyFromTheForm) > 70;
             $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+            if (!$isLenOfApiKeyFromTheFormOver70chars) {
+                // put a message in the session to inform the user that the api key is already in the .env
+                $this->addFlash('error', $this->translator->trans('management_smtp.api_key_too_short'));
+                return;
+            }
             if ($apiKeyFromEnv === $apiKeyFromTheForm) {
                 // put a message in the session to inform the user that the api key is already in the .env
                 $this->addFlash('success', $this->translator->trans('management_smtp.api_key_already_in_env'));
@@ -405,12 +410,12 @@ class ManagementSMTPController extends AbstractController
             $envFile .= "\nMAILER_DSN=" . $mailerUrl;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
 
-            $session = $this->requestStack->getSession();
-            $session->set('success', [$this->translator->trans('management_smtp.success')]);
+            // add flash success message
+            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
-            $session = $this->requestStack->getSession();
-            $session->set('error', [$this->translator->trans('management_smtp.error')]);
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            // add flash error message
+            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
         }
     }
 
@@ -425,11 +430,11 @@ class ManagementSMTPController extends AbstractController
             $envFile = file_get_contents(self::LOCAL_ENV_FILE);
             $envFile .= "\nBREVO_APIKEY=" . $apiKey;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
-            $session = $this->requestStack->getSession();
-            $session->set('success', [$this->translator->trans('management_smtp.success')]);
+            // add flash success message
+            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
-            $session = $this->requestStack->getSession();
-            $session->set('error', [$this->translator->trans('management_smtp.error')]);
+            // add flash error message
+            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
@@ -571,6 +576,7 @@ class ManagementSMTPController extends AbstractController
             $user_email = $this->getUser()->getEmail();
 
             // Prepare the email data
+
             $emailData = [
                 'sender' => [
                     'email' => !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'

@@ -1012,7 +1012,7 @@ management_smtp:
     success: SMTP config saved successfully
     error: Failed to save SMTP config
     api_key_already_in_env: This API key is already in the .env file.
-
+    api_key_too_short: The API key is too short. Are you sure it’s an BREVO API key in the form ? Be careful about your browser autofilling.
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
