@@ -212,6 +212,7 @@ class ManagementSMTPController extends AbstractController
         // Refills the content with everythintg but the api key
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
+
     // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
     public function EmptyMailerDsnEnv()
     {
@@ -581,17 +582,12 @@ class ManagementSMTPController extends AbstractController
             }
         }
 
-        // Flash messages handled here based on results
-        if ($isApiEmailSent === true || $isRegularEmailSent === true) {
-             $success = $this->translator->trans('email_validation.success');
-             $this->addFlash('success', $success);
-        } elseif ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
-             // Error flash for API was likely added in sendinblueSendMailByApiKey or caught above
-             // If not, add a generic one:
-             // $failed = $this->translator->trans('email_validation.error');
-             // $this->addFlash('error', $failed);
+        if ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
+             $failed = $this->translator->trans('email_validation.error');
+             $this->addFlash('error', $failed);
         } elseif ($isRegularEmailSent === false && $form->get('transport')->getData() !== "sendinblue") {
-            // Error flash for regular SMTP was added in the catch block above
+            $failed = $this->translator->trans('email_validation.error');
+            $this->addFlash('error', $failed);
         }
 
 
