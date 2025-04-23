@@ -171,7 +171,7 @@ class suitecrm8 extends solution
             } else { 
 				$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
 				$dateRefField = $this->getRefFieldName($param);
-				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef;	
+				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef.'&page[size]='.$param['limit'].'&sort=date_modified';	
 			}
 			$readSuite = $this->call('GET', $url); 
 			if (!empty($readSuite['data'])) {
