@@ -65,9 +65,9 @@ class ManagementSMTPController extends AbstractController
         if ($apiKeyFromEnv !== false) {
             $form = $this->getParametersFromApiKey($form, $apiKeyFromEnv);
         } else {
-            $mailerUrlFromEnv = $this->checkIfmailerUrlInEnv();
-        if ($mailerUrlFromEnv !== false) {
-            $form = $this->getParametersFromMailerUrl($form, $mailerUrlFromEnv);
+            $mailerDsnFromEnv = $this->checkIfmailerDsnInEnv();
+        if ($mailerDsnFromEnv !== false) {
+            $form = $this->getParametersFromMailerDsn($form, $mailerDsnFromEnv);
         }
         }
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
@@ -87,7 +87,7 @@ class ManagementSMTPController extends AbstractController
             if ($form->get('submit_test') === $form->getClickedButton()) {
                 $isMailSent = $this->testMailConfiguration($form);
             } else {
-                $this->envMailerUrlVsApiKey($form);
+                $this->envMailerDsnVsApiKey($form);
             }
             if ($form->isValid() && $form->isSubmitted()) {
                 $this->putMailerConfig($form);
@@ -109,7 +109,7 @@ class ManagementSMTPController extends AbstractController
     }
 
     // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer url
-    public function envMailerUrlVsApiKey($form)
+    public function envMailerDsnVsApiKey($form)
     {
         if ($form->get('transport')->getData() === 'sendinblue') {
             if ($this->checkIfApiKeyInEnv() !== $form->get('ApiKey')->getData()) {
@@ -142,7 +142,7 @@ class ManagementSMTPController extends AbstractController
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
     // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
-    public function EmptyMailerUrlEnv()
+    public function EmptyMailerDsnEnv()
     {
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $linesEnv = explode("\n", $envFile);
@@ -158,6 +158,8 @@ class ManagementSMTPController extends AbstractController
         fclose($clearContentOfDotEnv);
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
     }
+
+
     // Function to create the mail mailing form.
     // Is called once when you go to the smtp page.
     // Is called twice when you click on Save SMTP config.
@@ -183,17 +185,17 @@ class ManagementSMTPController extends AbstractController
     }
 
 
-    // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
-    public function getParametersFromMailerUrl($form, $mailerUrlFromEnv)
+    // Function to obtain parameters from the MAILER_DSN in .env and puts it in the form.
+    public function getParametersFromMailerDsn($form, $mailerDsnFromEnv)
     {
-        $mailerUrlArray = $this->envMailerUrlToArray($mailerUrlFromEnv);
+        $mailerDsnArray = $this->envMailerDsnToArray($mailerDsnFromEnv);
         $form->get('transport')->setData('smtp');
-        $form->get('host')->setData($mailerUrlArray[0]);
-        $form->get('port')->setData($mailerUrlArray[1]);
-        $form->get('auth_mode')->setData($mailerUrlArray[3]);
-        $form->get('encryption')->setData($mailerUrlArray[2]);
-        $form->get('user')->setData($mailerUrlArray[4]);
-        $form->get('password')->setData($mailerUrlArray[5]);
+        $form->get('host')->setData($mailerDsnArray[0]);
+        $form->get('port')->setData($mailerDsnArray[1]);
+        $form->get('auth_mode')->setData($mailerDsnArray[3]);
+        $form->get('encryption')->setData($mailerDsnArray[2]);
+        $form->get('user')->setData($mailerDsnArray[4]);
+        $form->get('password')->setData($mailerDsnArray[5]);
         return $form;
     }
 
@@ -206,7 +208,7 @@ class ManagementSMTPController extends AbstractController
     }
 
     // Takes MAILER_DSN and turns it into an array with all parameters
-    public function envMailerUrlToArray(string $envString): array
+    public function envMailerDsnToArray(string $envString): array
     {
         try {
             // Initialize default values
@@ -301,7 +303,7 @@ class ManagementSMTPController extends AbstractController
         }
 
         // Update .env.local file
-        $this->EmptyMailerUrlEnv();
+        $this->EmptyMailerDsnEnv();
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $envFile .= "\nMAILER_DSN=" . $dsn;
         file_put_contents(self::LOCAL_ENV_FILE, $envFile);
@@ -357,7 +359,7 @@ class ManagementSMTPController extends AbstractController
                 $mailerUrl .= '&auth_mode=' . $swiftParams['auth_mode'];
             }
 
-            $this->EmptyMailerUrlEnv();
+            $this->EmptyMailerDsnEnv();
             $envFile = file_get_contents(self::LOCAL_ENV_FILE);
             $envFile .= "\nMAILER_DSN=" . $mailerUrl;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
@@ -419,7 +421,7 @@ class ManagementSMTPController extends AbstractController
                 }
 
                 // 1. Try to get DSN from environment first
-                $dsn = $this->checkIfmailerUrlInEnv();
+                $dsn = $this->checkIfmailerDsnInEnv();
 
                 // 2. If no DSN in env, build it from the form (allows testing unsaved config)
                 if ($dsn === false) {
@@ -591,17 +593,17 @@ class ManagementSMTPController extends AbstractController
     }
 
 
-    public function checkIfmailerUrlInEnv()
+    public function checkIfmailerDsnInEnv()
     {
-        $mailerUrlEnv = false;
+        $mailerDsnEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
-            $mailerUrlEnv = $_ENV['MAILER_DSN'] ?? false;
-            if (!(isset($mailerUrlEnv) && $mailerUrlEnv !== '' && $mailerUrlEnv !== 'null://localhost' && $mailerUrlEnv !== false)) {
-                $mailerUrlEnv = false;
+            $mailerDsnEnv = $_ENV['MAILER_DSN'] ?? false;
+            if (!(isset($mailerDsnEnv) && $mailerDsnEnv !== '' && $mailerDsnEnv !== 'null://localhost' && $mailerDsnEnv !== false)) {
+                $mailerDsnEnv = false;
             }
         }
-        return $mailerUrlEnv;
+        return $mailerDsnEnv;
     }
 
     public function checkIfApiKeyInEnv()
