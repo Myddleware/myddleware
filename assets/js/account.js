@@ -83,34 +83,23 @@ class AccountManager {
       host: window.location.host
     });
     
-    // The correct application path based on the logs
-    let baseUrl = '';
-    if (window.location.href.includes('myddleware_NORMAL')) {
-      baseUrl = '/myddleware_NORMAL/public';
-    }
+    // Get base URL dynamically from current location
+    this.baseUrl = window.location.pathname.includes('/public/') 
+      ? window.location.pathname.split('/public/')[0] + '/public'
+      : '';
     
-    console.log("Using base URL:", baseUrl);
+    console.log("Using base URL:", this.baseUrl);
     
-    // API endpoints with the correct application path prefix
-    this.potentialEndpoints = [
-      `${baseUrl}/rule/api/account/info`,
-      `/myddleware_NORMAL/public/rule/api/account/info`
-    ];
-    
-    console.log("API endpoints to try:", this.potentialEndpoints);
-    
-    // Start with the first option
+    // API endpoints with dynamic base URL
     this.apiEndpoints = {
-      getUserInfo: this.potentialEndpoints[0],
-      updateProfile: `${baseUrl}/rule/api/account/profile/update`,
-      updatePassword: `${baseUrl}/rule/api/account/password/update`,
-      updateTwoFactor: `${baseUrl}/rule/api/account/twofactor/update`,
-      changeLocale: `${baseUrl}/rule/api/account/locale`,
-      downloadLogs: `${baseUrl}/rule/api/account/logs/download`,
-      emptyLogs: `${baseUrl}/rule/api/account/logs/empty`
+      getUserInfo: `${this.baseUrl}/rule/api/account/info`,
+      updateProfile: `${this.baseUrl}/rule/api/account/profile/update`,
+      updatePassword: `${this.baseUrl}/rule/api/account/password/update`,
+      updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
+      changeLocale: `${this.baseUrl}/rule/api/account/locale`,
+      downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
+      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`
     };
-    
-    console.log("Initial API endpoint:", this.apiEndpoints.getUserInfo);
     
     this.user = null;
     this.threeJsContainer = null;
@@ -400,66 +389,62 @@ class AccountManager {
   async loadUserData() {
     console.log("Starting to fetch user data...");
     
-    // Try each potential endpoint until one works
-    for (let i = 0; i < this.potentialEndpoints.length; i++) {
-      const endpoint = this.potentialEndpoints[i];
-      console.log(`Attempt ${i+1}: Trying to fetch from ${endpoint}`);
+    try {
+      console.log("Attempting to fetch from:", this.apiEndpoints.getUserInfo);
+      const response = await axios.get(this.apiEndpoints.getUserInfo);
+      console.log("User data received:", response.data);
       
-      try {
-        console.log("Attempting fetch request...");
-        const response = await axios.get(endpoint);
-        console.log(`Success with endpoint ${endpoint}!`);
-        console.log("User data received:", response.data);
-        
-        // Update the working endpoint for all API calls
-        this.apiEndpoints = {
-          getUserInfo: endpoint,
-          updateProfile: endpoint.replace('info', 'profile/update'),
-          updatePassword: endpoint.replace('info', 'password/update'),
-          updateTwoFactor: endpoint.replace('info', 'twofactor/update'),
-          changeLocale: endpoint.replace('info', 'locale'),
-          downloadLogs: endpoint.replace('info', 'logs/download'),
-          emptyLogs: endpoint.replace('info', 'logs/empty')
-        };
-        
-        console.log("Updated all API endpoints based on working endpoint:", this.apiEndpoints);
-        
-        // Save user data and populate UI
-        this.user = response.data;
-        this.updateUIWithTranslations();
-        this.populateUserData();
-        this.populateTimezones();
-        this.populateLanguages();
-        
-        // Configure UI based on user data
-        if (!this.user.smtpConfigured) {
-          document.getElementById('smtp-warning').classList.remove('hidden');
-          document.getElementById('twofa-enabled').disabled = true;
-        }
-        
-        if (this.user.roles.includes('ROLE_SUPER_ADMIN')) {
-          document.getElementById('empty-logs').style.display = 'block';
-        } else {
-          document.getElementById('empty-logs').style.display = 'none';
-        }
-        
-        // Exit the loop if successful
+      // Save user data and populate UI
+      this.user = response.data;
+      this.updateUIWithTranslations();
+      this.populateUserData();
+      this.populateTimezones();
+      this.populateLanguages();
+      
+      // Configure UI based on user data
+      if (!this.user.smtpConfigured) {
+        const smtpWarning = document.getElementById('smtp-warning');
+        const twofaToggle = document.getElementById('twofa-enabled');
+        if (smtpWarning) smtpWarning.classList.remove('hidden');
+        if (twofaToggle) twofaToggle.disabled = true;
+      }
+      
+      const emptyLogsBtn = document.getElementById('empty-logs');
+      if (emptyLogsBtn) {
+        emptyLogsBtn.style.display = this.user.roles?.includes('ROLE_SUPER_ADMIN') ? 'block' : 'none';
+      }
+      
+    } catch (error) {
+      console.error("Failed to load user data:", {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        endpoint: this.apiEndpoints.getUserInfo
+      });
+
+      // Handle authentication errors
+      if (error.response?.status === 401) {
+        console.log("User not authenticated, redirecting to login...");
+        // Get the current URL to redirect back after login
+        const currentPath = window.location.pathname;
+        // Redirect to login page with return URL
+        window.location.href = `${this.baseUrl}/login?redirect=${encodeURIComponent(currentPath)}`;
         return;
-        
-      } catch (error) {
-        console.error(`Attempt ${i+1} failed:`, error.message);
-        console.log("Error details:", {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          url: endpoint
-        });
-        
-        // Continue to the next endpoint if this one failed
+      }
+      
+      // Show error in UI for other types of errors
+      const container = document.getElementById('account-container');
+      if (container) {
+        container.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            <h4>Error Loading Account Data</h4>
+            <p>${error.response?.data?.error || error.message || 'Failed to load user data'}</p>
+            <p>Please try refreshing the page. If the problem persists, contact support.</p>
+          </div>
+        `;
       }
     }
-    
-    // If we've tried all endpoints and none worked, show an error
-    this.showErrorMessage('Failed to load user data. Please check the console for details and refresh the page.');
   }
   
   /**
