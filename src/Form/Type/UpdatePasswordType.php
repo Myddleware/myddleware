@@ -27,7 +27,7 @@ class UpdatePasswordType extends AbstractType
                     padding: 10px;
                     max-width: 500px;
                     width: 100%;
-                    text-align: center;
+                    text-align: left;
                     font-family: Arial, sans-serif; border: 1px solid #dcdcdc;
                     margin-top: 2px;
                     margin-bottom: 10px;'
@@ -52,7 +52,7 @@ class UpdatePasswordType extends AbstractType
                     padding: 10px;
                     max-width: 500px;
                     width: 100%;
-                    text-align: center;
+                    text-align: left;
                     font-family: Arial, sans-serif; border: 1px solid #dcdcdc'
             ],
         ])
