@@ -521,11 +521,21 @@ class AccountManager {
    */
   async changeLanguage(locale) {
     try {
-      await axios.post(this.apiEndpoints.changeLocale, { locale });
-      window.location.reload();
+      console.log('Changing language to:', locale);
+      const response = await axios.post(this.apiEndpoints.changeLocale, { locale });
+      
+      if (response.data.success) {
+        this.showSuccessMessage('Language changed successfully. Reloading page...');
+        // Give time for the message to be seen
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        this.showErrorMessage('Failed to change language: ' + (response.data.error || 'Unknown error'));
+      }
     } catch (error) {
-      this.showErrorMessage('Failed to change language.');
-      console.error('Failed to change language:', error);
+      console.error('Failed to change language:', error.response?.data || error);
+      this.showErrorMessage('Failed to change language: ' + (error.response?.data?.error || error.message));
     }
   }
   
@@ -592,9 +602,9 @@ class AccountManager {
         ...profileData
       };
       
-      // Reload page if language changed
+      // Change language if it was updated
       if (profileData.language !== this.user.currentLocale) {
-        window.location.reload();
+        await this.changeLanguage(profileData.language);
       }
       
     } catch (error) {

@@ -590,28 +590,41 @@ class AccountController extends AbstractController
         
         $locale = $data['locale'];
         
-        // Validate locale
-        $validLocales = ['en', 'fr']; // Add more as needed
-        
         // Get list of available translations
         $translationDir = $this->params->get('kernel.project_dir') . '/translations';
+        $validLocales = ['en', 'fr']; // Default locales
+        
         if (is_dir($translationDir)) {
-            $validLocales = [];
             $translationFiles = scandir($translationDir);
             foreach ($translationFiles as $file) {
-                if (preg_match('/^messages\.([a-z]{2})\.yaml$/', $file, $matches)) {
+                if (preg_match('/^messages\.([a-z]{2})\.ya?ml$/', $file, $matches)) {
                     $validLocales[] = $matches[1];
                 }
             }
+            // Remove duplicates
+            $validLocales = array_unique($validLocales);
         }
         
         if (!in_array($locale, $validLocales)) {
-            return new JsonResponse(['error' => 'Invalid locale'], 400);
+            return new JsonResponse([
+                'error' => sprintf('Invalid locale. Valid locales are: %s', implode(', ', $validLocales))
+            ], 400);
         }
         
-        $request->getSession()->set('_locale', $locale);
-        
-        return new JsonResponse(['success' => true, 'message' => 'Locale changed to ' . $locale]);
+        try {
+            // Set the locale in session
+            $request->getSession()->set('_locale', $locale);
+            
+            return new JsonResponse([
+                'success' => true,
+                'message' => sprintf('Locale changed to %s', $locale)
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Failed to change locale: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
