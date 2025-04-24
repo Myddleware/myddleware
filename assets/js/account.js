@@ -160,24 +160,46 @@ class AccountManager {
     container.style.margin = '0 auto';
     container.style.marginTop = '20px';
     
+    // We'll populate this with translations once we have them
     container.innerHTML = `
       <div class="account-header">
-        <h1 class="account-title">Account Settings</h1>
+        <h1 class="account-title">Loading...</h1>
         <div id="three-container"></div>
       </div>
       
       <div class="flash-messages"></div>
       
+      <div id="account-content" style="display: none;">
+        <!-- Content will be populated once we have translations -->
+      </div>
+    `;
+    
+    this.threeJsContainer = document.getElementById('three-container');
+  }
+  
+  /**
+   * Update UI with translations
+   */
+  updateUIWithTranslations() {
+    if (!this.user || !this.user.translations) return;
+    
+    const t = this.user.translations.account;
+    const container = document.getElementById('account-content');
+    
+    // Update title
+    document.querySelector('.account-title').textContent = t.title;
+    
+    container.innerHTML = `
       <!-- Tabbed Navigation -->
       <ul class="nav nav-tabs account-tabs" id="account-tabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
-            <i class="fas fa-user-cog"></i> General
+            <i class="fas fa-user-cog"></i> ${t.tabs.general}
           </button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
-            <i class="fas fa-shield-alt"></i> Security
+            <i class="fas fa-shield-alt"></i> ${t.tabs.security}
           </button>
         </li>
       </ul>
@@ -189,25 +211,25 @@ class AccountManager {
           <div class="account-grid">
             <!-- Profile Information -->
             <div class="account-section profile-section">
-              <h2>Profile Information</h2>
+              <h2>${t.sections.personal_info}</h2>
               <form id="profile-form" class="account-form">
                 <div class="form-group">
-                  <label for="username">Username</label>
+                  <label for="username">${t.fields.username}</label>
                   <input type="text" id="username" name="username" class="form-control" />
                 </div>
                 
                 <div class="form-group">
-                  <label for="email">Email</label>
+                  <label for="email">${t.fields.email}</label>
                   <input type="email" id="email" name="email" class="form-control" />
                 </div>
                 
                 <div class="form-group">
-                  <label for="timezone">Time Zone</label>
+                  <label for="timezone">${t.fields.timezone}</label>
                   <select id="timezone" name="timezone" class="form-control"></select>
                 </div>
                 
                 <div class="form-group">
-                  <label for="date-format">Date Format</label>
+                  <label for="date-format">${t.fields.date_format}</label>
                   <select id="date-format" name="date-format" class="form-control">
                     <option value="Y-m-d">YYYY-MM-DD</option>
                     <option value="d/m/Y">DD/MM/YYYY</option>
@@ -217,17 +239,17 @@ class AccountManager {
                 </div>
                 
                 <div class="form-group">
-                  <label for="export-separator">Export Separator (CSV)</label>
+                  <label for="export-separator">${t.fields.export_separator}</label>
                   <select id="export-separator" name="export-separator" class="form-control">
-                    <option value=",">Comma (,)</option>
-                    <option value=";">Semicolon (;)</option>
-                    <option value="\t">Tab</option>
-                    <option value="|">Pipe (|)</option>
+                    <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
+                    <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
+                    <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
+                    <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
                   </select>
                 </div>
                 
                 <div class="form-group">
-                  <label for="encoding">Charset/Encoding</label>
+                  <label for="encoding">${t.fields.charset}</label>
                   <select id="encoding" name="encoding" class="form-control">
                     <option value="UTF-8">UTF-8</option>
                     <option value="ISO-8859-1">ISO-8859-1</option>
@@ -236,7 +258,7 @@ class AccountManager {
                 </div>
                 
                 <div class="form-group">
-                  <label for="language">Language</label>
+                  <label for="language">${t.fields.language}</label>
                   <select id="language" name="language" class="form-control">
                     <option value="en">English</option>
                     <option value="fr">Français</option>
@@ -246,20 +268,19 @@ class AccountManager {
                   </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary mt-2">Save Profile</button>
+                <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
               </form>
             </div>
             
-            
             <!-- Log Management -->
             <div class="account-section logs-section">
-              <h4>Log Management</h4>
+              <h4>${t.sections.logs}</h4>
               <div class="buttons-container">
                 <button id="download-logs" class="btn btn-secondary">
-                  <i class="fas fa-download"></i> Download Logs
+                  <i class="fas fa-download"></i> ${t.buttons.download_logs}
                 </button>
                 <button id="empty-logs" class="btn btn-warning mt-2">
-                  <i class="fas fa-trash-alt"></i> Empty Logs
+                  <i class="fas fa-trash-alt"></i> ${t.buttons.empty_logs}
                 </button>
               </div>
             </div>
@@ -271,15 +292,15 @@ class AccountManager {
           <div class="account-grid">
             <!-- Password Management -->
             <div class="account-section password-section">
-              <h2>Password Management</h2>
+              <h2>${t.sections.password}</h2>
               <form id="password-form" class="account-form">
                 <div class="form-group">
-                  <label for="current-password">Current Password</label>
+                  <label for="current-password">${t.fields.current_password || 'Current Password'}</label>
                   <input type="password" id="current-password" name="oldPassword" class="form-control" />
                 </div>
                 
                 <div class="form-group">
-                  <label for="new-password">New Password</label>
+                  <label for="new-password">${t.fields.new_password || 'New Password'}</label>
                   <input type="password" id="new-password" name="plainPassword" class="form-control" />
                   <div class="password-strength-meter">
                     <div id="password-strength-bar"></div>
@@ -287,29 +308,29 @@ class AccountManager {
                 </div>
                 
                 <div class="form-group">
-                  <label for="confirm-password">Confirm New Password</label>
+                  <label for="confirm-password">${t.fields.confirm_password || 'Confirm New Password'}</label>
                   <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
                 </div>
                 
-                <button type="submit" class="btn btn-primary mt-2">Update Password</button>
+                <button type="submit" class="btn btn-primary mt-2">${t.buttons.reset_password}</button>
               </form>
             </div>
             
             <!-- Two-Factor Authentication -->
             <div class="account-section">
-              <h2 class="mt-2">Two-Factor Authentication</h2>
+              <h2 class="mt-2">${t.sections.twofa}</h2>
               <div class="form-group">
                 <div class="d-flex align-items-center justify-content-between">
-                  <label for="twofa-enabled" class="form-label mb-0">Enable Two-Factor Authentication</label>
+                  <label for="twofa-enabled" class="form-label mb-0">${t.fields.enable_twofa || 'Enable Two-Factor Authentication'}</label>
                   <div class="form-check form-switch">
                     <input type="checkbox" class="form-check-input" id="twofa-enabled" name="enabled" style="width: 3em; height: 1.5em;" />
                   </div>
                 </div>
                 <small class="helper-text mt-2">
-                  When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+                  ${t.messages.twofa_description}
                 </small>
                 <div id="smtp-warning" class="warning-message hidden mt-2">
-                  Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
+                  ${t.messages.smtp_warning}
                 </div>
               </div>
             </div>
@@ -318,8 +339,8 @@ class AccountManager {
       </div>
     `;
     
-    this.threeJsContainer = document.getElementById('three-container');
-
+    container.style.display = 'block';
+    
     // Add event listeners for tab switching
     const tabs = document.querySelectorAll('#account-tabs .nav-link');
     tabs.forEach(tab => {
@@ -405,6 +426,7 @@ class AccountManager {
         
         // Save user data and populate UI
         this.user = response.data;
+        this.updateUIWithTranslations();
         this.populateUserData();
         this.populateTimezones();
         this.populateLanguages();

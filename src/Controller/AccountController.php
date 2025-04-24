@@ -335,6 +335,45 @@ class AccountController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], 401);
         }
         
+        // Get current locale
+        $locale = $request->getLocale();
+        
+        // Get translations for the current locale
+        $translations = [
+            'account' => [
+                'title' => $this->translator->trans('view_account.title'),
+                'sections' => [
+                    'personal_info' => $this->translator->trans('view_account.sections.personal_info'),
+                    'logs' => $this->translator->trans('view_account.sections.logs'),
+                    'password' => $this->translator->trans('view_account.sections.password'),
+                    'twofa' => $this->translator->trans('view_account.sections.twofa')
+                ],
+                'fields' => [
+                    'username' => $this->translator->trans('Username'),
+                    'email' => $this->translator->trans('Email'),
+                    'language' => $this->translator->trans('view_account.fields.language'),
+                    'timezone' => $this->translator->trans('view_account.fields.timezone'),
+                    'date_format' => $this->translator->trans('view_account.fields.date_format'),
+                    'export_separator' => $this->translator->trans('view_account.fields.export_separator'),
+                    'charset' => $this->translator->trans('view_account.fields.charset')
+                ],
+                'buttons' => [
+                    'save' => $this->translator->trans('view_account.button.save'),
+                    'download_logs' => $this->translator->trans('view_account.button.download_logs'),
+                    'empty_logs' => $this->translator->trans('view_account.button.empty_logs'),
+                    'reset_password' => $this->translator->trans('view_account.button.reset_password')
+                ],
+                'tabs' => [
+                    'general' => $this->translator->trans('view_account.tabs.general'),
+                    'security' => $this->translator->trans('view_account.tabs.security')
+                ],
+                'messages' => [
+                    'twofa_description' => $this->translator->trans('view_account.info.twofa_description'),
+                    'smtp_warning' => $this->translator->trans('Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.')
+                ]
+            ]
+        ];
+        
         // Check if SMTP is configured
         $smtpConfigured = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
@@ -369,7 +408,7 @@ class AccountController extends AbstractController
         if (is_dir($translationDir)) {
             $translationFiles = scandir($translationDir);
             foreach ($translationFiles as $file) {
-                if (preg_match('/^messages\.([a-z]{2})\.yaml$/', $file, $matches)) {
+                if (preg_match('/^messages\.([a-z]{2})\.ya?ml$/', $file, $matches)) {
                     $locales[] = $matches[1];
                 }
             }
@@ -397,7 +436,8 @@ class AccountController extends AbstractController
             'smtpConfigured' => $smtpConfigured,
             'dateFormat' => $dateFormat,
             'exportSeparator' => $exportSeparator,
-            'encoding' => $encoding
+            'encoding' => $encoding,
+            'translations' => $translations
         ]);
     }
 
