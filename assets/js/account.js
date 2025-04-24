@@ -226,24 +226,24 @@ class AccountManager {
                   </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Save Profile</button>
+                <button type="submit" class="btn btn-primary mt-2">Save Profile</button>
               </form>
             </div>
             
             <!-- Language Settings -->
             <div class="account-section language-section">
-              <h2>Language Settings</h2>
+              <h4>Language Settings</h4>
               <div class="language-buttons" id="language-buttons"></div>
             </div>
             
             <!-- Log Management -->
             <div class="account-section logs-section">
-              <h2>Log Management</h2>
+              <h4>Log Management</h4>
               <div class="buttons-container">
                 <button id="download-logs" class="btn btn-secondary">
                   <i class="fas fa-download"></i> Download Logs
                 </button>
-                <button id="empty-logs" class="btn btn-warning">
+                <button id="empty-logs" class="btn btn-warning mt-2">
                   <i class="fas fa-trash-alt"></i> Empty Logs
                 </button>
               </div>
