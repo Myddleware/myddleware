@@ -380,6 +380,11 @@ class AccountController extends AbstractController
             $locales = ['en', 'fr'];
         }
         
+        // Get user preferences from session or defaults
+        $dateFormat = $request->getSession()->get('_date_format', 'Y-m-d');
+        $exportSeparator = $request->getSession()->get('_export_separator', ',');
+        $encoding = $request->getSession()->get('_encoding', 'UTF-8');
+        
         return new JsonResponse([
             'id' => $user->getId(),
             'username' => $user->getUsername(),
@@ -389,7 +394,10 @@ class AccountController extends AbstractController
             'currentLocale' => $defaultLocale,
             'availableLocales' => $locales,
             'twoFactorEnabled' => $twoFactorAuth->isEnabled(),
-            'smtpConfigured' => $smtpConfigured
+            'smtpConfigured' => $smtpConfigured,
+            'dateFormat' => $dateFormat,
+            'exportSeparator' => $exportSeparator,
+            'encoding' => $encoding
         ]);
     }
 
@@ -437,6 +445,31 @@ class AccountController extends AbstractController
                 $request->getSession()->set('_timezone', $data['timezone']);
             } catch (\Exception $e) {
                 return new JsonResponse(['errors' => ['Invalid timezone']], 400);
+            }
+        }
+        
+        // Store additional preferences in session
+        if (isset($data['dateFormat'])) {
+            // Validate date format
+            $validFormats = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'd.m.Y'];
+            if (in_array($data['dateFormat'], $validFormats)) {
+                $request->getSession()->set('_date_format', $data['dateFormat']);
+            }
+        }
+        
+        if (isset($data['exportSeparator'])) {
+            // Validate export separator
+            $validSeparators = [',', ';', "\t", '|'];
+            if (in_array($data['exportSeparator'], $validSeparators)) {
+                $request->getSession()->set('_export_separator', $data['exportSeparator']);
+            }
+        }
+        
+        if (isset($data['encoding'])) {
+            // Validate encoding
+            $validEncodings = ['UTF-8', 'ISO-8859-1', 'Windows-1252'];
+            if (in_array($data['encoding'], $validEncodings)) {
+                $request->getSession()->set('_encoding', $data['encoding']);
             }
         }
         

@@ -159,87 +159,208 @@ class AccountManager {
       
       <div class="flash-messages"></div>
       
-      <div class="account-grid">
-        <div class="account-section profile-section">
-          <h2>Profile Information</h2>
-          <form id="profile-form" class="account-form">
-            <div class="form-group">
-              <label for="username">Username</label>
-              <input type="text" id="username" name="username" class="form-control" />
+      <!-- Tabbed Navigation -->
+      <ul class="nav nav-tabs account-tabs" id="account-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+            <i class="fas fa-user-cog"></i> General
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+            <i class="fas fa-shield-alt"></i> Security
+          </button>
+        </li>
+      </ul>
+      
+      <!-- Tab Content -->
+      <div class="tab-content account-tab-content" id="account-tab-content">
+        <!-- General Tab -->
+        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+          <div class="account-grid">
+            <!-- Profile Information -->
+            <div class="account-section profile-section">
+              <h2>Profile Information</h2>
+              <form id="profile-form" class="account-form">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" id="username" name="username" class="form-control" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="email" id="email" name="email" class="form-control" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="timezone">Time Zone</label>
+                  <select id="timezone" name="timezone" class="form-control"></select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="date-format">Date Format</label>
+                  <select id="date-format" name="date-format" class="form-control">
+                    <option value="Y-m-d">YYYY-MM-DD</option>
+                    <option value="d/m/Y">DD/MM/YYYY</option>
+                    <option value="m/d/Y">MM/DD/YYYY</option>
+                    <option value="d.m.Y">DD.MM.YYYY</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="export-separator">Export Separator (CSV)</label>
+                  <select id="export-separator" name="export-separator" class="form-control">
+                    <option value=",">Comma (,)</option>
+                    <option value=";">Semicolon (;)</option>
+                    <option value="\t">Tab</option>
+                    <option value="|">Pipe (|)</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="encoding">Charset/Encoding</label>
+                  <select id="encoding" name="encoding" class="form-control">
+                    <option value="UTF-8">UTF-8</option>
+                    <option value="ISO-8859-1">ISO-8859-1</option>
+                    <option value="Windows-1252">Windows-1252</option>
+                  </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+              </form>
             </div>
             
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" class="form-control" />
+            <!-- Language Settings -->
+            <div class="account-section language-section">
+              <h2>Language Settings</h2>
+              <div class="language-buttons" id="language-buttons"></div>
             </div>
             
-            <div class="form-group">
-              <label for="timezone">Timezone</label>
-              <select id="timezone" name="timezone" class="form-control"></select>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Save Profile</button>
-          </form>
-        </div>
-        
-        <div class="account-section">
-          <h2>Two-Factor Authentication</h2>
-          <form id="twofa-form" class="account-form">
-            <div class="form-group">
-              <div class="checkbox-container">
-                <input type="checkbox" id="twofa-enabled" name="enabled" />
-                <label for="twofa-enabled">Enable Two-Factor Authentication</label>
+            <!-- Log Management -->
+            <div class="account-section logs-section">
+              <h2>Log Management</h2>
+              <div class="buttons-container">
+                <button id="download-logs" class="btn btn-secondary">
+                  <i class="fas fa-download"></i> Download Logs
+                </button>
+                <button id="empty-logs" class="btn btn-warning">
+                  <i class="fas fa-trash-alt"></i> Empty Logs
+                </button>
               </div>
-              <small class="helper-text">
-                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
-              </small>
-              <div id="smtp-warning" class="warning-message hidden">
-                Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
-              </div>
             </div>
-            
-            <button type="submit" class="btn btn-primary">Save 2FA Settings</button>
-          </form>
+          </div>
         </div>
         
-        <div class="account-section password-section">
-          <h2>Password Management</h2>
-          <form id="password-form" class="account-form">
-            <div class="form-group">
-              <label for="current-password">Current Password</label>
-              <input type="password" id="current-password" name="oldPassword" class="form-control" />
+        <!-- Security Tab -->
+        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+          <div class="account-grid">
+            <!-- Password Management -->
+            <div class="account-section password-section">
+              <h2>Password Management</h2>
+              <form id="password-form" class="account-form">
+                <div class="form-group">
+                  <label for="current-password">Current Password</label>
+                  <input type="password" id="current-password" name="oldPassword" class="form-control" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="new-password">New Password</label>
+                  <input type="password" id="new-password" name="plainPassword" class="form-control" />
+                  <div class="password-strength-meter">
+                    <div id="password-strength-bar"></div>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="confirm-password">Confirm New Password</label>
+                  <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Password</button>
+              </form>
             </div>
             
-            <div class="form-group">
-              <label for="new-password">New Password</label>
-              <input type="password" id="new-password" name="plainPassword" class="form-control" />
+            <!-- Two-Factor Authentication -->
+            <div class="account-section">
+              <h2>Two-Factor Authentication</h2>
+              <form id="twofa-form" class="account-form">
+                <div class="form-group">
+                  <div class="toggle-switch-container">
+                    <label for="twofa-enabled">Enable Two-Factor Authentication</label>
+                    <div class="toggle-switch">
+                      <input type="checkbox" id="twofa-enabled" name="enabled" />
+                      <label for="twofa-enabled" class="toggle-label"></label>
+                    </div>
+                  </div>
+                  <small class="helper-text">
+                    When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+                  </small>
+                  <div id="smtp-warning" class="warning-message hidden">
+                    Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
+                  </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save 2FA Settings</button>
+              </form>
             </div>
-            
-            <div class="form-group">
-              <label for="confirm-password">Confirm New Password</label>
-              <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Update Password</button>
-          </form>
-        </div>
-        
-        <div class="account-section language-section">
-          <h2>Language Settings</h2>
-          <div class="language-buttons" id="language-buttons"></div>
-        </div>
-        
-        <div class="account-section logs-section">
-          <h2>Log Management</h2>
-          <div class="buttons-container">
-            <button id="download-logs" class="btn btn-secondary">Download Logs</button>
-            <button id="empty-logs" class="btn btn-warning">Empty Logs</button>
           </div>
         </div>
       </div>
     `;
     
     this.threeJsContainer = document.getElementById('three-container');
+
+    // Add event listeners for tab switching
+    const tabs = document.querySelectorAll('#account-tabs .nav-link');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Remove active class from all tabs
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          const target = document.querySelector(t.getAttribute('data-bs-target'));
+          if (target) {
+            target.classList.remove('show', 'active');
+          }
+        });
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-bs-target');
+        const targetPane = document.querySelector(targetId);
+        if (targetPane) {
+          targetPane.classList.add('show', 'active');
+        }
+      });
+    });
+
+    // Add password strength meter functionality
+    const passwordInput = document.getElementById('new-password');
+    const strengthBar = document.getElementById('password-strength-bar');
+    
+    if (passwordInput && strengthBar) {
+      passwordInput.addEventListener('input', () => {
+        const value = passwordInput.value;
+        let strength = 0;
+        
+        // Calculate password strength
+        if (value.length >= 8) strength += 1;
+        if (value.match(/[a-z]/)) strength += 1;
+        if (value.match(/[A-Z]/)) strength += 1;
+        if (value.match(/[0-9]/)) strength += 1;
+        if (value.match(/[^a-zA-Z0-9]/)) strength += 1;
+        
+        // Update strength bar
+        strengthBar.className = '';
+        if (strength <= 2) {
+          strengthBar.classList.add('strength-weak');
+        } else if (strength <= 4) {
+          strengthBar.classList.add('strength-medium');
+        } else {
+          strengthBar.classList.add('strength-strong');
+        }
+      });
+    }
   }
   
   /**
@@ -318,6 +439,11 @@ class AccountManager {
     document.getElementById('email').value = this.user.email || '';
     document.getElementById('timezone').value = this.user.timezone || 'UTC';
     document.getElementById('twofa-enabled').checked = this.user.twoFactorEnabled || false;
+    
+    // Set default values for new fields if not present in user data
+    document.getElementById('date-format').value = this.user.dateFormat || 'Y-m-d';
+    document.getElementById('export-separator').value = this.user.exportSeparator || ',';
+    document.getElementById('encoding').value = this.user.encoding || 'UTF-8';
   }
   
   /**
@@ -451,12 +577,22 @@ class AccountManager {
     const profileData = {
       username: document.getElementById('username').value,
       email: document.getElementById('email').value,
-      timezone: document.getElementById('timezone').value
+      timezone: document.getElementById('timezone').value,
+      dateFormat: document.getElementById('date-format').value,
+      exportSeparator: document.getElementById('export-separator').value,
+      encoding: document.getElementById('encoding').value
     };
     
     try {
       const response = await axios.post(this.apiEndpoints.updateProfile, profileData);
       this.showSuccessMessage('Profile updated successfully');
+      
+      // Update local user data
+      this.user = {
+        ...this.user,
+        ...profileData
+      };
+      
     } catch (error) {
       this.showErrorMessage(error.response?.data?.message || 'Failed to update profile');
       console.error('Failed to update profile:', error);
