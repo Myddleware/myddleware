@@ -30,6 +30,25 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
     <div class="row justify-content-center">
         <div class="col text-center">
             <h2 class="display-4">{{ 'view_account.user_info'|trans }}</h2>
+            <ul class="mt-4">
+                <li class="user_info_li">
+                    <label>{{ 'view_account.label.language'|trans }}</label>
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button class="btn btn-light">
+                            <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
+                                {{ locales|languages['default']|trans }}
+                            </a>
+                        </button>
+                        {% for locale in locales|languages['other'] %}
+                        <button class="btn btn-primary">
+                            <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
+                                {{ locale|trans }}
+                            </a>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
     
@@ -42,198 +61,106 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         {% endfor %}
     {% endfor %}
     
-    <!-- Tabs navigation and content -->
-    <div class="account-tabs-wrapper">
-        <div class="tabs-container text-center">
-            <ul class="nav nav-tabs mt-4" id="profileTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">{{ 'view_account.tabs.general'|trans }}</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">{{ 'view_account.tabs.security'|trans }}</button>
-                </li>
-            </ul>
-        </div>
-        
-        <!-- Tabs content -->
-        <div class="tab-content" id="profileTabsContent">
-            <!-- General Tab -->
-            <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <h3 class="profile-section-title">{{ 'view_account.sections.personal_info'|trans }}</h3>
-                        {{ form_start(form, {'attr': {'class': 'profile-form'}}) }}
+    <div class="d-flex mt-4 edit-profile container">
+        <div class="me-5">
+            <div class="col">
+                <h2 class="display-6">{{ 'view_account.profile_edit'|trans }}</h2>
+                <ul class="mt-4">
+                    <li class="user_info_li">
+                        {{ form_start(form) }}
                         <div class="input-group mb-4">
-                            <label for="command" class="col-form-label input-group-text">{{ form_label(form.username) }}</label>
-                            <div class="flex-grow-1">
-                                {{ form_widget(form.username, { 'attr': {'class': 'form-control'} }) }}
-                                {{ form_errors(form.username, { 'attr': {'class': 'form-control'} }) }}
+                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.username) }}</label>
+                            <div>
+                                {{ form_widget( form.username, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.username, { 'attr': {'class': 'form-control'} }) }}
                             </div>
                         </div>
                         <div class="input-group mb-4">
-                            <label for="command" class="col-form-label input-group-text">{{ form_label(form.email) }}</label>
-                            <div class="flex-grow-1">
-                                {{ form_widget(form.email, { 'attr': {'class': 'form-control'} }) }}
-                                {{ form_errors(form.email, { 'attr': {'class': 'form-control'} }) }}
+                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.email) }}</label>
+                            <div>
+                                {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
                             </div>
                         </div>
-                        
-                        
+                         
                         <div class="input-group mb-4">
-                            <label for="command" class="col-form-label input-group-text">{{ 'view_account.fields.timezone'|trans }}</label>
-                            <div class="flex-grow-1">
-                                {{ form_widget(form.timezone, { 'attr': {'class': 'form-control'} }) }}
-                                {{ form_errors(form.timezone, { 'attr': {'class': 'form-control'} }) }}
+                        <label for="command" class="col-form-label input-group-text">Time zone</label>
+                            <div>
+                                {{ form_widget( form.timezone, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.timezone, { 'attr': {'class': 'form-control'} }) }}
                             </div>
                         </div>
-                        <div class="text-end mt-4">
-                            <button type="submit" id="save-account-details" class="btn btn-success" aria-label="{{ 'view_account.button.save'|trans }}">
-                                <i class="fas fa-save me-2"></i>{{ 'view_account.button.save'|trans }}
-                            </button>
-                        </div>
+                        <button type="submit" id="save-account-details" class="btn btn-success mt-4">{{ 'view_connector.btn.save'|trans }}</button>
                         {{ form_end(form) }}
-                        
-                        <div class="logs-section">
-                            <h3 class="profile-section-title">{{ 'view_account.sections.logs'|trans }}</h3>
-                            <div class="logs-actions">
-                                <a href="{{path('download_log')}}">
-                                    <button type="button" class="btn btn-outline-primary" aria-label="{{ 'view_account.tooltip.download_logs'|trans }}">
-                                        <i class="fas fa-download me-2"></i>{{ 'view_account.button.download_logs'|trans }}
-                                    </button>
-                                </a>
-                                
-                                {% if is_granted('ROLE_SUPER_ADMIN') %}
-                                <a href="{{path('empty_log')}}" id="empty-logs-btn">
-                                    <button type="button" class="btn btn-outline-danger" aria-label="{{ 'view_account.tooltip.empty_logs'|trans }}">
-                                        <i class="fas fa-trash-alt me-2"></i>{{ 'view_account.button.empty_logs'|trans }}
-                                    </button>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ 'view_account.sections.language_preferences'|trans }}</h5>
-                                <div class="mt-3 language-selector">
-                                    <label>{{ 'view_account.label.language'|trans }}</label>
-                                    <div class="btn-group mt-2" role="group" aria-label="{{ 'view_account.tooltip.choose_language'|trans }}">
-                                        <button class="btn btn-light">
-                                            <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
-                                                {{ locales|languages['default']|trans }}
-                                            </a>
-                                        </button>
-                                        {% for locale in locales|languages['other'] %}
-                                        <button class="btn btn-primary">
-                                            <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
-                                                {{ locale|trans }}
-                                            </a>
-                                        </button>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </li>
+                </ul>
             </div>
             
-            <!-- Security Tab -->
-            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-                <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h3 class="card-title mb-3">{{ 'view_account.sections.password'|trans }}</h3>
-                                <p class="card-text">{{ 'view_account.info.password_description'|trans }}</p>
-                                <div class="mt-auto text-center">
-                                    <a href="{{ path('my_account_reset_password')}}" class="btn btn-primary" aria-label="{{ 'view_account.button.reset_password'|trans }}">
-                                        <i class="fas fa-lock me-2"></i>{{ 'view_account.button.reset_password'|trans }}
-                                    </a>
-                                </div>
+            <div class="col mt-5">
+                <h2 class="display-6">Two-Factor Authentication</h2>
+                <ul class="mt-4">
+                    <li class="user_info_li">
+                        {{ form_start(twoFactorAuthForm) }}
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                {% if not smtpConfigured %}
+                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input', 'disabled': 'disabled'} }) }}
+                                    <div class="alert alert-danger mt-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span class="ms-2">Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key in the <a href="{{ path('management_smtp_index') }}">SMTP Management</a> page.</span>
+                                    </div>
+                                {% else %}
+                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
+                                {% endif %}
+                                {{ form_label(twoFactorAuthForm.enabled, null, { 'label_attr': {'class': 'form-check-label'} }) }}
                             </div>
+                            {{ form_errors(twoFactorAuthForm.enabled) }}
+                            <small class="form-text text-muted">
+                                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+                            </small>
                         </div>
-                    </div>
+                        
+                        {# Hide the preferredMethod field since we're only using email #}
+                        <div style="display: none;">
+                            {{ form_widget(twoFactorAuthForm.preferredMethod) }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success mt-4">Save 2FA Settings</button>
+                        {{ form_end(twoFactorAuthForm) }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="ms-5 password-reset">
+            <div class="col password-reset-center">
+                <h2 class="display-6">{{'password_reset.title'|trans}}</h2>
+                <a href="{{ path('my_account_reset_password')}}">
+                    <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>
+                </a>
+            </div>
+            <div class="row display-logs">
+                <div class="col">
+                    <h2>Download the latest logs</h2>
+                    <a href="{{path('download_log')}}">
+                        <button type="button" class="btn btn-primary">Download</button>
+                    </a>
                     
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h3 class="card-title mb-3">{{ 'view_account.sections.twofa'|trans }}</h3>
-                                
-                                {{ form_start(twoFactorAuthForm) }}
-                                <div class="form-group mb-4">
-                                    <div class="form-check">
-                                        {% if not smtpConfigured %}
-                                            {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input', 'disabled': 'disabled'} }) }}
-                                            <div class="alert alert-danger mt-2">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                <span class="ms-2">Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key in the <a href="{{ path('management_smtp_index') }}">SMTP Management</a> page.</span>
-                                            </div>
-                                        {% else %}
-                                            {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
-                                        {% endif %}
-                                        {{ form_label(twoFactorAuthForm.enabled, null, { 'label_attr': {'class': 'form-check-label'} }) }}
-                                    </div>
-                                    {{ form_errors(twoFactorAuthForm.enabled) }}
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>{{ 'view_account.info.twofa_description'|trans }}
-                                    </small>
-                                </div>
-                                
-                                <div class="form-group mb-4">
-                                    <label>{{ 'view_account.fields.auth_method'|trans }}</label>
-                                    <div class="input-group twofa-method">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input type="text" class="form-control disabled-field" value="Email" disabled>
-                                    </div>
-                                </div>
-                                
-                                {# Hide the preferredMethod field since we're only using email #}
-                                <div style="display: none;">
-                                    {{ form_widget(twoFactorAuthForm.preferredMethod) }}
-                                </div>
-                                
-                                <div class="text-end mt-4">
-                                    <button type="submit" class="btn btn-success" aria-label="{{ 'view_account.button.save_2fa'|trans }}">
-                                        <i class="fas fa-save me-2"></i>{{ 'view_account.button.save_2fa'|trans }}
-                                    </button>
-                                </div>
-                                {{ form_end(twoFactorAuthForm) }}
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
+            <div class="row display-logs">
+                <div class="col">
+                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                    <h2>Empty the log file</h2>
+                    <a href="{{path('empty_log')}}">
+                        <button type="button" class="btn btn-primary">Empty</button>
+                    </a>
+                    {% endif %}
+                    
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Confirmation Dialog for Empty Logs -->
-<div id="empty-logs-dialog" class="confirmation-dialog">
-    <div class="dialog-title">
-        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirmation
-    </div>
-    <div class="dialog-content">
-        {{ 'view_account.confirm.empty_logs'|trans }}
-    </div>
-    <div class="dialog-buttons">
-        <button id="cancel-empty-logs" class="btn btn-secondary">{{ 'cancel'|trans }}</button>
-        <a id="confirm-empty-logs" href="{{path('empty_log')}}" class="btn btn-danger">
-            <i class="fas fa-trash-alt me-2"></i>{{ 'view_account.button.empty_logs'|trans }}
-        </a>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-        
         // We don't need the phone number visibility logic anymore since we're only using email
         const enabledCheckbox = document.querySelector('input[name="two_factor_auth_form[enabled]"]');
         
@@ -245,28 +172,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
         updateFieldsVisibility();
         
         // Event listeners
-        if (enabledCheckbox) {
-            enabledCheckbox.addEventListener('change', updateFieldsVisibility);
-        }
-        
-        // Empty logs confirmation
-        const emptyLogsBtn = document.getElementById('empty-logs-btn');
-        const emptyLogsDialog = document.getElementById('empty-logs-dialog');
-        const cancelEmptyLogs = document.getElementById('cancel-empty-logs');
-        const confirmEmptyLogs = document.getElementById('confirm-empty-logs');
-        
-        if (emptyLogsBtn) {
-            emptyLogsBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                emptyLogsDialog.style.display = 'block';
-            });
-        }
-        
-        if (cancelEmptyLogs) {
-            cancelEmptyLogs.addEventListener('click', function() {
-                emptyLogsDialog.style.display = 'none';
-            });
-        }
+        enabledCheckbox.addEventListener('change', updateFieldsVisibility);
     });
 </script>
 {% endblock %}
