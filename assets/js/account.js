@@ -298,25 +298,20 @@ class AccountManager {
             <!-- Two-Factor Authentication -->
             <div class="account-section">
               <h2 class="mt-2">Two-Factor Authentication</h2>
-              <form id="twofa-form" class="account-form">
-                <div class="form-group">
-                  <div class="toggle-switch-container">
-                    <label for="twofa-enabled">Enable Two-Factor Authentication</label>
-                    <div class="toggle-switch">
-                      <input type="checkbox" id="twofa-enabled" name="enabled" />
-                      <label for="twofa-enabled" class="toggle-label"></label>
-                    </div>
-                  </div>
-                  <small class="helper-text">
-                    When enabled, you'll be asked to enter a verification code sent to your email after logging in.
-                  </small>
-                  <div id="smtp-warning" class="warning-message hidden">
-                    Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
+              <div class="form-group">
+                <div class="d-flex align-items-center justify-content-between">
+                  <label for="twofa-enabled" class="form-label mb-0">Enable Two-Factor Authentication</label>
+                  <div class="form-check form-switch">
+                    <input type="checkbox" class="form-check-input" id="twofa-enabled" name="enabled" style="width: 3em; height: 1.5em;" />
                   </div>
                 </div>
-                
-                <button type="submit" class="btn btn-primary mt-2">Save 2FA Settings</button>
-              </form>
+                <small class="helper-text mt-2">
+                  When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+                </small>
+                <div id="smtp-warning" class="warning-message hidden mt-2">
+                  Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -545,11 +540,10 @@ class AccountManager {
       this.updateProfile();
     });
     
-    // Two-factor form
-    const twoFaForm = document.getElementById('twofa-form');
-    twoFaForm.addEventListener('submit', e => {
-      e.preventDefault();
-      this.updateTwoFactor();
+    // Two-factor toggle
+    const twoFaToggle = document.getElementById('twofa-enabled');
+    twoFaToggle.addEventListener('change', e => {
+      this.updateTwoFactor(e.target.checked);
     });
     
     // Password form
@@ -612,15 +606,20 @@ class AccountManager {
   /**
    * Update two-factor authentication settings
    */
-  async updateTwoFactor() {
-    const twoFactorData = {
-      enabled: document.getElementById('twofa-enabled').checked
-    };
+  async updateTwoFactor(enabled) {
+    const twoFaToggle = document.getElementById('twofa-enabled');
+    const originalState = !enabled; // Store original state in case we need to revert
     
     try {
-      const response = await axios.post(this.apiEndpoints.updateTwoFactor, twoFactorData);
-      this.showSuccessMessage('Two-factor authentication settings updated successfully');
+      const response = await axios.post(this.apiEndpoints.updateTwoFactor, { enabled });
+      this.showSuccessMessage('Two-factor authentication ' + (enabled ? 'enabled' : 'disabled') + ' successfully');
+      
+      // Update user data
+      this.user.twoFactorEnabled = enabled;
+      
     } catch (error) {
+      // Revert the toggle if the API call failed
+      twoFaToggle.checked = originalState;
       this.showErrorMessage(error.response?.data?.message || 'Failed to update two-factor authentication settings');
       console.error('Failed to update two-factor authentication settings:', error);
     }
