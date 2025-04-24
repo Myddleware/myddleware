@@ -556,7 +556,7 @@ class AccountManager {
     // Download logs
     const downloadBtn = document.getElementById('download-logs');
     downloadBtn.addEventListener('click', () => {
-      window.location.href = this.apiEndpoints.downloadLogs;
+      window.open(this.apiEndpoints.downloadLogs, '_blank');
     });
     
     // Empty logs

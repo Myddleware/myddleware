@@ -615,6 +615,36 @@ class AccountController extends AbstractController
     }
 
     /**
+     * @Route("/api/account/logs/download", name="api_account_logs_download", methods={"GET"})
+     */
+    public function apiDownloadLog(): Response
+    {
+        if ($this->env === "dev") {
+            $logType = 'dev.log';
+        } else {
+            $logType = 'prod.log';
+        }
+        
+        $cwd = getcwd();
+        $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
+        $varPath = "\\var\log\\".$logType;
+        $file = $cwdWithoutPublic . $varPath;
+        $absolutePathFile = realpath($file);
+
+        // If realpath returns empty, try with Linux path
+        if (!$absolutePathFile) {
+            $cwdWithoutPublic = preg_replace('/\/public$/', '', $cwd);
+            $varPath = "/var/log/" . $logType;
+            $file = $cwdWithoutPublic . $varPath;
+            $absolutePathFile = realpath($file);
+        }
+
+        $response = new BinaryFileResponse($absolutePathFile);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $logType);
+        return $response;
+    }
+
+    /**
      * @Route("/api/account/logs/empty", name="api_account_logs_empty", methods={"POST"})
      */
     public function apiEmptyLog(): JsonResponse
