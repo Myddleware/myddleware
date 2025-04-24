@@ -24,13 +24,13 @@ class UpdatePasswordType extends AbstractType
                     'class' => 'password-field white-reset',
                     'style' => ' background-color: #fafafa;
                     border-radius: 4px;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
                     padding: 10px;
                     max-width: 500px;
                     width: 100%;
                     text-align: center;
                     font-family: Arial, sans-serif; border: 1px solid #dcdcdc;
-                    margin-top: 2px;'
+                    margin-top: 2px;
+                    margin-bottom: 10px;'
                 ],
             ],
             'first_options' => [
@@ -49,7 +49,6 @@ class UpdatePasswordType extends AbstractType
                 'class' => 'password-field white-reset',
                 'style' => ' background-color: #fafafa;
                     border-radius: 4px;
-                    box-shadow: 0 4px 15px #fafafa;
                     padding: 10px;
                     max-width: 500px;
                     width: 100%;
