@@ -150,6 +150,15 @@ class AccountManager {
     console.log('createUIStructure in account.js in assets/js');
     const container = document.getElementById('account-container');
     if (!container) return;
+
+    // style the container
+    container.style.backgroundColor = '#f8f9fa';
+    container.style.borderRadius = '10px';
+    container.style.padding = '20px';
+    container.style.boxShadow = '0 0 10px 0 rgba(0, 0, 0, 0.1)';
+    container.style.maxWidth = '1000px';
+    container.style.margin = '0 auto';
+    container.style.marginTop = '20px';
     
     container.innerHTML = `
       <div class="account-header">
