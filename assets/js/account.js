@@ -276,13 +276,13 @@ class AccountManager {
                   <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Update Password</button>
+                <button type="submit" class="btn btn-primary mt-2">Update Password</button>
               </form>
             </div>
             
             <!-- Two-Factor Authentication -->
             <div class="account-section">
-              <h2>Two-Factor Authentication</h2>
+              <h2 class="mt-2">Two-Factor Authentication</h2>
               <form id="twofa-form" class="account-form">
                 <div class="form-group">
                   <div class="toggle-switch-container">
@@ -300,7 +300,7 @@ class AccountManager {
                   </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Save 2FA Settings</button>
+                <button type="submit" class="btn btn-primary mt-2">Save 2FA Settings</button>
               </form>
             </div>
           </div>
