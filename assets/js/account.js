@@ -295,12 +295,12 @@ class AccountManager {
               <h2>${t.sections.password}</h2>
               <form id="password-form" class="account-form">
                 <div class="form-group">
-                  <label for="current-password">${t.fields.current_password || 'Current Password'}</label>
+                  <label for="current-password">${t.fields.current_password}</label>
                   <input type="password" id="current-password" name="oldPassword" class="form-control" />
                 </div>
                 
                 <div class="form-group">
-                  <label for="new-password">${t.fields.new_password || 'New Password'}</label>
+                  <label for="new-password">${t.fields.new_password}</label>
                   <input type="password" id="new-password" name="plainPassword" class="form-control" />
                   <div class="password-strength-meter">
                     <div id="password-strength-bar"></div>
@@ -308,7 +308,7 @@ class AccountManager {
                 </div>
                 
                 <div class="form-group">
-                  <label for="confirm-password">${t.fields.confirm_password || 'Confirm New Password'}</label>
+                  <label for="confirm-password">${t.fields.confirm_password}</label>
                   <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
                 </div>
                 

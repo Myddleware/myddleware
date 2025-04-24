@@ -349,13 +349,16 @@ class AccountController extends AbstractController
                     'twofa' => $this->translator->trans('view_account.sections.twofa')
                 ],
                 'fields' => [
-                    'username' => $this->translator->trans('Username'),
-                    'email' => $this->translator->trans('Email'),
+                    'username' => $this->translator->trans('form.username'),
+                    'email' => $this->translator->trans('form.email'),
                     'language' => $this->translator->trans('view_account.fields.language'),
                     'timezone' => $this->translator->trans('view_account.fields.timezone'),
                     'date_format' => $this->translator->trans('view_account.fields.date_format'),
                     'export_separator' => $this->translator->trans('view_account.fields.export_separator'),
-                    'charset' => $this->translator->trans('view_account.fields.charset')
+                    'charset' => $this->translator->trans('view_account.fields.charset'),
+                    'current_password' => $this->translator->trans('form.current_password'),
+                    'new_password' => $this->translator->trans('form.new_password'),
+                    'confirm_password' => $this->translator->trans('form.new_password_confirmation')
                 ],
                 'buttons' => [
                     'save' => $this->translator->trans('view_account.button.save'),
