@@ -118,10 +118,16 @@ create_rule:
             compose: Composer votre formule
             confirm: Confirmer
             delete: Effacer
-            close: Fermer 
+            close: Fermer
+            function_wizard: Assistant de fonction
+            select_function: Select a function
+            select_function_title: Function
+            select_rule: Select related rule
+            select_rule_title: Select a lookup rule
+            select_field: Select related field
+            select_field_title: Select a field for lookup
+            toggle_tooltip: Toggle function description
             error: Votre règle comporte une ou plusieurs erreurs de syntaxe
-            select_rule: Sélectionnez une règle
-            select_field: Sélectionnez un champ
         confirm:
             success: Enregistrement avec succès
             error: Une erreur est survenue 
@@ -171,6 +177,7 @@ view_rule:
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
         duplic_rule: Dupliquer la règle
+        exec_by_id: Entrer vos identifiants de documents
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
@@ -364,6 +371,8 @@ list_flux:
     start: Début
     end: Fin
     total: Nombre de documents
+    total1: Nombre de
+    total2: documents
     empty: Aucun document trouvé
     btn:
         filter: Filtrer
@@ -464,7 +473,7 @@ view_flux:
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
-    nbWorflowLogs: Logs workflow
+    nbnbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct
     unlocked_successfully: Document déverrouillé avec succès
@@ -749,6 +758,7 @@ solution:
         redirect_uri: URL de redirection
         applicationName: Nom de l'application
         hashkey: Clé de hachage
+        id_auth: Id auth
         authid: Id auth
         user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
         course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
@@ -984,8 +994,21 @@ email_alert:
         %base_uri%</p>
 
         Bien cordialement,
+email_alert_same_doc_reference:
+    subject: Alerte Myddleware
+    body: |
+        Bonjour,
+        <p>Il existe plusieurs documents avec la même date de référence %reference_date% dans la même règle. Veuillez vérifier la règle %rule_id% ou la tâche %job_id%.</p>
+        %base_uri%
+
+        Bien cordialement,
 jobscheduler:
+    id: Id
     command: Commande
+    output: Sortie
+    run_at: Exécuté à
+    run_time: Temps d'exécution
+    status_code: Code statut
     date_created: Date création
     active: Active
     list: Liste
@@ -1112,7 +1135,10 @@ crontab:
     arguments: Arguments
     description: Description
     running: Instance en cours
-    max_instance: Instance max
+    max_instance: Max instance
+    max_instances: Max instances
+    running_instances: Running instances
+    results: Résultats
     lastUse: Last use
     nextRun: Next run
     enable: Enable
@@ -1120,10 +1146,13 @@ crontab:
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     correct: Vos crontabs ont été désactivés
+    disableAllCrons: Vos crontabs ont été désactivés
+    enableAllCrons: Vos crontabs ont été activés
     create: Créer crontab
     massdisable: Désactiver toutes les tâches
     massenable: Activer toutes les tâches
-    enableCron: On/Off
+    enableCron: On
+    disableCron: Off
     title_cronjobresult: Résultats Crontab
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
@@ -1159,3 +1188,14 @@ variable:
     value: Valeur
     actions: Actions
     description: Description
+premium:
+    upgrade:
+        title_main: "Passer à la version Premium"
+        title: "Débloquer les fonctionnalités exclusives et recevoir un support personnalisé"
+        description: "Accédez à des fonctionnalités avancées et bénéficiez d'un support personnalisé en passant à la version Premium de Myddleware."
+        button: "Acheter la version Premium"
+        benefits:
+            title: "Avantages Premium"
+            benefit1: "Description avantage 1"
+            benefit2: "Description avantage 2"
+            benefit3: "Description avantage 3"

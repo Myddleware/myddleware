@@ -371,6 +371,7 @@ view_connector:
 list_flux:
     start: Start
     end: End
+    total: Number of documents
     total1: Number of
     total2: documents
     empty: No documents found
@@ -453,7 +454,7 @@ flux:
         error_transformed: Transformation error
         error_checking: Checking error
         error_sending: Sending error
-        not_found: Not found
+        Not_found: Not found
         Error_workflow: Workflow error
     type:
         update: Update
@@ -562,7 +563,7 @@ list_workflow:
     searchName: Search by name
     th:
         id: Id
-        ruleName: Rule name
+        RuleName: Rule name
         name: Name
         description: Description
         condition: Condition
@@ -759,6 +760,7 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        authid: Auth ID
         user_custom_fields: User custom fields (shortname separated by coma)
         course_custom_fields: Course custom fields (shortname separated by coma)
     params: 
@@ -1140,6 +1142,7 @@ crontab:
     number: Number
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
+    correct: Your crontabs have been disabled
     disableAllCrons: Your crontabs have been disabled
     enableAllCrons: Your crontabs have been enable
     create: Create crontab
