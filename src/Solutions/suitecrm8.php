@@ -163,15 +163,15 @@ class suitecrm8 extends solution
             } elseif (!empty($param['query'])) {
 				$filter = '';
 				foreach($param['query'] as $key => $value) {
-					$filter .= 'filter['.$key.'][eq]='.$value.'&and&';
+					$filter .= 'filter['.$key.'][eq]='.urlencode($value).'&';
 				}
-				$filter = rtrim($filter, '&and&');
+				$filter = rtrim($filter, '&');
                 $url = 'V8/module/'.$param['module'].'?'.$filter;	
 			// Search by date ref
             } else { 
 				$dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
 				$dateRefField = $this->getRefFieldName($param);
-				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef;	
+				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef.'&page[size]='.$param['limit'].'&sort=date_modified';	
 			}
 			$readSuite = $this->call('GET', $url); 
 			if (!empty($readSuite['data'])) {
