@@ -1,3 +1,4 @@
+console.log('loading account.js in assets/js');
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -25,6 +26,7 @@
 
 // Positionne les différentes Popup au centre de la page en prenant en compte le scroll
 function positionningPopup(id, idcontainer) {
+  console.log('positionningPopup in account.js in assets/js');
 	// Positionnement du bloc transparent (qui permet d'éviter les clics le temps de la popup)
 	$(id,idcontainer).css({
 		"height": $(document).height(),
@@ -59,3 +61,578 @@ function positionningPopup(id, idcontainer) {
 		});
 	});	
 }
+
+// Account page JavaScript implementation
+import * as THREE from 'three';
+import axios from 'axios';
+
+/**
+ * Account Manager Class
+ * Handles all account page functionality
+ */
+class AccountManager {
+  constructor() {
+    // Add console logs for debugging
+    console.log("AccountManager initializing...");
+    
+    // Debug location info
+    console.log("Window location:", {
+      href: window.location.href,
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      host: window.location.host
+    });
+    
+    // The correct application path based on the logs
+    let baseUrl = '';
+    if (window.location.href.includes('myddleware_NORMAL')) {
+      baseUrl = '/myddleware_NORMAL/public';
+    }
+    
+    console.log("Using base URL:", baseUrl);
+    
+    // API endpoints with the correct application path prefix
+    this.potentialEndpoints = [
+      `${baseUrl}/rule/api/account/info`,
+      `/myddleware_NORMAL/public/rule/api/account/info`
+    ];
+    
+    console.log("API endpoints to try:", this.potentialEndpoints);
+    
+    // Start with the first option
+    this.apiEndpoints = {
+      getUserInfo: this.potentialEndpoints[0],
+      updateProfile: `${baseUrl}/rule/api/account/profile/update`,
+      updatePassword: `${baseUrl}/rule/api/account/password/update`,
+      updateTwoFactor: `${baseUrl}/rule/api/account/twofactor/update`,
+      changeLocale: `${baseUrl}/rule/api/account/locale`,
+      downloadLogs: `${baseUrl}/rule/api/account/logs/download`,
+      emptyLogs: `${baseUrl}/rule/api/account/logs/empty`
+    };
+    
+    console.log("Initial API endpoint:", this.apiEndpoints.getUserInfo);
+    
+    this.user = null;
+    this.threeJsContainer = null;
+    this.scene = null;
+    this.camera = null;
+    this.renderer = null;
+    
+    // Initialize the page
+    this.init();
+  }
+  
+  /**
+   * Initialize the account page
+   */
+  async init() {
+    console.log('init in account.js in assets/js');
+    // Create the basic UI structure
+    this.createUIStructure();
+    
+    // Load user data
+    await this.loadUserData();
+    
+    // Setup event listeners
+    this.setupEventListeners();
+    
+    // Initialize Three.js visualization
+    this.initThreeJs();
+    
+    // Show notification if from redirects
+    this.handleUrlParams();
+  }
+  
+  /**
+   * Create the UI structure
+   */
+  createUIStructure() {
+    console.log('createUIStructure in account.js in assets/js');
+    const container = document.getElementById('account-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+      <div class="account-header">
+        <h1 class="account-title">Account Settings</h1>
+        <div id="three-container"></div>
+      </div>
+      
+      <div class="flash-messages"></div>
+      
+      <div class="account-grid">
+        <div class="account-section profile-section">
+          <h2>Profile Information</h2>
+          <form id="profile-form" class="account-form">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+              <label for="timezone">Timezone</label>
+              <select id="timezone" name="timezone" class="form-control"></select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Profile</button>
+          </form>
+        </div>
+        
+        <div class="account-section">
+          <h2>Two-Factor Authentication</h2>
+          <form id="twofa-form" class="account-form">
+            <div class="form-group">
+              <div class="checkbox-container">
+                <input type="checkbox" id="twofa-enabled" name="enabled" />
+                <label for="twofa-enabled">Enable Two-Factor Authentication</label>
+              </div>
+              <small class="helper-text">
+                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+              </small>
+              <div id="smtp-warning" class="warning-message hidden">
+                Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save 2FA Settings</button>
+          </form>
+        </div>
+        
+        <div class="account-section password-section">
+          <h2>Password Management</h2>
+          <form id="password-form" class="account-form">
+            <div class="form-group">
+              <label for="current-password">Current Password</label>
+              <input type="password" id="current-password" name="oldPassword" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" name="plainPassword" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password</label>
+              <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </form>
+        </div>
+        
+        <div class="account-section language-section">
+          <h2>Language Settings</h2>
+          <div class="language-buttons" id="language-buttons"></div>
+        </div>
+        
+        <div class="account-section logs-section">
+          <h2>Log Management</h2>
+          <div class="buttons-container">
+            <button id="download-logs" class="btn btn-secondary">Download Logs</button>
+            <button id="empty-logs" class="btn btn-warning">Empty Logs</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    this.threeJsContainer = document.getElementById('three-container');
+  }
+  
+  /**
+   * Load user data from API
+   */
+  async loadUserData() {
+    console.log("Starting to fetch user data...");
+    
+    // Try each potential endpoint until one works
+    for (let i = 0; i < this.potentialEndpoints.length; i++) {
+      const endpoint = this.potentialEndpoints[i];
+      console.log(`Attempt ${i+1}: Trying to fetch from ${endpoint}`);
+      
+      try {
+        console.log("Attempting fetch request...");
+        const response = await axios.get(endpoint);
+        console.log(`Success with endpoint ${endpoint}!`);
+        console.log("User data received:", response.data);
+        
+        // Update the working endpoint for all API calls
+        this.apiEndpoints = {
+          getUserInfo: endpoint,
+          updateProfile: endpoint.replace('info', 'profile/update'),
+          updatePassword: endpoint.replace('info', 'password/update'),
+          updateTwoFactor: endpoint.replace('info', 'twofactor/update'),
+          changeLocale: endpoint.replace('info', 'locale'),
+          downloadLogs: endpoint.replace('info', 'logs/download'),
+          emptyLogs: endpoint.replace('info', 'logs/empty')
+        };
+        
+        console.log("Updated all API endpoints based on working endpoint:", this.apiEndpoints);
+        
+        // Save user data and populate UI
+        this.user = response.data;
+        this.populateUserData();
+        this.populateTimezones();
+        this.populateLanguages();
+        
+        // Configure UI based on user data
+        if (!this.user.smtpConfigured) {
+          document.getElementById('smtp-warning').classList.remove('hidden');
+          document.getElementById('twofa-enabled').disabled = true;
+        }
+        
+        if (this.user.roles.includes('ROLE_SUPER_ADMIN')) {
+          document.getElementById('empty-logs').style.display = 'block';
+        } else {
+          document.getElementById('empty-logs').style.display = 'none';
+        }
+        
+        // Exit the loop if successful
+        return;
+        
+      } catch (error) {
+        console.error(`Attempt ${i+1} failed:`, error.message);
+        console.log("Error details:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: endpoint
+        });
+        
+        // Continue to the next endpoint if this one failed
+      }
+    }
+    
+    // If we've tried all endpoints and none worked, show an error
+    this.showErrorMessage('Failed to load user data. Please check the console for details and refresh the page.');
+  }
+  
+  /**
+   * Populate form fields with user data
+   */
+  populateUserData() {
+    console.log('populateUserData in account.js in assets/js');
+    document.getElementById('username').value = this.user.username || '';
+    document.getElementById('email').value = this.user.email || '';
+    document.getElementById('timezone').value = this.user.timezone || 'UTC';
+    document.getElementById('twofa-enabled').checked = this.user.twoFactorEnabled || false;
+  }
+  
+  /**
+   * Populate timezone dropdown
+   */
+  populateTimezones() {
+    console.log('populateTimezones in account.js in assets/js');
+    const timezoneSelect = document.getElementById('timezone');
+    const timezones = [
+      'UTC', 'Europe/Paris', 'Europe/London', 'America/New_York', 'America/Los_Angeles',
+      'Asia/Tokyo', 'Australia/Sydney', 'Pacific/Auckland'
+      // Add more timezones as needed
+    ];
+    
+    timezoneSelect.innerHTML = '';
+    timezones.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz;
+      option.textContent = tz;
+      if (this.user && this.user.timezone === tz) {
+        option.selected = true;
+      }
+      timezoneSelect.appendChild(option);
+    });
+  }
+  
+  /**
+   * Populate language buttons
+   */
+  populateLanguages() {
+    console.log('populateLanguages in account.js in assets/js');
+    const languageContainer = document.getElementById('language-buttons');
+    
+    if (!this.user || !this.user.availableLocales) return;
+    
+    languageContainer.innerHTML = '';
+    
+    // Create button for each language
+    this.user.availableLocales.forEach(locale => {
+      const button = document.createElement('button');
+      button.classList.add('btn', 'language-btn');
+      
+      if (locale === this.user.currentLocale) {
+        button.classList.add('btn-light');
+        button.disabled = true;
+      } else {
+        button.classList.add('btn-primary');
+      }
+      
+      button.textContent = this.getLanguageName(locale);
+      button.dataset.locale = locale;
+      
+      button.addEventListener('click', () => this.changeLanguage(locale));
+      languageContainer.appendChild(button);
+    });
+  }
+  
+  /**
+   * Get language name from locale code
+   */
+  getLanguageName(locale) {
+    const languages = {
+      'en': 'English',
+      'fr': 'Français',
+      'de': 'Deutsch',
+      'es': 'Español',
+      'it': 'Italiano'
+      // Add more languages as needed
+    };
+    
+    return languages[locale] || locale;
+  }
+  
+  /**
+   * Change the UI language
+   */
+  async changeLanguage(locale) {
+    try {
+      await axios.post(this.apiEndpoints.changeLocale, { locale });
+      window.location.reload();
+    } catch (error) {
+      this.showErrorMessage('Failed to change language.');
+      console.error('Failed to change language:', error);
+    }
+  }
+  
+  /**
+   * Set up event listeners
+   */
+  setupEventListeners() {
+    // Profile form
+    const profileForm = document.getElementById('profile-form');
+    profileForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this.updateProfile();
+    });
+    
+    // Two-factor form
+    const twoFaForm = document.getElementById('twofa-form');
+    twoFaForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this.updateTwoFactor();
+    });
+    
+    // Password form
+    const passwordForm = document.getElementById('password-form');
+    passwordForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this.updatePassword();
+    });
+    
+    // Download logs
+    const downloadBtn = document.getElementById('download-logs');
+    downloadBtn.addEventListener('click', () => {
+      window.location.href = this.apiEndpoints.downloadLogs;
+    });
+    
+    // Empty logs
+    const emptyBtn = document.getElementById('empty-logs');
+    emptyBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to empty the log file?')) {
+        this.emptyLogs();
+      }
+    });
+  }
+  
+  /**
+   * Update user profile
+   */
+  async updateProfile() {
+    const profileData = {
+      username: document.getElementById('username').value,
+      email: document.getElementById('email').value,
+      timezone: document.getElementById('timezone').value
+    };
+    
+    try {
+      const response = await axios.post(this.apiEndpoints.updateProfile, profileData);
+      this.showSuccessMessage('Profile updated successfully');
+    } catch (error) {
+      this.showErrorMessage(error.response?.data?.message || 'Failed to update profile');
+      console.error('Failed to update profile:', error);
+    }
+  }
+  
+  /**
+   * Update two-factor authentication settings
+   */
+  async updateTwoFactor() {
+    const twoFactorData = {
+      enabled: document.getElementById('twofa-enabled').checked
+    };
+    
+    try {
+      const response = await axios.post(this.apiEndpoints.updateTwoFactor, twoFactorData);
+      this.showSuccessMessage('Two-factor authentication settings updated successfully');
+    } catch (error) {
+      this.showErrorMessage(error.response?.data?.message || 'Failed to update two-factor authentication settings');
+      console.error('Failed to update two-factor authentication settings:', error);
+    }
+  }
+  
+  /**
+   * Update user password
+   */
+  async updatePassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    
+    if (newPassword !== confirmPassword) {
+      this.showErrorMessage('New password and confirmation do not match');
+      return;
+    }
+    
+    const passwordData = {
+      oldPassword: document.getElementById('current-password').value,
+      plainPassword: newPassword
+    };
+    
+    try {
+      const response = await axios.post(this.apiEndpoints.updatePassword, passwordData);
+      this.showSuccessMessage('Password updated successfully');
+      document.getElementById('password-form').reset();
+    } catch (error) {
+      this.showErrorMessage(error.response?.data?.message || 'Failed to update password');
+      console.error('Failed to update password:', error);
+    }
+  }
+  
+  /**
+   * Empty logs
+   */
+  async emptyLogs() {
+    try {
+      const response = await axios.post(this.apiEndpoints.emptyLogs);
+      this.showSuccessMessage('Logs emptied successfully');
+    } catch (error) {
+      this.showErrorMessage('Failed to empty logs');
+      console.error('Failed to empty logs:', error);
+    }
+  }
+  
+  /**
+   * Show success message
+   */
+  showSuccessMessage(message) {
+    this.showMessage(message, 'success');
+  }
+  
+  /**
+   * Show error message
+   */
+  showErrorMessage(message) {
+    this.showMessage(message, 'error');
+  }
+  
+  /**
+   * Show message with specified type
+   */
+  showMessage(message, type) {
+    const flashContainer = document.querySelector('.flash-messages');
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.classList.add('alert', `alert-${type === 'error' ? 'danger' : type}`);
+    alertDiv.role = 'alert';
+    
+    const icon = document.createElement('i');
+    icon.classList.add('fas', type === 'error' ? 'fa-times' : 'fa-check');
+    
+    const messageP = document.createElement('p');
+    messageP.textContent = message;
+    messageP.classList.add('ms-2');
+    
+    alertDiv.appendChild(icon);
+    alertDiv.appendChild(messageP);
+    
+    flashContainer.appendChild(alertDiv);
+    
+    // Remove the message after 5 seconds
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 5000);
+  }
+  
+  /**
+   * Initialize Three.js visualization
+   */
+  initThreeJs() {
+    if (!this.threeJsContainer) return;
+    
+    // Create scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xf8f9fa);
+    
+    // Create camera
+    this.camera = new THREE.PerspectiveCamera(
+      75, 
+      this.threeJsContainer.clientWidth / this.threeJsContainer.clientHeight, 
+      0.1, 
+      1000
+    );
+    this.camera.position.z = 5;
+    
+    // Create renderer
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(this.threeJsContainer.clientWidth, this.threeJsContainer.clientHeight);
+    this.threeJsContainer.appendChild(this.renderer.domElement);
+    
+    // Add a simple cube
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshNormalMaterial();
+    const cube = new THREE.Mesh(geometry, material);
+    this.scene.add(cube);
+    
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      
+      this.renderer.render(this.scene, this.camera);
+    };
+    
+    animate();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (!this.threeJsContainer) return;
+      
+      this.camera.aspect = this.threeJsContainer.clientWidth / this.threeJsContainer.clientHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.threeJsContainer.clientWidth, this.threeJsContainer.clientHeight);
+    });
+  }
+  
+  /**
+   * Handle URL parameters
+   */
+  handleUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    
+    if (success) {
+      this.showSuccessMessage(decodeURIComponent(success));
+    }
+    
+    if (error) {
+      this.showErrorMessage(decodeURIComponent(error));
+    }
+  }
+}
+
+// Initialize the account manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new AccountManager();
+});

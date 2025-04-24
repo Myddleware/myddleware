@@ -24,8 +24,9 @@
         "build": "php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json && encore production --progress"
     },
     "dependencies": {
-        "@fortawesome/fontawesome-free": "^5.15.3",
+        "@fortawesome/fontawesome-free": "^6.7.2",
         "@popperjs/core": "^2.9.2",
+        "axios": "^1.8.4",
         "bootstrap": "^5.0.1",
         "caniuse-lite": "^1.0.30001249",
         "docsify-cli": "^4.4.4",
@@ -34,6 +35,7 @@
         "jquery-ui": "^1.13.2",
         "popper.js": "^1.16.1",
         "select2": "^4.1.0-rc.0",
+        "three": "^0.176.0",
         "yarn": "^1.22.17"
     }
 }
