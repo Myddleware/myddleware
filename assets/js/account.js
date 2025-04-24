@@ -235,15 +235,21 @@ class AccountManager {
                   </select>
                 </div>
                 
+                <div class="form-group">
+                  <label for="language">Language</label>
+                  <select id="language" name="language" class="form-control">
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                  </select>
+                </div>
+                
                 <button type="submit" class="btn btn-primary mt-2">Save Profile</button>
               </form>
             </div>
             
-            <!-- Language Settings -->
-            <div class="account-section language-section">
-              <h4>Language Settings</h4>
-              <div class="language-buttons" id="language-buttons"></div>
-            </div>
             
             <!-- Log Management -->
             <div class="account-section logs-section">
@@ -480,33 +486,22 @@ class AccountManager {
   }
   
   /**
-   * Populate language buttons
+   * Populate language dropdown
    */
   populateLanguages() {
     console.log('populateLanguages in account.js in assets/js');
-    const languageContainer = document.getElementById('language-buttons');
+    const languageSelect = document.getElementById('language');
     
     if (!this.user || !this.user.availableLocales) return;
     
-    languageContainer.innerHTML = '';
+    // Set the current locale as selected
+    if (this.user.currentLocale) {
+      languageSelect.value = this.user.currentLocale;
+    }
     
-    // Create button for each language
-    this.user.availableLocales.forEach(locale => {
-      const button = document.createElement('button');
-      button.classList.add('btn', 'language-btn');
-      
-      if (locale === this.user.currentLocale) {
-        button.classList.add('btn-light');
-        button.disabled = true;
-      } else {
-        button.classList.add('btn-primary');
-      }
-      
-      button.textContent = this.getLanguageName(locale);
-      button.dataset.locale = locale;
-      
-      button.addEventListener('click', () => this.changeLanguage(locale));
-      languageContainer.appendChild(button);
+    // Add change event listener
+    languageSelect.addEventListener('change', (e) => {
+      this.changeLanguage(e.target.value);
     });
   }
   
@@ -589,7 +584,8 @@ class AccountManager {
       timezone: document.getElementById('timezone').value,
       dateFormat: document.getElementById('date-format').value,
       exportSeparator: document.getElementById('export-separator').value,
-      encoding: document.getElementById('encoding').value
+      encoding: document.getElementById('encoding').value,
+      language: document.getElementById('language').value // Add language to profile data
     };
     
     try {
@@ -601,6 +597,11 @@ class AccountManager {
         ...this.user,
         ...profileData
       };
+      
+      // Reload page if language changed
+      if (profileData.language !== this.user.currentLocale) {
+        window.location.reload();
+      }
       
     } catch (error) {
       this.showErrorMessage(error.response?.data?.message || 'Failed to update profile');
