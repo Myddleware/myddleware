@@ -181,4 +181,51 @@
 
 .me-2 {
   margin-right: 0.5rem;
+}
+
+/* Tab buttons styling with hover effects */
+.tab-group {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  border: none;
+  border-radius: 30px;
+  padding: 0.6rem 1.2rem;
+  background-color: #f0f0f0;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #e0e0e0;
+}
+
+.tab.active {
+  background-color: #198BCA;
+  color: #fff;
+}
+
+.tab.active:hover {
+  background-color: #0069B4;
+}
+
+/* Focus and active states for better accessibility */
+.tab:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 105, 180, 0.25);
+}
+
+.tab:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 } 
