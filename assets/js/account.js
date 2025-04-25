@@ -217,7 +217,7 @@ class AccountManager {
             <label>${t.buttons.download_logs}</label>
             <div>
               <button id="download-logs" class="btn-log btn-download">
-                ${t.buttons.download_logs}
+                <i class="fas fa-download me-2"></i>${t.buttons.download_logs}
               </button>
             </div>
           </div>
@@ -226,7 +226,7 @@ class AccountManager {
             <label>${t.buttons.empty_logs}</label>
             <div>
               <button id="empty-logs" class="btn-log btn-delete">
-                ${t.buttons.empty_logs}
+                <i class="fas fa-trash-alt me-2"></i>${t.buttons.empty_logs}
               </button>
             </div>
           </div>
