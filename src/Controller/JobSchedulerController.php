@@ -515,17 +515,21 @@ class JobSchedulerController extends AbstractController
         $currentRunningInstancesString = (string) $entity->getRunningInstances();
 
         // get the new value of the running instances from the request
-        $newRunningInstances = $request->request->get('job_scheduler_cron')['runningInstances'];
+
+        // get the request all first, Then serect the runningInstances
+        $requestAll = $request->request->all();
+        
+        $newRunningInstances = $requestAll['job_scheduler_cron']['runningInstances'];
 
         $newRunningInstancesInteger = (int) $newRunningInstances;
 
-        $newDescription = $request->request->get('job_scheduler_cron')['description'];
-        $newPeriod = $request->request->get('job_scheduler_cron')['period'];
-        $newMaxInstances = $request->request->get('job_scheduler_cron')['maxInstances'];
+        $newDescription = $requestAll['job_scheduler_cron']['description'];
+        $newPeriod = $requestAll['job_scheduler_cron']['period'];
+        $newMaxInstances = $requestAll['job_scheduler_cron']['maxInstances'];
 
         $currentEnable = $entity->isEnable();
 
-        $newEnable = $request->request->get('job_scheduler_cron')['enable'] ?? 0;
+        $newEnable = $requestAll['job_scheduler_cron']['enable'] ?? 0;
 
         // Validation: runningInstances should never be greater than maxInstances
         if ($newRunningInstances > $newMaxInstances) {
