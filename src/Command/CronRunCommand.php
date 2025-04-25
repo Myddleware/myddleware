@@ -8,12 +8,13 @@ use function count;
 use DateTime;
 use Exception;
 use Doctrine\Persistence\ManagerRegistry;
-use Shapecode\Bundle\CronBundle\Command\BaseCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Shapecode\Bundle\CronBundle\Console\Style\CronStyle;
 use Shapecode\Bundle\CronBundle\Entity\CronJob;
-use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
-use Shapecode\Bundle\CronBundle\Model\CronJobRunning;
-use Shapecode\Bundle\CronBundle\Service\CommandHelper;
+use Shapecode\Bundle\CronBundle\Domain\CronJobRunning;
+use Shapecode\Bundle\CronBundle\CronJob\CommandHelper;
+use Shapecode\Bundle\CronBundle\Repository\CronJobRepository;
 use function sleep;
 use function sprintf;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,40 +26,38 @@ use Doctrine\ORM\EntityManagerInterface;
 
 use App\Manager\ToolsManager;
 
-final class CronRunCommand extends BaseCommand
+#[AsCommand(
+    name: 'myddleware:cronrun',
+    description: 'Runs any currently schedule cron jobs'
+)]
+final class CronRunCommand extends Command
 {
     private CommandHelper $commandHelper;
-    //protected $configParams;
     protected EntityManagerInterface $entityManager;
-	
-	private ToolsManager $toolsManager;
+    private ToolsManager $toolsManager;
+    private CronJobRepository $cronJobRepository;
 
     public function __construct(
         CommandHelper $commandHelper,
         ManagerRegistry $registry,
         EntityManagerInterface $entityManager,
-		ToolsManager $toolsManager,
+        ToolsManager $toolsManager,
     ) {
-        parent::__construct($registry);
+        parent::__construct();
 
         $this->commandHelper = $commandHelper;
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setName('myddleware:cronrun')
-            ->setDescription('Runs any currently schedule cron jobs');
+        $this->cronJobRepository = $registry->getRepository(CronJob::class);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-		if (!$this->toolsManager->isPremium()) {
-			return $this->redirectToRoute('premium_list');
-		}
-        $jobRepo = $this->getCronJobRepository();
+        if (!$this->toolsManager->isPremium()) {
+            $output->writeln('This feature requires a premium license.');
+            return Command::FAILURE;
+        }
+        $jobRepo = $this->cronJobRepository;
         $style = new CronStyle($input, $output);
         //Check if crontab is enabled
         $entity = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'cron_enabled']);
@@ -83,7 +82,7 @@ final class CronRunCommand extends BaseCommand
     
             /** @var CronJobRunning[] $processes */
             $processes = [];
-            $em = $this->getManager();
+            $em = $this->entityManager;
     
             foreach ($jobsToRun as $job) {
                 sleep(1);
@@ -130,15 +129,15 @@ final class CronRunCommand extends BaseCommand
 				// wait for all processes
 				$this->waitProcesses($processes);
 
-				$style->success('All jobs are finished.');
-			} else {
-				$style->info('No jobs were executed. See reasons below.');
-			}
-			return CronJobResult::EXIT_CODE_SUCCEEDED;
-			
+                $style->success('All jobs are finished.');
+            } else {
+                $style->info('No jobs were executed. See reasons below.');
+            }
+            return Command::SUCCESS;
+            
         } else {
             $style->error('Your crontabs are disabled');
-            return CronJobResult::EXIT_CODE_FAILED;
+            return Command::FAILURE;
         }  
     }
 
@@ -147,11 +146,11 @@ final class CronRunCommand extends BaseCommand
      */
     public function waitProcesses(array $processes): void
     {
-        $em = $this->getManager();
+        $em = $this->entityManager;
 
         while (count($processes) > 0) {
             foreach ($processes as $key => $running) {
-                $process = $running->getProcess();
+                $process = $running->process;
 
                 try {
                     $process->checkTimeout();
@@ -162,7 +161,7 @@ final class CronRunCommand extends BaseCommand
                 } catch (ProcessTimedOutException $e) {
                 }
 
-                $job = $running->getCronJob();
+                $job = $running->cronJob;
                 $job->decreaseRunningInstances();
 
                 $em->persist($job);
