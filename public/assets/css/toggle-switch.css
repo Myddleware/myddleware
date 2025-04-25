@@ -128,4 +128,57 @@
   .toggle-switch {
     margin-top: 0.5rem;
   }
+}
+
+/* Log management buttons */
+.btn-log {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-download {
+  background-color: #198BCA;
+  color: white;
+}
+
+.btn-download:hover {
+  background-color: #0058a3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Add focus styles for accessibility */
+.btn-log:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 105, 180, 0.25);
+}
+
+/* Active state */
+.btn-log:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.me-2 {
+  margin-right: 0.5rem;
 } 
