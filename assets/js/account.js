@@ -162,12 +162,22 @@ class AccountManager {
             </div>
             
             <div class="form-group">
+            <label for="language">${t.fields.language}</label>
+            <select id="language" name="language" class="form-control">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+            </select>
+            </div>
+            <h3>${t.sections.preferences || 'Format preferences'}</h3>
+            
+            <div class="form-group">
               <label for="timezone">${t.fields.timezone}</label>
               <select id="timezone" name="timezone" class="form-control"></select>
             </div>
-            
-            <h3>${t.sections.preferences || 'Format preferences'}</h3>
-            
+
             <div class="form-group">
               <label for="date-format">${t.fields.date_format}</label>
               <select id="date-format" name="date-format" class="form-control">
@@ -197,16 +207,6 @@ class AccountManager {
               </select>
             </div>
             
-            <div class="form-group">
-              <label for="language">${t.fields.language}</label>
-              <select id="language" name="language" class="form-control">
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="es">Español</option>
-                <option value="it">Italiano</option>
-              </select>
-            </div>
             
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
           </form>

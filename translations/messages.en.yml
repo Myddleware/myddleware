@@ -629,7 +629,7 @@ view_workflow_action:
     save: Save
     cancel: Cancel
 view_account:
-    title: My account
+    title: My information
     user_info: My Information
     change_password: Change password
     profile_edit: Edit my profile
@@ -644,7 +644,7 @@ view_account:
         general: General
         security: Security
     sections:
-        personal_info: Personal Information
+        personal_info: Details
         language_preferences: Language Preferences
         logs: Logs
         password: Password
