@@ -140,8 +140,8 @@ class AccountManager {
     container.innerHTML = `
       <!-- Tabbed Navigation -->
       <div class="tab-group">
-        <button class="tab active" data-tab="general">${t.tabs.general}</button>
-        <button class="tab" data-tab="security">${t.tabs.security}</button>
+        <button class="tab active" data-tab="general"><i class="fas fa-user-gear me-2"></i>${t.tabs.general}</button>
+        <button class="tab" data-tab="security"><i class="fas fa-shield-halved me-2"></i>${t.tabs.security}</button>
       </div>
       
       <!-- Tab Content -->
