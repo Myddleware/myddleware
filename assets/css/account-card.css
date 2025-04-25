@@ -60,7 +60,7 @@
 
 .account-card input, 
 .account-card select {
-  width: 100%;
+  width: 60%;
   padding: 0.6rem;
   border: 2px solid #efefef;
   border-radius: 8px;

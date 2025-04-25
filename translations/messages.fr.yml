@@ -662,6 +662,7 @@ view_account:
         download_logs: Télécharger les derniers logs
         empty_logs: Vider le fichier de logs
         reset_password: Réinitialiser le mot de passe
+        update_password: Mettre à jour le mot de passe
         save_2fa: Enregistrer les paramètres 2FA
     tooltip:
         disabled_option: Option désactivée pour le moment
