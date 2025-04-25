@@ -23,156 +23,162 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 
 {% extends 'base.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/css/account-card.css') }}">
+{% endblock %}
+
 {% block titlesm %}{{ 'title.account.view'|trans }}{% endblock titlesm %}
 
 {% block body %}
-<div id="user_account" class="container">
-    <div class="row justify-content-center">
-        <div class="col text-center">
-            <h2 class="display-4">{{ 'view_account.user_info'|trans }}</h2>
-            <ul class="mt-4">
-                <li class="user_info_li">
-                    <label>{{ 'view_account.label.language'|trans }}</label>
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button class="btn btn-light">
-                            <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
-                                {{ locales|languages['default']|trans }}
-                            </a>
-                        </button>
-                        {% for locale in locales|languages['other'] %}
-                        <button class="btn btn-primary">
-                            <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
-                                {{ locale|trans }}
-                            </a>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
-                <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
-                <p class="ms-2">{{ message }}</p>
-            </div>
+<div id="account-container">
+    <div class="account-card">
+        <h1 class="text-center mb-4">{{ 'view_account.user_info'|trans }}</h1>
+        
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
+                    <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
+                    <p class="ms-2">{{ message }}</p>
+                </div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-    
-    <div class="d-flex mt-4 edit-profile container">
-        <div class="me-5">
-            <div class="col">
-                <h2 class="display-6">{{ 'view_account.profile_edit'|trans }}</h2>
-                <ul class="mt-4">
-                    <li class="user_info_li">
-                        {{ form_start(form) }}
-                        <div class="input-group mb-4">
-                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.username) }}</label>
-                            <div>
-                                {{ form_widget( form.username, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.username, { 'attr': {'class': 'form-control'} }) }}
-                            </div>
-                        </div>
-                        <div class="input-group mb-4">
-                            <label for="command" class="col-form-label input-group-text"> {{ form_label( form.email) }}</label>
-                            <div>
-                                {{ form_widget( form.email, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.email, { 'attr': {'class': 'form-control'} }) }}
-                            </div>
-                        </div>
-                         
-                        <div class="input-group mb-4">
-                        <label for="command" class="col-form-label input-group-text">Time zone</label>
-                            <div>
-                                {{ form_widget( form.timezone, { 'attr': {'class': 'form-control'} }) }} {{ form_errors( form.timezone, { 'attr': {'class': 'form-control'} }) }}
-                            </div>
-                        </div>
-                        <button type="submit" id="save-account-details" class="btn btn-success mt-4">{{ 'view_connector.btn.save'|trans }}</button>
-                        {{ form_end(form) }}
-                    </li>
-                </ul>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-group">
+            <button class="tab active" data-tab="general">General</button>
+            <button class="tab" data-tab="security">Security</button>
+        </div>
+        
+        <!-- General Tab -->
+        <div id="general-tab" class="tab-content active">
+            <!-- Language Selection -->
+            <h3>{{ 'view_account.label.language'|trans }}</h3>
+            <div class="form-group">
+                <div class="btn-group" role="group" aria-label="...">
+                    <button class="btn btn-light">
+                        <a href="#" data-locale="{{ locales|languages['default'] }}" class="text-decoration-none">
+                            {{ locales|languages['default']|trans }}
+                        </a>
+                    </button>
+                    {% for locale in locales|languages['other'] %}
+                    <button class="btn btn-primary">
+                        <a href="{{ path('account_locale', {'locale': locale}) }}" data-locale="{{ locale }}" style="color: #fff;" class="text-decoration-none">
+                            {{ locale|trans }}
+                        </a>
+                    </button>
+                    {% endfor %}
+                </div>
             </div>
             
-            <div class="col mt-5">
-                <h2 class="display-6">Two-Factor Authentication</h2>
-                <ul class="mt-4">
-                    <li class="user_info_li">
-                        {{ form_start(twoFactorAuthForm) }}
-                        <div class="form-group mb-4">
-                            <div class="form-check">
-                                {% if not smtpConfigured %}
-                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input', 'disabled': 'disabled'} }) }}
-                                    <div class="alert alert-danger mt-2">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span class="ms-2">Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key in the <a href="{{ path('management_smtp_index') }}">SMTP Management</a> page.</span>
-                                    </div>
-                                {% else %}
-                                    {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'class': 'form-check-input'} }) }}
-                                {% endif %}
-                                {{ form_label(twoFactorAuthForm.enabled, null, { 'label_attr': {'class': 'form-check-label'} }) }}
-                            </div>
-                            {{ form_errors(twoFactorAuthForm.enabled) }}
-                            <small class="form-text text-muted">
-                                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
-                            </small>
-                        </div>
-                        
-                        {# Hide the preferredMethod field since we're only using email #}
-                        <div style="display: none;">
-                            {{ form_widget(twoFactorAuthForm.preferredMethod) }}
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success mt-4">Save 2FA Settings</button>
-                        {{ form_end(twoFactorAuthForm) }}
-                    </li>
-                </ul>
+            <!-- Profile Edit -->
+            <h3>{{ 'view_account.profile_edit'|trans }}</h3>
+            {{ form_start(form) }}
+            <div class="form-group">
+                <label for="username">{{ form_label(form.username) }}</label>
+                {{ form_widget(form.username, { 'attr': {'class': 'form-control'} }) }}
+                {{ form_errors(form.username) }}
             </div>
-        </div>
-        <div class="ms-5 password-reset">
-            <div class="col password-reset-center">
-                <h2 class="display-6">{{'password_reset.title'|trans}}</h2>
+            <div class="form-group">
+                <label for="email">{{ form_label(form.email) }}</label>
+                {{ form_widget(form.email, { 'attr': {'class': 'form-control'} }) }}
+                {{ form_errors(form.email) }}
+            </div>
+            <div class="form-group">
+                <label for="timezone">Time zone</label>
+                {{ form_widget(form.timezone, { 'attr': {'class': 'form-control'} }) }}
+                {{ form_errors(form.timezone) }}
+            </div>
+            <button type="submit" id="save-account-details" class="btn btn-success mt-2">{{ 'view_connector.btn.save'|trans }}</button>
+            {{ form_end(form) }}
+            
+            <!-- Password Reset -->
+            <h3>{{'password_reset.title'|trans}}</h3>
+            <div class="form-group">
                 <a href="{{ path('my_account_reset_password')}}">
                     <button type="button" class="btn btn-primary">{{'password_reset.button'|trans}}</button>
                 </a>
             </div>
-            <div class="row display-logs">
-                <div class="col">
-                    <h2>Download the latest logs</h2>
+            
+            <!-- Log Management -->
+            <h3>Logs</h3>
+            <div class="form-group">
+                <label>Download the latest logs</label>
+                <div>
                     <a href="{{path('download_log')}}">
-                        <button type="button" class="btn btn-primary">Download</button>
+                        <button type="button" class="btn-log btn-download">Download</button>
                     </a>
-                    
                 </div>
             </div>
-            <div class="row display-logs">
-                <div class="col">
-                    {% if is_granted('ROLE_SUPER_ADMIN') %}
-                    <h2>Empty the log file</h2>
+            
+            {% if is_granted('ROLE_SUPER_ADMIN') %}
+            <div class="form-group">
+                <label>Empty the log file</label>
+                <div>
                     <a href="{{path('empty_log')}}">
-                        <button type="button" class="btn btn-primary">Empty</button>
+                        <button type="button" class="btn-log btn-delete">Empty</button>
                     </a>
-                    {% endif %}
-                    
                 </div>
             </div>
+            {% endif %}
+        </div>
+        
+        <!-- Security Tab -->
+        <div id="security-tab" class="tab-content" style="display: none;">
+            <h3>Two-Factor Authentication</h3>
+            {{ form_start(twoFactorAuthForm) }}
+            <div class="form-group toggle-switch-container">
+                <label>Active</label>
+                <div class="toggle-switch">
+                    {% if not smtpConfigured %}
+                        {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'disabled': 'disabled'} }) }}
+                        <span class="toggle-slider"></span>
+                        <div class="alert alert-danger mt-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span class="ms-2">Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key in the <a href="{{ path('management_smtp_index') }}">SMTP Management</a> page.</span>
+                        </div>
+                    {% else %}
+                        {{ form_widget(twoFactorAuthForm.enabled) }}
+                        <span class="toggle-slider"></span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <small class="helper-text">
+                When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+            </small>
+            
+            {# Hide the preferredMethod field since we're only using email #}
+            <div style="display: none;">
+                {{ form_widget(twoFactorAuthForm.preferredMethod) }}
+            </div>
+            
+            <button type="submit" class="btn btn-success mt-3">Save 2FA Settings</button>
+            {{ form_end(twoFactorAuthForm) }}
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // We don't need the phone number visibility logic anymore since we're only using email
-        const enabledCheckbox = document.querySelector('input[name="two_factor_auth_form[enabled]"]');
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
         
-        function updateFieldsVisibility() {
-            // Nothing to update since we've hidden the preferredMethod field
-        }
-        
-        // Initial state
-        updateFieldsVisibility();
-        
-        // Event listeners
-        enabledCheckbox.addEventListener('change', updateFieldsVisibility);
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs and hide all content
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Add active class to clicked tab and show its content
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-tab').style.display = 'block';
+            });
+        });
     });
 </script>
 {% endblock %}

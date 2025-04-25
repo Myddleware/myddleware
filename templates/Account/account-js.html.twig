@@ -2,6 +2,7 @@
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('account') }}
+    <link rel="stylesheet" href="{{ asset('assets/css/account-card.css') }}">
 {% endblock %}
 
 {% block javascripts %}
@@ -12,11 +13,13 @@
 {% block titlesm %}Account Management{% endblock titlesm %}
 
 {% block body %}
-<div id="account-container" class="container-fluid">
-    <!-- Our JavaScript will dynamically render the content here -->
-    <div class="loading-spinner">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+<div id="account-container">
+    <div class="account-card">
+        <!-- Our JavaScript will dynamically render the content here -->
+        <div class="loading-spinner text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
     </div>
 </div>

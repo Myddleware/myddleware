@@ -1,5 +1,6 @@
 // Import CSS
 import './css/account-modern.css';
+import './css/account-card.css';
 
 // Import FontAwesome for icons
 import '@fortawesome/fontawesome-free/css/all.min.css';

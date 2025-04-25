@@ -137,22 +137,13 @@ class AccountManager {
    */
   createUIStructure() {
     console.log('createUIStructure in account.js in assets/js');
-    const container = document.getElementById('account-container');
+    const container = document.querySelector('.account-card');
     if (!container) return;
-
-    // style the container
-    container.style.backgroundColor = '#f8f9fa';
-    container.style.borderRadius = '10px';
-    container.style.padding = '20px';
-    container.style.boxShadow = '0 0 10px 0 rgba(0, 0, 0, 0.1)';
-    container.style.maxWidth = '1000px';
-    container.style.margin = '0 auto';
-    container.style.marginTop = '20px';
     
     // We'll populate this with translations once we have them
     container.innerHTML = `
       <div class="account-header">
-        <h1 class="account-title">Loading...</h1>
+        <h1 class="text-center mb-4">Loading...</h1>
         <div id="three-container"></div>
       </div>
       
@@ -176,153 +167,143 @@ class AccountManager {
     const container = document.getElementById('account-content');
     
     // Update title
-    document.querySelector('.account-title').textContent = t.title;
+    document.querySelector('.account-header h1').textContent = t.title;
     
     container.innerHTML = `
       <!-- Tabbed Navigation -->
-      <ul class="nav nav-tabs account-tabs" id="account-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
-            <i class="fas fa-user-cog"></i> ${t.tabs.general}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
-            <i class="fas fa-shield-alt"></i> ${t.tabs.security}
-          </button>
-        </li>
-      </ul>
+      <div class="tab-group">
+        <button class="tab active" data-tab="general">${t.tabs.general}</button>
+        <button class="tab" data-tab="security">${t.tabs.security}</button>
+      </div>
       
       <!-- Tab Content -->
-      <div class="tab-content account-tab-content" id="account-tab-content">
+      <div class="tab-content-container">
         <!-- General Tab -->
-        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
-          <div class="account-grid">
-            <!-- Profile Information -->
-            <div class="account-section profile-section">
-              <h2>${t.sections.personal_info}</h2>
-              <form id="profile-form" class="account-form">
-                <div class="form-group">
-                  <label for="username">${t.fields.username}</label>
-                  <input type="text" id="username" name="username" class="form-control" />
-                </div>
-                
-                <div class="form-group">
-                  <label for="email">${t.fields.email}</label>
-                  <input type="email" id="email" name="email" class="form-control" />
-                </div>
-                
-                <div class="form-group">
-                  <label for="timezone">${t.fields.timezone}</label>
-                  <select id="timezone" name="timezone" class="form-control"></select>
-                </div>
-                
-                <div class="form-group">
-                  <label for="date-format">${t.fields.date_format}</label>
-                  <select id="date-format" name="date-format" class="form-control">
-                    <option value="Y-m-d">YYYY-MM-DD</option>
-                    <option value="d/m/Y">DD/MM/YYYY</option>
-                    <option value="m/d/Y">MM/DD/YYYY</option>
-                    <option value="d.m.Y">DD.MM.YYYY</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label for="export-separator">${t.fields.export_separator}</label>
-                  <select id="export-separator" name="export-separator" class="form-control">
-                    <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
-                    <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
-                    <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
-                    <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label for="encoding">${t.fields.charset}</label>
-                  <select id="encoding" name="encoding" class="form-control">
-                    <option value="UTF-8">UTF-8</option>
-                    <option value="ISO-8859-1">ISO-8859-1</option>
-                    <option value="Windows-1252">Windows-1252</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label for="language">${t.fields.language}</label>
-                  <select id="language" name="language" class="form-control">
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                    <option value="es">Español</option>
-                    <option value="it">Italiano</option>
-                  </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
-              </form>
+        <div id="general-tab" class="tab-content active">
+          <!-- Profile Information -->
+          <h3>${t.sections.personal_info}</h3>
+          <form id="profile-form" class="account-form">
+            <div class="form-group">
+              <label for="username">${t.fields.username}</label>
+              <input type="text" id="username" name="username" class="form-control" />
             </div>
             
-            <!-- Log Management -->
-            <div class="account-section logs-section">
-              <h4>${t.sections.logs}</h4>
-              <div class="buttons-container">
-                <button id="download-logs" class="btn btn-secondary">
-                  <i class="fas fa-download"></i> ${t.buttons.download_logs}
-                </button>
-                <button id="empty-logs" class="btn btn-warning mt-2">
-                  <i class="fas fa-trash-alt"></i> ${t.buttons.empty_logs}
-                </button>
-              </div>
+            <div class="form-group">
+              <label for="email">${t.fields.email}</label>
+              <input type="email" id="email" name="email" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+              <label for="timezone">${t.fields.timezone}</label>
+              <select id="timezone" name="timezone" class="form-control"></select>
+            </div>
+            
+            <h3>${t.sections.preferences || 'Format preferences'}</h3>
+            
+            <div class="form-group">
+              <label for="date-format">${t.fields.date_format}</label>
+              <select id="date-format" name="date-format" class="form-control">
+                <option value="Y-m-d">YYYY-MM-DD</option>
+                <option value="d/m/Y">DD/MM/YYYY</option>
+                <option value="m/d/Y">MM/DD/YYYY</option>
+                <option value="d.m.Y">DD.MM.YYYY</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="export-separator">${t.fields.export_separator}</label>
+              <select id="export-separator" name="export-separator" class="form-control">
+                <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
+                <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
+                <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
+                <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="encoding">${t.fields.charset}</label>
+              <select id="encoding" name="encoding" class="form-control">
+                <option value="UTF-8">UTF-8</option>
+                <option value="ISO-8859-1">ISO-8859-1</option>
+                <option value="Windows-1252">Windows-1252</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="language">${t.fields.language}</label>
+              <select id="language" name="language" class="form-control">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="es">Español</option>
+                <option value="it">Italiano</option>
+              </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
+          </form>
+            
+          <!-- Log Management -->
+          <h3>${t.sections.logs}</h3>
+          <div class="form-group">
+            <label>${t.buttons.download_logs}</label>
+            <div>
+              <button id="download-logs" class="btn-log btn-download">
+                ${t.buttons.download_logs}
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>${t.buttons.empty_logs}</label>
+            <div>
+              <button id="empty-logs" class="btn-log btn-delete">
+                ${t.buttons.empty_logs}
+              </button>
             </div>
           </div>
         </div>
         
         <!-- Security Tab -->
-        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-          <div class="account-grid">
-            <!-- Password Management -->
-            <div class="account-section password-section">
-              <h2>${t.sections.password}</h2>
-              <form id="password-form" class="account-form">
-                <div class="form-group">
-                  <label for="current-password">${t.fields.current_password}</label>
-                  <input type="password" id="current-password" name="oldPassword" class="form-control" />
-                </div>
-                
-                <div class="form-group">
-                  <label for="new-password">${t.fields.new_password}</label>
-                  <input type="password" id="new-password" name="plainPassword" class="form-control" />
-                  <div class="password-strength-meter">
-                    <div id="password-strength-bar"></div>
-                  </div>
-                </div>
-                
-                <div class="form-group">
-                  <label for="confirm-password">${t.fields.confirm_password}</label>
-                  <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
-                </div>
-                
-                <button type="submit" class="btn btn-primary mt-2">${t.buttons.reset_password}</button>
-              </form>
+        <div id="security-tab" class="tab-content" style="display: none;">
+          <!-- Password Management -->
+          <h3>${t.sections.password}</h3>
+          <form id="password-form" class="account-form">
+            <div class="form-group">
+              <label for="current-password">${t.fields.current_password}</label>
+              <input type="password" id="current-password" name="oldPassword" class="form-control" />
             </div>
             
-            <!-- Two-Factor Authentication -->
-            <div class="account-section">
-              <h2 class="mt-2">${t.sections.twofa}</h2>
-              <div class="form-group">
-                <div class="d-flex align-items-center justify-content-between">
-                  <label for="twofa-enabled" class="form-label mb-0">${t.fields.enable_twofa || 'Enable Two-Factor Authentication'}</label>
-                  <div class="form-check form-switch">
-                    <input type="checkbox" class="form-check-input" id="twofa-enabled" name="enabled" style="width: 3em; height: 1.5em;" />
-                  </div>
-                </div>
-                <small class="helper-text mt-2">
-                  ${t.messages.twofa_description}
-                </small>
-                <div id="smtp-warning" class="warning-message hidden mt-2">
-                  ${t.messages.smtp_warning}
-                </div>
+            <div class="form-group">
+              <label for="new-password">${t.fields.new_password}</label>
+              <input type="password" id="new-password" name="plainPassword" class="form-control" />
+              <div class="password-strength-meter">
+                <div id="password-strength-bar"></div>
               </div>
             </div>
+            
+            <div class="form-group">
+              <label for="confirm-password">${t.fields.confirm_password}</label>
+              <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
+            </div>
+            
+            <button type="submit" class="btn btn-primary mt-2">${t.buttons.reset_password}</button>
+          </form>
+          
+          <!-- Two-Factor Authentication -->
+          <h3>${t.sections.twofa}</h3>
+          <div class="form-group toggle-switch-container">
+            <label>${t.fields.enable_twofa || 'Enable Two-Factor Authentication'}</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="twofa-enabled" name="enabled" />
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+          <small class="helper-text">
+            ${t.messages.twofa_description}
+          </small>
+          <div id="smtp-warning" class="warning-message hidden mt-2">
+            ${t.messages.smtp_warning}
           </div>
         </div>
       </div>
@@ -330,27 +311,22 @@ class AccountManager {
     
     container.style.display = 'block';
     
-    // Add event listeners for tab switching
-    const tabs = document.querySelectorAll('#account-tabs .nav-link');
+    // Set up tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
     tabs.forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Remove active class from all tabs
-        tabs.forEach(t => {
-          t.classList.remove('active');
-          const target = document.querySelector(t.getAttribute('data-bs-target'));
-          if (target) {
-            target.classList.remove('show', 'active');
-          }
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs and hide all content
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(content => {
+          content.style.display = 'none';
         });
         
-        // Add active class to clicked tab
-        tab.classList.add('active');
-        const targetId = tab.getAttribute('data-bs-target');
-        const targetPane = document.querySelector(targetId);
-        if (targetPane) {
-          targetPane.classList.add('show', 'active');
-        }
+        // Add active class to clicked tab and show its content
+        this.classList.add('active');
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId + '-tab').style.display = 'block';
       });
     });
 
@@ -550,39 +526,69 @@ class AccountManager {
    * Set up event listeners
    */
   setupEventListeners() {
-    // Profile form
-    const profileForm = document.getElementById('profile-form');
-    profileForm.addEventListener('submit', e => {
+    document.getElementById('profile-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       this.updateProfile();
     });
     
-    // Two-factor toggle
-    const twoFaToggle = document.getElementById('twofa-enabled');
-    twoFaToggle.addEventListener('change', e => {
-      this.updateTwoFactor(e.target.checked);
-    });
-    
-    // Password form
-    const passwordForm = document.getElementById('password-form');
-    passwordForm.addEventListener('submit', e => {
+    document.getElementById('password-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       this.updatePassword();
     });
     
-    // Download logs
-    const downloadBtn = document.getElementById('download-logs');
-    downloadBtn.addEventListener('click', () => {
-      window.open(this.apiEndpoints.downloadLogs, '_blank');
+    document.getElementById('download-logs')?.addEventListener('click', () => {
+      window.location.href = '/account/logs/download';
     });
     
-    // Empty logs
-    const emptyBtn = document.getElementById('empty-logs');
-    emptyBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to empty the log file?')) {
+    document.getElementById('empty-logs')?.addEventListener('click', () => {
+      if (confirm(this.user.translations.account.messages.confirm_empty_logs)) {
         this.emptyLogs();
       }
     });
+    
+    // 2FA toggle
+    const twofaToggle = document.getElementById('twofa-enabled');
+    console.log('twofaToggle in account.js in assets/js', twofaToggle);
+    if (twofaToggle) {
+      twofaToggle.addEventListener('change', () => {
+        this.updateTwoFactor(twofaToggle.checked);
+      });
+    }
+    
+    // Language selector
+    const languageSelect = document.getElementById('language');
+    if (languageSelect) {
+      languageSelect.addEventListener('change', () => {
+        const locale = languageSelect.value;
+        this.changeLanguage(locale);
+      });
+    }
+    
+    // Password strength meter
+    const newPasswordInput = document.getElementById('new-password');
+    console.log('newPasswordInput in account.js in assets/js', newPasswordInput);
+    const strengthBar = document.getElementById('password-strength-bar');
+    console.log('strengthBar in account.js in assets/js', strengthBar);
+    
+    if (newPasswordInput && strengthBar) {
+      newPasswordInput.addEventListener('input', () => {
+        const password = newPasswordInput.value;
+        const strength = this.measurePasswordStrength(password);
+        
+        // Clear previous classes
+        strengthBar.className = '';
+        
+        if (password.length > 0) {
+          if (strength < 30) {
+            strengthBar.classList.add('strength-weak');
+          } else if (strength < 60) {
+            strengthBar.classList.add('strength-medium');
+          } else {
+            strengthBar.classList.add('strength-strong');
+          }
+        }
+      });
+    }
   }
   
   /**
@@ -791,6 +797,44 @@ class AccountManager {
     if (error) {
       this.showErrorMessage(decodeURIComponent(error));
     }
+  }
+  
+  /**
+   * Measure password strength on a scale of 0-100
+   * @param {string} password 
+   * @returns {number} Strength score 0-100
+   */
+  measurePasswordStrength(password) {
+    if (!password) return 0;
+    
+    let score = 0;
+    
+    // Length
+    score += Math.min(password.length * 4, 40);
+    
+    // Character variety
+    const hasLower = /[a-z]/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+    
+    const variety = (hasLower ? 1 : 0) + 
+                    (hasUpper ? 1 : 0) + 
+                    (hasDigit ? 1 : 0) + 
+                    (hasSpecial ? 1 : 0);
+    
+    score += variety * 10;
+    
+    // Special bonuses
+    if (password.length > 8 && variety >= 3) {
+      score += 10;
+    }
+    
+    if (password.length > 12 && variety >= 4) {
+      score += 10;
+    }
+    
+    return Math.min(score, 100);
   }
 }
 
