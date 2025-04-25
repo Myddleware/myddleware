@@ -27,6 +27,7 @@
 // Account page JavaScript implementation
 import * as THREE from 'three';
 import axios from 'axios';
+import { ThreeModal } from '../../public/assets/js/three-modal.js';
 
 /**
  * Account Manager Class
@@ -354,8 +355,11 @@ class AccountManager {
       }
       
       const emptyLogsBtn = document.getElementById('empty-logs');
+      console.log('emptyLogsBtn 1 in account.js in assets/js', emptyLogsBtn);
       if (emptyLogsBtn) {
+        console.log('emptyLogsBtn 2 in account.js in assets/js', emptyLogsBtn);
         emptyLogsBtn.style.display = this.user.roles?.includes('ROLE_SUPER_ADMIN') ? 'block' : 'none';
+        console.log('emptyLogsBtn 3 in account.js in assets/js', emptyLogsBtn);
       }
       
     } catch (error) {
@@ -562,9 +566,20 @@ class AccountManager {
     }
     
     document.getElementById('empty-logs')?.addEventListener('click', () => {
-      if (confirm(this.user.translations.account.messages.confirm_empty_logs)) {
-        this.emptyLogs();
-      }
+      // Use ThreeModal library instead of browser confirm dialog
+      ThreeModal.showConfirmation({
+        message: this.user.translations.account.messages.confirm_empty_logs,
+        confirmText: this.user.translations.account.buttons.empty_logs,
+        cancelText: 'Cancel',
+        confirmIcon: 'fa-trash-alt',
+        cancelIcon: 'fa-times',
+        confirmColor: '#dc3545',
+        themeColor: 0xdc3545,
+        onConfirm: () => {
+          // Empty the logs when user confirms
+          this.emptyLogs();
+        }
+      });
     });
     
     // 2FA toggle
@@ -735,9 +750,12 @@ class AccountManager {
    */
   async emptyLogs() {
     try {
+      console.log('emptying logs in account.js in assets/js');
       const response = await axios.post(this.apiEndpoints.emptyLogs);
       this.showSuccessMessage('Logs emptied successfully');
+      console.log('response in account.js in assets/js', response); 
     } catch (error) {
+      console.log('error in account.js in assets/js', error);
       this.showErrorMessage('Failed to empty logs');
       console.error('Failed to empty logs:', error);
     }

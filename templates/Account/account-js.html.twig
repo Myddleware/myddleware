@@ -9,6 +9,7 @@
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('account') }}
+    <script src="{{ asset('assets/js/three-modal.js') }}" type="module"></script>
 {% endblock %}
 
 {% block titlesm %}Account Management{% endblock titlesm %}

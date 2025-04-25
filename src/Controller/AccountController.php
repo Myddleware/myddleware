@@ -372,7 +372,8 @@ class AccountController extends AbstractController
                 ],
                 'messages' => [
                     'twofa_description' => $this->translator->trans('view_account.info.twofa_description'),
-                    'smtp_warning' => $this->translator->trans('Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.')
+                    'smtp_warning' => $this->translator->trans('Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.'),
+                    'confirm_empty_logs' => $this->translator->trans('Are you sure you want to empty the logs? This action cannot be undone.')
                 ]
             ]
         ];
