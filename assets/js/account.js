@@ -97,9 +97,12 @@ class AccountManager {
       updatePassword: `${this.baseUrl}/rule/api/account/password/update`,
       updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
       changeLocale: `${this.baseUrl}/rule/api/account/locale`,
-      downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
+      downloadLogs: `${this.baseUrl}/rule/account/logs/download`,
       emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`
     };
+    
+    // Log all endpoints for debugging
+    console.log("API Endpoints:", this.apiEndpoints);
     
     this.user = null;
     this.threeJsContainer = null;
@@ -168,6 +171,9 @@ class AccountManager {
     
     // Update title
     document.querySelector('.account-header h1').textContent = t.title;
+    
+    // Add logging for debugging
+    console.log('Starting UI update with translations');
     
     container.innerHTML = `
       <!-- Tabbed Navigation -->
@@ -409,16 +415,49 @@ class AccountManager {
         return;
       }
       
-      // Show error in UI for other types of errors
-      const container = document.getElementById('account-container');
+      // Show detailed error information in UI
+      const container = document.querySelector('.account-card');
       if (container) {
         container.innerHTML = `
           <div class="alert alert-danger" role="alert">
             <h4>Error Loading Account Data</h4>
             <p>${error.response?.data?.error || error.message || 'Failed to load user data'}</p>
+            <p>API Endpoint: ${this.apiEndpoints.getUserInfo}</p>
+            <p>Status: ${error.response?.status} ${error.response?.statusText || ''}</p>
             <p>Please try refreshing the page. If the problem persists, contact support.</p>
+            <button id="debug-button" class="btn btn-secondary mt-2">Debug API Endpoints</button>
           </div>
         `;
+        
+        // Add debug button event listener
+        setTimeout(() => {
+          const debugButton = document.getElementById('debug-button');
+          if (debugButton) {
+            debugButton.addEventListener('click', () => {
+              console.log('====== API DEBUG INFO ======');
+              console.log('Base URL:', this.baseUrl);
+              console.log('API Endpoints:', this.apiEndpoints);
+              console.log('Window Location:', window.location);
+              console.log('Document URL:', document.URL);
+              console.log('Error Details:', error);
+              
+              // Try to ping the server to check connectivity
+              fetch(window.location.origin)
+                .then(response => {
+                  console.log('Server ping result:', {
+                    ok: response.ok,
+                    status: response.status,
+                    statusText: response.statusText
+                  });
+                })
+                .catch(err => {
+                  console.log('Server ping failed:', err);
+                });
+              
+              alert('Debug information has been logged to the console (F12)');
+            });
+          }
+        }, 100);
       }
     }
   }
@@ -428,10 +467,18 @@ class AccountManager {
    */
   populateUserData() {
     console.log('populateUserData in account.js in assets/js');
+    console.log('User data for populating:', this.user);
+    
     document.getElementById('username').value = this.user.username || '';
     document.getElementById('email').value = this.user.email || '';
     document.getElementById('timezone').value = this.user.timezone || 'UTC';
-    document.getElementById('twofa-enabled').checked = this.user.twoFactorEnabled || false;
+    
+    // Configure two-factor toggle
+    const twofaToggle = document.getElementById('twofa-enabled');
+    if (twofaToggle) {
+      console.log('Setting 2FA toggle to:', this.user.twoFactorEnabled);
+      twofaToggle.checked = this.user.twoFactorEnabled || false;
+    }
     
     // Set default values for new fields if not present in user data
     document.getElementById('date-format').value = this.user.dateFormat || 'Y-m-d';
@@ -526,6 +573,8 @@ class AccountManager {
    * Set up event listeners
    */
   setupEventListeners() {
+    console.log('Setting up event listeners');
+    
     document.getElementById('profile-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       this.updateProfile();
@@ -536,9 +585,15 @@ class AccountManager {
       this.updatePassword();
     });
     
-    document.getElementById('download-logs')?.addEventListener('click', () => {
-      window.location.href = '/account/logs/download';
-    });
+    // Download logs button
+    const downloadLogsBtn = document.getElementById('download-logs');
+    if (downloadLogsBtn) {
+      console.log('Adding click event listener to download logs button');
+      downloadLogsBtn.addEventListener('click', () => {
+        console.log('Download logs button clicked, redirecting to:', this.apiEndpoints.downloadLogs);
+        window.location.href = this.apiEndpoints.downloadLogs;
+      });
+    }
     
     document.getElementById('empty-logs')?.addEventListener('click', () => {
       if (confirm(this.user.translations.account.messages.confirm_empty_logs)) {
@@ -550,7 +605,9 @@ class AccountManager {
     const twofaToggle = document.getElementById('twofa-enabled');
     console.log('twofaToggle in account.js in assets/js', twofaToggle);
     if (twofaToggle) {
-      twofaToggle.addEventListener('change', () => {
+      console.log('Adding change event listener to 2FA toggle');
+      twofaToggle.addEventListener('change', (e) => {
+        console.log('2FA toggle changed:', e.target.checked);
         this.updateTwoFactor(twofaToggle.checked);
       });
     }
@@ -571,19 +628,26 @@ class AccountManager {
     console.log('strengthBar in account.js in assets/js', strengthBar);
     
     if (newPasswordInput && strengthBar) {
-      newPasswordInput.addEventListener('input', () => {
+      console.log('Adding input event listener to password field');
+      newPasswordInput.addEventListener('input', (e) => {
+        console.log('Password input changed');
         const password = newPasswordInput.value;
         const strength = this.measurePasswordStrength(password);
+        console.log('Password strength calculated:', strength);
         
         // Clear previous classes
         strengthBar.className = '';
+        strengthBar.style.width = strength + '%';
         
         if (password.length > 0) {
           if (strength < 30) {
+            console.log('Setting strength-weak class');
             strengthBar.classList.add('strength-weak');
           } else if (strength < 60) {
+            console.log('Setting strength-medium class');
             strengthBar.classList.add('strength-medium');
           } else {
+            console.log('Setting strength-strong class');
             strengthBar.classList.add('strength-strong');
           }
         }
@@ -630,21 +694,24 @@ class AccountManager {
    * Update two-factor authentication settings
    */
   async updateTwoFactor(enabled) {
+    console.log('updateTwoFactor called with enabled =', enabled);
     const twoFaToggle = document.getElementById('twofa-enabled');
     const originalState = !enabled; // Store original state in case we need to revert
     
     try {
+      console.log('Sending request to update 2FA settings to:', this.apiEndpoints.updateTwoFactor);
       const response = await axios.post(this.apiEndpoints.updateTwoFactor, { enabled });
+      console.log('2FA update response:', response.data);
       this.showSuccessMessage('Two-factor authentication ' + (enabled ? 'enabled' : 'disabled') + ' successfully');
       
       // Update user data
       this.user.twoFactorEnabled = enabled;
       
     } catch (error) {
+      console.error('Error updating 2FA:', error.response || error.message);
       // Revert the toggle if the API call failed
       twoFaToggle.checked = originalState;
       this.showErrorMessage(error.response?.data?.message || 'Failed to update two-factor authentication settings');
-      console.error('Failed to update two-factor authentication settings:', error);
     }
   }
   

@@ -155,6 +155,29 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             
             <button type="submit" class="btn btn-success mt-3">Save 2FA Settings</button>
             {{ form_end(twoFactorAuthForm) }}
+
+            <h3>Change Password</h3>
+            <form id="password-form" class="account-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" name="oldPassword" class="form-control" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="plainPassword" class="form-control" />
+                    <div class="password-strength-meter">
+                        <div id="password-strength-bar"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
+                </div>
+                
+                <button type="submit" class="btn btn-primary mt-2">Change Password</button>
+            </form>
         </div>
     </div>
 </div>
@@ -180,5 +203,102 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             });
         });
     });
+    
+    // Password form submission
+    const passwordForm = document.getElementById('password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Validate passwords
+            if (newPassword !== confirmPassword) {
+                alert('New password and confirmation do not match');
+                return;
+            }
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('oldPassword', currentPassword);
+            formData.append('plainPassword', newPassword);
+            
+            // Send request
+            fetch('/rule/api/account/password/update', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Password updated successfully');
+                    passwordForm.reset();
+                } else {
+                    alert(data.message || 'Failed to update password');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating password');
+            });
+        });
+    }
+    
+    // Password strength meter functionality
+    const passwordInput = document.getElementById('new-password');
+    const strengthBar = document.getElementById('password-strength-bar');
+    
+    if (passwordInput && strengthBar) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Length
+            strength += Math.min(password.length * 4, 40);
+            
+            // Character variety
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasDigit = /\d/.test(password);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+            
+            const variety = (hasLower ? 1 : 0) + 
+                           (hasUpper ? 1 : 0) + 
+                           (hasDigit ? 1 : 0) + 
+                           (hasSpecial ? 1 : 0);
+            
+            strength += variety * 10;
+            
+            // Special bonuses
+            if (password.length > 8 && variety >= 3) {
+                strength += 10;
+            }
+            
+            if (password.length > 12 && variety >= 4) {
+                strength += 10;
+            }
+            
+            strength = Math.min(strength, 100);
+            
+            // Update the UI
+            strengthBar.className = '';
+            strengthBar.style.width = strength + '%';
+            
+            if (password.length > 0) {
+                if (strength < 30) {
+                    strengthBar.classList.add('strength-weak');
+                } else if (strength < 60) {
+                    strengthBar.classList.add('strength-medium');
+                } else {
+                    strengthBar.classList.add('strength-strong');
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

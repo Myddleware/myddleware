@@ -110,12 +110,15 @@
   position: relative;
   width: 50px;
   height: 24px;
+  display: inline-block;
 }
 
 .toggle-switch input {
   opacity: 0;
   width: 0;
   height: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .toggle-slider {
@@ -148,6 +151,45 @@
 
 .toggle-switch input:checked + .toggle-slider::before {
   transform: translateX(26px);
+}
+
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+/* Password strength meter */
+.password-strength-meter {
+  height: 6px;
+  background-color: #e0e0e0;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 3px;
+  overflow: hidden;
+  width: 100%;
+}
+
+#password-strength-bar {
+  height: 100%;
+  width: 0;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak {
+  background-color: #dc3545;
+  width: 30% !important;
+}
+
+.strength-medium {
+  background-color: #ffc107;
+  width: 60% !important;
+}
+
+.strength-strong {
+  background-color: #28a745;
+  width: 100% !important;
 }
 
 /* Log Buttons Styling */
