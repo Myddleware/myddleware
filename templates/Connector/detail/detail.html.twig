@@ -28,16 +28,14 @@
 	{{'view_connector.info.title'|trans}}
 {% endblock %}
 {% block titlesm %}
-	{{'view_connector.info.title'|trans}}
+	{{'view_connector.info.title'|trans}} <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i> Connector {{ connector.name }}
 {% endblock titlesm %}
 
 {% block body %}
 	<div class="container">
 		<div class="row justify-content-center">
 			<div class="col-md-11">
-				<h1 class="display-4 mt-3">{{ 'view_connector.info.title'|trans }}</h1>
-
-				<table class="table table-striped mt-3">
+				<table class="table table-striped mt-5">
 					<tbody>
 						<tr>
 							<th>{{ 'view_connector.info.solution'|trans }}</th>

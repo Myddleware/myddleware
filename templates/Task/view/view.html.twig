@@ -206,9 +206,9 @@
     var path_img = "{{ asset('build/images/regle/') }}";
 	var path_task_stop = "{{ path('task_stop',{'id' : task.getId }) }}";
 	function toggleMessage() {
-		console.log('toggleMessage');
+		// console.log('toggleMessage');
 		var messageDiv = document.getElementById('message_task_collapse');
-		console.log(messageDiv);
+		// console.log(messageDiv);
 		if (messageDiv.classList.contains('button_message_task_collapse')) {
 			messageDiv.classList.remove('button_message_task_collapse');
 			messageDiv.classList.add('button_message_task_expand');
@@ -218,9 +218,9 @@
 		}
 	}
 	function toggleParam() {
-		console.log('toggleParam');
+		// console.log('toggleParam');
 		var paramDiv = document.getElementById('param_task_collapse');
-		console.log(paramDiv);
+		// console.log(paramDiv);
 		if (paramDiv.classList.contains('button_param_task_collapse')) {
 			paramDiv.classList.remove('button_param_task_collapse');
 			paramDiv.classList.add('button_param_task_expand');

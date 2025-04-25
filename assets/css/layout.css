@@ -109,13 +109,37 @@ footer {
     transition: transform 0.3s ease;
 }
 
-.help-content-link:hover {
-    color: #03c4eb;
+.help-link:hover::after {
+	transform: scaleX(1);
+	transform-origin: bottom left;
 }
 
-.help-link:hover::after {
-    transform: scaleX(1);
+.help-link-update-password {
+	color: #03c4eb;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.help-link-update-password::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    transform: scaleX(0);
     transform-origin: bottom left;
+    transition: transform 0.3s ease;
+}
+
+.help-link-update-password:hover::after {
+	transform: scaleX(1);
+	transform-origin: bottom right;
+}
+
+.help-content-link:hover {
+    color: #03c4eb;
 }
 
 .clr {
@@ -267,10 +291,21 @@ footer {
 	background: #f2dedf;
 }
 
-#notification #zone_notification .success {
-	color: #9aa932;
-	background: white;
+.success {
+	background: #19CA426E !important;
+	display: flex;
 }
+
+.success-custom-adjust {
+	margin-right: 10px;
+	margin-top: 5px;
+}
+
+#notification #zone_notification .success {
+	color: #000;
+	background: #19CA426E;
+}
+
 
 /* help content */
 .help-content {

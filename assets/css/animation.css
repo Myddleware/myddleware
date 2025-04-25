@@ -605,3 +605,46 @@ margin-left: -0.5rem;
 .targetIdOfDocument {
     width: 19rem;
 }
+
+#relation_filter_field,
+#relation_filter_another_field,
+#relation_filter_textarea_field {
+    border: 1px solid #ccc;
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* in the document filter view (list of documents), reduce the width of the global status filter CONTAINER */
+.global-status-reduced-width {
+    width: 20rem !important;
+}
+
+/* reduce the width of the filter-premium-container-reduced-width to 94rem to match the end of the source id filter */
+.filter-premium-container-reduced-width {
+    width: 100%;
+    max-width: 1520px;
+}
+
+/* set the margin left of the button active of the workflow action list inside the workflow show page */
+.workflow-action-list-inside-workflow-show {
+    margin-left: -2.25em !important;
+}
+
+/* update password form in the account page */
+
+/* selector is a label with the for update_password_plainPassword_first */
+label[for="update_password_plainPassword_first"] {
+    font-weight: 600 !important;
+}
+
+/* selector is a label with the for update_password_plainPassword_second */
+label[for="update_password_plainPassword_second"] {
+    font-weight: 600 !important;
+}
+
+/* selector is a label with the for update_password_oldPassword */
+label[for="update_password_oldPassword"] {
+    font-weight: 600 !important;
+}

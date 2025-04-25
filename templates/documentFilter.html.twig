@@ -51,7 +51,7 @@
 <div class="px-5 mb-1 py-1 mt-5">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
-    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-grey' }}" class="input-group">
+    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-grey' }}" class="input-group filter-premium-container-reduced-width">
         {{ form_widget(formFilter.filter) }}
     </div>
     {{ form_end(formFilter) }}
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="globalStatus" hidden="true">
+        <div class="col-md-4 global-status-reduced-width" id="globalStatus" hidden="true">
             {{ form_label(form.document.globalStatus, 'list_flux.filter.global_status'|trans) }}
             <div class="input-group">
                  {{ form_widget(form.document.globalStatus, {'required': false, 'attr': {'class': 'select2'}}) }}
@@ -422,7 +422,11 @@ var csvdocumentids = "{{ csvdocumentids }}";
 
 // Initialisation de Select2 et autres scripts après le chargement du document
 $(document).ready(function () { // Initialisation de Select2 sur le champ globalStatus
-$('#globalStatus .select2').select2({placeholder: "Select Global Status", allowClear: true, width: 'resolve'});
+$('#globalStatus .select2').select2({
+    placeholder: "Select Global Status", 
+    allowClear: true, 
+    width: '300px'
+});
 
     });
 // Script pour récupérer et afficher les messages d'erreur liés aux documents

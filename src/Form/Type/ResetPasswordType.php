@@ -32,14 +32,9 @@ class ResetPasswordType extends AbstractType
             ],
             'required' => true,
         ])
-        ->add('oldPassword', PasswordType::class, [
-            'mapped' => false,
-            'required' => true,
-            'label' => 'password_reset.old_password',
-        ])
         ->add('submit', SubmitType::class, [
             'attr' => [
-                'class' => 'btn btn-success mt-3 btn-lg',
+                'class' => 'btn mt-3 btn-lg',
             ],
             'label' => 'password_reset.submit',
         ])

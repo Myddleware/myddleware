@@ -11,6 +11,12 @@ parameters:
   secret: '%env(APP_SECRET)%'
   myd_version: '%env(MYDDLEWARE_VERSION)%'
   email_from: '%env(MAILER_FROM)%'
+  mailer_from: '%env(MAILER_FROM)%'
+  sms_provider: '%env(SMS_PROVIDER)%'
+  twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
+  twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
+  twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+  brevo_api_key: '%env(default::BREVO_APIKEY)%'
 
 services:
   # default configuration for services in *this* file
@@ -49,6 +55,20 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
 
+  App\EventListener\TwoFactorAuthListener:
+    tags:
+      - { name: kernel.event_subscriber }
+
+  App\Service\TwoFactorAuthService:
+    arguments:
+      $mailer: '@mailer.mailer'
+      $brevoApiKey: '%brevo_api_key%'
+
   App\DataFixtures\:
     resource: '../src/DataFixtures'
     tags: ['doctrine.fixture.orm']
+
+  # Update JobManager to use RequestStack instead of SessionInterface
+  App\Manager\JobManager:
+    arguments:
+      $requestStack: '@request_stack'

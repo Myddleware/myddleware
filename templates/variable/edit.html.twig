@@ -2,7 +2,7 @@
 
 {% block title %}{{ parent() }} | {{ 'variable.edit'|trans }}{% endblock %}
 
-{% block titlesm %}{{ 'variable.edit'|trans }}{% endblock titlesm %}
+{% block titlesm %}{{ 'variable.edit'|trans }} <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i> {{ variable.name }}{% endblock titlesm %}
 
 {% block body %}
     <div class="container mt-5">
@@ -20,9 +20,6 @@
         
         {{ form_start(form) }}
         <div class="mb-3">
-            <div class="card-header mb-4">
-                {{ 'variable.editing'|trans }} #{{ variable.name }}
-            </div>
             <div class="row mb-4">
                 <div class="col-md-6">
                     {{ form_row(form.name) }}

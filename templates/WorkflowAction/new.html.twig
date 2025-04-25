@@ -22,82 +22,118 @@
 			<div class="card-body">
 				<div class="row mb-4">
 					<div class="col-md-6">
-						{{ form_row(form.name) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-name" id="name-container">
+							{{ form_row(form.name) }}
+						</div>
 					</div>
 					<div class="col-md-6">
-						{{ form_row(form.Workflow) }}
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						{{ form_row(form.description) }}
-					</div>
-					<div class="col-md-6">
-						{{ form_row(form.action) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-workflow" id="workflow-container">
+							{{ form_row(form.Workflow) }}
+						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						{{ form_row(form.order) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-description" id="description-container">
+							{{ form_row(form.description) }}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-action" id="action-container">
+							{{ form_row(form.action) }}
+						</div>
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action" id="order-container">
+							{{ form_row(form.order) }}
+						</div>
 					</div>
 					{% if form.multipleRuns is defined %}
 						<div class="col-md-6">
-							{{ form_row(form.multipleRuns) }}
+							<div class="workflow-field-container form-group-workflow-action" id="multiple-runs-container">
+								{{ form_row(form.multipleRuns) }}
+							</div>
 						</div>
 					{% endif %}
 					<div class="col-md-6">
-						{{ form_row(form.status) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-status" id="status-container">
+							{{ form_row(form.status) }}
+						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						{{ form_row(form.active) }}
+						<div class="workflow-field-container form-group-workflow-action" id="active-container">
+							{{ form_row(form.active) }}
+						</div>
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-to" id="to-container">
+							{{ form_row(form.to) }}
+						</div>
 					</div>
 					<div class="col-md-6">
-						{{ form_row(form.subject) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-subject" id="subject-container">
+							{{ form_row(form.subject) }}
+						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-12">
-						{{ form_row(form.message) }}
-					</div>
-					<div class="col-md-6">
-						{{ form_row(form.ruleId) }}
-					</div>
-					<div class="col-md-6">
-						{{ form_row(form.searchField) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-message" id="message-container">
+							{{ form_row(form.message) }}
+						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						{{ form_row(form.searchValue) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-rule" id="rule-container">
+							{{ form_row(form.ruleId) }}
+						</div>
 					</div>
 					<div class="col-md-6">
-						{{ form_row(form.rerun) }}
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchfield" id="search-field-container">
+							{{ form_row(form.searchField) }}
+						</div>
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
-						{{ form_row(form.targetField) }}
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchvalue" id="search-value-container">
+							{{ form_row(form.searchValue) }}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action" id="rerun-container">
+							{{ form_row(form.rerun) }}
+						</div>
+					</div>
+				</div>
+				<div class="row mb-4" style="display: none;">
+					<div class="col-md-6" id="targetFieldContainer">
+						<div class="workflow-field-container form-group-workflow-action">
+							{{ form_row(form.targetField) }}
+						</div>
 					</div>
 					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
-						<label for="form_targetFieldValue">New value</label>
-						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+						<div class="workflow-field-container form-group-workflow-action">
+							<label for="form_targetFieldValue">New value</label>
+							<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+						</div>
 					</div>
 				</div>
 				<div id="dynamicFieldsContainer"></div>
 				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						{{ form_row(form.to) }}
-					</div>
-				</div>
 			</div>
 		</div>
 		<div class="text-center">
 			{{ form_row(form.submit) }}
 		</div>
-		{{ form_end(form) }}
+		{{ form_end(form, {'render_rest': false}) }}
 	</div>
 
 	<script type="text/javascript">
