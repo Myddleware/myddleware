@@ -663,6 +663,7 @@ view_account:
         download_logs: Download Latest Logs
         empty_logs: Empty Log File
         reset_password: Reset Password
+        update_password: Update Password
         save_2fa: Save 2FA Settings
     tooltip:
         disabled_option: Option currently disabled

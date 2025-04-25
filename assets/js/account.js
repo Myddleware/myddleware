@@ -256,7 +256,7 @@ class AccountManager {
               <input type="password" id="confirm-password" name="confirmPassword" class="form-control" />
             </div>
             
-            <button type="submit" class="btn btn-primary mt-2">${t.buttons.reset_password}</button>
+            <button type="submit" class="btn btn-primary mt-2">${t.buttons.update_password}</button>
           </form>
           
           <!-- Two-Factor Authentication -->

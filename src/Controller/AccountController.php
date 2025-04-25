@@ -364,7 +364,7 @@ class AccountController extends AbstractController
                     'save' => $this->translator->trans('view_account.button.save'),
                     'download_logs' => $this->translator->trans('view_account.button.download_logs'),
                     'empty_logs' => $this->translator->trans('view_account.button.empty_logs'),
-                    'reset_password' => $this->translator->trans('view_account.button.reset_password')
+                    'update_password' => $this->translator->trans('view_account.button.update_password')
                 ],
                 'tabs' => [
                     'general' => $this->translator->trans('view_account.tabs.general'),
