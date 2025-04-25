@@ -59,7 +59,7 @@ class AccountManager {
       updatePassword: `${this.baseUrl}/rule/api/account/password/update`,
       updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
       changeLocale: `${this.baseUrl}/rule/api/account/locale`,
-      downloadLogs: `${this.baseUrl}/rule/account/logs/download`,
+      downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
       emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`
     };
     
