@@ -68,6 +68,9 @@ class RegistrationController extends AbstractController
                 $user->setEmailCanonical($user->getEmail());
                 $user->setTimezone('UTC');
 
+                $entityManager = $this->entityManager;
+
+
                 // block install from here as user has successfully installed Myddleware now
                 foreach ($configs as $config) {
                     if ('allow_install' === $config->getName()) {
