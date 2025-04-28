@@ -6,30 +6,36 @@ use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Repository\ConfigRepository;
 use App\Security\SecurityAuthenticator;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
     private ConfigRepository $configRepository;
     private LoggerInterface $logger;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(ConfigRepository $configRepository, LoggerInterface $logger)
-    {
+    public function __construct(
+        ConfigRepository $configRepository, 
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager
+    ) {
         $this->logger = $logger;
         $this->configRepository = $configRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, SecurityAuthenticator $authenticator): Response
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, UserAuthenticatorInterface $userAuthenticator, SecurityAuthenticator $authenticator): Response
     {
         try {
             //to help voter decide whether we allow access to install process again or not
@@ -49,7 +55,7 @@ class RegistrationController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 // encode the plain password
                 $user->setPassword(
-                $passwordEncoder->encodePassword(
+                $passwordHasher->hashPassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )
@@ -61,24 +67,25 @@ class RegistrationController extends AbstractController
                 $user->setUsernameCanonical($user->getUsername());
                 $user->setEmailCanonical($user->getEmail());
                 $user->setTimezone('UTC');
+
                 $entityManager = $this->entityManager;
+
 
                 // block install from here as user has successfully installed Myddleware now
                 foreach ($configs as $config) {
                     if ('allow_install' === $config->getName()) {
                         $config->setValue('false');
-                        $entityManager->persist($config);
+                        $this->entityManager->persist($config);
                     }
                 }
-                $entityManager->persist($user);
-                $entityManager->flush();
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
 
                 // do anything else you need here, like send an email
-                return $guardHandler->authenticateUserAndHandleSuccess(
+                return $userAuthenticator->authenticateUser(
                 $user,
-                $request,
                 $authenticator,
-                'main' // firewall name in security.yaml
+                $request
             );
             }
         } catch (Exception $e) {
