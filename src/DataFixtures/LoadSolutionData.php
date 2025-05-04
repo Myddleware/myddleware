@@ -53,7 +53,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'sendinblue',	    'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'yousign',           'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'brevo',           	'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'acton',           	'active' => 1, 'source' => 1, 'target' => 1]
+        ['name' => 'acton',           	'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'dynamicsbusiness',	'active' => 1, 'source' => 1, 'target' => 1]
     ];
 
     public function load(ObjectManager $manager)
