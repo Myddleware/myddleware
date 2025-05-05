@@ -288,9 +288,9 @@ menu .caret, #myd_top .caret {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-i.fa-sharp.fa-solid.fa-arrow-right.fa-flip.fa-flip {
-    animation-duration: 3s;
-    animation-iteration-count: 2; 
+.arrow-cut-animation {
+    animation-duration: 3s !important;
+    animation-iteration-count: 2 !important; 
 }
 
 
