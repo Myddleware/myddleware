@@ -221,37 +221,6 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    // /**
-    //  * @Route("/list/rulegroup/{ruleId}", name="rulegroup_list_by_rule", defaults={"page"=1})
-    //  * @Route("/list/rulegroup/{ruleId}/page-{page}", name="rulegroup_list_by_rule_page", requirements={"page"="\d+"})
-    //  */
-    // public function RulegroupListByRuleAction(string $ruleId, int $page = 1, Request $request)
-    // {
-    //     try {
-
-
-    //         // Récupération des rulegroups par règle
-    //         $rulegroups = $this->entityManager->getRepository(Rulegroup::class)->findBy(
-    //             ['rule' => $ruleId, 'deleted' => 0],
-    //             ['order' => 'ASC']
-    //         );
-
-    //         // Pagination avec ArrayAdapter
-    //         $adapter = new ArrayAdapter($rulegroups);
-    //         $pager = new Pagerfanta($adapter);
-    //         $pager->setMaxPerPage(15);
-    //         $pager->setCurrentPage($page);
-
-    //         // Rendu des rulegroups paginés
-    //         return $this->render('Rulegroup/list.html.twig', [
-    //             'entities' => $pager->getCurrentPageResults(),
-    //             'nb_rulegroup' => $pager->getNbResults(),
-    //             'pager_rulegroup_list' => $pager,
-    //         ]);
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
-    //     }
-    // }
 
 
     // public function to delet the rulegroup by id (set deleted to 1)
