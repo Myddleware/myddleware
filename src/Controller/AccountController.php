@@ -181,7 +181,7 @@ class AccountController extends AbstractController
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
 
-            return $this->redirectToRoute('my_account');
+            return $this->redirectToRoute('account_modern');
         }
         
         if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
@@ -194,7 +194,7 @@ class AccountController extends AbstractController
             }
             
             $this->entityManager->flush();
-            return $this->redirectToRoute('my_account');
+            return $this->redirectToRoute('account_modern');
         }
 
         return $this->render('Account/index.html.twig', [
@@ -233,7 +233,7 @@ class AccountController extends AbstractController
                 $success = $translator->trans('password_reset.success');
                 $this->addFlash('success', $success);
 
-                return $this->redirectToRoute('my_account');
+                return $this->redirectToRoute('account_modern');
             } else {
                 $failure = $translator->trans('password_reset.incorrect_password');
                 $this->addFlash('error', $failure);
