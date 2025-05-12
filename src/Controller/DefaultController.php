@@ -2549,6 +2549,18 @@ use Symfony\Component\Yaml\Yaml;
                         $p = array_merge($param['RuleParam'], $tab_new_rule['params']);
                     }
 
+                                    // set param parentrule
+                if (!empty($_SESSION['parentmodule']) && !empty($_SESSION['parentmoduleid'])) {
+                    // add the new params parentmodule and parentmoduleid to $p
+                    $p['parentmodule'] = $_SESSION['parentmodule'];
+                    $p['parentmoduleid'] = $_SESSION['parentmoduleid'];
+
+                    unset($_SESSION['parentmodule']);
+                    unset($_SESSION['parentmoduleid']);
+                    unset($_SESSION['modules']);
+                    unset($_SESSION['resultSaveIds']);
+                }
+
                     $bidirectional = '';
                     foreach ($p as $key => $value) {
                         // Value could be empty, for bidirectional parameter for example (we don't test empty because mode could be equal 0)
