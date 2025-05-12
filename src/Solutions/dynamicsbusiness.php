@@ -313,6 +313,85 @@ class dynamicsbusiness extends solution
         return $result;
     }
 
+    public function readData($param): array
+    {
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+
+        $this->validateReadParameters($param);
+
+        $module = $param['module'];
+        list($companyId, $module) = explode('_', $module, 2);
+
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
+
+        try {
+            $response = $client->get($url, ['headers' => $headers]);
+            $data = json_decode($response->getBody(), true);
+
+            if (!isset($data['value']) || !is_array($data['value'])) {
+                $this->logger->error("Invalid response format: missing or invalid 'value' array");
+                return [];
+            }
+
+            $results = [];
+            foreach ($data['value'] as $record) {
+                $result = [];
+
+                // Dynamically map fields based on $param['fields']
+                if (isset($param['fields']) && is_array($param['fields'])) {
+                    foreach ($param['fields'] as $field) {
+                        // Check if the field exists in the record
+                        if (isset($record[$field])) {
+                            $result[$field] = $record[$field];
+                        } else {
+                            // If field doesn't exist, set a default value or null
+                            $result[$field] = null;
+                        }
+                    }
+
+                    // Add date_modified from the record's lastModifiedDateTime
+                    if (!empty($record['lastModifiedDateTime'])) {
+                        $result['date_modified'] = date('Y-m-d H:i:s', strtotime($record['lastModifiedDateTime']));
+                    }
+                } else {
+                    // Fallback to default fields if $param['fields'] is not set
+                    $result['id'] = $record['id'] ?? null;
+                    $result['displayName'] = $record['displayName'] ?? null;
+                }
+
+                if (!isset($result['id']) && !empty($record['id'])) {
+                    $result['id'] = $record['id'];
+                }
+
+                $results[] = $result;
+
+            }
+
+            $countResult = count($results);
+
+            // put the actual data in a sub array called value
+            $resultFinal = [];
+            $resultFinal['values'] = $results;
+
+            // put the date modified of the LAST element to set the date_ref
+            $resultFinal['date_ref'] = date('Y-m-d H:i:s', strtotime($results[$countResult - 1]['date_modified']));
+
+            // for thes simulation, get the count of results
+            $resultFinal['count'] = $countResult;
+
+
+
+            return $resultFinal;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            return [];
+        }
+    }
+
     public function read($param)
     {
         $client = $this->getApiClient();
