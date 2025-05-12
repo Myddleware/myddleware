@@ -764,6 +764,10 @@ solution:
         authid: Auth ID
         user_custom_fields: User custom fields (shortname separated by coma)
         course_custom_fields: Course custom fields (shortname separated by coma)
+        tenant_id: Tenant ID
+        client_id: Client ID
+        client_secret: Client Secret
+        environment: Environment
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
