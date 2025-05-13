@@ -338,7 +338,14 @@ class dynamicsbusiness extends solution
             }
 
             $results = [];
+            $nbRecords = 0;
+
             foreach ($data['value'] as $record) {
+                // Stop the process if limit has been reached
+                if (isset($param['limit']) && $nbRecords >= $param['limit']) {
+                    break;
+                }
+
                 $result = [];
 
                 // Dynamically map fields based on $param['fields']
@@ -368,7 +375,7 @@ class dynamicsbusiness extends solution
                 }
 
                 $results[] = $result;
-
+                $nbRecords++;
             }
 
             $countResult = count($results);
@@ -378,12 +385,12 @@ class dynamicsbusiness extends solution
             $resultFinal['values'] = $results;
 
             // put the date modified of the LAST element to set the date_ref
-            $resultFinal['date_ref'] = date('Y-m-d H:i:s', strtotime($results[$countResult - 1]['date_modified']));
+            if ($countResult > 0) {
+                $resultFinal['date_ref'] = date('Y-m-d H:i:s', strtotime($results[$countResult - 1]['date_modified']));
+            }
 
-            // for thes simulation, get the count of results
+            // for the simulation, get the count of results
             $resultFinal['count'] = $countResult;
-
-
 
             return $resultFinal;
         } catch (\Exception $e) {
@@ -424,8 +431,9 @@ class dynamicsbusiness extends solution
                 return [];
             }
 
-            $results = [];
-            $result = [];
+        $results = [];
+        $result = [];
+        $nbRecords = 0;
 
             try {
             
@@ -449,19 +457,23 @@ class dynamicsbusiness extends solution
                     $result['displayName'] = $data['displayName'] ?? null;
                 }
 
-                if (!isset($result['id']) && !empty($data['id']) && !empty($param['query']['id'])) {
-                    $result['id'] = $data['id'];
-                }
-                
-                $results[] = $result;
-                return $results;
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
-                return [];
+            if (!isset($result['id']) && !empty($data['id']) && !empty($param['query']['id'])) {
+                $result['id'] = $data['id'];
             }
-        
+            
+            $results[] = $result;
+            $nbRecords++;
 
-        throw new \Exception("Unknown object type: " . $objectName);
+            // Check if we've reached the limit
+            if (isset($param['limit']) && $nbRecords >= $param['limit']) {
+                return array_slice($results, 0, $param['limit']);
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            return [];
+        }
     }
     /**
      * Validates the required parameters for the read method
