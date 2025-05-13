@@ -315,6 +315,11 @@ class dynamicsbusiness extends solution
 
     public function readData($param): array
     {
+
+        if(!empty($param['ruleParams']['limit'])) {
+            $param['limit'] = $param['ruleParams']['limit'];
+        }
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
