@@ -2550,7 +2550,10 @@ use Symfony\Component\Yaml\Yaml;
                     }
 
                                     // set param parentrule
-                if (!empty($_SESSION['parentmodule']) && !empty($_SESSION['parentmoduleid'])) {
+                if (!empty($_SESSION['parentmodule']) && !empty($_SESSION['parentmoduleid'])
+                
+                && empty($item['value']) // value is equal to 0 when creation, so empty works to discriminate
+                ) {
                     // add the new params parentmodule and parentmoduleid to $p
                     $p['parentmodule'] = $_SESSION['parentmodule'];
                     $p['parentmoduleid'] = $_SESSION['parentmoduleid'];
