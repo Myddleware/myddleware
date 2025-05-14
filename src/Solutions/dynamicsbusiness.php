@@ -331,7 +331,15 @@ class dynamicsbusiness extends solution
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
 
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
+        // intermediate value for the filter date based on the datereference
+        $dateRef = $param['ruleParams']['datereference'];
+
+        // format the dateref to the format of the filter
+        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+
+        $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
+
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filterValue}";
 
         try {
             $response = $client->get($url, ['headers' => $headers]);
@@ -389,9 +397,9 @@ class dynamicsbusiness extends solution
             $resultFinal = [];
             $resultFinal['values'] = $results;
 
-            // put the date modified of the LAST element to set the date_ref
+            // put now in the date_ref
             if ($countResult > 0) {
-                $resultFinal['date_ref'] = date('Y-m-d H:i:s', strtotime($results[$countResult - 1]['date_modified']));
+                $resultFinal['date_ref'] = date('Y-m-d H:i:s');
             }
 
             // for the simulation, get the count of results
@@ -421,8 +429,14 @@ class dynamicsbusiness extends solution
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
 
+        // intermediate value for the filter date based on the datereference
+        $dateRef = $param['ruleParams']['datereference'];
 
-            $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/{$parentmodule}({$parentmoduleId})/{$module}";
+        // format the dateref to the format of the filter
+        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+
+        $filter = urlencode("lastModifiedDateTime gt {$dateRef}");
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filter}";
 
             if (isset($param['query']['id'])) {
                 $url .= "({$param['query']['id']})";
