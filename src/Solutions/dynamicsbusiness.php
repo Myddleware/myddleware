@@ -333,11 +333,28 @@ class dynamicsbusiness extends solution
 
         // intermediate value for the filter date based on the datereference
         $dateRef = $param['ruleParams']['datereference'];
-
         // format the dateref to the format of the filter
         $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
 
-        $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
+        $filterValue = '';
+
+        // just like hubspot, we do an if not empty query else if not empty date_ref else all
+        if (!empty($param['query'])) {
+            foreach ($param['query'] as $key => $value) {
+                $filterValue .= "{$key} eq {$value} and ";
+            }
+
+            // trim the last and
+            $filterValue = rtrim($filterValue, ' and ');
+
+        } else if (!empty($param['date_ref'])) {
+            $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
+        } else {
+            $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
+        }
+
+
+
 
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filterValue}";
 
