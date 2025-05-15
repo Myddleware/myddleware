@@ -103,7 +103,7 @@
 										   id="crontab-{{ value.id }}"
 										   data-id="{{ value.id }}"
 										   data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}"
-										   {{ value.getEnable() ? 'checked' : '' }}>
+										   {{ value.isEnable() ? 'checked' : '' }}>
 								</div>
 							</td>
 							<td class="CRUD-icons">
