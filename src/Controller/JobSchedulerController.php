@@ -509,66 +509,38 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Unable to find Crontab entity.');
         }
 
-        // Get the current running instances from the $entity
-        $currentMaxInstancesString = (string) $entity->getMaxInstances();
-
-        $currentRunningInstancesString = (string) $entity->getRunningInstances();
-
-        // get the new value of the running instances from the request
-        $newRunningInstances = $request->request->get('job_scheduler_cron')['runningInstances'];
-
-        $newRunningInstancesInteger = (int) $newRunningInstances;
-
-        $newDescription = $request->request->get('job_scheduler_cron')['description'];
-        $newPeriod = $request->request->get('job_scheduler_cron')['period'];
-        $newMaxInstances = $request->request->get('job_scheduler_cron')['maxInstances'];
-
-        $currentEnable = $entity->isEnable();
-
-        $newEnable = $request->request->get('job_scheduler_cron')['enable'] ?? 0;
-
-        // Validation: runningInstances should never be greater than maxInstances
-        if ($newRunningInstances > $newMaxInstances) {
-            $this->addFlash('error', 'Running instances cannot be greater than max instances.');
-    
-            return $this->render('JobScheduler/edit_crontab.html.twig', [
-                'entity' => $entity,
-                'edit_form' => $this->createEditFormCrontab($entity)->createView(),
-            ]);
-        }
-
-
-        // if the new value is different from the current value, update the request to not update the running instances
-        if ($entity->getRunningInstances() !== $newRunningInstancesInteger) {
-            $request->request->set('job_scheduler_cron', ['runningInstances' => $currentRunningInstancesString, 'maxInstances' => $currentMaxInstancesString, "period" => $entity->getPeriod(), "command" => $entity->getCommand(), "description" => $entity->getDescription(), "enable" => $entity->isEnable()]);
-        }
-
         $editForm = $this->createEditFormCrontab($entity);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->entityManager->flush();
-
-            return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
-        } else if ($editForm->isSubmitted() && !($editForm->isValid())) {
-            // do an sql statement to update the running instances
-            $this->entityManager->getConnection()->executeQuery('UPDATE cron_job SET running_instances = :running_instances,
-            max_instances = :max_instances,
-            period = :period,
-            description = :description,
-            enable = :enable
+            // Get form data using the form object
+            $formData = $editForm->getData();
             
-            WHERE id = :id', 
-            ['running_instances' => $newRunningInstances,
-             'id' => $id,
-            'max_instances' => $newMaxInstances,
-            'period' => $newPeriod,
-            'description' => $newDescription,
-            'enable' => $newEnable
-            ]);
+            // Get the new values from the form
+            $newRunningInstances = $editForm->get('runningInstances')->getData();
+            $newMaxInstances = $editForm->get('maxInstances')->getData();
+            $newDescription = $editForm->get('description')->getData();
+            $newPeriod = $editForm->get('period')->getData();
+            $newEnable = $editForm->get('enable')->getData() ?? 0;
+
+            // Validation: runningInstances should never be greater than maxInstances
+            if ($newRunningInstances > $newMaxInstances) {
+                $this->addFlash('error', 'Running instances cannot be greater than max instances.');
+        
+                return $this->render('JobScheduler/edit_crontab.html.twig', [
+                    'entity' => $entity,
+                    'edit_form' => $editForm->createView(),
+                ]);
+            }
+
+            // Update the entity
+            $entity->setDescription($newDescription);
+            $entity->setPeriod($newPeriod);
+            $entity->setMaxInstances($newMaxInstances);
+            $entity->setEnable($newEnable);
+
             $this->entityManager->flush();
 
-            // redirect to the show view
             return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
         }
 
@@ -576,6 +548,48 @@ class JobSchedulerController extends AbstractController
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/{id}/enable_crontab/{enable}", name="enable_crontab", methods={"POST"})
+     */
+    public function enableDisableCrontab(Request $request, $id, $enable): Response
+    {
+        // Check if it's a valid request
+        if (!$request->isXmlHttpRequest()) {
+            throw $this->createAccessDeniedException('Only AJAX requests are allowed');
+        }
+
+        // Validate enable parameter
+        if (!in_array($enable, ['0', '1'])) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Invalid enable value'
+            ], 400);
+        }
+
+        $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+        if (!$entity) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Crontab not found'
+            ], 404);
+        }
+
+        try {
+            $entity->setEnable((bool)$enable);
+            $this->entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Crontab status updated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Failed to update crontab status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
