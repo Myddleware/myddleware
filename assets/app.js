@@ -30,7 +30,7 @@ require('./js/lib/jquery_fancybox/jquery.fancybox.pack.js')
 require('./js/lib/jquery_scrollbox/jquery.scrollbox.min.js')
 require('./js/lib/jquery_qtip/jquery.qtip.min.js')
 require('./js/lib/jquery_myddleware/function.js')
-require('./js/account.js')
+
 require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
@@ -68,6 +68,15 @@ if (window.location.href.includes('workflow/list')) {
 
 if (window.location.href.includes('rule/view')) {
     require('./js/workflow-toggle-list.js')
+}
+
+// if windows loction includes rule/account
+if (window.location.href.includes('rule/account')) {
+    require('./js/account.js')
+}
+
+if (window.location.href.includes('rule/jobscheduler/crontab_list')) {
+    require('./js/crontab-list-toggle.js')
 }
 
 
