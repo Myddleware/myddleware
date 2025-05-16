@@ -213,24 +213,24 @@ class AccountManager {
           </form>
             
           <!-- Log Management -->
-          <div class="row-logs">
           <h3>${t.sections.logs}</h3>
-          <div class="form-group">
-            <label>${t.buttons.download_logs}</label>
-            <div>
-              <button id="download-logs" class="btn-log btn-download">
-                <i class="fas fa-download me-2"></i>${t.buttons.download_logs}
-              </button>
+          <div class="row-logs">
+            <div class="form-group">
+              <label>${t.buttons.download_logs}</label>
+              <div>
+                <button id="download-logs" class="btn-log btn-download">
+                  <i class="fas fa-download me-2"></i>${t.buttons.download_logs}
+                </button>
+              </div>
             </div>
-          </div>
-          
-          <div class="form-group">
-            <label>${t.buttons.empty_logs}</label>
-            <div>
-              <button id="empty-logs" class="btn-log btn-delete">
-                <i class="fas fa-trash-alt me-2"></i>${t.buttons.empty_logs}
-              </button>
-            </div>
+            
+            <div class="form-group">
+              <label>${t.buttons.empty_logs}</label>
+              <div>
+                <button id="empty-logs" class="btn-log btn-delete">
+                  <i class="fas fa-trash-alt me-2"></i>${t.buttons.empty_logs}
+                </button>
+              </div>
             </div>
           </div>
           
