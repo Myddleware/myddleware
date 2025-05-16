@@ -657,3 +657,12 @@ label[for="update_password_oldPassword"] {
 .password-strength-meter {
     width: 60% !important;
   }
+
+
+/* puting the logs buttons in a row for the modern account page */
+.row-logs {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }

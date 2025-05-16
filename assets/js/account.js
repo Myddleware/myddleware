@@ -213,6 +213,7 @@ class AccountManager {
           </form>
             
           <!-- Log Management -->
+          <div class="row-logs">
           <h3>${t.sections.logs}</h3>
           <div class="form-group">
             <label>${t.buttons.download_logs}</label>
@@ -230,9 +231,9 @@ class AccountManager {
                 <i class="fas fa-trash-alt me-2"></i>${t.buttons.empty_logs}
               </button>
             </div>
+            </div>
           </div>
-        </div>
-        
+          
         <!-- Security Tab -->
         <div id="security-tab" class="tab-content" style="display: none;">
           <!-- Password Management -->
