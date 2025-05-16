@@ -31,11 +31,26 @@
 }
 
 .toggle-switch {
+  /* Base size variables */
+  --toggle-size: 60px;
+  --toggle-height: 30px;
+  --toggle-knob-size: 22px;
+  --toggle-knob-offset: 4px;
+  --toggle-checked-x: 30px;
+
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 30px;
+  width: var(--toggle-size);
+  height: var(--toggle-height);
   z-index: 1;
+}
+
+.toggle-switch.small {
+  --toggle-size: 45px;
+  --toggle-height: 23px;
+  --toggle-knob-size: 17px;
+  --toggle-knob-offset: 3px;
+  --toggle-checked-x: 17px;
 }
 
 .toggle-switch input {
@@ -63,10 +78,10 @@
 .toggle-label:before {
   position: absolute;
   content: "";
-  height: 22px;
-  width: 22px;
-  left: 4px;
-  bottom: 4px;
+  height: var(--toggle-knob-size);
+  width: var(--toggle-knob-size);
+  left: var(--toggle-knob-offset);
+  bottom: var(--toggle-knob-offset);
   background-color: white;
   transition: .4s;
   border-radius: 50%;
@@ -79,7 +94,7 @@
 }
 
 .toggle-switch input:checked + .toggle-label:before {
-  transform: translateX(30px);
+  transform: translateX(var(--toggle-checked-x));
 }
 
 /* Hover and focus states for better accessibility */

@@ -129,7 +129,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             {{ form_start(twoFactorAuthForm) }}
             <div class="form-group toggle-switch-container">
                 <label>Active</label>
-                <div class="toggle-switch">
+                <div class="toggle-switch small">
                     {% if not smtpConfigured %}
                         {{ form_widget(twoFactorAuthForm.enabled, { 'attr': {'disabled': 'disabled'} }) }}
                         <span class="toggle-slider"></span>

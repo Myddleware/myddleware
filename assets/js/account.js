@@ -263,7 +263,7 @@ class AccountManager {
           <h3>${t.sections.twofa}</h3>
           <div class="form-group toggle-switch-container">
             <label>${t.fields.enable_twofa || 'Enable Two-Factor Authentication'}</label>
-            <div class="toggle-switch">
+            <div class="toggle-switch small">
               <input type="checkbox" id="twofa-enabled" name="enabled" />
               <span class="toggle-label"></span>
             </div>
