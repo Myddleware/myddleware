@@ -344,6 +344,7 @@
   margin-top: 0.5rem;
   border-radius: 5px;
   overflow: hidden;
+  width: 60% !important;
 }
 
 .password-strength-meter div {

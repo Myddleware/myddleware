@@ -246,7 +246,7 @@ class AccountManager {
             <div class="form-group">
               <label for="new-password">${t.fields.new_password}</label>
               <input type="password" id="new-password" name="plainPassword" class="form-control" />
-              <div class="password-strength-meter">
+              <div id="#password-strength-meter-reduce-width" class="password-strength-meter">
                 <div id="password-strength-bar"></div>
               </div>
             </div>
