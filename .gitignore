@@ -133,3 +133,4 @@ composer.phar
 /vendor/
 ###< symfony/framework-bundle ###
 delete-cache-logs-myddleware.ps1
+/.env.test
