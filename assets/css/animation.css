@@ -648,3 +648,7 @@ label[for="update_password_plainPassword_second"] {
 label[for="update_password_oldPassword"] {
     font-weight: 600 !important;
 }
+
+#password-strength-meter-reduce-width {
+    width: 60% !important;
+}
