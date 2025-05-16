@@ -1,0 +1,8 @@
+doctrine:
+    dbal:
+        # Use the same database as your development environment for testing
+        # This ensures you have access to the connector with ID 77
+        url: '%env(resolve:DATABASE_URL)%'
+        driver: 'pdo_mysql'
+        server_version: '5.7'
+        charset: utf8mb4 

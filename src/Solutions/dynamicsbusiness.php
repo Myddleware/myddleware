@@ -511,6 +511,42 @@ class dynamicsbusiness extends solution
             return [];
         }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function create($param, $record, $idDoc = null) {
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}";
+        
+        try {
+            $response = $client->post($url, [
+                'headers' => $headers,
+                'json' => $record
+            ]);
+            
+            $data = json_decode($response->getBody(), true);
+            
+            if (!isset($data['id'])) {
+                throw new \Exception('No ID returned from API response');
+            }
+            
+            return [
+                'id' => $data['id'],
+                'status' => 'success'
+            ];
+            
+        } catch (\Exception $e) {
+            $this->logger->error('Error creating record: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
     /**
      * Validates the required parameters for the read method
      * 
