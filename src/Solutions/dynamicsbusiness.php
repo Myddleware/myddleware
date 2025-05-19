@@ -575,11 +575,6 @@ class dynamicsbusiness extends solution
             $responseBody = $getResponse->getBody()->getContents();
             $responseData = json_decode($responseBody, true);
             
-            // Debug: Log response details
-            $this->logger->debug('GET Response Status: ' . $getResponse->getStatusCode());
-            $this->logger->debug('GET Response Headers: ' . json_encode($getResponse->getHeaders()));
-            $this->logger->debug('GET Response Body: ' . $responseBody);
-            
             // Get ETag from response body
             $etag = $responseData['@odata.etag'] ?? null;
             
