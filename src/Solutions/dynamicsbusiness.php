@@ -323,9 +323,6 @@ class dynamicsbusiness extends solution
             $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
         }
 
-
-
-
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filterValue}";
 
         try {
