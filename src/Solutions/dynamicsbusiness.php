@@ -717,8 +717,11 @@ class dynamicsbusiness extends solution
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         $targetId = $data['target_id'];
+
+        $module = $param['module'];
+        list($companyId, $module) = explode('_', $module, 2);
         
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}({$targetId})";
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
         try {
             $response = $client->delete($url, [
