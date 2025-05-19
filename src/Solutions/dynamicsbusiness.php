@@ -518,11 +518,14 @@ class dynamicsbusiness extends solution
     public function create($param, $record, $idDoc = null) {
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
+
+        $module = $param['module'];
+        list($companyId, $module) = explode('_', $module, 2);
         
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}";
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
         
         try {
             $response = $client->post($url, [
@@ -554,6 +557,9 @@ class dynamicsbusiness extends solution
     {
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
+
+        $module = $param['module'];
+        list($companyId, $module) = explode('_', $module, 2);
         
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
@@ -562,7 +568,7 @@ class dynamicsbusiness extends solution
         // Remove target_id from the data as it's not a valid field for the API
         unset($data['target_id']);
         
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}({$targetId})";
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
         try {
             // First get the current record to obtain its ETag
