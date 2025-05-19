@@ -676,5 +676,36 @@ class dynamicsbusiness extends solution
             throw $e; 
         }
     }
+
+    /**
+     * @throws \Exception
+     */
+    protected function delete($param, $data)
+    {
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}({$targetId})";
+        
+        try {
+            $response = $client->delete($url, [
+                'headers' => $headers
+            ]);
+            
+            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
+                return $targetId;
+            } else {
+                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
+            }
+            
+        } catch (\Exception $e) {
+            $this->logger->error('Error deleting record: ' . $e->getMessage());
+            throw $e;
+        }
+    }
 }
 ?>
