@@ -209,19 +209,6 @@ class dynamicsbusiness extends solution
         return "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/";
     }
 
-    public function getOneCustomer($companyId, $customerId)
-    {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $url = $this->getBaseApiUrl() . "companies({$companyId})/customers({$customerId})";
-
-        $response = $client->get($url, ['headers' => $headers]);
-        $data = json_decode($response->getBody(), true);
-
-        return $data;
-    }
-
     // Permet de récupérer tous les modules accessibles à l'utilisateur
     public function get_modules($type = 'source')
     {
