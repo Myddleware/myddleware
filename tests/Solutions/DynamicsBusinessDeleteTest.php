@@ -69,11 +69,16 @@ class DynamicsBusinessDeleteTest extends KernelTestCase
     public function testDeleteCustomer()
     {
 
-        $CustomerIdTestFromEnv = $_ENV['CUSTOMER_ID_TEST'];
+        // $CustomerIdTestFromEnv = $_ENV['CUSTOMER_ID_TEST'];
+
+        $CustomerIdTestFromEnv = json_decode(file_get_contents(dirname(__DIR__, 2).'/tests/Solutions/ids-to-delete.json'), true);
 
         if (empty($CustomerIdTestFromEnv)) {
             throw new \RuntimeException('CUSTOMER_ID_TEST environment variable is not set.');
         }
+
+        foreach ($CustomerIdTestFromEnv['ids'] as $key => $value) {
+        
 
         // Arrange
         $param = [
@@ -84,7 +89,7 @@ class DynamicsBusinessDeleteTest extends KernelTestCase
             ],
             'data' => [
                 'doc1' => [
-                    'target_id' => $CustomerIdTestFromEnv
+                    'target_id' => $value
                 ]
             ]
         ];
@@ -101,6 +106,8 @@ class DynamicsBusinessDeleteTest extends KernelTestCase
         $this->assertArrayHasKey('id', $result['doc1']);
         $this->assertArrayHasKey('error', $result['doc1']);
         $this->assertFalse($result['doc1']['error']);
+
+    }
     }
 
     public function InsertJobIdInParams($param)
