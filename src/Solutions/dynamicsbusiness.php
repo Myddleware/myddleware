@@ -559,9 +559,34 @@ class dynamicsbusiness extends solution
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         $targetId = $data['target_id'];
         
+        // Remove target_id from the data as it's not a valid field for the API
+        unset($data['target_id']);
+        
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}({$targetId})";
         
         try {
+            // First get the current record to obtain its ETag
+            $getResponse = $client->get($url, ['headers' => $headers]);
+            
+            // Get response body content once
+            $responseBody = $getResponse->getBody()->getContents();
+            $responseData = json_decode($responseBody, true);
+            
+            // Debug: Log response details
+            $this->logger->debug('GET Response Status: ' . $getResponse->getStatusCode());
+            $this->logger->debug('GET Response Headers: ' . json_encode($getResponse->getHeaders()));
+            $this->logger->debug('GET Response Body: ' . $responseBody);
+            
+            // Get ETag from response body
+            $etag = $responseData['@odata.etag'] ?? null;
+            
+            if (!$etag) {
+                throw new \Exception('Could not obtain ETag for the record. Response status: ' . $getResponse->getStatusCode());
+            }
+            
+            // Add the ETag to the headers for the PATCH request
+            $headers['If-Match'] = $etag;
+            
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
