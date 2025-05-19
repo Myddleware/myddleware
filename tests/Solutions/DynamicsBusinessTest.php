@@ -57,11 +57,15 @@ class DynamicsBusinessTest extends KernelTestCase
             $formulaManager
         );
 
-        // Fetch connector with ID 77 and build paramConnexion
+        // Fetch connector with ID from the .env.test and build paramConnexion
         $connectorRepo = $entityManager->getRepository(\App\Entity\Connector::class);
-        $connector = $connectorRepo->find(77);
+        $connectorIdFromEnv = $_ENV['ID_CONNECTOR_DYNAMICS_TEST'];
+        if (empty($connectorIdFromEnv)) {
+            throw new \RuntimeException('ID_CONNECTOR_DYNAMICS_TEST environment variable is not set.');
+        }
+        $connector = $connectorRepo->find($connectorIdFromEnv);
         if (!$connector) {
-            throw new \RuntimeException('Connector with ID 77 not found.');
+            throw new \RuntimeException('Connector with ID '.$connectorIdFromEnv.' not found.');
         }
         $paramConnexion = [];
         foreach ($connector->getConnectorParams() as $param) {
