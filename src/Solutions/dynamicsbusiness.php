@@ -548,6 +548,40 @@ class dynamicsbusiness extends solution
     }
 
     /**
+     * @throws \Exception
+     */
+    protected function update($param, $data, $idDoc = null)
+    {
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$param['module']}({$targetId})";
+        
+        try {
+            $response = $client->patch($url, [
+                'headers' => $headers,
+                'json' => $data
+            ]);
+            
+            $data = json_decode($response->getBody(), true);
+            
+            if (!isset($data['id'])) {
+                throw new \Exception('No ID returned from API response');
+            }
+            
+            return $data['id'];
+            
+        } catch (\Exception $e) {
+            $this->logger->error('Error updating record: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * Validates the required parameters for the read method
      * 
      * @param array $param The parameters to validate
