@@ -539,10 +539,7 @@ class dynamicsbusiness extends solution
                 throw new \Exception('No ID returned from API response');
             }
             
-            return [
-                'id' => $data['id'],
-                'status' => 'success'
-            ];
+            return $data['id'];
             
         } catch (\Exception $e) {
             $this->logger->error('Error creating record: ' . $e->getMessage());
