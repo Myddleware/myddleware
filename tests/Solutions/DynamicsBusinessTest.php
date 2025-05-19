@@ -14,12 +14,12 @@ $dotenv = new Dotenv();
 $dotenv->loadEnv(dirname(__DIR__, 2).'/.env.test', 'APP_ENV', 'test');
 
 // Debug: Print environment variables and file path
-var_dump([
-    'ENV_FILE_PATH' => dirname(__DIR__, 2).'/.env.test',
-    'DATABASE_URL' => getenv('DATABASE_URL'),
-    'APP_ENV' => getenv('APP_ENV'),
-    'COMPANY_ID' => getenv('COMPANY_ID')
-]);
+// var_dump([
+//     'ENV_FILE_PATH' => dirname(__DIR__, 2).'/.env.test',
+//     'DATABASE_URL' => getenv('DATABASE_URL'),
+//     'APP_ENV' => getenv('APP_ENV'),
+//     'COMPANY_ID' => getenv('COMPANY_ID')
+// ]);
 
 class DynamicsBusinessTest extends KernelTestCase
 {
@@ -33,11 +33,11 @@ class DynamicsBusinessTest extends KernelTestCase
         $container = static::getContainer();
 
         // Debug: Print environment variables from $_ENV
-        var_dump([
-            'DATABASE_URL' => $_ENV['DATABASE_URL'] ?? 'not set',
-            'APP_ENV' => $_ENV['APP_ENV'] ?? 'not set',
-            'COMPANY_ID' => $_ENV['COMPANY_ID'] ?? 'not set'
-        ]);
+        // var_dump([
+        //     'DATABASE_URL' => $_ENV['DATABASE_URL'] ?? 'not set',
+        //     'APP_ENV' => $_ENV['APP_ENV'] ?? 'not set',
+        //     'COMPANY_ID' => $_ENV['COMPANY_ID'] ?? 'not set'
+        // ]);
 
         $logger = $container->get('logger');
         $connection = $container->get('doctrine.dbal.default_connection');
