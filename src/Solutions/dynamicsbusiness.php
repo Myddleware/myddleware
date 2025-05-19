@@ -436,9 +436,6 @@ class dynamicsbusiness extends solution
 
         $this->validateReadParameters($param);
 
-        $tenantId = $this->paramConnexion['tenant_id'];
-        $env = isset($this->paramConnexion['environment']) ? $this->paramConnexion['environment'] : 'production';
-
         $module = $param['module'];
 
         list($companyId, $module) = explode('_', $module, 2);
