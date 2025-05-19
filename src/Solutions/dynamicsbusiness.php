@@ -266,24 +266,6 @@ class dynamicsbusiness extends solution
 
     }
 
-    public function getCustomers($companyId)
-    {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $url = $this->getBaseApiUrl() . "companies({$companyId})/customers";
-
-        $response = $client->get($url, ['headers' => $headers]);
-        $data = json_decode($response->getBody(), true);
-
-        $result = [];
-        foreach ($data['value'] as $customer) {
-            $result[$customer['id']] = $customer['displayName'];
-        }
-
-        return $result;
-    }
-
     public function getCompanies()
     {
         $client = $this->getApiClient();
