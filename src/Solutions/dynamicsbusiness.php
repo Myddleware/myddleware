@@ -35,6 +35,14 @@ class dynamicsbusiness extends solution
     public bool $connexion_valide = false;
     protected array $moduleFields = [];
 
+    protected bool $readDeletion = true;
+    protected bool $sendDeletion = true;
+
+    protected $requiredFields = [
+        ['id', 'lastModifiedDateTime']
+    ];
+
+
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
