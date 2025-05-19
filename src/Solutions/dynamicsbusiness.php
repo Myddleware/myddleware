@@ -492,7 +492,9 @@ class dynamicsbusiness extends solution
         $headers = $this->getApiHeaders();
 
         $module = $param['module'];
-        list($companyId, $module) = explode('_', $module, 2);
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
         
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
@@ -528,7 +530,9 @@ class dynamicsbusiness extends solution
         $headers = $this->getApiHeaders();
 
         $module = $param['module'];
-        list($companyId, $module) = explode('_', $module, 2);
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
         
         $parentmodule = $param['ruleParams']['parentmodule'];
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
@@ -719,7 +723,9 @@ class dynamicsbusiness extends solution
         $targetId = $data['target_id'];
 
         $module = $param['module'];
-        list($companyId, $module) = explode('_', $module, 2);
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
