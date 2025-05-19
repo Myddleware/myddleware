@@ -1,27 +1,17 @@
 <?php
 
-namespace App\Tests\Solutions;
+namespace App\Tests\Solutions\DynamicsBusiness\Create;
 
 use App\Solutions\dynamicsbusiness;
 use PHPUnit\Framework\TestCase;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Dotenv\Dotenv;
 
 // Load .env.test file
 $dotenv = new Dotenv();
-$dotenv->loadEnv(dirname(__DIR__, 2).'/.env.test', 'APP_ENV', 'test');
+$dotenv->loadEnv(dirname(__DIR__, 4).'/.env.test', 'APP_ENV', 'test');
 
-// Debug: Print environment variables and file path
-// var_dump([
-//     'ENV_FILE_PATH' => dirname(__DIR__, 2).'/.env.test',
-//     'DATABASE_URL' => getenv('DATABASE_URL'),
-//     'APP_ENV' => getenv('APP_ENV'),
-//     'COMPANY_ID' => getenv('COMPANY_ID')
-// ]);
-
-class DynamicsBusinessTest extends KernelTestCase
+class CreateVendorTest extends KernelTestCase
 {
     private dynamicsbusiness $dynamicsBusiness;
     private array $paramConnexion;
@@ -31,13 +21,6 @@ class DynamicsBusinessTest extends KernelTestCase
     {
         self::bootKernel();
         $container = static::getContainer();
-
-        // Debug: Print environment variables from $_ENV
-        // var_dump([
-        //     'DATABASE_URL' => $_ENV['DATABASE_URL'] ?? 'not set',
-        //     'APP_ENV' => $_ENV['APP_ENV'] ?? 'not set',
-        //     'COMPANY_ID' => $_ENV['COMPANY_ID'] ?? 'not set'
-        // ]);
 
         $logger = $container->get('logger');
         $connection = $container->get('doctrine.dbal.default_connection');
@@ -81,24 +64,25 @@ class DynamicsBusinessTest extends KernelTestCase
         $this->companyId = $_ENV['COMPANY_ID'];
     }
 
-    public function testCreateCustomer()
+    public function testCreateVendor()
     {
+        // Generate a unique vendor number
+        $vendorNumber = 'V' . date('YmdHis') . rand(1000, 9999);
+        
         // Arrange
         $param = [
-            'module' => 'customers',
+            'module' => 'vendors',
             'ruleParams' => [
                 'parentmodule' => 'companies',
                 'parentmoduleid' => $this->companyId
             ]
         ];
-
-        $generatedCustommerName = 'Test Customer ' . date('YmdHis') . rand(1000, 9999);
-        $randomlygeneratedNumber = rand(1000, 9999);
         
         $record = [
-            'displayName' => $generatedCustommerName,
-            'number' => 'C' . $randomlygeneratedNumber,
-            'email' => 'test@example.com'
+            'displayName' => 'Test Vendor ' . $vendorNumber,
+            'number' => $vendorNumber,
+            'email' => 'vendor.' . $vendorNumber . '@example.com',
+            'vendorPostingGroup' => 'DOMESTIC'
         ];
 
         // Act
@@ -109,5 +93,4 @@ class DynamicsBusinessTest extends KernelTestCase
         $this->assertArrayHasKey('id', $result);
         $this->assertNotEmpty($result['id']);
     }
-
 } 
