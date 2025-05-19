@@ -46,7 +46,7 @@ class dynamicsbusiness extends solution
         $scope = 'https://api.businesscentral.dynamics.com/.default';
         $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
 
-        $client = new Client();
+        $client = $this->getApiClient();
         $response = $client->post($tokenUrl, [
             'form_params' => [
                 'grant_type' => 'client_credentials',
@@ -115,6 +115,7 @@ class dynamicsbusiness extends solution
     
             $xml = simplexml_load_string($response);
 
+            // register the namespaces in order to be able to use xpath so we can dynamically get the entity type
             $xml->registerXPathNamespace('edmx', 'http://docs.oasis-open.org/odata/ns/edmx');
             $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
 
