@@ -534,7 +534,7 @@ class dynamicsbusiness extends solution
     protected function update($param, $data, $idDoc = null)
     {
     try {
-        
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
@@ -618,6 +618,8 @@ class dynamicsbusiness extends solution
 
     protected function getEntityListFromMetadata($companyId): array
     {
+        
+    try {
 
         if (!$this->token) {
             throw new \Exception("Access token is not available. Please login first.");
@@ -634,7 +636,6 @@ class dynamicsbusiness extends solution
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
         $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/\$metadata";
 
-        try {
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
             $xmlString = $response->getBody()->getContents();
