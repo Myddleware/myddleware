@@ -533,6 +533,8 @@ class dynamicsbusiness extends solution
      */
     protected function update($param, $data, $idDoc = null)
     {
+    try {
+        
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
@@ -550,7 +552,6 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
-        try {
             // First get the current record to obtain its ETag
             $getResponse = $client->get($url, ['headers' => $headers]);
             
