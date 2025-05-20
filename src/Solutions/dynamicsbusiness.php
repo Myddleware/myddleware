@@ -710,8 +710,9 @@ class dynamicsbusiness extends solution
      */
     protected function delete($param, $data)
     {
-    try {
         
+    try {
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
         
