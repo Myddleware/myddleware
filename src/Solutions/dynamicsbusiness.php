@@ -42,6 +42,15 @@ class dynamicsbusiness extends solution
         ['id', 'lastModifiedDateTime']
     ];
 
+    public function getFieldsLogin(): array
+    {
+        return [
+            ['name' => 'tenant_id', 'type' => PasswordType::class, 'label' => 'solution.fields.tenant_id'],
+            ['name' => 'client_id', 'type' => PasswordType::class, 'label' => 'solution.fields.client_id'],
+            ['name' => 'client_secret', 'type' => PasswordType::class, 'label' => 'solution.fields.client_secret'],
+            ['name' => 'environment', 'type' => TextType::class, 'label' => 'solution.fields.environment'],
+        ];
+    }
 
     public function login($paramConnexion)
     {
@@ -81,15 +90,6 @@ class dynamicsbusiness extends solution
         }
     }
 
-    public function getFieldsLogin(): array
-    {
-        return [
-            ['name' => 'tenant_id', 'type' => PasswordType::class, 'label' => 'solution.fields.tenant_id'],
-            ['name' => 'client_id', 'type' => PasswordType::class, 'label' => 'solution.fields.client_id'],
-            ['name' => 'client_secret', 'type' => PasswordType::class, 'label' => 'solution.fields.client_secret'],
-            ['name' => 'environment', 'type' => TextType::class, 'label' => 'solution.fields.environment'],
-        ];
-    }
 
     public function get_module_fields($moduleKey, $type = 'source', $param = null): array
     {
