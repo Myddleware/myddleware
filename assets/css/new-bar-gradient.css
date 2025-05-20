@@ -2,3 +2,8 @@
     background: linear-gradient(135deg, #2c2c54, #03c4eb) !important;
     color: white !important;
 }
+
+.force-clear-background-color {
+    /* we use this class to force the background color to white for the table header, because the merge of the colors makes a light gray. We don't apply it to the description because it would turn it completely white */
+    background-color: #ffffff !important;
+}
