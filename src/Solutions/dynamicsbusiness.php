@@ -35,18 +35,37 @@ class dynamicsbusiness extends solution
     public bool $connexion_valide = false;
     protected array $moduleFields = [];
 
+    protected bool $readDeletion = true;
+    protected bool $sendDeletion = true;
+
+    protected array $requiredFields = [
+        ['id', 'lastModifiedDateTime']
+    ];
+
+    public function getFieldsLogin(): array
+    {
+        return [
+            ['name' => 'tenant_id', 'type' => PasswordType::class, 'label' => 'solution.fields.tenant_id'],
+            ['name' => 'client_id', 'type' => PasswordType::class, 'label' => 'solution.fields.client_id'],
+            ['name' => 'client_secret', 'type' => PasswordType::class, 'label' => 'solution.fields.client_secret'],
+            ['name' => 'environment', 'type' => TextType::class, 'label' => 'solution.fields.environment'],
+        ];
+    }
+
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
 
-        $tenantId = $this->paramConnexion['tenant_id'];
-        $clientId = $this->paramConnexion['client_id'];
-        $clientSecret = $this->paramConnexion['client_secret'];
+        try {
+
+            $tenantId = $this->paramConnexion['tenant_id'];
+            $clientId = $this->paramConnexion['client_id'];
+            $clientSecret = $this->paramConnexion['client_secret'];
 
         $scope = 'https://api.businesscentral.dynamics.com/.default';
         $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
 
-        $client = new Client();
+        $client = $this->getApiClient();
         $response = $client->post($tokenUrl, [
             'form_params' => [
                 'grant_type' => 'client_credentials',
@@ -62,18 +81,64 @@ class dynamicsbusiness extends solution
             $this->token = $data['access_token'];
             $this->connexion_valide = true;
         } else {
-            throw new \Exception("Unable to retrieve access token");
+                throw new \Exception("Unable to retrieve access token");
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
-    public function getFieldsLogin(): array
+    // Permet de récupérer tous les modules accessibles à l'utilisateur
+    public function get_modules($type = 'source')
     {
-        return [
-            ['name' => 'tenant_id', 'type' => PasswordType::class, 'label' => 'solution.fields.tenant_id'],
-            ['name' => 'client_id', 'type' => PasswordType::class, 'label' => 'solution.fields.client_id'],
-            ['name' => 'client_secret', 'type' => PasswordType::class, 'label' => 'solution.fields.client_secret'],
-            ['name' => 'environment', 'type' => TextType::class, 'label' => 'solution.fields.environment'],
-        ];
+        try {
+
+            $result = [];
+            $resultSaveIds = [];
+
+        $companies = $this->getCompanies();
+        if (empty($companies)) {
+            throw new \Exception("Could not retrieve companies");
+        }
+
+        if (!$this->connexion_valide) {
+            throw new \Exception("Connection not validated. Please ensure login parameters are correct and login() was successful.");
+        }
+
+        foreach ($companies as $companyId => $companyName) {
+                $entityList = $this->getEntityListFromMetadata($companyId);
+                if (empty($entityList)) {
+                    throw new \Exception("No entities found for company {$companyName}");
+                }
+
+                foreach ($entityList as $moduleName) {
+                    $displayModuleName = ucfirst($moduleName); 
+                    
+                    $displayString = "Company: {$companyName} _ Module: {$displayModuleName}";
+                    $key = "{$companyId}_{$moduleName}";
+
+                    $result[$key] = $displayString;
+                    $resultSaveIds[$key] = $displayString; 
+                }
+        }
+
+        if (count($result) < 10 && count($result) > 0) { // Log small results for review
+            $this->logger->warning("Not enough modules found for company {$companyName}. Found " . count($result) . " modules.");
+            $this->logger->debug("Module list for company {$companyName}:", ['modules' => $result]);
+            throw new \Exception("Not enough modules found for company {$companyName}. Please check the logs for details.");
+        }
+
+        $_SESSION['modules'] = $result;
+        $_SESSION['resultSaveIds'] = $resultSaveIds;
+        return $result;
+
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
     }
 
     public function get_module_fields($moduleKey, $type = 'source', $param = null): array
@@ -115,6 +180,7 @@ class dynamicsbusiness extends solution
     
             $xml = simplexml_load_string($response);
 
+            // register the namespaces in order to be able to use xpath so we can dynamically get the entity type
             $xml->registerXPathNamespace('edmx', 'http://docs.oasis-open.org/odata/ns/edmx');
             $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
 
@@ -208,98 +274,13 @@ class dynamicsbusiness extends solution
         return "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/";
     }
 
-    public function getOneCustomer($companyId, $customerId)
-    {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $url = $this->getBaseApiUrl() . "companies({$companyId})/customers({$customerId})";
-
-        $response = $client->get($url, ['headers' => $headers]);
-        $data = json_decode($response->getBody(), true);
-
-        return $data;
-    }
-
-    // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
-    {
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Called with type: {$type}");
-
-        $result = [];
-        $resultSaveIds = [];
-
-        $companies = $this->getCompanies();
-        error_log("[Myddleware_DynamicsBusiness] get_modules: getCompanies() returned: " . count($companies) . " companies.");
-        if (empty($companies)) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: No companies found. Returning empty result.");
-        }
-
-        if (!$this->connexion_valide) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Connection not validated. login() might have failed or not been called.");
-            throw new \Exception("Connection not validated. Please ensure login parameters are correct and login() was successful.");
-        }
-
-        foreach ($companies as $companyId => $companyName) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Processing company ID: {$companyId}, Name: {$companyName}");
-            try {
-                $entityList = $this->getEntityListFromMetadata($companyId);
-                error_log("[Myddleware_DynamicsBusiness] get_modules: getEntityListFromMetadata for company ID {$companyId} returned: " . count($entityList) . " entities.");
-                if (count($entityList) > 0) {
-                     error_log("[Myddleware_DynamicsBusiness] get_modules: Entities for company ID {$companyId}: " . implode(", ", $entityList));
-                }
-
-                foreach ($entityList as $moduleName) {
-                    error_log("[Myddleware_DynamicsBusiness] get_modules: Adding module '{$moduleName}' for company '{$companyName}'.");
-                    $displayModuleName = ucfirst($moduleName); 
-                    
-                    $displayString = "Company: {$companyName} _ Module: {$displayModuleName}";
-                    $key = "{$companyId}_{$moduleName}";
-
-                    $result[$key] = $displayString;
-                    $resultSaveIds[$key] = $displayString; 
-                }
-            } catch (\Exception $e) {
-                $errorMessage = "[Myddleware_DynamicsBusiness] get_modules: Failed to get modules for company '{$companyName}' (ID: {$companyId}). Exception: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-                error_log($errorMessage);
-                $this->logger->error($errorMessage);
-            }
-        }
-
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Final result count: " . count($result));
-        if (count($result) < 10 && count($result) > 0) { // Log small results for review
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Final result content: " . print_r($result, true));
-        }
-
-        $_SESSION['modules'] = $result;
-        $_SESSION['resultSaveIds'] = $resultSaveIds;
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Modules saved to session.");
-        return $result;
-
-    }
-
-    public function getCustomers($companyId)
-    {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $url = $this->getBaseApiUrl() . "companies({$companyId})/customers";
-
-        $response = $client->get($url, ['headers' => $headers]);
-        $data = json_decode($response->getBody(), true);
-
-        $result = [];
-        foreach ($data['value'] as $customer) {
-            $result[$customer['id']] = $customer['displayName'];
-        }
-
-        return $result;
-    }
 
     public function getCompanies()
     {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
+        try {
+
+            $client = $this->getApiClient();
+            $headers = $this->getApiHeaders();
 
         $url = $this->getBaseApiUrl() . "companies";
 
@@ -310,7 +291,12 @@ class dynamicsbusiness extends solution
             $result[$company['id']] = $company['name'];
         }
 
-        return $result;
+            return $result;
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
     }
 
     public function readData($param): array
@@ -334,7 +320,7 @@ class dynamicsbusiness extends solution
         // intermediate value for the filter date based on the datereference
         $dateRef = $param['ruleParams']['datereference'];
         // format the dateref to the format of the filter
-        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+        $dateRef = $this->dateTimeFromMyddleware($dateRef);
 
         $filterValue = '';
 
@@ -352,9 +338,6 @@ class dynamicsbusiness extends solution
         } else {
             $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
         }
-
-
-
 
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filterValue}";
 
@@ -392,7 +375,7 @@ class dynamicsbusiness extends solution
 
                     // Add date_modified from the record's lastModifiedDateTime
                     if (!empty($record['lastModifiedDateTime'])) {
-                        $result['date_modified'] = date('Y-m-d H:i:s', strtotime($record['lastModifiedDateTime']));
+                        $result['date_modified'] = $this->dateTimeToMyddleware($record['lastModifiedDateTime']);
                     }
                 } else {
                     // Fallback to default fields if $param['fields'] is not set
@@ -424,20 +407,20 @@ class dynamicsbusiness extends solution
 
             return $resultFinal;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return [];
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
     public function read($param)
     {
+        try {
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
         $this->validateReadParameters($param);
-
-        $tenantId = $this->paramConnexion['tenant_id'];
-        $env = isset($this->paramConnexion['environment']) ? $this->paramConnexion['environment'] : 'production';
 
         $module = $param['module'];
 
@@ -450,7 +433,7 @@ class dynamicsbusiness extends solution
         $dateRef = $param['ruleParams']['datereference'];
 
         // format the dateref to the format of the filter
-        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+        $dateRef = $this->dateTimeFromMyddleware($dateRef);
 
         $filter = urlencode("lastModifiedDateTime gt {$dateRef}");
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filter}";
@@ -459,19 +442,15 @@ class dynamicsbusiness extends solution
                 $url .= "({$param['query']['id']})";
             }
 
-            try {
-                $response = $client->get($url, ['headers' => $headers]);
-                $data = json_decode($response->getBody(), true);
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
-                return [];
-            }
+
+        $response = $client->get($url, ['headers' => $headers]);
+        $data = json_decode($response->getBody(), true);
+
 
         $results = [];
         $result = [];
         $nbRecords = 0;
 
-            try {
             
             // Dynamically map fields based on $param['fields']
             if (isset($param['fields']) && is_array($param['fields'])) {
@@ -486,7 +465,7 @@ class dynamicsbusiness extends solution
                 }
 
                 // convert "lastModifiedDateTime": "2025-03-24T02:05:51Z" to a string in this format: 2025-04-02 09:28:27
-                $result['date_modified'] = date('Y-m-d H:i:s', strtotime($data['lastModifiedDateTime']));
+                $result['date_modified'] = $this->dateTimeToMyddleware($data['lastModifiedDateTime']);
             } else {
                 // Fallback to default fields if $param['fields'] is not set
                 $result['id'] = $data['id'] ?? null;
@@ -507,10 +486,113 @@ class dynamicsbusiness extends solution
 
             return $results;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return [];
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function create($param, $record, $idDoc = null) {
+
+    try {
+
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+
+        $module = $param['module'];
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
+        
+            $response = $client->post($url, [
+                'headers' => $headers,
+                'json' => $record
+            ]);
+            
+            $data = json_decode($response->getBody(), true);
+            
+            if (!isset($data['id'])) {
+                throw new \Exception('No ID returned from API response');
+            }
+            
+            return $data['id'];
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function update($param, $data, $idDoc = null)
+    {
+    try {
+
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+
+        $module = $param['module'];
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+        
+        // Remove target_id from the data as it's not a valid field for the API
+        unset($data['target_id']);
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
+        
+            // First get the current record to obtain its ETag
+            $getResponse = $client->get($url, ['headers' => $headers]);
+            
+            // Get response body content once
+            $responseBody = $getResponse->getBody()->getContents();
+            $responseData = json_decode($responseBody, true);
+            
+            // Get ETag from response body
+            $etag = $responseData['@odata.etag'] ?? null;
+            
+            if (!$etag) {
+                throw new \Exception('Could not obtain ETag for the record. Response status: ' . $getResponse->getStatusCode());
+            }
+            
+            // Add the ETag to the headers for the PATCH request
+            $headers['If-Match'] = $etag;
+            
+            $response = $client->patch($url, [
+                'headers' => $headers,
+                'json' => $data
+            ]);
+            
+            $data = json_decode($response->getBody(), true);
+            
+            if (!isset($data['id'])) {
+                throw new \Exception('No ID returned from API response');
+            }
+            
+            return $data['id'];
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+
     /**
      * Validates the required parameters for the read method
      * 
@@ -540,10 +622,10 @@ class dynamicsbusiness extends solution
 
     protected function getEntityListFromMetadata($companyId): array
     {
-        error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Called for company ID: " . $companyId . " - Note: Company ID is not used in the metadata URL in this version, fetching global service metadata.");
+
+    try {
 
         if (!$this->token) {
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Access token is not available.");
             throw new \Exception("Access token is not available. Please login first.");
         }
 
@@ -557,15 +639,12 @@ class dynamicsbusiness extends solution
         // For this attempt, we are fetching global metadata for the tenant/environment.
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
         $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/\$metadata";
-        error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Requesting global service metadata URL: " . $url);
 
-        try {
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
             $xmlString = $response->getBody()->getContents();
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: API call successful. Status: {$statusCode}. Response size: " . strlen($xmlString) . " bytes.");
             if (strlen($xmlString) < 500) { // Log small responses, they might be errors or empty
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Response body (first 500 chars): " . substr($xmlString, 0, 500));
+                throw new \Exception("Response invalid. Body (first 500 chars): " . substr($xmlString, 0, 500));
             }
 
             libxml_use_internal_errors(true);
@@ -579,40 +658,33 @@ class dynamicsbusiness extends solution
                 }
                 libxml_clear_errors();
                 $flatErrors = implode("; ", $errorMessages);
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Failed to parse metadata XML for company ID {$companyId}. Errors: " . $flatErrors);
                 throw new \Exception("Failed to parse metadata XML for company ID {$companyId}: " . $flatErrors);
             }
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XML parsed successfully for company ID {$companyId}.");
 
             $entityNames = [];
             
             $namespaces = $xml->getNamespaces(true);
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XML Namespaces: " . print_r($namespaces, true));
             $xpathQuery = '';
 
             if (isset($namespaces['edm']) && $namespaces['edm'] === 'http://docs.oasis-open.org/odata/ns/edm') {
                  $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
                  $xpathQuery = '//edm:EntitySet';
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Using XPath with 'edm' namespace.");
             } elseif (isset($namespaces['']) && $namespaces[''] === 'http://docs.oasis-open.org/odata/ns/edm') {
                  $xml->registerXPathNamespace('d', 'http://docs.oasis-open.org/odata/ns/edm');
                  $xpathQuery = '//d:EntitySet';
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Using XPath with default 'd' namespace for EDM.");
             } else {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: EDM namespace not found or not standard. Trying local-name().");
+                 throw new \Exception("EDM namespace not found or not standard. Trying local-name().");
             }
             
             if (!empty($xpathQuery)) {
                 $entitySets = $xml->xpath($xpathQuery);
             } else {
                 $entitySets = $xml->xpath("//*[local-name()='EntitySet']");
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Executed XPath with local-name(): " . count($entitySets) . " potential EntitySet nodes found.");
             }
 
             if ($entitySets === false) {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XPath query failed for company ID {$companyId}.");
+                 throw new \Exception("XPath query failed for company ID {$companyId}.");
             } else {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XPath query resulted in " . count($entitySets) . " EntitySet nodes for company ID {$companyId}.");
                  foreach ($entitySets as $entitySet) {
                     if (isset($entitySet['Name'])) {
                         $entityNames[] = (string)$entitySet['Name'];
@@ -621,7 +693,6 @@ class dynamicsbusiness extends solution
             }
             
             $uniqueEntityNames = array_unique($entityNames);
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Found " . count($uniqueEntityNames) . " unique entity names for company ID {$companyId}: " . implode(", ", $uniqueEntityNames));
             return $uniqueEntityNames;
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -630,15 +701,75 @@ class dynamicsbusiness extends solution
                 $responseBody = $e->getResponse()->getBody()->getContents();
                 $errorMessage .= " Response: " . substr($responseBody, 0, 500) . (strlen($responseBody) > 500 ? '...' : '');
             }
-            error_log($errorMessage);
-            $this->logger->error($errorMessage); // Assuming $this->logger also uses error_log or similar
             throw new \Exception("Error fetching metadata from API: " . $e->getCode() . " - " . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
-            $errorMessage = "[Myddleware_DynamicsBusiness] getEntityListFromMetadata: General Exception for company ID {$companyId}. Message: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-            error_log($errorMessage);
-            $this->logger->error($errorMessage);
-            throw $e; 
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
+
+    /**
+     * @throws \Exception
+     */
+    protected function delete($param, $data)
+    {
+
+    try {
+
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+
+        $module = $param['module'];
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
+        
+            $response = $client->delete($url, [
+                'headers' => $headers
+            ]);
+            
+            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
+                return $targetId;
+            } else {
+                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
+            }
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+
+    // Function de conversion de datetime format solution à un datetime format Myddleware
+    protected function dateTimeToMyddleware($dateTime)
+    {
+        if (empty($dateTime)) {
+            throw new \Exception("Date time is empty");
+        }
+        $dto = new \DateTime($dateTime);
+        // Return date with milliseconds
+        return $dto->format('Y-m-d H:i:s');
+    }
+
+    // Function de conversion de datetime format Myddleware à un datetime format solution
+    protected function dateTimeFromMyddleware($dateTime)
+    {
+        if (empty($dateTime)) {
+            throw new \Exception("Date time is empty");
+        }
+
+        $dto = new \DateTime($dateTime);
+        // Return date with milliseconds
+        return $dto->format('Y-m-d\TH:i:s\Z');
+    }
+
 }
 ?>
