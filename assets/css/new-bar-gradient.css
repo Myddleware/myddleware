@@ -1,0 +1,4 @@
+.new-bar-gradient {
+    background: linear-gradient(135deg, #2c2c54, #03c4eb) !important;
+    color: white !important;
+}
