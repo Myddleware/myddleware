@@ -412,6 +412,8 @@ class dynamicsbusiness extends solution
 
     public function read($param)
     {
+        try {
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
@@ -446,7 +448,6 @@ class dynamicsbusiness extends solution
         $result = [];
         $nbRecords = 0;
 
-            try {
             
             // Dynamically map fields based on $param['fields']
             if (isset($param['fields']) && is_array($param['fields'])) {
