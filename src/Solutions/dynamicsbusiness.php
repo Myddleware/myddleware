@@ -618,7 +618,7 @@ class dynamicsbusiness extends solution
 
     protected function getEntityListFromMetadata($companyId): array
     {
-        
+
     try {
 
         if (!$this->token) {
@@ -710,6 +710,8 @@ class dynamicsbusiness extends solution
      */
     protected function delete($param, $data)
     {
+    try {
+        
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
         
@@ -724,7 +726,6 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
-        try {
             $response = $client->delete($url, [
                 'headers' => $headers
             ]);
