@@ -731,8 +731,9 @@ class dynamicsbusiness extends solution
             }
             
         } catch (\Exception $e) {
-            $this->logger->error('Error deleting record: ' . $e->getMessage());
-            throw $e;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 }
