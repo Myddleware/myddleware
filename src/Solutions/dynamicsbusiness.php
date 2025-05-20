@@ -90,6 +90,62 @@ class dynamicsbusiness extends solution
         }
     }
 
+    // Permet de récupérer tous les modules accessibles à l'utilisateur
+    public function get_modules($type = 'source')
+    {
+        error_log("[Myddleware_DynamicsBusiness] get_modules: Called with type: {$type}");
+
+        $result = [];
+        $resultSaveIds = [];
+
+        $companies = $this->getCompanies();
+        error_log("[Myddleware_DynamicsBusiness] get_modules: getCompanies() returned: " . count($companies) . " companies.");
+        if (empty($companies)) {
+            error_log("[Myddleware_DynamicsBusiness] get_modules: No companies found. Returning empty result.");
+        }
+
+        if (!$this->connexion_valide) {
+            error_log("[Myddleware_DynamicsBusiness] get_modules: Connection not validated. login() might have failed or not been called.");
+            throw new \Exception("Connection not validated. Please ensure login parameters are correct and login() was successful.");
+        }
+
+        foreach ($companies as $companyId => $companyName) {
+            error_log("[Myddleware_DynamicsBusiness] get_modules: Processing company ID: {$companyId}, Name: {$companyName}");
+            try {
+                $entityList = $this->getEntityListFromMetadata($companyId);
+                error_log("[Myddleware_DynamicsBusiness] get_modules: getEntityListFromMetadata for company ID {$companyId} returned: " . count($entityList) . " entities.");
+                if (count($entityList) > 0) {
+                     error_log("[Myddleware_DynamicsBusiness] get_modules: Entities for company ID {$companyId}: " . implode(", ", $entityList));
+                }
+
+                foreach ($entityList as $moduleName) {
+                    error_log("[Myddleware_DynamicsBusiness] get_modules: Adding module '{$moduleName}' for company '{$companyName}'.");
+                    $displayModuleName = ucfirst($moduleName); 
+                    
+                    $displayString = "Company: {$companyName} _ Module: {$displayModuleName}";
+                    $key = "{$companyId}_{$moduleName}";
+
+                    $result[$key] = $displayString;
+                    $resultSaveIds[$key] = $displayString; 
+                }
+            } catch (\Exception $e) {
+                $errorMessage = "[Myddleware_DynamicsBusiness] get_modules: Failed to get modules for company '{$companyName}' (ID: {$companyId}). Exception: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
+                error_log($errorMessage);
+                $this->logger->error($errorMessage);
+            }
+        }
+
+        error_log("[Myddleware_DynamicsBusiness] get_modules: Final result count: " . count($result));
+        if (count($result) < 10 && count($result) > 0) { // Log small results for review
+            error_log("[Myddleware_DynamicsBusiness] get_modules: Final result content: " . print_r($result, true));
+        }
+
+        $_SESSION['modules'] = $result;
+        $_SESSION['resultSaveIds'] = $resultSaveIds;
+        error_log("[Myddleware_DynamicsBusiness] get_modules: Modules saved to session.");
+        return $result;
+
+    }
 
     public function get_module_fields($moduleKey, $type = 'source', $param = null): array
     {
@@ -224,62 +280,6 @@ class dynamicsbusiness extends solution
         return "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/";
     }
 
-    // Permet de récupérer tous les modules accessibles à l'utilisateur
-    public function get_modules($type = 'source')
-    {
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Called with type: {$type}");
-
-        $result = [];
-        $resultSaveIds = [];
-
-        $companies = $this->getCompanies();
-        error_log("[Myddleware_DynamicsBusiness] get_modules: getCompanies() returned: " . count($companies) . " companies.");
-        if (empty($companies)) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: No companies found. Returning empty result.");
-        }
-
-        if (!$this->connexion_valide) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Connection not validated. login() might have failed or not been called.");
-            throw new \Exception("Connection not validated. Please ensure login parameters are correct and login() was successful.");
-        }
-
-        foreach ($companies as $companyId => $companyName) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Processing company ID: {$companyId}, Name: {$companyName}");
-            try {
-                $entityList = $this->getEntityListFromMetadata($companyId);
-                error_log("[Myddleware_DynamicsBusiness] get_modules: getEntityListFromMetadata for company ID {$companyId} returned: " . count($entityList) . " entities.");
-                if (count($entityList) > 0) {
-                     error_log("[Myddleware_DynamicsBusiness] get_modules: Entities for company ID {$companyId}: " . implode(", ", $entityList));
-                }
-
-                foreach ($entityList as $moduleName) {
-                    error_log("[Myddleware_DynamicsBusiness] get_modules: Adding module '{$moduleName}' for company '{$companyName}'.");
-                    $displayModuleName = ucfirst($moduleName); 
-                    
-                    $displayString = "Company: {$companyName} _ Module: {$displayModuleName}";
-                    $key = "{$companyId}_{$moduleName}";
-
-                    $result[$key] = $displayString;
-                    $resultSaveIds[$key] = $displayString; 
-                }
-            } catch (\Exception $e) {
-                $errorMessage = "[Myddleware_DynamicsBusiness] get_modules: Failed to get modules for company '{$companyName}' (ID: {$companyId}). Exception: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-                error_log($errorMessage);
-                $this->logger->error($errorMessage);
-            }
-        }
-
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Final result count: " . count($result));
-        if (count($result) < 10 && count($result) > 0) { // Log small results for review
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Final result content: " . print_r($result, true));
-        }
-
-        $_SESSION['modules'] = $result;
-        $_SESSION['resultSaveIds'] = $resultSaveIds;
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Modules saved to session.");
-        return $result;
-
-    }
 
     public function getCompanies()
     {
