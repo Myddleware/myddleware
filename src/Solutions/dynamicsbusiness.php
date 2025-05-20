@@ -38,7 +38,7 @@ class dynamicsbusiness extends solution
     protected bool $readDeletion = true;
     protected bool $sendDeletion = true;
 
-    protected $requiredFields = [
+    protected array $requiredFields = [
         ['id', 'lastModifiedDateTime']
     ];
 
