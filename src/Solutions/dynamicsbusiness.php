@@ -95,8 +95,10 @@ class dynamicsbusiness extends solution
     {
         error_log("[Myddleware_DynamicsBusiness] get_modules: Called with type: {$type}");
 
-        $result = [];
-        $resultSaveIds = [];
+        try {
+
+            $result = [];
+            $resultSaveIds = [];
 
         $companies = $this->getCompanies();
         error_log("[Myddleware_DynamicsBusiness] get_modules: getCompanies() returned: " . count($companies) . " companies.");
@@ -145,6 +147,11 @@ class dynamicsbusiness extends solution
         error_log("[Myddleware_DynamicsBusiness] get_modules: Modules saved to session.");
         return $result;
 
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
     }
 
     public function get_module_fields($moduleKey, $type = 'source', $param = null): array
