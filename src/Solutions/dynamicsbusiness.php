@@ -521,8 +521,9 @@ class dynamicsbusiness extends solution
             return $data['id'];
             
         } catch (\Exception $e) {
-            $this->logger->error('Error creating record: ' . $e->getMessage());
-            throw $e;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
@@ -580,8 +581,9 @@ class dynamicsbusiness extends solution
             return $data['id'];
             
         } catch (\Exception $e) {
-            $this->logger->error('Error updating record: ' . $e->getMessage());
-            throw $e;
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
