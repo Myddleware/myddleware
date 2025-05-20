@@ -34,13 +34,13 @@
 	height: 50px;
 	background: #f8f9f9;
 	margin: 0 auto;
-	color: rgb(0, 0, 0);
+	color: white;
 	padding: 14px;		
 	font-weight: bold;	
 }
 
 #myd_title a, #myd_title a:hover { 
-	color: #000000;
+	color: white;
 	text-decoration: none;
 }
 
