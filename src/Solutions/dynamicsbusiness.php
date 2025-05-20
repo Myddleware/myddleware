@@ -93,35 +93,28 @@ class dynamicsbusiness extends solution
     // Permet de récupérer tous les modules accessibles à l'utilisateur
     public function get_modules($type = 'source')
     {
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Called with type: {$type}");
-
         try {
 
             $result = [];
             $resultSaveIds = [];
 
         $companies = $this->getCompanies();
-        error_log("[Myddleware_DynamicsBusiness] get_modules: getCompanies() returned: " . count($companies) . " companies.");
         if (empty($companies)) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: No companies found. Returning empty result.");
+            throw new \Exception("Could not retrieve companies");
         }
 
         if (!$this->connexion_valide) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Connection not validated. login() might have failed or not been called.");
             throw new \Exception("Connection not validated. Please ensure login parameters are correct and login() was successful.");
         }
 
         foreach ($companies as $companyId => $companyName) {
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Processing company ID: {$companyId}, Name: {$companyName}");
             try {
                 $entityList = $this->getEntityListFromMetadata($companyId);
-                error_log("[Myddleware_DynamicsBusiness] get_modules: getEntityListFromMetadata for company ID {$companyId} returned: " . count($entityList) . " entities.");
                 if (count($entityList) > 0) {
-                     error_log("[Myddleware_DynamicsBusiness] get_modules: Entities for company ID {$companyId}: " . implode(", ", $entityList));
+                    throw new \Exception("No entities found for company {$companyName}");
                 }
 
                 foreach ($entityList as $moduleName) {
-                    error_log("[Myddleware_DynamicsBusiness] get_modules: Adding module '{$moduleName}' for company '{$companyName}'.");
                     $displayModuleName = ucfirst($moduleName); 
                     
                     $displayString = "Company: {$companyName} _ Module: {$displayModuleName}";
@@ -137,14 +130,12 @@ class dynamicsbusiness extends solution
             }
         }
 
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Final result count: " . count($result));
         if (count($result) < 10 && count($result) > 0) { // Log small results for review
-            error_log("[Myddleware_DynamicsBusiness] get_modules: Final result content: " . print_r($result, true));
+            throw new \Exception("Final result content: " . print_r($result, true));
         }
 
         $_SESSION['modules'] = $result;
         $_SESSION['resultSaveIds'] = $resultSaveIds;
-        error_log("[Myddleware_DynamicsBusiness] get_modules: Modules saved to session.");
         return $result;
 
         } catch (\Exception $e) {
@@ -623,10 +614,8 @@ class dynamicsbusiness extends solution
 
     protected function getEntityListFromMetadata($companyId): array
     {
-        error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Called for company ID: " . $companyId . " - Note: Company ID is not used in the metadata URL in this version, fetching global service metadata.");
 
         if (!$this->token) {
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Access token is not available.");
             throw new \Exception("Access token is not available. Please login first.");
         }
 
@@ -640,15 +629,13 @@ class dynamicsbusiness extends solution
         // For this attempt, we are fetching global metadata for the tenant/environment.
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
         $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/\$metadata";
-        error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Requesting global service metadata URL: " . $url);
 
         try {
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
             $xmlString = $response->getBody()->getContents();
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: API call successful. Status: {$statusCode}. Response size: " . strlen($xmlString) . " bytes.");
             if (strlen($xmlString) < 500) { // Log small responses, they might be errors or empty
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Response body (first 500 chars): " . substr($xmlString, 0, 500));
+                throw new \Exception("Response invalid. Body (first 500 chars): " . substr($xmlString, 0, 500));
             }
 
             libxml_use_internal_errors(true);
@@ -662,40 +649,33 @@ class dynamicsbusiness extends solution
                 }
                 libxml_clear_errors();
                 $flatErrors = implode("; ", $errorMessages);
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Failed to parse metadata XML for company ID {$companyId}. Errors: " . $flatErrors);
                 throw new \Exception("Failed to parse metadata XML for company ID {$companyId}: " . $flatErrors);
             }
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XML parsed successfully for company ID {$companyId}.");
 
             $entityNames = [];
             
             $namespaces = $xml->getNamespaces(true);
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XML Namespaces: " . print_r($namespaces, true));
             $xpathQuery = '';
 
             if (isset($namespaces['edm']) && $namespaces['edm'] === 'http://docs.oasis-open.org/odata/ns/edm') {
                  $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
                  $xpathQuery = '//edm:EntitySet';
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Using XPath with 'edm' namespace.");
             } elseif (isset($namespaces['']) && $namespaces[''] === 'http://docs.oasis-open.org/odata/ns/edm') {
                  $xml->registerXPathNamespace('d', 'http://docs.oasis-open.org/odata/ns/edm');
                  $xpathQuery = '//d:EntitySet';
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Using XPath with default 'd' namespace for EDM.");
             } else {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: EDM namespace not found or not standard. Trying local-name().");
+                 throw new \Exception("EDM namespace not found or not standard. Trying local-name().");
             }
             
             if (!empty($xpathQuery)) {
                 $entitySets = $xml->xpath($xpathQuery);
             } else {
                 $entitySets = $xml->xpath("//*[local-name()='EntitySet']");
-                error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Executed XPath with local-name(): " . count($entitySets) . " potential EntitySet nodes found.");
             }
 
             if ($entitySets === false) {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XPath query failed for company ID {$companyId}.");
+                 throw new \Exception("XPath query failed for company ID {$companyId}.");
             } else {
-                 error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: XPath query resulted in " . count($entitySets) . " EntitySet nodes for company ID {$companyId}.");
                  foreach ($entitySets as $entitySet) {
                     if (isset($entitySet['Name'])) {
                         $entityNames[] = (string)$entitySet['Name'];
@@ -704,7 +684,6 @@ class dynamicsbusiness extends solution
             }
             
             $uniqueEntityNames = array_unique($entityNames);
-            error_log("[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Found " . count($uniqueEntityNames) . " unique entity names for company ID {$companyId}: " . implode(", ", $uniqueEntityNames));
             return $uniqueEntityNames;
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -713,12 +692,10 @@ class dynamicsbusiness extends solution
                 $responseBody = $e->getResponse()->getBody()->getContents();
                 $errorMessage .= " Response: " . substr($responseBody, 0, 500) . (strlen($responseBody) > 500 ? '...' : '');
             }
-            error_log($errorMessage);
             $this->logger->error($errorMessage); // Assuming $this->logger also uses error_log or similar
             throw new \Exception("Error fetching metadata from API: " . $e->getCode() . " - " . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
             $errorMessage = "[Myddleware_DynamicsBusiness] getEntityListFromMetadata: General Exception for company ID {$companyId}. Message: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-            error_log($errorMessage);
             $this->logger->error($errorMessage);
             throw $e; 
         }
