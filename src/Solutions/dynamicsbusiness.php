@@ -131,9 +131,9 @@ class dynamicsbusiness extends solution
                     $resultSaveIds[$key] = $displayString; 
                 }
             } catch (\Exception $e) {
-                $errorMessage = "[Myddleware_DynamicsBusiness] get_modules: Failed to get modules for company '{$companyName}' (ID: {$companyId}). Exception: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-                error_log($errorMessage);
-                $this->logger->error($errorMessage);
+                $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $this->logger->error($error);
+                return ['error' => $error];
             }
         }
 
