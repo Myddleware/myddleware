@@ -47,9 +47,11 @@ class dynamicsbusiness extends solution
     {
         parent::login($paramConnexion);
 
-        $tenantId = $this->paramConnexion['tenant_id'];
-        $clientId = $this->paramConnexion['client_id'];
-        $clientSecret = $this->paramConnexion['client_secret'];
+        try {
+
+            $tenantId = $this->paramConnexion['tenant_id'];
+            $clientId = $this->paramConnexion['client_id'];
+            $clientSecret = $this->paramConnexion['client_secret'];
 
         $scope = 'https://api.businesscentral.dynamics.com/.default';
         $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
@@ -70,7 +72,12 @@ class dynamicsbusiness extends solution
             $this->token = $data['access_token'];
             $this->connexion_valide = true;
         } else {
-            throw new \Exception("Unable to retrieve access token");
+                throw new \Exception("Unable to retrieve access token");
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
