@@ -125,7 +125,7 @@ class dynamicsbusiness extends solution
         }
 
         if (count($result) < 10 && count($result) > 0) { // Log small results for review
-            throw new \Exception("Final result content: " . print_r($result, true));
+            throw new \Exception("Not enough modules found for company {$companyName}. Final result content: " . print_r($result, true));
         }
 
         $_SESSION['modules'] = $result;
