@@ -431,7 +431,7 @@ class dynamicsbusiness extends solution
         $dateRef = $param['ruleParams']['datereference'];
 
         // format the dateref to the format of the filter
-        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+        $dateRef = $this->dateTimeFromMyddleware($dateRef);
 
         $filter = urlencode("lastModifiedDateTime gt {$dateRef}");
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filter}";
