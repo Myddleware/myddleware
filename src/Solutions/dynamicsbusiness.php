@@ -492,6 +492,9 @@ class dynamicsbusiness extends solution
      * @throws Exception
      */
     public function create($param, $record, $idDoc = null) {
+
+    try {
+
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
 
@@ -505,7 +508,6 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
         
-        try {
             $response = $client->post($url, [
                 'headers' => $headers,
                 'json' => $record
