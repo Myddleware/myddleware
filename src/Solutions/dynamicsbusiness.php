@@ -281,8 +281,10 @@ class dynamicsbusiness extends solution
 
     public function getCompanies()
     {
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
+        try {
+
+            $client = $this->getApiClient();
+            $headers = $this->getApiHeaders();
 
         $url = $this->getBaseApiUrl() . "companies";
 
@@ -293,7 +295,12 @@ class dynamicsbusiness extends solution
             $result[$company['id']] = $company['name'];
         }
 
-        return $result;
+            return $result;
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
     }
 
     public function readData($param): array
