@@ -692,12 +692,11 @@ class dynamicsbusiness extends solution
                 $responseBody = $e->getResponse()->getBody()->getContents();
                 $errorMessage .= " Response: " . substr($responseBody, 0, 500) . (strlen($responseBody) > 500 ? '...' : '');
             }
-            $this->logger->error($errorMessage); // Assuming $this->logger also uses error_log or similar
             throw new \Exception("Error fetching metadata from API: " . $e->getCode() . " - " . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
-            $errorMessage = "[Myddleware_DynamicsBusiness] getEntityListFromMetadata: General Exception for company ID {$companyId}. Message: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine();
-            $this->logger->error($errorMessage);
-            throw $e; 
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
