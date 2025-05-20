@@ -373,7 +373,7 @@ class dynamicsbusiness extends solution
 
                     // Add date_modified from the record's lastModifiedDateTime
                     if (!empty($record['lastModifiedDateTime'])) {
-                        $result['date_modified'] = date('Y-m-d H:i:s', strtotime($record['lastModifiedDateTime']));
+                        $result['date_modified'] = $this->dateTimeToMyddleware($record['lastModifiedDateTime']);
                     }
                 } else {
                     // Fallback to default fields if $param['fields'] is not set
@@ -464,7 +464,7 @@ class dynamicsbusiness extends solution
                 }
 
                 // convert "lastModifiedDateTime": "2025-03-24T02:05:51Z" to a string in this format: 2025-04-02 09:28:27
-                $result['date_modified'] = date('Y-m-d H:i:s', strtotime($data['lastModifiedDateTime']));
+                $result['date_modified'] = $this->dateTimeToMyddleware($data['lastModifiedDateTime']);
             } else {
                 // Fallback to default fields if $param['fields'] is not set
                 $result['id'] = $data['id'] ?? null;
@@ -739,5 +739,17 @@ class dynamicsbusiness extends solution
             return ['error' => $error];
         }
     }
+
+    // Function de conversion de datetime format solution à un datetime format Myddleware
+    protected function dateTimeToMyddleware($dateTime)
+    {
+        if (empty($dateTime)) {
+            throw new \Exception("Date time is empty");
+        }
+        $dto = new \DateTime($dateTime);
+        // Return date with milliseconds
+        return $dto->format('Y-m-d H:i:s');
+    }
+
 }
 ?>
