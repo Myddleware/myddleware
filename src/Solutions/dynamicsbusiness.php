@@ -108,7 +108,6 @@ class dynamicsbusiness extends solution
         }
 
         foreach ($companies as $companyId => $companyName) {
-            try {
                 $entityList = $this->getEntityListFromMetadata($companyId);
                 if (count($entityList) > 0) {
                     throw new \Exception("No entities found for company {$companyName}");
@@ -123,11 +122,6 @@ class dynamicsbusiness extends solution
                     $result[$key] = $displayString;
                     $resultSaveIds[$key] = $displayString; 
                 }
-            } catch (\Exception $e) {
-                $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                $this->logger->error($error);
-                return ['error' => $error];
-            }
         }
 
         if (count($result) < 10 && count($result) > 0) { // Log small results for review
