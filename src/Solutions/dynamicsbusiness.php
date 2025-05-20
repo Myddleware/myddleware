@@ -109,7 +109,7 @@ class dynamicsbusiness extends solution
 
         foreach ($companies as $companyId => $companyName) {
                 $entityList = $this->getEntityListFromMetadata($companyId);
-                if (count($entityList) > 0) {
+                if (empty($entityList)) {
                     throw new \Exception("No entities found for company {$companyName}");
                 }
 
