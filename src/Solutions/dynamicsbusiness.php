@@ -405,8 +405,9 @@ class dynamicsbusiness extends solution
 
             return $resultFinal;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return [];
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
@@ -483,8 +484,9 @@ class dynamicsbusiness extends solution
 
             return $results;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return [];
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         }
     }
 
@@ -710,7 +712,7 @@ class dynamicsbusiness extends solution
      */
     protected function delete($param, $data)
     {
-        
+
     try {
 
         $client = $this->getApiClient();
