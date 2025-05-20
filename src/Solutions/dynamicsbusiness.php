@@ -318,7 +318,7 @@ class dynamicsbusiness extends solution
         // intermediate value for the filter date based on the datereference
         $dateRef = $param['ruleParams']['datereference'];
         // format the dateref to the format of the filter
-        $dateRef = date('Y-m-d\TH:i:s\Z', strtotime($dateRef));
+        $dateRef = $this->dateTimeFromMyddleware($dateRef);
 
         $filterValue = '';
 
@@ -755,6 +755,18 @@ class dynamicsbusiness extends solution
         $dto = new \DateTime($dateTime);
         // Return date with milliseconds
         return $dto->format('Y-m-d H:i:s');
+    }
+
+    // Function de conversion de datetime format Myddleware à un datetime format solution
+    protected function dateTimeFromMyddleware($dateTime)
+    {
+        if (empty($dateTime)) {
+            throw new \Exception("Date time is empty");
+        }
+
+        $dto = new \DateTime($dateTime);
+        // Return date with milliseconds
+        return $dto->format('Y-m-d\TH:i:s\Z');
     }
 
 }
