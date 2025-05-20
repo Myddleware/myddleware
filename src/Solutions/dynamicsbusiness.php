@@ -437,13 +437,10 @@ class dynamicsbusiness extends solution
                 $url .= "({$param['query']['id']})";
             }
 
-            try {
-                $response = $client->get($url, ['headers' => $headers]);
-                $data = json_decode($response->getBody(), true);
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
-                return [];
-            }
+
+        $response = $client->get($url, ['headers' => $headers]);
+        $data = json_decode($response->getBody(), true);
+
 
         $results = [];
         $result = [];
