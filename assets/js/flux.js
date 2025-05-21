@@ -1,3 +1,5 @@
+console.log('flux.js loaded');
+
 import { Controller } from '@hotwired/stimulus';
 import { Modal } from 'bootstrap';
 
@@ -7,12 +9,16 @@ export default class extends Controller {
         fluxId: String
     }
 
+
     connect() {
+        console.log('connect');
         this.loadFluxData();
     }
 
     async loadFluxData() {
         try {
+            console.log('loadFluxData');
+            console.log(this.fluxIdValue);
             const response = await fetch(`/api/flux/info${this.fluxIdValue ? '/' + this.fluxIdValue : ''}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -27,6 +33,7 @@ export default class extends Controller {
     }
 
     renderFluxContent(data) {
+        console.log('renderFluxContent');
         const { translations, fluxData, currentLocale } = data;
         
         // Create the main content structure
@@ -72,6 +79,7 @@ export default class extends Controller {
     }
 
     createSection(title, content) {
+        console.log('createSection');
         const section = document.createElement('div');
         section.className = 'flux-section';
         
@@ -84,6 +92,7 @@ export default class extends Controller {
     }
 
     createGeneralContent(fluxData, translations) {
+        console.log('createGeneralContent');
         const content = document.createElement('div');
         content.className = 'general-content';
         
@@ -131,6 +140,7 @@ export default class extends Controller {
     }
 
     createLogsContent(translations) {
+        console.log('createLogsContent');
         const content = document.createElement('div');
         content.className = 'logs-content';
         
@@ -161,6 +171,7 @@ export default class extends Controller {
     }
 
     createMappingContent(translations) {
+        console.log('createMappingContent');
         const content = document.createElement('div');
         content.className = 'mapping-content';
         
@@ -172,38 +183,10 @@ export default class extends Controller {
         return content;
     }
 
-    async downloadLogs() {
-        try {
-            window.location.href = `/api/flux/logs/download${this.fluxIdValue ? '/' + this.fluxIdValue : ''}`;
-        } catch (error) {
-            console.error('Error downloading logs:', error);
-            this.showError('Failed to download logs');
-        }
-    }
-
-    async emptyLogs() {
-        if (!confirm('Are you sure you want to empty the logs? This action cannot be undone.')) {
-            return;
-        }
-        
-        try {
-            const response = await fetch(`/api/flux/logs/empty${this.fluxIdValue ? '/' + this.fluxIdValue : ''}`, {
-                method: 'POST'
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to empty logs');
-            }
-            
-            // Reload the flux data to refresh the view
-            this.loadFluxData();
-        } catch (error) {
-            console.error('Error emptying logs:', error);
-            this.showError('Failed to empty logs');
-        }
-    }
+    
 
     showError(message) {
+        console.log('showError');
         const alert = document.createElement('div');
         alert.className = 'alert alert-danger';
         alert.textContent = message;
