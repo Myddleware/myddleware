@@ -1,4 +1,5 @@
-var Encore = require('@symfony/webpack-encore');
+import Encore from '@symfony/webpack-encore';
+
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -55,15 +56,8 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     // configure Babel
-     .configureBabel((config) => {
-        config.plugins.push('@babel/plugin-proposal-class-properties');
-    })
+     .configureBabel(null)
 
-    // enables and configure @babel/preset-env polyfills
-    .configureBabelPresetEnv((config) => {
-        config.useBuiltIns = 'usage';
-        config.corejs = '3.23';
-    })
 
     // enables Sass/SCSS support
     .enableSassLoader()
@@ -85,4 +79,5 @@ Encore
     //.autoProvidejQuery()
 ;
 
-module.exports = Encore.getWebpackConfig();
+export default Encore.getWebpackConfig();
+

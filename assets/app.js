@@ -22,7 +22,7 @@ require('jquery-ui/ui/widgets/droppable')
 require('jquery-ui/ui/widgets/sortable')
 require('jquery-ui/ui/widgets/dialog')
 require('jquery-ui/ui/tabbable')
-require('bootstrap')
+import 'bootstrap'
 require('@fortawesome/fontawesome-free/js/all')
 require('./vendors/dtsel/dtsel')
 require('google-charts/dist/googleCharts')
@@ -120,8 +120,6 @@ if (window.location.href.includes('flux/modern')) {
     require('./js/flux.js')
 }
 
-// start the Stimulus application
-import './bootstrap';
 import 'select2/dist/css/select2.css';
 import 'select2';
 
