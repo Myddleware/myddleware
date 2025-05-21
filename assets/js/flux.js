@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import axios from 'axios';
 import { ThreeModal } from '../../public/assets/js/three-modal.js';
 
-class Flux {
+export class Flux {
     constructor() {
         console.log('Flux constructor');
         this.init();
