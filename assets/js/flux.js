@@ -9,13 +9,18 @@ class Flux {
         console.log('Flux constructor');
         this.init();
     }
-}
 
-async function init() {
-    console.log('Flux init');
+    async init() {
+        console.log('Flux init');
+        this.createUIStructure();
+    }
+
+    createUIStructure() {
+        console.log('Flux createUIStructure');
+    }
 }
 
 // Initialize the account manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new Flux();
-  });
+});
