@@ -112,7 +112,7 @@ if (window.location.href.includes('flux')) {
     require('./js/imagemousehoverbutton.js')
 }
 
-if (window.location.href.includes('rule/flux')) {
+if (window.location.href.includes('rule/flux') && !window.location.href.includes('flux/modern')) {
     require('./js/lookup-filter.js')
 }
 
