@@ -25,6 +25,12 @@ export class Flux {
             return;
         }
 
+        fluxContainer.innerHTML = `
+            <div id="flux-button-container">
+                <button id="run-same-record">Run same record</button>
+            </div>
+        `;
+
     }
 }
 

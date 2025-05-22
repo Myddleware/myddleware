@@ -54,4 +54,22 @@ describe('Flux', () => {
         const fluxContainer = document.getElementById('flux-container');
         expect(fluxContainer).toBeDefined();
     });
+
+    test('should create button container inside of flux-container', () => {
+        const buttonContainer = document.getElementById('flux-button-container');
+        expect(buttonContainer).toBeDefined();
+    });
+
+    test('should create button to run the same record inside of button container', () => {
+        const button = document.getElementById('run-same-record');
+        expect(button).toBeDefined();
+    });
+
+    test('should create button to cancel the document inside of button container', () => {
+        const button = document.getElementById('cancel-document');
+        expect(button).toBeDefined();
+    });
+    
+    
+    
 }); 
