@@ -74,4 +74,10 @@ describe('Flux', () => {
         expect(button).not.toBeNull();
         expect(button.textContent).toBe('Cancel document');
     });
+
+    test('button container should be in flexbox with its two element aligned horizontally', () => {
+        flux.createUIStructure();
+        const buttonContainer = document.getElementById('flux-button-container');
+        expect(buttonContainer).toHaveClass('flex-row');
+    });
 }); 
