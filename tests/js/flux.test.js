@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 import { Flux } from '../../assets/js/flux';
 
 // Set up a basic DOM environment
-const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+const dom = new JSDOM('<!DOCTYPE html><html><body><div id="flux-container"></div></body></html>');
 global.document = dom.window.document;
 global.window = dom.window;
 
@@ -12,7 +12,7 @@ describe('Flux', () => {
 
     beforeEach(() => {
         // Clear the document body before each test
-        document.body.innerHTML = '';
+        document.body.innerHTML = '<div id="flux-container"></div>';
         // Create a new instance of Flux for each test
         flux = new Flux();
     });
@@ -51,25 +51,27 @@ describe('Flux', () => {
     });
 
     test('should find div with id flux-container', () => {
-        const fluxContainer = document.getElementById('flux-container');
-        expect(fluxContainer).toBeDefined();
+        const container = document.getElementById('flux-container');
+        expect(container).not.toBeNull();
     });
 
     test('should create button container inside of flux-container', () => {
+        flux.createUIStructure();
         const buttonContainer = document.getElementById('flux-button-container');
-        expect(buttonContainer).toBeDefined();
+        expect(buttonContainer).not.toBeNull();
     });
 
     test('should create button to run the same record inside of button container', () => {
+        flux.createUIStructure();
         const button = document.getElementById('run-same-record');
-        expect(button).toBeDefined();
+        expect(button).not.toBeNull();
+        expect(button.textContent).toBe('Run same record');
     });
 
     test('should create button to cancel the document inside of button container', () => {
+        flux.createUIStructure();
         const button = document.getElementById('cancel-document');
-        expect(button).toBeDefined();
+        expect(button).not.toBeNull();
+        expect(button.textContent).toBe('Cancel document');
     });
-    
-    
-    
 }); 
