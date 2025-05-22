@@ -49,4 +49,9 @@ describe('Flux', () => {
         // Clean up
         consoleSpy.mockRestore();
     });
+
+    test('should find div with id flux-container', () => {
+        const fluxContainer = document.getElementById('flux-container');
+        expect(fluxContainer).toBeDefined();
+    });
 }); 

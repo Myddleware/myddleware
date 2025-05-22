@@ -17,6 +17,14 @@ export class Flux {
 
     createUIStructure() {
         console.log('Flux createUIStructure');
+
+        const fluxContainer = document.getElementById('flux-container');
+
+        if (!fluxContainer) {
+            console.error('flux-container not found');
+            return;
+        }
+
     }
 }
 
