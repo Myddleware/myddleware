@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 {% block title %}{{ parent() }} | {{ 'rulegroup.edit'| trans}}{% endblock %}
-{% block titlesm %}{{ 'rulegroup.edit'| trans}}{% endblock titlesm %}
+{% block titlesm %}{{ 'rulegroup.edit'| trans}} <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i> {{ rulegroup.name }}{% endblock titlesm %}
 {% block body %}
     <div class="container mt-5">
         <div class="text-center m-5">
@@ -9,9 +9,6 @@
         
         {{ form_start(form) }}
         <div class="mb-3">
-            <div class="card-header mb-4 card-title-rulegroup">
-                {{ 'rulegroup.edit'| trans }}
-            </div>
                 <div class="row mb-4">
                     <div class="col-md-6">
                         {{ form_row(form.name) }}

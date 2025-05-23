@@ -107,7 +107,7 @@
 	min-width: 155px;
 	text-align: center!important;
 	vertical-align: middle;
-	word-break: break-all;
+	word-break: break-word;
 }
 
 .solution_block {	
@@ -435,4 +435,138 @@ td > a {
 
 .workflow-name-link-rule:hover {
 	text-decoration: underline !important;
+}
+
+/* connector parameters input */
+
+input[id^="connector_connectorParams_"][id$="_value"],
+input#connector_name {
+    border: 1px solid #dfdddd;
+    border-radius: 4px;
+	margin-bottom: 3px;
+	min-width: 410px;
+}
+
+label[for^="connector_connectorParams_"][for$="_value"] {
+    margin-bottom: 3px;
+}
+
+/* workflow action fields */
+
+input#form_name,
+textarea#form_description,
+input#form_order,
+input#form_multipleRuns,
+input#form_status,
+input#form_active,
+input#form_subject,
+input#form_message,
+input#form_to,
+input#form_targetField,
+input#form_targetFieldValue,
+input#form_rerun,
+input#form_ruleId,
+input#form_searchField,
+input#form_searchValue,
+select#form_name,
+select#form_Workflow,
+select#form_description,
+select#form_action,
+select#form_order,
+select#form_multipleRuns,
+select#form_status,
+select#form_active,
+select#form_subject,
+select#form_message,
+select#form_to,
+select#form_targetField,
+select#form_targetFieldValue,
+select#form_rerun,
+select#form_ruleId,
+select#form_searchField,
+select#form_searchValue {
+	border: 1px solid #dfdddd;
+    border-radius: 4px;
+	margin-bottom: 3px;
+	margin-left: 10px;
+}
+
+  .form-group-workflow-action {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .form-group-workflow-action label {
+    font-weight: 600;
+  }
+
+  .form-group-workflow-action input,
+  .form-group-workflow-action select,
+  .form-group-workflow-action textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .form-group-workflow-action label {
+	margin-bottom: 0.4rem;
+	font-weight: 600;
+	/* 👇 This aligns label start with input */
+	padding-left: 10px;
+  }
+
+  .form-actions-workflow-action {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .form-actions-workflow-action button {
+    padding: 8px 16px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
+
+.rule-list-activation-switch {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.flex-center-rule-name {
+	margin-left: 4rem;
+}
+
+.workflow-action-new-name div #form_name,
+.workflow-action-edit-name div #form_name,
+.workflow-action-new-workflow div #form_Workflow,
+.workflow-action-edit-workflow div #form_Workflow,
+.workflow-action-new-action div #form_action,
+.workflow-action-edit-action div #form_action,
+.workflow-action-edit-status div #form_status,
+.workflow-action-new-status div #form_status,
+.workflow-action-new-rule div #form_ruleId,
+.workflow-action-edit-rule div #form_ruleId,
+.workflow-action-new-searchfield div #form_searchField,
+.workflow-action-edit-searchfield div #form_searchField,
+.workflow-action-new-searchvalue div #form_searchValue,
+.workflow-action-edit-searchvalue div #form_searchValue,
+.workflow-action-new-to div #form_to,
+.workflow-action-edit-to div #form_to,
+.workflow-action-new-subject div #form_subject,
+.workflow-action-edit-subject div #form_subject {
+	width: 200%;
+}
+
+.workflow-action-new-description div #form_description,
+.workflow-action-edit-description div #form_description {
+	width: 350%;
+}
+
+.workflow-action-new-message div #form_message,
+.workflow-action-edit-message div #form_message {
+	width: 400% !important;
 }

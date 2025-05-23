@@ -1,8 +1,8 @@
 const $ = require('jquery');
 
 $(function(){
-    $( ".onoffswitch" ).on('change', function(e) { 
-        path_fiche_update = $(this).children('input').attr('title');
+    $(".form-check-input.toggle-switch-rule").on('change', function(e) {
+        path_fiche_update = $(this).attr('title');
         $.ajax({
             type: "POST",
             url: path_fiche_update,						

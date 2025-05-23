@@ -6,6 +6,13 @@
         <div class="text-center m-5">
             <a href="{{ path('workflow_list') }}" class="btn btn-outline-warning m-2"> {{ 'view_workflow.cancel'| trans }}</a>
         </div>
+        {% if app.session.flashBag.has('error_workflow_name') %}
+            <div class="alert alert-danger">
+                {% for message in app.session.flashBag.get('error_workflow_name') %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
         
         {{ form_start(form) }}
         <div class="mb-3">

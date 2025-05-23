@@ -63,27 +63,6 @@ $(function () {
     });
   });
 
-  $("#rule_previous").on("click", function () {
-    // console.log("previous start");
-    previous_next(0);
-    // console.log("previous end");  
-  });
-
-  $("#rule_next").on("click", function () {
-    // console.log("next start");
-    previous_next(1);
-    // console.log("next end");
-  });
-
-  $("#tabs", "#rule_mapping").tabs({
-    activate: function (event, ui) {
-      // console.log("activate rule mapping start");
-      previous_next(2);
-      // console.log("activate rule mapping end");
-    },
-  });
-  // rev 1.08 ----------------------------
-
   $(".tooltip").qtip(); // Infobulle
 
   notification();
@@ -186,17 +165,6 @@ $(function () {
           );
       }
 
-      $(this)
-        .parent()
-        .find(".help")
-        .append(
-          '<i class="fas fa-info-circle"></i> <a href="' +
-            path_link_fr +
-            solution +
-            '" target="_blank"> ' +
-            help_connector +
-            "</a>"
-        );
 
       if ($.isNumeric(val2[1])) {
         $.ajax({
@@ -781,70 +749,108 @@ $.fn.setCursorPosition = function(pos) {
     recup_fields_relate();
   });
 
-  // Validation et vérification de l'ensemble du formulaire
-  $("#validation").on("click", function () {
-    before = $("#validation").attr("value");
+// Validation and form check
+$("#validation").on("click", function () {
+// console.log("[🔵 CLICK] Validation button clicked");
 
-    if (
-      require() &&
-      require_params() &&
-      require_relate() &&
-      duplicate_fields_error()
-    ) {
-      $.ajax({
-        type: "POST",
-        url: path_validation,
-        data: {
-          champs: recup_champs(),
-          formules: recup_formule(),
-          params: recup_params(),
-          relations: recup_relation(),
-          duplicate: recup_fields_relate(),
-          filter: recup_filter(),
-        },
-        beforeSend: function () {
-          $("#validation").attr("value", save_wait);
-        },
-        success: function (data) {
-          if (data.status == 1) {
-            alert(confirm_success);
+  let before = $("#validation").attr("value");
+// console.log("[ℹ️ BEFORE] Button value before request:", before);
 
-            var path_template = $("#validation").data("url");
-            var path_view_detail = path_template.replace(
-              "placeholder_id",
-              data.id
-            );
-            $(location).attr("href", path_view_detail);
+  // Call each validation function and log their results
+  let isRequireValid = require();
+  let isParamsValid = require_params();
+  let isRelateValid = require_relate();
+  let isDuplicateValid = duplicate_fields_error();
+
+// console.log("[✅ CHECK] require() →", isRequireValid);
+// console.log("[✅ CHECK] require_params() →", isParamsValid);
+// console.log("[✅ CHECK] require_relate() →", isRelateValid);
+// console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
+
+  if (isRequireValid && isParamsValid && isRelateValid && isDuplicateValid) {
+    let champs = recup_champs();
+    let formules = recup_formule();
+    let params = JSON.stringify(recup_params());
+    let relations = recup_relation();
+    let duplicate = recup_fields_relate();
+    let filter = recup_filter();
+
+// console.log("[📦 DATA] champs →", champs);
+// console.log("[📦 DATA] formules →", formules);
+// console.log("[📦 DATA] params →", params);
+// console.log("[📦 DATA] relations →", relations);
+// console.log("[📦 DATA] duplicate →", duplicate);
+// console.log("[📦 DATA] filter →", filter);
+
+    $.ajax({
+      type: "POST",
+      url: path_validation,
+      data: {
+        champs: champs,
+        formules: formules,
+        params: params,
+        relations: relations,
+        duplicate: duplicate,
+        filter: filter,
+      },
+      beforeSend: function () {
+// console.log("[🚀 AJAX] Sending data to", path_validation);
+        $("#validation").attr("value", save_wait);
+      },
+      success: function (data) {
+// console.log("[✅ SUCCESS] Response received:", data);
+
+        if (data.status == 1) {
+// console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
+
+          alert(confirm_success);
+
+          var path_template = $("#validation").data("url");
+          var path_view_detail = path_template.replace(
+            "placeholder_id",
+            data.id
+          );
+
+// console.log("[🔁 REDIRECT] To:", path_view_detail);
+          $(location).attr("href", path_view_detail);
+        } else {
+          console.warn("[⚠️ VALIDATION ERROR] Raw response:", data);
+          data = data.split(";");
+          if (data[0] == 2) {
+            alert(data[1]);
+// console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
           } else {
-            data = data.split(";");
-            if (data[0] == 2) {
-              alert(data[1]);
-            } else {
-              alert(confirm_error);
-            }
-            $("#validation").attr("value", before);
+            alert(confirm_error);
+            console.error("[❌ ERROR] General form validation error");
           }
+          $("#validation").attr("value", before);
+        }
+      },
+      statusCode: {
+        500: function (e) {
+          console.error("[🔥 SERVER ERROR 500]", e.responseText);
+          alert("An error occurred. Please check your server logs for more detailed information.");
+          $("#validation").attr("value", before);
         },
-        statusCode: {
-          500: function (e) {
-            // console.log(e.responseText);
-            alert(
-              "An error occured. Please check your server logs for more detailed information."
-            );
-            $("#validation").attr("value", before);
-          },
-        },
-      });
-    } else {
-      $("#dialog").dialog({
-        draggable: false,
-        modal: true,
-        resizable: false,
-      });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("[❌ AJAX ERROR]", textStatus, errorThrown);
+        $("#validation").attr("value", before);
+      },
+    });
+  } else {
+    console.warn("[❌ VALIDATION FAILED] At least one requirement not met");
 
-      $("#validation").attr("value", before);
-    }
-  });
+    $("#dialog").dialog({
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+
+    $("#validation").attr("value", before);
+  }
+});
+
 
   // ---- PARAMS ET VALIDATION  ------------------------------------------------------------
 
@@ -1031,7 +1037,7 @@ $.fn.setCursorPosition = function(pos) {
                 }
             },
             error: function (jqXHR) {
-                // console.log('Error response:', jqXHR.responseText);
+// console.log('Error response:', jqXHR.responseText);
                 alert('An error occurred while unlocking documents.');
             },
         });
@@ -1039,7 +1045,7 @@ $.fn.setCursorPosition = function(pos) {
 });
 
   $("#reloadflux").on("click", function () {
-    // console.log(mass_run);
+// console.log(mass_run);
     if (confirm(confirm_reload)) {
       // Clic sur OK
       $.ajax({
@@ -1275,88 +1281,54 @@ function fields_target_hover() {
   });
 }
 
-// rev 1.08 ----------------------------
-function previous_next(tab) {
-  // console.log("previous_next start inside the function charlie");
-  // console.log("tab", tab);
-  // tab 0 : default
-  // tab 1 : plus
-  // tab 2 : manual tab
-  name_current = $(".active").attr("aria-controls");
-  // console.log("Current active tab name:", name_current);
-  
-  number = 0;
-  number = name_current.split("-");
-  number = parseInt(number[1]);
-  // console.log("Parsed tab number:", number);
-
-  $("#rule_previous").show();
-  $("#rule_next").show();
-
-  if (number == 3) {
-    // console.log("Hiding previous button because number is 3");
-    $("#rule_previous").hide();
-    $("#rule_next").show();
-  }
-
-  if (number == 7) {
-    // console.log("Hiding next button because number is 7");
-    $("#rule_next").hide();
-    $("#rule_previous").show();
-  }
-
-  if (tab == 1) {
-    number_next = number + 1;
-    // console.log("Next tab number:", number_next);
-    let nextTab = $(".tab-" + number_next);
-    
-    // Check if tab-5 exists, if not, skip to tab-6
-    if (number_next === 5 && nextTab.length === 0) {
-      // console.log("Tab-5 does not exist, skipping to tab-6");
-      number_next = 6;
-      nextTab = $(".tab-" + number_next);
-    }
-
-    if (nextTab.length > 0) {
-      // console.log("Next tab exists, triggering click");
-      nextTab.trigger("click");
-    } else {
-      // console.log("Next tab does not exist");
-    }
-  } else if (tab == 0) {
-    number_previous = number - 1;
-    // console.log("Previous tab number:", number_previous);
-    
-    // Check if tab-5 exists, if not, skip back to tab-4
-    if (number_previous === 5 && $(".tab-" + number_previous).length === 0) {
-      // console.log("Tab-5 does not exist, skipping back to tab-4");
-      number_previous = 4;
-    }
-
-    const previousTab = $(".tab-" + number_previous);
-    if (previousTab.length > 0) {
-      // console.log("Previous tab exists, triggering click");
-      previousTab.trigger("click");
-    } else {
-      // console.log("Previous tab does not exist");
-    }
-  }
-}
 
 function btn_action_fct() {
+  // console.log('[🚀 btn_action_fct] Function started');
+  
+  // First, clean up any existing loading overlays to prevent duplicates
+  $('.myd_div_loading').remove();
+  $('body').css('overflow', '');
+  // console.log('[🧹 Cleanup] Removed any existing loading overlays');
+
+  // Log window dimensions and scroll position
+  // console.log('[📏 Dimensions] Window:', {
+    // width: $(window).width(),
+    // height: $(window).height(),
+    // scrollTop: $(window).scrollTop()
+  // });
+
   // IMPORTANT
   $(window).scrollTop(0);
+  // console.log('[⬆️ Scroll] Window scrolled to top');
+
+  // Log body overflow state before and after change
+  // console.log('[💫 Overflow] Body overflow before:', $("body").css("overflow"));
   $("body").css("overflow", "hidden");
+  // console.log('[💫 Overflow] Body overflow after:', $("body").css("overflow"));
+
   var ww = $(window).width() / 2 - 33 + "px";
   var wh = $(window).height() / 2 - 33 + "px";
+  // console.log('[📐 Calculated] Center positions:', { width: ww, height: wh });
+
+  // Log rule div detection
   var divrule = $("#rule");
+  // console.log('[🔍 Rule Div] Initial #rule element found:', divrule.length > 0);
+  
   if (!divrule.length) {
-    var divrule = $("#flux");
+    divrule = $("#flux");
+    // console.log('[🔍 Rule Div] Fallback to #flux element:', divrule.length > 0);
   }
+
+  // Create and configure loading div
   var loading = $("<div></div>");
-  loading.empty(); // on le vide
+  loading.empty();
   loading.attr("id", "myd_loading");
-  loading.css({
+  
+  // Log loading div creation
+  // console.log('[📦 Loading Div] Created with ID:', loading.attr("id"));
+
+  // Apply and log CSS properties
+  var loadingCSS = {
     position: "absolute",
     display: "block",
     top: 0,
@@ -1366,32 +1338,120 @@ function btn_action_fct() {
     "background-color": "white",
     "text-align": "center",
     "z-index": 100,
-  });
-  loading.attr("class", "myd_div_loading");
+  };
+  
+  loading.css(loadingCSS);
+  // console.log('[🎨 Loading CSS] Applied styles:', loadingCSS);
 
+  loading.attr("class", "myd_div_loading");
+  // console.log('[🏷️ Class] Added class:', loading.attr("class"));
+
+  // Create and configure message paragraph
   var p = $("<p>Please wait. This can take a few minutes.</p>");
-  p.css({
+  var pCSS = {
     position: "absolute",
     top: $(window).height() / 2 - 100,
     left: $(window).width() / 2 - 65,
     width: "130px",
     height: "60px",
     "font-weight": "bold",
-  });
-  loading.append(p);
+  };
+  
+  p.css(pCSS);
+  // console.log('[📝 Message] Created and styled paragraph:', {
+    // text: p.text(),
+    // styles: pCSS
+  // });
 
+  loading.append(p);
+  // console.log('[➕ Append] Added message to loading div');
+
+  // Create and configure logo div
   var img = $("<div></div>");
   img.attr("class", "myd_div_loading_logo");
-  img.css({
+  var imgCSS = {
     position: "absolute",
     top: "5px",
     left: "5px",
     height: "150px",
     width: "150px",
-  });
+  };
+  
+  img.css(imgCSS);
+  // console.log('[🖼️ Logo] Created and styled logo div:', {
+    // class: img.attr("class"),
+    // styles: imgCSS
+  // });
+
   loading.append(img);
+  // console.log('[➕ Append] Added logo to loading div');
+
+  // Final append to container
   divrule.append(loading);
+  // console.log('[✅ Complete] Loading overlay appended to container');
+  
+  // Multiple event handlers for cleanup
+  
+  // 1. Browser back/forward navigation
+  $(window).on('popstate.myddleware', function(event) {
+    // console.log('[⚡ Navigation] Browser navigation detected');
+    cleanupLoading();
+  });
+
+  // 2. History change detection
+  var currentPath = window.location.pathname;
+  var checkInterval = setInterval(function() {
+    if (window.location.pathname !== currentPath) {
+      // console.log('[🔄 Path Change] URL changed from', currentPath, 'to', window.location.pathname);
+      cleanupLoading();
+      clearInterval(checkInterval);
+    }
+  }, 100);
+
+  // 3. Page unload
+  $(window).on('unload.myddleware', function() {
+    // console.log('[📤 Unload] Page unloading');
+    cleanupLoading();
+  });
+
+  // 4. Safety timeout (30 seconds)
+  setTimeout(function() {
+    if ($('#myd_loading').length > 0) {
+      console.warn('[⚠️ Timeout] Loading overlay forcefully removed after 30 seconds');
+      cleanupLoading();
+    }
+  }, 30000);
+
+  // Cleanup function
+  function cleanupLoading() {
+    // console.log('[🧹 Cleanup] Starting cleanup process');
+    
+    // Remove event handlers
+    $(window).off('popstate.myddleware');
+    $(window).off('unload.myddleware');
+    
+    // Remove loading overlay
+    $('#myd_loading').fadeOut(300, function() {
+      $(this).remove();
+      // console.log('[🗑️ Removed] Loading overlay');
+    });
+    
+    // Restore body overflow
+    $('body').css('overflow', '');
+    // console.log('[↩️ Restored] Body overflow');
+  }
 }
+
+// Ensure cleanup happens if the script is re-run
+$(document).ready(function() {
+  // Clean up any existing handlers
+  $(window).off('popstate.myddleware');
+  $(window).off('unload.myddleware');
+  
+  // Clean up any existing loading overlays
+  $('.myd_div_loading').remove();
+  $('body').css('overflow', '');
+});
 
 function notification() {
   var notification = $.trim($("#zone_notification", "#notification").html());
@@ -1592,7 +1652,13 @@ function verif(div_clock) {
       .find("input")
       .each(function () {
         if ($(this).val().length == 0) {
-          err++;
+          // Get the data-param value
+          var fieldParam = $(this).attr("data-param");
+
+          // Check if field is in non required fields list loaded from config
+          if (!nonRequiredFields.includes(fieldParam)) {
+            err++;
+          }
         }
       });
 

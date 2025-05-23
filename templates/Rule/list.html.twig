@@ -100,7 +100,7 @@
 												{{rule.lbl_target }}
 											</td>
 											<td class="text-center col-rule-name">
-												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="rule-name-display help-link all-link">{{rule.name }}</a>
+												<a href="{{ path('regle_open',{'id' : rule.id }) }}" title="{{'list_rule.btn.view'|trans}}" class="rule-name-display help-link all-link flex-center-rule-name">{{rule.name }}</a>
 												<a class="mx-3 edit-button-name-list">
 													<i class="fa fa-pen" aria-hidden="true"></i>
 												</a>
@@ -116,7 +116,7 @@
 												</div>
 											</td>
 											<td class="text-center">
-												<div class="form-check form-switch">
+												<div class="form-check form-switch rule-list-activation-switch">
 													<input class="form-check-input toggle-switch-rule" 
 														   type="checkbox" 
 														   id="{{ rule.id }}"

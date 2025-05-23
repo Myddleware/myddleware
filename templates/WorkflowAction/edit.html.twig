@@ -46,71 +46,77 @@
 			</div>
 			<div class="card-body">
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-name" id="name-container">
 						{{ form_row(form.name) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 workflow-field-container form-group-workflow-action workflow-action-edit-workflow" id="workflow-container">
 						{{ form_row(form.Workflow) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-description" id="description-container">
 						{{ form_row(form.description) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-action" id="action-container">
 						{{ form_row(form.action) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action" id="order-container">
 						{{ form_row(form.order) }}
 					</div>
 					{% if form.multipleRuns is defined %}
-						<div class="col-md-6">
+						<div class="col-md-6 form-group-workflow-action" id="multiple-runs-container">
 							{{ form_row(form.multipleRuns) }}
 						</div>
 					{% endif %}
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-status" id="status-container">
 						{{ form_row(form.status) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action" id="active-container">
 						{{ form_row(form.active) }}
 					</div>
-					<div class="col-md-6">
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-to" id="to-container">
+						{{ form_row(form.to) }}
+					</div>
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-subject" id="subject-container">
 						{{ form_row(form.subject) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-12">
-						{{ form_row(form.message) }}
+					<div class="col-md-12" id="message-container">
+						<div class="workflow-field-container form-group-workflow-action workflow-action-edit-message">
+							{{ form_row(form.message) }}
+						</div>
 					</div>
-					<div class="col-md-6">
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-rule" id="rule-container">
 						{{ form_row(form.ruleId) }}
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-searchfield" id="search-field-container">
 						{{ form_row(form.searchField) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-searchvalue" id="search-value-container">
 						{{ form_row(form.searchValue) }}
 					</div>
 				</div>
 				<div class="row mb-4">
-					<div class="col-md-6">
+					<div class="col-md-6 form-group-workflow-action" id="rerun-container">
 						{{ form_row(form.rerun) }}
 					</div>
-					<div class="col-md-6">
-						{{ form_row(form.to) }}
-					</div>
 				</div>
-				<div class="row mb-4">
-					<div class="col-md-6" id="targetFieldContainer" style="display: none;">
+				<div class="row mb-4" style="display: none;">
+					<div class="col-md-6 form-group-workflow-action" id="targetFieldContainer">
 						{{ form_row(form.targetFields) }}
 					</div>
-					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+					<div class="col-md-6 form-group-workflow-action" id="targetFieldValueContainer" style="display: none;">
 						<label for="form_targetFieldValue">New value</label>
 						<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
 					</div>
@@ -122,7 +128,7 @@
 				{{ form_row(form.submit) }}
 			</div>
 		</div>
-		{{ form_end(form) }}
+		{{ form_end(form, {'render_rest': false}) }}
 
 		<script type="text/javascript">
 			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";

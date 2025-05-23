@@ -254,7 +254,7 @@ rulegroup:
     create_by: Créé par
     modified_by: Modifié par
     delete: Supprimer
-    edit: Editer
+    edit: Édition d'un groupe de règles
     updated_successfully: Groupe de règles modifié avec succès
     rules: Liste des règles
     rule_removed_successfully: Règle supprimée avec succès
@@ -561,6 +561,7 @@ list_workflow:
         actions: Actions
         order: Ordre
         option: Options
+        status: Statut
 view_workflow:
     title: Workflow
     create: Créer un workflow
@@ -596,6 +597,8 @@ view_workflow:
     cancel_edit: Annuler l'édition
     save: Sauvegarder
     cancel: Annuler
+edit_workflow:
+    name_already_exists: Le nom du workflow existe déjà
 view_workflow_action:
     title2: Action du workflow
     title: Détail de l'action du workflow
@@ -1101,6 +1104,7 @@ duplicate_rule:
 banner: Crontab est désactivé
 variable:
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
+  edit: Modification de la variable
   back_to_list: Retour à la liste des variables
   editing: Modification de la variable
   save: Enregistrer

@@ -27,6 +27,7 @@ class DatabaseSetupType extends AbstractType
                 ],
             ])
             ->add('name', null, [
+                'label' => 'Database name',
                 'attr' => [
                     'placeholder' => 'eg: my_database_name',
                 ],

@@ -122,7 +122,7 @@
 		localStorage.setItem('dateReference_' + ruleId, dateReferenceValue);
 		
 		// Log the stored value to verify
-		console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
+		// console.log('Stored date reference for rule ' + ruleId + ':', localStorage.getItem('dateReference_' + ruleId));
 	});
 
 	document.getElementById('getReferenceDateButton').addEventListener('click', function() {
@@ -130,11 +130,11 @@
 		var storedDateReference = localStorage.getItem('dateReference_' + ruleId);
 
 		if (storedDateReference) {
-			console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
+			// console.log('Retrieved date reference for rule ' + ruleId + ':', storedDateReference);
 			// Set the retrieved value to the input field
 			document.getElementById('datereference').value = storedDateReference;
 		} else {
-			console.log('No stored date reference found for rule ' + ruleId);
+			// console.log('No stored date reference found for rule ' + ruleId);
 		}
 	});
 

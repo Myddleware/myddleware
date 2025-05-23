@@ -35,6 +35,8 @@ use Symfony\Component\Yaml\Yaml;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SmtpTransport;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 
 class ToolsManager
 {
@@ -44,6 +46,10 @@ class ToolsManager
     protected $language;
     protected $translations;
     private string $projectDir;
+    protected $kernel;
+    protected $requestStack;
+    protected $mailer;
+    protected $configParams;
 
     // Standard rule param list to avoid to delete specific rule param (eg : filename for file connector)
     protected array $ruleParam = ['datereference', 'bidirectional', 'fieldId', 'mode', 'duplicate_fields', 'limit', 'delete', 'fieldDateRef', 'fieldId', 'targetFieldId', 'deletionField', 'deletion', 'language'];
@@ -52,10 +58,14 @@ class ToolsManager
         LoggerInterface $logger,
         Connection $connection,
         KernelInterface $kernel,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        MailerInterface $mailer
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
+        $this->kernel = $kernel;
+        $this->requestStack = $requestStack;
+        $this->mailer = $mailer;
         $this->projectDir = $kernel->getProjectDir();
         $request = $requestStack->getCurrentRequest();
         $language = $request ? $request->getLocale() : 'en';
@@ -222,36 +232,75 @@ class ToolsManager
 	// Send a message using Brevo or SMTP parameters
 	public function sendMessage($to, $subject, $message) {
 		// Use Brevo if the key is set
-		if (!empty($_ENV['SENDINBLUE_APIKEY'])) {
+		if (!empty($_ENV['BREVO_APIKEY'])) {
             try {
-				$sendinblue = \SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_APIKEY']);
-				$apiInstance = new \SendinBlue\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $sendinblue);
-				$sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail(); // \SendinBlue\Client\Model\SendSmtpEmail | Values to send a transactional email
-				$recipients = array();
-				foreach($to as $recipient) {
-					$recipients[] = array('email' => $recipient);
-				}
-				$sendSmtpEmail['to'] = $recipients;
-				$sendSmtpEmail['subject'] = $subject;
-				$sendSmtpEmail['htmlContent'] = $message;
-				$sendSmtpEmail['sender'] = array('email' => $this->configParams['email_from'] ?? 'no-reply@myddleware.com');				
-                $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+                $apiKey = $_ENV['BREVO_APIKEY'];
+
+            // Prepare the email data
+            $emailData = [
+                'sender' => [
+                    'email' => !empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'
+                ],
+                'to' => [
+                    [
+                        'email' => $to[0]
+                    ]
+                ],
+                'subject' => $subject,
+                'htmlContent' => $message . "\n"
+            ];
+
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => json_encode($emailData),
+                CURLOPT_HTTPHEADER => [
+                    "accept: application/json",
+                    "api-key: " . $apiKey,
+                    "content-type: application/json"
+                ],
+            ]);
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+            if ($err) {
+                $session = $this->requestStack->getSession();
+                $session->set('error', ["workflow notification error"]);
+                return false;
+            } else {
+                return true;
+            }
+
             } catch (Exception $e) {
                 throw new Exception('Exception when calling TransactionalEmailsApi->sendTransacEmail: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             }
         } else {
-            $swiftMessage =
-                    (new Swift_Message($subject))
-                    ->setFrom($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
-                    ->setBody($message);
-			// Send message
-			$message->setTo($to);
-			$send = $this->mailer->send($message);
-			if (!$send) {
-				$this->logger->error('Failed to send alert email : '.$message.' to '.$to);
-				throw new Exception('Failed to send alert email : '.$message.' to '.$to);
-			}
+            try {
+                // Create the Email object
+                $email = (new Email())
+                    ->from($this->configParams['email_from'] ?? 'no-reply@myddleware.com')
+                    ->subject($subject)
+                    ->html($message);
+
+                // Add recipients
+                foreach ((array)$to as $recipient) {
+                    $email->addTo($recipient);
+                }
+
+                // Send the email
+                $this->mailer->send($email);
+            } catch (Exception $e) {
+                $this->logger->error('Failed to send email: ' . $e->getMessage());
+                throw new Exception('Failed to send email: ' . $e->getMessage());
+            }
         }
+        return true;
 	}
 	
 	public function isPremium() {
