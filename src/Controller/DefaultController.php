@@ -2560,7 +2560,17 @@ use Symfony\Component\Yaml\Yaml;
                         list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
 
                         $p['parentmoduleid'] = $companyId;
-                }
+                    }
+
+                    // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
+                    if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                        $moduleTarget = $oneRule->getModuleTarget();
+
+                        // destructure $moduleSource to get $companyId and $apiModuleName
+                        list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
+
+                        $p['parentmoduleid'] = $companyId;
+                    }
 
                     $bidirectional = '';
                     foreach ($p as $key => $value) {
