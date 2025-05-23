@@ -2549,19 +2549,17 @@ use Symfony\Component\Yaml\Yaml;
                         $p = array_merge($param['RuleParam'], $tab_new_rule['params']);
                     }
 
-                                    // set param parentrule
-                if (!empty($_SESSION['parentmodule']) && !empty($_SESSION['parentmoduleid'])
-                
-                && empty($item['value']) // value is equal to 0 when creation, so empty works to discriminate
-                ) {
-                    // add the new params parentmodule and parentmoduleid to $p
-                    $p['parentmodule'] = $_SESSION['parentmodule'];
-                    $p['parentmoduleid'] = $_SESSION['parentmoduleid'];
+                    // find in the database the id of the solution with the name dynamicsbusiness
+                    $solutionDynamicsBusiness = $this->entityManager->getRepository(Solution::class)->findOneBy(['name' => 'dynamicsbusiness']);
 
-                    unset($_SESSION['parentmodule']);
-                    unset($_SESSION['parentmoduleid']);
-                    unset($_SESSION['modules']);
-                    unset($_SESSION['resultSaveIds']);
+                    // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
+                    if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                        $moduleSource = $oneRule->getModuleSource();
+
+                        // destructure $moduleSource to get $companyId and $apiModuleName
+                        list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
+
+                        $p['parentmoduleid'] = $companyId;
                 }
 
                     $bidirectional = '';
