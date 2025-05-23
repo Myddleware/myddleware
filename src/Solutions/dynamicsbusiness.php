@@ -38,6 +38,12 @@ class dynamicsbusiness extends solution
     protected bool $readDeletion = true;
     protected bool $sendDeletion = true;
 
+    public string $parentModule = 'companies';
+    public string $parentModuleId = '';
+
+    public array $modules = [];
+    public array $resultSaveIds = [];
+
     protected array $requiredFields = [
         ['id', 'lastModifiedDateTime']
     ];
@@ -130,8 +136,8 @@ class dynamicsbusiness extends solution
             throw new \Exception("Not enough modules found for company {$companyName}. Please check the logs for details.");
         }
 
-        $_SESSION['modules'] = $result;
-        $_SESSION['resultSaveIds'] = $resultSaveIds;
+        $this->modules = $result;
+        $this->resultSaveIds = $resultSaveIds;
         return $result;
 
         } catch (\Exception $e) {
@@ -154,11 +160,9 @@ class dynamicsbusiness extends solution
     
             list($companyId, $apiModuleName) = explode('_', $moduleKey, 2);
     
-            $_SESSION['parentmodule'] = "companies";
-            $_SESSION['parentmoduleid'] = $companyId;
+            $this->parentModuleId = $companyId;
     
-            $accessToken = $this->token;
-            if (!$accessToken) {
+            if (!$this->token) {
                 throw new \Exception("Unable to retrieve access token.");
             }
     
@@ -166,7 +170,7 @@ class dynamicsbusiness extends solution
 
             $client = $this->getApiClient();
             $headers = [
-                'Authorization' => "Bearer {$accessToken}",
+                'Authorization' => "Bearer {$this->token}",
                 'Accept' => 'application/xml',
             ];
             $response = $client->get($url, ['headers' => $headers]);
