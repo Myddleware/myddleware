@@ -164,21 +164,15 @@ class dynamicsbusiness extends solution
     
             $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$environment}/api/v2.0/\$metadata";
 
+            $client = $this->getApiClient();
+            $headers = [
+                'Authorization' => "Bearer {$accessToken}",
+                'Accept' => 'application/xml',
+            ];
+            $response = $client->get($url, ['headers' => $headers]);
+            $responseBody = $response->getBody()->getContents();
     
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                "Authorization: Bearer {$accessToken}",
-                "Accept: application/xml"
-            ]);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
-            $response = curl_exec($ch);
-            if (curl_errno($ch)) {
-                throw new \Exception('Curl error: ' . curl_error($ch));
-            }
-            curl_close($ch);
-    
-            $xml = simplexml_load_string($response);
+            $xml = simplexml_load_string($responseBody);
 
             // register the namespaces in order to be able to use xpath so we can dynamically get the entity type
             $xml->registerXPathNamespace('edmx', 'http://docs.oasis-open.org/odata/ns/edmx');
