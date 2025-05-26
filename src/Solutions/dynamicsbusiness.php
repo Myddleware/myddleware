@@ -197,38 +197,12 @@ class dynamicsbusiness extends solution
 
             foreach ($entityTypes[0]->xpath("edm:Property") as $property) {
                 $name = (string) $property['Name'];
-                $edmType = (string) $property['Type'];
                 $nullable = (string) $property['Nullable'];
-            
-                // Map Edm types to SQL types (very basic mapping)
-                switch ($edmType) {
-                    case 'Edm.Guid':
-                    case 'Edm.String':
-                        $type = 'varchar(255)';
-                        break;
-                    case 'Edm.Int32':
-                    case 'Edm.Int64':
-                        $type = 'int(11)';
-                        break;
-                    case 'Edm.Boolean':
-                        $type = 'tinyint(1)';
-                        break;
-                    case 'Edm.Decimal':
-                    case 'Edm.Double':
-                        $type = 'decimal(18,2)';
-                        break;
-                    case 'Edm.DateTimeOffset':
-                        $type = 'datetime';
-                        break;
-                    default:
-                        $type = 'varchar(255)'; // fallback for unknown or complex types
-                        break;
-                }
             
                 $fields[$name] = [
                     'label' => $name,
-                    'type' => $type,
-                    'type_bdd' => $type,
+                    'type' => 'varchar(255)',
+                    'type_bdd' => 'varchar(255)',
                     'required' => ($nullable === 'false') ? 1 : 0
                 ];
             }
