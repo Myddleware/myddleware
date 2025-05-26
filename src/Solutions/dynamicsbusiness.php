@@ -687,20 +687,26 @@ class dynamicsbusiness extends solution
                 $entitySets = $xml->xpath("//*[local-name()='EntitySet']");
             }
 
+            // Validate XPath query results
             if ($entitySets === false) {
-                 throw new \Exception("XPath query failed for company ID {$companyId}.");
+                throw new \Exception("XPath query failed for company ID {$companyId}.");
             } else {
-                 foreach ($entitySets as $entitySet) {
+                // Extract entity names from EntitySet elements
+                // Each EntitySet has a Name attribute that represents an available entity
+                foreach ($entitySets as $entitySet) {
                     if (isset($entitySet['Name'])) {
                         $entityNames[] = (string)$entitySet['Name'];
                     }
                 }
             }
             
+            // Remove any duplicate entity names and return the list
             $uniqueEntityNames = array_unique($entityNames);
             return $uniqueEntityNames;
 
         } catch (\GuzzleHttp\Exception\RequestException $e) {
+            // Handle HTTP request errors with detailed error messages
+            // Include response body in error message if available
             $errorMessage = "[Myddleware_DynamicsBusiness] getEntityListFromMetadata: Guzzle RequestException for company ID {$companyId}. Code: " . $e->getCode() . " Message: " . $e->getMessage();
             if ($e->hasResponse()) {
                 $responseBody = $e->getResponse()->getBody()->getContents();
@@ -708,6 +714,8 @@ class dynamicsbusiness extends solution
             }
             throw new \Exception("Error fetching metadata from API: " . $e->getCode() . " - " . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
+            // Handle all other exceptions
+            // Log the error and return it in a format consistent with the application's error handling
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             return ['error' => $error];
