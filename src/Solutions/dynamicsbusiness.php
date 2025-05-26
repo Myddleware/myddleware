@@ -636,7 +636,7 @@ class dynamicsbusiness extends solution
         // If companyId was essential for the URL, this would be an issue.
         // For this attempt, we are fetching global metadata for the tenant/environment.
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
-        $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/\$metadata";
+        $url = $this->getBaseApiUrl() . "\$metadata";
 
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
