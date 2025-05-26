@@ -518,7 +518,7 @@ class dynamicsbusiness extends solution
             $responseBody = $getResponse->getBody()->getContents();
             $responseData = json_decode($responseBody, true);
             
-            // Get ETag from response body
+            // Get ETag from response body, it is used by the PATCH request to update the record and that's how we do optimistic concurrency control
             $etag = $responseData['@odata.etag'] ?? null;
             
             if (!$etag) {
@@ -528,10 +528,22 @@ class dynamicsbusiness extends solution
             // Add the ETag to the headers for the PATCH request
             $headers['If-Match'] = $etag;
             
+
+            // this is where the optimisitc concurrency is happening, we assume that conflicts are rare and only check for conflicts when actually saving the data. if the header matches, the data has not been modified since the last read so we can save the data.
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
             ]);
+
+            
+            // When updating, the ETag is sent in the If-Match header.
+            // Example:
+            // User A reads a record (gets ETag "123")
+            // User B reads the same record (gets ETag "123")
+            // User A updates the record (sends ETag "123" - succeeds)
+            // User B tries to update the record (sends ETag "123" - fails because the record was modified)
+            // This prevents User B from accidentally overwriting User A's changes. If the ETag doesn't match, the update fails.
+            // The alternative (pessimistic concurrency control) would be to lock the record when User A starts reading it, preventing User B from even reading it until User A is done. This is more restrictive and can lead to performance issues in high-concurrency situations.
             
             $data = json_decode($response->getBody(), true);
             
