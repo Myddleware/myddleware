@@ -271,7 +271,7 @@ class dynamicsbusiness extends solution
         }
     }
 
-    public function readData($param): array
+    public function read($param): array
     {
 
         if(!empty($param['ruleParams']['limit'])) {
@@ -289,11 +289,6 @@ class dynamicsbusiness extends solution
         $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
 
-        // intermediate value for the filter date based on the datereference
-        $dateRef = $param['ruleParams']['datereference'];
-        // format the dateref to the format of the filter
-        $dateRef = $this->dateTimeFromMyddleware($dateRef);
-
         $filterValue = '';
 
         // just like hubspot, we do an if not empty query else if not empty date_ref else all
@@ -306,8 +301,10 @@ class dynamicsbusiness extends solution
             $filterValue = rtrim($filterValue, ' and ');
 
         } else if (!empty($param['date_ref'])) {
+            $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
             $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
         } else {
+            $dateRef = $this->dateTimeFromMyddleware($param['ruleParams']['datereference']);
             $filterValue = urlencode("lastModifiedDateTime gt {$dateRef}");
         }
 
@@ -363,100 +360,16 @@ class dynamicsbusiness extends solution
                 $nbRecords++;
             }
 
-            $countResult = count($results);
-
             // put the actual data in a sub array called value
             $resultFinal = [];
-            $resultFinal['values'] = $results;
 
-            // put now in the date_ref
-            if ($countResult > 0) {
-                $resultFinal['date_ref'] = date('Y-m-d H:i:s');
+            foreach($results as $value)
+            {
+                $recordId = $value['id'];
+                $resultFinal[$recordId] = $value;
             }
-
-            // for the simulation, get the count of results
-            $resultFinal['count'] = $countResult;
 
             return $resultFinal;
-        } catch (\Exception $e) {
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            return ['error' => $error];
-        }
-    }
-
-    public function read($param)
-    {
-        try {
-
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $this->validateReadParameters($param);
-
-        $module = $param['module'];
-
-        list($companyId, $module) = explode('_', $module, 2);
-
-        $parentmodule = $this->parentModule;
-        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
-
-        // intermediate value for the filter date based on the datereference
-        $dateRef = $param['ruleParams']['datereference'];
-
-        // format the dateref to the format of the filter
-        $dateRef = $this->dateTimeFromMyddleware($dateRef);
-
-        $filter = urlencode("lastModifiedDateTime gt {$dateRef}");
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filter}";
-
-            if (isset($param['query']['id'])) {
-                $url .= "({$param['query']['id']})";
-            }
-
-
-        $response = $client->get($url, ['headers' => $headers]);
-        $data = json_decode($response->getBody(), true);
-
-
-        $results = [];
-        $result = [];
-        $nbRecords = 0;
-
-            
-            // Dynamically map fields based on $param['fields']
-            if (isset($param['fields']) && is_array($param['fields'])) {
-                foreach ($param['fields'] as $field) {
-                    // Check if the field exists in the data
-                    if (isset($data[$field])) {
-                        $result[$field] = $data[$field];
-                    } else {
-                        // If field doesn't exist, set a default value or null
-                        $result[$field] = null;
-                    }
-                }
-
-                // convert "lastModifiedDateTime": "2025-03-24T02:05:51Z" to a string in this format: 2025-04-02 09:28:27
-                $result['date_modified'] = $this->dateTimeToMyddleware($data['lastModifiedDateTime']);
-            } else {
-                // Fallback to default fields if $param['fields'] is not set
-                $result['id'] = $data['id'] ?? null;
-                    $result['displayName'] = $data['displayName'] ?? null;
-                }
-
-            if (!isset($result['id']) && !empty($data['id']) && !empty($param['query']['id'])) {
-                $result['id'] = $data['id'];
-            }
-            
-            $results[] = $result;
-            $nbRecords++;
-
-            // Check if we've reached the limit
-            if (isset($param['limit']) && $nbRecords >= $param['limit']) {
-                return array_slice($results, 0, $param['limit']);
-            }
-
-            return $results;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
