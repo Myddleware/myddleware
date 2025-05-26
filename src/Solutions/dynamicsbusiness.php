@@ -286,7 +286,7 @@ class dynamicsbusiness extends solution
         $module = $param['module'];
         list($companyId, $module) = explode('_', $module, 2);
 
-        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
 
         // intermediate value for the filter date based on the datereference
@@ -398,7 +398,7 @@ class dynamicsbusiness extends solution
 
         list($companyId, $module) = explode('_', $module, 2);
 
-        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
 
         // intermediate value for the filter date based on the datereference
@@ -479,7 +479,7 @@ class dynamicsbusiness extends solution
             list($companyId, $module) = explode('_', $module, 2);
         }
         
-        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
@@ -519,7 +519,7 @@ class dynamicsbusiness extends solution
             list($companyId, $module) = explode('_', $module, 2);
         }
         
-        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         $targetId = $data['target_id'];
         
@@ -575,7 +575,7 @@ class dynamicsbusiness extends solution
     {
         $requiredParams = [
             'tenant_id' => $this->paramConnexion['tenant_id'] ?? null,
-            'parentmodule' => $param['ruleParams']['parentmodule'] ?? null,
+            'parentmodule' => $this->parentModule ?? null,
             'parentmoduleId' => $param['ruleParams']['parentmoduleid'] ?? null,
             'module' => $param['module'] ?? null
         ];
@@ -692,7 +692,7 @@ class dynamicsbusiness extends solution
         $client = $this->getApiClient();
         $headers = $this->getApiHeaders();
         
-        $parentmodule = $param['ruleParams']['parentmodule'];
+        $parentmodule = $this->parentModule;
         $parentmoduleId = $param['ruleParams']['parentmoduleid'];
         $targetId = $data['target_id'];
 
