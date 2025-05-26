@@ -592,40 +592,60 @@ class dynamicsbusiness extends solution
      * Retrieves list of available entities from API metadata
      * Parses XML metadata to extract entity definitions
      * 
-     * @param string $companyId Company identifier
+     * This function fetches the OData metadata from Dynamics Business Central API,
+     * which contains the complete schema of all available entities (tables/objects)
+     * that can be accessed through the API. The metadata is in XML format and follows
+     * the OData specification.
+     * 
+     * Process:
+     * 1. Fetches metadata XML from the API
+     * 2. Validates the response is not empty/error
+     * 3. Parses XML using SimpleXML
+     * 4. Extracts entity names using XPath queries
+     * 5. Handles different XML namespace scenarios
+     * 
+     * @param string $companyId Company identifier (used for error messages only)
      * @return array List of available entity names
      * @throws \Exception If metadata cannot be retrieved or parsed
      */
     protected function getEntityListFromMetadata($companyId): array
     {
+        try {
+            // Ensure we have a valid authentication token before making API calls
+            if (!$this->token) {
+                throw new \Exception("Access token is not available. Please login first.");
+            }
 
-    try {
+            // Initialize HTTP client and set up headers for the API request
+            $client = $this->getApiClient();
+            $headers = $this->getApiHeaders();
 
-        if (!$this->token) {
-            throw new \Exception("Access token is not available. Please login first.");
-        }
-
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-
-        $tenantId = $this->paramConnexion['tenant_id'];
-        $env = $this->paramConnexion['environment'] ?? 'production';
+            // Get tenant and environment configuration for the API URL
+            $tenantId = $this->paramConnexion['tenant_id'];
+            $env = $this->paramConnexion['environment'] ?? 'production';
 
         // If companyId was essential for the URL, this would be an issue.
         // For this attempt, we are fetching global metadata for the tenant/environment.
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
         $url = $this->getBaseApiUrl() . "\$metadata";
 
+            // Make the API request to fetch metadata
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
             $xmlString = $response->getBody()->getContents();
-            if (strlen($xmlString) < 500) { // Log small responses, they might be errors or empty
+
+            // Validate response size - small responses likely indicate errors
+            // OData metadata is typically large, so responses under 500 chars are suspicious
+            if (strlen($xmlString) < 500) {
                 throw new \Exception("Response invalid. Body (first 500 chars): " . substr($xmlString, 0, 500));
             }
 
+            // Enable internal error handling for XML parsing
+            // This allows us to capture and format XML parsing errors
             libxml_use_internal_errors(true);
             $xml = simplexml_load_string($xmlString);
 
+            // Handle XML parsing errors with detailed messages
             if ($xml === false) {
                 $errors = libxml_get_errors();
                 $errorMessages = [];
