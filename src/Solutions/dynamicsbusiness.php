@@ -743,5 +743,10 @@ class dynamicsbusiness extends solution
         return $dto->format('Y-m-d\TH:i:s\Z');
     }
 
+    public function getRefFieldName($param)
+    {
+        return "lastModifiedDateTime";
+    }
+
 }
 ?>
