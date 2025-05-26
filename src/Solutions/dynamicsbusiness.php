@@ -166,7 +166,7 @@ class dynamicsbusiness extends solution
                 throw new \Exception("Unable to retrieve access token.");
             }
     
-            $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$environment}/api/v2.0/\$metadata";
+            $url = $this->getBaseApiUrl() . "\$metadata";
 
             $client = $this->getApiClient();
             $headers = [
