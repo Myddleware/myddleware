@@ -29,6 +29,11 @@ use GuzzleHttp\Client;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+/**
+ * Class dynamicsbusiness
+ * Handles integration with Microsoft Dynamics Business Central API
+ * Manages authentication, data retrieval, and CRUD operations
+ */
 class dynamicsbusiness extends solution
 {
     protected $token;
@@ -48,6 +53,11 @@ class dynamicsbusiness extends solution
         ['id', 'lastModifiedDateTime']
     ];
 
+    /**
+     * Returns the form fields required for login configuration
+     * 
+     * @return array Array of form field configurations
+     */
     public function getFieldsLogin(): array
     {
         return [
@@ -58,6 +68,14 @@ class dynamicsbusiness extends solution
         ];
     }
 
+    /**
+     * Authenticates with the Dynamics Business Central API
+     * Retrieves and stores the access token for subsequent API calls
+     * 
+     * @param array $paramConnexion Connection parameters containing tenant_id, client_id, client_secret, and environment
+     * @return array|bool Returns true on success, array with error on failure
+     * @throws \Exception If authentication fails or token cannot be retrieved
+     */
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -96,7 +114,14 @@ class dynamicsbusiness extends solution
         }
     }
 
-    // Permet de récupérer tous les modules accessibles à l'utilisateur
+    /**
+     * Retrieves all available modules (entities) for the connected user
+     * Groups modules by company for better organization
+     * 
+     * @param string $type The type of modules to retrieve (source/target)
+     * @return array Associative array of module names and their display names
+     * @throws \Exception If modules cannot be retrieved or connection is invalid
+     */
     public function get_modules($type = 'source')
     {
         try {
@@ -147,6 +172,16 @@ class dynamicsbusiness extends solution
         }
     }
 
+    /**
+     * Retrieves field definitions for a specific module
+     * Fetches metadata from the API to determine available fields and their properties
+     * 
+     * @param string $moduleKey Module identifier in format 'companyId_apiModuleName'
+     * @param string $type The type of fields to retrieve (source/target)
+     * @param array|null $param Additional parameters for field retrieval
+     * @return array Array of field definitions with their properties
+     * @throws \Exception If module key is invalid or metadata cannot be retrieved
+     */
     public function get_module_fields($moduleKey, $type = 'source', $param = null): array
     {
         parent::get_module_fields($moduleKey, $type);
@@ -218,7 +253,9 @@ class dynamicsbusiness extends solution
     
 
     /**
-     * Returns a Guzzle HTTP client instance
+     * Creates a new Guzzle HTTP client instance for API calls
+     * 
+     * @return Client Configured Guzzle HTTP client
      */
     private function getApiClient(): Client
     {
@@ -226,7 +263,10 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * Returns the standard headers for API requests
+     * Returns standard headers required for API requests
+     * Includes authentication token and content type
+     * 
+     * @return array Array of HTTP headers
      */
     private function getApiHeaders(): array
     {
@@ -237,7 +277,10 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * Returns the base URL for API calls
+     * Constructs the base URL for API calls
+     * Includes tenant ID and environment configuration
+     * 
+     * @return string Base URL for API endpoints
      */
     private function getBaseApiUrl(): string
     {
@@ -247,6 +290,12 @@ class dynamicsbusiness extends solution
     }
 
 
+    /**
+     * Retrieves list of available companies from the API
+     * 
+     * @return array Associative array of company IDs and names
+     * @throws \Exception If companies cannot be retrieved
+     */
     public function getCompanies()
     {
         try {
@@ -271,6 +320,14 @@ class dynamicsbusiness extends solution
         }
     }
 
+    /**
+     * Reads records from a specified module
+     * Supports filtering by query parameters or date reference
+     * 
+     * @param array $param Parameters for the read operation including module, filters, and limits
+     * @return array Array of records with their field values
+     * @throws \Exception If read operation fails or parameters are invalid
+     */
     public function read($param): array
     {
 
@@ -378,7 +435,13 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * @throws Exception
+     * Creates a new record in the specified module
+     * 
+     * @param array $param Parameters for the create operation
+     * @param array $record Data to be created
+     * @param string|null $idDoc Document ID for tracking
+     * @return string|array Created record ID or error array
+     * @throws \Exception If creation fails
      */
     public function create($param, $record, $idDoc = null) {
 
@@ -418,7 +481,14 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * @throws \Exception
+     * Updates an existing record in the specified module
+     * Handles ETag for optimistic concurrency control
+     * 
+     * @param array $param Parameters for the update operation
+     * @param array $data Data to be updated
+     * @param string|null $idDoc Document ID for tracking
+     * @return string|array Updated record ID or error array
+     * @throws \Exception If update fails or ETag cannot be retrieved
      */
     protected function update($param, $data, $idDoc = null)
     {
@@ -479,9 +549,10 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * Validates the required parameters for the read method
+     * Validates required parameters for read operations
+     * Ensures all necessary parameters are present and valid
      * 
-     * @param array $param The parameters to validate
+     * @param array $param Parameters to validate
      * @throws \Exception If any required parameter is missing
      */
     private function validateReadParameters($param)
@@ -505,6 +576,14 @@ class dynamicsbusiness extends solution
         }
     }
 
+    /**
+     * Retrieves list of available entities from API metadata
+     * Parses XML metadata to extract entity definitions
+     * 
+     * @param string $companyId Company identifier
+     * @return array List of available entity names
+     * @throws \Exception If metadata cannot be retrieved or parsed
+     */
     protected function getEntityListFromMetadata($companyId): array
     {
 
@@ -595,7 +674,12 @@ class dynamicsbusiness extends solution
     }
 
     /**
-     * @throws \Exception
+     * Deletes a record from the specified module
+     * 
+     * @param array $param Parameters for the delete operation
+     * @param array $data Data containing the record to delete
+     * @return string|array Deleted record ID or error array
+     * @throws \Exception If deletion fails
      */
     protected function delete($param, $data)
     {
@@ -633,7 +717,13 @@ class dynamicsbusiness extends solution
         }
     }
 
-    // Function de conversion de datetime format solution à un datetime format Myddleware
+    /**
+     * Converts Dynamics Business Central datetime format to Myddleware format
+     * 
+     * @param string $dateTime Datetime in Dynamics format
+     * @return string Datetime in Myddleware format
+     * @throws \Exception If datetime is empty or invalid
+     */
     protected function dateTimeToMyddleware($dateTime)
     {
         if (empty($dateTime)) {
@@ -644,7 +734,13 @@ class dynamicsbusiness extends solution
         return $dto->format('Y-m-d H:i:s');
     }
 
-    // Function de conversion de datetime format Myddleware à un datetime format solution
+    /**
+     * Converts Myddleware datetime format to Dynamics Business Central format
+     * 
+     * @param string $dateTime Datetime in Myddleware format
+     * @return string Datetime in Dynamics format
+     * @throws \Exception If datetime is empty or invalid
+     */
     protected function dateTimeFromMyddleware($dateTime)
     {
         if (empty($dateTime)) {
@@ -656,6 +752,12 @@ class dynamicsbusiness extends solution
         return $dto->format('Y-m-d\TH:i:s\Z');
     }
 
+    /**
+     * Returns the field name used for reference tracking
+     * 
+     * @param array $param Parameters for the operation
+     * @return string Field name used for reference tracking
+     */
     public function getRefFieldName($param)
     {
         return "lastModifiedDateTime";
