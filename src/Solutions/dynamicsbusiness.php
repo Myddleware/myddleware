@@ -659,19 +659,28 @@ class dynamicsbusiness extends solution
 
             $entityNames = [];
             
+            // Handle different XML namespace scenarios
+            // OData metadata can use different namespace prefixes, so we need to handle both standard and custom cases
             $namespaces = $xml->getNamespaces(true);
             $xpathQuery = '';
 
+            // Check for standard EDM namespace first
             if (isset($namespaces['edm']) && $namespaces['edm'] === 'http://docs.oasis-open.org/odata/ns/edm') {
-                 $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
-                 $xpathQuery = '//edm:EntitySet';
-            } elseif (isset($namespaces['']) && $namespaces[''] === 'http://docs.oasis-open.org/odata/ns/edm') {
-                 $xml->registerXPathNamespace('d', 'http://docs.oasis-open.org/odata/ns/edm');
-                 $xpathQuery = '//d:EntitySet';
-            } else {
-                 throw new \Exception("EDM namespace not found or not standard. Trying local-name().");
+                $xml->registerXPathNamespace('edm', 'http://docs.oasis-open.org/odata/ns/edm');
+                $xpathQuery = '//edm:EntitySet';
+            } 
+            // Fallback to default namespace if standard not found
+            elseif (isset($namespaces['']) && $namespaces[''] === 'http://docs.oasis-open.org/odata/ns/edm') {
+                $xml->registerXPathNamespace('d', 'http://docs.oasis-open.org/odata/ns/edm');
+                $xpathQuery = '//d:EntitySet';
+            } 
+            // Last resort: use local-name() to find EntitySet elements regardless of namespace
+            else {
+                throw new \Exception("EDM namespace not found or not standard. Trying local-name().");
             }
             
+            // Execute XPath query to find all EntitySet elements
+            // EntitySet elements represent available entities in the API
             if (!empty($xpathQuery)) {
                 $entitySets = $xml->xpath($xpathQuery);
             } else {
