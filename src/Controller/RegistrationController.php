@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -22,11 +23,8 @@ class RegistrationController extends AbstractController
     private LoggerInterface $logger;
     private EntityManagerInterface $entityManager;
 
-    public function __construct(
-        ConfigRepository $configRepository, 
-        LoggerInterface $logger,
-        EntityManagerInterface $entityManager
-    ) {
+    public function __construct(ConfigRepository $configRepository, LoggerInterface $logger, EntityManagerInterface $entityManager)
+    {
         $this->logger = $logger;
         $this->configRepository = $configRepository;
         $this->entityManager = $entityManager;
@@ -67,8 +65,6 @@ class RegistrationController extends AbstractController
                 $user->setUsernameCanonical($user->getUsername());
                 $user->setEmailCanonical($user->getEmail());
                 $user->setTimezone('UTC');
-
-                $entityManager = $this->entityManager;
 
 
                 // block install from here as user has successfully installed Myddleware now
