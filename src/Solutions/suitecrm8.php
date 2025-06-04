@@ -153,8 +153,9 @@ class suitecrm8 extends solution
 
 	public function read($param)
     {
-        try {			
+        try {
 			$result = array();
+			$maxDateModified = null;
 			// Generate the URL
 			// Get a specific record
             if (!empty($param['query']['id'])) {
@@ -184,11 +185,48 @@ class suitecrm8 extends solution
 				foreach ($records as $record) {
 					foreach($param['fields'] as $fieldName) {
 						$result[$record['id']][$fieldName] = (!empty($record['attributes'][$fieldName]) ? $record['attributes'][$fieldName] : '');
+						// Get the max date if deletion enabed on the rule
+						if (
+								!empty($param['ruleParams']['deletion'])
+							AND	$fieldName == 'date_modified'
+							AND (
+									is_null($maxDateModified)
+								 OR $maxDateModified < $record['attributes'][$fieldName]
+							)
+						) {
+							$maxDateModified = $record['attributes'][$fieldName];
+						}
 					}
 					$result[$record['id']]['id'] = $record['id'];
 				}
 			}
-        } catch (\Exception $e) {
+			// Read deletion if enabled
+			if (
+					empty($param['query'])
+				AND !empty($param['ruleParams']['deletion'])
+			) {
+				$url = 'V8/module/'.$param['module'].'?filter[date_modified][gt]='.$dateRef.'&filter[deleted][eq]=1&page[size]='.$param['limit'].'&sort=date_modified';	
+				$readSuiteDeleted = $this->call('GET', $url); 
+				if (!empty($readSuiteDeleted['data'])) {
+					foreach ($readSuiteDeleted['data'] as $record) {
+						// Stop reading in case the limit has been reached and the date of the current record > maxDateModified
+						// We don't want to read record with date_modified greater than the first read to not change the reference date because of deleted record
+						if (
+								!is_null($maxDateModified)
+							AND count($result) >= $param['limit']
+							AND $record['attributes']['date_modified'] > $maxDateModified
+						) {
+							break;
+						}
+						foreach($param['fields'] as $fieldName) {
+							$result[$record['id']][$fieldName] = (!empty($record['attributes'][$fieldName]) ? $record['attributes'][$fieldName] : '');
+						}
+						$result[$record['id']]['id'] = $record['id'];
+						$result[$record['id']]['myddleware_deletion'] = true;
+					}
+				}
+			}
+		} catch (\Exception $e) {
             $result['error'] = 'Error : '.$e->getMessage().' '.__CLASS__.' Line : ( '.$e->getLine().' )';
         }
         return $result;
