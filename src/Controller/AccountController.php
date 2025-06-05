@@ -140,9 +140,11 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @Route("/account", name="my_account")
+     * @return RedirectResponse|Response|null
+     *
+     * @Route("/account/old", name="my_account_old")
      */
-    public function myAccount(Request $request, UserPasswordHasherInterface $hasher, UserManagerInterface $userManager): Response
+    public function account(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
         $user = $this->getUser();
         $em = $this->entityManager;
@@ -181,7 +183,7 @@ class AccountController extends AbstractController
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
 
-            return $this->redirectToRoute('account_modern');
+            return $this->redirectToRoute('my_account_old');
         }
         
         if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
@@ -194,7 +196,7 @@ class AccountController extends AbstractController
             }
             
             $this->entityManager->flush();
-            return $this->redirectToRoute('account_modern');
+            return $this->redirectToRoute('my_account_old');
         }
 
         return $this->render('Account/index.html.twig', [
@@ -317,7 +319,7 @@ class AccountController extends AbstractController
     /**
      * Modern JavaScript-based account page
      * 
-     * @Route("/account/modern", name="account_modern")
+     * @Route("/account", name="account_modern")
      */
     public function accountModern(): Response
     {
