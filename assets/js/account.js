@@ -234,6 +234,8 @@ class AccountManager {
             </div>
           </div>
           
+        </div>
+        
         <!-- Security Tab -->
         <div id="security-tab" class="tab-content" style="display: none;">
           <!-- Password Management -->
