@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Repository\ConfigRepository;
 use App\Security\SecurityAuthenticator;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -65,7 +64,6 @@ class RegistrationController extends AbstractController
                 $user->setUsernameCanonical($user->getUsername());
                 $user->setEmailCanonical($user->getEmail());
                 $user->setTimezone('UTC');
-
 
                 // block install from here as user has successfully installed Myddleware now
                 foreach ($configs as $config) {
