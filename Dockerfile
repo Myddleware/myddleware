@@ -57,17 +57,25 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy composer files first to leverage layer caching
-COPY composer.json composer.lock ./
-RUN composer install --no-scripts --no-autoloader
-
-# Copy application files
+# Copy application files first
 COPY --chown=www-data:www-data . .
 
-# Final composer and yarn steps
-RUN composer dump-autoload --optimize && \
-    yarn install && \
-    yarn run build
+# Create necessary directories with proper permissions
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/sessions && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+# Switch to www-data user for dependency installation
+USER www-data
+
+# Install PHP dependencies
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Install Node.js dependencies only (build will happen at startup)
+RUN yarn install --frozen-lockfile
+
+# Switch back to root to copy scripts and set permissions
+USER root
 
 # Copy scripts and set permissions
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
