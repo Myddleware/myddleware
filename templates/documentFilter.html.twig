@@ -323,7 +323,7 @@
 					{% for document in pager %}
 						<tr>
 							<td>
-								{% if document.global_status|lower == 'close' or document.global_status|lower == 'cancel' %}
+								{% if not (is_granted('ROLE_SUPER_ADMIN')) and (document.global_status|lower == 'close' or document.global_status|lower == 'cancel') %}
 									<input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
 								{% else %}
 									<input type="checkbox" name="{{ document.id }}"/>
