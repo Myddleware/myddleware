@@ -302,23 +302,21 @@ class moodle extends solution
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
-                    if (!empty($value)) {
-                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
-                        if (in_array($key, $customFieldList)) {
-                            $customField = new \stdClass();
-                            // Param names are differents depending on the module
-                            if($param['module'] == 'users') {
-                                $customField->type = $key;
-                            } elseif($param['module'] == 'courses') {
-                                $customField->shortname = $key; 
-                            }
-                            $customField->value = $value;
-                            $obj->customfields[] = $customField;
-                            
-                        } else {
-                            $obj->$key = $value;
-                        }
-                    }
+					// if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+					if (in_array($key, $customFieldList)) {
+						$customField = new \stdClass();
+						// Param names are differents depending on the module
+						if($param['module'] == 'users') {
+							$customField->type = $key;
+						} elseif($param['module'] == 'courses') {
+							$customField->shortname = $key; 
+						}
+						$customField->value = $value;
+						$obj->customfields[] = $customField;
+						
+					} else {
+						$obj->$key = $value;
+					}
                 }
                 switch ($param['module']) {
                     case 'users':
@@ -467,22 +465,20 @@ class moodle extends solution
                     if ('target_id' == $key) {
                         continue;
                     } 
-                    if (!empty($value)) {
-                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
-                        if (in_array($key, $customFieldList)) {
-                            $customField = new \stdClass();
-                            // Param names are differents depending on the module
-                            if($param['module'] == 'users') {
-                                $customField->type = $key;
-                            } elseif($param['module'] == 'courses') {
-                                $customField->shortname = $key;
-                            }
-                            $customField->value = $value;
-                            $obj->customfields[] = $customField;
-                        } else {
-                            $obj->$key = $value;
-                        }
-                    }
+					// if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+					if (in_array($key, $customFieldList)) {
+						$customField = new \stdClass();
+						// Param names are differents depending on the module
+						if($param['module'] == 'users') {
+							$customField->type = $key;
+						} elseif($param['module'] == 'courses') {
+							$customField->shortname = $key;
+						}
+						$customField->value = $value;
+						$obj->customfields[] = $customField;
+					} else {
+						$obj->$key = $value;
+					}
                 }
 
                 // Fonctions et paramètres différents en fonction des appels webservice
