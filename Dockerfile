@@ -87,6 +87,9 @@ RUN composer install --no-interaction --optimize-autoloader
 RUN yarn install --frozen-lockfile && \
     yarn run build
 
+# Switch back to root for the startup script
+USER root
+
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1

@@ -20,10 +20,18 @@ echo "--"
 
 ## Setup cache directories and permissions
 echo "====[ SETUP CACHE DIRECTORIES ]===="
-mkdir -p var/cache var/log var/sessions var/cache/dev var/cache/prod
-chown -R www-data:www-data var/cache var/log var/sessions
-chmod -R 775 var/cache var/log var/sessions
-echo "Cache directories created with proper ownership and permissions"
+if [ "$(id -u)" = "0" ]; then
+    # Running as root - can create directories and set ownership
+    mkdir -p var/cache var/log var/sessions var/cache/dev var/cache/prod
+    chown -R www-data:www-data var/cache var/log var/sessions
+    chmod -R 775 var/cache var/log var/sessions
+    echo "Cache directories created with proper ownership and permissions (as root)"
+else
+    # Running as www-data - create directories without chown
+    mkdir -p var/cache var/log var/sessions var/cache/dev var/cache/prod 2>/dev/null || true
+    chmod -R u+w var/cache var/log var/sessions 2>/dev/null || true
+    echo "Cache directories setup attempted (as www-data user)"
+fi
 echo "--"
 
 ## Extend Hosts (only if running as root)
