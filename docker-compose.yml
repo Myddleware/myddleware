@@ -14,7 +14,13 @@ services:
       - MYSQL_USER=myddleware
       - MYSQL_PASSWORD=${mysql_password:-secret}
       - DATABASE_URL=mysql://myddleware:${mysql_password:-secret}@mysql:3306/myddleware?serverVersion=5.7
-      # Add Symfony-compatible database parameters
+      # Add Symfony-compatible database parameters (uppercase for Doctrine)
+      - DATABASE_HOST=mysql
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=myddleware
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=${mysql_root_password:-secret}
+      # Keep lowercase versions for backward compatibility
       - database_host=mysql
       - database_port=3306
       - database_name=myddleware
