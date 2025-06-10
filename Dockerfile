@@ -19,7 +19,8 @@ RUN apt-get update && apt-get upgrade -y && \
         gnupg2 \
         libaio1 \
         sudo \
-        curl && \
+        curl \
+        git && \
     docker-php-ext-configure intl && \
     docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install \
