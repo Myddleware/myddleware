@@ -91,7 +91,7 @@ RUN yarn install --frozen-lockfile && \
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Start as root to handle system operations, then switch appropriately
-USER root
+# Stay as root for startup script that needs to set permissions
+# The Apache process will run as www-data as configured in Apache
 
 CMD ["myddleware-foreground.sh"]

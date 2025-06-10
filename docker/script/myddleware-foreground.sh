@@ -18,6 +18,14 @@ if [ ! -f "public/build/manifest.json" ]; then
 fi
 echo "--"
 
+## Setup cache directories and permissions
+echo "====[ SETUP CACHE DIRECTORIES ]===="
+mkdir -p var/cache var/log var/sessions var/cache/dev var/cache/prod
+chown -R www-data:www-data var/cache var/log var/sessions
+chmod -R 775 var/cache var/log var/sessions
+echo "Cache directories created with proper ownership and permissions"
+echo "--"
+
 ## Extend Hosts (only if running as root)
 echo "====[ UPDATE HOSTS ]===="
 if [ "$(id -u)" = "0" ]; then
