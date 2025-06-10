@@ -11,10 +11,16 @@ services:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
+      - MYSQL_USER=myddleware
+      - MYSQL_PASSWORD=${mysql_password:-secret}
+      - DATABASE_URL=mysql://myddleware:${mysql_password:-secret}@mysql:3306/myddleware?serverVersion=5.7
     volumes:
       - .:/var/www/html:delegated
       - ./docker/tmp/composer:/root/.composer:delegated
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+      # Preserve dependencies by using named volumes
+      - myddleware_vendor:/var/www/html/vendor
+      - myddleware_node_modules:/var/www/html/node_modules
     depends_on:
       mysql:
         condition: service_healthy
@@ -38,6 +44,7 @@ services:
       - --innodb_write_io_threads=4
     volumes:
       - mysql_data:/var/lib/mysql:delegated
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -47,3 +54,5 @@ services:
 
 volumes:
   mysql_data:
+  myddleware_vendor:
+  myddleware_node_modules:

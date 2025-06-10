@@ -17,7 +17,9 @@ RUN apt-get update && apt-get upgrade -y && \
         libc-client-dev \
         libkrb5-dev \
         gnupg2 \
-        libaio1 && \
+        libaio1 \
+        sudo \
+        curl && \
     docker-php-ext-configure intl && \
     docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install \
@@ -57,36 +59,39 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Configure sudo for www-data user
+RUN echo "www-data ALL=(ALL) NOPASSWD: /usr/local/bin/apache2-foreground" >> /etc/sudoers && \
+    echo "www-data ALL=(ALL) NOPASSWD: /usr/sbin/apache2-foreground" >> /etc/sudoers
+
 # Copy application files first
 COPY --chown=www-data:www-data . .
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/sessions && \
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/sessions \
+             /var/www/html/vendor /var/www/html/node_modules /var/www/html/public/build && \
     chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html
-
-# Switch to www-data user for dependency installation
-USER www-data
-
-# Install PHP dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
-
-# Install Node.js dependencies only (build will happen at startup)
-RUN yarn install --frozen-lockfile
-
-# Switch back to root to copy scripts and set permissions
-USER root
 
 # Copy scripts and set permissions
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 
+# Switch to www-data user for dependency installation
+USER www-data
+
+# Install PHP dependencies (including dev dependencies for build process)
+RUN composer install --no-interaction --optimize-autoloader
+
+# Install Node.js dependencies and build assets
+RUN yarn install --frozen-lockfile && \
+    yarn run build
+
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Switch to non-root user
-USER www-data
+# Start as root to handle system operations, then switch appropriately
+USER root
 
 CMD ["myddleware-foreground.sh"]
