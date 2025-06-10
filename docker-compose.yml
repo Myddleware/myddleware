@@ -14,6 +14,13 @@ services:
       - MYSQL_USER=myddleware
       - MYSQL_PASSWORD=${mysql_password:-secret}
       - DATABASE_URL=mysql://myddleware:${mysql_password:-secret}@mysql:3306/myddleware?serverVersion=5.7
+      # Add Symfony-compatible database parameters
+      - database_host=mysql
+      - database_port=3306
+      - database_name=myddleware
+      - database_user=root
+      - database_password=${mysql_root_password:-secret}
+      - database_driver=pdo_mysql
     volumes:
       - .:/var/www/html:delegated
       - ./docker/tmp/composer:/root/.composer:delegated
