@@ -286,9 +286,56 @@ class DatabaseSetupController extends AbstractController
                 'connection_failed_message' => $this->connectionFailedMessage,
             ]);
         } catch (ConnectionException  | DBALException  | Exception $e) {
+            // Enhanced error handling with detailed diagnostics
+            $errorDetails = [
+                'Error Type: ' . get_class($e),
+                'Error Message: ' . $e->getMessage(),
+                'Error Code: ' . $e->getCode(),
+            ];
+            
+            // Add connection-specific diagnostics
+            if ($e instanceof ConnectionException) {
+                $errorDetails[] = 'Database Connection Details:';
+                try {
+                    $errorDetails[] = '- Host: ' . ($this->getParameter('database_host') ?? 'NOT SET');
+                    $errorDetails[] = '- Port: ' . ($this->getParameter('database_port') ?? 'NOT SET');
+                    $errorDetails[] = '- Database: ' . ($this->getParameter('database_name') ?? 'NOT SET');
+                    $errorDetails[] = '- User: ' . ($this->getParameter('database_user') ?? 'NOT SET');
+                } catch (Exception $paramEx) {
+                    $errorDetails[] = '- Unable to read database parameters: ' . $paramEx->getMessage();
+                }
+                
+                // Check if it's a connection refused error
+                if (strpos($e->getMessage(), 'Connection refused') !== false) {
+                    $errorDetails[] = '';
+                    $errorDetails[] = 'DIAGNOSIS: Connection Refused Error';
+                    $errorDetails[] = 'This usually means:';
+                    $errorDetails[] = '1. The MySQL container is not running';
+                    $errorDetails[] = '2. The host name is incorrect (should be "mysql" in Docker)';
+                    $errorDetails[] = '3. The port is blocked or incorrect';
+                    $errorDetails[] = '4. Network connectivity issues between containers';
+                }
+                
+                // Check if it's an unknown database error
+                if (strpos($e->getMessage(), 'Unknown database') !== false) {
+                    $errorDetails[] = '';
+                    $errorDetails[] = 'DIAGNOSIS: Unknown Database Error';
+                    $errorDetails[] = 'The database name might be incorrect or not created yet.';
+                }
+            }
+            
+            // Add environment diagnostics
+            $errorDetails[] = '';
+            $errorDetails[] = 'Environment Information:';
+            $errorDetails[] = '- PHP Version: ' . PHP_VERSION;
+            $errorDetails[] = '- Symfony Environment: ' . $kernel->getEnvironment();
+            
+            // Join all error details
+            $detailedErrorMessage = implode(PHP_EOL, $errorDetails);
+            
             // if the database doesn't exist yet, ask user to go create it
             if ($e instanceof ConnectionException) {
-                $this->connectionFailedMessage = 'Unknown database. Please make sure your database exists. '.$e->getMessage();
+                $this->connectionFailedMessage = $detailedErrorMessage;
 
                 return $this->render('database_setup/database_connection.html.twig', [
                     'connection_success_message' => $this->connectionSuccessMessage,
@@ -297,6 +344,7 @@ class DatabaseSetupController extends AbstractController
             }
 
             if ($e instanceof TableNotFoundException) {
+                $this->connectionFailedMessage = 'Database exists but tables are missing. This is normal for a fresh installation. ' . $detailedErrorMessage;
                 return $this->render('database_setup/database_connection.html.twig', [
                     'connection_success_message' => $this->connectionSuccessMessage,
                     'connection_failed_message' => $this->connectionFailedMessage,
@@ -307,7 +355,12 @@ class DatabaseSetupController extends AbstractController
                 return $this->redirectToRoute('login');
             }
 
-            return $this->redirectToRoute('database_setup');
+            // Generic error case
+            $this->connectionFailedMessage = 'Database connection error: ' . $detailedErrorMessage;
+            return $this->render('database_setup/database_connection.html.twig', [
+                'connection_success_message' => $this->connectionSuccessMessage,
+                'connection_failed_message' => $this->connectionFailedMessage,
+            ]);
         }
     }
 
