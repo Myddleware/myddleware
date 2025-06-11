@@ -27,8 +27,8 @@ export class Flux {
 
         fluxContainer.innerHTML = `
             <div class="flex-row" id="flux-button-container">
-                <button id="run-same-record">Run same record</button>
-                <button id="cancel-document">Cancel document</button>
+                <button class="btn btn-primary" id="run-same-record">Run same record</button>
+                <button class="btn btn-warning" id="cancel-document">Cancel document</button>
             </div>
         `;
 
