@@ -210,7 +210,8 @@ class suitecrm8 extends solution
 				if (!empty($readSuiteDeleted['data'])) {
 					foreach ($readSuiteDeleted['data'] as $record) {
 						// Stop reading in case the limit has been reached and the date of the current record > maxDateModified
-						// We don't want to read record with date_modified greater than the first read to not change the reference date because of deleted record
+						// We don't want to read record with date_modified greater than the latest record read in the first loop above 
+						// to not change the reference date because of deleted record
 						if (
 								!is_null($maxDateModified)
 							AND count($result) >= $param['limit']

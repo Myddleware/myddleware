@@ -1356,8 +1356,8 @@ class DocumentManager
                 foreach ($this->ruleFields as $field) {
 					// If one of the field isn't set then we return false
 					if (
-							!isset($history[$field['target_field_name']])
-						 OR !isset($target[$field['target_field_name']]) 
+							!array_key_exists($field['target_field_name'], $history)
+						 OR !array_key_exists($field['target_field_name'], $target)
 					){
 						return false;
 					}
