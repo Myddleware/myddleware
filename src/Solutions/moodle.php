@@ -36,6 +36,7 @@ class moodle extends solution
     protected array $required_fields = [
         'default' => ['id'],
         'get_users_statistics_by_date' => ['id', 'timemodified'],
+        'get_course_completion_percentage' => ['id', 'timecompleted', 'timemodified'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
@@ -121,6 +122,7 @@ class moodle extends solution
                     'get_users_completion' => 'Get course activity completion',
                     'get_users_last_access' => 'Get users last access',
                     'get_users_statistics_by_date' => 'Get users statistics',
+                    'get_course_completion_percentage' => 'Get course completion percentage',
                     'get_enrolments_by_date' => 'Get enrolments',
                     'get_course_completion_by_date' => 'Get course completion',
                     'get_user_compentencies_by_date' => 'Get user compentency',
@@ -767,6 +769,12 @@ class moodle extends solution
             AND !empty($this->paramConnexion['course_custom_fields'])
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
+        } 
+        if (
+                $param['module'] == 'get_course_completion_percentage'
+            AND !empty($this->paramConnexion['user_custom_fields'])
+        ) {
+            return explode(',',$this->paramConnexion['user_custom_fields']);
         } 
         return array();
     }
