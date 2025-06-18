@@ -769,13 +769,7 @@ class moodle extends solution
             AND !empty($this->paramConnexion['course_custom_fields'])
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
-        } 
-        if (
-                $param['module'] == 'get_course_completion_percentage'
-            AND !empty($this->paramConnexion['user_custom_fields'])
-        ) {
-            return explode(',',$this->paramConnexion['user_custom_fields']);
-        } 
+        }
         return array();
     }
 
