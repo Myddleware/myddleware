@@ -197,12 +197,6 @@
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
-    "laminas/laminas-hydrator": {
-        "version": "4.3.1"
-    },
-    "laminas/laminas-stdlib": {
-        "version": "3.7.1"
-    },
     "lcobucci/clock": {
         "version": "2.0.0"
     },

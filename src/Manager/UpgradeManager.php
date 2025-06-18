@@ -231,6 +231,7 @@ class UpgradeManager
         $application->setAutoExit(false);
         $arguments = [
             'command' => 'doctrine:schema:update',
+            '--complete' => true,
             '--force' => true,
             '--env' => $this->env,
         ];

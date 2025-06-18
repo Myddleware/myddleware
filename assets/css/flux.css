@@ -285,3 +285,77 @@ li span {
     border-left-color: #777777 !important;
     border-right-color: #777777 !important;
 }
+
+/* Flux Button Container Styling */
+#flux-button-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 20px;
+}
+
+#flux-button-container .btn {
+    border-radius: 25px !important;
+    padding: 12px 24px;
+    font-weight: 500;
+    font-size: 16px;
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+#flux-button-container .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Flux Table Styling */
+#flux-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+#flux-table th {
+    background: white;
+    height: 40px;
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ddd;
+}
+
+#flux-table th:last-child {
+    border-right: none;
+}
+
+#flux-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+#flux-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#flux-table .gblstatus_close {
+    color: #19ca42 !important;
+    font-weight: bold;
+}
+
+#flux-table a {
+    color: #0F66A9 !important;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#flux-table a:hover {
+    text-decoration: underline;
+}

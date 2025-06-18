@@ -482,7 +482,27 @@ class dynamicsbusiness extends solution
 
     /**
      * Updates an existing record in the specified module
-     * Handles ETag for optimistic concurrency control
+     * 
+     * Implements optimistic concurrency control using ETags:
+     * 
+     * ETags (Entity Tags) are HTTP response headers that act as version identifiers for resources.
+     * In Dynamics Business Central, every record has an ETag that changes whenever the record is modified.
+     * 
+     * How Optimistic Concurrency Control Works:
+     * 1. When reading a record, the API returns the current ETag value in the '@odata.etag' field
+     * 2. When updating, we send this ETag in the 'If-Match' header
+     * 3. The server checks if the ETag matches the current record version
+     * 4. If it matches: Update proceeds (no one else modified the record)
+     * 5. If it doesn't match: Update fails with 412 Precondition Failed (someone else modified it)
+     * 
+     * This prevents the "lost update" problem where:
+     * - User A reads record (ETag: "v1")
+     * - User B reads record (ETag: "v1") 
+     * - User A updates record (ETag becomes "v2")
+     * - User B tries to update with ETag "v1" → FAILS (preventing overwrite of User A's changes)
+     * 
+     * Alternative: Pessimistic concurrency would lock records during reads, reducing concurrency.
+     * Optimistic concurrency assumes conflicts are rare and only checks at write time.
      * 
      * @param array $param Parameters for the update operation
      * @param array $data Data to be updated
@@ -552,6 +572,50 @@ class dynamicsbusiness extends solution
             }
             
             return $data['id'];
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+
+    /**
+     * Deletes a record from the specified module
+     * 
+     * @param array $param Parameters for the delete operation
+     * @param array $data Data containing the record to delete
+     * @return string|array Deleted record ID or error array
+     * @throws \Exception If deletion fails
+     */
+    protected function delete($param, $data)
+    {
+
+    try {
+
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $this->parentModule;
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+
+        $module = $param['module'];
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
+        
+            $response = $client->delete($url, [
+                'headers' => $headers
+            ]);
+            
+            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
+                return $targetId;
+            } else {
+                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
+            }
             
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -716,50 +780,6 @@ class dynamicsbusiness extends solution
         } catch (\Exception $e) {
             // Handle all other exceptions
             // Log the error and return it in a format consistent with the application's error handling
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            return ['error' => $error];
-        }
-    }
-
-    /**
-     * Deletes a record from the specified module
-     * 
-     * @param array $param Parameters for the delete operation
-     * @param array $data Data containing the record to delete
-     * @return string|array Deleted record ID or error array
-     * @throws \Exception If deletion fails
-     */
-    protected function delete($param, $data)
-    {
-
-    try {
-
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-        
-        $parentmodule = $this->parentModule;
-        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
-        $targetId = $data['target_id'];
-
-        $module = $param['module'];
-        if (strpos($module, '_') !== false) {
-            list($companyId, $module) = explode('_', $module, 2);
-        }
-        
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
-        
-            $response = $client->delete($url, [
-                'headers' => $headers
-            ]);
-            
-            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
-                return $targetId;
-            } else {
-                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
-            }
-            
-        } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             return ['error' => $error];

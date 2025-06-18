@@ -255,6 +255,7 @@ class DatabaseSetupController extends AbstractController
             // we execute Doctrine console commands to test the connection to the database
             $input = new ArrayInput([
                 'command' => 'doctrine:schema:update',
+                '--complete' => true,
                 '--force' => true,
                 '--env' => $env,
             ]);

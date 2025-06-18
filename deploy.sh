@@ -15,7 +15,7 @@ echo " [4/6]===> Building the assets"
 yarn build
 
 echo " [5/6]===> Updating the database schema"
-php bin/console doctrine:schema:update --force
+php bin/console doctrine:schema:update --complete --force
 
 echo " [6/6]===> Clearing the cache"
 rm -rf var/cache/background/*

@@ -86,7 +86,7 @@ class Job
     private ?int $cancel;
 
     /**
-     * @ORM\Column(name="manual", type="boolean",  nullable=true, options={"default":0})
+     * @ORM\Column(name="`manual`", type="boolean",  nullable=true, options={"default":0})
      */
     private ?bool $manual;
 
