@@ -45,64 +45,44 @@
 				<div class="row justify-content-center align-center">
 					<div class="col">
 						<div class="row d-flex">
-							<div class="card m-2 info col ">
+							<div class="card m-2 info col">
 								<div class="card-body">
-									<h4 class="card-title">{{'panel.graph_tranfer_rule.desc'|trans}}</h4>
-									<div id="pie_chart_transfer_rule" ></div>
+									<span class="icon-container pt-5">
+										<svg
+											class="icon_small_homepage" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512">
+											<!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+											<path d="M438.6 150.6c12.5-12.5 12.5-32.8 0-45.3l-96-96c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 96 32 96C14.3 96 0 110.3 0 128s14.3 32 32 32l306.7 0-41.4 41.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l96-96zm-333.3 352c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 416 416 416c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0 41.4-41.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-96 96c-12.5 12.5-12.5 32.8 0 45.3l96 96z"/>
+										</svg>
+									</span>
+									<div class="text-center">
+										<p id="countNbDocuments">0</p>
+										<h4 class="card-title title_countNbDocuments pt-3 pb-3">{{'panel.documents.title'|trans}}</h4>
+									</div>
 								</div>
 							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{'panel.graph_error.title'|trans}} ({{ nbFlux }})</h4>
-									<div id="pie_chart_error_doc" ></div>
-								</div>        
-							</div>
-						</div>	
-						<div  class="row d-flex">                    
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{ 'panel.graph_job_histo.title'|trans }}</h4>
-									<div id="column_chart_job_histo" ></div>
-								</div>        
-							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{ 'panel.graph_histo.title'|trans }}</h4>
-									<div id="column_chart_histo" ></div>
-								</div>        
-							</div>
 						</div>
-						<div  class="row d-flex">        
-							<div class="card m-2 info col">
-								<div class="card-body">
-									<h4 class="card-title">{{'panel.list_job.title'|trans}}</h4>
-									<ul class="list-group">
-										{% for job in listJobDetail %}  
-										<li class="list-group-item">
-											<a href="{{ path('task_view',{'id' : job.id }) }}">{{ job.begin|date('d/m/Y') }}</span></a>
-											<span> | {{ job.duration }} {{'panel.list_job.duration'|trans}}</span>
-											<span> | {{ job.status }}</span>
-											<span> | {{ job.message|sensor }}</span>
-										</li>
-										{% endfor %}
-									</ul>
-								</div>       	
-							</div>
-							<div class="card m-2 info col">
-								<div class="card-body">
-									{% if errorByRule %}
-									<h4 class="card-title">{{'panel.list_job.nb'|trans}}</h4>
-									<ul class="list-group">
-										{% for rule in errorByRule %}  
-										<li class="list-group-item">
+					</div>
+					<div class="card m-2 info col">
+						<div class="card-body">
+							{% if errorByRule %}
+								<div class="text-center">
+									<h4 class="card-title title_countNbDocuments">{{'panel.list_job.nb'|trans}}</h4>
+								</div>
+								<ul class="list-group" id="error-list">
+									{% for rule in errorByRule %}
+										<li class="list-group-item {% if loop.index > 5 %}d-none{% endif %}">
 											<span class="badge">{{ rule.cpt }}</span>
-											<a href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</span></a>
+											<a class="error_rule_homepage" href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</a>
 										</li>
-										{% endfor %}
-									</ul>
-									{% endif %}
-								</div>        
-							</div>
+									{% endfor %}
+								</ul>
+								{% if errorByRule|length > 5 %}
+									<div class="text-center mt-3">
+										<button class="btn btn-outline-dark" id="show-more-btn">{{ 'Show More'|trans }}</button>
+										<button class="btn btn-primary d-none" id="show-less-btn">{{ 'Show Less'|trans }}</button>
+									</div>
+								{% endif %}
+							{% endif %}
 						</div>
 					</div>
 				</div>
