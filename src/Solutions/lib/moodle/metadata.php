@@ -367,9 +367,6 @@ $moduleFields = [
 
     'get_course_completion_percentage' => [
         'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'timeenrolled' => ['label' => 'Time enrolled', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'timestarted' => ['label' => 'Time start', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
-        'timecompleted' => ['label' => 'Time completed', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
         'userid' => ['label' => 'User ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
         'courseid' => ['label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0, 'required_relationship' => 1, 'relate' => true],
         'percentage' => ['label' => 'Percentage', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 1],
