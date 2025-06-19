@@ -28,7 +28,7 @@
 		<span class="typewriter mb-4 mt-5">{{'title.index.panel'|trans }}</span>
 		<p class="homepage_welcome_text mt-4">{{'title.index.text'|trans }}</p>
 		<p class="homepage_welcome_text mb-5">{{'title.index.text2'|trans }}</p>
-		<button id="bnt_welcome" class="btn btn-dark text-center mt-5" onclick="window.open('https://myddleware.github.io/myddleware/#/', '_blank')">
+		<button id="bnt_welcome" class="btn btn-dark text-center mt-5" onclick="window.open('https://myddleware.github.io/myddleware-docs/#/', '_blank')">
 			{{ 'title.index.btn'|trans }}
 		</button>
 	</div>
@@ -64,25 +64,17 @@
 					</div>
 					<div class="card m-2 info col">
 						<div class="card-body">
-							{% if errorByRule %}
-								<div class="text-center">
-									<h4 class="card-title title_countNbDocuments">{{'panel.list_job.nb'|trans}}</h4>
-								</div>
-								<ul class="list-group" id="error-list">
-									{% for rule in errorByRule %}
-										<li class="list-group-item {% if loop.index > 5 %}d-none{% endif %}">
+									{% if errorByRule %}
+									<h4 class="card-title">{{'panel.list_job.nb'|trans}}</h4>
+									<ul class="list-group">
+										{% for rule in errorByRule %}  
+										<li class="list-group-item">
 											<span class="badge">{{ rule.cpt }}</span>
-											<a class="error_rule_homepage" href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</a>
+											<a href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</span></a>
 										</li>
-									{% endfor %}
-								</ul>
-								{% if errorByRule|length > 5 %}
-									<div class="text-center mt-3">
-										<button class="btn btn-outline-dark" id="show-more-btn">{{ 'Show More'|trans }}</button>
-										<button class="btn btn-primary d-none" id="show-less-btn">{{ 'Show Less'|trans }}</button>
-									</div>
-								{% endif %}
-							{% endif %}
+										{% endfor %}
+									</ul>
+									{% endif %}
 						</div>
 					</div>
 				</div>
