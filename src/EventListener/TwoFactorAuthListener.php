@@ -101,8 +101,11 @@ class TwoFactorAuthListener implements EventSubscriberInterface
             return;
         }
 
+        // Get the session from the request
+        $session = $request->getSession();
+        
         // Check if the user has completed 2FA
-        if ($this->session->get('two_factor_auth_complete', false)) {
+        if ($session->get('two_factor_auth_complete', false)) {
             $this->logger->debug('TwoFactorAuthListener: 2FA already completed');
             return;
         }
@@ -111,7 +114,7 @@ class TwoFactorAuthListener implements EventSubscriberInterface
         $rememberedAuth = $this->twoFactorAuthService->checkRememberCookie($request);
         if ($rememberedAuth && $rememberedAuth->getUser()->getId() === $user->getId()) {
             // If the user has a valid remember cookie, mark as complete
-            $this->session->set('two_factor_auth_complete', true);
+            $session->set('two_factor_auth_complete', true);
             $this->logger->debug('TwoFactorAuthListener: Valid remember cookie found, marking 2FA as complete');
             return;
         }
