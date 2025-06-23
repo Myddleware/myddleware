@@ -561,6 +561,50 @@ class dynamicsbusiness extends solution
     }
 
     /**
+     * Deletes a record from the specified module
+     * 
+     * @param array $param Parameters for the delete operation
+     * @param array $data Data containing the record to delete
+     * @return string|array Deleted record ID or error array
+     * @throws \Exception If deletion fails
+     */
+    protected function delete($param, $data)
+    {
+
+    try {
+
+        $client = $this->getApiClient();
+        $headers = $this->getApiHeaders();
+        
+        $parentmodule = $this->parentModule;
+        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
+        $targetId = $data['target_id'];
+
+        $module = $param['module'];
+        if (strpos($module, '_') !== false) {
+            list($companyId, $module) = explode('_', $module, 2);
+        }
+        
+        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
+        
+            $response = $client->delete($url, [
+                'headers' => $headers
+            ]);
+            
+            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
+                return $targetId;
+            } else {
+                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
+            }
+            
+        } catch (\Exception $e) {
+            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
+        }
+    }
+
+    /**
      * Validates required parameters for read operations
      * Ensures all necessary parameters are present and valid
      * 
@@ -716,50 +760,6 @@ class dynamicsbusiness extends solution
         } catch (\Exception $e) {
             // Handle all other exceptions
             // Log the error and return it in a format consistent with the application's error handling
-            $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            return ['error' => $error];
-        }
-    }
-
-    /**
-     * Deletes a record from the specified module
-     * 
-     * @param array $param Parameters for the delete operation
-     * @param array $data Data containing the record to delete
-     * @return string|array Deleted record ID or error array
-     * @throws \Exception If deletion fails
-     */
-    protected function delete($param, $data)
-    {
-
-    try {
-
-        $client = $this->getApiClient();
-        $headers = $this->getApiHeaders();
-        
-        $parentmodule = $this->parentModule;
-        $parentmoduleId = $param['ruleParams']['parentmoduleid'];
-        $targetId = $data['target_id'];
-
-        $module = $param['module'];
-        if (strpos($module, '_') !== false) {
-            list($companyId, $module) = explode('_', $module, 2);
-        }
-        
-        $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
-        
-            $response = $client->delete($url, [
-                'headers' => $headers
-            ]);
-            
-            if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
-                return $targetId;
-            } else {
-                throw new \Exception('Unexpected response status code: ' . $response->getStatusCode());
-            }
-            
-        } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             return ['error' => $error];
