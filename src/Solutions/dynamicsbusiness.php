@@ -405,7 +405,10 @@ class dynamicsbusiness extends solution
                     }
                 } else {
                     // Fallback to default fields if $param['fields'] is not set
-                    $result['id'] = $record['id'] ?? null;
+                    if (empty($record['id'])) {
+                        throw new \Exception("Record missing required ID field. Record data: " . json_encode($record));
+                    }
+                    $result['id'] = $record['id'];
                     $result['displayName'] = $record['displayName'] ?? null;
                 }
 
