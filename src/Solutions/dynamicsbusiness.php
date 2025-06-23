@@ -482,7 +482,27 @@ class dynamicsbusiness extends solution
 
     /**
      * Updates an existing record in the specified module
-     * Handles ETag for optimistic concurrency control
+     * 
+     * Implements optimistic concurrency control using ETags:
+     * 
+     * ETags (Entity Tags) are HTTP response headers that act as version identifiers for resources.
+     * In Dynamics Business Central, every record has an ETag that changes whenever the record is modified.
+     * 
+     * How Optimistic Concurrency Control Works:
+     * 1. When reading a record, the API returns the current ETag value in the '@odata.etag' field
+     * 2. When updating, we send this ETag in the 'If-Match' header
+     * 3. The server checks if the ETag matches the current record version
+     * 4. If it matches: Update proceeds (no one else modified the record)
+     * 5. If it doesn't match: Update fails with 412 Precondition Failed (someone else modified it)
+     * 
+     * This prevents the "lost update" problem where:
+     * - User A reads record (ETag: "v1")
+     * - User B reads record (ETag: "v1") 
+     * - User A updates record (ETag becomes "v2")
+     * - User B tries to update with ETag "v1" → FAILS (preventing overwrite of User A's changes)
+     * 
+     * Alternative: Pessimistic concurrency would lock records during reads, reducing concurrency.
+     * Optimistic concurrency assumes conflicts are rare and only checks at write time.
      * 
      * @param array $param Parameters for the update operation
      * @param array $data Data to be updated
