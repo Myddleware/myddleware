@@ -376,7 +376,7 @@ class dynamicsbusiness extends solution
                 return [];
             }
 
-            $results = [];
+            $resultFinal = [];
             $nbRecords = 0;
 
             foreach ($data['value'] as $record) {
@@ -416,17 +416,9 @@ class dynamicsbusiness extends solution
                     $result['id'] = $record['id'];
                 }
 
-                $results[] = $result;
+                // Directly build the final associative array using record ID as key
+                $resultFinal[$result['id']] = $result;
                 $nbRecords++;
-            }
-
-            // put the actual data in a sub array called value
-            $resultFinal = [];
-
-            foreach($results as $value)
-            {
-                $recordId = $value['id'];
-                $resultFinal[$recordId] = $value;
             }
 
             return $resultFinal;
