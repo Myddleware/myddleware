@@ -1165,19 +1165,7 @@ class DocumentManager
                     throw new \Exception('Failed to search duplicate data in the target system because there is no target data in this data transfer. This document is queued. ');
                 }
                 // Prepare the search array with teh value for each duplicate field
-                foreach ($duplicate_fields as $duplicate_field) {
-                    // In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
-                    if ('Myddleware_element_id' == $duplicate_field) {
-                        $searchFields['id'] = $target[$duplicate_field];
-                        continue;
-                    }
-					// Do not search duplicates on an empty field
-					if (empty($target[$duplicate_field])) {
-						$searchFields= array();
-						break;
-					}
-					$searchFields[$duplicate_field] = $target[$duplicate_field];
-                }
+				$searchFields = $this->prepareSearchFields($duplicate_fields, $target);
                 if (!empty($searchFields)) {
                     $history = $this->getDocumentHistory($searchFields);
                 }
@@ -1267,6 +1255,27 @@ class DocumentManager
         return true;
     }
 
+	// Prepare the search fields
+	protected function prepareSearchFields($duplicateFields, $target) {
+		$searchFields = array();
+		if (!empty($duplicateFields)) {
+			foreach ($duplicateFields as $duplicateField) {
+				// In case of Myddleware_element_id, we change it to id. Myddleware_element_id reprensents the id of the record in the target application
+				if ('Myddleware_element_id' == $duplicateField) {
+					$searchFields['id'] = $target[$duplicateField];
+					continue;
+				}
+				// Do not search duplicates on an empty field
+				if (empty($target[$duplicateField])) {
+					$searchFields= array();
+					break;
+				}
+				$searchFields[$duplicateField] = $target[$duplicateField];
+			}
+		}
+		return $searchFields;
+	}
+
     /**
      * Get the child rule of the current rule
      * If child rule exist, we run it.
@@ -1347,8 +1356,8 @@ class DocumentManager
                 foreach ($this->ruleFields as $field) {
 					// If one of the field isn't set then we return false
 					if (
-							!isset($history[$field['target_field_name']])
-						 OR !isset($target[$field['target_field_name']]) 
+							!array_key_exists($field['target_field_name'], $history)
+						 OR !array_key_exists($field['target_field_name'], $target)
 					){
 						return false;
 					}
@@ -1756,6 +1765,7 @@ class DocumentManager
 						$currentRule = $this->ruleId;
 						$connection = $this->connection;
 						$entityManager = $this->entityManager;
+						$solutionManager = $this->solutionManager;
 						$myddlewareUserId = $this->userId;
 						$sourceFieldName = $ruleField['source_field_name'];
 						$docId = $this->id;
@@ -1764,6 +1774,10 @@ class DocumentManager
 					// Manage lookup formula by adding parameters
 					if (strpos($f, 'lookup') !== false ) {
 						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
+					}
+					// Manage getRecord formula by adding parameters
+					if (strpos($f, 'getRecord') !== false ) {
+						$f = str_replace('getRecord(', 'getRecord($entityManager, $connection, $solutionManager, ', $f);
 					}
                     try {
                         // Trigger to redefine formula
@@ -1840,7 +1854,10 @@ class DocumentManager
 
 	// Function to check if a formula require variables
 	protected function isVariableRequested($formula) {
-		if (strpos($formula, 'lookup') !== false ) {
+		if (
+				strpos($formula, 'lookup') !== false
+			 or strpos($formula, 'getRecord') !== false
+		) {
 			return true;
 		}
 		return false;
