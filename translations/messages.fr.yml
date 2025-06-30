@@ -846,7 +846,7 @@ menu_user:
     crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration SMTP
     logout: Déconnexion
-    
+    user_manager: Gestionnaire d'utilisateurs
 help:
     title: Aide
     viewrule:
@@ -1122,3 +1122,12 @@ variable:
     value: Valeur
     actions: Actions
     description: Description
+user_manager:
+    list: Liste des utilisateurs
+    table:
+        username: Nom d'utilisateur
+        email: Email
+        last_login: Dernière connexion
+        roles: Rôles
+        timezone: Fuseau horaire
+        action: Action

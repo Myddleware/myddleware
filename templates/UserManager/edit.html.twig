@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'user_manager.edit'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        {{ form_start(form) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.roles) }}
+            {{ form_row(form.timezone) }}
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

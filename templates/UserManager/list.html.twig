@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'user_manager.list'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1>{{ 'user_manager.list'|trans }}</h1>
+
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>{{ 'user_manager.table.username'|trans }}</th>
+                    <th>{{ 'user_manager.table.email'|trans }}</th>
+                    <th>{{ 'user_manager.table.last_login'|trans }}</th>
+                    <th>{{ 'user_manager.table.roles'|trans }}</th>
+                    <th>{{ 'user_manager.table.timezone'|trans }}</th>
+                    <th>{{ 'user_manager.table.action'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.lastLogin %}
+                                {{ user.lastLogin|date('d/m/Y H:i') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for role in user.roles %}
+                               {{ role }}
+                            {% endfor %}
+                        </td>
+                        <td>{{ user.timezone }}</td>
+                 		<td class="CRUD-icons">
+                        
+                            <a href="{{ path('user_manager_edit', {id: user.id}) }}" title="{{ 'edit'|trans }}" class="btn btn-sm btn-outline-primary">
+                                <span class="btn-opt">
+                                    <i class="fa fa-pen" aria-hidden="true"></i>
+                                </span>
+                            </a>
+                            {# <a class="delete btn btn-sm btn-outline-danger" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
+                                <span class="btn-opt">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </span>
+                            </a> #}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun utilisateur</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
