@@ -1330,4 +1330,72 @@ $result = [];
             return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
         }
     }
+
+    /**
+     * Modern JavaScript-based flux page
+     * 
+     * @Route("/flux/modern/{id}", name="flux_modern", defaults={"id"=null})
+     */
+    public function fluxModern(?string $id = null): Response
+    {
+        return $this->render('Flux/flux-js.html.twig');
+    }
+
+    /**
+     * @Route("/api/flux/info/{id}", name="api_flux_info", methods={"GET"})
+     */
+    public function getFluxInfo(Request $request, ?string $id = null): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        }
+
+        // Get current locale
+        $locale = $request->getLocale();
+        
+        // Get translations for the current locale
+        $translations = [
+            'flux' => [
+                'title' => $this->translator->trans('view_flux.title'),
+                'sections' => [
+                    'general' => $this->translator->trans('view_flux.sections.general'),
+                    'logs' => $this->translator->trans('view_flux.sections.logs'),
+                    'mapping' => $this->translator->trans('view_flux.sections.mapping')
+                ],
+                'fields' => [
+                    'name' => $this->translator->trans('form.name'),
+                    'source' => $this->translator->trans('form.source'),
+                    'target' => $this->translator->trans('form.target'),
+                    'status' => $this->translator->trans('form.status')
+                ],
+                'buttons' => [
+                    'save' => $this->translator->trans('view_flux.button.save'),
+                    'download_logs' => $this->translator->trans('view_flux.button.download_logs'),
+                    'empty_logs' => $this->translator->trans('view_flux.button.empty_logs')
+                ]
+            ]
+        ];
+
+        // If an ID is provided, get the specific flux data
+        $fluxData = null;
+        if ($id) {
+            // Add your logic here to fetch the specific flux data
+            // This is just a placeholder structure
+            $fluxData = [
+                'id' => $id,
+                'name' => 'Sample Flux',
+                'source' => 'Source System',
+                'target' => 'Target System',
+                'status' => 'active'
+            ];
+        }
+
+        return new JsonResponse([
+            'translations' => $translations,
+            'fluxData' => $fluxData,
+            'currentLocale' => $locale
+        ]);
+    }
 }
