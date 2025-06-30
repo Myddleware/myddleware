@@ -416,3 +416,71 @@ li span {
     padding: 20px;
     min-height: 200px;
 }
+
+/* Field Layout Styling */
+.field-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    min-height: 20px;
+}
+
+.field-label {
+    width: 120px;
+    flex-shrink: 0;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: none;
+    line-height: 1.2;
+    padding-right: 10px;
+    text-align: left;
+}
+
+.field-separator {
+    width: 2px;
+    background-color: #ccc;
+    margin: 0 15px;
+    flex-shrink: 0;
+    align-self: stretch;
+    min-height: 20px;
+}
+
+.field-value {
+    flex: 1;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.2;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.field-value:hover {
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+    background-color: #f8f9fa;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: relative;
+    max-width: none;
+    width: auto;
+}
+
+/* Handle long labels by breaking every 10 characters */
+.field-label[data-long="true"] {
+    word-break: break-all;
+    max-width: 120px;
+}
+
+/* Multi-line label support */
+.field-row.multi-line .field-separator {
+    align-self: stretch;
+}

@@ -86,6 +86,31 @@ export class Flux {
                             <h3>Source</h3>
                         </div>
                         <div class="source-data-content-body">
+                            <div class="field-row">
+                                <div class="field-label">Email</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="luciefaure@myddleware.com">luciefaure@myddleware.com</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Firstname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="Lucie">Lucie</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Lastname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="FAURE">FAURE</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Address</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="1234 rue de la fleur 16800 Rive">1234 rue de la fleur 16800 Rive</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">CourseID</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="XID80073">XID80073</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -98,6 +123,31 @@ export class Flux {
                             <h3>Target</h3>
                         </div>
                         <div class="target-data-content-body">
+                            <div class="field-row">
+                                <div class="field-label">Email</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="luciefaure@myddleware.com">luciefaure@myddleware.com</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Firstname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="Lucie">Lucie</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Lastname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="FAURE">FAURE</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Address</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="1234 rue de la fleur 16800 Rive">1234 rue de la fleur 16800 Rive</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">CourseID</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="XID80073">XID80073</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -110,6 +160,31 @@ export class Flux {
                             <h3>History</h3>
                         </div>
                         <div class="history-data-content-body">
+                            <div class="field-row">
+                                <div class="field-label">Email</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="luciefaure@myddleware.com">luciefaure@myddleware.com</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Firstname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="Lucie">Lucie</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Lastname</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="FAURE">FAURE</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Address</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="1234 rue de la fleur 16800 Rive">1234 rue de la fleur 16800 Rive</div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">CourseID</div>
+                                <div class="field-separator"></div>
+                                <div class="field-value" title="XID80073">XID80073</div>
+                            </div>
                         </div>
                     </div>
                 </div>
