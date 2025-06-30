@@ -25,6 +25,21 @@ export class Flux {
             return;
         }
 
+        const path_img_modal = "../../../build/images/solution/";
+
+        const solutionSource = "salesforce.png";
+        const solutionTarget = "hubspot.png";
+        const solutionHistory = "hubspot.png";
+
+        const fullpathSource = `${path_img_modal}${solutionSource}`;
+        const fullpathTarget = `${path_img_modal}${solutionTarget}`;
+        const fullpathHistory = `${path_img_modal}${solutionHistory}`;
+
+
+
+
+
+
         fluxContainer.innerHTML = `
             <div class="flex-row" id="flux-button-container">
                 <button class="btn btn-primary" id="run-same-record">Run the same record</button>
@@ -64,20 +79,38 @@ export class Flux {
             <div class="data-wrapper" style="margin: 20px;">
                 <div class="source-data">
                     <div class="source-logo-container">
+                        <img src="${fullpathSource}" alt="Source Logo">
                     </div>
                     <div class="source-data-content">
+                        <div class="source-data-content-header">
+                            <h3>Source Data</h3>
+                        </div>
+                        <div class="source-data-content-body">
+                        </div>
                     </div>
                 </div>
                 <div class="target-data">
                     <div class="target-logo-container">
+                        <img src="${fullpathTarget}" alt="Target Logo">
                     </div>
                     <div class="target-data-content">
+                        <div class="target-data-content-header">
+                            <h3>Target Data</h3>
+                        </div>
+                        <div class="target-data-content-body">
+                        </div>
                     </div>
                 </div>
                 <div class="history-data">
                     <div class="history-logo-container">
+                        <img src="${fullpathHistory}" alt="History Logo">
                     </div>
                     <div class="history-data-content">
+                        <div class="history-data-content-header">
+                            <h3>History Data</h3>
+                        </div>
+                        <div class="history-data-content-body">
+                        </div>
                     </div>
                 </div>
             </div>
