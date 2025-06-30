@@ -51,7 +51,7 @@
   --toggle-height: 23px;
   --toggle-knob-size: 17px;
   --toggle-knob-offset: 3px;
-  --toggle-checked-x: 17px;
+  --toggle-checked-x: 22px;
 }
 
 .toggle-switch input {
@@ -63,7 +63,8 @@
   position: absolute;
 }
 
-.toggle-label {
+.toggle-label,
+.toggle-slider {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -76,7 +77,8 @@
   z-index: 0;
 }
 
-.toggle-label:before {
+.toggle-label:before,
+.toggle-slider:before {
   position: absolute;
   content: "";
   height: var(--toggle-knob-size);
@@ -90,35 +92,42 @@
 }
 
 /* Checked state */
-.toggle-switch input:checked + .toggle-label {
+.toggle-switch input:checked + .toggle-label,
+.toggle-switch input:checked + .toggle-slider {
   background-color: #0069B4;
 }
 
-.toggle-switch input:checked + .toggle-label:before {
+.toggle-switch input:checked + .toggle-label:before,
+.toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(var(--toggle-checked-x));
 }
 
 /* Hover and focus states for better accessibility */
-.toggle-switch:hover .toggle-label {
+.toggle-switch:hover .toggle-label,
+.toggle-switch:hover .toggle-slider {
   background-color: #b8b8b8;
 }
 
-.toggle-switch input:checked:hover + .toggle-label {
+.toggle-switch input:checked:hover + .toggle-label,
+.toggle-switch input:checked:hover + .toggle-slider {
   background-color: #0058a3;
 }
 
-.toggle-switch input:focus + .toggle-label {
+.toggle-switch input:focus + .toggle-label,
+.toggle-switch input:focus + .toggle-slider {
   box-shadow: 0 0 0 2px rgba(0, 105, 180, 0.25);
 }
 
 /* Disabled state */
-.toggle-switch input:disabled + .toggle-label {
+.toggle-switch input:disabled + .toggle-label,
+.toggle-switch input:disabled + .toggle-slider {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Add visual indication that element is interactive */
-.toggle-switch .toggle-label:after {
+.toggle-switch .toggle-label:after,
+.toggle-switch .toggle-slider:after {
   content: "";
   position: absolute;
   width: 100%;
@@ -130,7 +139,8 @@
   pointer-events: none;
 }
 
-.toggle-switch:active .toggle-label:after {
+.toggle-switch:active .toggle-label:after,
+.toggle-switch:active .toggle-slider:after {
   opacity: 1;
 }
 

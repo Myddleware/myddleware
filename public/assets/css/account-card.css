@@ -103,54 +103,7 @@
   margin-bottom: 1rem;
 }
 
-/* Security Page: Toggle Switch */
-.toggle-switch {
-  position: relative;
-  width: 50px;
-  height: 24px;
-  display: inline-block;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  background-color: #ccc;
-  border-radius: 24px;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transition: 0.4s;
-}
-
-.toggle-slider::before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: 0.4s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #007bff;
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(26px);
-}
-
+/* Toggle switch container - compatible with toggle-switch.css */
 .toggle-switch-container {
   display: flex;
   align-items: center;
