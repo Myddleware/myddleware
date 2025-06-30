@@ -360,3 +360,59 @@ li span {
 #flux-table a:hover {
     text-decoration: underline;
 }
+
+/* Data Wrapper and Logo Styling */
+.data-wrapper {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.source-data, .target-data, .history-data {
+    flex: 1;
+    min-width: 300px;
+}
+
+.source-data-content, .target-data-content, .history-data-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.source-data-content-header, .target-data-content-header, .history-data-content-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    padding-left: 40px;
+}
+
+.source-logo-container, .target-logo-container, .history-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.source-logo-container img, .target-logo-container img, .history-logo-container img {
+    max-width: 60px;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+.source-data-content-header h3, .target-data-content-header h3, .history-data-content-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.source-data-content-body, .target-data-content-body, .history-data-content-body {
+    /* background-color: #f8f9fa; */
+    /* border: 1px solid #dee2e6; */
+    /* we keep the 2 properties above for testing the limit of the container */
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 200px;
+}

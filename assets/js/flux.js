@@ -78,36 +78,36 @@ export class Flux {
 
             <div class="data-wrapper" style="margin: 20px;">
                 <div class="source-data">
-                    <div class="source-logo-container">
-                        <img src="${fullpathSource}" alt="Source Logo">
-                    </div>
                     <div class="source-data-content">
                         <div class="source-data-content-header">
-                            <h3>Source Data</h3>
+                            <div class="source-logo-container">
+                                <img src="${fullpathSource}" alt="Source Logo">
+                            </div>
+                            <h3>Source</h3>
                         </div>
                         <div class="source-data-content-body">
                         </div>
                     </div>
                 </div>
                 <div class="target-data">
-                    <div class="target-logo-container">
-                        <img src="${fullpathTarget}" alt="Target Logo">
-                    </div>
                     <div class="target-data-content">
                         <div class="target-data-content-header">
-                            <h3>Target Data</h3>
+                            <div class="target-logo-container">
+                                <img src="${fullpathTarget}" alt="Target Logo">
+                            </div>
+                            <h3>Target</h3>
                         </div>
                         <div class="target-data-content-body">
                         </div>
                     </div>
                 </div>
                 <div class="history-data">
-                    <div class="history-logo-container">
-                        <img src="${fullpathHistory}" alt="History Logo">
-                    </div>
                     <div class="history-data-content">
                         <div class="history-data-content-header">
-                            <h3>History Data</h3>
+                            <div class="history-logo-container">
+                                <img src="${fullpathHistory}" alt="History Logo">
+                            </div>
+                            <h3>History</h3>
                         </div>
                         <div class="history-data-content-body">
                         </div>
