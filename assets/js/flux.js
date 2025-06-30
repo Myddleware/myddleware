@@ -49,10 +49,10 @@ export class Flux {
                         <tr>
                             <td><a href="#" style="color: #0F66A9; font-weight: bold; text-decoration: none;">Moodle Users to contacts</a></td>
                             <td><span class="gblstatus_close">Send ✓</span></td>
-                            <td>-</td>
+                            <td>C</td>
                             <td>1</td>
-                            <td>-</td>
-                            <td>-</td>
+                            <td>Error</td>
+                            <td>2024-01-15 10:30:00</td>
                             <td>2024-01-15 10:30:00</td>
                             <td>2024-01-15 10:30:00</td>
                         </tr>
