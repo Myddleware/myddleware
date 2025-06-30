@@ -334,7 +334,7 @@ li span {
 
 #flux-table td {
     padding: 12px;
-    text-align: left;
+    text-align: center !important;
     font-size: 14px;
     color: #333;
     border-bottom: 1px solid #e0e0e0;
