@@ -92,7 +92,7 @@ export class Flux {
                                 <div class="field-value" title="luciefaure@myddleware.com">luciefaure@myddleware.com</div>
                             </div>
                             <div class="field-row">
-                                <div class="field-label">Firstname</div>
+                                <div class="field-label">FirstnameFirstnameFirstnameFirstnameFirstname</div>
                                 <div class="field-separator"></div>
                                 <div class="field-value" title="Lucie">Lucie</div>
                             </div>

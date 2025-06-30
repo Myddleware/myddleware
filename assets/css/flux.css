@@ -393,6 +393,8 @@ li span {
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
+    height: 60px;
+    width: 60px;
 }
 
 .source-logo-container img, .target-logo-container img, .history-logo-container img {
@@ -431,12 +433,13 @@ li span {
     font-weight: bold;
     color: #333;
     font-size: 14px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: none;
     line-height: 1.2;
     padding-right: 10px;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
 }
 
 .field-separator {
@@ -444,8 +447,7 @@ li span {
     background-color: #ccc;
     margin: 0 15px;
     flex-shrink: 0;
-    align-self: stretch;
-    min-height: 20px;
+    height: 20px;
 }
 
 .field-value {
@@ -474,13 +476,16 @@ li span {
     width: auto;
 }
 
-/* Handle long labels by breaking every 10 characters */
-.field-label[data-long="true"] {
-    word-break: break-all;
-    max-width: 120px;
-}
-
-/* Multi-line label support */
-.field-row.multi-line .field-separator {
-    align-self: stretch;
+.field-label:hover {
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+    background-color: #f0f8ff;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: relative;
+    max-width: none;
+    width: auto;
 }
