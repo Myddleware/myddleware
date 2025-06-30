@@ -59,6 +59,28 @@ export class Flux {
                     </tbody>
                 </table>
             </div>
+
+
+            <div class="data-wrapper" style="margin: 20px;">
+                <div class="source-data">
+                    <div class="source-logo-container">
+                    </div>
+                    <div class="source-data-content">
+                    </div>
+                </div>
+                <div class="target-data">
+                    <div class="target-logo-container">
+                    </div>
+                    <div class="target-data-content">
+                    </div>
+                </div>
+                <div class="history-data">
+                    <div class="history-logo-container">
+                    </div>
+                    <div class="history-data-content">
+                    </div>
+                </div>
+            </div>
         `;
 
     }
