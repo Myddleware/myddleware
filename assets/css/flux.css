@@ -462,7 +462,7 @@ li span {
     cursor: default;
 }
 
-.field-value:hover {
+.field-value:hover, .field-value.expanded {
     overflow: visible;
     white-space: normal;
     word-wrap: break-word;
@@ -474,6 +474,16 @@ li span {
     position: relative;
     max-width: none;
     width: auto;
+}
+
+.field-value.expanded {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+}
+
+.field-value {
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .field-label:hover {
