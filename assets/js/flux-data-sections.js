@@ -6,7 +6,7 @@ export class FluxDataSections {
                     <div class="source-data-content">
                         <div class="source-data-content-header">
                             <div class="source-logo-container">
-                                <img src="${fullpathSource}" alt="Source Logo">
+                                <img class="logo-small-size" src="${fullpathSource}" alt="Source Logo">
                             </div>
                             <h3>Source</h3>
                         </div>
@@ -19,7 +19,7 @@ export class FluxDataSections {
                     <div class="target-data-content">
                         <div class="target-data-content-header">
                             <div class="target-logo-container">
-                                <img src="${fullpathTarget}" alt="Target Logo">
+                                <img class="logo-small-size" src="${fullpathTarget}" alt="Target Logo">
                             </div>
                             <h3>Target</h3>
                         </div>
@@ -32,7 +32,7 @@ export class FluxDataSections {
                     <div class="history-data-content">
                         <div class="history-data-content-header">
                             <div class="history-logo-container">
-                                <img src="${fullpathHistory}" alt="History Logo">
+                                <img class="logo-small-size" src="${fullpathHistory}" alt="History Logo">
                             </div>
                             <h3>History</h3>
                         </div>
