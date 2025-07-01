@@ -54,11 +54,11 @@
                                     <i class="fa fa-pen" aria-hidden="true"></i>
                                 </span>
                             </a>
-                            {# <a class="delete btn btn-sm btn-outline-danger" href="{{ path('connector_delete',{'id' : connector.0.getId }) }}" title="{{'list_connector.btn.delete'|trans}}" onclick="return(confirm('{{'list_connector.delete'|trans}}'));">
+                            <a class="btn btn-sm btn-outline-danger" href="{{ path('user_manager_delete', {'id': user.id}) }}" title="{{ 'delete'|trans }}" onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
                                 <span class="btn-opt">
                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                 </span>
-                            </a> #}
+                            </a>
                         </td>
                     </tr>
                 {% else %}

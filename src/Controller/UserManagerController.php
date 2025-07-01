@@ -107,4 +107,14 @@ class UserManagerController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['GET'])]
+    public function delete(User $user, EntityManagerInterface $em): Response
+    {
+        $em->remove($user);
+        $em->flush();
+
+        $this->addFlash('success', 'success');
+        return $this->redirectToRoute('user_manager');
+    }
 }
