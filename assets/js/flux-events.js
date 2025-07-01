@@ -1,6 +1,12 @@
 import axios from 'axios';
 
 export class FluxEvents {
+    static getBaseUrl() {
+        return window.location.pathname.includes('/public/') 
+            ? window.location.pathname.split('/public/')[0] + '/public'
+            : '';
+    }
+
     static setupEventListeners() {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'run-same-record') {
@@ -18,10 +24,11 @@ export class FluxEvents {
                 return;
             }
 
-            const response = await axios.get(`/flux/rerun/${documentId}`);
+            const baseUrl = FluxEvents.getBaseUrl();
+            const response = await axios.get(`${baseUrl}/rule/flux/rerun/${documentId}`);
             
             if (response.status === 200) {
-                window.location.href = `/flux/info/${documentId}`;
+                window.location.href = `${baseUrl}/rule/flux/${documentId}/log/1`;
             }
         } catch (error) {
             console.error('Error running same record:', error);
