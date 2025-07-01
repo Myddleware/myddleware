@@ -3,13 +3,22 @@
 {% block title %}{{ 'user_manager.create'|trans }}{% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        {{ form_start(form) }}
-            {{ form_row(form.username) }}
-            {{ form_row(form.email) }}
-            {{ form_row(form.password) }}
-            {{ form_row(form.roles) }}
-            {{ form_row(form.timezone) }}
-        {{ form_end(form) }}
+    <div class="container user-create-container mt-5">
+
+        <h2 class="user-create-title mb-4">{{ 'user_manager.create'|trans }}</h2>
+
+        <div class="user-create-form-wrapper p-4 shadow rounded bg-white">
+            {{ form_start(form, { attr: { class: 'user-create-form' } }) }}
+                {{ form_row(form.username) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.password) }}
+                {{ form_row(form.roles) }}
+                {{ form_row(form.timezone) }}
+
+                <button type="submit" class="btn btn-primary mt-3">
+                    {{ 'user_manager.create'|trans }}
+                </button>
+            {{ form_end(form) }}
+        </div>
     </div>
 {% endblock %}

@@ -6,7 +6,21 @@
 <div id="user-manager-wrapper" class="d-flex">
     <div id="user-table-container" class="flex-grow-1 transition-width">
     <div class="container mt-5">
-
+	    {% for message in app.flashes('success_deleted_user') %}
+			<div class="alert alert-success" role="alert">
+				{{ message }}
+			</div>
+		{% endfor %}
+        {% for message in app.flashes('success_create_user') %}
+            <div class="alert alert-success" role="alert">
+                <i class="fa fa-check-circle me-2"></i> {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('success_update_user') %}
+            <div class="alert alert-primary" role="alert">
+                <i class="fa fa-edit me-2"></i> {{ message }}
+            </div>
+        {% endfor %}
     	<div id="workflows">
             <div class="link-help-view text-end mx-4">
                 <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=create-a-workflow">
@@ -19,6 +33,7 @@
                 <a href="{{ path('user_manager_create') }}" class="btn btn-primary mt-4">{{ 'user_manager.create'|trans }}</a>
             </div>
         </div>
+        <div id="user-manager-container">
         <table class="table table-bordered table-hover text-center">
             <thead class="table-light">
                 <tr>
@@ -49,19 +64,53 @@
                         </td>
                         <td>{{ user.timezone }}</td>
                  		<td class="CRUD-icons">
-                            <button class="btn btn-sm btn-outline-primary edit-user-btn"
-                                    data-user-id="{{ user.id }}"
-                                    title="{{ 'edit'|trans }}">
-                                <span class="btn-opt">
-                                    <i class="fa fa-pen" aria-hidden="true"></i>
-                                </span>
-                            </button>
+                            {% if app.user.id == user.id %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% elseif 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% endif %}
 
-                            <a class="btn btn-sm btn-outline-danger" href="{{ path('user_manager_delete', {'id': user.id}) }}" title="{{ 'delete'|trans }}" onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
-                                <span class="btn-opt">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </span>
-                            </a>
+                            {% if app.user.id != user.id %}
+                                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                                    <a class="btn btn-sm btn-outline-danger"
+                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
+                                    title="{{ 'delete'|trans }}"
+                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+                                {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
+                                    <a class="btn btn-sm btn-outline-danger"
+                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
+                                    title="{{ 'delete'|trans }}"
+                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
                         </td>
                     </tr>
                 {% else %}
@@ -72,6 +121,7 @@
             </tbody>
         </table>
 
+    </div>
     </div>
         </div>
     

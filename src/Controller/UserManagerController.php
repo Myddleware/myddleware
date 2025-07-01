@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -27,6 +28,7 @@ class UserManagerController extends AbstractController
 
         return $this->render('UserManager/list.html.twig', [
             'users' => $users,
+            'currentUser' => $this->getUser(),
         ]);
     }
     #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
@@ -41,6 +43,7 @@ class UserManagerController extends AbstractController
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_manager_update', ['id' => $user->getId()]),
             'method' => 'POST',
+            'current_user' => $this->getUser(),
         ]);
 
         return $this->render('UserManager/edit.html.twig', [
@@ -49,14 +52,14 @@ class UserManagerController extends AbstractController
     }
 
     #[Route('/rule/user_manager/{id}/update', name: 'user_manager_update', methods: ['POST'])]
-    public function update(Request $request, User $user, EntityManagerInterface $em): Response
+    public function update(Request $request, User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'User updated successfully');
+             $this->addFlash('success_update_user', $translator->trans('success_update_user'));
             return $this->redirectToRoute('user_manager');
         }
 
@@ -66,43 +69,28 @@ class UserManagerController extends AbstractController
     }
 
     #[Route('/rule/user_manager/new', name: 'user_manager_create')]
-    public function create(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    public function create(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator): Response
     {
         $user = new User();
-
-        $form = $this->createFormBuilder($user)
-            ->add('username', TextType::class)
-            ->add('email', EmailType::class)
-            ->add('roles', ChoiceType::class, [
-                'choices' => [
-                    'Utilisateur' => 'ROLE_USER',
-                    'Admin' => 'ROLE_ADMIN',
-                    'Super Admin' => 'ROLE_SUPER_ADMIN',
-                ],
-                'multiple' => true,
-                'expanded' => false,
-            ])
-            ->add('password', PasswordType::class, [
-                'mapped' => false,
-                'required' => true,
-                'label' => 'Mot de passe'
-            ])
-            ->add('timezone', TimezoneType::class)
-            ->add('save', SubmitType::class, ['label' => 'Create User'])
-            ->getForm();
+        $form = $this->createForm(UserType::class, $user, [
+            'include_password' => true,
+            'current_user' => $this->getUser()
+        ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $user->setUsernameCanonical(strtolower($user->getUsername()));
             $user->setEmailCanonical(strtolower($user->getEmail()));
+            $user->setEnabled(true);
+
             $hashedPassword = $passwordHasher->hashPassword($user, $form->get('password')->getData());
             $user->setPassword($hashedPassword);
 
             $em->persist($user);
             $em->flush();
-            $this->addFlash('success', 'User created successfully');
+
+            $this->addFlash('success_create_user', $translator->trans('success_create_user'));
             return $this->redirectToRoute('user_manager');
         }
 
@@ -112,12 +100,12 @@ class UserManagerController extends AbstractController
     }
 
     #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['GET'])]
-    public function delete(User $user, EntityManagerInterface $em): Response
+    public function delete(User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
         $em->remove($user);
         $em->flush();
 
-        $this->addFlash('success', 'success');
+          $this->addFlash('success_deleted_user', $translator->trans('success_deleted_user'));
         return $this->redirectToRoute('user_manager');
     }
 }

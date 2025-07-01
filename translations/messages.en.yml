@@ -1169,5 +1169,11 @@ user_manager:
         timezone: Timezone
         action: Action
     create: Create user
+    edit: Edit user
+    password: Password
+success_create_user: User created successfully.
+success_update_user: User updated successfully.
+success_deleted_user: User deleted successfully.
+error_generic: An error occurred.
 
         

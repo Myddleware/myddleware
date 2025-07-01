@@ -1132,3 +1132,9 @@ user_manager:
         timezone: Fuseau horaire
         action: Action
     create: Créer un utilisateur
+    edit: Modifier un utilisateur
+    password: Mot de passe
+success_create_user: Utilisateur créé avec succès.
+success_update_user: Utilisateur mis à jour avec succès.
+success_deleted_user: Utilisateur supprimé avec succès.
+error_generic: Une erreur est survenue.
