@@ -31,12 +31,17 @@ export class FluxFieldExpander {
             fieldValueElement.classList.add('expanded');
             await this.delay(200);
             icon.classList.add('show');
+            icon.classList.remove('hide');
+
+            console.log('icon class list in if', icon.classList);
         } else {
             icon.classList.remove('show');
             icon.classList.add('hide');
             await this.delay(200);
             fieldValueElement.classList.remove('expanded');
             setTimeout(() => icon.classList.remove('hide'), 400);
+
+            console.log('icon class list in else', icon.classList);
         }
     }
 
