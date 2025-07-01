@@ -1,14 +1,8 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}{{ 'user_manager.edit'|trans }}{% endblock %}
-
-{% block body %}
-    <div class="container mt-5">
-        {{ form_start(form) }}
-            {{ form_row(form.username) }}
-            {{ form_row(form.email) }}
-            {{ form_row(form.roles) }}
-            {{ form_row(form.timezone) }}
-        {{ form_end(form) }}
-    </div>
-{% endblock %}
+<h4>Modifier l'utilisateur</h4>
+{{ form_start(form, { attr: { id: 'user-edit-form' } }) }}
+    {{ form_row(form.username) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.roles) }}
+    {{ form_row(form.timezone) }}
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+{{ form_end(form) }}

@@ -1,0 +1,79 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  St�phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  St�phane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com    
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+.th-user-manager{
+    padding: 20px !important;
+    background-color: white !important;
+}
+   #user-manager-wrapper {
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    #user-table-container {
+        transition: width 0.4s ease;
+        width: 100%;
+    }
+
+    #user-manager-edit-form-container {
+        width: 0;
+        transition: width 0.4s ease;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+
+    #user-manager-edit-form-container.visible {
+        width: 400px;
+    }
+
+    .user-manager-edit-form-content {
+        padding: 1rem;
+        border-left: 1px solid #dee2e6;
+        height: 100%;
+        position: relative;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .user-manager-edit-form-content .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: #333;
+        cursor: pointer;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }

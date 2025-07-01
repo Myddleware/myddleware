@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,37 +29,39 @@ class UserManagerController extends AbstractController
             'users' => $users,
         ]);
     }
-
-    #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit')]
-    public function edit(User $user, Request $request, EntityManagerInterface $em): Response
+    #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
+    public function edit(UserRepository $userRepository, int $id): Response
     {
-        $form = $this->createFormBuilder($user)
-            ->add('username', TextType::class)
-            ->add('email', EmailType::class)
-            ->add('roles', ChoiceType::class, [
-                'choices' => [
-                    'Utilisateur' => 'ROLE_USER',
-                    'Admin' => 'ROLE_ADMIN',
-                    'Super Admin' => 'ROLE_SUPER_ADMIN',
-                ],
-                'multiple' => true,
-                'expanded' => false,
-            ])
-            ->add('timezone', TimezoneType::class)
-            ->add('save', SubmitType::class, ['label' => 'Update'])
-            ->getForm();
+        $user = $userRepository->find($id);
 
+        if (!$user) {
+            return new Response('<div class="alert alert-danger">Utilisateur introuvable</div>', 404);
+        }
+
+        $form = $this->createForm(UserType::class, $user, [
+            'action' => $this->generateUrl('user_manager_update', ['id' => $user->getId()]),
+            'method' => 'POST',
+        ]);
+
+        return $this->render('UserManager/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/rule/user_manager/{id}/update', name: 'user_manager_update', methods: ['POST'])]
+    public function update(Request $request, User $user, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'maj success');
+            $this->addFlash('success', 'User updated successfully');
             return $this->redirectToRoute('user_manager');
         }
 
         return $this->render('UserManager/edit.html.twig', [
             'form' => $form->createView(),
-            'user' => $user,
         ]);
     }
 
@@ -99,7 +102,7 @@ class UserManagerController extends AbstractController
 
             $em->persist($user);
             $em->flush();
-            $this->addFlash('success', 'success');
+            $this->addFlash('success', 'User created successfully');
             return $this->redirectToRoute('user_manager');
         }
 
