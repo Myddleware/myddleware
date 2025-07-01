@@ -1168,5 +1168,6 @@ user_manager:
         roles: Roles
         timezone: Timezone
         action: Action
+    create: Create user
 
         

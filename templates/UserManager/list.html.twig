@@ -4,7 +4,19 @@
 
 {% block body %}
     <div class="container mt-5">
-        <h1>{{ 'user_manager.list'|trans }}</h1>
+
+    	<div id="workflows">
+            <div class="link-help-view text-end mx-4">
+                <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=create-a-workflow">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    {{ 'rule.help' | trans }}
+                </a>
+            </div>
+
+            <div>
+                <a href="{{ path('user_manager_create') }}" class="btn btn-primary mt-4">{{ 'user_manager.create'|trans }}</a>
+            </div>
+        </div>
 
         <table class="table table-striped mt-3">
             <thead>

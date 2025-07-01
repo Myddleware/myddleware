@@ -1131,3 +1131,4 @@ user_manager:
         roles: Rôles
         timezone: Fuseau horaire
         action: Action
+    create: Créer un utilisateur
