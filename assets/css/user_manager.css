@@ -23,7 +23,7 @@
 *********************************************************************************/
 
 .th-user-manager {
-    padding: 20px !important;
+    padding: 10px !important;
     background-color: white !important;
 }
 
@@ -42,7 +42,8 @@
     width: 0;
     transition: width 0.4s ease;
     overflow: hidden;
-    box-shadow: rgba(0, 0, 0, 0.06) 0px -1px 2px 2px inset;
+    background: #f8f9f9;
+    /* box-shadow: rgba(0, 0, 0, 0.06) 0px -1px 2px 2px inset; */
 }
 
 #user-manager-edit-form-container.visible {
@@ -141,4 +142,8 @@
 .user-manager-edit-form-content button[type="submit"]:hover {
     background-color: #0056b3;
     box-shadow: 0 4px 10px rgba(0,123,255,0.2);
+}
+
+#user-manager-container .table thead th {
+    border-bottom: none !important;
 }

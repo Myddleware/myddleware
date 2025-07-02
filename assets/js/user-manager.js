@@ -33,6 +33,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const createBtn = document.getElementById('create-user-btn');
+    if (createBtn) {
+        createBtn.addEventListener('click', async () => {
+            const url = createBtn.dataset.url;
+            content.innerHTML = `<div class="text-center text-muted">...</div>`;
+            container.classList.remove('hidden');
+            container.classList.add('visible');
+            tableContainer.style.width = 'calc(100% - 400px)';
+
+            try {
+                const response = await fetch(url);
+                const html = await response.text();
+
+                if (!response.ok) {
+                    content.innerHTML = `<div class="alert alert-danger">${html}</div>`;
+                } else {
+                    content.innerHTML = `
+                        <button class="close-btn" id="close-user-manager-edit-form">&times;</button>
+                        ${html}`;
+                    closeHandler();
+                }
+            } catch (error) {
+                content.innerHTML = `<div class="alert alert-danger">Erreur</div>`;
+                console.error(error);
+            }
+        });
+    }
+
     function closeHandler() {
         const closeBtn = document.getElementById('close-user-manager-edit-form');
         if (closeBtn) {

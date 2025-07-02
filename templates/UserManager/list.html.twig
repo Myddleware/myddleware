@@ -30,7 +30,10 @@
             </div>
 
             <div>
-                <a href="{{ path('user_manager_create') }}" class="btn btn-primary mt-4">{{ 'user_manager.create'|trans }}</a>
+                <button class="btn btn-primary mt-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
+                    {{ 'user_manager.create'|trans }}
+                </button>
+
             </div>
         </div>
         <div id="user-manager-container">
