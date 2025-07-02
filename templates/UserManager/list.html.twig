@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'user_manager.list'|trans }}{% endblock %}
+
+{% block body %}
+<div id="user-manager-wrapper" class="d-flex">
+    <div id="user-table-container" class="flex-grow-1 transition-width">
+    <div class="container mt-5">
+	    {% for message in app.flashes('success_deleted_user') %}
+			<div class="alert alert-success" role="alert">
+				{{ message }}
+			</div>
+		{% endfor %}
+        {% for message in app.flashes('success_create_user') %}
+            <div class="alert alert-success" role="alert">
+                <i class="fa fa-check-circle me-2"></i> {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('success_update_user') %}
+            <div class="alert alert-primary" role="alert">
+                <i class="fa fa-edit me-2"></i> {{ message }}
+            </div>
+        {% endfor %}
+    	<div id="workflows">
+            <div class="link-help-view text-end mx-4">
+                <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=create-a-workflow">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    {{ 'rule.help' | trans }}
+                </a>
+            </div>
+
+            <div>
+                <button class="btn btn-primary mt-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
+                    {{ 'user_manager.create'|trans }}
+                </button>
+
+            </div>
+        </div>
+        <div id="user-manager-container">
+        <table class="table table-bordered table-hover text-center">
+            <thead class="table-light">
+                <tr>
+                    <th class="th-user-manager">{{ 'user_manager.table.username'|trans }}</th>
+                    <th class="th-user-manager">{{ 'user_manager.table.email'|trans }}</th>
+                    <th class="th-user-manager">{{ 'user_manager.table.last_login'|trans }}</th>
+                    <th class="th-user-manager">{{ 'user_manager.table.roles'|trans }}</th>
+                    <th class="th-user-manager">{{ 'user_manager.table.timezone'|trans }}</th>
+                    <th class="th-user-manager">{{ 'user_manager.table.action'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.lastLogin %}
+                                {{ user.lastLogin|date('d/m/Y H:i') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for role in user.roles %}
+                               {{ role }}
+                            {% endfor %}
+                        </td>
+                        <td>{{ user.timezone }}</td>
+                 		<td class="CRUD-icons">
+                            {% if app.user.id == user.id %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% elseif 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
+                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
+                                        data-user-id="{{ user.id }}"
+                                        title="{{ 'edit'|trans }}">
+                                    <span class="btn-opt">
+                                        <i class="fa fa-pen" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% endif %}
+
+                            {% if app.user.id != user.id %}
+                                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                                    <a class="btn btn-sm btn-outline-danger"
+                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
+                                    title="{{ 'delete'|trans }}"
+                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+                                {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
+                                    <a class="btn btn-sm btn-outline-danger"
+                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
+                                    title="{{ 'delete'|trans }}"
+                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun utilisateur</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    </div>
+        </div>
+    
+    <div id="user-manager-edit-form-container" class="user-manager-edit-form-container hidden">
+        <div class="user-manager-edit-form-content"></div>
+    </div>
+    </div>
+
+<script>
+    const userEditUrl = "{{ path('user_manager_edit', { id: '__ID__' }) }}";
+</script>
+<script src="{{ asset('js/user_manager.js') }}"></script>
+
+
+{% endblock %}
+

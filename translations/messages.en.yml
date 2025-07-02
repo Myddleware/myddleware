@@ -895,6 +895,7 @@ menu_user:
     crontab: Crontab
     management_smtp: SMTP config
     logout: Logout
+    user_manager: UserManager
 
 help:
     title: Help
@@ -1204,3 +1205,19 @@ premium:
             benefit1: "Benefit 1 description"
             benefit2: "Benefit 2 description"
             benefit3: "Benefit 3 description"
+user_manager:
+    list: User list
+    table:
+        username: Username
+        email: Email
+        last_login: Last login
+        roles: Roles
+        timezone: Timezone
+        action: Action
+    create: Create user
+    edit: Edit user
+    password: Password
+success_create_user: User created successfully.
+success_update_user: User updated successfully.
+success_deleted_user: User deleted successfully.
+error_generic: An error occurred.

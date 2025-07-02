@@ -891,6 +891,7 @@ menu_user:
     crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration SMTP
     logout: Déconnexion
+    user_manager: Gestion utilisateur
     
 help:
     title: Aide
@@ -1200,3 +1201,19 @@ premium:
             benefit1: "Description avantage 1"
             benefit2: "Description avantage 2"
             benefit3: "Description avantage 3"
+user_manager:
+    list: Liste des utilisateurs
+    table:
+        username: Nom d'utilisateur
+        email: Email
+        last_login: Dernière connexion
+        roles: Rôles
+        timezone: Fuseau horaire
+        action: Action
+    create: Créer un utilisateur
+    edit: Modifier un utilisateur
+    password: Mot de passe
+success_create_user: Utilisateur créé avec succès.
+success_update_user: Utilisateur mis à jour avec succès.
+success_deleted_user: Utilisateur supprimé avec succès.
+error_generic: Une erreur est survenue.

@@ -116,6 +116,10 @@ if (window.location.href.includes('rule/flux')) {
     require('./js/lookup-filter.js')
 }
 
+if (window.location.href.includes('rule/user_manager')) {
+    require('./js/user-manager.js')
+}
+
 // start the Stimulus application
 import './bootstrap';
 import 'select2/dist/css/select2.css';
