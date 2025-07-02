@@ -14,41 +14,57 @@ class DatabaseSetupType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
+      $builder
             ->add('host', null, [
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'eg: localhost',
                 ],
+                'row_attr' => ['class' => 'mb-3'],
+                'label_attr' => ['class' => 'form-label'],
             ])
             ->add('port', IntegerType::class, [
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'eg: 3306',
+                    'class' => 'form-control',
+                    'placeholder' => '3306',
                 ],
+                'row_attr' => ['class' => 'mb-3'],
+                'label_attr' => ['class' => 'form-label'],
             ])
             ->add('name', null, [
                 'label' => 'Database name',
                 'attr' => [
-                    'placeholder' => 'eg: my_database_name',
+                    'class' => 'form-control',
+                    'placeholder' => 'my_database_name',
                 ],
+                'row_attr' => ['class' => 'mb-3'],
+                'label_attr' => ['class' => 'form-label'],
             ])
             ->add('user', null, [
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'eg: root',
                 ],
+                'row_attr' => ['class' => 'mb-3'],
+                'label_attr' => ['class' => 'form-label'],
             ])
             ->add('password', PasswordType::class, [
                 'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'Database password',
                 ],
+                'row_attr' => ['class' => 'mb-3'],
+                'label_attr' => ['class' => 'form-label'],
             ])
             ->add('Save', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn btn-success btn-lg',
+                    'class' => 'btn btn-success btn-lg mt-3',
                 ],
             ])
         ;
+
     }
 
     public function configureOptions(OptionsResolver $resolver)
