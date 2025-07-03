@@ -1784,6 +1784,10 @@ class DocumentManager
                         $f = $this->changeFormula($f);
 						eval('$rFormula = '.$f.';'); // exec
 						if (isset($rFormula)) {
+							return $rFormula;	
+						}
+						// Second check in case isset returns false, we check the variable doesn't exist at all
+						if (array_key_exists('rFormula', get_defined_vars())) {
 							// Return result
 							return $rFormula;
 						} else {
