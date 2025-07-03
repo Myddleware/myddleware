@@ -620,7 +620,8 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
             if (!$this->getUser()->isAdmin()) {
                 if (
                     empty($doc[0])
-                    || $doc[0]->getCreatedBy() != $this->getUser()->getId()
+                    || !$doc[0]->getCreatedBy()
+                    || $doc[0]->getCreatedBy()->getId() != $this->getUser()->getId()
                 ) {
                     return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
                 }
