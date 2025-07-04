@@ -5,12 +5,19 @@ console.log('flux-data-extractor.js loaded');
 
 // let's start by getting the rule
 
-export function getRuleName(documentId) {
+export function getRuleName(documentId, callback) {
     console.log('getRuleName called with documentId:', documentId);
     
     // Validate documentId parameter
     if (!documentId) {
         console.error('getRuleName: documentId is required but was not provided');
+        if (callback) callback(null, null, 'Document ID is required');
+        return;
+    }
+    
+    // Validate callback parameter
+    if (!callback || typeof callback !== 'function') {
+        console.error('getRuleName: callback function is required');
         return;
     }
     
@@ -59,13 +66,18 @@ export function getRuleName(documentId) {
                     console.log('Rule name:', response.rule_name);
                     console.log('Rule ID:', response.rule_id);
                     console.log('Document ID:', response.document_id);
+                    
+                    // Call the callback with rule name and ID
+                    callback(response.rule_name, response.rule_id, null);
                 } else if (response.error) {
                     console.error('❌ Server returned error:', response.error);
+                    callback(null, null, response.error);
                 }
             } else {
                 // Handle legacy string response (if backend returns plain text)
                 console.log('Response length:', response ? response.length : 'N/A');
                 console.log('Rule name (legacy format):', response);
+                callback(response, null, null);
             }
         },
         error: function(xhr, status, error) {
@@ -77,17 +89,26 @@ export function getRuleName(documentId) {
             console.error('XHR responseText:', xhr.responseText);
             console.error('XHR responseJSON:', xhr.responseJSON);
             
+            let errorMessage = `AJAX Error: ${status} - ${error}`;
+            
             // Log specific error cases
             if (xhr.status === 404) {
                 console.error('ERROR: 404 - Endpoint not found. Check if the URL path is correct.');
                 console.error('Expected endpoint: /rule/api/flux/rule-get/{id}');
+                errorMessage = 'Endpoint not found (404)';
             } else if (xhr.status === 403) {
                 console.error('ERROR: 403 - Access forbidden. Check authentication/authorization.');
+                errorMessage = 'Access forbidden (403)';
             } else if (xhr.status === 500) {
                 console.error('ERROR: 500 - Server error. Check server logs.');
+                errorMessage = 'Server error (500)';
             } else if (xhr.status === 0) {
                 console.error('ERROR: Network error or CORS issue. Check if server is running.');
+                errorMessage = 'Network error or CORS issue';
             }
+            
+            // Call the callback with error
+            callback(null, null, errorMessage);
         },
         complete: function(xhr, status) {
             console.log('AJAX request completed with status:', status);
@@ -96,4 +117,34 @@ export function getRuleName(documentId) {
     });
     
     console.log('getRuleName function execution completed (async request sent)');
+}
+
+// Helper function to get rule data and automatically update href attributes
+export function updateRuleLinks(documentId, linkElementId) {
+    getRuleName(documentId, function(ruleName, ruleId, error) {
+        if (error) {
+            console.error('Failed to update rule links:', error);
+            return;
+        }
+        
+        if (ruleName && ruleId) {
+            const linkElement = document.getElementById(linkElementId);
+            if (linkElement) {
+                // Get the base URL for consistency
+                const pathParts = window.location.pathname.split('/');
+                const publicIndex = pathParts.indexOf('public');
+                let baseUrl = window.location.origin;
+                if (publicIndex !== -1) {
+                    const baseParts = pathParts.slice(0, publicIndex + 1);
+                    baseUrl = window.location.origin + baseParts.join('/');
+                }
+                
+                linkElement.href = `${baseUrl}/rule/view/${ruleId}`;
+                linkElement.textContent = ruleName;
+                console.log('✅ Updated link:', linkElement.href);
+            } else {
+                console.warn('Element with ID', linkElementId, 'not found');
+            }
+        }
+    });
 }
