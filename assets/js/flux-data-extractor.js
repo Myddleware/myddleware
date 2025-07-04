@@ -1,122 +1,209 @@
 // file that handle the extraction of data from the document
 console.log('flux-data-extractor.js loaded');
 
-// we start by testing the extraction of data from the document with id 6863a07946e8b9.38306852
+// Cache for document data to avoid repeated API calls
+let documentDataCache = new Map();
 
-// let's start by getting the rule
-
-export function getRuleName(documentId, callback) {
-    console.log('getRuleName called with documentId:', documentId);
+// ===== COMPREHENSIVE DOCUMENT DATA FETCHER =====
+export function getDocumentData(documentId, callback) {
+    console.log('getDocumentData called with documentId:', documentId);
     
-    // Validate documentId parameter
+    // Check cache first
+    if (documentDataCache.has(documentId)) {
+        console.log('📋 Using cached data for document:', documentId);
+        const cachedData = documentDataCache.get(documentId);
+        if (callback) callback(cachedData, null);
+        return;
+    }
+    
+    // Validate parameters
     if (!documentId) {
-        console.error('getRuleName: documentId is required but was not provided');
-        if (callback) callback(null, null, 'Document ID is required');
+        console.error('getDocumentData: documentId is required');
+        if (callback) callback(null, 'Document ID is required');
         return;
     }
     
-    // Validate callback parameter
     if (!callback || typeof callback !== 'function') {
-        console.error('getRuleName: callback function is required');
+        console.error('getDocumentData: callback function is required');
         return;
     }
     
-    // Log the full URL that will be called
-    // Get the base URL from the current location
-    // Current URL: http://localhost/myddleware_NORMAL/public/rule/flux/modern/ID
-    // We need: http://localhost/myddleware_NORMAL/public/api/flux/rule-get/ID
+    // Build URL for comprehensive document data
     const pathParts = window.location.pathname.split('/');
     const publicIndex = pathParts.indexOf('public');
     let baseUrl;
     
     if (publicIndex !== -1) {
-        // Take everything up to and including 'public'
         const baseParts = pathParts.slice(0, publicIndex + 1);
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
-        // Fallback: assume we're already at the root
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/flux/rule-get/${documentId}`;
-    console.log('Current pathname:', window.location.pathname);
-    console.log('Path parts:', pathParts);
-    console.log('Public index:', publicIndex);
-    console.log('Base URL detected:', baseUrl);
-    console.log('Making AJAX request to URL:', url);
-    console.log('Request type: GET');
+    const url = `${baseUrl}/rule/api/flux/document-data/${documentId}`;
+    console.log('🚀 Fetching comprehensive document data from:', url);
     
-    // get the rule from the document using an ajax request
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-            console.log('AJAX request about to be sent');
-            console.log('XHR object:', xhr);
+            console.log('📡 Sending request for document data...');
         },
         success: function(response) {
-            console.log('AJAX request successful!');
-            console.log('Response received:', response);
-            console.log('Response type:', typeof response);
+            console.log('✅ Document data request successful!');
+            console.log('Response:', response);
             
-            // Handle the new JSON response format
-            if (response && typeof response === 'object') {
-                if (response.success) {
-                    console.log('✅ Rule found successfully!');
-                    console.log('Rule name:', response.rule_name);
-                    console.log('Rule ID:', response.rule_id);
-                    console.log('Document ID:', response.document_id);
-                    
-                    // Call the callback with rule name and ID
-                    callback(response.rule_name, response.rule_id, null);
-                } else if (response.error) {
-                    console.error('❌ Server returned error:', response.error);
-                    callback(null, null, response.error);
-                }
+            if (response && typeof response === 'object' && response.success) {
+                // Cache the data
+                documentDataCache.set(documentId, response.data);
+                console.log('💾 Cached document data for:', documentId);
+                
+                callback(response.data, null);
+            } else if (response && response.error) {
+                console.error('❌ Server returned error:', response.error);
+                callback(null, response.error);
             } else {
-                // Handle legacy string response (if backend returns plain text)
-                console.log('Response length:', response ? response.length : 'N/A');
-                console.log('Rule name (legacy format):', response);
-                callback(response, null, null);
+                console.error('❌ Unexpected response format');
+                callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX request failed!');
-            console.error('Status:', status);
-            console.error('Error:', error);
-            console.error('XHR status:', xhr.status);
-            console.error('XHR statusText:', xhr.statusText);
-            console.error('XHR responseText:', xhr.responseText);
-            console.error('XHR responseJSON:', xhr.responseJSON);
+            console.error('❌ Document data request failed!');
+            console.error('Status:', status, 'Error:', error);
             
             let errorMessage = `AJAX Error: ${status} - ${error}`;
-            
-            // Log specific error cases
             if (xhr.status === 404) {
-                console.error('ERROR: 404 - Endpoint not found. Check if the URL path is correct.');
-                console.error('Expected endpoint: /rule/api/flux/rule-get/{id}');
-                errorMessage = 'Endpoint not found (404)';
+                errorMessage = 'Document data endpoint not found (404)';
             } else if (xhr.status === 403) {
-                console.error('ERROR: 403 - Access forbidden. Check authentication/authorization.');
                 errorMessage = 'Access forbidden (403)';
             } else if (xhr.status === 500) {
-                console.error('ERROR: 500 - Server error. Check server logs.');
                 errorMessage = 'Server error (500)';
-            } else if (xhr.status === 0) {
-                console.error('ERROR: Network error or CORS issue. Check if server is running.');
-                errorMessage = 'Network error or CORS issue';
             }
             
-            // Call the callback with error
-            callback(null, null, errorMessage);
-        },
-        complete: function(xhr, status) {
-            console.log('AJAX request completed with status:', status);
-            console.log('Final XHR state:', xhr.readyState);
+            callback(null, errorMessage);
         }
     });
+}
+
+// ===== MODULAR DATA EXTRACTION FUNCTIONS =====
+
+export function extractRuleInfo(documentData) {
+    if (!documentData) return { name: null, id: null };
     
-    console.log('getRuleName function execution completed (async request sent)');
+    return {
+        name: documentData.rule_name || null,
+        id: documentData.rule_id || null,
+        url: documentData.rule_url || null
+    };
+}
+
+export function extractDocumentStatus(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        status: documentData.status || null,
+        globalStatus: documentData.global_status || null,
+        statusLabel: documentData.status_label || null,
+        statusClass: documentData.status_class || null
+    };
+}
+
+export function extractDocumentType(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        type: documentData.type || null,
+        typeLabel: documentData.type_label || null
+    };
+}
+
+export function extractDocumentAttempts(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        attempt: documentData.attempt || 0,
+        maxAttempts: documentData.max_attempts || null
+    };
+}
+
+export function extractDocumentDates(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        creationDate: documentData.creation_date || null,
+        modificationDate: documentData.modification_date || null,
+        reference: documentData.reference || null
+    };
+}
+
+export function extractSourceData(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        sourceData: documentData.source_data || null,
+        sourceFields: documentData.source_fields || null
+    };
+}
+
+export function extractTargetData(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        targetData: documentData.target_data || null,
+        targetFields: documentData.target_fields || null
+    };
+}
+
+export function extractHistoryData(documentData) {
+    if (!documentData) return null;
+    
+    return {
+        historyData: documentData.history_data || null,
+        errorMessage: documentData.error_message || null,
+        logs: documentData.logs || null
+    };
+}
+
+// ===== CONVENIENCE FUNCTIONS =====
+
+export function getAndExtractRuleInfo(documentId, callback) {
+    getDocumentData(documentId, function(data, error) {
+        if (error) {
+            callback(null, error);
+            return;
+        }
+        
+        const ruleInfo = extractRuleInfo(data);
+        callback(ruleInfo, null);
+    });
+}
+
+export function getAndExtractDocumentStatus(documentId, callback) {
+    getDocumentData(documentId, function(data, error) {
+        if (error) {
+            callback(null, error);
+            return;
+        }
+        
+        const status = extractDocumentStatus(data);
+        callback(status, null);
+    });
+}
+
+// ===== LEGACY COMPATIBILITY =====
+// Keep the original getRuleName function for backward compatibility
+export function getRuleName(documentId, callback) {
+    console.log('getRuleName called with documentId:', documentId);
+    
+    // Use the new comprehensive function but maintain the old callback signature
+    getAndExtractRuleInfo(documentId, function(ruleInfo, error) {
+        if (error) {
+            callback(null, null, error);
+            return;
+        }
+        
+        callback(ruleInfo.name, ruleInfo.id, null);
+    });
 }
 
 // Helper function to get rule data and automatically update href attributes

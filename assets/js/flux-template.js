@@ -1,5 +1,13 @@
 import { FluxDataSections } from './flux-data-sections.js';
-import { getRuleName } from './flux-data-extractor.js';
+import { 
+    getDocumentData, 
+    extractRuleInfo, 
+    extractDocumentStatus, 
+    extractDocumentType, 
+    extractDocumentAttempts, 
+    extractDocumentDates,
+    getRuleName  // Keep for backward compatibility
+} from './flux-data-extractor.js';
 
 export class FluxTemplate {
     static generateHTML() {
@@ -40,13 +48,13 @@ export class FluxTemplate {
                     <tbody>
                         <tr>
                             <td><a id="rule-link" href="#" style="color: #0F66A9; font-weight: bold; text-decoration: none;">Loading rule...</a></td>
-                            <td><span class="gblstatus_close">Send ✓</span></td>
-                            <td>C</td>
-                            <td>1</td>
-                            <td>Error</td>
-                            <td>2024-01-15 10:30:00</td>
-                            <td>2024-01-15 10:30:00</td>
-                            <td>2024-01-15 10:30:00</td>
+                            <td id="document-status">Loading...</td>
+                            <td id="document-type">Loading...</td>
+                            <td id="document-attempt">Loading...</td>
+                            <td id="document-global-status">Loading...</td>
+                            <td id="document-reference">Loading...</td>
+                            <td id="document-creation-date">Loading...</td>
+                            <td id="document-modification-date">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -54,55 +62,148 @@ export class FluxTemplate {
 ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
         `;
 
-        // After returning the template, load the rule data asynchronously
+        // After returning the template, load ALL document data with a single call
         setTimeout(() => {
-            console.log('we are about to get the rule name and ID');
-            getRuleName(documentId, function(ruleName, ruleId, error) {
+            console.log('🚀 Loading comprehensive document data...');
+            
+            // NEW APPROACH: Single API call + modular extraction
+            getDocumentData(documentId, function(data, error) {
                 if (error) {
-                    console.error('Could not get the rule name and ID:', error);
-                    // Update with error state
-                    const linkElement = document.getElementById('rule-link');
-                    if (linkElement) {
-                        linkElement.textContent = 'Error loading rule';
-                        linkElement.style.color = '#dc3545';
-                    }
+                    console.error('❌ Could not get document data:', error);
+                    FluxTemplate.showErrorState();
                     return;
                 }
                 
-                if (ruleName && ruleId) {
-                    console.log('✅ Successfully retrieved rule data:');
-                    console.log('Rule name:', ruleName);
-                    console.log('Rule ID:', ruleId);
-                    
-                    // Update the DOM with the actual rule data
-                    const linkElement = document.getElementById('rule-link');
-                    if (linkElement) {
-                        // Get the base URL for consistency
-                        const pathParts = window.location.pathname.split('/');
-                        const publicIndex = pathParts.indexOf('public');
-                        let baseUrl = window.location.origin;
-                        if (publicIndex !== -1) {
-                            const baseParts = pathParts.slice(0, publicIndex + 1);
-                            baseUrl = window.location.origin + baseParts.join('/');
-                        }
-                        
-                        const ruleLink = `${baseUrl}/rule/view/${ruleId}`;
-                        linkElement.href = ruleLink;
-                        linkElement.textContent = ruleName;
-                        console.log('✅ Updated rule link:', ruleLink);
-                    }
-                } else {
-                    console.error('Could not get the rule name or ID - received null values');
-                    const linkElement = document.getElementById('rule-link');
-                    if (linkElement) {
-                        linkElement.textContent = 'Rule not found';
-                        linkElement.style.color = '#dc3545';
-                    }
-                }
+                console.log('✅ Document data loaded successfully!');
+                
+                // Extract and update each piece of data using modular functions
+                FluxTemplate.updateRuleInfo(extractRuleInfo(data));
+                FluxTemplate.updateDocumentStatus(extractDocumentStatus(data));
+                FluxTemplate.updateDocumentType(extractDocumentType(data));
+                FluxTemplate.updateDocumentAttempts(extractDocumentAttempts(data));
+                FluxTemplate.updateDocumentDates(extractDocumentDates(data));
             });
-        }, 100); // Small delay to ensure DOM is ready
+        }, 100);
 
         return template;
     }
+    
+    // ===== MODULAR UPDATE FUNCTIONS =====
+    
+    static updateRuleInfo(ruleInfo) {
+        if (!ruleInfo || !ruleInfo.name) {
+            console.warn('⚠️ No rule info available');
+            return;
+        }
+        
+        const linkElement = document.getElementById('rule-link');
+        if (linkElement) {
+            // Get base URL for link construction
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const ruleLink = `${baseUrl}/rule/view/${ruleInfo.id}`;
+            linkElement.href = ruleLink;
+            linkElement.textContent = ruleInfo.name;
+            console.log('✅ Updated rule link:', ruleLink);
+        }
+    }
+    
+    static updateDocumentStatus(statusInfo) {
+        if (!statusInfo) {
+            console.warn('⚠️ No status info available');
+            return;
+        }
+        
+        const statusElement = document.getElementById('document-status');
+        const globalStatusElement = document.getElementById('document-global-status');
+        
+        if (statusElement && statusInfo.statusLabel) {
+            statusElement.innerHTML = `<span class="${statusInfo.statusClass || ''}">${statusInfo.statusLabel}</span>`;
+        }
+        
+        if (globalStatusElement && statusInfo.globalStatus) {
+            globalStatusElement.textContent = statusInfo.globalStatus;
+        }
+        
+        console.log('✅ Updated document status');
+    }
+    
+    static updateDocumentType(typeInfo) {
+        if (!typeInfo) {
+            console.warn('⚠️ No type info available');
+            return;
+        }
+        
+        const typeElement = document.getElementById('document-type');
+        if (typeElement && typeInfo.type) {
+            typeElement.textContent = typeInfo.type;
+            console.log('✅ Updated document type');
+        }
+    }
+    
+    static updateDocumentAttempts(attemptInfo) {
+        if (!attemptInfo) {
+            console.warn('⚠️ No attempt info available');
+            return;
+        }
+        
+        const attemptElement = document.getElementById('document-attempt');
+        if (attemptElement) {
+            let attemptText = attemptInfo.attempt.toString();
+            if (attemptInfo.maxAttempts) {
+                attemptText += ` / ${attemptInfo.maxAttempts}`;
+            }
+            attemptElement.textContent = attemptText;
+            console.log('✅ Updated document attempts');
+        }
+    }
+    
+    static updateDocumentDates(dateInfo) {
+        if (!dateInfo) {
+            console.warn('⚠️ No date info available');
+            return;
+        }
+        
+        const referenceElement = document.getElementById('document-reference');
+        const creationElement = document.getElementById('document-creation-date');
+        const modificationElement = document.getElementById('document-modification-date');
+        
+        if (referenceElement && dateInfo.reference) {
+            referenceElement.textContent = dateInfo.reference;
+        }
+        
+        if (creationElement && dateInfo.creationDate) {
+            creationElement.textContent = dateInfo.creationDate;
+        }
+        
+        if (modificationElement && dateInfo.modificationDate) {
+            modificationElement.textContent = dateInfo.modificationDate;
+        }
+        
+        console.log('✅ Updated document dates');
+    }
+    
+    static showErrorState() {
+        // Update all elements to show error state
+        const elements = [
+            'rule-link', 'document-status', 'document-type', 
+            'document-attempt', 'document-global-status', 
+            'document-reference', 'document-creation-date', 
+            'document-modification-date'
+        ];
+        
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = 'Error loading data';
+                element.style.color = '#dc3545';
+            }
+        });
+    }
 }
-// THIS IS THE HARD LIMIT FOR FILE LENGTH, WE CANNOT GO ABOVE 50 LINES --------------------------------- 

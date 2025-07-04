@@ -48,9 +48,9 @@ export class FluxDataSections {
     static generateFields() {
         const fields = [
             { label: 'Email', value: 'luciefaure@myddleware.com' },
-            { label: 'Firstname', value: 'Lucie' },
+            { label: 'FirstnameFirstnameFirstnameFirstnameFirstnameFirstnameFirstname', value: 'Lucie' },
             { label: 'Lastname', value: 'FAURE' },
-            { label: 'Address', value: '1234 rue de la fleur 16800 Rive' },
+            { label: 'Address', value: '1234 rue de la fleur 16800 Rive TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST ' },
             { label: 'CourseID', value: 'XID80073' }
         ];
         
