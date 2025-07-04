@@ -6,14 +6,18 @@ export class FluxFieldExpander {
 
     static setupFieldValueClickHandlers() {
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('field-value')) {
+            if (e.target.classList.contains('field-value') && this.isInTargetData(e.target)) {
                 this.toggleFieldValueWithIcon(e.target);
             }
         });
     }
 
     static createPencilIcons() {
-        const fieldValues = document.querySelectorAll('.field-value');
+        // Only create pencil icons for field values in target data section
+        const targetDataContainer = document.querySelector('.target-data-content');
+        if (!targetDataContainer) return;
+        
+        const fieldValues = targetDataContainer.querySelectorAll('.field-value');
         fieldValues.forEach(fieldValue => {
             if (!fieldValue.querySelector('.field-edit-icon')) {
                 const icon = document.createElement('i');
@@ -21,6 +25,10 @@ export class FluxFieldExpander {
                 fieldValue.appendChild(icon);
             }
         });
+    }
+
+    static isInTargetData(element) {
+        return element.closest('.target-data-content') !== null;
     }
 
     static async toggleFieldValueWithIcon(fieldValueElement) {
