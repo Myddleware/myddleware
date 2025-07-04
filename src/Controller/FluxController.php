@@ -1398,4 +1398,52 @@ $result = [];
             'currentLocale' => $locale
         ]);
     }
+
+    // function to get the rule name from the document id
+    /**
+     * @Route("/api/flux/rule-get/{id}", name="api_flux_rule", methods={"GET"})
+     */
+    public function getRuleName($id): JsonResponse {
+        try {
+            // Log the incoming request
+            error_log("getRuleName called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getRuleName: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID (not the rule directly)
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getRuleName: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                error_log("getRuleName: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            $ruleName = $rule->getName();
+            error_log("getRuleName: Successfully found rule name: " . $ruleName . " for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'rule_name' => $ruleName,
+                'rule_id' => $rule->getId(),
+                'document_id' => $id
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getRuleName: Exception occurred: " . $e->getMessage());
+            error_log("getRuleName: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
 }
