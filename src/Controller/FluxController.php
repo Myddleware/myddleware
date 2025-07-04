@@ -1446,4 +1446,158 @@ $result = [];
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Comprehensive document data API endpoint
+     * @Route("/api/flux/document-data/{id}", name="api_flux_document_data", methods={"GET"})
+     */
+    public function getDocumentData($id): JsonResponse {
+        try {
+            error_log("getDocumentData called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getDocumentData: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getDocumentData: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                error_log("getDocumentData: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            // Get status display information
+            $statusInfo = $this->getDocumentStatusInfo($document);
+            
+            // Get document data (source, target, history)
+            $sourceData = $this->listeFluxTable($id, 'S');
+            $targetData = $this->listeFluxTable($id, 'T');
+            $historyData = $this->listeFluxTable($id, 'H');
+            
+            // Get error message from logs if status is error
+            $errorMessage = null;
+            if ($document->getGlobalStatus() === 'Error') {
+                $errorMessage = $this->getLatestErrorMessage($document);
+            }
+            
+            // Prepare comprehensive response
+            $responseData = [
+                // Rule information
+                'rule_name' => $rule->getName(),
+                'rule_id' => $rule->getId(),
+                'rule_url' => null, // Could be constructed if needed
+                
+                // Document basic info
+                'document_id' => $id,
+                'status' => $document->getStatus(),
+                'global_status' => $document->getGlobalStatus(),
+                'type' => $document->getType(),
+                'mode' => $document->getMode(),
+                'attempt' => $document->getAttempt(),
+                'max_attempts' => null, // Could be fetched from rule config if available
+                
+                // Status display info
+                'status_label' => $statusInfo['label'],
+                'status_class' => $statusInfo['class'],
+                
+                // Type display info
+                'type_label' => $this->getTypeLabel($document->getType()),
+                
+                // Dates and reference
+                'creation_date' => $document->getDateCreated()->format('Y-m-d H:i:s'),
+                'modification_date' => $document->getDateModified()->format('Y-m-d H:i:s'),
+                'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
+                
+                // IDs
+                'source_id' => $document->getSource(),
+                'target_id' => $document->getTarget(),
+                'parent_id' => $document->getParentId(),
+                
+                // Data sections
+                'source_data' => $sourceData,
+                'target_data' => $targetData,
+                'history_data' => $historyData,
+                
+                // Error handling
+                'error_message' => $errorMessage,
+                'logs' => null, // Could be added if needed
+                
+                // Additional metadata
+                'deleted' => $document->getDeleted(),
+                'workflow_error' => $document->getWorkflowError(),
+                'job_lock' => $document->getJobLock()
+            ];
+            
+            error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $responseData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getDocumentData: Exception occurred: " . $e->getMessage());
+            error_log("getDocumentData: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper method to get document status display information
+     */
+    private function getDocumentStatusInfo($document): array {
+        $status = $document->getStatus();
+        $globalStatus = $document->getGlobalStatus();
+        
+        // Map status to display information (you may need to adjust these based on your system)
+        $statusMapping = [
+            'S' => ['label' => 'Send ✓', 'class' => 'gblstatus_close'],
+            'T' => ['label' => 'Transform ✓', 'class' => 'gblstatus_transform'],
+            'E' => ['label' => 'Error ✗', 'class' => 'gblstatus_error'],
+            'C' => ['label' => 'Cancelled', 'class' => 'gblstatus_cancel'],
+            'N' => ['label' => 'New', 'class' => 'gblstatus_new'],
+        ];
+        
+        return $statusMapping[$status] ?? ['label' => $status, 'class' => ''];
+    }
+
+    /**
+     * Helper method to get type display label
+     */
+    private function getTypeLabel($type): string {
+        $typeMapping = [
+            'C' => 'Create',
+            'U' => 'Update', 
+            'D' => 'Delete',
+            'S' => 'Search'
+        ];
+        
+        return $typeMapping[$type] ?? $type;
+    }
+
+    /**
+     * Helper method to get latest error message from logs
+     */
+    private function getLatestErrorMessage($document): ?string {
+        $logs = $document->getLogs();
+        
+        foreach ($logs as $log) {
+            if ($log->getType() === 'E') { // Error type
+                return $log->getMessage();
+            }
+        }
+        
+        return null;
+    }
 }
