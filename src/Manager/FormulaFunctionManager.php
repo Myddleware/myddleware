@@ -307,7 +307,6 @@ class FormulaFunctionManager
             }
         } catch (\Exception $e) {
             throw new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            $this->logger->error($this->id.' - '.$this->message);
         }
         return null;
     }
