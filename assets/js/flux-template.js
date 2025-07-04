@@ -123,15 +123,15 @@ ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpath
         const statusElement = document.getElementById('document-status');
         const globalStatusElement = document.getElementById('document-global-status');
         
-        if (statusElement && statusInfo.statusLabel) {
-            statusElement.innerHTML = `<span class="${statusInfo.statusClass || ''}">${statusInfo.statusLabel}</span>`;
+        if (statusElement && statusInfo.status_label) {
+            statusElement.innerHTML = `<span class="${statusInfo.status_class || ''}">${statusInfo.status_label}</span>`;
         }
         
-        if (globalStatusElement && statusInfo.globalStatus) {
-            globalStatusElement.textContent = statusInfo.globalStatus;
+        if (globalStatusElement && statusInfo.global_status_label) {
+            globalStatusElement.innerHTML = `<span class="${statusInfo.global_status_class || ''}">${statusInfo.global_status_label}</span>`;
         }
         
-        console.log('✅ Updated document status');
+        console.log('✅ Updated document status with colors');
     }
     
     static updateDocumentType(typeInfo) {

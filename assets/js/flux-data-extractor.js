@@ -101,10 +101,17 @@ export function extractDocumentStatus(documentData) {
     if (!documentData) return null;
     
     return {
+        // Basic status values
         status: documentData.status || null,
         globalStatus: documentData.global_status || null,
-        statusLabel: documentData.status_label || null,
-        statusClass: documentData.status_class || null
+        
+        // Display labels with proper formatting
+        status_label: documentData.status_label || null,
+        global_status_label: documentData.global_status_label || null,
+        
+        // Color classes for styling
+        status_class: documentData.status_class || null,
+        global_status_class: documentData.global_status_class || null
     };
 }
 

@@ -555,11 +555,54 @@ li span {
     overflow: visible;
     white-space: normal;
     word-wrap: break-word;
-    background-color: #f0f8ff;
+    background-color: #f8f9fa;
     padding: 5px;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 10;
     position: relative;
     max-width: none;
+}
+
+/* Status Color Classes for Document Status and Global Status */
+
+/* Yellow statuses: cancel, filter, no send, error expected */
+.status-yellow {
+	color: #ffc107 !important;
+	font-weight: bold;
+}
+
+/* Green statuses: send, sent, success */
+.status-green {
+	color: #28a745 !important;
+	font-weight: bold;
+}
+
+/* Red statuses: error, failed, ko, predecessor_ko */
+.status-red {
+	color: #dc3545 !important;
+	font-weight: bold;
+}
+
+/* Blue statuses: all others (new, transform, open, etc.) */
+.status-blue {
+	color: #0069B4 !important;
+	font-weight: bold;
+}
+
+/* Hover effects for status colors */
+.status-yellow:hover {
+	color: #e0a800 !important;
+}
+
+.status-green:hover {
+	color: #1e7e34 !important;
+}
+
+.status-red:hover {
+	color: #c82333 !important;
+}
+
+.status-blue:hover {
+	color: #004085 !important;
 }

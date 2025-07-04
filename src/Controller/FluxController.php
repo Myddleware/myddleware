@@ -1507,9 +1507,11 @@ $result = [];
                 'attempt' => $document->getAttempt(),
                 'max_attempts' => null, // Could be fetched from rule config if available
                 
-                // Status display info
-                'status_label' => $statusInfo['label'],
-                'status_class' => $statusInfo['class'],
+                // Status display info with colors
+                'status_label' => $statusInfo['status'],
+                'status_class' => $statusInfo['status_class'],
+                'global_status_label' => $statusInfo['global_status'],
+                'global_status_class' => $statusInfo['global_status_class'],
                 
                 // Type display info
                 'type_label' => $this->getTypeLabel($document->getType()),
@@ -1560,30 +1562,77 @@ $result = [];
         $status = $document->getStatus();
         $globalStatus = $document->getGlobalStatus();
         
-        // Map status to display information (you may need to adjust these based on your system)
-        $statusMapping = [
-            'S' => ['label' => 'Send ✓', 'class' => 'gblstatus_close'],
-            'T' => ['label' => 'Transform ✓', 'class' => 'gblstatus_transform'],
-            'E' => ['label' => 'Error ✗', 'class' => 'gblstatus_error'],
-            'C' => ['label' => 'Cancelled', 'class' => 'gblstatus_cancel'],
-            'N' => ['label' => 'New', 'class' => 'gblstatus_new'],
-        ];
+        // Get status info with color coding
+        $statusInfo = $this->getStatusDisplayInfo($status);
+        $globalStatusInfo = $this->getStatusDisplayInfo($globalStatus);
         
-        return $statusMapping[$status] ?? ['label' => $status, 'class' => ''];
+        return [
+            'status' => $statusInfo['status'],
+            'status_class' => $statusInfo['status_class'],
+            'global_status' => $globalStatusInfo['status'],
+            'global_status_class' => $globalStatusInfo['status_class']
+        ];
     }
 
     /**
-     * Helper method to get type display label
+     * Helper method to get status display info with proper color coding
      */
-    private function getTypeLabel($type): string {
-        $typeMapping = [
-            'C' => 'Create',
-            'U' => 'Update', 
-            'D' => 'Delete',
-            'S' => 'Search'
+    private function getStatusDisplayInfo($statusValue): array {
+        // Normalize status value for comparison
+        $statusLower = strtolower(trim($statusValue));
+        
+        // Yellow statuses: cancel, filter, no send, error expected
+        if (in_array($statusLower, ['c', 'cancel', 'cancelled', 'filter', 'no send', 'error expected', 'cancel !'])) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-yellow'
+            ];
+        }
+        
+        // Green statuses: send, sent, success
+        if (in_array($statusLower, ['s', 'send', 'sent', 'success', 'send ✓'])) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-green'
+            ];
+        }
+        
+        // Red statuses: error, failed, ko, predecessor_ko
+        if (in_array($statusLower, ['e', 'error', 'failed', 'ko', 'predecessor_ko', 'error ✗']) || 
+            strpos($statusLower, 'error') !== false || 
+            strpos($statusLower, 'ko') !== false ||
+            strpos($statusLower, 'fail') !== false) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-red'
+            ];
+        }
+        
+        // Blue statuses: all others (new, transform, open, etc.)
+        return [
+            'status' => $this->getStatusLabel($statusValue),
+            'status_class' => 'status-blue'
+        ];
+    }
+
+    /**
+     * Helper method to get human-readable status labels
+     */
+    private function getStatusLabel($statusValue): string {
+        // Map common status codes to readable labels with icons
+        $statusLabels = [
+            'S' => 'Send ✓',
+            'C' => 'Cancel !',
+            'E' => 'Error ✗',
+            'T' => 'Transform ✓',
+            'N' => 'New',
+            'O' => 'Open',
+            'Error' => 'Error ✗',
+            'Open' => 'Open',
+            'Close' => 'Close ✓'
         ];
         
-        return $typeMapping[$type] ?? $type;
+        return $statusLabels[$statusValue] ?? $statusValue;
     }
 
     /**
@@ -1599,5 +1648,25 @@ $result = [];
         }
         
         return null;
+    }
+
+    /**
+     * Helper method to get type label
+     */
+    private function getTypeLabel($type): string {
+        // Map common type codes to readable labels with icons
+        $typeLabels = [
+            'S' => 'Send',
+            'C' => 'Cancel',
+            'E' => 'Error',
+            'T' => 'Transform',
+            'N' => 'New',
+            'O' => 'Open',
+            'Error' => 'Error',
+            'Open' => 'Open',
+            'Close' => 'Close'
+        ];
+        
+        return $typeLabels[$type] ?? $type;
     }
 }
