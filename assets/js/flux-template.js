@@ -1,4 +1,5 @@
 import { FluxDataSections } from './flux-data-sections.js';
+import { getRuleName } from './flux-data-extractor.js';
 
 export class FluxTemplate {
     static generateHTML() {
@@ -10,6 +11,20 @@ export class FluxTemplate {
         const fullpathSource = `${path_img_modal}${solutionSource}`;
         const fullpathTarget = `${path_img_modal}${solutionTarget}`;
         const fullpathHistory = `${path_img_modal}${solutionHistory}`;
+
+        // the url is like http://localhost/myddleware_NORMAL/public/rule/flux/modern/6863a07946e8b9.38306852
+        // we need to get 6863a07946e8b9.3830685
+        let documentId = window.location.pathname.split('/').pop();
+
+        // get the rulename using the function from the flux-data-extractor.js
+        console.log('we are about to get the rule name');
+        const ruleName = getRuleName(documentId);
+        // console error if we could not get the rule name
+        if (!ruleName) {
+            console.error('Could not get the rule name');
+        } else {
+            console.log('Rule name: ' + ruleName);
+        }
 
         return `
             <div class="flex-row" id="flux-button-container">
@@ -33,7 +48,7 @@ export class FluxTemplate {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><a href="#" style="color: #0F66A9; font-weight: bold; text-decoration: none;">Moodle Users to contacts</a></td>
+                            <td><a href="#" style="color: #0F66A9; font-weight: bold; text-decoration: none;">${ruleName}</a></td>
                             <td><span class="gblstatus_close">Send ✓</span></td>
                             <td>C</td>
                             <td>1</td>
