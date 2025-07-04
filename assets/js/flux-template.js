@@ -82,6 +82,9 @@ ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpath
                 FluxTemplate.updateDocumentType(extractDocumentType(data));
                 FluxTemplate.updateDocumentAttempts(extractDocumentAttempts(data));
                 FluxTemplate.updateDocumentDates(extractDocumentDates(data));
+                
+                // Update data sections with real data
+                FluxTemplate.updateDataSections(data);
             });
         }, 100);
 
@@ -203,6 +206,102 @@ ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpath
             if (element) {
                 element.textContent = 'Error loading data';
                 element.style.color = '#dc3545';
+            }
+        });
+    }
+
+    // ===== DATA SECTIONS UPDATE FUNCTIONS =====
+
+    /**
+     * Updates all data sections with real data from the API
+     * @param {Object} documentData - Complete document data from API
+     */
+    static updateDataSections(documentData) {
+        console.log('🔄 Updating all data sections with real data');
+        
+        try {
+            // Extract data for each section
+            const sourceData = FluxTemplate.extractSourceData(documentData);
+            const targetData = FluxTemplate.extractTargetData(documentData);
+            const historyData = FluxTemplate.extractHistoryData(documentData);
+            
+            // Import FluxDataSections dynamically if needed, or call directly
+            setTimeout(() => {
+                FluxDataSections.updateSourceData(sourceData);
+                FluxDataSections.updateTargetData(targetData);
+                FluxDataSections.updateHistoryData(historyData);
+            }, 50); // Small delay to ensure DOM sections are ready
+            
+            console.log('✅ All data sections update initiated');
+            
+        } catch (error) {
+            console.error('❌ Error updating data sections:', error);
+            FluxTemplate.showDataSectionErrors();
+        }
+    }
+
+    /**
+     * Extracts source data from document data
+     * @param {Object} documentData - Complete document data
+     * @returns {Object|null} Source data object
+     */
+    static extractSourceData(documentData) {
+        try {
+            const sourceData = documentData?.source_data;
+            console.log('📊 Extracted source data:', sourceData ? 'Available' : 'Not available');
+            return sourceData || null;
+        } catch (error) {
+            console.error('❌ Error extracting source data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Extracts target data from document data
+     * @param {Object} documentData - Complete document data
+     * @returns {Object|null} Target data object
+     */
+    static extractTargetData(documentData) {
+        try {
+            const targetData = documentData?.target_data;
+            console.log('🎯 Extracted target data:', targetData ? 'Available' : 'Not available');
+            return targetData || null;
+        } catch (error) {
+            console.error('❌ Error extracting target data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Extracts history data from document data
+     * @param {Object} documentData - Complete document data
+     * @returns {Object|null} History data object
+     */
+    static extractHistoryData(documentData) {
+        try {
+            const historyData = documentData?.history_data;
+            console.log('📜 Extracted history data:', historyData ? 'Available' : 'Not available');
+            return historyData || null;
+        } catch (error) {
+            console.error('❌ Error extracting history data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Shows error state for data sections
+     */
+    static showDataSectionErrors() {
+        const sectionIds = ['source-data-body', 'target-data-body', 'history-data-body'];
+        
+        sectionIds.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.innerHTML = `
+                    <div class="error-data-message">
+                        <p style="color: #dc3545;">⚠️ Error loading data</p>
+                    </div>
+                `;
             }
         });
     }
