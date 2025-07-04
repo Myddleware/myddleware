@@ -1730,7 +1730,7 @@ class DocumentManager
 								$ruleField['formula'] = str_replace($listFields, $fieldNameDyn, $ruleField['formula']);
 							}
                             if (array_key_exists($listFields, $source)) {
-                                $$fieldNameDyn = (!empty($source[$listFields]) ? $source[$listFields] : ''); // Dynamic variable (e.g $name = name)
+                                $$fieldNameDyn = (array_key_exists($listFields,$source) ? $source[$listFields] : ''); // Dynamic variable (e.g $name = name)
                             } else {
                                 // Erreur
                                 throw new \Exception('The field '.$listFields.' is unknow in the formula '.$ruleField['formula'].'. ');
@@ -1784,6 +1784,10 @@ class DocumentManager
                         $f = $this->changeFormula($f);
 						eval('$rFormula = '.$f.';'); // exec
 						if (isset($rFormula)) {
+							return $rFormula;	
+						}
+						// Second check in case isset returns false, we check the variable doesn't exist at all
+						if (array_key_exists('rFormula', get_defined_vars())) {
 							// Return result
 							return $rFormula;
 						} else {
