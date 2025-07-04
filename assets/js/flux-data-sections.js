@@ -175,7 +175,6 @@ export class FluxDataSections {
     static generateSingleField(fieldName, fieldValue, sectionType) {
         const sanitizedFieldName = this.sanitizeString(fieldName);
         const sanitizedFieldValue = this.sanitizeString(fieldValue);
-        const truncatedValue = this.truncateValue(sanitizedFieldValue);
         const fieldId = `field-${sectionType}-${this.generateFieldId(fieldName)}`;
 
         return `
@@ -185,10 +184,8 @@ export class FluxDataSections {
                 <div class="field-value" 
                      id="${fieldId}"
                      title="${sanitizedFieldValue}" 
-                     data-full-value="${sanitizedFieldValue}"
-                     data-truncated-value="${truncatedValue}">
-                    ${truncatedValue}
-                    ${this.shouldShowExpandIcon(sanitizedFieldValue, truncatedValue) ? this.generateExpandIcon() : ''}
+                     data-full-value="${sanitizedFieldValue}">
+                    ${sanitizedFieldValue}
                 </div>
             </div>
         `;
@@ -226,74 +223,27 @@ export class FluxDataSections {
     }
 
     /**
-     * Truncates long values for better display
-     * @param {string} value - Value to truncate
-     * @param {number} maxLength - Maximum length before truncation
-     * @returns {string} Truncated value
-     */
-    static truncateValue(value, maxLength = 100) {
-        if (!value || value.length <= maxLength) {
-            return value;
-        }
-        
-        return value.substring(0, maxLength) + '...';
-    }
-
-    /**
-     * Determines if expand icon should be shown
-     * @param {string} fullValue - Full value
-     * @param {string} truncatedValue - Truncated value
-     * @returns {boolean} True if expand icon should be shown
-     */
-    static shouldShowExpandIcon(fullValue, truncatedValue) {
-        return fullValue !== truncatedValue;
-    }
-
-    /**
-     * Generates expand/collapse icon HTML
-     * @returns {string} HTML for expand icon
-     */
-    static generateExpandIcon() {
-        return '<span class="field-edit-icon">✏️</span>';
-    }
-
-    /**
-     * Adds click handlers for field expansion
+     * Adds click handlers for field expansion - REMOVED: Using existing FluxFieldExpander system
      * @param {HTMLElement} sectionElement - Section container element
      */
     static addFieldClickHandlers(sectionElement) {
-        const fieldValues = sectionElement.querySelectorAll('.field-value');
-        
-        fieldValues.forEach(fieldElement => {
-            const expandIcon = fieldElement.querySelector('.field-edit-icon');
-            if (expandIcon) {
-                fieldElement.addEventListener('click', () => this.toggleFieldExpansion(fieldElement));
-                fieldElement.style.cursor = 'pointer';
-            }
-        });
+        // Notify the existing FluxFieldExpander system that new content is available
+        this.notifyFieldExpanderOfNewContent();
     }
 
     /**
-     * Toggles field expansion state
-     * @param {HTMLElement} fieldElement - Field element to toggle
+     * Notifies the existing FluxFieldExpander system that new content has been loaded
      */
-    static toggleFieldExpansion(fieldElement) {
-        try {
-            const fullValue = fieldElement.dataset.fullValue;
-            const truncatedValue = fieldElement.dataset.truncatedValue;
-            const isExpanded = fieldElement.classList.contains('expanded');
-            
-            if (isExpanded) {
-                fieldElement.innerHTML = truncatedValue + this.generateExpandIcon();
-                fieldElement.classList.remove('expanded');
-            } else {
-                fieldElement.innerHTML = fullValue + this.generateExpandIcon();
-                fieldElement.classList.add('expanded');
+    static notifyFieldExpanderOfNewContent() {
+        // Dispatch a custom event to let FluxFieldExpander know it should re-initialize
+        const event = new CustomEvent('fluxDataUpdated', {
+            detail: { 
+                source: 'FluxDataSections',
+                timestamp: new Date().toISOString()
             }
-            
-        } catch (error) {
-            console.error('❌ Error toggling field expansion:', error);
-        }
+        });
+        document.dispatchEvent(event);
+        console.log('📢 Notified FluxFieldExpander of new content');
     }
 
     /**
