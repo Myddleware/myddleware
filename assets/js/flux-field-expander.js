@@ -1,7 +1,7 @@
 export class FluxFieldExpander {
     static init() {
         console.log('🔧 FluxFieldExpander initializing...');
-        this.setupFieldValueClickHandlers();
+        this.setupFieldClickHandlers();
         this.createPencilIcons();
         this.setupDataUpdateListener();
     }
@@ -17,12 +17,62 @@ export class FluxFieldExpander {
         });
     }
 
-    static setupFieldValueClickHandlers() {
+    static setupFieldClickHandlers() {
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('field-value') && this.isInTargetData(e.target)) {
-                this.toggleFieldValueWithIcon(e.target);
+            // Handle clicks on both field labels and field values in ALL sections
+            if (e.target.classList.contains('field-label') || e.target.classList.contains('field-value')) {
+                this.handleFieldClick(e.target);
             }
         });
+    }
+
+    static handleFieldClick(element) {
+        // Always toggle the expansion persistence
+        this.toggleFieldExpansion(element);
+        
+        // Only show pencil icon for target field values (not labels)
+        if (element.classList.contains('field-value') && this.isInTargetData(element)) {
+            this.togglePencilIcon(element);
+        }
+    }
+
+    static toggleFieldExpansion(element) {
+        // Toggle the expanded class for persistence
+        element.classList.toggle('expanded');
+        
+        const isExpanded = element.classList.contains('expanded');
+        const elementType = element.classList.contains('field-label') ? 'label' : 'value';
+        const section = this.getDataSection(element);
+        
+        console.log(`📖 Field ${elementType} in ${section} section ${isExpanded ? 'expanded' : 'collapsed'}`);
+    }
+
+    static async togglePencilIcon(fieldValueElement) {
+        try {
+            const icon = fieldValueElement.querySelector('.field-edit-icon');
+            
+            if (!icon) {
+                console.warn('⚠️ No edit icon found for field value');
+                return;
+            }
+            
+            const isExpanded = fieldValueElement.classList.contains('expanded');
+            
+            if (isExpanded) {
+                await this.delay(200);
+                icon.classList.add('show');
+                icon.classList.remove('hide');
+                console.log('✏️ Pencil icon shown');
+            } else {
+                icon.classList.remove('show');
+                icon.classList.add('hide');
+                await this.delay(200);
+                setTimeout(() => icon.classList.remove('hide'), 400);
+                console.log('✏️ Pencil icon hidden');
+            }
+        } catch (error) {
+            console.error('❌ Error toggling pencil icon:', error);
+        }
     }
 
     static createPencilIcons() {
@@ -58,43 +108,14 @@ export class FluxFieldExpander {
         return element.closest('.target-data-content') !== null;
     }
 
-    static async toggleFieldValueWithIcon(fieldValueElement) {
-        try {
-            const icon = fieldValueElement.querySelector('.field-edit-icon');
-            
-            if (!icon) {
-                console.warn('⚠️ No edit icon found for field value');
-                return;
-            }
-            
-            const isExpanded = fieldValueElement.classList.contains('expanded');
-            
-            if (!isExpanded) {
-                fieldValueElement.classList.add('expanded');
-                await this.delay(200);
-                icon.classList.add('show');
-                icon.classList.remove('hide');
-
-                console.log('📖 Field expanded, icon class list:', icon.classList.toString());
-            } else {
-                icon.classList.remove('show');
-                icon.classList.add('hide');
-                await this.delay(200);
-                fieldValueElement.classList.remove('expanded');
-                setTimeout(() => icon.classList.remove('hide'), 400);
-
-                console.log('📕 Field collapsed, icon class list:', icon.classList.toString());
-            }
-        } catch (error) {
-            console.error('❌ Error toggling field value:', error);
-        }
+    static getDataSection(element) {
+        if (element.closest('.source-data-content')) return 'source';
+        if (element.closest('.target-data-content')) return 'target';
+        if (element.closest('.history-data-content')) return 'history';
+        return 'unknown';
     }
 
     static delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    static toggleFieldValue(fieldValueElement) {
-        fieldValueElement.classList.toggle('expanded');
     }
 }
