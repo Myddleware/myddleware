@@ -56,14 +56,6 @@
 								<strong>{{ 'rulegroup.create_by'| trans| upper }}</strong>
 								<div>{{ rulegroup.createdBy.username }}</div>
 							</div>
-							<div class="rulegroup-col mb-2">
-								<strong>{{ 'rulegroup.modified_by'| trans| upper }}</strong>
-								<div>{{ rulegroup.modifiedBy.username }}</div>
-							</div>
-						</div>
-						<div class="rulegroup-row mb-2">
-							<div class="rulegroup-col mb-2">
-							</div>
 						</div>
 						<div class="rulegroup-row mb-2">
 							<div class="rulegroup-col mb-2">
@@ -72,8 +64,15 @@
 							</div>
 						</div>
 
-						<div class="card m-4">
-							<div class="card-header">
+					
+				</div>
+
+				
+
+					</div>
+				</div>
+	<div class="card rulegroup-card-table">
+							<div class="card-header rulegroup-card-header-table">
 								<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#rules-content" aria-expanded="true" aria-controls="rules-content">
 									<i class="fa fa-minus"></i>
 								</button>
@@ -139,13 +138,6 @@
 						<div class="card m-4">
 						</div>
 					</div>
-				</div>
-
-				
-
-					</div>
-				</div>
-
 			{% else %}
 				<p class="display-6">{{ 'list_rulegroup.empty'|trans }}</p>
 			{% endif %}

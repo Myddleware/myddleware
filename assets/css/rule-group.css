@@ -1,5 +1,9 @@
 .rulegroup-details {
+    background-color: #fff;
     padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dee2e6;
 }
 
 .rulegroup-row {
@@ -57,4 +61,12 @@ a.btn-sm {
 .rulegroups-btn{
     text-align: center;
     padding-top: 20px;
+}
+
+.rulegroup-card-table{
+    margin: 100px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+.rulegroup-card-header-table{
+    background-color: white !important;
 }
