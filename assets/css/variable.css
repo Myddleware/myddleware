@@ -8,6 +8,7 @@
 
 .variable-details .card-header {
     font-weight: bold;
+    font-size: 20px;
 }
 
 .variable-details strong {
@@ -17,7 +18,8 @@
     text-transform: uppercase;
 }
 
-.variable-details .row {
+.variable-details .row {    
+    text-align: justify;
     padding-bottom: 10px;
     margin-bottom: 10px;
     border-bottom: 1px dashed #dee2e6;
