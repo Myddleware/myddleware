@@ -1,6 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'user_manager.list'|trans }}{% endblock %}
+{% block title %}
+	{{ parent() }}
+    {{ 'user_manager.list'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+	{{ 'user_manager.list'|trans }}
+{% endblock titlesm %}
 
 {% block body %}
 <div id="user-manager-wrapper" class="d-flex">
@@ -22,22 +29,15 @@
             </div>
         {% endfor %}
     	<div id="workflows">
-            <div class="link-help-view text-end mx-4">
-                <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=create-a-workflow">
-                    <i class="fa fa-info-circle" aria-hidden="true"></i>
-                    {{ 'rule.help' | trans }}
-                </a>
-            </div>
-
             <div>
-                <button class="btn btn-primary mt-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
+                <button class="btn btn-primary mt-4 mb-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
                     {{ 'user_manager.create'|trans }}
                 </button>
 
             </div>
         </div>
         <div id="user-manager-container">
-        <table class="table table-bordered table-hover text-center">
+        <table class="table table-bordered table-hover text-center rounded-table">
             <thead class="table-light">
                 <tr>
                     <th class="th-user-manager">{{ 'user_manager.table.username'|trans }}</th>

@@ -1206,7 +1206,7 @@ premium:
             benefit2: "Benefit 2 description"
             benefit3: "Benefit 3 description"
 user_manager:
-    list: User list
+    list: Users
     table:
         username: Username
         email: Email
