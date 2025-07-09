@@ -47,41 +47,43 @@
 				</a>
 			</div>
 		</div>
-		<div class="mb-3">
-			<div class="card-header mb-4 card-title-workflow">
-				{{ 'view_workflow.edit'| trans }}
-			</div>
-			<div class="row mb-4">
-				<div class="col-md-6">
-					{{ form_row(form.name) }}
+		<div class="workflow-details">
+			<div class="mb-3 workflow-details">
+				<div class="card-header mb-4 card-title-workflow">
+					{{ 'view_workflow.edit'| trans | upper }}
 				</div>
-				<div class="col-md-6">
-					{{ form_row(form.Rule) }}
-				</div>
-			</div>
-			<div class="row mb-4">
-				<div class="col-md-6">
-					{{ form_row(form.description) }}
-				</div>
-				<div class="col-md-6">
-					{{ form_row(form.order) }}
-				</div>
-				<div class="col-md-6">
-					{{ form_row(form.active) }}
-				</div>
-			</div>
-		</div>
-		<div>
-			{# <div class="card-header mt-4">
-						                 {{ 'view_workflow.conditions'| trans }}
-						            </div> #}
-			<div class="card-body m-4 conditions">
 				<div class="row mb-4">
-					{{ form_row(form.condition) }}
+					<div class="col-md-6">
+						{{ form_row(form.name) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.Rule) }}
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						{{ form_row(form.description) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.order) }}
+					</div>
+					<div class="col-md-6">
+						{{ form_row(form.active) }}
+					</div>
 				</div>
 			</div>
+			<div>
+				{# <div class="card-header mt-4">
+											{{ 'view_workflow.conditions'| trans }}
+										</div> #}
+				<div class="card-body m-4 conditions">
+					<div class="row mb-4">
+						{{ form_row(form.condition) }}
+					</div>
+				</div>
+			</div>
+			{{ form_end(form) }}
 		</div>
-		{{ form_end(form) }}
 	</div>
 
 {% endblock %}

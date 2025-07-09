@@ -67,54 +67,33 @@
                         </td>
                         <td>{{ user.timezone }}</td>
                  		<td class="CRUD-icons">
-                            {% if app.user.id == user.id %}
-                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
-                                        data-user-id="{{ user.id }}"
-                                        title="{{ 'edit'|trans }}">
-                                    <span class="btn-opt">
-                                        <i class="fa fa-pen" aria-hidden="true"></i>
-                                    </span>
-                                </button>
-                            {% elseif 'ROLE_SUPER_ADMIN' in app.user.roles %}
-                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
-                                        data-user-id="{{ user.id }}"
-                                        title="{{ 'edit'|trans }}">
-                                    <span class="btn-opt">
-                                        <i class="fa fa-pen" aria-hidden="true"></i>
-                                    </span>
-                                </button>
-                            {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
-                                <button class="btn btn-sm btn-outline-primary edit-user-btn"
-                                        data-user-id="{{ user.id }}"
-                                        title="{{ 'edit'|trans }}">
-                                    <span class="btn-opt">
-                                        <i class="fa fa-pen" aria-hidden="true"></i>
-                                    </span>
-                                </button>
-                            {% endif %}
+                            {% set can_edit = app.user.id == user.id
+                                or 'ROLE_SUPER_ADMIN' in app.user.roles
+                                or ('ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles) 
+                                %}
+                            <button class="btn btn-sm btn-outline-primary edit-user-btn {{ can_edit ? '' : 'disabled opacity-50' }}"
+                                    data-user-id="{{ user.id }}"
+                                    title="{{ 'edit'|trans }}"
+                                    {% if not can_edit %}disabled{% endif %}>
+                                <span class="btn-opt">
+                                    <i class="fa fa-pen" aria-hidden="true"></i>
+                                </span>
+                            </button>
+                            {% set can_delete = app.user.id != user.id and (
+                                'ROLE_SUPER_ADMIN' in app.user.roles or
+                                ('ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles)
+                            ) %}
 
-                            {% if app.user.id != user.id %}
-                                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
-                                    <a class="btn btn-sm btn-outline-danger"
-                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
-                                    title="{{ 'delete'|trans }}"
-                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
-                                        <span class="btn-opt">
-                                            <i class="fa fa-trash" aria-hidden="true"></i>
-                                        </span>
-                                    </a>
-                                {% elseif 'ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles %}
-                                    <a class="btn btn-sm btn-outline-danger"
-                                    href="{{ path('user_manager_delete', {'id': user.id}) }}"
-                                    title="{{ 'delete'|trans }}"
-                                    onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');">
-                                        <span class="btn-opt">
-                                            <i class="fa fa-trash" aria-hidden="true"></i>
-                                        </span>
-                                    </a>
-                                {% endif %}
-                            {% endif %}
+                            <a class="btn btn-sm btn-outline-danger {{ can_delete ? '' : 'disabled opacity-50' }}"
+                            href="{{ can_delete ? path('user_manager_delete', {'id': user.id}) : '#' }}"
+                            title="{{ 'delete'|trans }}"
+                            {% if not can_delete %}onclick="return false;"{% else %}onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"{% endif %}>
+                                <span class="btn-opt">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </span>
+                            </a>
                         </td>
+
                     </tr>
                 {% else %}
                     <tr>

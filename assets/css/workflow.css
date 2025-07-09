@@ -16,6 +16,11 @@
 
 .workflow-details {
     margin-top: 20px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .05);
+    padding: 20px;
 }
 
 .workflow-row {
@@ -53,6 +58,7 @@
 .card-title-workflow{
     font-size: x-large;
     font-weight: 700;
+    text-align: center;
 }
 
 .text-left{

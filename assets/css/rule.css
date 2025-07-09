@@ -114,7 +114,7 @@
 }
 
 #rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th {
-	background: #F2F2F2;
+	background: #ffffff;
 	height: 45px;
 	padding: 10px;
 	text-align: center;
