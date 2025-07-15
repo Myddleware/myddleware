@@ -479,9 +479,9 @@
 color: #03c4eb!important; 
 }
 
-#ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
+/* #ruleInfoTabs, #ruleConfigTabs, #connectorCreateTabs, #connectorTabs {
 	box-shadow: rgb(248 249 249) 0px -5px 9px -4px inset, rgba(255, 255, 256, 14.5) 20px 1px 2px 0px inset;
-}
+} */
 
 .fancybox {
 	text-decoration: none!important;
@@ -732,4 +732,62 @@ td .link-fit-rule-name {
 #rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
 #rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
     inset: 0px !important;
+}
+
+
+
+.myd-tab-wrapper {
+    /* display: flex; */
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+#myd-rule-tabs {
+    scroll-behavior: smooth;
+    margin: 0;
+    padding: 0 40px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    flex-grow: 1;
+}
+
+.myd-tab-scroll {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ffffff;
+    border: none;
+    font-size: 20px;
+    z-index: 20;
+    padding: 5px 10px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    transition: opacity 0.2s ease;
+}
+
+.myd-tab-scroll-left {
+    left: 0;
+}
+
+.myd-tab-scroll-right {
+    right: 0;
+}
+
+.myd-tab-scroll.d-none {
+    display: none !important;
+}
+
+#myd-rule-tabs .nav-link {
+    transition: transform 0.2s ease, font-size 0.2s ease;
+}
+
+#myd-rule-tabs .nav-link:hover {
+    transform: scale(1.1);
+}
+
+#myd-rule-tabs .nav-link {
+    transition: transform 0.2s ease;
+    display: inline-block;
 }
