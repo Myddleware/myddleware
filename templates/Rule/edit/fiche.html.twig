@@ -20,61 +20,71 @@
 
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************************/ #} 
+*********************************************************************************/ #}
 
 {% extends 'base.html.twig' %}
-{% block title %}{{parent()}} | {{'title.rule.view'|trans}} {{rule.getName}}{% endblock %}
+{% block title %}
+	{{parent()}}
+	|
+	{{'title.rule.view'|trans}}
+	{{rule.getName}}
+{% endblock %}
 {% block titlesm %}
-	<a href="{{ path('regle_list') }}">{{'breadcrumb.rule_list'|trans}}</a> 
+	<a href="{{ path('regle_list') }}">{{'breadcrumb.rule_list'|trans}}</a>
 	<i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation"></i>
 
-	{{'title.rule.view'|trans}} {{rule.getName}} 
-{% endblock titlesm %}  
+	{{'title.rule.view'|trans}}
+	{{rule.getName}}
+{% endblock titlesm %}
 {% block body %}
 	<div id="rule">
-<div class="myd-tab-wrapper position-relative">
-    <button class="myd-tab-scroll myd-tab-scroll-left d-none" aria-label="Scroll left">
-        <i class="fa fa-chevron-left"></i>
-    </button>
+		<div class="myd-tab-wrapper position-relative">
+			<button class="myd-tab-scroll myd-tab-scroll-left" aria-label="Scroll left">
+				<i class="fa-solid fa-chevron-left"></i>
+			</button>
 			<ul class="nav justify-content-center" id="myd-rule-tabs" role="tablist">
 				{% include "Rule/edit/onglets/index.html.twig" %}
 			</ul>
-		<div id="ruleInfoTabContent" class="tab-content my-4">
-			<div id="infos" class="tab-pane fade show active mx-4 pb-4" role="tabpanel" aria-labelledby="infos-tab">
-				{# ------------- INFOS ------------- #}
-				{% include "Rule/edit/onglets/infos.html.twig" %}
+			<button class="myd-tab-scroll myd-tab-scroll-right" aria-label="Scroll right">
+				<i class="fa-solid fa-chevron-right"></i>
+			</button>
+			<div id="ruleInfoTabContent" class="tab-content my-4">
+				<div
+					id="infos" class="tab-pane fade show active mx-4 pb-4" role="tabpanel" aria-labelledby="infos-tab">
+					{# ------------- INFOS ------------- #}
+					{% include "Rule/edit/onglets/infos.html.twig" %}
+				</div>
+				<div
+					id="mapping" class="tab-pane fade pb-4" role="tabpanel" aria-labelledby="mapping-tab">
+					{# ------------- MAPPING ------------- #}
+					{% include "Rule/edit/onglets/mapping.html.twig" %}
+				</div>
+				<div
+					id="relation" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="relation-tab">
+					{# ------------- RELATIONS ------------- #}
+					{% include "Rule/edit/onglets/relation.html.twig" %}
+				</div>
+				<div
+					id="filter" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="filter-tab">
+					{# ------------- FILTER ------------- #}
+					{% include "Rule/edit/onglets/filter.html.twig" %}
+				</div>
+				<div
+					id="params" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="params-tab">
+					{# ------------- PARAMS ------------- #}
+					{% include "Rule/edit/onglets/params.html.twig" %}
+				</div>
 			</div>
-			<div id="mapping" class="tab-pane fade pb-4" role="tabpanel" aria-labelledby="mapping-tab">
-				{# ------------- MAPPING ------------- #}
-				{% include "Rule/edit/onglets/mapping.html.twig" %}
-			</div>
-			<div id="relation" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="relation-tab">
-				{# ------------- RELATIONS ------------- #}
-				{% include "Rule/edit/onglets/relation.html.twig" %}
-			</div>
-			<div id="filter" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="filter-tab">
-				{# ------------- FILTER ------------- #}
-				{% include "Rule/edit/onglets/filter.html.twig" %}
-			</div>						
-			<div id="params" class="tab-pane fade mx-4 pb-4" role="tabpanel" aria-labelledby="params-tab">
-				{# ------------- PARAMS ------------- #}
-				{% include "Rule/edit/onglets/params.html.twig" %}
-			</div>
-
-    <button class="myd-tab-scroll myd-tab-scroll-right d-none" aria-label="Scroll right">
-        <i class="fa fa-chevron-right"></i>
-    </button>
-</div>
-	</div>
-    <script type="text/javascript">   	
-	var path_img = "{{ asset('build/images/') }}";
-	var path_fiche_update = "{{ path('regle_update',{'id' : rule.getId }) }}";
-	var path_fiche_update_params = "{{ path('path_fiche_params_update',{'id' : rule.getId }) }}";
-	var path_fiche_update_simulate = "{{ path('path_fiche_params_simulate',{'id' : rule.getId }) }}";
-	var onglets = {
-		active: 0
-	};
-	var path_rule_exec = "{{ path('regle_exec',{'id' : rule.GetId }) }}";
-    </script>
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-{% endblock %}
+		</div>
+		<script type="text/javascript">
+			var path_img = "{{ asset('build/images/') }}";
+var path_fiche_update = "{{ path('regle_update',{'id' : rule.getId }) }}";
+var path_fiche_update_params = "{{ path('path_fiche_params_update',{'id' : rule.getId }) }}";
+var path_fiche_update_simulate = "{{ path('path_fiche_params_simulate',{'id' : rule.getId }) }}";
+var onglets = {
+active: 0
+};
+var path_rule_exec = "{{ path('regle_exec',{'id' : rule.GetId }) }}";
+		</script>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	{% endblock %}

@@ -2,24 +2,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const tabContainer = document.getElementById('myd-rule-tabs');
     const btnLeft = document.querySelector('.myd-tab-scroll-left');
     const btnRight = document.querySelector('.myd-tab-scroll-right');
+    const tabs = tabContainer.querySelectorAll('.nav-link');
 
-    function updateTabArrows() {
-        const scrollLeft = tabContainer.scrollLeft;
-        const maxScroll = tabContainer.scrollWidth - tabContainer.clientWidth;
+    function getActiveTabIndex() {
+        return Array.from(tabs).findIndex(tab => tab.classList.contains('active'));
+    }
 
-        btnLeft.classList.toggle('d-none', scrollLeft <= 0);
-        btnRight.classList.toggle('d-none', scrollLeft >= maxScroll - 1);
+    function activateTab(index) {
+        if (index >= 0 && index < tabs.length) {
+            tabs[index].click(); // simulate Bootstrap tab click
+        }
     }
 
     btnLeft.addEventListener('click', () => {
-        tabContainer.scrollBy({ left: -150, behavior: 'smooth' });
+        const current = getActiveTabIndex();
+        if (current > 0) {
+            activateTab(current - 1);
+        }
     });
 
     btnRight.addEventListener('click', () => {
-        tabContainer.scrollBy({ left: 150, behavior: 'smooth' });
+        const current = getActiveTabIndex();
+        if (current < tabs.length - 1) {
+            activateTab(current + 1);
+        }
     });
-
-    tabContainer.addEventListener('scroll', updateTabArrows);
-    window.addEventListener('resize', updateTabArrows);
-    updateTabArrows();
 });

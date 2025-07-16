@@ -191,7 +191,7 @@ view_rule:
         params: Parameters 
         filter: Filters
     title:
-        rule: Rule
+        rule: Details
         connector: Connectors
         source: Source
         target: Target
