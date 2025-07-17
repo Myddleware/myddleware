@@ -349,7 +349,7 @@ class moodle extends solution
                     case 'manual_unenrol_users':
 						$enrolments = [$obj];
                         $params = ['enrolments' => $enrolments];
-                        $functionname = 'manual_unenrol_users';
+                        $functionname = 'enrol_manual_unenrol_users';
                         break;
                     case 'notes':
                         $notes = [$obj];
@@ -391,7 +391,7 @@ class moodle extends solution
                 // Réponse standard pour les modules avec retours
                 if (
                         !empty($xml->MULTIPLE->SINGLE->KEY->VALUE)
-                    && !in_array($param['module'], ['manual_enrol_users', 'group_members'])
+                    && !in_array($param['module'], ['manual_enrol_users', 'manual_unenrol_users', 'group_members'])
                 ) {
                     $result[$idDoc] = [
                         'id' => $xml->MULTIPLE->SINGLE->KEY->VALUE,
@@ -418,7 +418,7 @@ class moodle extends solution
                     throw new \Exception($xml->ERRORCODE.' : '.$xml->MESSAGE);
                 }
                 // Si pas d'erreur et module sans retour alors on génère l'id
-                elseif (in_array($param['module'], ['manual_enrol_users'])) {
+                elseif (in_array($param['module'], ['manual_enrol_users', 'manual_unenrol_users'])) {
                     $result[$idDoc] = [
                         'id' => $obj->courseid.'_'.$obj->userid.'_'.$obj->roleid,
                         'error' => false,
