@@ -721,6 +721,7 @@ class DocumentManager
 								AND document.source_id = :source_id 
 								AND document.date_created < :date_created  
 								AND document.deleted = 0 
+								AND document.type <> 'D' 
 								AND document.global_status IN ('Error','Open')
 							LIMIT 1	
 							";
