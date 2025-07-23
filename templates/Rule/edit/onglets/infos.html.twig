@@ -29,7 +29,7 @@
 		</a>
 	</div>
 
-	<div class="block-btn-infos mb-4 d-flex justify-content-around">
+	<div class="block-btn-infos mb-4 d-flex flex-wrap justify-content-center gap-2">
 		<a class="btn_action_loading btn btn-outline-success mb-2" href="{{ path('regle_exec', {'id': rule.GetId }) }}" title="" role="button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewbox="0 0 16 16">
 				<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
@@ -60,10 +60,10 @@
 		</a>
 	</div>
 
-	<div class="container">
-		<div class="row edit-rule-overview">
+	<div class="container-fluid px-4">
+		<div class="custom-row gx-4 gy-4 rule-panel-wrapper">
 			<div
-				class="col">
+				class="custom-col">
 				{# TABLE RULE #}
 				<div class="table table-hover align-middle shadow-table">
 					<table id="tab_rule" class="table table-rule-view">
@@ -172,15 +172,15 @@
 				</div>
 			</div>
 			{# TABLE CONNECTOR #}
-			<div class="col">
+			<div class="custom-col">
 				<table id="tab_connector" class="table table-rule-view">
 					<tr>
 						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="4">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-							<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
-							<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
-						</svg>
-						{{ 'view_rule.title.connector' | trans }}
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewbox="0 0 16 16">
+								<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+								<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+							</svg>
+							{{ 'view_rule.title.connector' | trans }}
 						</th>
 					</tr>
 					<tr>
@@ -217,7 +217,7 @@
 							{{ rule.getModuleTarget }}
 						</td>
 					</tr>
-					
+
 					<tr>
 						<td class="value link-rule-detail">
 							<i class="fa fa-arrow-right" aria-hidden="true"></i>
@@ -232,11 +232,9 @@
 				</table>
 			</div>
 		</div>
-	</div>
-	{# TABLE DESCRIPTION #}
-	<div class="container mt-4">
-		<div class="row edit-rule-overview">
-			<div class="col">
+		{# TABLE DESCRIPTION #}
+		<div class="custom-row gx-4 gy-4 rule-panel-wrapper mt-3">
+			<div class="custom-col">
 				<table id="tab_rule_params" class="table table-rule-view">
 					<thead class="thead-light">
 						<tr>
@@ -271,7 +269,7 @@
 			</div>
 
 			{# TABLE WORKFLOW #}
-			<div class="col">
+			<div class="custom-col">
 				<table id="tab_workflow" class="table table-rule-view">
 					<tr>
 						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="4">{{ 'view_rule.infos.workflows' | trans }}</th>

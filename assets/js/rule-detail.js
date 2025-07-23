@@ -28,3 +28,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+	const tabWrapper = document.getElementById('myd-rule-tabs');
+	const leftArrow = document.querySelector('.myd-tab-scroll-left');
+	const rightArrow = document.querySelector('.myd-tab-scroll-right');
+
+	if (leftArrow && rightArrow && tabWrapper) {
+		leftArrow.addEventListener('click', () => {
+			tabWrapper.scrollBy({ left: -200, behavior: 'smooth' });
+		});
+
+		rightArrow.addEventListener('click', () => {
+			tabWrapper.scrollBy({ left: 200, behavior: 'smooth' });
+		});
+	}
+});
