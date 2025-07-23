@@ -923,3 +923,14 @@ table.table-rule-view tr:first-child th {
   min-width: 300px;
   box-sizing: border-box;
 }
+
+.rule-details-buttons {
+  margin-top: 1.5rem;
+  display: inline-block !important;
+  margin-left: 200px;
+}
+
+.rule-connectors-buttons {
+  display: inline-block !important;
+  margin-left: 280px;
+}
