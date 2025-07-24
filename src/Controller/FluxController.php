@@ -119,7 +119,7 @@ class FluxController extends AbstractController
         if ($this->getUser()->isAdmin()) {
             $list_fields_sql =
                 [
-					'id' => $id
+					'id' => $id,
 					'deleted' => 0,
 				];
         } else {
