@@ -185,8 +185,8 @@ view_rule:
         displayflux: Display the documents
         new_rule: Create a new rule
     tabs:
-        info: Information
-        mapping: Mapping of the fields
+        info: Overview
+        mapping: Field Mapping
         relation: Relations
         params: Parameters 
         filter: Filters
@@ -212,6 +212,7 @@ view_rule:
         status: Status
         workflows: Workflows
         workflow_create: Create a new workflow
+        variables: Variables
     connector:
         title: Connector
         solution: Solution

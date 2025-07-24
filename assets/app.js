@@ -40,7 +40,6 @@ require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/historique.js')
 require('./js/mappingRule.js')
-require('./js/rule-detail.js')
 
 
 if (window.location.href.includes('rule/document/list')) {
@@ -68,6 +67,7 @@ if (window.location.href.includes('workflow/list')) {
 }
 
 if (window.location.href.includes('rule/view')) {
+    require('./js/rule-detail.js')
     require('./js/workflow-toggle-list.js')
 }
 

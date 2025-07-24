@@ -160,14 +160,40 @@
 						{% endif %}
 						{% if params_suite.customParams is defined and params_suite.customParams is not empty %}
 							{% for r in params_suite.customParams %}
-								<tr id="deletion-rule-tr-{{ r.name }}">
-									<td id="deletion-rule-left-{{ r.name }}" class="title rounded-table-down-left">{{ r.name }}</td>
-									<td id="deletion-rule-right-{{ r.name }}" class="value rounded-table-down-right">
-										<span class="label label-default">{{ r.value }}</span>
-									</td>
-								</tr>
+								{% if r.name != 'description' %}
+									<tr id="deletion-rule-tr-{{ r.name }}">
+										<td id="deletion-rule-left-{{ r.name }}" class="title rounded-table-down-left">{{ r.name }}</td>
+										<td id="deletion-rule-right-{{ r.name }}" class="value rounded-table-down-right">
+											<span class="label label-default">{{ r.value }}</span>
+										</td>
+									</tr>
+								{% endif %}
 							{% endfor %}
 						{% endif %}
+
+						{% for param in rule.params %}
+							{% if param.name == 'description' %}
+								<tr id="deletion-rule-tr-description">
+									<td id="deletion-rule-left-description" class="value rounded-table-down-left ">
+										<div class="value">{{ 'solution.params.description' | trans }}</div>
+									</td>
+									<td id="deletion-rule-right-description" class="rounded-table-down-right">
+										<div class="description-field">
+											<div id="description-field-value" class="value">{{ param.value }}</div>
+										</div>
+										<button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
+										<form class="edit-form edit-form-description-close" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
+											<button type="button" class="close-button-description">
+												<i class="fa fa-times close-icon" aria-hidden="true"></i>
+											</button>
+											<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
+											<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+											<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
+										</form>
+									</td>
+								</tr>
+							{% endif %}
+						{% endfor %}
 					</table>
 				</div>
 			</div>
@@ -232,41 +258,54 @@
 				</table>
 			</div>
 		</div>
-		{# TABLE DESCRIPTION #}
+		{# TABLE VARIABLE #}
 		<div class="custom-row gx-4 gy-4 rule-panel-wrapper mt-3">
 			<div class="custom-col">
-				<table id="tab_rule_params" class="table table-rule-view">
-					<thead class="thead-light">
-						<tr>
-							<th class="rounded-table-up-left rounded-table-up-right" colspan="4">{{ 'solution.params.description' | trans }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for param in rule.params %}
-							{% if param.name == 'description' %}
-								<tr id="deletion-rule-tr-description">
-									<td id="deletion-rule-left-description" class="value rounded-table-down-left ">
-										<div class="description-field">
-											<div id="description-field-value" class="value">{{ param.value }}</div>
-										</div>
-									</td>
-									<td id="deletion-rule-right-description" class="rounded-table-down-right">
-										<button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
-										<form class="edit-form edit-form-description-close" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
-											<button type="button" class="close-button-description">
-												<i class="fa fa-times close-icon" aria-hidden="true"></i>
-											</button>
-											<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
-											<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-											<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
-										</form>
-									</td>
-								</tr>
+				<table id="tab_variables" class="table table-rule-view">
+					<tr>
+						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="3">
+							{{ 'view_rule.infos.variables' | trans }}
+						</th>
+					</tr>
+					<tr>
+						<td class="value inner-table-workflow" colspan="3">
+							{% if variables is defined and variables|length > 0 %}
+								<table class="table table-rule-view">
+									<thead class="thead-light">
+										<tr>
+											<th class="text-left">{{ 'Nom' }}</th>
+											<th class="text-left">{{ 'Valeur' }}</th>
+											<th class="text-left">{{ 'Action' }}</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for variable in variables %}
+											<tr data-toggle="tooltip" title="{{ variable.description }}">
+												<td class="title rounded-table-down-left">{{ variable.name }}</td>
+												<td class="value">
+													<span id="var-value-{{ variable.id }}">{{ variable.value }}</span>
+													<input type="text" class="form-control d-none" id="input-var-{{ variable.id }}" value="{{ variable.value }}">
+												</td>
+												<td class="value rounded-table-down-right">
+													<button class="btn btn-sm btn-outline-secondary edit-var-btn" data-id="{{ variable.id }}">
+														<i class="fa fa-pencil-alt"></i>
+													</button>
+													<button class="btn btn-sm btn-success d-none save-var-btn" data-id="{{ variable.id }}">
+														<i class="fa fa-check"></i>
+													</button>
+												</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							{% else %}
+								<span class="p-3">No variable</span>
 							{% endif %}
-						{% endfor %}
-					</tbody>
+						</td>
+					</tr>
 				</table>
 			</div>
+
 
 			{# TABLE WORKFLOW #}
 			<div class="custom-col">
@@ -308,7 +347,7 @@
 									</tbody>
 								</table>
 							{% else %}
-								<span>No workflow</span>
+								<span class="p-3">No workflow</span>
 							{% endif %}
 							<div class="workflow-btn-rule-info">
 								<a class="btn btn-primary mt-2 mb-2" href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
