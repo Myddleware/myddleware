@@ -67,6 +67,7 @@ if (window.location.href.includes('workflow/list')) {
 }
 
 if (window.location.href.includes('rule/view')) {
+    require('./js/rule-detail.js')
     require('./js/workflow-toggle-list.js')
 }
 

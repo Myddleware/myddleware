@@ -190,7 +190,7 @@ view_rule:
         params: Paramètres 
         filter: Filtres
     title:
-        rule: Règle
+        rule: Détails
         connector: Connecteurs
         source: Source
         target: Cible
@@ -211,6 +211,7 @@ view_rule:
         status: Statut
         workflows: Workflows
         workflow_create: Créer un nouveau workflow
+        variables: Variables
     connector:
         title: Connecteur
         solution: Solution

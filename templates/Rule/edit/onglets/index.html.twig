@@ -22,30 +22,30 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg active btn-lg fw-bold py-4" id="info-tab" data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab" aria-controls="infos" aria-selected="true">
+<li class="nav-item px-4" role="presentation">
+    <button class="nav-link lh-lg active fw-bold" id="info-tab" data-bs-toggle="tab" data-bs-target="#infos" type="button" role="tab" aria-controls="infos" aria-selected="true">
         {{'view_rule.tabs.info'|trans}}
     </button>
 </li>
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg btn-lg fw-bold py-4" id="mapping-tab" data-bs-toggle="tab" data-bs-target="#mapping" type="button" role="tab" aria-controls="mapping" aria-selected="false">
+<li class="nav-item px-4" role="presentation">
+    <button class="nav-link lh-lg fw-bold" id="mapping-tab" data-bs-toggle="tab" data-bs-target="#mapping" type="button" role="tab" aria-controls="mapping" aria-selected="false">
         {{'view_rule.tabs.mapping'|trans}}
     </button>
 </li>
 {% if rule.relationsShip|length > 0 %}
-    <li class="nav-item d-grid flex-fill" role="presentation">
-        <button class="nav-link lh-lg btn-lg fw-bold py-4" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation" aria-selected="false">
+    <li class="nav-item px-4" role="presentation">
+        <button class="nav-link lh-lg fw-bold" id="relation-tab" data-bs-toggle="tab" data-bs-target="#relation" type="button" role="tab" aria-controls="relation" aria-selected="false">
             {{'view_rule.tabs.relation'|trans}}
         </button>
     </li>
 {% endif %}
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg btn-lg fw-bold py-4 " id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="false">
+<li class="nav-item px-4" role="presentation">
+    <button class="nav-link lh-lg fw-bold" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="false">
     {{'view_rule.tabs.filter'|trans}}
     </button>
 </li>
-<li class="nav-item d-grid flex-fill" role="presentation">
-    <button class="nav-link lh-lg btn-lg fw-bold py-4" id="params-tab" data-bs-toggle="tab" data-bs-target="#params" type="button" role="tab" aria-controls="params" aria-selected="false">
+<li class="nav-item px-4" role="presentation">
+    <button class="nav-link lh-lg fw-bold" id="params-tab" data-bs-toggle="tab" data-bs-target="#params" type="button" role="tab" aria-controls="params" aria-selected="false">
         {{'view_rule.tabs.params'|trans}}
     </button>
 </li>
