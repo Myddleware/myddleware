@@ -770,4 +770,26 @@ class JobSchedulerController extends AbstractController
         // ... handle other commands as before ...
     }
 
+    /**
+     * @Route("/crontab/results", name="crontab_results_partial")
+     */
+    public function loadResults(Request $request): Response
+    {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium_list');
+        }
+
+        $query = $this->entityManager->createQuery(
+            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
+        );
+
+        $adapter = new QueryAdapter($query);
+        $pager = new Pagerfanta($adapter);
+        $pager->setMaxPerPage(25);
+        $pager->setCurrentPage($request->query->getInt('page', 1));
+
+        return $this->render('JobScheduler/_crontab_results_table.html.twig', [
+            'pager' => $pager,
+        ]);
+    }
 }

@@ -79,4 +79,33 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+    const btn = document.getElementById('load-crontab-result');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            const container = document.getElementById('cronjobresult_table');
+            container.innerHTML = '...';
+
+            const url = this.dataset.url;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    container.innerHTML = 'Error.';
+                    console.error(err);
+                });
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (e.target && (e.target.id === 'close-crontab-result' || e.target.closest('#close-crontab-result'))) {
+            const resultContainer = document.getElementById('crontab-results-container');
+            if (resultContainer) {
+                resultContainer.innerHTML = '';
+            }
+        }
+    });
+
 });
