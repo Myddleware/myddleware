@@ -153,7 +153,7 @@ class RuleRepository extends ServiceEntityRepository
             ->join('r.documents', 'document')
             ->andWhere('document.globalStatus IN (:status)')
             ->andWhere('document.deleted = 0')
-            ->setParameter('status', ['Open', 'Error'])
+            ->setParameter('status', ['Error'])
             ->groupBy('r.id')
             ->having('cpt > 0')
             ->orderBy('cpt', 'DESC');

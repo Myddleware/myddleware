@@ -138,7 +138,7 @@ class FluxController extends AbstractController
         if ($rule) {
             $this->sessionService->setFluxFilterRuleName($rule[0]->getName());
             $this->sessionService->setFluxFilterGlobalStatus('Error');
-            $this->sessionService->setFluxFilterWhere(['rule' => $rule[0]->getName(), 'gblstatus' => ['Error', 'Open']]);
+            $this->sessionService->setFluxFilterWhere(['rule' => $rule[0]->getName(), 'gblstatus' => ['Error']]);
         } else {
             $this->sessionService->removeFluxFilter();
         }
