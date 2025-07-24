@@ -1132,6 +1132,7 @@ install:
 crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
+    see_results: Résultats Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
     command: Commande
     period: Périodes
@@ -1156,7 +1157,15 @@ crontab:
     massenable: Activer toutes les tâches
     enableCron: On
     disableCron: Off
-    title_cronjobresult: Résultats Crontab
+    title_cronjobresult: Résultats Crontab   
+    column_id: Identifiant
+    column_cronjob_id: Tâche Cron
+    column_run_at: Exécuté le
+    column_run_time: Durée d'exécution
+    column_status_code: Code de statut
+    column_output: Sortie
+    column_created_at: Créé le
+    column_updated_at: Mis à jour le
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
     help: > 

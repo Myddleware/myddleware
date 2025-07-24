@@ -1161,6 +1161,15 @@ crontab:
     enableCron: On
     disableCron: Off
     title_cronjobresult: Crontab results
+    column_id: ID
+    column_cronjob_id: Cronjob ID
+    column_run_at: Run At
+    column_run_time: Runtime
+    column_status_code: Status Code
+    column_output: Output
+    column_created_at: Created At
+    column_updated_at: Updated At   
+    see_results: Show Crontab Results
     period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
     max_instance_help: A maximum instance limit for new tasks
     help:  > 
