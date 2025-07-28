@@ -140,7 +140,6 @@
 
 		<div class="container-fluid p-3">
 			<div id="cronjobresult_table" class="">
-				{# <div class="navigation" id="workflows"> #}
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'jobscheduler_cron_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
 
