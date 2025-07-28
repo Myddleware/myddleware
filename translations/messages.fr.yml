@@ -1133,6 +1133,7 @@ crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
     see_results: Résultats Crontab
+    hide_results: Fermer Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
     command: Commande
     period: Périodes
