@@ -13,40 +13,39 @@
                 {% endfor %}
             </div>
         {% endif %}
+        <div class="workflow-details">
+            {{ form_start(form) }}
+            <div class="mb-3">
+                <div class="card-header mb-4 card-title-workflow">
+                    {{ 'view_workflow.create'| trans | upper }}
+                </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            {{ form_row(form.name) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.Rule) }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            {{ form_row(form.description) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.order) }}
+                        </div>
+                    </div>
+            </div>
         
-        {{ form_start(form) }}
-        <div class="mb-3">
-            <div class="card-header mb-4 card-title-workflow">
-                {{ 'view_workflow.create'| trans }}
+            <div class="mb-3">
+                <div class="card-body">
+                    <div class="row mb-4">
+                            {{ form_row(form.condition) }}
+                    </div>
+                </div>
             </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.name) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.Rule) }}
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        {{ form_row(form.description) }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form_row(form.order) }}
-                    </div>
-                </div>
-        </div>
+            {{ form_end(form) }}
         
-        <div class=" mb-3 ">
-            <div class="card-header mt-4">
-                 {{ 'view_workflow.conditions'| trans }}
-            </div>
-            <div class="card-body">
-                <div class="row mb-4">
-                        {{ form_row(form.condition) }}
-                </div>
-            </div>
         </div>
-        {{ form_end(form) }}
     </div>
 {% endblock %}
