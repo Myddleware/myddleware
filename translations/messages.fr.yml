@@ -169,6 +169,7 @@ behavior_filters:
     error_empty: Erreur si vide
             
 view_rule:
+    go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
         confirm_exec_all: Souhaitez-vous exécuter toutes les règles actives ?

@@ -170,6 +170,7 @@ behavior_filters:
     error_empty: Error if empty
 
 view_rule:
+    go_connector: Go to connector
     action:
         exec_all: Execute all active rules
         confirm_exec_all: Do you want to execute all active rules?

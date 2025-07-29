@@ -172,11 +172,20 @@ $('.edit-form').off('submit').on('submit', function (event) {
             ruleId: ruleId,
             description: newValue
         },
-        success: function (response) {
-            valueField.text(newValue);
-            valueField.css('visibility', 'visible');
-            editForm.hide();
-        },
+		success: function (response) {
+			valueField.text(newValue);
+			valueField.css('visibility', 'visible');
+			editForm.hide();
+			field.find('.description-field').show();
+			if (valueField[0].scrollHeight > valueField[0].clientHeight) {
+				$('#read-more-link').removeClass('d-none');
+			} else {
+				$('#read-more-link').addClass('d-none');
+			}
+			valueField.addClass('description-collapsed');
+			$('#read-more-link').text("Read all description");
+		},
+
         error: function (error) {
             console.log(error);
             alert("Une erreur s'est produite lors de la mise à jour.");
