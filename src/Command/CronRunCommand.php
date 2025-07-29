@@ -8,12 +8,12 @@ use function count;
 use DateTime;
 use Exception;
 use Doctrine\Persistence\ManagerRegistry;
-use Shapecode\Bundle\CronBundle\Command\BaseCommand;
+use Symfony\Component\Console\Command\Command;
 use Shapecode\Bundle\CronBundle\Console\Style\CronStyle;
 use Shapecode\Bundle\CronBundle\Entity\CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Shapecode\Bundle\CronBundle\Model\CronJobRunning;
-use Shapecode\Bundle\CronBundle\Service\CommandHelper;
+use Shapecode\Bundle\CronBundle\CronJob\CommandHelper;
 use function sleep;
 use function sprintf;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,7 +25,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 use App\Manager\ToolsManager;
 
-final class CronRunCommand extends BaseCommand
+final class CronRunCommand extends Command
 {
     private CommandHelper $commandHelper;
     //protected $configParams;
