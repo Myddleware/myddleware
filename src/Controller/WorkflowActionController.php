@@ -162,7 +162,8 @@ class WorkflowActionController extends AbstractController
 
     // public function to delet the workflow by id (set deleted to 1)
     /**
-     * @Route("/deleteAction/{id}", name="workflow_action_delete")
+     * @Route("/deleteAction/{id}", name="workflow_action_delete", methods={"POST", "DELETE"})
+     * * @IsGranted("ROLE_ADMIN")
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
