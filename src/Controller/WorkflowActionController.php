@@ -90,6 +90,8 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 /**
  * @Route("/workflowAction")
@@ -163,7 +165,7 @@ class WorkflowActionController extends AbstractController
     // public function to delet the workflow by id (set deleted to 1)
     /**
      * @Route("/deleteAction/{id}", name="workflow_action_delete", methods={"POST", "DELETE"})
-     * * @IsGranted("ROLE_ADMIN")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
