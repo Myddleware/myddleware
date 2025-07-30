@@ -82,6 +82,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 /**
  * @Route("/rulegroup")
@@ -225,7 +227,8 @@ class RuleGroupController extends AbstractController
 
     // public function to delet the rulegroup by id (set deleted to 1)
     /**
-     * @Route("/delete/{id}", name="rulegroup_delete")
+     * @Route("/delete/{id}", name="rulegroup_delete", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function RulegroupDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
@@ -386,7 +389,8 @@ class RuleGroupController extends AbstractController
     }
 
     /**
-     * @Route("/rulegroup/{groupId}/remove-rule/{ruleId}", name="rulegroup_remove_rule")
+     * @Route("/rulegroup/{groupId}/remove-rule/{ruleId}", name="rulegroup_remove_rule", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function removeRule(
         Request $request, 

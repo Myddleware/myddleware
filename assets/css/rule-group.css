@@ -70,3 +70,6 @@ a.btn-sm {
 .rulegroup-card-header-table{
     background-color: white !important;
 }
+.card-title-rulegroup{
+    text-align: center;
+}
