@@ -25,9 +25,24 @@ export class FluxTemplate {
         let documentId = window.location.pathname.split('/').pop();
         // a quick fixture so we can see the table
         const myCustomPayload = [
-        { label: 'Foo ID',    value: '12345' },
-        { label: 'Bar Status', value: 'Enabled' },
-        { label: 'Last Sync',  value: '2025‑07‑30 14:22' }
+            {
+            docId: '6889b6292eb4e6.41501526',
+            name: 'REEC – Engagé vers COMET',
+            sourceId: '1079335',
+            targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+            modificationDate: '30/07/2025 08:30:02',
+            type: 'U',
+            status: 'Error_transformed'
+            },
+            {
+            docId: '6889aef46f03f7.32307392',
+            name: 'REEC – Engagé vers COMET',
+            sourceId: '1079335',
+            targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+            modificationDate: '30/07/2025 07:30:01',
+            type: 'U',
+            status: 'Cancel'
+            },
         ];
 
         // First, return the template with placeholders

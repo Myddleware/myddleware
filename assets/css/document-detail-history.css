@@ -1,0 +1,63 @@
+/* ─── wrapper spacing ───────────────────────────────────────────────────── */
+.data-wrapper.custom-section {
+  width: 100%;
+  margin: 2rem 0;
+}
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+.custom-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.custom-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* ─── table styling ─────────────────────────────────────────────────────── */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.custom-table th,
+.custom-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #374151;
+}
+.custom-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+.custom-table tbody td {
+  color: #4b5563;
+}
+.custom-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* ─── status badge ─────────────────────────────────────────────────────── */
+.status‑badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+.status‑error_transformed {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
+.status‑cancel {
+  color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+}
+/* add more .status‑<yourstatus> rules as needed */

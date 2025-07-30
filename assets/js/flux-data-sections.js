@@ -27,31 +27,55 @@ export class FluxDataSections {
 
 
     /**
-     * Renders a full‑width, pretty table under Source/Target/History
+     * Renders a full‑width placeholder table under Source/Target/History.
+     * @param {Array<Object>} rows
+     *   Each row should have: docId, name, sourceId, targetId,
+     *   modificationDate, type, status
      */
     static generateCustomSection(rows = []) {
-        // if there's nothing to render, bail out
         if (!rows.length) return ``;
 
-        // build each row as a <tr>
+        // build each row’s <tr>…
         const body = rows
-        .map(({ label, value }) => `
+        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+            // turn “Error_transformed” → “error_transformed” for class names
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            return `
             <tr>
-            <td class="custom-label">${label}</td>
-            <td class="custom-value">${value}</td>
+                <td>${docId}</td>
+                <td>${name}</td>
+                <td>${sourceId}</td>
+                <td>${targetId}</td>
+                <td>${modificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
             </tr>
-        `)
+            `;
+        })
         .join(``);
 
         return `
         <div class="data-wrapper custom-section">
-            <h3>My Custom Section</h3>
+            <div class="custom-header">
+            <h3>Documents history</h3>
+            <span class="custom-count">${rows.length} rows</span>
+            </div>
 
             <table class="custom-table">
             <thead>
                 <tr>
-                <th>Field</th>
-                <th>Value</th>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
                 </tr>
             </thead>
             <tbody>
