@@ -188,10 +188,10 @@
 											<div id="description-field-value" class="value description-collapsed">
 												{{ param.value|nl2br }}
 											</div>
-											<a href="#" id="read-more-link" class="read-more-link d-none">Read all description</a>
-											<a href="#" class="edit-button-description position-absolute top-0 end-0 me-2 mt-2" title="{{ 'Edit' | trans }}">
+											<a href="#" class="edit-button-description me-2 mt-2" title="{{ 'Edit' | trans }}">
 												<i class="fa fa-pen" aria-hidden="true"></i>
 											</a>
+											<a href="#" id="read-more-link" class="read-more-link d-none">Read all description</a>
 										</div>
 
 										<form class="edit-form edit-form-description-close mt-2" style="display: none;" action="{{ path('update_rule_description') }}" method="post">

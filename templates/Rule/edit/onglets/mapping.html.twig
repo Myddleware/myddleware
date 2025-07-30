@@ -42,41 +42,61 @@
 	<p></p>
 </div>
 <div class="clr"></div>
-<div class="d-flex mapping-container flex-wrap p-5">
-	{% if fields %}
-		{% for c, f in fields %}
-			<div class="card mapping-card text-center">
-				<div class="card-body mapping-card-body">
-					<h4 class="card-title mapping-card-title">{{ f.getTarget }}</h4>
-					<p class="card-text mapping-card-text"></p>
-					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}
-					</p>
-					{% if f.getFormula %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
-							:
-							{{ f.getFormula }}
-						</p>
-					{% else %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
-					{% endif %}
-				</p>
-				<button type="button" class="btn btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
-					<i class="fa fa-info-circle" aria-hidden="true"></i>
-				</button>
-				<div class="comment-box">
-					<i class="fa fa-times close-icon" aria-hidden="true" onclick="closeCommentBox(this)"></i>
-					<p class="comment-text m-2">{{ 'view_rule.mapping.comment'| trans }}</p>
-					<form method="post" action="{{ path('rulefield_update_comment', {'id': f.getId()}) }}">
-						<textarea class="form-control comment-textarea" name="comment" rows="3">{{ f.getComment is not empty ? f.getComment : '' }}</textarea>
-						<button type="submit" class="btn btn-primary m-2">{{ 'view_rule.mapping.add_comment'|trans }}</button>
-					</form>
-				</div>
-				{% if f.getComment is not empty %}
-					<div class="comment-outside">{{ f.getComment }}</div>
-				{% endif %}
-			</div>
-		</div>
-	{% endfor %}
+<div class="mapping-container flex-wrap p-5">
+    {% if fields %}
+                {% for c, f in fields %}
+            <div class="card mapping-card text-start mb-3">
+                <div class="card-body mapping-card-body">
+
+                    <!-- Ligne avec les infos et le bouton -->
+                    <div class="flex-wrap align-items-center justify-content-between mapping-line-wrapper">
+                        <div class="mapping-line">
+                            <strong>Target :</strong> {{ f.getTarget }} &nbsp;&nbsp;
+                            <strong>Source :</strong> {{ f.getSource }} &nbsp;&nbsp;
+                            <strong>Formula :</strong>
+                            {% if f.getFormula %}
+                                {{ f.getFormula }}
+                            {% else %}
+                                {{ 'view_rule.mapping.formula_empty'|trans }}
+                            {% endif %}
+                        </div>
+
+                        <!-- Bouton commentaire -->
+                        <div class="comment-btn-wrapper">
+                            <button type="button"
+                                    class="btn btn-icon tooltip-icon"
+                                    onclick="toggleCommentBox(this)"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="{{ 'view_rule.mapping.comment_title'| trans }}">
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Boîte de commentaire doit être juste après le bouton -->
+                    <div class="comment-box">
+                        <i class="fa fa-times close-icon" aria-hidden="true"
+                           onclick="closeCommentBox(this)"></i>
+                        <p class="comment-text m-2">{{ 'view_rule.mapping.comment'| trans }}</p>
+                        <form method="post" action="{{ path('rulefield_update_comment', {'id': f.getId()}) }}">
+                            <textarea class="form-control comment-textarea" name="comment" rows="3">
+                                {{ f.getComment is not empty ? f.getComment : '' }}
+                            </textarea>
+                            <button type="submit" class="btn btn-primary m-2">
+                                {{ 'view_rule.mapping.add_comment'|trans }}
+                            </button>
+                        </form>
+                    </div>
+
+                    {% if f.getComment is not empty %}
+                        <div class="comment-outside">{{ f.getComment }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+</div>
+
 	<div class="clr"></div>
 
 {% else %}

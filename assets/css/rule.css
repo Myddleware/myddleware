@@ -648,6 +648,7 @@ opacity: 0%;
 
 #deletion-rule-right-description {
 	border-bottom: none !important;
+	max-width: 50px;
 }
 
 #deletion-rule-left-description {
@@ -948,9 +949,8 @@ table.table-rule-view tr:first-child th {
 }
 .read-more-link {
 	display: block;
-	color: #337ab7;
-	text-decoration: underline;
+	color: #0a58ca;
+	text-align: center;
 	cursor: pointer;
 	margin-top: 0.3em;
-	font-size: 0.85rem;
 }

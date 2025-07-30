@@ -280,13 +280,18 @@ menu .caret, #myd_top .caret {
 }
 
 .btn {
-    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: rgba(25, 139, 202, 0.4) 0px 6px 16px,
+                rgba(25, 139, 202, 0.2) 0px 0px 8px 2px;
+    background: #0F66A9;
 }
+
+
 
 .arrow-cut-animation {
     animation-duration: 3s !important;
