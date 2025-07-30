@@ -19,6 +19,8 @@
 .custom-count {
   font-size: 0.875rem;
   color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 /* ─── table styling ─────────────────────────────────────────────────────── */

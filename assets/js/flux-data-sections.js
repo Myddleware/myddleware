@@ -63,7 +63,7 @@ export class FluxDataSections {
         <div class="data-wrapper custom-section">
             <div class="custom-header">
             <h3>Documents history</h3>
-            <span class="custom-count">${rows.length} rows</span>
+            <span class="custom-count">(${rows.length})</span>
             </div>
 
             <table class="custom-table">
