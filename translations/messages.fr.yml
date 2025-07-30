@@ -169,6 +169,7 @@ behavior_filters:
     error_empty: Erreur si vide
             
 view_rule:
+    go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
         confirm_exec_all: Souhaitez-vous exécuter toutes les règles actives ?
@@ -257,6 +258,7 @@ rulegroup:
     back: Retour à la liste
     title_one: Groupe de règles
     name: Nom
+    details: Détails
     description: Description
     status: Statut
     create_by: Créé par
@@ -264,7 +266,7 @@ rulegroup:
     delete: Supprimer
     edit: Édition d'un groupe de règles
     updated_successfully: Groupe de règles modifié avec succès
-    rules: Liste des règles
+    rules: Règles
     rule_removed_successfully: Règle supprimée avec succès
     no_rules: Aucune règle dans ce groupe
     rule:

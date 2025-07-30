@@ -113,6 +113,7 @@
 	margin-left: 0;
 }
 
+
 #rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th {
 	background: #ffffff;
 	height: 45px;
@@ -648,6 +649,7 @@ opacity: 0%;
 
 #deletion-rule-right-description {
 	border-bottom: none !important;
+	max-width: 50px;
 }
 
 #deletion-rule-left-description {
@@ -742,7 +744,8 @@ td .link-fit-rule-name {
 	width: 100%;
 	overflow: hidden;
 	padding: 16px 2.5rem;
-	min-height: 56px;
+	min-height: 56px;    
+	border-bottom: 1px solid #ccc
 }
 
 #myd-rule-tabs {
@@ -789,7 +792,7 @@ td .link-fit-rule-name {
 	font-weight: 500;
 	border: none;
 	background: none;
-	color: #007bff;
+	color: #03c4eb;
 }
 
 #myd-rule-tabs .nav-link:hover {
@@ -825,6 +828,7 @@ td .link-fit-rule-name {
 
 table.table-rule-view tr:not(:first-child) > td:first-child {
     color: #6c757d;
+	padding-left: 45px;
 }
 
 table.table-rule-view th,
@@ -904,7 +908,7 @@ table.table-rule-view tr:first-child th {
 
 .link-rule-detail,
 .link-rule-detail a {
-	color: #03c4eb !important;
+	color: #337ab7 !important;
 	font-weight: 500;
 }
 .rule-panel-wrapper .table-rule-view {
@@ -933,4 +937,21 @@ table.table-rule-view tr:first-child th {
 .rule-connectors-buttons {
   display: inline-block !important;
   margin-left: 280px;
+}
+
+.description-collapsed {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-height: 3.5em;
+	position: relative;
+}
+.read-more-link {
+	display: block;
+	color: #0a58ca;
+	text-align: center;
+	cursor: pointer;
+	margin-top: 0.3em;
 }

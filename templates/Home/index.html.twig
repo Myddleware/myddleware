@@ -62,21 +62,47 @@
 							</div>
 						</div>
 					</div>
-					<div class="card m-2 info col">
-						<div class="card-body">
-									{% if errorByRule %}
-									<h4 class="card-title">{{'panel.list_job.nb'|trans}}</h4>
-									<ul class="list-group">
-										{% for rule in errorByRule %}  
-										<li class="list-group-item">
-											<span class="badge">{{ rule.cpt }}</span>
-											<a href="{{ path('flux_error_rule',{'id' : rule.id }) }}">{{ rule.name }}</span></a>
-										</li>
-										{% endfor %}
-									</ul>
-									{% endif %}
-						</div>
+					<div class="card m-2 info col shadow-sm error-card"> 
+					<div class="card-body">
+						{% if errorByRule %}
+							<div class="d-flex justify-content-between align-items-center mb-3">
+								<h4 class="card-title text-danger mb-0">
+									<i class="fa fa-exclamation-triangle me-2"></i> 
+									{{ 'panel.list_job.nb'|trans }}
+								</h4>
+								<span class="badge bg-danger text-white p-2">
+									{{ errorByRule|length }}
+								</span>
+							</div>
+							<ul class="list-group list-group-flush error-list">
+								{% for rule in errorByRule %}
+									<li class="list-group-item d-flex justify-content-between align-items-center 
+										{% if loop.index > 4 %}d-none{% endif %}">
+										<a class="help-link all-link text-decoration-none fw-semibold text-dark error-link" 
+										href="{{ path('flux_error_rule', {'id' : rule.id }) }}">
+											{{ rule.name }}
+										</a>
+										<span class="badge rounded-pill bg-secondary px-3">
+											{{ rule.cpt }}
+										</span>
+									</li>
+								{% endfor %}
+							</ul>
+							{% if errorByRule|length > 4 %}
+								<div class="text-center mt-3">
+									<button id="toggleErrorsBtn" class="btn btn-sm btn-outline-primary" data-expanded="false">
+										Show more
+									</button>
+								</div>
+							{% endif %}
+						{% else %}
+							<p class="text-muted text-center m-0">
+								<i class="fa fa-check-circle text-success me-2"></i> 
+								no document
+							</p>
+						{% endif %}
 					</div>
+				</div>
 				</div>
 			</div>
 			<section class="solution-home-section">

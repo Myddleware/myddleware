@@ -22,11 +22,10 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-google.charts.load("visualization", "1", {packages:["corechart"]});
+google.charts.load("visualization", "1", { packages: ["corechart"] });
 
-document.addEventListener('DOMContentLoaded', function () {
-
-	$(".toggle-btn-homepage").click(function () {
+document.addEventListener("DOMContentLoaded", function () {
+    $(".toggle-btn-homepage").click(function () {
         var extraText = $(this).find(".extra-text");
         if (extraText.is(":visible")) {
             extraText.slideUp();
@@ -35,67 +34,62 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-	if (typeof countNbDocuments !== 'undefined') {
+    if (typeof countNbDocuments !== "undefined") {
 		// Function for smooth animation of the counter
-		function animateCounter(id, start, end, duration) {
-			var obj = document.getElementById(id);
-			var startTime = null;
-	
-			function easeOutQuad(t) {
-				return t * (2 - t);
-			}
-	
-			function animate(currentTime) {
-				if (startTime === null) startTime = currentTime;
-				var timeElapsed = currentTime - startTime;
-				var progress = Math.min(timeElapsed / duration, 1);
-				var easedProgress = easeOutQuad(progress);
-				
-				var currentValue = Math.round(start + (end - start) * easedProgress);
-				obj.innerHTML = currentValue;
-	
-				if (progress < 1) {
-					requestAnimationFrame(animate);
-				}
-			}
-	
-			requestAnimationFrame(animate);
-		}
-	
-		animateCounter('countNbDocuments', 0, countNbDocuments, 2000);
-	} else {
-		console.error("countNbDocuments not defined");
-	}
-	
+        function animateCounter(id, start, end, duration) {
+            var obj = document.getElementById(id);
+            var startTime = null;
 
-	const showMoreBtn = document.getElementById('show-more-btn');
-	const showLessBtn = document.getElementById('show-less-btn');
-	const hiddenItems = document.querySelectorAll('#error-list .list-group-item.d-none');
-	const allItems = document.querySelectorAll('#error-list .list-group-item');
+            function easeOutQuad(t) {
+                return t * (2 - t);
+            }
 
-	if (showMoreBtn) {
-		showMoreBtn.addEventListener('click', function () {
-			hiddenItems.forEach(item => item.classList.remove('d-none'));
-			showMoreBtn.classList.add('d-none');
-			showLessBtn.classList.remove('d-none');
-		});
-	}
+            function animate(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                var timeElapsed = currentTime - startTime;
+                var progress = Math.min(timeElapsed / duration, 1);
+                var easedProgress = easeOutQuad(progress);
 
-	if (showLessBtn) {
-		showLessBtn.addEventListener('click', function () {
-			allItems.forEach((item, index) => {
-				if (index >= 5) {
-					item.classList.add('d-none');
-				}
-			});
-			showLessBtn.classList.add('d-none');
-			showMoreBtn.classList.remove('d-none');
-		});
-	}
+                var currentValue = Math.round(
+                    start + (end - start) * easedProgress
+                );
+                obj.innerHTML = currentValue;
 
-    document.querySelectorAll('.dropdown-toggle').forEach(function (dropdown) {
-        dropdown.addEventListener('click', function (e) {
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+		
+        animateCounter("countNbDocuments", 0, countNbDocuments, 2000);
+    } else {
+        console.error("countNbDocuments not defined");
+    }
+    document.querySelectorAll(".dropdown-toggle").forEach(function (dropdown) {
+        dropdown.addEventListener("click", function (e) {
             e.preventDefault();
         });
     });
+    const list = document.querySelector(".error-list");
+    const btn = document.getElementById("toggleErrorsBtn");
+    const maxVisible = 5;
+
+    if (list && btn) {
+        const items = list.querySelectorAll("li");
+
+        btn.addEventListener("click", function () {
+            const isExpanded = btn.getAttribute("data-expanded") === "true";
+
+            items.forEach((item, index) => {
+                if (index >= maxVisible) {
+                    item.classList.toggle("d-none", isExpanded);
+                }
+            });
+
+            btn.textContent = isExpanded ? "Show more" : "Show less";
+            btn.setAttribute("data-expanded", !isExpanded);
+        });
+    }
 });
