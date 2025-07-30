@@ -25,6 +25,43 @@ export class FluxDataSections {
         }
     }
 
+
+    /**
+     * Renders a full‑width, pretty table under Source/Target/History
+     */
+    static generateCustomSection(rows = []) {
+        // if there's nothing to render, bail out
+        if (!rows.length) return ``;
+
+        // build each row as a <tr>
+        const body = rows
+        .map(({ label, value }) => `
+            <tr>
+            <td class="custom-label">${label}</td>
+            <td class="custom-value">${value}</td>
+            </tr>
+        `)
+        .join(``);
+
+        return `
+        <div class="data-wrapper custom-section">
+            <h3>My Custom Section</h3>
+
+            <table class="custom-table">
+            <thead>
+                <tr>
+                <th>Field</th>
+                <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        `;
+    }
+
     /**
      * Generates the source data section HTML
      * @param {string} logoPath - Path to source logo image

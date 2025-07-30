@@ -23,6 +23,12 @@ export class FluxTemplate {
         // the url is like http://localhost/myddleware_NORMAL/public/rule/flux/modern/6863a07946e8b9.38306852
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
+        // a quick fixture so we can see the table
+        const myCustomPayload = [
+        { label: 'Foo ID',    value: '12345' },
+        { label: 'Bar Status', value: 'Enabled' },
+        { label: 'Last Sync',  value: '2025‑07‑30 14:22' }
+        ];
 
         // First, return the template with placeholders
         const template = `
@@ -56,12 +62,13 @@ export class FluxTemplate {
                             <td id="document-creation-date">Loading...</td>
                             <td id="document-modification-date">Loading...</td>
                         </tr>
-                    </tbody>
-                </table>
-            </div>
-${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
-        `;
-
+                        </tbody>
+                        </table>
+                        </div>
+                        ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
+                        ${FluxDataSections.generateCustomSection(myCustomPayload)}
+                        `;
+                        
         // After returning the template, load ALL document data with a single call
         setTimeout(() => {
             console.log('🚀 Loading comprehensive document data...');
