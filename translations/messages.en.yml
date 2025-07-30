@@ -257,6 +257,7 @@ rulegroup:
     create: Create a new rule group
     back: Back to the list
     title_one: Rule group
+    details: Details
     name: Name
     description: Description
     status: Status
@@ -265,7 +266,7 @@ rulegroup:
     delete: Delete
     edit: Editing of a Rule Group
     updated_successfully: Rule group updated successfully
-    rules: List of rules
+    rules: Rules
     rule_removed_successfully: Rule removed successfully
     no_rules: No rules in this group
     rule:

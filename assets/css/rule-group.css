@@ -43,7 +43,7 @@
 
 .table thead th {
     border-bottom: none !important;
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; */
     font-size: 0.85rem;
     text-transform: uppercase;
     color: #495057;
@@ -64,7 +64,7 @@ a.btn-sm {
 }
 
 .rulegroup-card-table{
-    margin: 100px;
+    margin: 30px 185px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 .rulegroup-card-header-table{
