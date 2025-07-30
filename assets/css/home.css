@@ -456,3 +456,38 @@
         margin-left: 70px;
     }
 }
+
+.error-card {
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.error-card .card-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.error-list .list-group-item {
+    border: none;
+    border-bottom: 1px solid #f1f1f1;
+    padding: 10px 5px;
+    transition: background 0.2s ease;
+}
+
+.error-list .list-group-item:last-child {
+    border-bottom: none;
+}
+
+.error-list .list-group-item:hover {
+    background: #f9f9f9;
+}
+
+.error-link {
+    color: #333;
+    transition: color 0.2s ease;
+}
+
+.error-link:hover {
+    color: #0a58ca !important;
+}
