@@ -48,7 +48,6 @@
 	display:none;
 }
 
-
 .clr {
 	both: clear;
 }
@@ -67,8 +66,6 @@
 	cursor:pointer;
 	color: #12BA00;
 }
-
-
 
 /* step 3 */
 
@@ -254,9 +251,7 @@ input[type="text"] {
 	margin-top: 3vh;
 }
 
-td {
-	text-align: left!important;
-}
+
 
 td > a {
 	color: #337ab7;

@@ -286,8 +286,8 @@ menu .caret, #myd_top .caret {
 }
 
 .btn:hover {
-    box-shadow: rgba(25, 139, 202, 0.4) 0px 6px 16px,
-                rgba(25, 139, 202, 0.2) 0px 0px 8px 2px;
+    box-shadow: rgba(164, 164, 164, 0.4) 0px 6px 16px,
+                rgba(65, 65, 65, 0.2) 0px 0px 8px 2px;
     background: #0F66A9;
 }
 
