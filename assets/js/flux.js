@@ -45,6 +45,7 @@ export class Flux {
         for (let i = 1; i <= pageCount; i++) {
             const btn = document.createElement('button');
             btn.textContent = i;
+            btn.className = 'pagination-btn';
             btn.addEventListener('click', () => {
                 rows.forEach((row, idx) => {
                     row.style.display =
@@ -52,13 +53,15 @@ export class Flux {
                             ? ''
                             : 'none';
                 });
+                controls.querySelectorAll('.pagination-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
             });
             controls.appendChild(btn);
         }
 
         const customSection = document.querySelector('.custom-section');
         customSection.appendChild(controls);
-        controls.querySelector('button').click();
+        controls.querySelector('.pagination-btn').click();
     }
 }
 
