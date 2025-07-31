@@ -49,7 +49,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
-        nb : Documents with error
+        nb : Rule with error
     graph_histo:
         title: Documents history
     graph_job_histo:
