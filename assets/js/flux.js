@@ -31,6 +31,7 @@ export class Flux {
 
         fluxContainer.innerHTML = FluxTemplate.generateHTML();
         this.setupPagination();
+        this.setupCollapsible();
     }
 
     setupPagination() {
@@ -63,6 +64,20 @@ export class Flux {
         customSection.appendChild(controls);
         controls.querySelector('.pagination-btn').click();
     }
+
+    setupCollapsible() {
+        const container = document.getElementById('flux-container');
+        const btn = document.querySelector('.custom-header .toggle-btn');
+        const content = document.querySelector('.custom-content');
+
+        btn.addEventListener('click', () => {
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            content.style.display = expanded ? 'none' : '';
+            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            btn.textContent = expanded ? 'Expand' : 'Collapse';
+            });
+    }
+
 }
 
 // Initialize the flux manager when DOM is loaded

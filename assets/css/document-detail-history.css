@@ -62,4 +62,16 @@
   color: #d97706;
   background-color: rgba(217, 119, 6, 0.1);
 }
-/* add more .status‑<yourstatus> rules as needed */
+
+
+/* expand fold button */
+.toggle-btn {
+  margin-left: auto;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.toggle-btn:hover { background: #d1d5db; }

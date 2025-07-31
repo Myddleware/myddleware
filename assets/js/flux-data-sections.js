@@ -64,8 +64,10 @@ export class FluxDataSections {
             <div class="custom-header">
             <h3>Documents history</h3>
             <span class="custom-count">(${rows.length})</span>
+            <button class="toggle-btn" aria-expanded="true">Collapse</button>
             </div>
 
+            <div class="custom-content">
             <table class="custom-table">
             <thead>
                 <tr>
@@ -82,6 +84,7 @@ export class FluxDataSections {
                 ${body}
             </tbody>
             </table>
+        </div>
         </div>
         `;
     }
