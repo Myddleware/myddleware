@@ -30,6 +30,35 @@ export class Flux {
         }
 
         fluxContainer.innerHTML = FluxTemplate.generateHTML();
+        this.setupPagination();
+    }
+
+    setupPagination() {
+        const pageSize = 5;
+        const rows = Array.from(
+            document.querySelectorAll('.custom-section .custom-table tbody tr')
+        );
+        const pageCount = Math.ceil(rows.length / pageSize);
+
+        const controls = document.createElement('div');
+        controls.className = 'pagination-controls';
+        for (let i = 1; i <= pageCount; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.addEventListener('click', () => {
+                rows.forEach((row, idx) => {
+                    row.style.display =
+                        idx >= (i - 1) * pageSize && idx < i * pageSize
+                            ? ''
+                            : 'none';
+                });
+            });
+            controls.appendChild(btn);
+        }
+
+        const customSection = document.querySelector('.custom-section');
+        customSection.appendChild(controls);
+        controls.querySelector('button').click();
     }
 }
 
