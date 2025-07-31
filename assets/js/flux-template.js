@@ -190,6 +190,172 @@ export class FluxTemplate {
             ];
 
 
+        const parentPayload = [
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'TEST PARENT DOCUMENT',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            },
+            {
+                docId: '6889b6292eb4e6.41501526',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 08:30:02',
+                type: 'U',
+                status: 'Error_transformed'
+            },
+            {
+                docId: '6889aef46f03f7.32307392',
+                name: 'REEC – Engagé vers COMET',
+                sourceId: '1079335',
+                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
+                modificationDate: '30/07/2025 07:30:01',
+                type: 'U',
+                status: 'Cancel'
+            }
+            ];
+
+
         // First, return the template with placeholders
         const template = `
             <div class="flex-row" id="flux-button-container">
@@ -227,6 +393,7 @@ export class FluxTemplate {
                         </div>
                         ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
                         ${FluxDataSections.generateCustomSection(myCustomPayload)}
+                        ${FluxDataSections.generateCustomSection(parentPayload)}
                         `;
                         
         // After returning the template, load ALL document data with a single call
