@@ -32,10 +32,11 @@ export class Flux {
 
         fluxContainer.innerHTML = FluxTemplate.generateHTML();
         
-        // Initialize state management after DOM is ready
+        // Wait for the template's setTimeout to complete (template uses 100ms)
+        // Then initialize state management
         setTimeout(() => {
             this.initializeSectionStateManagement();
-        }, 200);
+        }, 300);
     }
 
     initializeSectionStateManagement() {
@@ -76,7 +77,7 @@ export class Flux {
             }
             // Add more fixture data as needed for testing
         ].concat(Array(16).fill().map((_, i) => ({
-            docId: `test${i}.id`,
+            docId: `test${i + 1}.id`,
             name: `Test Document ${i + 1}`,
             sourceId: '1079335',
             targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',

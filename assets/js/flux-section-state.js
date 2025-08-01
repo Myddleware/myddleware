@@ -98,12 +98,15 @@ export class FluxSectionState {
     /**
      * Setup pagination for a section
      */
-    static setupPagination(sectionClass, sectionName, rows) {
+    static setupPagination(sectionClass, stateKey, rows) {
         const state = this.getState();
-        const sectionState = state[sectionName];
+        const sectionState = state[stateKey];
         const pageCount = Math.ceil(rows.length / this.PAGE_SIZE);
 
-        if (pageCount <= 1) return; // No pagination needed
+        if (pageCount <= 1) {
+            console.log(`ℹ️ No pagination needed for ${stateKey} (${rows.length} rows)`);
+            return; // No pagination needed
+        }
 
         // Create pagination controls
         const controls = document.createElement('div');
@@ -119,9 +122,10 @@ export class FluxSectionState {
             }
 
             btn.addEventListener('click', () => {
-                this.showPage(sectionClass, sectionName, i, rows);
+                this.showPage(sectionClass, stateKey, i, rows);
                 this.updatePaginationButtons(controls, i);
-                this.updateSectionState(sectionName, { currentPage: i });
+                this.updateSectionState(stateKey, { currentPage: i });
+                console.log(`✅ Updated ${stateKey} to page:`, i);
             });
 
             controls.appendChild(btn);
@@ -133,14 +137,17 @@ export class FluxSectionState {
             section.appendChild(controls);
             
             // Show initial page
-            this.showPage(sectionClass, sectionName, sectionState.currentPage, rows);
+            this.showPage(sectionClass, stateKey, sectionState.currentPage, rows);
+            console.log(`✅ Pagination setup complete for: ${stateKey} (${pageCount} pages)`);
+        } else {
+            console.warn(`Section not found for pagination: .${sectionClass}`);
         }
     }
 
     /**
      * Show specific page for a section
      */
-    static showPage(sectionClass, sectionName, pageNumber, rows) {
+    static showPage(sectionClass, stateKey, pageNumber, rows) {
         const startIndex = (pageNumber - 1) * this.PAGE_SIZE;
         const endIndex = startIndex + this.PAGE_SIZE;
         
@@ -153,6 +160,8 @@ export class FluxSectionState {
                 row.style.display = 'none';
             }
         });
+
+        console.log(`✅ Showing page ${pageNumber} for ${stateKey} (rows ${startIndex + 1}-${Math.min(endIndex, rows.length)})`);
     }
 
     /**
@@ -168,18 +177,30 @@ export class FluxSectionState {
     /**
      * Setup collapse/expand functionality for a section
      */
-    static setupCollapsible(sectionClass, sectionName) {
+    static setupCollapsible(sectionClass, sectionName, stateKey) {
         const section = document.querySelector(`.${sectionClass}`);
-        if (!section) return;
+        if (!section) {
+            console.warn(`Section not found: .${sectionClass}`);
+            return;
+        }
 
         const header = section.querySelector(`.${sectionName}-header`);
         const content = section.querySelector(`.${sectionName}-content`);
         const toggleBtn = section.querySelector(`.${sectionName}-toggle-btn`);
 
-        if (!header || !content || !toggleBtn) return;
+        if (!header || !content || !toggleBtn) {
+            console.warn(`Elements not found for section: ${sectionName}`);
+            console.warn('Header:', !!header, 'Content:', !!content, 'ToggleBtn:', !!toggleBtn);
+            return;
+        }
 
         const state = this.getState();
-        const sectionState = state[sectionName];
+        const sectionState = state[stateKey];
+
+        if (!sectionState) {
+            console.error(`Section state not found for: ${stateKey}`);
+            return;
+        }
 
         // Set initial state
         if (sectionState.isExpanded) {
@@ -201,24 +222,29 @@ export class FluxSectionState {
             toggleBtn.textContent = newExpandedState ? '-' : '+';
             toggleBtn.setAttribute('aria-expanded', newExpandedState.toString());
 
-            this.updateSectionState(sectionName, { isExpanded: newExpandedState });
+            this.updateSectionState(stateKey, { isExpanded: newExpandedState });
+            console.log(`✅ Updated ${stateKey} expand state:`, newExpandedState);
         });
+
+        console.log(`✅ Collapsible setup complete for: ${stateKey}`);
     }
 
     /**
      * Initialize all sections with state management
      */
     static initializeSections(sectionsData) {
+        console.log('🚀 Initializing sections with state management...');
+        
         // Documents History
-        this.setupCollapsible('custom-section', 'custom');
+        this.setupCollapsible('custom-section', 'custom', 'documentsHistory');
         this.setupPagination('custom-section', 'documentsHistory', sectionsData.documentsHistory || []);
 
         // Parent Documents  
-        this.setupCollapsible('parent-documents-section', 'parent-documents');
+        this.setupCollapsible('parent-documents-section', 'parent-documents', 'parentDocuments');
         this.setupPagination('parent-documents-section', 'parentDocuments', sectionsData.parentDocuments || []);
 
         // Child Documents
-        this.setupCollapsible('child-documents-section', 'child-documents');
+        this.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
         this.setupPagination('child-documents-section', 'childDocuments', sectionsData.childDocuments || []);
 
         console.log('✅ All sections initialized with independent state management');
