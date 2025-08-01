@@ -215,13 +215,19 @@ export class FluxDataSections {
 
         const body = rows
         .map(({ id, reference, job, creationDate, type, message }) => {
+            // Determine color based on type
+            let typeColor = '#28a745'; // default green for 'S ✓'
+            if (type.startsWith('W')) {
+                typeColor = '#ffc107'; // yellow for 'W x' types
+            }
+
             return `
             <tr>
                 <td>${id}</td>
                 <td><a href="#" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
                 <td>${job}</td>
                 <td>${creationDate}</td>
-                <td><span style="color: #28a745; font-weight: bold;">${type}</span></td>
+                <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
             </tr>
             `;

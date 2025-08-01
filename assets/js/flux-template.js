@@ -212,7 +212,7 @@ export class FluxTemplate {
             reference: '67c80b9b825da9.34866137',
             job: '67c80b9b825da9.34866137',
             creationDate: '05/03/2025 09:30:30',
-            type: 'S ✓',
+            type: 'W x',
             message: [
                 'Status : Ready_to_send',
                 'Status : Transformed',
