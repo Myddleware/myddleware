@@ -6,10 +6,12 @@ import { FluxTemplate } from './flux-template.js';
 import { FluxEvents } from './flux-events.js';
 import { FluxFieldExpander } from './flux-field-expander.js';
 import { FluxSectionState } from './flux-section-state.js';
+import { MultilineLinkHandler } from './multiline-links/multiline-link-handler.js';
 
 export class Flux {
     constructor() {
         console.log('Flux constructor');
+        this.multilineLinkHandler = null;
         this.init();
     }
 
@@ -18,6 +20,12 @@ export class Flux {
         this.createUIStructure();
         FluxEvents.setupEventListeners();
         FluxFieldExpander.init();
+        
+        // Initialize multiline link handler after UI is created
+        setTimeout(() => {
+            this.multilineLinkHandler = new MultilineLinkHandler();
+            console.log('🔗 MultilineLinkHandler initialized in Flux');
+        }, 500);
     }
 
     createUIStructure() {

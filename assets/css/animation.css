@@ -681,14 +681,47 @@ label[for="update_password_oldPassword"] {
     color: #0F66A9;
     text-decoration: none;
     transition: color 0.3s ease;
+    /* Default to pseudo-element animation */
+    background-image: none;
 }
 
-/* Create the underline effect using ::after pseudo-element */
-#rule-link::after,
-.log-reference::after,
-.log-job::after,
-.doc-id::after,
-.doc-name::after {
+/* Multi-line detected links use background animation */
+.doc-name.multiline-detected,
+.log-reference.multiline-detected,
+.log-job.multiline-detected,
+.doc-id.multiline-detected,
+#rule-link.multiline-detected {
+    background: linear-gradient(to right, #337ab7 0%, #337ab7 100%);
+    background-size: 0% 1.5px;
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s ease, color 0.3s ease;
+}
+
+.doc-name.multiline-detected:hover,
+.log-reference.multiline-detected:hover,
+.log-job.multiline-detected:hover,
+.doc-id.multiline-detected:hover,
+#rule-link.multiline-detected:hover {
+    background-size: 100% 1.5px;
+    color: #337ab7;
+}
+
+/* Single-line detected links use pseudo-element animation */
+.doc-name.single-line-detected,
+.log-reference.single-line-detected,
+.log-job.single-line-detected,
+.doc-id.single-line-detected,
+#rule-link.single-line-detected {
+    background: none;
+}
+
+/* Create the underline effect using ::after pseudo-element - ONLY for single-line links */
+#rule-link.single-line-detected::after,
+.log-reference.single-line-detected::after,
+.log-job.single-line-detected::after,
+.doc-id.single-line-detected::after,
+.doc-name.single-line-detected::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -699,24 +732,33 @@ label[for="update_password_oldPassword"] {
     transition: width 0.3s ease;
 }
 
-/* Hover effects */
-#rule-link:hover,
-.log-reference:hover,
-.log-job:hover,
-.doc-id:hover,
-.doc-name:hover {
+/* Disable ::after for multiline links */
+.doc-name.multiline-detected::after,
+.log-reference.multiline-detected::after,
+.log-job.multiline-detected::after,
+.doc-id.multiline-detected::after,
+#rule-link.multiline-detected::after {
+    display: none;
+}
+
+/* Hover effects - for single-line links */
+#rule-link.single-line-detected:hover,
+.log-reference.single-line-detected:hover,
+.log-job.single-line-detected:hover,
+.doc-id.single-line-detected:hover,
+.doc-name.single-line-detected:hover {
     color: #337ab7;
 }
 
-#rule-link:hover::after,
-.log-reference:hover::after,
-.log-job:hover::after,
-.doc-id:hover::after,
-.doc-name:hover::after {
+#rule-link.single-line-detected:hover::after,
+.log-reference.single-line-detected:hover::after,
+.log-job.single-line-detected:hover::after,
+.doc-id.single-line-detected:hover::after,
+.doc-name.single-line-detected:hover::after {
     width: 100%;
 }
 
-/* For multi-line rule links using background-image */
+/* Legacy multiline styles - kept for backward compatibility but shouldn't be needed */
 #rule-link.multiline,
 .log-reference.multiline,
 .log-job.multiline,
