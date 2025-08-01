@@ -64,7 +64,7 @@ export class FluxDataSections {
             <div class="custom-header">
             <h3>Documents history</h3>
             <span class="custom-count">(${rows.length})</span>
-            <button class="toggle-btn" aria-expanded="true">Collapse</button>
+            <button class="toggle-btn" aria-expanded="true">-</button>
             </div>
 
             <div class="custom-content">

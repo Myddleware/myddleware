@@ -74,7 +74,7 @@ export class Flux {
             const expanded = btn.getAttribute('aria-expanded') === 'true';
             content.style.display = expanded ? 'none' : '';
             btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-            btn.textContent = expanded ? 'Expand' : 'Collapse';
+            btn.textContent = expanded ? '+' : '-';
             });
     }
 
