@@ -673,7 +673,8 @@ label[for="update_password_oldPassword"] {
 /* Link hover animation with underline effect - Rule link only */
 #rule-link,
 .log-reference,
-.log-job {
+.log-job,
+.doc-id {
     position: relative;
     display: inline;
     color: #0F66A9;
@@ -684,7 +685,8 @@ label[for="update_password_oldPassword"] {
 /* Create the underline effect using ::after pseudo-element */
 #rule-link::after,
 .log-reference::after,
-.log-job::after {
+.log-job::after,
+.doc-id::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -698,20 +700,23 @@ label[for="update_password_oldPassword"] {
 /* Hover effects */
 #rule-link:hover,
 .log-reference:hover,
-.log-job:hover {
+.log-job:hover,
+.doc-id:hover {
     color: #337ab7;
 }
 
 #rule-link:hover::after,
 .log-reference:hover::after,
-.log-job:hover::after {
+.log-job:hover::after,
+.doc-id:hover::after {
     width: 100%;
 }
 
 /* For multi-line rule links using background-image */
 #rule-link.multiline,
 .log-reference.multiline,
-.log-job.multiline {
+.log-job.multiline,
+.doc-id.multiline {
     background-image: linear-gradient(to right, #337ab7, #337ab7);
     background-position: 0% 100%;
     background-repeat: no-repeat;
@@ -721,7 +726,8 @@ label[for="update_password_oldPassword"] {
 
 #rule-link.multiline:hover,
 .log-reference.multiline:hover,
-.log-job.multiline:hover {
+.log-job.multiline:hover,
+.doc-id.multiline:hover {
     background-size: 100% 1px;
     color: #337ab7;
 }
