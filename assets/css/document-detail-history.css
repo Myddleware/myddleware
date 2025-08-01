@@ -84,3 +84,157 @@
   margin-top: 1.5rem;
   width: 100%;
 }
+
+/* Parent documents section - specific styling */
+.data-wrapper.parent-documents-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.parent-documents-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.parent-documents-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.parent-documents-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.parent-documents-toggle-btn {
+  position: absolute;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.parent-documents-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.parent-documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.parent-documents-table th,
+.parent-documents-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.parent-documents-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.parent-documents-table tbody td {
+  color: #000000;
+}
+
+.parent-documents-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.parent-documents-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* Child documents section - specific styling */
+.data-wrapper.child-documents-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.child-documents-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.child-documents-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.child-documents-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.child-documents-toggle-btn {
+  position: absolute;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.child-documents-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.child-documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.child-documents-table th,
+.child-documents-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.child-documents-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.child-documents-table tbody td {
+  color: #000000;
+}
+
+.child-documents-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.child-documents-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}

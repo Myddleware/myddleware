@@ -383,6 +383,34 @@ li span {
     width: 100%;
 }
 
+/* Parent documents section styling */
+.data-wrapper.parent-documents-section {
+    display: block;
+    width: 100%;
+    margin: 2rem auto;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.data-wrapper.parent-documents-section .parent-documents-content {
+    display: block;
+    width: 100%;
+}
+
+/* Child documents section styling */
+.data-wrapper.child-documents-section {
+    display: block;
+    width: 100%;
+    margin: 2rem auto;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.data-wrapper.child-documents-section .child-documents-content {
+    display: block;
+    width: 100%;
+}
+
 .source-data, .target-data, .history-data {
     flex: 1;
     min-width: 300px;

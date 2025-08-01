@@ -25,7 +25,6 @@ export class FluxDataSections {
         }
     }
 
-
     /**
      * Renders a full‑width placeholder table under Source/Target/History.
      * @param {Array<Object>} rows
@@ -35,10 +34,10 @@ export class FluxDataSections {
     static generateCustomSection(rows = []) {
         if (!rows.length) return ``;
 
-        // build each row’s <tr>…
+        // build each row's <tr>…
         const body = rows
         .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
-            // turn “Error_transformed” → “error_transformed” for class names
+            // turn "Error_transformed" → "error_transformed" for class names
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
             return `
@@ -69,6 +68,124 @@ export class FluxDataSections {
 
             <div class="custom-content">
             <table class="custom-table">
+            <thead>
+                <tr>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
+     * Generates Parent documents section
+     * @param {Array<Object>} rows - Same structure as Documents history
+     */
+    static generateParentDocumentsSection(rows = []) {
+        if (!rows.length) return ``;
+
+        const body = rows
+        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            return `
+            <tr>
+                <td>${docId}</td>
+                <td>${name}</td>
+                <td>${sourceId}</td>
+                <td>${targetId}</td>
+                <td>${modificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper parent-documents-section">
+            <div class="parent-documents-header">
+            <h3>Parent documents</h3>
+            <span class="parent-documents-count">(${rows.length})</span>
+            <button class="parent-documents-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="parent-documents-content">
+            <table class="parent-documents-table">
+            <thead>
+                <tr>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
+     * Generates Child documents section
+     * @param {Array<Object>} rows - Same structure as Documents history
+     */
+    static generateChildDocumentsSection(rows = []) {
+        if (!rows.length) return ``;
+
+        const body = rows
+        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            return `
+            <tr>
+                <td>${docId}</td>
+                <td>${name}</td>
+                <td>${sourceId}</td>
+                <td>${targetId}</td>
+                <td>${modificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper child-documents-section">
+            <div class="child-documents-header">
+            <h3>Child documents</h3>
+            <span class="child-documents-count">(${rows.length})</span>
+            <button class="child-documents-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="child-documents-content">
+            <table class="child-documents-table">
             <thead>
                 <tr>
                 <th>Doc Id</th>
@@ -307,7 +424,7 @@ export class FluxDataSections {
             }
         });
         document.dispatchEvent(event);
-        console.log('📢 Notified FluxFieldExpander of new content');
+        console.log('📢 Notified FluxFieldExpanner of new content');
     }
 
     /**

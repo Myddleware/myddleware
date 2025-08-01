@@ -227,6 +227,8 @@ export class FluxTemplate {
                         </div>
                         ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
                         ${FluxDataSections.generateCustomSection(myCustomPayload)}
+                        ${FluxDataSections.generateParentDocumentsSection(myCustomPayload)}
+                        ${FluxDataSections.generateChildDocumentsSection(myCustomPayload)}
                         `;
                         
         // After returning the template, load ALL document data with a single call
