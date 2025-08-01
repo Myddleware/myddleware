@@ -236,3 +236,80 @@
   margin-top: 1.5rem;
   width: 100%;
 }
+
+/* Logs section - specific styling */
+.data-wrapper.logs-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.logs-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.logs-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.logs-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.logs-toggle-btn {
+  position: absolute;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logs-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.logs-table th,
+.logs-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.logs-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.logs-table tbody td {
+  color: #000000;
+}
+
+.logs-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.logs-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}

@@ -411,6 +411,20 @@ li span {
     width: 100%;
 }
 
+/* Logs section styling */
+.data-wrapper.logs-section {
+    display: block;
+    width: 100%;
+    margin: 2rem auto;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.data-wrapper.logs-section .logs-content {
+    display: block;
+    width: 100%;
+}
+
 .source-data, .target-data, .history-data {
     flex: 1;
     min-width: 300px;

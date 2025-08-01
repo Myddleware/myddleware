@@ -189,6 +189,42 @@ export class FluxTemplate {
             }
             ];
 
+        // Logs fixture data matching the screenshot
+        const myLogsPayload = [
+            {
+                id: '207568887',
+                reference: '67c80b9b825da9.34866137',
+                job: '67c80b9b825da9.34866137',
+                creationDate: '05/03/2025 09:30:30',
+                type: 'S ✓',
+                message: 'Status : Send'
+            },
+            {
+                id: '207568886',
+                reference: '67c80b9b825da9.34866137',
+                job: '67c80b9b825da9.34866137',
+                creationDate: '05/03/2025 09:30:30',
+                type: 'S ✓',
+                message: 'Target id : 129055'
+            }
+        ].concat(Array(16).fill().map((_, i) => ({
+            id: `20756${8859 + i}`,
+            reference: '67c80b9b825da9.34866137',
+            job: '67c80b9b825da9.34866137',
+            creationDate: '05/03/2025 09:30:30',
+            type: 'S ✓',
+            message: [
+                'Status : Ready_to_send',
+                'Status : Transformed',
+                'Status : Relate_OK',
+                'Status : Predecessor_OK',
+                'Type : U',
+                'Status : Filter_OK',
+                'Status : New',
+                'Target id : 129055'
+            ][i % 8]
+        })));
+
 
         // First, return the template with placeholders
         const template = `
@@ -229,6 +265,7 @@ export class FluxTemplate {
                         ${FluxDataSections.generateCustomSection(myCustomPayload)}
                         ${FluxDataSections.generateParentDocumentsSection(myCustomPayload)}
                         ${FluxDataSections.generateChildDocumentsSection(myCustomPayload)}
+                        ${FluxDataSections.generateLogsSection(myLogsPayload)}
                         `;
                         
         // After returning the template, load ALL document data with a single call

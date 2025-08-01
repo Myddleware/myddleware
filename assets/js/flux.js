@@ -48,15 +48,16 @@ export class Flux {
         
         // Initialize all sections with independent state management
         FluxSectionState.initializeSections({
-            documentsHistory: fixtureData,
-            parentDocuments: fixtureData,
-            childDocuments: fixtureData
+            documentsHistory: fixtureData.documents,
+            parentDocuments: fixtureData.documents,
+            childDocuments: fixtureData.documents,
+            logs: fixtureData.logs
         });
     }
 
     getFixtureData() {
-        // This should match the data structure from flux-template.js
-        return [
+        // Documents data structure
+        const documentsData = [
             {
                 docId: '6889b6292eb4e6.41501526',
                 name: 'REEC – Engagé vers COMET',
@@ -75,7 +76,6 @@ export class Flux {
                 type: 'U',
                 status: 'Cancel'
             }
-            // Add more fixture data as needed for testing
         ].concat(Array(16).fill().map((_, i) => ({
             docId: `test${i + 1}.id`,
             name: `Test Document ${i + 1}`,
@@ -85,9 +85,48 @@ export class Flux {
             type: 'U',
             status: i % 2 === 0 ? 'Error_transformed' : 'Cancel'
         })));
-}
 
-} // end of the class 
+        // Logs data structure matching the screenshot
+        const logsData = [
+            {
+                id: '207568887',
+                reference: '67c80b9b825da9.34866137',
+                job: '67c80b9b825da9.34866137',
+                creationDate: '05/03/2025 09:30:30',
+                type: 'S ✓',
+                message: 'Status : Send'
+            },
+            {
+                id: '207568886',
+                reference: '67c80b9b825da9.34866137',
+                job: '67c80b9b825da9.34866137',
+                creationDate: '05/03/2025 09:30:30',
+                type: 'S ✓',
+                message: 'Target id : 129055'
+            }
+        ].concat(Array(16).fill().map((_, i) => ({
+            id: `20756${8860 + i}`,
+            reference: '67c80b9b825da9.34866137',
+            job: '67c80b9b825da9.34866137',
+            creationDate: '05/03/2025 09:30:30',
+            type: 'S ✓',
+            message: [
+                'Status : Ready_to_send',
+                'Status : Transformed',
+                'Status : Relate_OK',
+                'Status : Predecessor_OK',
+                'Type : U',
+                'Status : Filter_OK',
+                'Status : New'
+            ][i % 7]
+        })));
+
+        return {
+            documents: documentsData,
+            logs: logsData
+        };
+    }
+}
 
 // Initialize the flux manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

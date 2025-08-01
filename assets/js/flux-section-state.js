@@ -63,6 +63,10 @@ export class FluxSectionState {
             childDocuments: {
                 currentPage: 1,
                 isExpanded: true
+            },
+            logs: {
+                currentPage: 1,
+                isExpanded: true
             }
         };
     }
@@ -246,6 +250,10 @@ export class FluxSectionState {
         // Child Documents
         this.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
         this.setupPagination('child-documents-section', 'childDocuments', sectionsData.childDocuments || []);
+
+        // Logs
+        this.setupCollapsible('logs-section', 'logs', 'logs');
+        this.setupPagination('logs-section', 'logs', sectionsData.logs || []);
 
         console.log('✅ All sections initialized with independent state management');
     }

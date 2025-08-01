@@ -207,6 +207,57 @@ export class FluxDataSections {
     }
 
     /**
+     * Generates Logs section
+     * @param {Array<Object>} rows - Logs data with id, reference, job, creationDate, type, message
+     */
+    static generateLogsSection(rows = []) {
+        if (!rows.length) return ``;
+
+        const body = rows
+        .map(({ id, reference, job, creationDate, type, message }) => {
+            return `
+            <tr>
+                <td>${id}</td>
+                <td><a href="#" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
+                <td>${job}</td>
+                <td>${creationDate}</td>
+                <td><span style="color: #28a745; font-weight: bold;">${type}</span></td>
+                <td>${message}</td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper logs-section">
+            <div class="logs-header">
+            <h3>Logs</h3>
+            <span class="logs-count">(${rows.length})</span>
+            <button class="logs-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="logs-content">
+            <table class="logs-table">
+            <thead>
+                <tr>
+                <th>Id</th>
+                <th>Reference</th>
+                <th>Job</th>
+                <th>Creation date</th>
+                <th>Type</th>
+                <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
      * Generates the source data section HTML
      * @param {string} logoPath - Path to source logo image
      * @returns {string} HTML string for source section
