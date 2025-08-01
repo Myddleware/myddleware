@@ -671,7 +671,8 @@ label[for="update_password_oldPassword"] {
 
 
 /* Link hover animation with underline effect - Rule link only */
-#rule-link {
+#rule-link,
+.log-reference {
     position: relative;
     display: inline;
     color: #0F66A9;
@@ -680,7 +681,8 @@ label[for="update_password_oldPassword"] {
 }
 
 /* Create the underline effect using ::after pseudo-element */
-#rule-link::after {
+#rule-link::after,
+.log-reference::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -692,16 +694,19 @@ label[for="update_password_oldPassword"] {
 }
 
 /* Hover effects */
-#rule-link:hover {
+#rule-link:hover,
+.log-reference::hover {
     color: #337ab7;
 }
 
-#rule-link:hover::after {
+#rule-link:hover::after,
+.log-reference:hover::after {
     width: 100%;
 }
 
 /* For multi-line rule links using background-image */
-#rule-link.multiline {
+#rule-link.multiline,
+.log-reference.multiline {
     background-image: linear-gradient(to right, #337ab7, #337ab7);
     background-position: 0% 100%;
     background-repeat: no-repeat;
@@ -709,7 +714,8 @@ label[for="update_password_oldPassword"] {
     transition: background-size 0.3s ease, color 0.3s ease;
 }
 
-#rule-link.multiline:hover {
+#rule-link.multiline:hover,
+.log-reference.multiline:hover {
     background-size: 100% 1px;
     color: #337ab7;
 }

@@ -226,7 +226,7 @@ export class FluxDataSections {
             return `
             <tr>
                 <td>${id}</td>
-                <td><a href="#" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
+                <td><a href="#" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
                 <td>${job}</td>
                 <td>${creationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
