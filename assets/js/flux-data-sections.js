@@ -219,6 +219,8 @@ export class FluxDataSections {
             let typeColor = '#28a745'; // default green for 'S ✓'
             if (type.startsWith('W')) {
                 typeColor = '#ffc107'; // yellow for 'W x' types
+            } else if (type.startsWith('E')) {
+                typeColor = '#dc3545'; // red for 'E' types
             }
 
             return `
