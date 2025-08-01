@@ -208,43 +208,20 @@ export class FluxDataSections {
 
     /**
      * Generates Logs section
-     * @param {Array<Object>} rows - Logs data with id, reference, job, creationDate, type, status, message
+     * @param {Array<Object>} rows - Logs data with id, reference, job, creationDate, type, message
      */
     static generateLogsSection(rows = []) {
         if (!rows.length) return ``;
 
         const body = rows
-        .map(({ id, reference, job, creationDate, type, status, message }) => {
-            // Generate icon based on status (mimicking Twig template logic)
-            let icon = '';
-            let statusClass = `gblstatus_${status}`;
-            
-            switch(status) {
-                case 'close':
-                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>';
-                    break;
-                case 'error':
-                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>';
-                    break;
-                case 'open':
-                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>';
-                    break;
-                case 'cancel':
-                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewBox="0 0 16 16"><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/></svg>';
-                    break;
-                default:
-                    icon = '';
-            }
-            
+        .map(({ id, reference, job, creationDate, type, message }) => {
             return `
             <tr>
                 <td>${id}</td>
                 <td><a href="#" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
                 <td>${job}</td>
                 <td>${creationDate}</td>
-                <td class="ctr">
-                    <div class="${statusClass}">${type} ${icon}</div>
-                </td>
+                <td><span style="color: #28a745; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
             </tr>
             `;

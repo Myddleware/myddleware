@@ -86,7 +86,7 @@ export class Flux {
             status: i % 2 === 0 ? 'Error_transformed' : 'Cancel'
         })));
 
-        // Logs data structure with varied statuses for icon display
+        // Logs data structure matching the screenshot
         const logsData = [
             {
                 id: '207568887',
@@ -94,7 +94,6 @@ export class Flux {
                 job: '67c80b9b825da9.34866137',
                 creationDate: '05/03/2025 09:30:30',
                 type: 'S ✓',
-                status: 'close',
                 message: 'Status : Send'
             },
             {
@@ -102,33 +101,25 @@ export class Flux {
                 reference: '67c80b9b825da9.34866137',
                 job: '67c80b9b825da9.34866137',
                 creationDate: '05/03/2025 09:30:30',
-                type: 'E ✗',
-                status: 'error',
+                type: 'S ✓',
                 message: 'Target id : 129055'
             }
-        ].concat(Array(16).fill().map((_, i) => {
-            const statuses = ['close', 'error', 'open', 'cancel'];
-            const types = ['S ✓', 'E ✗', 'O ↻', 'C !'];
-            const statusIndex = i % 4;
-            
-            return {
-                id: `20756${8860 + i}`,
-                reference: '67c80b9b825da9.34866137',
-                job: '67c80b9b825da9.34866137',
-                creationDate: '05/03/2025 09:30:30',
-                type: types[statusIndex],
-                status: statuses[statusIndex],
-                message: [
-                    'Status : Ready_to_send',
-                    'Status : Transformed',
-                    'Status : Relate_OK',
-                    'Status : Predecessor_OK',
-                    'Type : U',
-                    'Status : Filter_OK',
-                    'Status : New'
-                ][i % 7]
-            };
-        }));
+        ].concat(Array(16).fill().map((_, i) => ({
+            id: `20756${8860 + i}`,
+            reference: '67c80b9b825da9.34866137',
+            job: '67c80b9b825da9.34866137',
+            creationDate: '05/03/2025 09:30:30',
+            type: 'S ✓',
+            message: [
+                'Status : Ready_to_send',
+                'Status : Transformed',
+                'Status : Relate_OK',
+                'Status : Predecessor_OK',
+                'Type : U',
+                'Status : Filter_OK',
+                'Status : New'
+            ][i % 7]
+        })));
 
         return {
             documents: documentsData,
