@@ -105,6 +105,25 @@ export class FluxSectionState {
     static setupPagination(sectionClass, stateKey, rows) {
         const state = this.getState();
         const sectionState = state[stateKey];
+        
+        if (!sectionState) {
+            console.error(`Section state not found for: ${stateKey}. Available states:`, Object.keys(state));
+            // Create missing state with defaults
+            const updatedState = this.updateSectionState(stateKey, {
+                currentPage: 1,
+                isExpanded: true
+            });
+            const newSectionState = updatedState[stateKey];
+            if (!newSectionState) {
+                console.error(`Failed to create state for: ${stateKey}`);
+                return;
+            }
+            // Use the newly created state
+            var currentPage = newSectionState.currentPage;
+        } else {
+            var currentPage = sectionState.currentPage;
+        }
+        
         const pageCount = Math.ceil(rows.length / this.PAGE_SIZE);
 
         if (pageCount <= 1) {
@@ -121,7 +140,7 @@ export class FluxSectionState {
             btn.textContent = i;
             btn.className = 'pagination-btn';
             
-            if (i === sectionState.currentPage) {
+            if (i === currentPage) {
                 btn.classList.add('active');
             }
 
@@ -141,7 +160,7 @@ export class FluxSectionState {
             section.appendChild(controls);
             
             // Show initial page
-            this.showPage(sectionClass, stateKey, sectionState.currentPage, rows);
+            this.showPage(sectionClass, stateKey, currentPage, rows);
             console.log(`✅ Pagination setup complete for: ${stateKey} (${pageCount} pages)`);
         } else {
             console.warn(`Section not found for pagination: .${sectionClass}`);
@@ -189,8 +208,22 @@ export class FluxSectionState {
         }
 
         const header = section.querySelector(`.${sectionName}-header`);
-        const content = section.querySelector(`.${sectionName}-content`);
-        const toggleBtn = section.querySelector(`.${sectionName}-toggle-btn`);
+        let content;
+        
+        // Handle special case for Documents History section
+        if (sectionName === 'custom') {
+            content = section.querySelector('.custom-content');
+        } else {
+            content = section.querySelector(`.${sectionName}-content`);
+        }
+        let toggleBtn;
+        
+        // Handle special case for Documents History section
+        if (sectionName === 'custom') {
+            toggleBtn = section.querySelector('.toggle-btn');
+        } else {
+            toggleBtn = section.querySelector(`.${sectionName}-toggle-btn`);
+        }
 
         if (!header || !content || !toggleBtn) {
             console.warn(`Elements not found for section: ${sectionName}`);
@@ -202,12 +235,25 @@ export class FluxSectionState {
         const sectionState = state[stateKey];
 
         if (!sectionState) {
-            console.error(`Section state not found for: ${stateKey}`);
-            return;
+            console.error(`Section state not found for: ${stateKey}. Available states:`, Object.keys(state));
+            // Create missing state with defaults
+            const updatedState = this.updateSectionState(stateKey, {
+                currentPage: 1,
+                isExpanded: true
+            });
+            const newSectionState = updatedState[stateKey];
+            if (!newSectionState) {
+                console.error(`Failed to create state for: ${stateKey}`);
+                return;
+            }
+            // Use the newly created state
+            var isExpanded = newSectionState.isExpanded;
+        } else {
+            var isExpanded = sectionState.isExpanded;
         }
 
         // Set initial state
-        if (sectionState.isExpanded) {
+        if (isExpanded) {
             content.style.display = '';
             toggleBtn.textContent = '-';
             toggleBtn.setAttribute('aria-expanded', 'true');
