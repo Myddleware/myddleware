@@ -1,7 +1,6 @@
 /* ─── wrapper spacing ───────────────────────────────────────────────────── */
 .data-wrapper.custom-section {
-  width: 100%;
-  margin: 2rem 0;
+  /* Styles are now handled in flux.css to ensure proper centering */
 }
 .custom-header {
   display: flex;
@@ -28,6 +27,8 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
 }
 .custom-table th,
 .custom-table td {
@@ -75,3 +76,10 @@
   cursor: pointer;
 }
 .toggle-btn:hover { background: #d1d5db; }
+
+/* ─── pagination controls ─────────────────────────────────────────────── */
+.data-wrapper.custom-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
