@@ -4,11 +4,12 @@
 }
 .custom-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: baseline;
   margin-bottom: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 0.5rem;
+  position: relative;
 }
 .custom-header h3 {
   margin: 0;
@@ -67,7 +68,7 @@
 
 /* expand fold button */
 .toggle-btn {
-  margin-left: auto;
+  right: 0;
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   border: none;
