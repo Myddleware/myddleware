@@ -666,3 +666,50 @@ label[for="update_password_oldPassword"] {
     flex-direction: row;
     gap: 1rem;
   }
+
+/* new link for rules in documents */
+
+
+/* Link hover animation with underline effect - Rule link only */
+#rule-link {
+    position: relative;
+    display: inline;
+    color: #0F66A9;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* Create the underline effect using ::after pseudo-element */
+#rule-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background-color: #337ab7;
+    transition: width 0.3s ease;
+}
+
+/* Hover effects */
+#rule-link:hover {
+    color: #337ab7;
+}
+
+#rule-link:hover::after {
+    width: 100%;
+}
+
+/* For multi-line rule links using background-image */
+#rule-link.multiline {
+    background-image: linear-gradient(to right, #337ab7, #337ab7);
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.3s ease, color 0.3s ease;
+}
+
+#rule-link.multiline:hover {
+    background-size: 100% 1px;
+    color: #337ab7;
+}
