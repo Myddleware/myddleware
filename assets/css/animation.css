@@ -674,7 +674,8 @@ label[for="update_password_oldPassword"] {
 #rule-link,
 .log-reference,
 .log-job,
-.doc-id {
+.doc-id,
+.doc-name {
     position: relative;
     display: inline;
     color: #0F66A9;
@@ -686,7 +687,8 @@ label[for="update_password_oldPassword"] {
 #rule-link::after,
 .log-reference::after,
 .log-job::after,
-.doc-id::after {
+.doc-id::after,
+.doc-name::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -701,14 +703,16 @@ label[for="update_password_oldPassword"] {
 #rule-link:hover,
 .log-reference:hover,
 .log-job:hover,
-.doc-id:hover {
+.doc-id:hover,
+.doc-name:hover {
     color: #337ab7;
 }
 
 #rule-link:hover::after,
 .log-reference:hover::after,
 .log-job:hover::after,
-.doc-id:hover::after {
+.doc-id:hover::after,
+.doc-name:hover::after {
     width: 100%;
 }
 
@@ -716,7 +720,8 @@ label[for="update_password_oldPassword"] {
 #rule-link.multiline,
 .log-reference.multiline,
 .log-job.multiline,
-.doc-id.multiline {
+.doc-id.multiline,
+.doc-name.multiline {
     background-image: linear-gradient(to right, #337ab7, #337ab7);
     background-position: 0% 100%;
     background-repeat: no-repeat;
@@ -727,7 +732,8 @@ label[for="update_password_oldPassword"] {
 #rule-link.multiline:hover,
 .log-reference.multiline:hover,
 .log-job.multiline:hover,
-.doc-id.multiline:hover {
+.doc-id.multiline:hover,
+.doc-name.multiline:hover {
     background-size: 100% 1px;
     color: #337ab7;
 }

@@ -43,7 +43,7 @@ export class FluxDataSections {
             return `
             <tr>
                 <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td>${name}</td>
+                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>
@@ -102,7 +102,7 @@ export class FluxDataSections {
             return `
             <tr>
                 <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td>${name}</td>
+                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>
@@ -161,7 +161,7 @@ export class FluxDataSections {
             return `
             <tr>
                 <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td>${name}</td>
+                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>
