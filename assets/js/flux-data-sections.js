@@ -1,4 +1,4 @@
-console.log('flux-data-sections.js loaded');
+// console.log('flux-data-sections.js loaded');
 
 export class FluxDataSections {
     /**
@@ -9,7 +9,7 @@ export class FluxDataSections {
      * @returns {string} HTML string for all data sections
      */
     static generateDataSections(sourceImagePath, targetImagePath, historyImagePath) {
-        console.log('🏗️ Generating data sections with placeholder containers');
+        // console.log('🏗️ Generating data sections with placeholder containers');
         
         try {
             return `
@@ -324,7 +324,7 @@ export class FluxDataSections {
      * @param {Object|null} sourceData - Source data object from API
      */
     static updateSourceData(sourceData) {
-        console.log('📊 Updating source data section');
+        // console.log('📊 Updating source data section');
         this.updateDataSection('source', sourceData, 'Source');
     }
 
@@ -333,7 +333,7 @@ export class FluxDataSections {
      * @param {Object|null} targetData - Target data object from API
      */
     static updateTargetData(targetData) {
-        console.log('🎯 Updating target data section');
+        // console.log('🎯 Updating target data section');
         this.updateDataSection('target', targetData, 'Target');
     }
 
@@ -342,7 +342,7 @@ export class FluxDataSections {
      * @param {Object|null} historyData - History data object from API
      */
     static updateHistoryData(historyData) {
-        console.log('📜 Updating history data section');
+        // console.log('📜 Updating history data section');
         this.updateDataSection('history', historyData, 'History');
     }
 
@@ -374,7 +374,7 @@ export class FluxDataSections {
             // Add click handlers for field expansion
             this.addFieldClickHandlers(sectionElement);
             
-            console.log(`✅ ${sectionName} data updated successfully`);
+            // console.log(`✅ ${sectionName} data updated successfully`);
             
         } catch (error) {
             console.error(`❌ Error updating ${sectionName.toLowerCase()} data:`, error);
@@ -483,7 +483,7 @@ export class FluxDataSections {
             }
         });
         document.dispatchEvent(event);
-        console.log('📢 Notified FluxFieldExpanner of new content');
+        // console.log('📢 Notified FluxFieldExpanner of new content');
     }
 
     /**
