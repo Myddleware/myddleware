@@ -279,9 +279,6 @@ export class FluxTemplate {
                     return;
                 }
                 
-                // console.log('✅ Document data loaded successfully!');
-                // console.log('this is the data', data);
-                
                 // Extract and update each piece of data using modular functions
                 FluxTemplate.updateRuleInfo(extractRuleInfo(data));
                 FluxTemplate.updateDocumentStatus(extractDocumentStatus(data));
