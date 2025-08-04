@@ -1,7 +1,5 @@
 console.log('flux.js loaded');
 
-import * as THREE from 'three';
-import { ThreeModal } from '../../public/assets/js/three-modal.js';
 import { FluxTemplate } from './flux-template.js';
 import { FluxEvents } from './flux-events.js';
 import { FluxFieldExpander } from './flux-field-expander.js';
