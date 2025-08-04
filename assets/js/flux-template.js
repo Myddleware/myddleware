@@ -6,6 +6,7 @@ import {
     extractDocumentType, 
     extractDocumentAttempts, 
     extractDocumentDates,
+    getDocumentHistory
 } from './flux-data-extractor.js';
 
 import {
@@ -191,6 +192,8 @@ export class FluxTemplate {
                 status: 'Cancel'
             }
             ];
+
+        const myHistoryPayload = extractDocumentHistory(documentId)
 
         // Logs fixture data matching the screenshot
         const myLogsPayload = [
