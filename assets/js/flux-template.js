@@ -6,7 +6,6 @@ import {
     extractDocumentType, 
     extractDocumentAttempts, 
     extractDocumentDates,
-    getRuleName  // Keep for backward compatibility
 } from './flux-data-extractor.js';
 
 export class FluxTemplate {
