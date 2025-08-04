@@ -262,7 +262,7 @@ export class FluxTemplate {
                         </table>
                         </div>
                         ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
-                        ${FluxDataSections.generateCustomSection(myCustomPayload)}
+                        ${FluxDataSections.generateDocumentHistory(myCustomPayload)}
                         ${FluxDataSections.generateParentDocumentsSection(myCustomPayload)}
                         ${FluxDataSections.generateChildDocumentsSection(myCustomPayload)}
                         ${FluxDataSections.generateLogsSection(myLogsPayload)}

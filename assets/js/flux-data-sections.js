@@ -31,7 +31,7 @@ export class FluxDataSections {
      *   Each row should have: docId, name, sourceId, targetId,
      *   modificationDate, type, status
      */
-    static generateCustomSection(rows = []) {
+    static generateDocumentHistory(rows = []) {
         if (!rows.length) return ``;
 
         // build each row's <tr>…
