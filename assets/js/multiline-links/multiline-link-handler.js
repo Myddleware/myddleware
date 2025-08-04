@@ -1,4 +1,4 @@
-console.log('multiline-link-handler.js loaded');
+// console.log('multiline-link-handler.js loaded');
 
 export class MultilineLinkHandler {
     constructor() {
@@ -8,7 +8,7 @@ export class MultilineLinkHandler {
     }
 
     init() {
-        console.log('🔗 Initializing MultilineLinkHandler');
+        // console.log('🔗 Initializing MultilineLinkHandler');
         
         // Wait for DOM to be ready
         if (document.readyState === 'loading') {
@@ -19,13 +19,13 @@ export class MultilineLinkHandler {
 
         // Listen for dynamic content updates
         document.addEventListener('fluxDataUpdated', () => {
-            console.log('📢 Received fluxDataUpdated event, re-checking links');
+            // console.log('📢 Received fluxDataUpdated event, re-checking links');
             setTimeout(() => this.checkAllLinks(), 100);
         });
     }
 
     setupHandler() {
-        console.log('🎯 Setting up multiline link handler');
+        // console.log('🎯 Setting up multiline link handler');
         
         // Initial check for existing links
         this.checkAllLinks();
@@ -63,7 +63,7 @@ export class MultilineLinkHandler {
             });
 
             if (shouldCheck) {
-                console.log('🔄 New content detected, checking links');
+                // console.log('🔄 New content detected, checking links');
                 setTimeout(() => this.checkAllLinks(), 50);
             }
         });
@@ -82,7 +82,7 @@ export class MultilineLinkHandler {
         // Focus specifically on .doc-name links as they're most likely to be multi-line
         const docNameLinks = document.querySelectorAll('.doc-name');
         
-        console.log(`🔍 Checking ${docNameLinks.length} .doc-name links for multi-line behavior`);
+        // console.log(`🔍 Checking ${docNameLinks.length} .doc-name links for multi-line behavior`);
         
         docNameLinks.forEach(link => this.processLink(link));
 
@@ -107,7 +107,7 @@ export class MultilineLinkHandler {
         const isMultiline = this.isLinkMultiline(link);
         
         if (isMultiline) {
-            console.log('📏 Multi-line link detected:', link.textContent.substring(0, 30) + '...');
+            // console.log('📏 Multi-line link detected:', link.textContent.substring(0, 30) + '...');
             link.classList.add('multiline-detected');
             this.applyMultilineStyles(link);
         } else {
@@ -136,7 +136,7 @@ export class MultilineLinkHandler {
         const threshold = singleLineHeight * 1.3; // 30% tolerance
         const isMultiline = actualHeight > threshold;
         
-        console.log(`📐 Link height: ${actualHeight}px, single-line: ${singleLineHeight}px, multiline: ${isMultiline}`);
+        // console.log(`📐 Link height: ${actualHeight}px, single-line: ${singleLineHeight}px, multiline: ${isMultiline}`);
         
         return isMultiline;
     }
@@ -153,7 +153,7 @@ export class MultilineLinkHandler {
 
     // Public method to manually trigger a check (useful for debugging)
     recheckLinks() {
-        console.log('🔄 Manual recheck triggered');
+        // console.log('🔄 Manual recheck triggered');
         this.checkAllLinks();
     }
 }
