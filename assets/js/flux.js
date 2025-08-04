@@ -1,4 +1,4 @@
-console.log('flux.js loaded');
+// console.log('flux.js loaded');
 
 import { FluxTemplate } from './flux-template.js';
 import { FluxEvents } from './flux-events.js';
