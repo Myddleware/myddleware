@@ -28,7 +28,7 @@ export class FluxDataSections {
     /**
      * Renders a full‑width placeholder table under Source/Target/History.
      * @param {Array<Object>} rows
-     *   Each row should have: docId, name, sourceId, targetId,
+     *   Each row should have: docId, name, ruleId, sourceId, targetId,
      *   modificationDate, type, status
      */
     static generateDocumentHistory(rows = []) {
@@ -36,14 +36,26 @@ export class FluxDataSections {
 
         // build each row's <tr>…
         const body = rows
-        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             // turn "Error_transformed" → "error_transformed" for class names
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
+
             return `
             <tr>
-                <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>

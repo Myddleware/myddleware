@@ -1724,6 +1724,7 @@ $result = [];
                 $historyData[] = [
                     'docId' => $histDoc->getId(),
                     'name' => $rule->getName(),
+                    'ruleId' => $rule->getId(),
                     'sourceId' => $histDoc->getSource(),
                     'targetId' => $histDoc->getTarget(),
                     'modificationDate' => $histDoc->getDateModified()->format('d/m/Y H:i:s'),
