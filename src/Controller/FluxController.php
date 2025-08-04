@@ -1669,4 +1669,81 @@ $result = [];
         
         return $typeLabels[$type] ?? $type;
     }
+
+    /**
+     * Document history API endpoint
+     * @Route("/api/flux/document-history/{id}", name="api_flux_document_history", methods={"GET"})
+     */
+    public function getDocumentHistory($id): JsonResponse {
+        try {
+            // error_log("getDocumentHistory called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                // error_log("getDocumentHistory: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                // error_log("getDocumentHistory: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                // error_log("getDocumentHistory: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            // Get history documents (all documents for the same source and rule)
+            $historyDocuments = $this->entityManager->getRepository(Document::class)->findBy(
+                [
+                    'source' => $document->getSource(), 
+                    'rule' => $document->getRule(), 
+                    'deleted' => 0
+                ], 
+                ['dateModified' => 'DESC'], 
+                10 // limit to 10 most recent
+            );
+            
+            // If only one record, the history is the current document, so we remove it => no history
+            if (1 == count($historyDocuments)) {
+                $historyDocuments = [];
+            }
+            
+            // Build the response data
+            $historyData = [];
+            foreach ($historyDocuments as $histDoc) {
+                $statusInfo = $this->getDocumentStatusInfo($histDoc);
+                
+                $historyData[] = [
+                    'docId' => $histDoc->getId(),
+                    'name' => $rule->getName(),
+                    'sourceId' => $histDoc->getSource(),
+                    'targetId' => $histDoc->getTarget(),
+                    'modificationDate' => $histDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'type' => $histDoc->getType(),
+                    'status' => $statusInfo['status'],
+                    'statusClass' => $statusInfo['status_class']
+                ];
+            }
+            
+            // error_log("getDocumentHistory: Successfully retrieved " . count($historyData) . " history documents for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $historyData
+            ]);
+            
+        } catch (\Exception $e) {
+            // error_log("getDocumentHistory: Exception occurred: " . $e->getMessage());
+            // error_log("getDocumentHistory: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
 }
