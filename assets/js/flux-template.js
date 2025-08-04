@@ -269,7 +269,7 @@ export class FluxTemplate {
                         
         // After returning the template, load ALL document data with a single call
         setTimeout(() => {
-            console.log('🚀 Loading comprehensive document data...');
+            // console.log('🚀 Loading comprehensive document data...');
             
             // NEW APPROACH: Single API call + modular extraction
             getDocumentData(documentId, function(data, error) {
@@ -280,6 +280,7 @@ export class FluxTemplate {
                 }
                 
                 console.log('✅ Document data loaded successfully!');
+                console.log('this is the data', data);
                 
                 // Extract and update each piece of data using modular functions
                 FluxTemplate.updateRuleInfo(extractRuleInfo(data));
@@ -318,7 +319,7 @@ export class FluxTemplate {
             const ruleLink = `${baseUrl}/rule/view/${ruleInfo.id}`;
             linkElement.href = ruleLink;
             linkElement.textContent = ruleInfo.name;
-            console.log('✅ Updated rule link:', ruleLink);
+            // console.log('✅ Updated rule link:', ruleLink);
         }
     }
     
@@ -339,7 +340,7 @@ export class FluxTemplate {
             globalStatusElement.innerHTML = `<span class="${statusInfo.global_status_class || ''}">${statusInfo.global_status_label}</span>`;
         }
         
-        console.log('✅ Updated document status with colors');
+        // console.log('✅ Updated document status with colors');
     }
     
     static updateDocumentType(typeInfo) {
@@ -351,7 +352,7 @@ export class FluxTemplate {
         const typeElement = document.getElementById('document-type');
         if (typeElement && typeInfo.type) {
             typeElement.textContent = typeInfo.type;
-            console.log('✅ Updated document type');
+            // console.log('✅ Updated document type');
         }
     }
     
@@ -368,7 +369,7 @@ export class FluxTemplate {
                 attemptText += ` / ${attemptInfo.maxAttempts}`;
             }
             attemptElement.textContent = attemptText;
-            console.log('✅ Updated document attempts');
+            // console.log('✅ Updated document attempts');
         }
     }
     
@@ -394,7 +395,7 @@ export class FluxTemplate {
             modificationElement.textContent = dateInfo.modificationDate;
         }
         
-        console.log('✅ Updated document dates');
+        // console.log('✅ Updated document dates');
     }
     
     static showErrorState() {
@@ -422,7 +423,7 @@ export class FluxTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateDataSections(documentData) {
-        console.log('🔄 Updating all data sections with real data');
+        // console.log('🔄 Updating all data sections with real data');
         
         try {
             // Extract data for each section
@@ -437,7 +438,7 @@ export class FluxTemplate {
                 FluxDataSections.updateHistoryData(historyData);
             }, 50); // Small delay to ensure DOM sections are ready
             
-            console.log('✅ All data sections update initiated');
+            // console.log('✅ All data sections update initiated');
             
         } catch (error) {
             console.error('❌ Error updating data sections:', error);
@@ -453,7 +454,7 @@ export class FluxTemplate {
     static extractSourceData(documentData) {
         try {
             const sourceData = documentData?.source_data;
-            console.log('📊 Extracted source data:', sourceData ? 'Available' : 'Not available');
+            // console.log('📊 Extracted source data:', sourceData ? 'Available' : 'Not available');
             return sourceData || null;
         } catch (error) {
             console.error('❌ Error extracting source data:', error);
@@ -469,7 +470,7 @@ export class FluxTemplate {
     static extractTargetData(documentData) {
         try {
             const targetData = documentData?.target_data;
-            console.log('🎯 Extracted target data:', targetData ? 'Available' : 'Not available');
+            // console.log('🎯 Extracted target data:', targetData ? 'Available' : 'Not available');
             return targetData || null;
         } catch (error) {
             console.error('❌ Error extracting target data:', error);

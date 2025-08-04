@@ -8,13 +8,13 @@ import { MultilineLinkHandler } from './multiline-links/multiline-link-handler.j
 
 export class Flux {
     constructor() {
-        console.log('Flux constructor');
+        // console.log('Flux constructor');
         this.multilineLinkHandler = null;
         this.init();
     }
 
     async init() {
-        console.log('Flux init');
+        // console.log('Flux init');
         this.createUIStructure();
         FluxEvents.setupEventListeners();
         FluxFieldExpander.init();
@@ -22,12 +22,12 @@ export class Flux {
         // Initialize multiline link handler after UI is created
         setTimeout(() => {
             this.multilineLinkHandler = new MultilineLinkHandler();
-            console.log('🔗 MultilineLinkHandler initialized in Flux');
+            // console.log('🔗 MultilineLinkHandler initialized in Flux');
         }, 500);
     }
 
     createUIStructure() {
-        console.log('Flux createUIStructure');
+        // console.log('Flux createUIStructure');
 
         const fluxContainer = document.getElementById('flux-container');
 
