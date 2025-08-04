@@ -323,53 +323,20 @@ td > a {
 /* Page View rule : mapping tab */
 
 .mapping-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    background: #fff;
-    transition: box-shadow 0.2s ease;
+	margin-bottom: 10px;
+	box-shadow: 3px 3px 3px rgba(0,0,0,0.1);
 }
 
-.mapping-card:hover {
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+.mapping-card-title {
+	margin: 10px;
 }
 
-.mapping-line-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.mapped-fields{
+	color: #198BCA;
 }
 
-.mapping-line {
-    flex: 1;
-    font-size: 0.95rem;
-    color: #444;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-}
-
-.mapping-line strong {
-    font-weight: 600;
-    color: #6c757d;
-}
-
-.comment-btn-wrapper button {
-    background: none;
-    border: none;
-    display: flex;    
-    color: #999;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin-bottom: 10px;
-    padding: 4px;
-    transition: color 0.2s ease;
-}
-
-.comment-btn-wrapper button:hover {
-    color: #198BCA;
+.mapped-formula {
+	color: #0F66A9;
 }
 
 

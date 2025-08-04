@@ -656,22 +656,9 @@ opacity: 0%;
 	border-bottom: none !important;
 }
 
-#description-field-value {
-	padding-left: 1em;
-}
-
 .inner-table-workflow {
 	padding: 0px 0px !important;
 }
-
-/* .border-bottom-connector-none {
-	border-bottom: none !important;
-	border-bottom-style: hidden !important;
-} */
-/* .border-bottom-workflow-none {
-	border-bottom: none !important;
-	border-bottom-style: hidden !important;
-} */
 
 .name-connector-fit-box {
 	min-width: fit-content;
@@ -826,9 +813,17 @@ td .link-fit-rule-name {
 	border-bottom: 0px solid #ffffff !important;	
 }
 
-table.table-rule-view tr:not(:first-child) > td:first-child {
+.table-rule-view:not(#tab_connector) tr > td:first-child {
     color: #6c757d;
-	padding-left: 45px;
+    padding-left: 45px;
+}
+
+#tab_connector tr:nth-child(even) td {
+    color: #000000;
+}
+
+#tab_connector tr:nth-child(odd) td {
+    color: #6c757d; 
 }
 
 table.table-rule-view th,
@@ -954,4 +949,9 @@ table.table-rule-view tr:first-child th {
 	text-align: center;
 	cursor: pointer;
 	margin-top: 0.3em;
+}
+
+.edit-button-description{
+	margin-left: 90%;
+	color: #337ab7;
 }

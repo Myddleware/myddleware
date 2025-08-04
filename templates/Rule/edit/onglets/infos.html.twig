@@ -78,7 +78,7 @@
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
 											{{ 'view_rule.action.duplic_rule' | trans }}
 										</a>
-										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-primary btn-sm">
+										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
 										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
