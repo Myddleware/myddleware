@@ -8,6 +8,10 @@ import {
     extractDocumentDates,
 } from './flux-data-extractor.js';
 
+import {
+    extractDocumentHistory
+} from './flux-dynamic-data-extractor.js';
+
 export class FluxTemplate {
     static generateHTML() {
         const path_img_modal = "../../../build/images/solution/";
