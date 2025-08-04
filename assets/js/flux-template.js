@@ -193,8 +193,6 @@ export class FluxTemplate {
             }
             ];
 
-        const myHistoryPayload = extractDocumentHistory(documentId)
-
         // Logs fixture data matching the screenshot
         const myLogsPayload = [
             {
