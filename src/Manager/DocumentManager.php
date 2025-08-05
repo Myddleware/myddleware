@@ -714,7 +714,8 @@ class DocumentManager
 								document.id,							
 								document.rule_id,
 								document.status,
-								document.global_status											
+								document.global_status,										
+								document.job_lock											
 							FROM document								
 							WHERE 
 									document.rule_id = :rule_id 
@@ -734,6 +735,9 @@ class DocumentManager
 
             // if id found, we stop to send an error, we cancel the predecessor and try again
             if (!empty($result['id'])) {
+				if (!empty($result['job_lock'])) {
+					throw new \Exception('The successor document '.$result['id'].' is locked. Failed to cancel it. The current document is stopped. ');
+				}
 				// Load the document that locks the current document
 				$paramCancel['id_doc_myddleware'] = $result['id'];
 				$paramCancel['jobId'] = $this->jobId;
