@@ -102,19 +102,31 @@ export class FluxDataSections {
 
     /**
      * Generates Parent documents section
-     * @param {Array<Object>} rows - Same structure as Documents history
+     * @param {Array<Object>} rows - Each row should have: docId, name, ruleId, sourceId, targetId, modificationDate, type, status
      */
     static generateParentDocumentsSection(rows = []) {
         if (!rows.length) return ``;
 
         const body = rows
-        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
             <tr>
-                <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>
@@ -130,7 +142,7 @@ export class FluxDataSections {
         .join(``);
 
         return `
-        <div class="data-wrapper parent-documents-section">
+        <div class="data-wrapper parent-documents-section" data-section="parent-documents">
             <div class="parent-documents-header">
             <h3>Parent documents</h3>
             <span class="parent-documents-count">(${rows.length})</span>
@@ -161,19 +173,31 @@ export class FluxDataSections {
 
     /**
      * Generates Child documents section
-     * @param {Array<Object>} rows - Same structure as Documents history
+     * @param {Array<Object>} rows - Each row should have: docId, name, ruleId, sourceId, targetId, modificationDate, type, status
      */
     static generateChildDocumentsSection(rows = []) {
         if (!rows.length) return ``;
 
         const body = rows
-        .map(({ docId, name, sourceId, targetId, modificationDate, type, status }) => {
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
             <tr>
-                <td><a href="#" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
-                <td><a href="#" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${sourceId}</td>
                 <td>${targetId}</td>
                 <td>${modificationDate}</td>
@@ -189,7 +213,7 @@ export class FluxDataSections {
         .join(``);
 
         return `
-        <div class="data-wrapper child-documents-section">
+        <div class="data-wrapper child-documents-section" data-section="child-documents">
             <div class="child-documents-header">
             <h3>Child documents</h3>
             <span class="child-documents-count">(${rows.length})</span>

@@ -10,7 +10,9 @@ import {
 } from './flux-data-extractor.js';
 
 import {
-    extractDocumentHistory
+    extractDocumentHistory,
+    extractDocumentParents,
+    extractDocumentChildren
 } from './flux-dynamic-data-extractor.js';
 
 export class FluxTemplate {
@@ -194,6 +196,8 @@ export class FluxTemplate {
             ];
 
         const myHistoryPayload = extractDocumentHistory(documentId)
+        const myParentsPayload = extractDocumentParents(documentId)
+        const myChildrenPayload = extractDocumentChildren(documentId)
 
         // Logs fixture data matching the screenshot
         const myLogsPayload = [
@@ -269,8 +273,8 @@ export class FluxTemplate {
                         </div>
                         ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
                         ${FluxDataSections.generateDocumentHistory(myCustomPayload)}
-                        ${FluxDataSections.generateParentDocumentsSection(myCustomPayload)}
-                        ${FluxDataSections.generateChildDocumentsSection(myCustomPayload)}
+                        ${FluxDataSections.generateParentDocumentsSection(myParentsPayload)}
+                        ${FluxDataSections.generateChildDocumentsSection(myChildrenPayload)}
                         ${FluxDataSections.generateLogsSection(myLogsPayload)}
                         `;
                         

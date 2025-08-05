@@ -1747,4 +1747,157 @@ $result = [];
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Document parent documents API endpoint
+     * @Route("/api/flux/document-parents/{id}", name="api_flux_document_parents", methods={"GET"})
+     */
+    public function getDocumentParents($id): JsonResponse {
+        try {
+            // error_log("getDocumentParents called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // PARENT RELATE DOCUMENT
+            // Document link to other document, the parent ones
+            $parentRelationships = $this->entityManager->getRepository(DocumentRelationship::class)->findBy(
+                ['doc_id' => $document->getId()],
+                ['dateCreated' => 'DESC'],        // order
+                10                                    // limit
+            );
+            
+            // Get the detail of documents related
+            $parentData = [];
+            foreach ($parentRelationships as $parentRelationship) {
+                $parentDocument = $this->entityManager->getRepository(Document::class)->find($parentRelationship->getDocRelId());
+                if ($parentDocument) {
+                    $rule = $parentDocument->getRule();
+                    $statusInfo = $this->getDocumentStatusInfo($parentDocument);
+                    
+                    $parentData[] = [
+                        'docId' => $parentDocument->getId(),
+                        'name' => $rule ? $rule->getName() : 'Unknown Rule',
+                        'ruleId' => $rule ? $rule->getId() : null,
+                        'sourceId' => $parentDocument->getSource(),
+                        'targetId' => $parentDocument->getTarget(),
+                        'modificationDate' => $parentDocument->getDateModified()->format('d/m/Y H:i:s'),
+                        'type' => $parentDocument->getType(),
+                        'status' => $statusInfo['status'],
+                        'statusClass' => $statusInfo['status_class'],
+                        'sourceField' => $parentRelationship->getSourceField()
+                    ];
+                }
+            }
+            
+            // error_log("getDocumentParents: Successfully retrieved " . count($parentData) . " parent documents for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $parentData
+            ]);
+            
+        } catch (\Exception $e) {
+            // error_log("getDocumentParents: Exception occurred: " . $e->getMessage());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Document child documents API endpoint
+     * @Route("/api/flux/document-children/{id}", name="api_flux_document_children", methods={"GET"})
+     */
+    public function getDocumentChildren($id): JsonResponse {
+        try {
+            // error_log("getDocumentChildren called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            $childData = [];
+            
+            // POST DOCUMENT (Direct children via parentId)
+            $postDocuments = $this->entityManager->getRepository(Document::class)->findBy(
+                ['parentId' => $id],
+                ['dateCreated' => 'DESC'],    // order
+                10                                // limit
+            );
+            
+            foreach ($postDocuments as $postDocument) {
+                $rule = $postDocument->getRule();
+                $statusInfo = $this->getDocumentStatusInfo($postDocument);
+                
+                $childData[] = [
+                    'docId' => $postDocument->getId(),
+                    'name' => $rule ? $rule->getName() : 'Unknown Rule',
+                    'ruleId' => $rule ? $rule->getId() : null,
+                    'sourceId' => $postDocument->getSource(),
+                    'targetId' => $postDocument->getTarget(),
+                    'modificationDate' => $postDocument->getDateModified()->format('d/m/Y H:i:s'),
+                    'type' => $postDocument->getType(),
+                    'status' => $statusInfo['status'],
+                    'statusClass' => $statusInfo['status_class'],
+                    'relationshipType' => 'direct'
+                ];
+            }
+            
+            // CHILD RELATE DOCUMENT (Related children via DocumentRelationship)
+            $childRelationships = $this->entityManager->getRepository(DocumentRelationship::class)->findBy(
+                ['doc_rel_id' => $document->getId()],
+                ['dateCreated' => 'DESC'],            // order
+                10                                        // limit
+            );
+            
+            foreach ($childRelationships as $childRelationship) {
+                $childDocument = $this->entityManager->getRepository(Document::class)->find($childRelationship->getDocId());
+                if ($childDocument) {
+                    $rule = $childDocument->getRule();
+                    $statusInfo = $this->getDocumentStatusInfo($childDocument);
+                    
+                    $childData[] = [
+                        'docId' => $childDocument->getId(),
+                        'name' => $rule ? $rule->getName() : 'Unknown Rule',
+                        'ruleId' => $rule ? $rule->getId() : null,
+                        'sourceId' => $childDocument->getSource(),
+                        'targetId' => $childDocument->getTarget(),
+                        'modificationDate' => $childDocument->getDateModified()->format('d/m/Y H:i:s'),
+                        'type' => $childDocument->getType(),
+                        'status' => $statusInfo['status'],
+                        'statusClass' => $statusInfo['status_class'],
+                        'sourceField' => $childRelationship->getSourceField(),
+                        'relationshipType' => 'related'
+                    ];
+                }
+            }
+            
+            // error_log("getDocumentChildren: Successfully retrieved " . count($childData) . " child documents for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $childData
+            ]);
+            
+        } catch (\Exception $e) {
+            // error_log("getDocumentChildren: Exception occurred: " . $e->getMessage());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
 }
