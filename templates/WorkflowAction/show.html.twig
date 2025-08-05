@@ -16,7 +16,13 @@
 		<div>
 			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
 			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2">{{ 'view_workflow_action.edit'|trans }}</a>
-			<a href="{{ path('workflow_action_delete', {'id': workflow.id}) }}" onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" class="btn btn-outline-danger m-2">{{ 'view_workflow_action.delete'|trans }}</a>
+			<form method="post" action="{{ path('workflow_action_delete', {'id': workflow.id}) }}" style="display: inline;">
+				<button type="submit" 
+						onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" 
+						class="btn btn-outline-danger m-2">
+					{{ 'view_workflow_action.delete'|trans }}
+				</button>
+			</form>
 		</div>
 
 				<div class="link-help-view text-end mb-4 mx-4">
