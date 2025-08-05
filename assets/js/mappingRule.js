@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let commentOutside = form.closest('.comment-box').nextElementSibling;
 
             if (commentText === "") {
-                alert("Le commentaire ne peut pas être vide.");
+                alert("Comment cannot be empty.");
                 return;
             }
 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Erreur lors de la mise à jour du commentaire');
+                        throw new Error('Error updating comment');
                     }
                     return response.text();
                 })
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert("Une erreur s'est produite lors de la mise à jour du commentaire.");
+                    alert("An error occurred while updating the comment.");
                 });
         });
     });
@@ -96,4 +96,22 @@ document.addEventListener('DOMContentLoaded', function () {
             button.innerHTML = '<i class="fa fa-minus"></i>';
         }
     };
+
+    const searchInput = document.getElementById('field-filter');
+    const cards = document.querySelectorAll('.mapping-card');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.trim().toLowerCase();
+
+        cards.forEach(card => {
+            const target = card.getAttribute('data-target');
+            const source = card.getAttribute('data-source');
+
+            if (target.includes(query) || source.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
 });

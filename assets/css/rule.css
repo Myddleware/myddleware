@@ -995,3 +995,7 @@ table.table-rule-view tr:first-child th {
 .toggle-formula:hover {
 	text-decoration: underline;
 }
+
+.search-formula{
+	max-width: 295px;
+}

@@ -41,11 +41,11 @@
     </div>
 </div>
 
-
+<input type="text" id="field-filter" class="form-control m-3 search-formula" placeholder="Search...">
 <div class="d-flex mapping-container flex-wrap p-5">
 	{% if fields %}
 		{% for c, f in fields %}
-			<div class="card mapping-card text-center">
+			<div class="card mapping-card text-center" data-target="{{ f.getTarget|lower }}" data-source="{{ f.getSource|lower }}">
 				<div class="card-body mapping-card-body">
 					<h4 class="card-title mapping-card-title">{{ f.getTarget }}</h4>
 					<p class="card-text mapping-card-text"></p>
