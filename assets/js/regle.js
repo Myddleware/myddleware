@@ -80,9 +80,15 @@ $(function () {
   }
 
   // ----------------------------- Step
-  if (typeof onglets !== "undefined" && onglets) {
+  
+ if (
+    typeof onglets !== "undefined" &&
+    onglets &&
+    typeof $.fn.tabs === "function"
+  ) {
     $("#tabs").tabs(onglets);
   }
+
 
   // ----------------------------- Step 1
 
