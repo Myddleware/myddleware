@@ -222,8 +222,8 @@ view_rule:
         empty: No field
         formula_empty: No formula
         formula: Formula
-        module_target: Target module
-        module_source: Source Module
+        module_target: Target
+        module_source: Source
         comment: Comment
         add_comment: Save
         comment_title: Add/Edit comment

@@ -29,20 +29,19 @@
 		{{'rule.help'|trans}}
 	</a>
 </div>
-
-<div id="fd-title" class="left">
-	<p>{{'view_rule.mapping.module_target'|trans}}
-		:
-		{{ rule.getModuleTarget }}
-	</p>
-	<p></p>
-	<p>{{'view_rule.mapping.module_source'|trans}}
-		:
-		{{ rule.getModuleSource }}
-	</p>
-	<p></p>
+<div id="info-toggle" class="info-toggle collapsed">
+    <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#03c4eb" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 5.5a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 5H14.5a.5.5 0 0 1 .5.5zm-14 5a.5.5 0 0 1 .5-.5h10.793l-2.147-2.146a.5.5 0 0 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L12.293 11H1.5a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+    </div>
+    <div class="text">
+        <strong>{{'view_rule.mapping.module_target'|trans}}</strong>: {{ rule.getModuleTarget }}<br />
+        <strong>{{'view_rule.mapping.module_source'|trans}}</strong>: {{ rule.getModuleSource }}
+    </div>
 </div>
-<div class="clr"></div>
+
+
 <div class="d-flex mapping-container flex-wrap p-5">
 	{% if fields %}
 		{% for c, f in fields %}
