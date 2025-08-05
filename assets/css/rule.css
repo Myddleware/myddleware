@@ -984,3 +984,14 @@ table.table-rule-view tr:first-child th {
 .info-toggle.expanded .text {
   opacity: 1;
 }
+
+.toggle-formula {
+	font-size: 0.85em;
+	padding-left: 8px;
+	cursor: pointer;
+	color: #03c4eb;
+}
+
+.toggle-formula:hover {
+	text-decoration: underline;
+}

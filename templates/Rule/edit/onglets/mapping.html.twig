@@ -52,15 +52,21 @@
 					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}
 					</p>
 					{% if f.getFormula %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
-							:
-							{{ f.getFormula }}
-						</p>
-					{% else %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
-					{% endif %}
+                        <p class="mapped-formula card-text mapping-card-text">
+                            {{ 'view_rule.mapping.formula'|trans }} :
+                            <span class="formula-preview">
+                                {{ f.getFormula|slice(0, 10) }}{% if f.getFormula|length > 10 %}...{% endif %}
+                            </span>
+                            {% if f.getFormula|length > 10 %}
+                                <span class="formula-full d-none">{{ f.getFormula }}</span>
+                                <button type="button" class="btn btn-sm btn-link toggle-formula" onclick="toggleFormula(this)"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <p class="mapped-formula card-text mapping-card-text">{{ 'view_rule.mapping.formula_empty'|trans }}</p>
+                    {% endif %}
 				</p>
-				<button type="button" class="btn btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
+				<button type="button" class="btn btn-sm btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
 					<i class="fa fa-info-circle" aria-hidden="true"></i>
 				</button>
 				<div class="comment-box">

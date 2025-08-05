@@ -79,4 +79,21 @@ document.addEventListener('DOMContentLoaded', function () {
         collapse();
         }
     });
+
+    window.toggleFormula = function (button) {
+        const preview = button.parentElement.querySelector('.formula-preview');
+        const full = button.parentElement.querySelector('.formula-full');
+
+        const isExpanded = !full.classList.contains('d-none');
+
+        if (isExpanded) {
+            full.classList.add('d-none');
+            preview.classList.remove('d-none');
+            button.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
+        } else {
+            full.classList.remove('d-none');
+            preview.classList.add('d-none');
+            button.innerHTML = '<i class="fa fa-minus"></i>';
+        }
+    };
 });
