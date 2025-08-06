@@ -36,6 +36,7 @@ use App\Solutions\facebook;
 use App\Solutions\file;
 use App\Solutions\hubspot;
 use App\Solutions\internallist;
+use App\Solutions\iomad;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
@@ -90,6 +91,7 @@ class SolutionManager
 							'airtable',
 							'sendinblue',
 							'internallist',
+							'iomad',
 							'yousign',
 							'brevo',
 							'acton'
@@ -116,6 +118,7 @@ class SolutionManager
         airtable $airtable,
         sendinblue $sendinblue,
         internallist $internallist,
+        iomad $iomad,
         yousign $yousign,
         brevo $brevo,
         acton $acton
