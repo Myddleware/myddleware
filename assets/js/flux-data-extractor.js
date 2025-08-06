@@ -10,7 +10,7 @@ export function getDocumentData(documentId, callback) {
     
     // Check cache first
     if (documentDataCache.has(documentId)) {
-        // console.log('📋 Using cached data for document:', documentId);
+        console.log('📋 Using cached data for document:', documentId);
         const cachedData = documentDataCache.get(documentId);
         if (callback) callback(cachedData, null);
         return;
@@ -180,8 +180,8 @@ export function getDocumentHistory(documentId, callback) {
             // console.log('📡 Sending request for document history...');
         },
         success: function(response) {
-            // console.log('✅ Document history request successful!');
-            // console.log('Response:', response);
+            console.log('✅ Document history request successful!');
+            console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
