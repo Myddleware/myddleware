@@ -71,7 +71,7 @@ export function getDocumentParents(documentId, callback) {
 
 // ===== DOCUMENT CHILDREN FETCHER =====
 export function getDocumentChildren(documentId, callback) {
-    console.log('getDocumentChildren called with documentId:', documentId);
+    // console.log('getDocumentChildren called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -104,11 +104,11 @@ export function getDocumentChildren(documentId, callback) {
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-            console.log('📡 Sending request for document children...');
+            // console.log('📡 Sending request for document children...');
         },
         success: function(response) {
-            console.log('✅ Document children request successful!');
-            console.log('Response:', response);
+            // console.log('✅ Document children request successful!');
+            // console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);

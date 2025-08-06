@@ -93,7 +93,7 @@ export function extractDocumentParents(documentId) {
 }
 
 export function extractDocumentChildren(documentId) {
-    console.log("calling extractDocumentChildren with id: ", documentId);
+    // console.log("calling extractDocumentChildren with id: ", documentId);
     
     return new Promise((resolve) => {
         if (!documentId) {
@@ -111,7 +111,7 @@ export function extractDocumentChildren(documentId) {
                 }
                 
                 if (data && data.length > 0) {
-                    console.log('🔄 About to update document children section with', data.length, 'records');
+                    // console.log('🔄 About to update document children section with', data.length, 'records');
                     // Update the document children section with real data
                     updateDocumentChildrenSection(data);
                     resolve(data);
@@ -152,19 +152,19 @@ function updateDocumentParentsSection(parentsData) {
  * @param {Array} childrenData - Array of child document objects
  */
 function updateDocumentChildrenSection(childrenData) {
-    console.log('🔍 updateDocumentChildrenSection called with data:', childrenData);
+    // console.log('🔍 updateDocumentChildrenSection called with data:', childrenData);
     try {
         // Find the existing children section and update it
         const childrenSection = document.querySelector('[data-section="child-documents"]');
-        console.log('🔍 Found children section in DOM:', childrenSection);
+        // console.log('🔍 Found children section in DOM:', childrenSection);
         if (childrenSection) {
             // Import FluxDataSections dynamically and regenerate the section
             import('./flux-data-sections.js').then(module => {
-                console.log('🔍 FluxDataSections module loaded:', module);
+                // console.log('🔍 FluxDataSections module loaded:', module);
                 const newChildrenHTML = module.FluxDataSections.generateChildDocumentsSection(childrenData);
-                console.log('🔍 Generated new HTML:', newChildrenHTML);
+                // console.log('🔍 Generated new HTML:', newChildrenHTML);
                 childrenSection.outerHTML = newChildrenHTML;
-                console.log('✅ Updated document children section with', childrenData.length, 'records');
+                // console.log('✅ Updated document children section with', childrenData.length, 'records');
             });
         } else {
             console.warn('⚠️ Document children section not found in DOM');

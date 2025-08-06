@@ -37,13 +37,13 @@ export class FluxTemplate {
         let myChildrenPayload = [];
         extractDocumentChildren(documentId).then(data => {
             myChildrenPayload = data;
-            console.log("🔍 myChildrenPayload resolved:", myChildrenPayload);
-            console.log("🔍 But template was already generated...");
+            // console.log("🔍 myChildrenPayload resolved:", myChildrenPayload);
+            // console.log("🔍 But template was already generated...");
         });
         
         const myLogsPayload = [];
 
-        console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
+        // console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
         // First, return the template with placeholders
         const template = `
             <div class="flex-row" id="flux-button-container">
