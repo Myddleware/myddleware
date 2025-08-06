@@ -2,7 +2,7 @@
 
 // ===== DOCUMENT PARENTS FETCHER =====
 export function getDocumentParents(documentId, callback) {
-    console.log('getDocumentParents called with documentId:', documentId);
+    // console.log('getDocumentParents called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -38,8 +38,8 @@ export function getDocumentParents(documentId, callback) {
             // console.log('📡 Sending request for document parents...');
         },
         success: function(response) {
-            console.log('✅ Document parents request successful!');
-            console.log('Response:', response);
+            // console.log('✅ Document parents request successful!');
+            // console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);

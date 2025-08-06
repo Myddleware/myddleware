@@ -82,11 +82,11 @@ export function extractDocumentParents(documentId) {
             }
             
             if (data && data.length > 0) {
-                console.log('🔄 About to update document parents section with', data.length, 'records');
+                // console.log('🔄 About to update document parents section with', data.length, 'records');
                 // Update the document parents section with real data
                 updateDocumentParentsSection(data);
             } else {
-                console.log('⚠️ No parent data received or data is empty');
+                // console.log('⚠️ No parent data received or data is empty');
             }
         });
     }, 150);
@@ -132,18 +132,18 @@ export function extractDocumentChildren(documentId) {
  */
 function updateDocumentParentsSection(parentsData) {
     try {
-        console.log('🔍 Looking for parent documents section in DOM...');
+        // console.log('🔍 Looking for parent documents section in DOM...');
         // Find the existing parents section and update it
         const parentsSection = document.querySelector('[data-section="parent-documents"]');
-        console.log('🔍 Found parents section in DOM:', parentsSection);
+        // console.log('🔍 Found parents section in DOM:', parentsSection);
         if (parentsSection) {
             // Import FluxDataSections dynamically and regenerate the section
             import('./flux-data-sections.js').then(module => {
-                console.log('🔍 FluxDataSections module loaded for parents:', module);
+                // console.log('🔍 FluxDataSections module loaded for parents:', module);
                 const newParentsHTML = module.FluxDataSections.generateParentDocumentsSection(parentsData);
-                console.log('🔍 Generated new parents HTML:', newParentsHTML);
+                // console.log('🔍 Generated new parents HTML:', newParentsHTML);
                 parentsSection.outerHTML = newParentsHTML;
-                console.log('✅ Updated document parents section with', parentsData.length, 'records');
+                // console.log('✅ Updated document parents section with', parentsData.length, 'records');
             }).catch(moduleError => {
                 console.error('❌ Error loading FluxDataSections module for parents:', moduleError);
             });
