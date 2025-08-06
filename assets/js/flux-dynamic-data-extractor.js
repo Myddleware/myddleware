@@ -116,7 +116,6 @@ export function extractDocumentChildren(documentId) {
                     updateDocumentChildrenSection(data);
                     resolve(data);
                 } else {
-                    console.log('⚠️ No children data to display');
                     resolve([]);
                 }
             });
