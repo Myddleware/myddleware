@@ -73,7 +73,7 @@ export class FluxTemplate {
                         </table>
                         </div>
                         ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
-                        ${FluxDataSections.generateDocumentHistory([])}
+                        ${FluxDataSections.generateDocumentHistory(myHistoryPayload)}
                         ${FluxDataSections.generateParentDocumentsSection(myParentsPayload)}
                         ${FluxDataSections.generateChildDocumentsSection(myChildrenPayload)}
                         ${FluxDataSections.generateLogsSection(myLogsPayload)}
