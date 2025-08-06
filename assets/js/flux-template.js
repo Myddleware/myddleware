@@ -32,29 +32,29 @@ export class FluxTemplate {
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 
-        console.log('🚀 FluxTemplate.generateHTML called with documentId:', documentId);
+        // console.log('🚀 FluxTemplate.generateHTML called with documentId:', documentId);
         
         const myHistoryPayload = extractDocumentHistory(documentId);
-        console.log('📊 History payload extracted:', myHistoryPayload?.length || 0, 'items');
+        // console.log('📊 History payload extracted:', myHistoryPayload?.length || 0, 'items');
         
         const myParentsPayload = extractDocumentParents(documentId);
-        console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
+        // console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
         
         // Handle the promise from extractDocumentChildren
         let myChildrenPayload = [];
         extractDocumentChildren(documentId).then(data => {
             myChildrenPayload = data;
-            console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
+            // console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
         });
         
         // Initialize logs payload and fetch logs data
         let myLogsPayload = [];
-        console.log('📋 Starting logs data fetch for documentId:', documentId);
+        // console.log('📋 Starting logs data fetch for documentId:', documentId);
         getDocumentLogs(documentId, (logsData, error) => {
             if (error) {
                 console.error('❌ Error fetching logs data:', error);
             } else {
-                console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
+                // console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
                 myLogsPayload = logsData || [];
                 // Update the logs section with real data
                 FluxTemplate.updateLogsSection(myLogsPayload);
@@ -351,37 +351,37 @@ export class FluxTemplate {
      * @param {Array} logsData - Array of logs data
      */
     static updateLogsSection(logsData) {
-        console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
-        console.log('📋 Sample log data:', logsData?.[0]);
+        // console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
+        // console.log('📋 Sample log data:', logsData?.[0]);
         
         try {
             const logsContainer = document.querySelector('.logs-section');
-            console.log('📋 Logs container found:', !!logsContainer);
+            // console.log('📋 Logs container found:', !!logsContainer);
             
             if (!logsContainer) {
                 console.warn('⚠️ Logs section container not found in DOM');
                 // Let's also check what containers do exist
                 const allDataWrappers = document.querySelectorAll('.data-wrapper');
-                console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
+                // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
                 allDataWrappers.forEach((wrapper, index) => {
-                    console.log(`📋 Container ${index}:`, wrapper.className);
+                    // console.log(`📋 Container ${index}:`, wrapper.className);
                 });
                 return;
             }
 
             if (!logsData || logsData.length === 0) {
-                console.log('📋 No logs data available, keeping empty section');
+                // console.log('📋 No logs data available, keeping empty section');
                 return;
             }
 
             // Generate new logs section HTML with real data
-            console.log('📋 Generating new logs HTML...');
+            // console.log('📋 Generating new logs HTML...');
             const newLogsHtml = FluxDataSections.generateLogsSection(logsData);
-            console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
+            // console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
             
             // Replace the existing logs section
             logsContainer.outerHTML = newLogsHtml;
-            console.log('✅ Logs section updated successfully');
+            // console.log('✅ Logs section updated successfully');
             
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
