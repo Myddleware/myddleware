@@ -6,7 +6,7 @@ let documentDataCache = new Map();
 
 // ===== COMPREHENSIVE DOCUMENT DATA FETCHER =====
 export function getDocumentData(documentId, callback) {
-    // console.log('getDocumentData called with documentId:', documentId);
+    console.log('getDocumentData called with documentId:', documentId);
     
     // Check cache first
     if (documentDataCache.has(documentId)) {

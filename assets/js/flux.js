@@ -49,27 +49,13 @@ export class Flux {
         // Clean up any expired entries first
         FluxSectionState.cleanupExpiredEntries();
         
-        // Get fixture data from template (this would normally come from API)
-        const fixtureData = this.getFixtureData();
-        
-        // Initialize all sections with independent state management
+        // Initialize all sections with empty data - real data will be loaded via API calls
         FluxSectionState.initializeSections({
-            documentsHistory: fixtureData.documents,
-            parentDocuments: fixtureData.documents,
-            childDocuments: fixtureData.documents,
-            logs: fixtureData.logs
+            documentsHistory: [],
+            parentDocuments: [],
+            childDocuments: [],
+            logs: []
         });
-    }
-
-    getFixtureData() {
-        const documentsData = [];
-
-        const logsData = [];
-
-        return {
-            documents: documentsData,
-            logs: logsData
-        };
     }
 }
 
