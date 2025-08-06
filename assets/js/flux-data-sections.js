@@ -176,7 +176,18 @@ export class FluxDataSections {
      * @param {Array<Object>} rows - Each row should have: docId, name, ruleId, sourceId, targetId, modificationDate, type, status
      */
     static generateChildDocumentsSection(rows = []) {
-        if (!rows.length) return ``;
+        if (!rows.length) {
+            return `
+            <div class="data-wrapper child-documents-section" data-section="child-documents">
+                <div class="child-documents-header">
+                    <h3>📄 Child Documents</h3>
+                </div>
+                <div class="child-documents-content">
+                    <p>Loading child documents...</p>
+                </div>
+            </div>
+            `;
+        }
 
         const body = rows
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
