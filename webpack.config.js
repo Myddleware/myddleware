@@ -29,7 +29,7 @@ Encore
     .addEntry('filter', './assets/js/filter.js')
     .addEntry('crontab', './assets/js/crontab.js')
     .addEntry('account', './assets/js/account.js')
-    .addEntry('flux', './assets/js/flux.js')
+    .addEntry('flux', './assets/flux.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
