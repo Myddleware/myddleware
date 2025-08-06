@@ -26,6 +26,63 @@ export class FluxDataSections {
     }
 
     /**
+     * Generates the source data section with logo
+     * @param {string} sourceImagePath - Path to the source logo image
+     * @returns {string} HTML string for the source section
+     */
+    static generateSourceSection(sourceImagePath) {
+        return `
+            <div class="source-section">
+                <div class="section-header">
+                    <img src="${sourceImagePath}" alt="Source Logo" class="solution-logo source-logo" style="width: 24px; height: 24px; margin-right: 8px;">
+                    <h3>Source</h3>
+                </div>
+                <div id="source-data-body" class="section-body">
+                    <p>Loading source data...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Generates the target data section with logo
+     * @param {string} targetImagePath - Path to the target logo image
+     * @returns {string} HTML string for the target section
+     */
+    static generateTargetSection(targetImagePath) {
+        return `
+            <div class="target-section">
+                <div class="section-header">
+                    <img src="${targetImagePath}" alt="Target Logo" class="solution-logo target-logo" style="width: 24px; height: 24px; margin-right: 8px;">
+                    <h3>Target</h3>
+                </div>
+                <div id="target-data-body" class="section-body">
+                    <p>Loading target data...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Generates the history data section with logo
+     * @param {string} historyImagePath - Path to the history logo image
+     * @returns {string} HTML string for the history section
+     */
+    static generateHistorySection(historyImagePath) {
+        return `
+            <div class="history-section">
+                <div class="section-header">
+                    <img src="${historyImagePath}" alt="History Logo" class="solution-logo history-logo" style="width: 24px; height: 24px; margin-right: 8px;">
+                    <h3>History</h3>
+                </div>
+                <div id="history-data-body" class="section-body">
+                    <p>Loading history data...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
      * Renders a full‑width placeholder table under Source/Target/History.
      * @param {Array<Object>} rows
      *   Each row should have: docId, name, ruleId, sourceId, targetId,

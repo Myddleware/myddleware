@@ -21,9 +21,10 @@ import { FluxSectionState } from './flux-section-state.js';
 export class FluxTemplate {
     static generateHTML() {
         const path_img_modal = "../../../build/images/solution/";
-        const solutionSource = "salesforce.png";
-        const solutionTarget = "hubspot.png";
-        const solutionHistory = "hubspot.png";
+        // Default logos - will be updated with real ones when API data arrives
+        const solutionSource = "default.png";
+        const solutionTarget = "default.png";
+        const solutionHistory = "default.png";
 
         const fullpathSource = `${path_img_modal}${solutionSource}`;
         const fullpathTarget = `${path_img_modal}${solutionTarget}`;
@@ -126,6 +127,9 @@ export class FluxTemplate {
                 
                 // Update data sections with real data
                 FluxTemplate.updateDataSections(data);
+                
+                // Update logos with real solution information
+                FluxTemplate.updateLogos(data);
             });
         }, 100);
 
@@ -393,6 +397,63 @@ export class FluxTemplate {
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
             console.error('Error stack:', error.stack);
+        }
+    }
+
+    /**
+     * Updates the solution logos with real solution information
+     * @param {Object} documentData - Complete document data from API
+     */
+    static updateLogos(documentData) {
+        console.log('🖼️ Updating logos with solution data');
+        
+        try {
+            if (!documentData || !documentData.source_solution || !documentData.target_solution) {
+                console.warn('⚠️ Solution information not available in document data');
+                return;
+            }
+
+            const path_img_modal = "../../../build/images/solution/";
+            const sourceSolution = documentData.source_solution.toLowerCase();
+            const targetSolution = documentData.target_solution.toLowerCase();
+            
+            console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
+
+            // Update source logo
+            const sourceImg = document.querySelector('.source-logo');
+            if (sourceImg) {
+                const sourceLogo = `${path_img_modal}${sourceSolution}.png`;
+                sourceImg.src = sourceLogo;
+                sourceImg.alt = `${sourceSolution} logo`;
+                console.log('✅ Updated source logo:', sourceLogo);
+            } else {
+                console.warn('⚠️ Source logo element not found');
+            }
+
+            // Update target logo
+            const targetImg = document.querySelector('.target-logo');
+            if (targetImg) {
+                const targetLogo = `${path_img_modal}${targetSolution}.png`;
+                targetImg.src = targetLogo;
+                targetImg.alt = `${targetSolution} logo`;
+                console.log('✅ Updated target logo:', targetLogo);
+            } else {
+                console.warn('⚠️ Target logo element not found');
+            }
+
+            // Update history logo (usually same as target)
+            const historyImg = document.querySelector('.history-logo');
+            if (historyImg) {
+                const historyLogo = `${path_img_modal}${targetSolution}.png`;
+                historyImg.src = historyLogo;
+                historyImg.alt = `${targetSolution} logo`;
+                console.log('✅ Updated history logo:', historyLogo);
+            } else {
+                console.warn('⚠️ History logo element not found');
+            }
+
+        } catch (error) {
+            console.error('❌ Error updating logos:', error);
         }
     }
 }

@@ -1491,12 +1491,27 @@ $result = [];
                 $errorMessage = $this->getLatestErrorMessage($document);
             }
             
+            // Get solution information for logos
+            $sourceSolution = null;
+            $targetSolution = null;
+            try {
+                $sourceSolution = $rule->getConnectorSource()->getSolution()->getName();
+                $targetSolution = $rule->getConnectorTarget()->getSolution()->getName();
+                error_log("getDocumentData: Found solutions - Source: " . $sourceSolution . ", Target: " . $targetSolution);
+            } catch (\Exception $e) {
+                error_log("getDocumentData: Error getting solution names: " . $e->getMessage());
+            }
+            
             // Prepare comprehensive response
             $responseData = [
                 // Rule information
                 'rule_name' => $rule->getName(),
                 'rule_id' => $rule->getId(),
                 'rule_url' => null, // Could be constructed if needed
+                
+                // Solution information for logos
+                'source_solution' => $sourceSolution,
+                'target_solution' => $targetSolution,
                 
                 // Document basic info
                 'document_id' => $id,
