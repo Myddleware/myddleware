@@ -28,7 +28,7 @@ export function getDocumentParents(documentId, callback) {
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/flux/document-parents/${documentId}`;
+    const url = `${baseUrl}/rule/api/document-detail/document-parents/${documentId}`;
     // console.log('🚀 Fetching document parents from:', url);
     
     $.ajax({
@@ -97,7 +97,7 @@ export function getDocumentChildren(documentId, callback) {
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/flux/document-children/${documentId}`;
+    const url = `${baseUrl}/rule/api/document-detail/document-children/${documentId}`;
     // console.log('🚀 Fetching document children from:', url);
     
     $.ajax({

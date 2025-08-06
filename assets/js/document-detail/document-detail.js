@@ -1,12 +1,12 @@
 // console.log('flux.js loaded');
 
-import { FluxTemplate } from './flux-template.js';
-import { FluxEvents } from './flux-events.js';
-import { FluxFieldExpander } from './flux-field-expander.js';
-import { FluxSectionState } from './flux-section-state.js';
+import { DocumentDetailTemplate } from './document-detail-template.js';
+import { DocumentDetailEvents } from './document-detail-events.js';
+import { DocumentDetailFieldExpander } from './document-detail-field-expander.js';
+import { DocumentDetailSectionState } from './document-detail-section-state.js';
 import { MultilineLinkHandler } from '../multiline-links/multiline-link-handler.js';
 
-export class Flux {
+export class DocumentDetail {
     constructor() {
         // console.log('Flux constructor called');
         this.multilineLinkHandler = null;
@@ -16,8 +16,8 @@ export class Flux {
     async init() {
         // console.log('Flux init starting');
         this.createUIStructure();
-        FluxEvents.setupEventListeners();
-        FluxFieldExpander.init();
+        DocumentDetailEvents.setupEventListeners();
+        DocumentDetailFieldExpander.init();
         
         // Initialize multiline link handler after UI is created
         setTimeout(() => {
@@ -37,7 +37,7 @@ export class Flux {
         }
 
         // console.log('✅ flux-container found, generating template...');
-        fluxContainer.innerHTML = FluxTemplate.generateHTML();
+        fluxContainer.innerHTML = DocumentDetailTemplate.generateHTML();
         // console.log('✅ Template HTML inserted into flux-container');
         
         // Wait for the template's setTimeout to complete (template uses 100ms)
@@ -50,10 +50,10 @@ export class Flux {
 
     initializeSectionStateManagement() {
         // Clean up any expired entries first
-        FluxSectionState.cleanupExpiredEntries();
+        DocumentDetailSectionState.cleanupExpiredEntries();
         
         // Initialize all sections with empty data - real data will be loaded via API calls
-        FluxSectionState.initializeSections({
+        DocumentDetailSectionState.initializeSections({
             documentsHistory: [],
             parentDocuments: [],
             childDocuments: [],
@@ -65,5 +65,5 @@ export class Flux {
 // Initialize the flux manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // console.log('🚀 DOM loaded, initializing Flux...');
-    new Flux();
+    new DocumentDetail();
 });

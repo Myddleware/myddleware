@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export class FluxEvents {
+export class DocumentDetailEvents {
     static getBaseUrl() {
         return window.location.pathname.includes('/public/') 
             ? window.location.pathname.split('/public/')[0] + '/public'
@@ -10,25 +10,25 @@ export class FluxEvents {
     static setupEventListeners() {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'run-same-record') {
-                FluxEvents.handleRunSameRecord();
+                DocumentDetailEvents.handleRunSameRecord();
             }
         });
     }
 
     static async handleRunSameRecord() {
         try {
-            const documentId = FluxEvents.getDocumentId();
+            const documentId = DocumentDetailEvents.getDocumentId();
             
             if (!documentId) {
                 alert('Document ID not found');
                 return;
             }
 
-            const baseUrl = FluxEvents.getBaseUrl();
-            const response = await axios.get(`${baseUrl}/rule/flux/readrecord/${documentId}`);
+            const baseUrl = DocumentDetailEvents.getBaseUrl();
+            const response = await axios.get(`${baseUrl}/rule/document-detail/readrecord/${documentId}`);
             
             if (response.status === 200) {
-                window.location.href = `${baseUrl}/rule/flux/modern/${documentId}`;
+                window.location.href = `${baseUrl}/rule/document-detail/modern/${documentId}`;
             }
         } catch (error) {
             console.error('Error running same record:', error);

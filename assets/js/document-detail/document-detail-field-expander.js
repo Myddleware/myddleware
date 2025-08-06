@@ -1,4 +1,4 @@
-export class FluxFieldExpander {
+export class DocumentDetailFieldExpander {
     static init() {
         // console.log('🔧 FluxFieldExpander initializing...');
         this.setupFieldClickHandlers();

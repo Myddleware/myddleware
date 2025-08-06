@@ -1,4 +1,4 @@
-import { FluxDataSections } from './flux-data-sections.js';
+import { DocumentDetailDataSections } from './document-detail-data-sections.js';
 import { 
     getDocumentData, 
     extractRuleInfo, 
@@ -7,18 +7,18 @@ import {
     extractDocumentAttempts, 
     extractDocumentDates,
     getDocumentHistory
-} from './flux-data-extractor.js';
+} from './document-detail-data-extractor.js';
 
 import {
     extractDocumentHistory,
     extractDocumentParents,
     extractDocumentChildren
-} from './flux-dynamic-data-extractor.js';
+} from './document-detail-dynamic-data-extractor.js';
 
-import { getDocumentLogs } from './flux-data-extractor-logs.js';
-import { FluxSectionState } from './flux-section-state.js';
+import { getDocumentLogs } from './document-detail-data-extractor-logs.js';
+import { DocumentDetailSectionState } from './document-detail-section-state.js';
 
-export class FluxTemplate {
+export class DocumentDetailTemplate {
     static generateHTML() {
         const path_img_modal = "../../../build/images/solution/";
         // Default logos - will be updated with real ones when API data arrives
@@ -30,7 +30,7 @@ export class FluxTemplate {
         const fullpathTarget = `${path_img_modal}${solutionTarget}`;
         const fullpathHistory = `${path_img_modal}${solutionHistory}`;
 
-        // the url is like http://localhost/myddleware_NORMAL/public/rule/flux/modern/6863a07946e8b9.38306852
+        // the url is like http://localhost/myddleware_NORMAL/public/rule/document-detail/modern/6863a07946e8b9.38306852
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 
@@ -59,7 +59,7 @@ export class FluxTemplate {
                 // console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
                 myLogsPayload = logsData || [];
                 // Update the logs section with real data
-                FluxTemplate.updateLogsSection(myLogsPayload);
+                DocumentDetailTemplate.updateLogsSection(myLogsPayload);
             }
         });
 
@@ -99,11 +99,11 @@ export class FluxTemplate {
                         </tbody>
                         </table>
                         </div>
-                        ${FluxDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
-                        ${FluxDataSections.generateDocumentHistory(myHistoryPayload)}
-                        ${FluxDataSections.generateParentDocumentsSection(myParentsPayload)}
-                        ${FluxDataSections.generateChildDocumentsSection(myChildrenPayload)}
-                        ${FluxDataSections.generateLogsSection(myLogsPayload)}
+                        ${DocumentDetailDataSections.generateDataSections(fullpathSource, fullpathTarget, fullpathHistory)}
+                        ${DocumentDetailDataSections.generateDocumentHistory(myHistoryPayload)}
+                        ${DocumentDetailDataSections.generateParentDocumentsSection(myParentsPayload)}
+                        ${DocumentDetailDataSections.generateChildDocumentsSection(myChildrenPayload)}
+                        ${DocumentDetailDataSections.generateLogsSection(myLogsPayload)}
                         `;
                         
         // After returning the template, load ALL document data with a single call
@@ -114,22 +114,22 @@ export class FluxTemplate {
             getDocumentData(documentId, function(data, error) {
                 if (error) {
                     console.error('❌ Could not get document data:', error);
-                    FluxTemplate.showErrorState();
+                    DocumentDetailTemplate.showErrorState();
                     return;
                 }
                 
                 // Extract and update each piece of data using modular functions
-                FluxTemplate.updateRuleInfo(extractRuleInfo(data));
-                FluxTemplate.updateDocumentStatus(extractDocumentStatus(data));
-                FluxTemplate.updateDocumentType(extractDocumentType(data));
-                FluxTemplate.updateDocumentAttempts(extractDocumentAttempts(data));
-                FluxTemplate.updateDocumentDates(extractDocumentDates(data));
+                DocumentDetailTemplate.updateRuleInfo(extractRuleInfo(data));
+                DocumentDetailTemplate.updateDocumentStatus(extractDocumentStatus(data));
+                DocumentDetailTemplate.updateDocumentType(extractDocumentType(data));
+                DocumentDetailTemplate.updateDocumentAttempts(extractDocumentAttempts(data));
+                DocumentDetailTemplate.updateDocumentDates(extractDocumentDates(data));
                 
                 // Update data sections with real data
-                FluxTemplate.updateDataSections(data);
+                DocumentDetailTemplate.updateDataSections(data);
                 
                 // Update logos with real solution information
-                FluxTemplate.updateLogos(data);
+                DocumentDetailTemplate.updateLogos(data);
             });
         }, 100);
 
@@ -266,22 +266,22 @@ export class FluxTemplate {
         
         try {
             // Extract data for each section
-            const sourceData = FluxTemplate.extractSourceData(documentData);
-            const targetData = FluxTemplate.extractTargetData(documentData);
-            const historyData = FluxTemplate.extractHistoryData(documentData);
+            const sourceData = DocumentDetailTemplate.extractSourceData(documentData);
+            const targetData = DocumentDetailTemplate.extractTargetData(documentData);
+            const historyData = DocumentDetailTemplate.extractHistoryData(documentData);
             
             // Import FluxDataSections dynamically if needed, or call directly
             setTimeout(() => {
-                FluxDataSections.updateSourceData(sourceData);
-                FluxDataSections.updateTargetData(targetData);
-                FluxDataSections.updateHistoryData(historyData);
+                DocumentDetailDataSections.updateSourceData(sourceData);
+                DocumentDetailDataSections.updateTargetData(targetData);
+                DocumentDetailDataSections.updateHistoryData(historyData);
             }, 50); // Small delay to ensure DOM sections are ready
             
 // console.log('✅ All data sections update initiated');
             
         } catch (error) {
             console.error('❌ Error updating data sections:', error);
-            FluxTemplate.showDataSectionErrors();
+            DocumentDetailTemplate.showDataSectionErrors();
         }
     }
 
@@ -381,7 +381,7 @@ export class FluxTemplate {
 
             // Generate new logs section HTML with real data
             // console.log('📋 Generating new logs HTML...');
-            const newLogsHtml = FluxDataSections.generateLogsSection(logsData);
+            const newLogsHtml = DocumentDetailDataSections.generateLogsSection(logsData);
             // console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
             
             // Replace the existing logs section
@@ -390,8 +390,8 @@ export class FluxTemplate {
             
             // Re-initialize the section state management for the new DOM elements
             console.log('🔄 Re-initializing section state after logs update...');
-            FluxSectionState.setupCollapsible('logs-section', 'logs', 'logs');
-            FluxSectionState.setupPagination('logs-section', 'logs', logsData);
+            DocumentDetailSectionState.setupCollapsible('logs-section', 'logs', 'logs');
+            DocumentDetailSectionState.setupPagination('logs-section', 'logs', logsData);
             console.log('✅ Logs section state re-initialized');
             
         } catch (error) {

@@ -1,6 +1,6 @@
 // console.log('flux-data-sections.js loaded');
 
-export class FluxDataSections {
+export class DocumentDetailDataSections {
     /**
      * Generates the complete data sections HTML with real data
      * @param {string} sourceImagePath - Path to source system logo
@@ -106,7 +106,7 @@ export class FluxDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
@@ -188,7 +188,7 @@ export class FluxDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
@@ -270,7 +270,7 @@ export class FluxDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `

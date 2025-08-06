@@ -1,4 +1,4 @@
-export class FluxFieldExpanderUtils {
+export class DocumentDetailFieldExpanderUtils {
     static resetAllExpanded() {
         const expandedElements = document.querySelectorAll('.field-value.expanded');
         const icons = document.querySelectorAll('.field-edit-icon.show');

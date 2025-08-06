@@ -28,7 +28,7 @@ export function getDocumentLogs(documentId, callback) {
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/flux/document-logs/${documentId}`;
+    const url = `${baseUrl}/rule/api/document-detail/document-logs/${documentId}`;
     // console.log('🚀 Fetching document logs from:', url);
     
     $.ajax({

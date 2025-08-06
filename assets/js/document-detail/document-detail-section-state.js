@@ -1,7 +1,7 @@
 // console.log('flux-section-state.js loaded');
 
-export class FluxSectionState {
-    static STORAGE_KEY_PREFIX = 'flux_sections_';
+export class DocumentDetailSectionState {
+    static STORAGE_KEY_PREFIX = 'document_detail_sections_';
     static EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
     static PAGE_SIZE = 5;
 

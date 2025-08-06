@@ -1,7 +1,7 @@
-import { getDocumentHistory } from './flux-data-extractor.js';
-import { getDocumentParents, getDocumentChildren } from './flux-data-extractor-parents-children.js';
-import { FluxDataSections } from './flux-data-sections.js';
-import { FluxSectionState } from './flux-section-state.js';
+import { getDocumentHistory } from './document-detail-data-extractor.js';
+import { getDocumentParents, getDocumentChildren } from './document-detail-data-extractor-parents-children.js';
+import { DocumentDetailDataSections } from './document-detail-data-sections.js';
+import { DocumentDetailSectionState } from './document-detail-section-state.js';
 
 export function extractDocumentHistory(documentId) {
 
@@ -47,13 +47,13 @@ function updateDocumentHistorySection(historyData) {
             const mainDataWrapper = document.querySelector('.data-wrapper');
             if (mainDataWrapper) {
                 // Insert the history section after the main data wrapper
-                const newHistoryHTML = FluxDataSections.generateDocumentHistory(historyData);
+                const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData);
                 mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
                 
                 // Re-initialize section state management for the new DOM elements
                 console.log('🔄 Re-initializing document history section state (new insertion)...');
-                FluxSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
-                FluxSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
+                DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
+                DocumentDetailSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
                 console.log('✅ Document history section state initialized (new)');
                 return;
             }
@@ -61,13 +61,13 @@ function updateDocumentHistorySection(historyData) {
         
         if (historySection) {
             // Replace existing history section
-            const newHistoryHTML = FluxDataSections.generateDocumentHistory(historyData);
+            const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData);
             historySection.outerHTML = newHistoryHTML;
             
             // Re-initialize section state management for the new DOM elements
             console.log('🔄 Re-initializing document history section state (replacement)...');
-            FluxSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
-            FluxSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
+            DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
+            DocumentDetailSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
             console.log('✅ Document history section state re-initialized (replacement)');
         } else {
             console.warn('⚠️ Could not find appropriate location for document history section');
@@ -149,15 +149,15 @@ function updateDocumentParentsSection(parentsData) {
         if (parentsSection) {
             // Generate and update the section
             // console.log('🔍 FluxDataSections module loaded for parents');
-            const newParentsHTML = FluxDataSections.generateParentDocumentsSection(parentsData);
+            const newParentsHTML = DocumentDetailDataSections.generateParentDocumentsSection(parentsData);
             // console.log('🔍 Generated new parents HTML:', newParentsHTML);
             parentsSection.outerHTML = newParentsHTML;
             // console.log('✅ Updated document parents section with', parentsData.length, 'records');
             
             // Re-initialize section state management for the new DOM elements
             console.log('🔄 Re-initializing parent documents section state...');
-            FluxSectionState.setupCollapsible('parent-documents-section', 'parent-documents', 'parentDocuments');
-            FluxSectionState.setupPagination('parent-documents-section', 'parentDocuments', parentsData);
+            DocumentDetailSectionState.setupCollapsible('parent-documents-section', 'parent-documents', 'parentDocuments');
+            DocumentDetailSectionState.setupPagination('parent-documents-section', 'parentDocuments', parentsData);
             console.log('✅ Parent documents section state re-initialized');
         } else {
             console.warn('⚠️ Document parents section not found in DOM');
@@ -181,15 +181,15 @@ function updateDocumentChildrenSection(childrenData) {
         if (childrenSection) {
             // Generate and update the section
             // console.log('🔍 FluxDataSections module loaded');
-            const newChildrenHTML = FluxDataSections.generateChildDocumentsSection(childrenData);
+            const newChildrenHTML = DocumentDetailDataSections.generateChildDocumentsSection(childrenData);
             // console.log('🔍 Generated new HTML:', newChildrenHTML);
             childrenSection.outerHTML = newChildrenHTML;
             // console.log('✅ Updated document children section with', childrenData.length, 'records');
             
             // Re-initialize section state management for the new DOM elements
             console.log('🔄 Re-initializing child documents section state...');
-            FluxSectionState.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
-            FluxSectionState.setupPagination('child-documents-section', 'childDocuments', childrenData);
+            DocumentDetailSectionState.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
+            DocumentDetailSectionState.setupPagination('child-documents-section', 'childDocuments', childrenData);
             console.log('✅ Child documents section state re-initialized');
         } else {
             console.warn('⚠️ Document children section not found in DOM');
