@@ -62,70 +62,9 @@ export class Flux {
     }
 
     getFixtureData() {
-        // Documents data structure
-        const documentsData = [
-            {
-                docId: '6889b6292eb4e6.41501526',
-                name: 'REEC – Engagé vers COMET',
-                sourceId: '1079335',
-                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
-                modificationDate: '30/07/2025 08:30:02',
-                type: 'U',
-                status: 'Error_transformed'
-            },
-            {
-                docId: '6889aef46f03f7.32307392',
-                name: 'REEC – Engagé vers COMET',
-                sourceId: '1079335',
-                targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
-                modificationDate: '30/07/2025 07:30:01',
-                type: 'U',
-                status: 'Cancel'
-            }
-        ].concat(Array(16).fill().map((_, i) => ({
-            docId: `test${i + 1}.id`,
-            name: `Test Document ${i + 1}`,
-            sourceId: '1079335',
-            targetId: '5ccf4c12-14e6-7464-a5c8-66d0299f1c2d',
-            modificationDate: '30/07/2025 08:30:02',
-            type: 'U',
-            status: i % 2 === 0 ? 'Error_transformed' : 'Cancel'
-        })));
+        const documentsData = [];
 
-        // Logs data structure matching the screenshot
-        const logsData = [
-            {
-                id: '207568887',
-                reference: '67c80b9b825da9.34866137',
-                job: '67c80b9b825da9.34866137',
-                creationDate: '05/03/2025 09:30:30',
-                type: 'S ✓',
-                message: 'Status : Send'
-            },
-            {
-                id: '207568886',
-                reference: '67c80b9b825da9.34866137',
-                job: '67c80b9b825da9.34866137',
-                creationDate: '05/03/2025 09:30:30',
-                type: 'S ✓',
-                message: 'Target id : 129055'
-            }
-        ].concat(Array(16).fill().map((_, i) => ({
-            id: `20756${8860 + i}`,
-            reference: '67c80b9b825da9.34866137',
-            job: '67c80b9b825da9.34866137',
-            creationDate: '05/03/2025 09:30:30',
-            type: 'S ✓',
-            message: [
-                'Status : Ready_to_send',
-                'Status : Transformed',
-                'Status : Relate_OK',
-                'Status : Predecessor_OK',
-                'Type : U',
-                'Status : Filter_OK',
-                'Status : New'
-            ][i % 7]
-        })));
+        const logsData = [];
 
         return {
             documents: documentsData,
