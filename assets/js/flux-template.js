@@ -16,6 +16,7 @@ import {
 } from './flux-dynamic-data-extractor.js';
 
 import { getDocumentLogs } from './flux-data-extractor-logs.js';
+import { FluxSectionState } from './flux-section-state.js';
 
 export class FluxTemplate {
     static generateHTML() {
@@ -385,12 +386,9 @@ export class FluxTemplate {
             
             // Re-initialize the section state management for the new DOM elements
             console.log('🔄 Re-initializing section state after logs update...');
-            import('./flux-section-state.js').then(module => {
-                const FluxSectionState = module.FluxSectionState;
-                FluxSectionState.setupCollapsible('logs-section', 'logs', 'logs');
-                FluxSectionState.setupPagination('logs-section', 'logs', logsData);
-                console.log('✅ Logs section state re-initialized');
-            });
+            FluxSectionState.setupCollapsible('logs-section', 'logs', 'logs');
+            FluxSectionState.setupPagination('logs-section', 'logs', logsData);
+            console.log('✅ Logs section state re-initialized');
             
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
