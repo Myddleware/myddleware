@@ -40,7 +40,7 @@ export function getDocumentData(documentId, callback) {
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/document-detail/document-data/${documentId}`;
+    const url = `${baseUrl}/rule/api/flux/document-data/${documentId}`;
     // console.log('🚀 Fetching comprehensive document data from:', url);
     
     $.ajax({
@@ -170,7 +170,7 @@ export function getDocumentHistory(documentId, callback) {
         baseUrl = window.location.origin;
     }
     
-    const url = `${baseUrl}/rule/api/document-detail/document-history/${documentId}`;
+    const url = `${baseUrl}/rule/api/flux/document-history/${documentId}`;
     // console.log('🚀 Fetching document history from:', url);
     
     $.ajax({

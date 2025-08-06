@@ -106,7 +106,7 @@ export class DocumentDetailDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
@@ -188,7 +188,7 @@ export class DocumentDetailDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `
@@ -270,7 +270,7 @@ export class DocumentDetailDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
             
-            const documentUrl = `${baseUrl}/rule/document-detail/modern/${docId}`;
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
             return `

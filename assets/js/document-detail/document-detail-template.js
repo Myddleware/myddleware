@@ -30,7 +30,7 @@ export class DocumentDetailTemplate {
         const fullpathTarget = `${path_img_modal}${solutionTarget}`;
         const fullpathHistory = `${path_img_modal}${solutionHistory}`;
 
-        // the url is like http://localhost/myddleware_NORMAL/public/rule/document-detail/modern/6863a07946e8b9.38306852
+        // the url is like http://localhost/myddleware_NORMAL/public/rule/flux/modern/6863a07946e8b9.38306852
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 

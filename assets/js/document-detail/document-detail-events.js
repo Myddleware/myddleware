@@ -25,10 +25,10 @@ export class DocumentDetailEvents {
             }
 
             const baseUrl = DocumentDetailEvents.getBaseUrl();
-            const response = await axios.get(`${baseUrl}/rule/document-detail/readrecord/${documentId}`);
+            const response = await axios.get(`${baseUrl}/rule/flux/readrecord/${documentId}`);
             
             if (response.status === 200) {
-                window.location.href = `${baseUrl}/rule/document-detail/modern/${documentId}`;
+                window.location.href = `${baseUrl}/rule/flux/modern/${documentId}`;
             }
         } catch (error) {
             console.error('Error running same record:', error);
