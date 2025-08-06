@@ -383,6 +383,15 @@ export class FluxTemplate {
             logsContainer.outerHTML = newLogsHtml;
             // console.log('✅ Logs section updated successfully');
             
+            // Re-initialize the section state management for the new DOM elements
+            console.log('🔄 Re-initializing section state after logs update...');
+            import('./flux-section-state.js').then(module => {
+                const FluxSectionState = module.FluxSectionState;
+                FluxSectionState.setupCollapsible('logs-section', 'logs', 'logs');
+                FluxSectionState.setupPagination('logs-section', 'logs', logsData);
+                console.log('✅ Logs section state re-initialized');
+            });
+            
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
             console.error('Error stack:', error.stack);

@@ -180,8 +180,8 @@ export function getDocumentHistory(documentId, callback) {
             // console.log('📡 Sending request for document history...');
         },
         success: function(response) {
-            // console.log('✅ Document history request successful!');
-            // console.log('Response:', response);
+            // console.log('✅ Document history request successful!
+            // console.log('Response:', respons
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);

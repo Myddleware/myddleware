@@ -48,6 +48,17 @@ function updateDocumentHistorySection(historyData) {
                 import('./flux-data-sections.js').then(module => {
                     const newHistoryHTML = module.FluxDataSections.generateDocumentHistory(historyData);
                     mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
+                    
+                    // Re-initialize section state management for the new DOM elements
+                    console.log('🔄 Re-initializing document history section state (new insertion)...');
+                    import('./flux-section-state.js').then(stateModule => {
+                        const FluxSectionState = stateModule.FluxSectionState;
+                        FluxSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
+                        FluxSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
+                        console.log('✅ Document history section state initialized (new)');
+                    }).catch(stateError => {
+                        console.error('❌ Error initializing document history section state (new):', stateError);
+                    });
                 });
                 return;
             }
@@ -58,6 +69,17 @@ function updateDocumentHistorySection(historyData) {
             import('./flux-data-sections.js').then(module => {
                 const newHistoryHTML = module.FluxDataSections.generateDocumentHistory(historyData);
                 historySection.outerHTML = newHistoryHTML;
+                
+                // Re-initialize section state management for the new DOM elements
+                console.log('🔄 Re-initializing document history section state (replacement)...');
+                import('./flux-section-state.js').then(stateModule => {
+                    const FluxSectionState = stateModule.FluxSectionState;
+                    FluxSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
+                    FluxSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
+                    console.log('✅ Document history section state re-initialized (replacement)');
+                }).catch(stateError => {
+                    console.error('❌ Error re-initializing document history section state (replacement):', stateError);
+                });
             });
         } else {
             console.warn('⚠️ Could not find appropriate location for document history section');
@@ -144,6 +166,17 @@ function updateDocumentParentsSection(parentsData) {
                 // console.log('🔍 Generated new parents HTML:', newParentsHTML);
                 parentsSection.outerHTML = newParentsHTML;
                 // console.log('✅ Updated document parents section with', parentsData.length, 'records');
+                
+                // Re-initialize section state management for the new DOM elements
+                console.log('🔄 Re-initializing parent documents section state...');
+                import('./flux-section-state.js').then(stateModule => {
+                    const FluxSectionState = stateModule.FluxSectionState;
+                    FluxSectionState.setupCollapsible('parent-documents-section', 'parent-documents', 'parentDocuments');
+                    FluxSectionState.setupPagination('parent-documents-section', 'parentDocuments', parentsData);
+                    console.log('✅ Parent documents section state re-initialized');
+                }).catch(stateError => {
+                    console.error('❌ Error re-initializing parent documents section state:', stateError);
+                });
             }).catch(moduleError => {
                 console.error('❌ Error loading FluxDataSections module for parents:', moduleError);
             });
@@ -174,6 +207,17 @@ function updateDocumentChildrenSection(childrenData) {
                 // console.log('🔍 Generated new HTML:', newChildrenHTML);
                 childrenSection.outerHTML = newChildrenHTML;
                 // console.log('✅ Updated document children section with', childrenData.length, 'records');
+                
+                // Re-initialize section state management for the new DOM elements
+                console.log('🔄 Re-initializing child documents section state...');
+                import('./flux-section-state.js').then(stateModule => {
+                    const FluxSectionState = stateModule.FluxSectionState;
+                    FluxSectionState.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
+                    FluxSectionState.setupPagination('child-documents-section', 'childDocuments', childrenData);
+                    console.log('✅ Child documents section state re-initialized');
+                }).catch(stateError => {
+                    console.error('❌ Error re-initializing child documents section state:', stateError);
+                });
             });
         } else {
             console.warn('⚠️ Document children section not found in DOM');
