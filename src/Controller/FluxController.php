@@ -1453,7 +1453,7 @@ $result = [];
      */
     public function getDocumentData($id): JsonResponse {
         try {
-            error_log("getDocumentData called with document ID: " . $id);
+            // error_log("getDocumentData called with document ID: " . $id);
             
             // Validate the document ID
             if (empty($id)) {
@@ -1541,7 +1541,7 @@ $result = [];
                 'job_lock' => $document->getJobLock()
             ];
             
-            error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
+            // error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
             
             return new JsonResponse([
                 'success' => true,
@@ -1680,7 +1680,7 @@ $result = [];
             
             // Validate the document ID
             if (empty($id)) {
-                // error_log("getDocumentHistory: Empty document ID provided");
+                error_log("getDocumentHistory: Empty document ID provided");
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
@@ -1688,7 +1688,7 @@ $result = [];
             $document = $this->entityManager->getRepository(Document::class)->find($id);
             
             if (!$document) {
-                // error_log("getDocumentHistory: Document not found with ID: " . $id);
+                error_log("getDocumentHistory: Document not found with ID: " . $id);
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
             
@@ -1713,7 +1713,9 @@ $result = [];
             
             // If only one record, the history is the current document, so we remove it => no history
             if (1 == count($historyDocuments)) {
-                $historyDocuments = [];
+                $historyDocuments = [
+                    $document
+                ];
             }
             
             // Build the response data
