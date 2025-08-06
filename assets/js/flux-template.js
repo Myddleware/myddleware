@@ -15,6 +15,8 @@ import {
     extractDocumentChildren
 } from './flux-dynamic-data-extractor.js';
 
+import { getDocumentLogs } from './flux-data-extractor-logs.js';
+
 export class FluxTemplate {
     static generateHTML() {
         const path_img_modal = "../../../build/images/solution/";
@@ -30,18 +32,34 @@ export class FluxTemplate {
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 
+        console.log('🚀 FluxTemplate.generateHTML called with documentId:', documentId);
+        
         const myHistoryPayload = extractDocumentHistory(documentId);
+        console.log('📊 History payload extracted:', myHistoryPayload?.length || 0, 'items');
+        
         const myParentsPayload = extractDocumentParents(documentId);
+        console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
         
         // Handle the promise from extractDocumentChildren
         let myChildrenPayload = [];
         extractDocumentChildren(documentId).then(data => {
             myChildrenPayload = data;
-            // console.log("🔍 myChildrenPayload resolved:", myChildrenPayload);
-            // console.log("🔍 But template was already generated...");
+            console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
         });
         
-        const myLogsPayload = [];
+        // Initialize logs payload and fetch logs data
+        let myLogsPayload = [];
+        console.log('📋 Starting logs data fetch for documentId:', documentId);
+        getDocumentLogs(documentId, (logsData, error) => {
+            if (error) {
+                console.error('❌ Error fetching logs data:', error);
+            } else {
+                console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
+                myLogsPayload = logsData || [];
+                // Update the logs section with real data
+                FluxTemplate.updateLogsSection(myLogsPayload);
+            }
+        });
 
         // console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
         // First, return the template with placeholders
@@ -326,5 +344,38 @@ export class FluxTemplate {
                 `;
             }
         });
+    }
+
+    /**
+     * Updates the logs section with real logs data
+     * @param {Array} logsData - Array of logs data
+     */
+    static updateLogsSection(logsData) {
+        console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
+        
+        try {
+            const logsContainer = document.querySelector('.logs-section');
+            
+            if (!logsContainer) {
+                console.warn('⚠️ Logs section container not found in DOM');
+                return;
+            }
+
+            if (!logsData || logsData.length === 0) {
+                console.log('📋 No logs data available, keeping empty section');
+                return;
+            }
+
+            // Generate new logs section HTML with real data
+            const newLogsHtml = FluxDataSections.generateLogsSection(logsData);
+            console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
+            
+            // Replace the existing logs section
+            logsContainer.outerHTML = newLogsHtml;
+            console.log('✅ Logs section updated successfully');
+            
+        } catch (error) {
+            console.error('❌ Error updating logs section:', error);
+        }
     }
 }
