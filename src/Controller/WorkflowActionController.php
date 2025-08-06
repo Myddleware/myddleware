@@ -58,6 +58,7 @@ use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
 use App\Manager\DocumentManager;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
 use App\Repository\JobRepository;

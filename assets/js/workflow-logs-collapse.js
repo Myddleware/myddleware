@@ -1,33 +1,52 @@
-// console.log('workflow-logs-collapse.js');
+document.addEventListener("DOMContentLoaded", function () {
+    const toggleButton = document.querySelector('.minus-workflow-logs');
+    const logsContent = document.getElementById('logs-content');
+    const logsTableBody = document.querySelector('.workflow-logs-collapse-body');
+    const icon = toggleButton?.querySelector('i.fa');
+    const logsUrl = logsTableBody?.dataset.url;
 
-// find the button with the class minus-workflow-logs
-const minusWorkflowLogsButton = document.querySelector('.minus-workflow-logs');
-// console.log('minusWorkflowLogsButton', minusWorkflowLogsButton);
+    let logsLoaded = false;
+    const collapseInstance = new bootstrap.Collapse(logsContent, {
+        toggle: false
+    });
 
-// if that button is clicked, toggle the visibility
-minusWorkflowLogsButton.addEventListener('click', function() {
-    // console.log('button clicked');
-    // find the tbody with the class workflow-logs-collapse-body
-    const workflowLogsCollapseBody = document.querySelector('.workflow-logs-collapse-body');
-    // console.log('workflowLogsCollapseBody', workflowLogsCollapseBody);
-
-    // find the icon inside the button
-    const icon = minusWorkflowLogsButton.querySelector('svg');
-    // console.log('icon', icon);
-
-    // Check current display state
-    const isVisible = workflowLogsCollapseBody.style.display !== 'none';
-    // console.log('isVisible', isVisible);
-
-    if (isVisible) {
-        // If visible, hide it and change to plus
-        workflowLogsCollapseBody.style.display = 'none';
-        icon.classList.remove('fa-minus');
-        icon.classList.add('fa-plus');
-    } else {
-        // If hidden, show it and change to minus
-        workflowLogsCollapseBody.style.display = 'table-row-group';
-        icon.classList.remove('fa-plus');
-        icon.classList.add('fa-minus');
+    if (!toggleButton || !logsContent || !logsTableBody || !logsUrl || !icon) {
+        console.error("Element not found in DOM.");
+        return;
     }
-}); 
+ 
+    // Hide on startup
+    icon.classList.remove('fa-minus');
+    icon.classList.add('fa-plus');
+    logsTableBody.style.display = 'none';
+
+    toggleButton.addEventListener('click', async function () {
+        const isOpen = logsContent.classList.contains('show');
+
+        if (isOpen) {
+            collapseInstance.hide();
+            logsTableBody.style.display = 'none';
+            icon.classList.remove('fa-minus');
+            icon.classList.add('fa-plus');
+        } else {
+            collapseInstance.show();
+            logsTableBody.style.display = 'table-row-group';
+            icon.classList.remove('fa-plus');
+            icon.classList.add('fa-minus');
+
+            if (!logsLoaded) {
+                try {
+                    const response = await fetch(logsUrl);
+                    if (!response.ok) throw new Error("Error loading");
+
+                    const html = await response.text();
+                    logsTableBody.innerHTML = html;
+                    logsLoaded = true;
+                } catch (error) {
+                    logsTableBody.innerHTML = `<tr><td colspan="11">Error loading logs</td></tr>`;
+                    console.error("Erreur :", error);
+                }
+            }
+        }
+    });
+});

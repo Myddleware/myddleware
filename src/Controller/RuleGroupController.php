@@ -69,6 +69,7 @@ use App\Form\Type\RelationFilterType;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleGroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
