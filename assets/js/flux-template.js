@@ -30,10 +30,10 @@ export class FluxTemplate {
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 
-        const myHistoryPayload = extractDocumentHistory(documentId)
-        const myParentsPayload = extractDocumentParents(documentId)
-        const myChildrenPayload = extractDocumentChildren(documentId)
-
+        const myHistoryPayload = extractDocumentHistory(documentId);
+        const myParentsPayload = extractDocumentParents(documentId);
+        const myChildrenPayload = extractDocumentChildren(documentId);
+        
         const myLogsPayload = [];
 
 
