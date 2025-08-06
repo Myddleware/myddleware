@@ -6,7 +6,7 @@ let documentDataCache = new Map();
 
 // ===== COMPREHENSIVE DOCUMENT DATA FETCHER =====
 export function getDocumentData(documentId, callback) {
-    console.log('getDocumentData called with documentId:', documentId);
+    // console.log('getDocumentData called with documentId:', documentId);
     
     // Check cache first
     if (documentDataCache.has(documentId)) {
@@ -180,8 +180,8 @@ export function getDocumentHistory(documentId, callback) {
             // console.log('📡 Sending request for document history...');
         },
         success: function(response) {
-            console.log('✅ Document history request successful!');
-            console.log('Response:', response);
+            // console.log('✅ Document history request successful!');
+            // console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
