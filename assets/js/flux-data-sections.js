@@ -269,7 +269,22 @@ export class FluxDataSections {
      * @param {Array<Object>} rows - Logs data with id, reference, job, creationDate, type, message
      */
     static generateLogsSection(rows = []) {
-        if (!rows.length) return ``;
+        if (!rows.length) {
+            // Always create the logs section container, even when empty
+            return `
+            <div class="data-wrapper logs-section">
+                <div class="logs-header">
+                <h3>Logs</h3>
+                <span class="logs-count">(0)</span>
+                <button class="logs-toggle-btn" aria-expanded="true">-</button>
+                </div>
+
+                <div class="logs-content">
+                    <p>No logs available</p>
+                </div>
+            </div>
+            `;
+        }
 
         const body = rows
         .map(({ id, reference, job, creationDate, type, message }) => {

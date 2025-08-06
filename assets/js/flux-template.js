@@ -352,12 +352,20 @@ export class FluxTemplate {
      */
     static updateLogsSection(logsData) {
         console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
+        console.log('📋 Sample log data:', logsData?.[0]);
         
         try {
             const logsContainer = document.querySelector('.logs-section');
+            console.log('📋 Logs container found:', !!logsContainer);
             
             if (!logsContainer) {
                 console.warn('⚠️ Logs section container not found in DOM');
+                // Let's also check what containers do exist
+                const allDataWrappers = document.querySelectorAll('.data-wrapper');
+                console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
+                allDataWrappers.forEach((wrapper, index) => {
+                    console.log(`📋 Container ${index}:`, wrapper.className);
+                });
                 return;
             }
 
@@ -367,6 +375,7 @@ export class FluxTemplate {
             }
 
             // Generate new logs section HTML with real data
+            console.log('📋 Generating new logs HTML...');
             const newLogsHtml = FluxDataSections.generateLogsSection(logsData);
             console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
             
@@ -376,6 +385,7 @@ export class FluxTemplate {
             
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 }
