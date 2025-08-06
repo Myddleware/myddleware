@@ -419,38 +419,54 @@ export class FluxTemplate {
             
             console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
 
-            // Update source logo
-            const sourceImg = document.querySelector('.source-logo');
-            if (sourceImg) {
-                const sourceLogo = `${path_img_modal}${sourceSolution}.png`;
-                sourceImg.src = sourceLogo;
-                sourceImg.alt = `${sourceSolution} logo`;
-                console.log('✅ Updated source logo:', sourceLogo);
-            } else {
-                console.warn('⚠️ Source logo element not found');
-            }
+            // Check what sections and logo elements exist in the DOM
+            const dataSections = document.querySelectorAll('.data-wrapper, .source-section, .target-section, .history-section');
+            console.log('🖼️ Data sections found:', dataSections.length);
+            dataSections.forEach((section, index) => {
+                console.log(`🖼️ Section ${index}:`, section.className);
+            });
+            
+            const allLogos = document.querySelectorAll('img');
+            console.log('🖼️ All images in DOM:', allLogos.length);
+            allLogos.forEach((img, index) => {
+                console.log(`🖼️ Image ${index}:`, img.className, img.src);
+            });
 
-            // Update target logo
-            const targetImg = document.querySelector('.target-logo');
-            if (targetImg) {
-                const targetLogo = `${path_img_modal}${targetSolution}.png`;
-                targetImg.src = targetLogo;
-                targetImg.alt = `${targetSolution} logo`;
-                console.log('✅ Updated target logo:', targetLogo);
-            } else {
-                console.warn('⚠️ Target logo element not found');
-            }
-
-            // Update history logo (usually same as target)
-            const historyImg = document.querySelector('.history-logo');
-            if (historyImg) {
-                const historyLogo = `${path_img_modal}${targetSolution}.png`;
-                historyImg.src = historyLogo;
-                historyImg.alt = `${targetSolution} logo`;
-                console.log('✅ Updated history logo:', historyLogo);
-            } else {
-                console.warn('⚠️ History logo element not found');
-            }
+            // Update all logo images (they all have logo-small-size class)
+            const logoImages = document.querySelectorAll('.logo-small-size');
+            console.log('🖼️ Found', logoImages.length, 'logo images to update');
+            
+            logoImages.forEach((img, index) => {
+                let solutionName, logoType;
+                
+                // Determine which solution logo this should be based on position/context
+                // For now, let's assume: 0=source, 1=target, 2=history
+                switch(index) {
+                    case 0:
+                        solutionName = sourceSolution;
+                        logoType = 'source';
+                        break;
+                    case 1:
+                        solutionName = targetSolution;
+                        logoType = 'target';
+                        break;
+                    case 2:
+                        solutionName = targetSolution; // History usually same as target
+                        logoType = 'history';
+                        break;
+                    default:
+                        solutionName = sourceSolution;
+                        logoType = 'unknown';
+                }
+                
+                const logoPath = `${path_img_modal}${solutionName}.png`;
+                console.log(`🖼️ Updating ${logoType} logo (index ${index}):`, logoPath);
+                
+                img.src = logoPath;
+                img.alt = `${solutionName} logo`;
+                
+                console.log(`✅ Updated ${logoType} logo:`, logoPath);
+            });
 
         } catch (error) {
             console.error('❌ Error updating logos:', error);
