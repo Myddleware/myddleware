@@ -1902,4 +1902,86 @@ $result = [];
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Document logs API endpoint
+     * @Route("/api/flux/document-logs/{id}", name="api_flux_document_logs", methods={"GET"})
+     */
+    public function getDocumentLogs($id): JsonResponse {
+        try {
+            error_log("getDocumentLogs called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getDocumentLogs: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getDocumentLogs: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the logs for this document
+            $logs = $this->entityManager->getRepository(Log::class)->findBy(
+                ['document' => $id],
+                ['id' => 'DESC'], // Most recent first
+                50 // Limit to 50 most recent logs
+            );
+            
+            error_log("getDocumentLogs: Found " . count($logs) . " logs for document ID: " . $id);
+            
+            // Build the response data
+            $logsData = [];
+            foreach ($logs as $log) {
+                $job = $log->getJob();
+                
+                // Format the log type with icon
+                $typeFormatted = $this->formatLogType($log->getType());
+                
+                $logsData[] = [
+                    'id' => $log->getId(),
+                    'reference' => $log->getRef() ?: $document->getId(),
+                    'job' => $job ? $job->getId() : 'N/A',
+                    'creationDate' => $log->getCreated()->format('d/m/Y H:i:s'),
+                    'type' => $typeFormatted,
+                    'message' => $log->getMessage() ?: 'No message',
+                    'rawType' => $log->getType() // For frontend styling
+                ];
+            }
+            
+            error_log("getDocumentLogs: Successfully processed " . count($logsData) . " logs for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $logsData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getDocumentLogs: Exception occurred: " . $e->getMessage());
+            error_log("getDocumentLogs: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper method to format log types with icons and colors
+     */
+    private function formatLogType($type): string {
+        switch (strtoupper($type)) {
+            case 'S':
+                return 'S ✓'; // Success - green
+            case 'E':
+                return 'E ✗'; // Error - red  
+            case 'W':
+                return 'W ⚠'; // Warning - yellow
+            case 'I':
+                return 'I ℹ'; // Info - blue
+            default:
+                return $type; // Return original if unknown
+        }
+    }
 }
