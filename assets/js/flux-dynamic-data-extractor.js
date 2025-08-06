@@ -36,16 +36,31 @@ export function extractDocumentHistory(documentId) {
  */
 function updateDocumentHistorySection(historyData) {
     try {
-        // Find the existing history section and update it
-        const historySection = document.querySelector('.data-wrapper');
+        // Look for existing document history section first
+        let historySection = document.querySelector('.data-wrapper.custom-section');
+        
+        if (!historySection) {
+            // If no existing history section, find where to insert it
+            // Look for the main data-wrapper that contains source/target/history sections
+            const mainDataWrapper = document.querySelector('.data-wrapper');
+            if (mainDataWrapper) {
+                // Insert the history section after the main data wrapper
+                import('./flux-data-sections.js').then(module => {
+                    const newHistoryHTML = module.FluxDataSections.generateDocumentHistory(historyData);
+                    mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
+                });
+                return;
+            }
+        }
+        
         if (historySection) {
-            // Import FluxDataSections dynamically and regenerate the section
+            // Replace existing history section
             import('./flux-data-sections.js').then(module => {
                 const newHistoryHTML = module.FluxDataSections.generateDocumentHistory(historyData);
                 historySection.outerHTML = newHistoryHTML;
             });
         } else {
-            console.warn('⚠️ Document history section not found in DOM');
+            console.warn('⚠️ Could not find appropriate location for document history section');
         }
     } catch (error) {
         console.error('❌ Error updating document history section:', error);
