@@ -183,7 +183,7 @@ export class FluxDataSections {
                     <h3>📄 Child Documents</h3>
                 </div>
                 <div class="child-documents-content">
-                    <p>Loading child documents...</p>
+                    <p>No child document</p>
                 </div>
             </div>
             `;
