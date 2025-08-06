@@ -93,28 +93,33 @@ export function extractDocumentParents(documentId) {
 }
 
 export function extractDocumentChildren(documentId) {
-    // Return empty array initially - will be populated asynchronously
-    if (!documentId) {
-        return [];
-    }
+    console.log("calling extractDocumentChildren with id: ", documentId);
     
-    // Start async fetch immediately - this will update the DOM when ready
-    setTimeout(() => {
-        getDocumentChildren(documentId, function(data, error) {
-            if (error) {
-                console.error('❌ Could not get document children:', error);
-                return;
-            }
-            
-            if (data && data.length > 0) {
-                // Update the document children section with real data
-                updateDocumentChildrenSection(data);
-            }
-        });
-    }, 200);
-    
-    // Return empty array for now - the async call will populate the DOM
-    return [];
+    return new Promise((resolve) => {
+        if (!documentId) {
+            resolve([]);
+            return;
+        }
+        
+        // Start async fetch immediately - this will update the DOM when ready
+        setTimeout(() => {
+            getDocumentChildren(documentId, function(data, error) {
+                if (error) {
+                    console.error('❌ Could not get document children:', error);
+                    resolve([]);
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    // Update the document children section with real data
+                    updateDocumentChildrenSection(data);
+                    resolve(data);
+                } else {
+                    resolve([]);
+                }
+            });
+        }, 200);
+    });
 }
 
 /**

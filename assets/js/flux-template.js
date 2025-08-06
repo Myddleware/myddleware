@@ -32,7 +32,13 @@ export class FluxTemplate {
 
         const myHistoryPayload = extractDocumentHistory(documentId);
         const myParentsPayload = extractDocumentParents(documentId);
-        const myChildrenPayload = extractDocumentChildren(documentId);
+        
+        // Handle the promise from extractDocumentChildren
+        let myChildrenPayload = [];
+        extractDocumentChildren(documentId).then(data => {
+            myChildrenPayload = data;
+            console.log("myChildrenPayload", myChildrenPayload);
+        });
         
         const myLogsPayload = [];
 
