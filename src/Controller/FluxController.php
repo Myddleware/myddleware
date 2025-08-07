@@ -1626,7 +1626,7 @@ $result = [];
         // Blue statuses: all others (new, transform, open, etc.)
         return [
             'status' => $this->getStatusLabel($statusValue),
-            'status_class' => 'status-blue'
+            'status_class' => 'status-green'
         ];
     }
 
