@@ -41,7 +41,6 @@ use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
 use App\Entity\WorkflowLog;
 use App\Form\ConnectorType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
 use App\Manager\RuleManager;
