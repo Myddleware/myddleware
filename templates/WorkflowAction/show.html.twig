@@ -128,14 +128,16 @@
 			<div class="workflow-logs container mt-4">
 				<div class="mt-4">
 					<div class="card-header mb-4 card-title-workflow">
-						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#workflow-logs-content" aria-expanded="true" aria-controls="workflow-logs-content">
-							<i class="fa fa-minus"></i>
+						<button class="minus-workflow-actions toggle-button btn btn-outline-secondary btn-sm float-end">
+							<i class="fa fa-plus"></i>
 						</button>
+
+
 						{{ 'view_workflow.logs'| trans | upper }}
 					</div>
 					{# templates/workflow/show.html.twig #}
 
-					<div id="workflow-logs-content" class="collapse show">
+					<div id="actions-content" class="collapse">
 						<table class="table table-striped">
 							<thead>
 								<tr>
@@ -151,39 +153,8 @@
 									<th>{{ 'view_workflow.action_type'|trans }}</th>
 								</tr>
 							</thead>
-							<tbody>
-								{% for log in pager.currentPageResults %}
-									<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-										<td class="ctr">{{ log.id }}</td>
-										<td class="ctr">
-											<a href="{{ path('workflow_list') }}" class="help-link all-link">{{ log.workflow.id }}</a>
-										</td>
-										<td class="ctr">
-											<a href="{{ path('task_view', {'id': log.job.id}) }}" class="help-link all-link">{{ log.job.id }}</a>
-										</td>
-										<td class="ctr">
-											{% if log.triggerDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
-											{% else %}
-												<span></span>
-											{% endif %}
-										</td>
-										<td class="ctr">
-											{% if log.generateDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
-											{% else %}
-												<span></span>
-											{% endif %}
-										</td>
-										<td class="ctr">{{ log.createdBy }}</td>
-										<td class="ctr">
-											<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
-										</td>
-										<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-										<td class="ctr">{{ log.getMessage }}</td>
-										<td class="ctr">{{ log.action.action }}</td>
-									</tr>
-								{% endfor %}
+							<tbody class="workflow-actions-collapse-body" data-url="{{ path('workflow_actions_partial', {'id': workflow.id}) }}">
+								
 							</tbody>
 						</table>
 

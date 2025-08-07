@@ -632,4 +632,17 @@ class WorkflowController extends AbstractController
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
+
+     /**
+     * @Route("/workflow/{id}/logs/partial", name="workflow_logs_partial")
+     */
+    public function logsPartial(Workflow $workflow, WorkflowLogRepository $repo): Response
+    {
+        $logs = $repo->findBy(['workflow' => $workflow], ['dateCreated' => 'DESC']);
+
+        return $this->render('workflow/_logs_table_rows.html.twig', [
+            'logs' => $logs
+        ]);
+    }
+
 }

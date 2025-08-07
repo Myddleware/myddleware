@@ -334,6 +334,10 @@ $(document).ready(function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   function toggleIcon(button, content) {
+    if (!button || !content) {
+      return;
+    }
+
     if (content.classList.contains("show")) {
       button.innerHTML = '<i class="fa fa-minus"></i>';
     } else {
@@ -401,10 +405,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const formAction = document.getElementById("form_action");
 
   // Cacher les champs et le bouton au démarrage
-  targetFieldContainer.style.display = "none";
-  targetFieldValueContainer.style.display = "none";
-  addFieldButton.style.display = "none";
-  dynamicFieldsContainer.style.display = "none";
+  if (targetFieldContainer) targetFieldContainer.style.display = "none";
+  if (targetFieldValueContainer) targetFieldValueContainer.style.display = "none";
+  if (addFieldButton) addFieldButton.style.display = "none";
+  if (dynamicFieldsContainer) dynamicFieldsContainer.style.display = "none";
+
 
   // Fonction pour afficher/masquer les champs et le bouton en fonction de la valeur de form_action
   function toggleTargetFields() {
