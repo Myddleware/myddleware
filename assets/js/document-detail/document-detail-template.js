@@ -434,7 +434,7 @@ export class DocumentDetailTemplate {
 
             // Update all logo images (they all have logo-small-size class)
             const logoImages = document.querySelectorAll('.logo-small-size');
-            console.log('🖼️ Found', logoImages.length, 'logo images to update');
+            // console.log('🖼️ Found', logoImages.length, 'logo images to update');
             
             logoImages.forEach((img, index) => {
                 let solutionName, logoType;
