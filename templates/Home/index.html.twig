@@ -66,13 +66,10 @@
 					<div class="card-body">
 						{% if errorByRule %}
 							<div class="d-flex justify-content-between align-items-center mb-3">
-								<h4 class="card-title text-danger mb-0">
+								<h4 class="card-title mb-0 exclamation-title-home">
 									<i class="fa fa-exclamation-triangle me-2"></i> 
-									{{ 'panel.list_job.nb'|trans }}
+									{{ 'panel.list_job.nb'|trans }} ({{ errorByRule|length }})
 								</h4>
-								<span class="badge bg-danger text-white p-2">
-									{{ errorByRule|length }}
-								</span>
 							</div>
 							<ul class="list-group list-group-flush error-list">
 								{% for rule in errorByRule %}
@@ -82,7 +79,7 @@
 										href="{{ path('flux_error_rule', {'id' : rule.id }) }}">
 											{{ rule.name }}
 										</a>
-										<span class="badge rounded-pill bg-secondary px-3">
+										<span class="badge rounded-pill bg-secondary">
 											{{ rule.cpt }}
 										</span>
 									</li>

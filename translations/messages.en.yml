@@ -49,7 +49,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
-        nb : Documents with error
+        nb : Rule with error
     graph_histo:
         title: Documents history
     graph_job_histo:
@@ -222,8 +222,8 @@ view_rule:
         empty: No field
         formula_empty: No formula
         formula: Formula
-        module_target: Target module
-        module_source: Source Module
+        module_target: Target
+        module_source: Source
         comment: Comment
         add_comment: Save
         comment_title: Add/Edit comment

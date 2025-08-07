@@ -1,4 +1,4 @@
-.rulegroup-details {
+.rulegroup-details, .rulegroup-card-table {
     background-color: #fff;
     padding: 20px;
     border-radius: 12px;
@@ -43,7 +43,6 @@
 
 .table thead th {
     border-bottom: none !important;
-    /* background-color: #f8f9fa; */
     font-size: 0.85rem;
     text-transform: uppercase;
     color: #495057;
@@ -64,12 +63,45 @@ a.btn-sm {
 }
 
 .rulegroup-card-table{
-    margin: 30px 185px;
+    margin: 30px 100px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-.rulegroup-card-header-table{
-    background-color: white !important;
 }
 .card-title-rulegroup{
     text-align: center;
+}
+.add-rule-rulegroup{
+    margin-left: 50%;
+}
+
+.modern-rules-table {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+.modern-rules-table thead th {
+    background-color: #f8f9fa;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px;
+}
+
+.modern-rules-table tbody td {
+    vertical-align: middle;
+    padding: 10px 12px;
+}
+
+.modern-rules-table tbody tr:hover {
+    background-color: #f5f9ff;
+}
+
+.btn.rounded-circle {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
 }

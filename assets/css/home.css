@@ -488,6 +488,6 @@
     transition: color 0.2s ease;
 }
 
-.error-link:hover {
+.error-link:hover, .exclamation-title-home {
     color: #0a58ca !important;
 }

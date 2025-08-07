@@ -39,13 +39,12 @@
 
             <div class="rulegroup-details container mt-4">
                 <div class="card-header mb-4 card-title-rulegroup">
-				<button class="toggle-button btn btn-outline-secondary btn-sm float-end"
-						data-target="#rulegroup-content"
-						aria-expanded="true" 
-						aria-controls="rulegroup-content">
-					<i class="fa fa-minus"></i>
-				</button>
-
+                    <button class="toggle-button btn btn-outline-secondary btn-sm float-end"
+                            data-target="#rulegroup-content"
+                            aria-expanded="true" 
+                            aria-controls="rulegroup-content">
+                        <i class="fa fa-minus"></i>
+                    </button>
                 </div>
                 <div id="rulegroup-content" class="collapse show">
                     <div class="rulegroup-row mb-2">
@@ -71,73 +70,72 @@
                 <h4>{{ 'rulegroup.rules'| trans | upper }}</h4>
             </div> 
 
-            <div class="card rulegroup-card-table">
-                <div class="card-header rulegroup-card-header-table">					
-				<button class="toggle-button btn btn-outline-secondary btn-sm float-end"
-						data-target="#rules-content"
-						aria-expanded="true" 
-						aria-controls="rules-content">
-					<i class="fa fa-minus"></i>
-				</button>
-                    <a href="{{ path('rulegroup_add_rule', {'id': rulegroup.id}) }}" class="btn btn-sm btn-outline-success ms-2">
-                        <i class="fa fa-plus"></i> {{ 'rulegroup.add_rule'|trans }}
-                    </a>
-                </div>
-                <div id="rules-content" class="collapse show">
-                    {% if rulegroup.rules|length > 0 %}
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+            <div class="rulegroup-card-table">
+            <div class="card-header card-title-rulegroup">
+                <button class="toggle-button btn btn-outline-secondary btn-sm float-end"
+                        data-target="#rules-content"
+                        aria-expanded="true" 
+                        aria-controls="rules-content">
+                    <i class="fa fa-minus"></i>
+                </button>
+            </div>
+            <div id="rules-content" class="collapse show">
+                {% if rulegroup.rules|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table modern-rules-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">{{ 'rulegroup.rule.name'|trans }}</th>
+                                    <th class="text-center">{{ 'rulegroup.rule.module_source'|trans }}</th>
+                                    <th class="text-center">{{ 'rulegroup.rule.module_target'|trans }}</th>
+                                    <th class="text-center">{{ 'rulegroup.rule.active'|trans }}</th>
+                                    <th class="text-center">{{ 'actions'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rule in rulegroup.rules %}
                                     <tr>
-                                        <th>{{ 'rulegroup.rule.name'|trans }}</th>
-                                        <th>{{ 'rulegroup.rule.module_source'|trans }}</th>
-                                        <th>{{ 'rulegroup.rule.module_target'|trans }}</th>
-                                        <th>{{ 'rulegroup.rule.active'|trans }}</th>
-                                        <th>{{ 'actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for rule in rulegroup.rules %}
-                                        <tr>
-                                            <td>
-                                                <a href="{{ path('regle_open', {'id': rule.id}) }}" class="btn btn-sm btn-outline-primary">
-                                                    {{ rule.name }}
-                                                </a>
-                                            </td>
-                                            <td>{{ rule.moduleSource }}</td>
-                                            <td>{{ rule.moduleTarget }}</td>
-                                            <td>
+                                        <td class="fw-semibold">
+                                            <a href="{{ path('regle_open', {'id': rule.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                {{ rule.name }}
+                                            </a>
+                                        </td>
+                                        <td class="text-center">{{ rule.moduleSource }}</td>
+                                        <td class="text-center">{{ rule.moduleTarget }}</td>
+                                        <td class="text-center">
                                                 {% if rule.active %}
                                                     <i class="fa fa-check text-success"></i>
                                                 {% else %}
                                                     <i class="fa fa-times text-danger"></i>
                                                 {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{{ path('regle_open', {'id': rule.id}) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                                <a href="{{ path('rulegroup_remove_rule', {'groupId': rulegroup.id, 'ruleId': rule.id}) }}" 
-                                                   class="btn btn-sm btn-outline-danger unlink_rule_from_group" 
-                                                   onclick="return confirm('{{ 'rulegroup.rule.confirm_remove_rule'|trans }}')"
-                                                   title="{{ 'rulegroup.remove_rule'|trans }}">
-                                                    <i class="fa fa-unlink"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="card-body">
-                            <p class="text-muted">{{ 'rulegroup.no_rules'|trans }}</p>
-                        </div>
-                    {% endif %}
-                </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{{ path('regle_open', {'id': rule.id}) }}" class="btn btn-sm btn-outline-primary rounded-circle me-1">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('rulegroup_remove_rule', {'groupId': rulegroup.id, 'ruleId': rule.id}) }}" 
+                                            class="btn btn-sm btn-outline-danger unlink_rule_from_group"
+                                            onclick="return confirm('{{ 'rulegroup.rule.confirm_remove_rule'|trans }}')"
+                                            title="{{ 'rulegroup.remove_rule'|trans }}">
+                                                <i class="fa fa-unlink"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">{{ 'rulegroup.no_rules'|trans }}</p>
+                {% endif %}
             </div>
+        </div>
 
-            <div class="card m-4"></div>
+        <div class="text-center mt-3">
+            <a href="{{ path('rulegroup_add_rule', {'id': rulegroup.id}) }}" class="btn btn-primary px-4 rounded-pill">
+                <i class="fa fa-plus"></i> {{ 'rulegroup.add_rule'|trans }}
+            </a>
+        </div>
         {% else %}
             <p class="display-6">{{ 'list_rulegroup.empty'|trans }}</p>
         {% endif %}
