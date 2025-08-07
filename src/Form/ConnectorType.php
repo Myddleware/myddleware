@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Valid;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ConnectorType extends AbstractType
 {
@@ -29,7 +30,11 @@ class ConnectorType extends AbstractType
             }
         }
 
-        $builder->add('name', TextType::class, ['label' => 'create_connector.connexion', 'attr' => ['id' => 'label', 'class' => 'params']]);
+        $builder->add('name', TextType::class, [
+            'label' => 'create_connector.connexion', 
+            'attr' => ['id' => 'label', 'class' => 'params'],
+            'constraints' => [new NotBlank(['message' => 'Connector name is required'])]
+        ]);
         $builder->add('connectorParams', CollectionType::class, [
             'constraints' => new Valid(),
             'error_bubbling' => true,
