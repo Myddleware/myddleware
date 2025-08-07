@@ -1605,7 +1605,7 @@ $result = [];
         }
         
         // Green statuses: send, sent, success
-        if (in_array($statusLower, ['s', 'send', 'sent', 'success', 'send ✓'])) {
+        if (in_array($statusLower, ['close', 's', 'send', 'sent', 'success', 'send ✓'])) {
             return [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-green'
@@ -1626,7 +1626,7 @@ $result = [];
         // Blue statuses: all others (new, transform, open, etc.)
         return [
             'status' => $this->getStatusLabel($statusValue),
-            'status_class' => 'status-green'
+            'status_class' => 'status-blue'
         ];
     }
 
