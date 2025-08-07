@@ -389,10 +389,10 @@ export class DocumentDetailTemplate {
             // console.log('✅ Logs section updated successfully');
             
             // Re-initialize the section state management for the new DOM elements
-            console.log('🔄 Re-initializing section state after logs update...');
+            // console.log('🔄 Re-initializing section state after logs update...');
             DocumentDetailSectionState.setupCollapsible('logs-section', 'logs', 'logs');
             DocumentDetailSectionState.setupPagination('logs-section', 'logs', logsData);
-            console.log('✅ Logs section state re-initialized');
+            // console.log('✅ Logs section state re-initialized');
             
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
@@ -405,7 +405,7 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateLogos(documentData) {
-        console.log('🖼️ Updating logos with solution data');
+        // console.log('🖼️ Updating logos with solution data');
         
         try {
             if (!documentData || !documentData.source_solution || !documentData.target_solution) {
@@ -417,19 +417,19 @@ export class DocumentDetailTemplate {
             const sourceSolution = documentData.source_solution.toLowerCase();
             const targetSolution = documentData.target_solution.toLowerCase();
             
-            console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
+            // console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
 
             // Check what sections and logo elements exist in the DOM
             const dataSections = document.querySelectorAll('.data-wrapper, .source-section, .target-section, .history-section');
-            console.log('🖼️ Data sections found:', dataSections.length);
+            // console.log('🖼️ Data sections found:', dataSections.length);
             dataSections.forEach((section, index) => {
-                console.log(`🖼️ Section ${index}:`, section.className);
+                // console.log(`🖼️ Section ${index}:`, section.className);
             });
             
             const allLogos = document.querySelectorAll('img');
-            console.log('🖼️ All images in DOM:', allLogos.length);
+            // console.log('🖼️ All images in DOM:', allLogos.length);
             allLogos.forEach((img, index) => {
-                console.log(`🖼️ Image ${index}:`, img.className, img.src);
+                // console.log(`🖼️ Image ${index}:`, img.className, img.src);
             });
 
             // Update all logo images (they all have logo-small-size class)
@@ -460,12 +460,12 @@ export class DocumentDetailTemplate {
                 }
                 
                 const logoPath = `${path_img_modal}${solutionName}.png`;
-                console.log(`🖼️ Updating ${logoType} logo (index ${index}):`, logoPath);
+                // console.log(`🖼️ Updating ${logoType} logo (index ${index}):`, logoPath);
                 
                 img.src = logoPath;
                 img.alt = `${solutionName} logo`;
                 
-                console.log(`✅ Updated ${logoType} logo:`, logoPath);
+                // console.log(`✅ Updated ${logoType} logo:`, logoPath);
             });
 
         } catch (error) {
