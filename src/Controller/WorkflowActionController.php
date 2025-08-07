@@ -1090,4 +1090,26 @@ class WorkflowActionController extends AbstractController
 
     //     return new JsonResponse(['error' => 'Données invalides'], 400);
     // }
+
+    /**
+     * @Route("/workflow/{id}/actions/partial", name="workflow_actions_partial")
+     */
+    public function actionLogsPartial(EntityManagerInterface $em, string $id): Response
+    {
+        $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
+
+        if (!$workflow) {
+            throw $this->createNotFoundException('WorkflowAction not found');
+        }
+
+        $logs = $em->getRepository(WorkflowLog::class)->findBy(
+            ['action' => $workflow],
+            ['dateCreated' => 'DESC']
+        );
+
+        return $this->render('workflowAction/_partial_action_logs.html.twig', [
+            'logs' => $logs,
+        ]);
+    }
+
 }

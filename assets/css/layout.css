@@ -171,23 +171,23 @@ footer {
 
 /* tabs */
 
-#tabs {
+.tabs {
 	border: 0px !important;	
 }
 
-#tabs ul.ui-widget-header {
+.tabs ul.ui-widget-header {
 	background: none;
 	border: none;
 }
 
-#tabs ul.ui-widget-header li {
+.tabs ul.ui-widget-header li {
 	height: 80px;
 	min-width: 173px;
 	max-width: 173px;
 	margin: -1px;
 }
 
-#tabs .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+.tabs .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
 	background: #D7D8DA;
 	border-left: 2px solid #B7B7B9;	
 	border-right: 2px solid #B7B7B9;	
@@ -195,26 +195,26 @@ footer {
 	opacity: 1;
 }
 
-#tabs .ui-state-active {
+.tabs .ui-state-active {
 	background: white;
 	color: #454547;
 }
 
-#tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+.tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
 	color: #454547;
 }
 
-#tabs .ui-corner-all, #tabs .ui-corner-top, #tabs .ui-corner-right, #tabs .ui-corner-tr,
-#tabs .ui-corner-left, #tabs .ui-corner-tl,
-#tabs.ui-corner-br, #tabs .ui-corner-bottom, #tabs .ui-corner-bl {
+.tabs .ui-corner-all, .tabs .ui-corner-top, .tabs .ui-corner-right, .tabs .ui-corner-tr,
+.tabs .ui-corner-left, .tabs .ui-corner-tl,
+.tabs.ui-corner-br, .tabs .ui-corner-bottom, .tabs .ui-corner-bl {
 	border-top-right-radius: 0px;
 	border-top-left-radius: 0px;
 }
 
-#tabs .ui-corner-all, #tabs .ui-corner-bottom, #tabs .ui-corner-right, #tabs .ui-corner-br {
+.tabs .ui-corner-all, .tabs .ui-corner-bottom, .tabs .ui-corner-right, .tabs .ui-corner-br {
     border-bottom-right-radius: 0px;
 }
-#tabs .ui-corner-all, #tabs .ui-corner-bottom, #tabs .ui-corner-left, #tabs .ui-corner-bl {
+.tabs .ui-corner-all, .tabs .ui-corner-bottom, .tabs .ui-corner-left, .tabs .ui-corner-bl {
     border-bottom-left-radius: 0px;
 }
 
@@ -222,21 +222,21 @@ footer {
 	padding: 0em !important;
 }
 
-#tabs .ui-tabs .ui-tabs-nav li.ui-tabs-active, #tabs .ui-state-hover,
-#tabs .ui-state-active {
+.tabs .ui-tabs .ui-tabs-nav li.ui-tabs-active, .tabs .ui-state-hover,
+.tabs .ui-state-active {
 	border-top: 0px !important;	
 }
 
-#tabs .ui-state-disabled {
+.tabs .ui-state-disabled {
 	background: #7D7D7F;
 	border-top: 9px solid #9E9937;
 }
 
-#tabs .ui-state-disabled a.ui-tabs-anchor {
+.tabs .ui-state-disabled a.ui-tabs-anchor {
 	color: #343436;
 }
 
-#tabs ul.ui-tabs-nav {
+.tabs ul.ui-tabs-nav {
 	width: 1200px;
 }
 
