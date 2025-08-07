@@ -202,14 +202,13 @@ class ManagementSMTPController extends AbstractController
             $form->get('user')->setData($mailerUrlArray[4]);
             $form->get('password')->setData($mailerUrlArray[5]);
         } else {
-            $value = Yaml::parse(file_get_contents(self::PATH));
-            $form->get('transport')->setData($value['swiftmailer']['transport']);
-            $form->get('host')->setData($value['swiftmailer']['host']);
-            $form->get('port')->setData($value['swiftmailer']['port']);
-            $form->get('auth_mode')->setData($value['swiftmailer']['auth_mode']);
-            $form->get('encryption')->setData($value['swiftmailer']['encryption']);
-            $form->get('user')->setData($value['swiftmailer']['user']);
-            $form->get('password')->setData($value['swiftmailer']['password']);
+            $form->get('transport')->setData('smtp');
+            $form->get('host')->setData('');
+            $form->get('port')->setData('587');
+            $form->get('auth_mode')->setData('login');
+            $form->get('encryption')->setData('tls');
+            $form->get('user')->setData('');
+            $form->get('password')->setData('');
         }
         return $form;
     }
