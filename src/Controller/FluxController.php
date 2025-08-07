@@ -61,7 +61,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
-
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/rule")
@@ -1978,6 +1978,36 @@ $result = [];
         } catch (\Exception $e) {
             error_log("getDocumentLogs: Exception occurred: " . $e->getMessage());
             error_log("getDocumentLogs: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * User permissions API endpoint
+     * @Route("/api/flux/user-permissions", name="api_flux_user_permissions", methods={"GET"})
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function getUserPermissions(): JsonResponse {
+        try {
+            $user = $this->getUser();
+            
+            if (!$user) {
+                return new JsonResponse(['error' => 'User not authenticated'], 401);
+            }
+            
+            $permissions = [
+                'is_super_admin' => $user->hasRole('ROLE_SUPER_ADMIN'),
+                'is_admin' => $user->hasRole('ROLE_ADMIN'),
+                'roles' => $user->getRoles(),
+                'username' => $user->getUsername()
+            ];
+            
+            return new JsonResponse([
+                'success' => true,
+                'permissions' => $permissions
+            ]);
+            
+        } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }

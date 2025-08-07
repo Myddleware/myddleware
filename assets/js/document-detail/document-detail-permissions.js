@@ -9,30 +9,30 @@ export class DocumentDetailPermissions {
      */
     static async getCurrentUserPermissions() {
         try {
-            // Try to get permissions from multiple sources
+            // Priority is now API first, then fallbacks
             
-            // 1. Try from HTML meta tags (if your app injects them)
-            const metaPermissions = this.getPermissionsFromMeta();
-            if (metaPermissions) {
-                console.log('✅ Got permissions from meta tags');
-                return metaPermissions;
-            }
-            
-            // 2. Try from global JavaScript variables (if your app sets them)
-            const globalPermissions = this.getPermissionsFromGlobals();
-            if (globalPermissions) {
-                console.log('✅ Got permissions from global variables');
-                return globalPermissions;
-            }
-            
-            // 3. Try from API endpoint
+            // 1. Try from API endpoint (primary source)
             const apiPermissions = await this.getPermissionsFromAPI();
             if (apiPermissions) {
                 console.log('✅ Got permissions from API');
                 return apiPermissions;
             }
             
-            // 4. Fallback to checking URL patterns or other indicators
+            // 2. Try from HTML meta tags (fallback)
+            const metaPermissions = this.getPermissionsFromMeta();
+            if (metaPermissions) {
+                console.log('✅ Got permissions from meta tags');
+                return metaPermissions;
+            }
+            
+            // 3. Try from global JavaScript variables (fallback)
+            const globalPermissions = this.getPermissionsFromGlobals();
+            if (globalPermissions) {
+                console.log('✅ Got permissions from global variables');
+                return globalPermissions;
+            }
+            
+            // 4. Final fallback to checking URL patterns or other indicators
             const urlPermissions = this.getPermissionsFromContext();
             console.log('⚠️ Using fallback permission detection');
             return urlPermissions;
@@ -107,14 +107,16 @@ export class DocumentDetailPermissions {
     }
     
     /**
-     * Gets permissions from API endpoint
+     * Gets permissions from API endpoint using the FluxController
      * @returns {Promise<Object|null>} Permissions object or null
      */
     static async getPermissionsFromAPI() {
         try {
-            // Construct API URL
+            // Construct API URL for the new FluxController endpoint
             const baseUrl = this.getBaseUrl();
-            const apiUrl = `${baseUrl}/api/user/permissions`; // Adjust this URL to match your API
+            const apiUrl = `${baseUrl}/rule/api/flux/user-permissions`;
+            
+            console.log('🔐 Requesting permissions from API:', apiUrl);
             
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -131,7 +133,14 @@ export class DocumentDetailPermissions {
             }
             
             const data = await response.json();
-            return data.permissions || data;
+            
+            if (!data.success) {
+                console.warn('⚠️ API permissions request failed:', data.error);
+                return null;
+            }
+            
+            console.log('🔐 API permissions response:', data.permissions);
+            return data.permissions;
             
         } catch (error) {
             console.warn('⚠️ Error getting permissions from API:', error.message);
