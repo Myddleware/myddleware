@@ -17,6 +17,8 @@ import {
 
 import { getDocumentLogs } from './document-detail-data-extractor-logs.js';
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
+import { DocumentDetailButtons } from './document-detail-buttons.js';
+import { DocumentDetailPermissions } from './document-detail-permissions.js';
 
 export class DocumentDetailTemplate {
     static generateHTML() {
@@ -66,10 +68,7 @@ export class DocumentDetailTemplate {
         // console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
         // First, return the template with placeholders
         const template = `
-            <div class="flex-row" id="flux-button-container">
-                <button class="btn btn-primary" id="run-same-record">Run the same record</button>
-                <button class="btn btn-warning" id="cancel-document">Cancel the document</button>
-            </div>
+            ${DocumentDetailButtons.generateButtonsHTML()}
             
             <div class="table-wrapper" style="margin: 20px;">
                 <table class="shadow-table" id="flux-table">
@@ -130,6 +129,9 @@ export class DocumentDetailTemplate {
                 
                 // Update logos with real solution information
                 DocumentDetailTemplate.updateLogos(data);
+                
+                // Update buttons based on document status and permissions
+                DocumentDetailTemplate.updateButtons(data);
             });
         }, 100);
 
@@ -397,6 +399,32 @@ export class DocumentDetailTemplate {
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
             console.error('Error stack:', error.stack);
+        }
+    }
+
+    /**
+     * Updates the document action buttons based on status and permissions
+     * @param {Object} documentData - Complete document data from API
+     */
+    static async updateButtons(documentData) {
+        console.log('🔘 Updating document buttons based on status and permissions');
+        
+        try {
+            // Get current user permissions
+            const userPermissions = await DocumentDetailPermissions.getCurrentUserPermissions();
+            const permissions = DocumentDetailButtons.processPermissions(userPermissions);
+            
+            // For debugging - can be removed in production
+            DocumentDetailButtons.debugButtonLogic(documentData, permissions);
+            
+            // Update the buttons
+            DocumentDetailButtons.updateButtons(documentData, permissions);
+            
+        } catch (error) {
+            console.error('❌ Error updating document buttons:', error);
+            // Fallback to basic permissions
+            const fallbackPermissions = { is_super_admin: false };
+            DocumentDetailButtons.updateButtons(documentData, fallbackPermissions);
         }
     }
 
