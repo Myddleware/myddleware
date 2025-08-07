@@ -64,7 +64,11 @@ Encore
     })
 
     // enables Sass/SCSS support
-    .enableSassLoader()
+    .enableSassLoader(options => {
+        options.sourceMap = true;
+    }, {
+        resolveUrlLoader: true
+    })
     .copyFiles({
         from: './assets/images',
         to: 'images/[path][name].[ext]',
