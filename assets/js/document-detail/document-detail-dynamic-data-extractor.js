@@ -51,10 +51,10 @@ function updateDocumentHistorySection(historyData) {
                 mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
                 
                 // Re-initialize section state management for the new DOM elements
-                console.log('🔄 Re-initializing document history section state (new insertion)...');
+                // console.log('🔄 Re-initializing document history section state (new insertion)...');
                 DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
                 DocumentDetailSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
-                console.log('✅ Document history section state initialized (new)');
+                // console.log('✅ Document history section state initialized (new)');
                 return;
             }
         }
