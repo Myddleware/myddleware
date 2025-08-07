@@ -607,19 +607,48 @@ class ConnectorController extends AbstractController
         if ('POST' == $request->getMethod()) {
             try {
                 $form->handleRequest($request);
-                // SAVE
-                $params = $connector->getConnectorParams();
-                // SAVE PARAMS CONNECTEUR
-                if (count($params) > 0) {
+                if ($form->isSubmitted() && $form->isValid()) {
+                    if (empty($connector->getName())) {
+                        $request->getSession()->getFlashBag()->add('error', 'Connector name cannot be empty');
+                        return $this->render('Connector/edit/fiche.html.twig', [
+                            'connector' => $connector,
+                            'form' => $form->createView(),
+                            'connector_name' => $connector->getName() ?: 'Unnamed',
+                        ]);
+                    }
+                    
+                    $params = $connector->getConnectorParams();
+                    $connector->setDateModified(new \DateTime());
+                    $connector->setModifiedBy($this->getUser()->getId());
+                    
                     $this->entityManager->persist($connector);
                     $this->entityManager->flush();
 
                     return $this->redirect($this->generateUrl('regle_connector_list'));
+                } else {
+                    $errors = [];
+                    foreach ($form->getErrors(true) as $error) {
+                        $errors[] = $error->getMessage();
+                    }
+                    if (!empty($errors)) {
+                        $request->getSession()->getFlashBag()->add('error', implode(', ', $errors));
+                    }
+                    
+                    return $this->render('Connector/edit/fiche.html.twig', [
+                        'connector' => $connector,
+                        'form' => $form->createView(),
+                        'connector_name' => $connector->getName() ?: 'Unnamed',
+                    ]);
                 }
-
-                return new Response(0);
             } catch (Exception $e) {
-                return new Response($e->getMessage());
+                $this->logger->error('Connector save error: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+                $request->getSession()->getFlashBag()->add('error', 'Error saving connector: ' . $e->getMessage());
+                
+                return $this->render('Connector/edit/fiche.html.twig', [
+                    'connector' => $connector,
+                    'form' => $form->createView(),
+                    'connector_name' => $connector->getName() ?: 'Unnamed',
+                ]);
             }
         }
         // Display the connector
