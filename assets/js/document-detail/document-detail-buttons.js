@@ -69,7 +69,7 @@ export class DocumentDetailButtons {
         // 4. Unlock button (Danger) - Show if document has job lock
         if (hasJobLock) {
             buttons.push(`
-                <a class="btn_action_loading" href="${baseUrl}/rule/document/view/${documentId}" title="Unlock document">
+                <a class="btn_action_loading" href="${baseUrl}/rule/document/unlock/${documentId}" title="Unlock document">
                     <button type="button" class="btn btn-danger">
                         Unlock
                     </button>

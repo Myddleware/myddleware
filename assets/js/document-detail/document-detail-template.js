@@ -117,6 +117,9 @@ export class DocumentDetailTemplate {
                     return;
                 }
                 
+                // Add the document ID to the data object before processing
+                data.id = documentId;
+                
                 // Extract and update each piece of data using modular functions
                 DocumentDetailTemplate.updateRuleInfo(extractRuleInfo(data));
                 DocumentDetailTemplate.updateDocumentStatus(extractDocumentStatus(data));
