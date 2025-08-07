@@ -1597,7 +1597,7 @@ $result = [];
         $statusLower = strtolower(trim($statusValue));
         
         // Yellow statuses: cancel, filter, no send, error expected
-        if (in_array($statusLower, ['c', 'cancel', 'cancelled', 'filter', 'no_send', 'error expected', 'cancel !'])) {
+        if (in_array($statusLower, ['c', 'cancel', 'cancelled', 'filter', 'no_send', 'error_expected', 'cancel !'])) {
             return [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-yellow'
