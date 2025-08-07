@@ -78,7 +78,7 @@ class salesforce extends solution {
 
 	// Connexion à Salesforce - Instancie la classe salesforce et affecte access_token et instance_url
     public function login($paramConnexion) {
-		parent::login($paramConnexion);	
+		parent::login($paramConnexion);
 		try {
 			if (
 					!empty($this->paramConnexion['sandbox'])
@@ -89,7 +89,6 @@ class salesforce extends solution {
 			else {
 				$token_url = 'https://login.salesforce.com/services/oauth2/token';
 			}
-			
 		    $post_fields = array(
 		        'grant_type' => 'password',
 		        'client_id' => $this->paramConnexion['consumerkey'],
@@ -99,7 +98,6 @@ class salesforce extends solution {
 		    );
 
  			$token_request_data = $this->call($token_url, $post_fields);
-
 		    if (!isset($token_request_data['access_token'])||
 		        !isset($token_request_data['instance_url'])){
 				throw new \Exception("Missing expected data from ".print_r($token_request_data, true));
