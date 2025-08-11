@@ -1959,7 +1959,7 @@ $result = [];
                 
                 $logsData[] = [
                     'id' => $log->getId(),
-                    'reference' => $log->getRef() ?: $document->getId(),
+                    'reference' => $log->getRef() ?: '',
                     'job' => $job ? $job->getId() : 'N/A',
                     'creationDate' => $log->getCreated()->format('d/m/Y H:i:s'),
                     'type' => $typeFormatted,
