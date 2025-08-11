@@ -1,21 +1,21 @@
 {# macros.html.twig #}
 
 {% macro custom_route_generator_first(logPage, documentPage) %}
-    {{ path('flux_info_page', { 'id': app.request.attributes.get('id'), 'logPage': 1, 'page': documentPage }) }}
+    {{ path('flux_modern', { 'id': app.request.attributes.get('id') }) }}
 {% endmacro %}
 
 {% macro custom_route_generator_previous(logPage, documentPage) %}
-    {{ path('flux_info_page', { 'id': app.request.attributes.get('id'), 'logPage': logPage - 1, 'page': documentPage }) }}
+    {{ path('flux_modern', { 'id': app.request.attributes.get('id') }) }}
 {% endmacro %}
 
 {% macro custom_route_generator_last(logPage, documentPage) %}
-    {{ path('flux_info_page', { 'id': app.request.attributes.get('id'), 'logPage': logPage, 'page': documentPage }) }}
+    {{ path('flux_modern', { 'id': app.request.attributes.get('id') }) }}
 {% endmacro %}
 
 {% macro custom_route_generator_next(logPage, documentPage) %}
-    {{ path('flux_info_page', { 'id': app.request.attributes.get('id'), 'logPage': logPage + 1, 'page': documentPage }) }}
+    {{ path('flux_modern', { 'id': app.request.attributes.get('id') }) }}
 {% endmacro %}
 
 {% macro custom_route_generator_between(logPage, documentPage) %}
-    {{ path('flux_info_page', { 'id': app.request.attributes.get('id'), 'logPage': logPage, 'page': documentPage }) }}
+    {{ path('flux_modern', { 'id': app.request.attributes.get('id') }) }}
 {% endmacro %}

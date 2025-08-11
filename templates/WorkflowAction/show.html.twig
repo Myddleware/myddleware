@@ -169,14 +169,14 @@
 										</td>
 										<td class="ctr">
 											{% if log.triggerDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
+												<a href="{{ path('flux_modern', {'id': log.triggerDocument.id }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}
 										</td>
 										<td class="ctr">
 											{% if log.generateDocument is not null %}
-												<a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
+												<a href="{{ path('flux_modern', {'id': log.generateDocument.id }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}

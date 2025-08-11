@@ -139,7 +139,7 @@
 						</td>
 						<td>				     		
 							{% if log.getRef is not empty %}	
-									<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}">
+									<a onclick="window.open(this.href); return false;" href="{{ path('flux_modern', {'id': log.getRef }) }}">
 									    {{ log.getRef }}
 									</a>
 							{% else %}
@@ -148,7 +148,7 @@
 						</td>	
 						<td>
 							{% if log.getDocument is not empty %}
-								<a href="{{ path('flux_info_page', {'id': log.getDocument.id, 'page' : 1, 'logPage' : 1}) }}">{{ log.getDocument.id }}</a>
+								<a href="{{ path('flux_modern', {'id': log.getDocument.id }) }}">{{ log.getDocument.id }}</a>
 							{% endif %}
 						</td>					     					     			     			     	
 						<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
