@@ -6,6 +6,7 @@ export class DocumentDetailTargetEditor {
     constructor() {
         this.currentlyEditingField = null;
         this.originalValue = null;
+        this.lastCleanupTime = 0; // Throttle cleanup calls
         this.init();
     }
 
@@ -139,8 +140,12 @@ export class DocumentDetailTargetEditor {
         
         console.log(`✅ Added edit capability to ${addedCount} target fields`);
         
-        // Clean up any fields that might have gotten corrupted with emoji data
-        this.cleanupCorruptedFields();
+        // Clean up any fields that might have gotten corrupted with emoji data (throttled)
+        const now = Date.now();
+        if (now - this.lastCleanupTime > 1000) { // Only cleanup once per second
+            this.cleanupCorruptedFields();
+            this.lastCleanupTime = now;
+        }
     }
 
     /**
@@ -321,15 +326,20 @@ export class DocumentDetailTargetEditor {
                 console.log('✅ Field saved successfully');
                 this.showNotification('Field updated successfully', 'success');
                 
+                // Store reference to the field element before clearing editing state
+                const savedFieldElement = this.currentlyEditingField;
+                
                 // Update the field with the new value
                 this.finishEditing(newValue);
                 
                 // Keep orange color briefly to show it was updated
                 setTimeout(() => {
-                    this.currentlyEditingField.style.backgroundColor = '';
-                    this.currentlyEditingField.style.border = '';
-                    this.currentlyEditingField.style.borderRadius = '';
-                    this.currentlyEditingField.style.padding = '';
+                    if (savedFieldElement) {
+                        savedFieldElement.style.backgroundColor = '';
+                        savedFieldElement.style.border = '';
+                        savedFieldElement.style.borderRadius = '';
+                        savedFieldElement.style.padding = '';
+                    }
                 }, 2000);
                 
             } else {
