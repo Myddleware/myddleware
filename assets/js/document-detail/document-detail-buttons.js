@@ -35,7 +35,7 @@ export class DocumentDetailButtons {
             buttons.push(`
                 <a href="${baseUrl}/rule/flux/rerun/${documentId}">
                     <button type="button" class="btn btn-success" data-bs-toggle="tooltip" 
-                            data-bs-placement="top" title="Reload document">
+                            data-bs-placement="top" title="Reload the synchronization of this document">
                         Reload
                     </button>
                 </a>
@@ -47,7 +47,7 @@ export class DocumentDetailButtons {
             buttons.push(`
                 <a class="btn_action_loading" href="${baseUrl}/rule/flux/cancel/${documentId}">
                     <button type="button" class="btn btn-warning" data-bs-toggle="tooltip" 
-                            data-bs-placement="top" title="Cancel document">
+                            data-bs-placement="top" title="Cancel execution of this document">
                         Cancel
                     </button>
                 </a>
@@ -59,7 +59,7 @@ export class DocumentDetailButtons {
             buttons.push(`
                 <a class="btn_action_loading hover-button" href="${baseUrl}/rule/flux/readrecord/${documentId}">
                     <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" 
-                            data-bs-placement="top" title="Read record">
+                            data-bs-placement="top" title="Re-execute the processing of this document">
                         Read Record
                     </button>
                 </a>
