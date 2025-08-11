@@ -7,6 +7,7 @@ export class DocumentDetailTargetEditor {
         this.currentlyEditingField = null;
         this.originalValue = null;
         this.lastCleanupTime = 0; // Throttle cleanup calls
+        this.activeNotifications = new Map(); // Track active notifications
         this.init();
     }
 
@@ -287,8 +288,8 @@ export class DocumentDetailTargetEditor {
         
         console.log(`💾 Saving field: ${fieldLabel} = "${newValue}"`);
 
-        // Show loading state
-        this.showNotification('Saving changes...', 'info');
+        // Show loading state and store the promise
+        const savingNotification = this.showNotification('Saving changes...', 'info');
         
         try {
             // Get document ID from URL
@@ -324,13 +325,17 @@ export class DocumentDetailTargetEditor {
             
             if (result.success) {
                 console.log('✅ Field saved successfully');
-                this.showNotification('Field updated successfully', 'success');
                 
                 // Store reference to the field element before clearing editing state
                 const savedFieldElement = this.currentlyEditingField;
                 
                 // Update the field with the new value
                 this.finishEditing(newValue);
+                
+                // Wait for the "Saving changes..." notification to disappear before showing success
+                savingNotification.then(() => {
+                    this.showNotification('Field updated successfully', 'info');
+                });
                 
                 // Keep orange color briefly to show it was updated
                 setTimeout(() => {
@@ -403,50 +408,60 @@ export class DocumentDetailTargetEditor {
      * Show notification to user
      * @param {string} message - Message to show
      * @param {string} type - Type of notification (success, error, info)
+     * @returns {Promise} Promise that resolves when the notification disappears
      */
     showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `field-edit-notification ${type}`;
-        notification.textContent = message;
-        
-        // Style the notification
-        Object.assign(notification.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '12px 20px',
-            borderRadius: '4px',
-            color: 'white',
-            fontWeight: 'bold',
-            zIndex: '9999',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        });
-        
-        // Set background color based on type
-        switch (type) {
-            case 'success':
-                notification.style.backgroundColor = '#28a745';
-                break;
-            case 'error':
-                notification.style.backgroundColor = '#dc3545';
-                break;
-            case 'info':
-            default:
-                notification.style.backgroundColor = '#17a2b8';
-                break;
-        }
-        
-        // Add to document
-        document.body.appendChild(notification);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+        return new Promise((resolve) => {
+            // Create notification element
+            const notification = document.createElement('div');
+            const notificationId = Date.now() + '_' + Math.random();
+            notification.className = `field-edit-notification ${type}`;
+            notification.textContent = message;
+            notification.dataset.notificationId = notificationId;
+            
+            // Style the notification
+            Object.assign(notification.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                padding: '12px 20px',
+                borderRadius: '4px',
+                color: 'white',
+                fontWeight: 'bold',
+                zIndex: '9999',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            });
+            
+            // Set background color based on type
+            switch (type) {
+                case 'success':
+                    notification.style.backgroundColor = '#28a745';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#dc3545';
+                    break;
+                case 'info':
+                default:
+                    notification.style.backgroundColor = '#17a2b8';
+                    break;
             }
-        }, 3000);
-        
-        console.log(`📢 Notification: [${type.toUpperCase()}] ${message}`);
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Track the notification
+            this.activeNotifications.set(notificationId, notification);
+            
+            // Remove after 3 seconds and resolve the promise
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                this.activeNotifications.delete(notificationId);
+                resolve(); // Resolve the promise when notification disappears
+            }, 3000);
+            
+            console.log(`📢 Notification: [${type.toUpperCase()}] ${message}`);
+        });
     }
 }
