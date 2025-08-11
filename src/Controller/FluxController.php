@@ -1032,7 +1032,7 @@ $result = [];
                 $this->jobManager->actionMassTransfer('rerun', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1048,7 +1048,7 @@ $result = [];
                 $this->jobManager->actionMassTransfer('cancel', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1074,7 +1074,7 @@ $result = [];
 				 
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1090,7 +1090,7 @@ $result = [];
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
 
-        return $this->redirect($this->generateUrl('flux_info', ['id' => $id]));
+        return $this->redirect($this->generateUrl('flux_modern', ['id' => $id]));
     }
 
     /**
