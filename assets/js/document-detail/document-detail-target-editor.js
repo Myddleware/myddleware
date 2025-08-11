@@ -122,13 +122,63 @@ export class DocumentDetailTargetEditor {
         let addedCount = 0;
         fieldRows.forEach(fieldRow => {
             const fieldValue = fieldRow.querySelector('.field-value');
-            if (fieldValue && !fieldValue.querySelector('.edit-icons-container')) {
+            
+            // More thorough check to prevent duplicate icons
+            if (fieldValue && 
+                !fieldValue.querySelector('.edit-icons-container') && 
+                !fieldValue.hasAttribute('data-edit-enabled') &&
+                !fieldValue.textContent.includes('✏️')) {
+                
                 this.addEditIconToField(fieldValue);
+                
+                // Mark as having edit capability added
+                fieldValue.setAttribute('data-edit-enabled', 'true');
                 addedCount++;
             }
         });
         
         console.log(`✅ Added edit capability to ${addedCount} target fields`);
+        
+        // Clean up any fields that might have gotten corrupted with emoji data
+        this.cleanupCorruptedFields();
+    }
+
+    /**
+     * Clean up any fields that have emoji icons mixed into their content
+     */
+    cleanupCorruptedFields() {
+        const targetSection = document.querySelector('.target-data');
+        if (!targetSection) return;
+
+        const fieldValues = targetSection.querySelectorAll('.field-value');
+        let cleanedCount = 0;
+        
+        fieldValues.forEach(fieldValue => {
+            const originalText = fieldValue.textContent;
+            const cleanText = originalText.replace(/[✏️✅❌]/g, '').trim();
+            
+            if (originalText !== cleanText) {
+                // Update the text content, preserving any edit icons
+                const editContainer = fieldValue.querySelector('.edit-icons-container');
+                fieldValue.textContent = cleanText;
+                
+                // Re-add the edit container if it existed
+                if (editContainer) {
+                    fieldValue.appendChild(editContainer);
+                }
+                
+                // Update attributes
+                fieldValue.setAttribute('title', cleanText);
+                fieldValue.setAttribute('data-full-value', cleanText);
+                
+                cleanedCount++;
+                console.log(`🧹 Cleaned corrupted field: "${originalText}" → "${cleanText}"`);
+            }
+        });
+        
+        if (cleanedCount > 0) {
+            console.log(`✅ Cleaned up ${cleanedCount} corrupted fields`);
+        }
     }
 
     /**
@@ -173,7 +223,8 @@ export class DocumentDetailTargetEditor {
         }
 
         this.currentlyEditingField = fieldElement;
-        this.originalValue = fieldElement.textContent.trim();
+        // Clean the original value to remove any emojis that might have been mixed in
+        this.originalValue = fieldElement.textContent.replace(/[✏️✅❌]/g, '').trim();
 
         // Get field information
         const fieldRow = fieldElement.closest('.field-row');
@@ -311,11 +362,21 @@ export class DocumentDetailTargetEditor {
     finishEditing(value) {
         if (!this.currentlyEditingField) return;
 
-        // Restore field display
-        this.currentlyEditingField.innerHTML = value;
+        // Clean the value to make sure no emojis or icons are mixed in
+        const cleanValue = value.replace(/[✏️✅❌]/g, '').trim();
         
-        // Add pencil icon back
-        this.addEditIconToField(this.currentlyEditingField);
+        // Restore field display with clean value
+        this.currentlyEditingField.innerHTML = cleanValue;
+        
+        // Update the data attributes with clean value
+        this.currentlyEditingField.setAttribute('title', cleanValue);
+        this.currentlyEditingField.setAttribute('data-full-value', cleanValue);
+        
+        // Add pencil icon back (only if not already present)
+        if (!this.currentlyEditingField.querySelector('.edit-icons-container') && 
+            !this.currentlyEditingField.hasAttribute('data-edit-enabled')) {
+            this.addEditIconToField(this.currentlyEditingField);
+        }
         
         // Reset styles
         this.currentlyEditingField.style.backgroundColor = '';
