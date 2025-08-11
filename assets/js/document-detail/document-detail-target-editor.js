@@ -380,28 +380,33 @@ export class DocumentDetailTargetEditor {
         // Clean the value to make sure no emojis or icons are mixed in
         const cleanValue = value.replace(/[✏️✅❌]/g, '').trim();
         
+        // Store reference to the field before clearing editing state
+        const fieldElement = this.currentlyEditingField;
+        
         // Restore field display with clean value
-        this.currentlyEditingField.innerHTML = cleanValue;
+        fieldElement.innerHTML = cleanValue;
         
         // Update the data attributes with clean value
-        this.currentlyEditingField.setAttribute('title', cleanValue);
-        this.currentlyEditingField.setAttribute('data-full-value', cleanValue);
+        fieldElement.setAttribute('title', cleanValue);
+        fieldElement.setAttribute('data-full-value', cleanValue);
         
-        // Add pencil icon back (only if not already present)
-        if (!this.currentlyEditingField.querySelector('.edit-icons-container') && 
-            !this.currentlyEditingField.hasAttribute('data-edit-enabled')) {
-            this.addEditIconToField(this.currentlyEditingField);
-        }
+        // Reset the data-edit-enabled flag so we can add the icon again
+        fieldElement.removeAttribute('data-edit-enabled');
+        
+        // Always add pencil icon back after finishing editing
+        this.addEditIconToField(fieldElement);
         
         // Reset styles
-        this.currentlyEditingField.style.backgroundColor = '';
-        this.currentlyEditingField.style.border = '';
-        this.currentlyEditingField.style.borderRadius = '';
-        this.currentlyEditingField.style.padding = '';
+        fieldElement.style.backgroundColor = '';
+        fieldElement.style.border = '';
+        fieldElement.style.borderRadius = '';
+        fieldElement.style.padding = '';
         
         // Clear editing state
         this.currentlyEditingField = null;
         this.originalValue = null;
+        
+        console.log('✅ Finished editing, pencil icon restored');
     }
 
     /**
