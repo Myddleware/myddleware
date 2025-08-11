@@ -20,8 +20,22 @@ export class DocumentDetailTargetEditor {
      */
     async checkUserPermissions() {
         try {
-            const response = await fetch('/api/flux/user-permissions');
+            // Build proper URL - use the same pattern as document-detail-permissions.js
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const permissionsUrl = `${baseUrl}/rule/api/flux/user-permissions`;
+            console.log('🔐 Target editor requesting permissions from:', permissionsUrl);
+            
+            const response = await fetch(permissionsUrl);
             const data = await response.json();
+            
+            console.log('🔐 Target editor permissions response:', data);
             
             if (!data.success || !data.permissions.is_admin) {
                 console.log('🔒 User does not have admin permissions, disabling target editing');
@@ -224,8 +238,20 @@ export class DocumentDetailTargetEditor {
             // Get document ID from URL
             const documentId = window.location.pathname.split('/').pop();
             
+            // Build proper URL for the update request
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+            
+            const updateUrl = `${baseUrl}/rule/flux/update-field`;
+            console.log('💾 Making field update request to:', updateUrl);
+            
             // Make AJAX request to save the field
-            const response = await fetch('/rule/flux/update-field', {
+            const response = await fetch(updateUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
