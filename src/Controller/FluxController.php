@@ -1284,7 +1284,7 @@ $result = [];
         try{
             $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
