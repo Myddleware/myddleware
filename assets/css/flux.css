@@ -712,3 +712,141 @@ li span {
 	border-radius: 8px;
 }
 
+/* Target Field Editing Styles */
+.edit-icons-container {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 20;
+}
+
+.field-value:hover .edit-icons-container,
+.edit-icons-container.editing {
+    opacity: 1;
+}
+
+.edit-icon {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    user-select: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.edit-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.edit-icon.pencil-icon:hover {
+    background-color: #e3f2fd;
+    border-color: #1976d2;
+}
+
+.edit-icon.check-icon:hover {
+    background-color: #e8f5e8;
+    border-color: #28a745;
+}
+
+.edit-icon.cross-icon:hover {
+    background-color: #fdeaea;
+    border-color: #dc3545;
+}
+
+.field-edit-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 2px solid #fd7e14;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: #fff;
+    outline: none;
+}
+
+.field-edit-input:focus {
+    border-color: #fd7e14;
+    box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.2);
+}
+
+/* Field in editing state */
+.field-value.editing {
+    position: relative;
+    background-color: #ffc107 !important;
+    border: 2px solid #fd7e14 !important;
+    border-radius: 4px !important;
+    padding: 4px !important;
+    transition: all 0.3s ease;
+}
+
+/* Animation for edit icons appearance */
+.edit-icons-container.editing .edit-icon {
+    animation: icon-slide-in 0.3s ease forwards;
+}
+
+.edit-icons-container.editing .check-icon {
+    animation-delay: 0.1s;
+}
+
+.edit-icons-container.editing .cross-icon {
+    animation-delay: 0.2s;
+}
+
+@keyframes icon-slide-in {
+    from {
+        transform: translateX(10px) scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Field update notification styles */
+.field-edit-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: notification-slide-in 0.3s ease;
+}
+
+.field-edit-notification.success {
+    background-color: #28a745;
+}
+
+.field-edit-notification.error {
+    background-color: #dc3545;
+}
+
+.field-edit-notification.info {
+    background-color: #17a2b8;
+}
+
+@keyframes notification-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+

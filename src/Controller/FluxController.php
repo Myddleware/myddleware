@@ -2029,4 +2029,128 @@ $result = [];
                 return $type; // Return original if unknown
         }
     }
+
+    /**
+     * Update a specific field in document target data
+     * @Route("/flux/update-field", name="flux_update_field", methods={"POST"})
+     */
+    public function updateField(Request $request): JsonResponse {
+        try {
+            // Check if user is admin
+            if (!$this->getUser() || !$this->getUser()->isAdmin()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Insufficient permissions. Admin access required.'
+                ], 403);
+            }
+
+            // Get JSON data from request
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Invalid JSON data'
+                ], 400);
+            }
+
+            // Validate required fields
+            if (empty($data['documentId']) || empty($data['fieldName']) || !isset($data['fieldValue'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Missing required fields: documentId, fieldName, fieldValue'
+                ], 400);
+            }
+
+            $documentId = $data['documentId'];
+            $fieldName = trim($data['fieldName']);
+            $fieldValue = $data['fieldValue']; // Allow empty string
+
+            error_log("Updating field: Document ID = $documentId, Field = $fieldName, Value = $fieldValue");
+
+            // Get the document
+            $document = $this->entityManager->getRepository(Document::class)->find($documentId);
+            
+            if (!$document) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Document not found'
+                ], 404);
+            }
+
+            // Get target data for the document
+            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
+                ->findOneBy([
+                    'doc_id' => $documentId,
+                    'type' => 'T',
+                ]);
+                
+            if (!$documentDataEntity) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Target data not found for this document'
+                ], 404);
+            }
+
+            // Decode current target data
+            $targetData = json_decode($documentDataEntity->getData(), true);
+            
+            if ($targetData === null) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Invalid target data format'
+                ], 500);
+            }
+
+            // Check if field exists in target data
+            if (!array_key_exists($fieldName, $targetData)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => "Field '$fieldName' not found in target data"
+                ], 404);
+            }
+
+            // Store the old value for audit
+            $oldValue = $targetData[$fieldName];
+            
+            // Update the field value
+            $targetData[$fieldName] = $fieldValue;
+            
+            // Save the updated data back to the entity
+            $documentDataEntity->setData(json_encode($targetData));
+            
+            // Create audit record
+            $documentAudit = new DocumentAudit();
+            $documentAudit->setDoc($documentId);
+            $documentAudit->setDateModified(new \DateTime());
+            $documentAudit->setBefore($oldValue);
+            $documentAudit->setAfter($fieldValue);
+            $documentAudit->setByUser($this->getUser()->getId());
+            $documentAudit->setName($fieldName);
+            
+            $this->entityManager->persist($documentAudit);
+            $this->entityManager->flush();
+
+            error_log("Field updated successfully: $fieldName changed from '$oldValue' to '$fieldValue'");
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Field updated successfully',
+                'data' => [
+                    'fieldName' => $fieldName,
+                    'oldValue' => $oldValue,
+                    'newValue' => $fieldValue
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Error updating field: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Internal server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

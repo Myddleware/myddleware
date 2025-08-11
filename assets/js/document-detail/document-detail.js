@@ -5,11 +5,13 @@ import { DocumentDetailEvents } from './document-detail-events.js';
 import { DocumentDetailFieldExpander } from './document-detail-field-expander.js';
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
 import { MultilineLinkHandler } from '../multiline-links/multiline-link-handler.js';
+import { DocumentDetailTargetEditor } from './document-detail-target-editor.js';
 
 export class DocumentDetail {
     constructor() {
         // console.log('Flux constructor called');
         this.multilineLinkHandler = null;
+        this.targetEditor = null;
         this.init();
     }
 
@@ -19,10 +21,13 @@ export class DocumentDetail {
         DocumentDetailEvents.setupEventListeners();
         DocumentDetailFieldExpander.init();
         
-        // Initialize multiline link handler after UI is created
+        // Initialize multiline link handler and target editor after UI is created
         setTimeout(() => {
             this.multilineLinkHandler = new MultilineLinkHandler();
             // console.log('🔗 MultilineLinkHandler initialized in Flux');
+            
+            this.targetEditor = new DocumentDetailTargetEditor();
+            // console.log('🖊️ DocumentDetailTargetEditor initialized in Flux');
         }, 500);
     }
 
