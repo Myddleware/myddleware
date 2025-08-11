@@ -353,10 +353,26 @@ export class DocumentDetailDataSections {
                 typeColor = '#dc3545'; // red for 'E' types
             }
 
+            // Build proper URL for reference link if reference exists
+            let referenceLink = reference;
+            if (reference && reference !== 'N/A' && reference.trim() !== '') {
+                // Build proper URLs
+                const pathParts = window.location.pathname.split('/');
+                const publicIndex = pathParts.indexOf('public');
+                let baseUrl = window.location.origin;
+                if (publicIndex !== -1) {
+                    const baseParts = pathParts.slice(0, publicIndex + 1);
+                    baseUrl = window.location.origin + baseParts.join('/');
+                }
+                
+                const referenceUrl = `${baseUrl}/rule/flux/modern/${reference}`;
+                referenceLink = `<a href="${referenceUrl}" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a>`;
+            }
+
             return `
             <tr>
                 <td>${id}</td>
-                <td><a href="#" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a></td>
+                <td>${referenceLink}</td>
                 <td><a href="#" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a></td>
                 <td>${creationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
