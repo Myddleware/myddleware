@@ -50,7 +50,7 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Node.js (using specific version)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && \
     apt-get install -y nodejs build-essential && \
     npm install -g npm yarn && \
@@ -65,8 +65,9 @@ RUN composer install --no-scripts --no-autoloader
 COPY --chown=www-data:www-data . .
 
 # Final composer and yarn steps
-RUN composer dump-autoload --optimize && \
-    yarn install && \
+RUN composer dump-autoload --optimize --no-dev && \
+    npm i -g yarn@1 && \
+    yarn install --frozen-lockfile && \
     yarn run build
 
 # Copy scripts and set permissions
