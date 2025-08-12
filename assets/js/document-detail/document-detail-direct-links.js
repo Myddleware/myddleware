@@ -72,20 +72,32 @@ export class DocumentDetailDirectLinks {
             return;
         }
 
+        // Look for the content body div within the section
+        let contentBody;
+        if (sectionSelector.includes('source')) {
+            contentBody = section.querySelector('.source-data-content-body');
+        } else if (sectionSelector.includes('target')) {
+            contentBody = section.querySelector('.target-data-content-body');
+        }
+
+        if (!contentBody) {
+            console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
+            return;
+        }
+
         // Look for existing direct link and remove it
-        const existingDirectLink = section.querySelector('.direct-link-document');
+        const existingDirectLink = contentBody.querySelector('.direct-link-document');
         if (existingDirectLink) {
             existingDirectLink.remove();
         }
 
-        // Create and add the direct link at the beginning of the section
+        // Create and add the direct link at the beginning of the content body
         const directLinkHtml = this.createDirectLink(directLinkUrl);
-        const sectionBody = section.querySelector('.section-body') || section;
         
-        // Insert the direct link at the beginning of the section body
-        sectionBody.insertAdjacentHTML('afterbegin', directLinkHtml);
+        // Insert the direct link at the beginning of the content body
+        contentBody.insertAdjacentHTML('afterbegin', directLinkHtml);
         
-        console.log(`✅ Added direct link to section: ${sectionSelector}`);
+        console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
     }
 
     /**

@@ -137,9 +137,6 @@ export class DocumentDetailTemplate {
                 // Update target editor with global status
                 DocumentDetailTemplate.updateTargetEditor(data);
                 
-                // Update direct links to source and target records
-                DocumentDetailTemplate.updateDirectLinks(data);
-                
                 // Update buttons based on document status and permissions
                 DocumentDetailTemplate.updateButtons(data);
             });
@@ -287,6 +284,11 @@ export class DocumentDetailTemplate {
                 DocumentDetailDataSections.updateSourceData(sourceData);
                 DocumentDetailDataSections.updateTargetData(targetData);
                 DocumentDetailDataSections.updateHistoryData(historyData);
+                
+                // Update direct links after data sections have been populated
+                setTimeout(() => {
+                    DocumentDetailTemplate.updateDirectLinks(documentData);
+                }, 10); // Small delay to ensure content is rendered
             }, 50); // Small delay to ensure DOM sections are ready
             
 // console.log('✅ All data sections update initiated');
