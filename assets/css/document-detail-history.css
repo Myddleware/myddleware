@@ -1,0 +1,314 @@
+/* ─── wrapper spacing ───────────────────────────────────────────────────── */
+.data-wrapper.custom-section {
+  /* Styles are now handled in flux.css to ensure proper centering */
+}
+.custom-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+.custom-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.custom-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+/* ─── table styling ─────────────────────────────────────────────────────── */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+.custom-table th,
+.custom-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+.custom-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+.custom-table tbody td {
+  color: #000000;
+}
+.custom-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* ─── status badge ─────────────────────────────────────────────────────── */
+.status‑badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+.status‑error_transformed {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
+.status‑cancel {
+  color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+}
+
+
+/* expand fold button */
+.toggle-btn {
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.toggle-btn:hover { background: #d1d5db; }
+
+/* ─── pagination controls ─────────────────────────────────────────────── */
+.data-wrapper.custom-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* Parent documents section - specific styling */
+.data-wrapper.parent-documents-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.parent-documents-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.parent-documents-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.parent-documents-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.parent-documents-toggle-btn {
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.parent-documents-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.parent-documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.parent-documents-table th,
+.parent-documents-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.parent-documents-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.parent-documents-table tbody td {
+  color: #000000;
+}
+
+.parent-documents-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.parent-documents-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* Child documents section - specific styling */
+.data-wrapper.child-documents-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.child-documents-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.child-documents-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.child-documents-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.child-documents-toggle-btn {
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.child-documents-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.child-documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.child-documents-table th,
+.child-documents-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.child-documents-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.child-documents-table tbody td {
+  color: #000000;
+}
+
+.child-documents-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.child-documents-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* Logs section - specific styling */
+.data-wrapper.logs-section {
+  /* Styles are inherited from flux.css for proper centering */
+}
+
+.logs-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.logs-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.logs-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.logs-toggle-btn {
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logs-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.logs-table th,
+.logs-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.logs-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.logs-table tbody td {
+  color: #000000;
+}
+
+.logs-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.logs-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}

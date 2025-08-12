@@ -120,10 +120,11 @@ if (window.location.href.includes('rule/flux')) {
 
 if (window.location.href.includes('rule/user_manager')) {
     require('./js/user-manager.js')
+if (window.location.href.includes('flux/modern')) {
+    require('./js/document-detail/document-detail.js')
 }
 
 // start the Stimulus application
-import './bootstrap';
 import 'select2/dist/css/select2.css';
 import 'select2';
 
