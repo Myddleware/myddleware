@@ -1,5 +1,4 @@
-FROM --platform=linux/amd64 php:8.2-apache-bookworm
-
+FROM --platform=linux/amd64 php:8.2-apache
 
 # Add labels for better maintainability
 LABEL maintainer="Your Name <your.email@example.com>"
@@ -7,8 +6,6 @@ LABEL description="Your application description"
 
 # Set working directory
 WORKDIR /var/www/html
-
-ENV PATH="/var/www/html/node_modules/.bin:${PATH}"
 
 # Install system dependencies and PHP extensions in a single layer
 RUN apt-get update && apt-get upgrade -y && \
@@ -53,7 +50,7 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Node.js (using specific version)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update && \
     apt-get install -y nodejs build-essential && \
     npm install -g npm yarn && \
@@ -68,23 +65,20 @@ RUN composer install --no-scripts --no-autoloader
 COPY --chown=www-data:www-data . .
 
 # Final composer and yarn steps
-RUN composer dump-autoload --optimize --no-dev \
- && npm i -g yarn@1 \
- && yarn install --frozen-lockfile \
- && encore production --progress
-
+RUN composer dump-autoload --optimize && \
+    yarn install && \
+    yarn run build
 
 # Copy scripts and set permissions
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 
-# Ensure .env.local exists and is writable (only if it doesn't exist)
-RUN if [ ! -f .env.local ]; then touch .env.local; fi && \
-    chown www-data:www-data .env.local 2>/dev/null || true
-
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
+
+# Switch to non-root user
+USER www-data
 
 CMD ["myddleware-foreground.sh"]

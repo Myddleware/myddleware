@@ -1,13 +1,20 @@
+version: '3.8'
+
 services:
   myddleware:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["bash","-lc","php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json || true; exec apache2-foreground"]
     ports:
-      - "${myddleware_port:-30080}:80"
+      - ${myddleware_port:-30080}:80
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=myddleware
+      - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
     volumes:
       - .:/var/www/html:delegated
+      - ./docker/tmp/composer:/root/.composer:delegated
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
     depends_on:
       mysql:
         condition: service_healthy
@@ -16,28 +23,26 @@ services:
   mysql:
     image: mysql:5.7.33
     environment:
-      MYSQL_DATABASE: myddleware
-      MYSQL_ROOT_PASSWORD: ${mysql_root_password:-secret}
-      MYSQL_USER: myddleware
-      MYSQL_PASSWORD: ${mysql_password:-secret}
-    command:
+      - MYSQL_DATABASE=myddleware
+      - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
+      - MYSQL_USER=myddleware
+      - MYSQL_PASSWORD=${mysql_password:-secret}
+    command: 
       - --max_allowed_packet=524288000
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --default-authentication-plugin=mysql_native_password
-      - --innodb_buffer_pool_size=512M
-      - --innodb_log_file_size=256M
-      - --innodb_flush_log_at_trx_commit=1
+      - --wait_timeout=100
+      - --innodb_buffer_pool_size=1G
+      - --innodb_flush_method=O_DIRECT
+      - --innodb_flush_log_at_trx_commit=2
       - --innodb_buffer_pool_instances=4
       - --innodb_read_io_threads=4
       - --innodb_write_io_threads=4
     volumes:
       - mysql_data:/var/lib/mysql:delegated
     healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","127.0.0.1","-uroot","-p${mysql_root_password:-secret}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
     restart: always
 
 volumes:
