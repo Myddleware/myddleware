@@ -32,7 +32,7 @@ export class DocumentDetailLookupLinks {
      */
     static createLookupLink(fieldValue, fieldName) {
         const baseUrl = this.getBaseUrl();
-        const linkUrl = `${baseUrl}/document/list/page-1?source_id=${encodeURIComponent(fieldValue)}`;
+        const linkUrl = `${baseUrl}/rule/document/list/page?source_id=${encodeURIComponent(fieldValue)}`;
         const sanitizedValue = this.sanitizeString(fieldValue);
         const sanitizedFieldName = this.sanitizeString(fieldName);
 
