@@ -133,6 +133,9 @@ export class DocumentDetailTemplate {
                 // Update logos with real solution information
                 DocumentDetailTemplate.updateLogos(data);
                 
+                // Update target editor with global status
+                DocumentDetailTemplate.updateTargetEditor(data);
+                
                 // Update buttons based on document status and permissions
                 DocumentDetailTemplate.updateButtons(data);
             });
@@ -402,6 +405,33 @@ export class DocumentDetailTemplate {
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
             console.error('Error stack:', error.stack);
+        }
+    }
+
+    /**
+     * Updates the target editor with document global status
+     * @param {Object} documentData - Complete document data from API
+     */
+    static updateTargetEditor(documentData) {
+        try {
+            // Access the target editor instance through window
+            if (window.documentDetailInstance && window.documentDetailInstance.targetEditor) {
+                const globalStatus = documentData.global_status;
+                window.documentDetailInstance.targetEditor.setDocumentGlobalStatus(globalStatus);
+                console.log('✅ Target editor updated with global status:', globalStatus);
+            } else {
+                console.warn('⚠️ Target editor instance not found, will retry later');
+                // Retry after a short delay as the target editor might still be initializing
+                setTimeout(() => {
+                    if (window.documentDetailInstance && window.documentDetailInstance.targetEditor) {
+                        const globalStatus = documentData.global_status;
+                        window.documentDetailInstance.targetEditor.setDocumentGlobalStatus(globalStatus);
+                        console.log('✅ Target editor updated with global status (retry):', globalStatus);
+                    }
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('❌ Error updating target editor with global status:', error);
         }
     }
 

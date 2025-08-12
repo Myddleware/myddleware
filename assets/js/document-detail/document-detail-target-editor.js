@@ -8,6 +8,7 @@ export class DocumentDetailTargetEditor {
         this.originalValue = null;
         this.lastCleanupTime = 0; // Throttle cleanup calls
         this.activeNotifications = new Map(); // Track active notifications
+        this.documentGlobalStatus = null; // Store document global status
         this.init();
     }
 
@@ -109,6 +110,56 @@ export class DocumentDetailTargetEditor {
     }
 
     /**
+     * Update the document global status
+     * @param {string} globalStatus - The document's global status
+     */
+    setDocumentGlobalStatus(globalStatus) {
+        this.documentGlobalStatus = globalStatus;
+        console.log('📊 Target editor: Document global status updated to:', this.documentGlobalStatus);
+        
+        // Re-evaluate existing pencil icons based on new status
+        this.reevaluatePencilIcons();
+    }
+
+    /**
+     * Re-evaluate and add/remove pencil icons based on current global status
+     */
+    reevaluatePencilIcons() {
+        const targetSection = document.querySelector('.target-data');
+        if (!targetSection) {
+            console.log('🔍 Target section not found for pencil icon re-evaluation');
+            return;
+        }
+
+        const fieldRows = targetSection.querySelectorAll('.field-row[data-field-type="target"]');
+        const isErrorStatus = this.documentGlobalStatus && this.documentGlobalStatus.toLowerCase() === 'error';
+        
+        fieldRows.forEach(fieldRow => {
+            const fieldValue = fieldRow.querySelector('.field-value');
+            const editContainer = fieldValue ? fieldValue.querySelector('.edit-icons-container') : null;
+            
+            if (!fieldValue) return;
+
+            if (isErrorStatus) {
+                // Add pencil icon if it doesn't exist and status is Error
+                if (!editContainer && !fieldValue.hasAttribute('data-edit-enabled')) {
+                    this.addEditIconToField(fieldValue);
+                    fieldValue.setAttribute('data-edit-enabled', 'true');
+                }
+            } else {
+                // Remove pencil icon if it exists and status is not Error
+                if (editContainer) {
+                    editContainer.remove();
+                    console.log('🔒 Removed pencil icon due to status change:', this.documentGlobalStatus);
+                }
+                fieldValue.removeAttribute('data-edit-enabled');
+            }
+        });
+        
+        console.log(`🔄 Re-evaluated ${fieldRows.length} target fields for pencil icons (Status: ${this.documentGlobalStatus})`);
+    }
+
+    /**
      * Add editing capability to newly loaded target fields
      */
     addEditCapabilityToNewFields() {
@@ -192,6 +243,12 @@ export class DocumentDetailTargetEditor {
      * @param {HTMLElement} fieldElement - The field value element
      */
     addEditIconToField(fieldElement) {
+        // Only show pencil icon if document global status is "Error"
+        if (this.documentGlobalStatus && this.documentGlobalStatus.toLowerCase() !== 'error') {
+            console.log('🔒 Pencil icon not added - document status is not Error:', this.documentGlobalStatus);
+            return;
+        }
+        
         // Ensure the field element has relative positioning for absolute positioned icons
         const computedStyle = window.getComputedStyle(fieldElement);
         if (computedStyle.position === 'static') {

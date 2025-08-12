@@ -70,5 +70,5 @@ export class DocumentDetail {
 // Initialize the flux manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // console.log('🚀 DOM loaded, initializing Flux...');
-    new DocumentDetail();
+    window.documentDetailInstance = new DocumentDetail();
 });
