@@ -1,5 +1,7 @@
 // console.log('flux-data-sections.js loaded');
 
+import { DocumentDetailLookupLinks } from './document-detail-lookup-links.js';
+
 export class DocumentDetailDataSections {
     /**
      * Generates the complete data sections HTML with real data
@@ -563,6 +565,9 @@ export class DocumentDetailDataSections {
         const sanitizedFieldValue = this.sanitizeString(fieldValue);
         const fieldId = `field-${sectionType}-${this.generateFieldId(fieldName)}`;
 
+        // Use lookup link utility to wrap value with link if conditions are met
+        const fieldValueWithLookupLink = DocumentDetailLookupLinks.wrapWithLookupLinkIfNeeded(fieldName, fieldValue);
+
         return `
             <div class="field-row" data-field-type="${sectionType}">
                 <div class="field-label" title="${sanitizedFieldName}">${sanitizedFieldName}</div>
@@ -571,7 +576,7 @@ export class DocumentDetailDataSections {
                      id="${fieldId}"
                      title="${sanitizedFieldValue}" 
                      data-full-value="${sanitizedFieldValue}">
-                    ${sanitizedFieldValue}
+                    ${fieldValueWithLookupLink}
                 </div>
             </div>
         `;
