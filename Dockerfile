@@ -8,6 +8,8 @@ LABEL description="Your application description"
 # Set working directory
 WORKDIR /var/www/html
 
+ENV PATH="/var/www/html/node_modules/.bin:${PATH}"
+
 # Install system dependencies and PHP extensions in a single layer
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
