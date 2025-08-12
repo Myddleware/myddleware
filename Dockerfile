@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 php:8.2-apache
+FROM --platform=linux/amd64 php:8.2-apache-bookworm
+
 
 # Add labels for better maintainability
 LABEL maintainer="Your Name <your.email@example.com>"
