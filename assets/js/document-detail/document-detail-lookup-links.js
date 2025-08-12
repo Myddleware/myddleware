@@ -19,9 +19,9 @@ export class DocumentDetailLookupLinks {
         const fieldValueStr = String(fieldValue).trim();
 
         // Both conditions must be met:
-        // 1. Field name contains 'id' 
-        // 2. Field value length is exactly 36 characters (UUID format)
-        return fieldNameLower.includes('id') && fieldValueStr.length === 36;
+        // 1. Field name contains 'id'
+        // 2. Field name is NOT exactly 'id' (reserved for another feature)
+        return fieldNameLower.includes('id') && fieldNameLower !== 'id';
     }
 
     /**
