@@ -66,10 +66,11 @@ RUN composer install --no-scripts --no-autoloader
 COPY --chown=www-data:www-data . .
 
 # Final composer and yarn steps
-RUN composer dump-autoload --optimize --no-dev && \
-    npm i -g yarn@1 && \
-    yarn install --frozen-lockfile && \
-    yarn run build
+RUN composer dump-autoload --optimize --no-dev \
+ && npm i -g yarn@1 \
+ && yarn install --frozen-lockfile \
+ && encore production --progress
+
 
 # Copy scripts and set permissions
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
@@ -83,8 +84,5 @@ RUN if [ ! -f .env.local ]; then touch .env.local; fi && \
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
-
-# Switch to non-root user
-USER www-data
 
 CMD ["myddleware-foreground.sh"]
