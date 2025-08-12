@@ -24,7 +24,7 @@ export class DocumentDetailDirectLinks {
         const sanitizedText = this.sanitizeString(linkText);
 
         return `
-            <div class="center direct-link-document">
+            <div class="center direct-link-document" style="margin-bottom: 1rem;">
                 <u>
                     <a href="${sanitizedUrl}" target="_blank" rel="noopener noreferrer" 
                        class="direct-link-modern" 
