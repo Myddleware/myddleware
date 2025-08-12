@@ -371,11 +371,27 @@ export class DocumentDetailDataSections {
                 referenceLink = `<a href="${referenceUrl}" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a>`;
             }
 
+            // Build proper URL for job link if job exists
+            let jobLink = job;
+            if (job && job !== 'N/A' && job.trim() !== '') {
+                // Build proper URLs
+                const pathParts = window.location.pathname.split('/');
+                const publicIndex = pathParts.indexOf('public');
+                let baseUrl = window.location.origin;
+                if (publicIndex !== -1) {
+                    const baseParts = pathParts.slice(0, publicIndex + 1);
+                    baseUrl = window.location.origin + baseParts.join('/');
+                }
+                
+                const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
+                jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
+            }
+
             return `
             <tr>
                 <td>${id}</td>
                 <td>${referenceLink}</td>
-                <td><a href="#" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a></td>
+                <td>${jobLink}</td>
                 <td>${creationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
