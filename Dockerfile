@@ -74,6 +74,10 @@ COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 
+# Ensure .env.local exists and is writable (only if it doesn't exist)
+RUN if [ ! -f .env.local ]; then touch .env.local; fi && \
+    chown www-data:www-data .env.local 2>/dev/null || true
+
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
