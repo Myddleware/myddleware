@@ -1485,6 +1485,21 @@ $result = [];
             $targetData = $this->listeFluxTable($id, 'T');
             $historyData = $this->listeFluxTable($id, 'H');
             
+            // Generate direct links to the record in the source and target applications
+            $sourceDirectLink = null;
+            $targetDirectLink = null;
+            try {
+                $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
+                $sourceSolution = $this->solutionManager->get($sourceSolutionName);
+                $sourceDirectLink = $sourceSolution->getDirectLink($rule, $document, 'source');
+                
+                $targetSolutionName = $rule->getConnectorTarget()->getSolution()->getName();
+                $targetSolution = $this->solutionManager->get($targetSolutionName);
+                $targetDirectLink = $targetSolution->getDirectLink($rule, $document, 'target');
+            } catch (\Exception $e) {
+                error_log("getDocumentData: Error generating direct links: " . $e->getMessage());
+            }
+            
             // Get error message from logs if status is error
             $errorMessage = null;
             if ($document->getGlobalStatus() === 'Error') {
@@ -1545,6 +1560,10 @@ $result = [];
                 'source_data' => $sourceData,
                 'target_data' => $targetData,
                 'history_data' => $historyData,
+                
+                // Direct links to the records in source and target applications
+                'source_direct_link' => $sourceDirectLink,
+                'target_direct_link' => $targetDirectLink,
                 
                 // Error handling
                 'error_message' => $errorMessage,

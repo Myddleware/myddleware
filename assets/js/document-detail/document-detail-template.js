@@ -8,6 +8,7 @@ import {
     extractDocumentDates,
     getDocumentHistory
 } from './document-detail-data-extractor.js';
+import { DocumentDetailDirectLinks } from './document-detail-direct-links.js';
 
 import {
     extractDocumentHistory,
@@ -135,6 +136,9 @@ export class DocumentDetailTemplate {
                 
                 // Update target editor with global status
                 DocumentDetailTemplate.updateTargetEditor(data);
+                
+                // Update direct links to source and target records
+                DocumentDetailTemplate.updateDirectLinks(data);
                 
                 // Update buttons based on document status and permissions
                 DocumentDetailTemplate.updateButtons(data);
@@ -405,6 +409,22 @@ export class DocumentDetailTemplate {
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
             console.error('Error stack:', error.stack);
+        }
+    }
+
+    /**
+     * Updates direct links to source and target records
+     * @param {Object} documentData - Complete document data from API
+     */
+    static updateDirectLinks(documentData) {
+        try {
+            console.log('🔗 Updating direct links for document');
+            
+            // Use the DocumentDetailDirectLinks class to update all direct links
+            DocumentDetailDirectLinks.updateAllDirectLinks(documentData);
+            
+        } catch (error) {
+            console.error('❌ Error updating direct links:', error);
         }
     }
 
