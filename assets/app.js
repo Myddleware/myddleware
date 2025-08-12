@@ -120,6 +120,7 @@ if (window.location.href.includes('rule/flux')) {
 
 if (window.location.href.includes('rule/user_manager')) {
     require('./js/user-manager.js')
+}
 if (window.location.href.includes('flux/modern')) {
     require('./js/document-detail/document-detail.js')
 }
