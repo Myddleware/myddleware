@@ -19,9 +19,9 @@ export class DocumentDetailLookupLinks {
         const fieldValueStr = String(fieldValue).trim();
 
         // Both conditions must be met:
-        // 1. Field name contains 'id'
+        // 1. Field name contains '-id' or '_id' (but not just 'id' anywhere)
         // 2. Field name is NOT exactly 'id' (reserved for another feature)
-        return fieldNameLower.includes('id') && fieldNameLower !== 'id';
+        return (fieldNameLower.includes('-id') || fieldNameLower.includes('_id')) && fieldNameLower !== 'id';
     }
 
     /**
