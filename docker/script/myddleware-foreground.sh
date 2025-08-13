@@ -15,6 +15,11 @@ echo "--"
 rsyslogd
 cron
 
+## Start yarn build
+composer dump-autoload --optimize
+yarn install
+yarn run build
+
 ## Start Apache
 echo "====[ START APACHE ]===="
 apache2-foreground "$@"

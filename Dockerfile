@@ -64,11 +64,6 @@ RUN composer install --no-scripts --no-autoloader
 # Copy application files
 COPY --chown=www-data:www-data . .
 
-# Final composer and yarn steps
-RUN composer dump-autoload --optimize && \
-    yarn install && \
-    yarn run build
-
 # Copy scripts and set permissions
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
