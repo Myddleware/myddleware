@@ -50,7 +50,7 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Node.js (using specific version)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update && \
     apt-get install -y nodejs build-essential && \
     npm install -g npm yarn && \
