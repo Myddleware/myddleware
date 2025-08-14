@@ -64,6 +64,14 @@
   color: #d97706;
   background-color: rgba(217, 119, 6, 0.1);
 }
+.status‑filter {
+  color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+}
+.status‑no_send {
+  color: #d97706;
+  background-color: rgba(217, 119, 6, 0.1);
+}
 
 
 /* expand fold button */
