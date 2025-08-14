@@ -200,100 +200,18 @@
 
 			<div class="container mt-5">
 				<div class="card-header mb-4 card-title-workflow">
-					<button class="minus-workflow-logs toggle-button btn btn-outline-secondary btn-sm float-end" 
-							data-bs-toggle="collapse" 
-							data-bs-target="#logs-content" 
-							aria-expanded="true" 
-							aria-controls="logs-content">
-						<i class="fa fa-minus"></i>
+					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" 
+							data-workflow-id="{{ workflow.id }}">
+						<i class="fa fa-plus"></i>
 					</button>
 					{{ 'view_workflow.logs'|trans | upper }}
 				</div>
 
-				<div id="logs-content" class="collapse show">
-					<table class="table">
-						<thead>
-							<tr>
-								<th>{{ 'view_workflow.log_id'|trans }}</th>
-								<th>{{ 'view_workflow.workflow'|trans }}</th>
-								<th>{{ 'view_workflow.job'|trans }}</th>
-								<th>{{ 'view_workflow.trigger_document'|trans }}</th>
-								<th>{{ 'view_workflow.generate_document'|trans }}</th>
-								<th>{{ 'view_workflow.created_by'|trans }}</th>
-								<th>{{ 'view_workflow.status'|trans }}</th>
-								<th>{{ 'view_workflow.date_created'|trans }}</th>
-								<th>{{ 'view_workflow.message'|trans }}</th>
-								<th>{{ 'view_workflow.action_name'|trans }}</th>
-								<th>{{ 'view_workflow.action_type'|trans }}</th>
-							</tr>
-						</thead>
-						<tbody class="workflow-logs-collapse-body">
-							{% for log in pager.currentPageResults %}
-								<tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-									<td class="ctr">{{ log.id }}</td>
-									<td class="ctr">
-										<a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a>
-									</td>
-									<td class="ctr">
-										<a href="{{ path('task_view',{'id' : log.job.id }) }}" class="help-link all-link">{{ log.job.id }}</a>
-									</td>
-									<td class="ctr">
-										{% if log.triggerDocument is not null %}
-											<a href="{{ path('flux_modern',{'id' : log.triggerDocument.id }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
-										{% else %}
-											<span></span>
-										{% endif %}
-									</td>
-									<td class="ctr">
-										{% if log.generateDocument is not null %}
-											<a href="{{ path('flux_modern',{'id' : log.generateDocument.id }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
-										{% else %}
-											<span></span>
-										{% endif %}
-									</td>
-									<td class="ctr">{{ log.createdBy }}</td>
-									<td class="ctr">
-										<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
-									</td>
-									<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-									<td class="ctr">{{ log.getMessage }}</td>
-									<td class="ctr">
-										<a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>
-									</td>
-									<td class="ctr">{{ log.action.action }}</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-
-					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
-
-						<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
-							<div class="form-group" required style="width: 15em;">
-								<label for="page" class="sr-only">Page</label>
-								<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
-							</div>
-							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
-						</form>
-
-						<script>
-							const maxPage = {{ pager.getNbPages() }};
-							function updateFormAction(event) {
-								event.preventDefault();
-								const page = document.getElementById('page').value;
-								if (page < 1 || page > maxPage) {
-									alert('Please enter a valid page number between 1 and ' + maxPage);
-									return;
-								}
-								const form = document.getElementById('pageForm');
-								const baseUrl = "{{ path('workflow_show_page', {'id': workflow.id, 'page': 1}) }}";
-								const action = baseUrl.replace('/page-1', '/page-' + page);
-								form.action = action;
-								form.submit();
-							}
-						</script>
-					{% endif %}
+				<div id="logs-content" class="collapse" style="display: none;">
+					<div id="logs-table-container">
+						<p class="text-center">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
+					</div>
+				</div>
 
 					{% block js %}
 						<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -307,5 +225,47 @@
 							var pathWorkflowtoggle = "{{ path('workflow_toggle', {'id': workflow.id}) }}";
 						</script>
 					{% endblock js_workflow_toggle %}
+
+					{% block js_logs_lazy_loading %}
+						<script type="text/javascript">
+							$(document).ready(function() {
+								let logsLoaded = false;
+								let logsVisible = false;
+								
+								$('#toggle-logs-btn').on('click', function() {
+									const workflowId = $(this).data('workflow-id');
+									const logsContent = $('#logs-content');
+									const toggleIcon = $(this).find('i');
+									
+									if (!logsVisible) {
+										logsContent.show();
+										toggleIcon.removeClass('fa-plus').addClass('fa-minus');
+										logsVisible = true;
+										
+										if (!logsLoaded) {
+											$.ajax({
+												url: "{{ path('workflow_show_logs', {'id': workflow.id}) }}",
+												type: 'GET',
+												headers: {
+													'X-Requested-With': 'XMLHttpRequest'
+												},
+												success: function(response) {
+													$('#logs-table-container').html(response.html || response);
+													logsLoaded = true;
+												},
+												error: function(xhr, status, error) {
+													$('#logs-table-container').html('<p class="text-danger text-center">Error loading logs: ' + error + '</p>');
+												}
+											});
+										}
+									} else {
+										logsContent.hide();
+										toggleIcon.removeClass('fa-minus').addClass('fa-plus');
+										logsVisible = false;
+									}
+								});
+							});
+						</script>
+					{% endblock js_logs_lazy_loading %}
 
 				{% endblock %}
