@@ -53,11 +53,14 @@ final class CronRunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$this->toolsManager->isPremium()) {
-            $output->writeln('This feature requires a premium license.');
-            return Command::FAILURE;
+
+		if (!$this->toolsManager->isPremium()) {
+            $style = new CronStyle($input, $output);
+            $style->error('This feature is only available in the premium version. However you can use your linux crontab to run command like synchro or rerunerror.');
+            return CronJobResult::EXIT_CODE_FAILED;
         }
-        $jobRepo = $this->cronJobRepository;
+        $jobRepo = $this->getCronJobRepository();
+
         $style = new CronStyle($input, $output);
         //Check if crontab is enabled
         $entity = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'cron_enabled']);
