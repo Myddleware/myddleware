@@ -14,14 +14,7 @@ global.Routing = Routing;
 global.lang = $('html').attr('lang');
 global.path_img = 'build/images/';
 
-require('jquery-ui')
-require('jquery-ui/ui/widgets/tabs')
-require('jquery-ui/ui/widgets/accordion')
-require('jquery-ui/ui/widgets/draggable')
-require('jquery-ui/ui/widgets/droppable')
-require('jquery-ui/ui/widgets/sortable')
-require('jquery-ui/ui/widgets/dialog')
-require('jquery-ui/ui/tabbable')
+// jQuery UI imports moved to individual files that need them
 require('bootstrap')
 require('@fortawesome/fontawesome-free/js/all')
 require('./vendors/dtsel/dtsel')
@@ -39,9 +32,11 @@ require('./js/connector.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/historique.js')
-require('./js/mappingRule.js')
 require('./js/rule-group.js')
 
+if (window.location.href.includes('rule/create/step3')) {
+require('./js/mappingRule.js')
+}
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');

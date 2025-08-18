@@ -22,6 +22,19 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
+// Load jQuery UI via CDN as fallback since webpack imports aren't working
+if (typeof $.ui === 'undefined') {
+  const jqueryUIScript = document.createElement('script');
+  jqueryUIScript.src = 'https://code.jquery.com/ui/1.14.1/jquery-ui.min.js';
+  jqueryUIScript.async = false;
+  document.head.appendChild(jqueryUIScript);
+  
+  const jqueryUICSS = document.createElement('link');
+  jqueryUICSS.rel = 'stylesheet';
+  jqueryUICSS.href = 'https://code.jquery.com/ui/1.14.1/themes/ui-lightness/jquery-ui.css';
+  document.head.appendChild(jqueryUICSS);
+}
+
 global.path_img = '../../build/images/';
 
 $(function () {
@@ -80,9 +93,29 @@ $(function () {
   }
 
   // ----------------------------- Step
-  if (typeof onglets !== "undefined" && onglets) {
-    $("#tabs").tabs(onglets);
+  
+  // Wait for jQuery UI to be loaded before initializing tabs
+  function initializeTabs() {
+    if (typeof onglets !== "undefined" && onglets) {
+      console.log('Attempting to initialize tabs with:', onglets);
+      console.log('jQuery available:', typeof $ !== 'undefined');
+      console.log('jQuery UI available:', typeof $.ui !== 'undefined');
+      console.log('jQuery UI tabs available:', typeof $.fn.tabs !== 'undefined');
+      
+      if (typeof $.fn.tabs === 'function') {
+        $("#tabs").tabs(onglets);
+        console.log('✅ Tabs initialized successfully');
+        return true; // Stop retrying
+      } else {
+        console.warn('$.fn.tabs is not a function - jQuery UI tabs plugin not loaded, retrying...');
+        setTimeout(initializeTabs, 200);
+        return false;
+      }
+    }
   }
+  
+  // Try to initialize tabs with longer delay for CDN loading
+  setTimeout(initializeTabs, 1000);
 
   // ----------------------------- Step 1
 
@@ -1714,10 +1747,24 @@ function prepareDrag() {
     };
   })(jQuery);
 
-  $("#catalog").accordion({
-    collapsible: true,
-    heightStyle: "content",
-  }); // liste des modules : source
+  // Initialize accordion with jQuery UI availability check
+  function initializeAccordion() {
+    if (typeof $.fn.accordion === 'function') {
+      $("#catalog").accordion({
+        collapsible: true,
+        heightStyle: "content",
+      }); // liste des modules : source
+      console.log('✅ Accordion initialized successfully');
+      return true; // Stop retrying
+    } else {
+      console.warn('$.fn.accordion is not available, retrying...');
+      setTimeout(initializeAccordion, 200);
+      return false;
+    }
+  }
+  
+  // Try to initialize accordion with delay for CDN loading
+  setTimeout(initializeAccordion, 1000);
 
   $("#catalog li").draggable({
     appendTo: "body",
