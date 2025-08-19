@@ -981,7 +981,7 @@ class RuleManager
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-						if (in_array($this->documentManager->getStatus(), array('Transformed', 'Error_checking'))) {
+						if (in_array($this->documentManager->getStatus(), array('Transformed', 'Error_checking', 'Not_found'))) {
                             $response[$document['id']] = $this->documentManager->getTargetDataDocument();
                             $response['doc_status'] = $this->documentManager->getStatus();
                         }
