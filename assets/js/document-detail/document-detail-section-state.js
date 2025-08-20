@@ -184,6 +184,14 @@ export class DocumentDetailSectionState {
             }
         });
 
+        // After changing page visibility, recheck links for hover animations
+        setTimeout(() => {
+            if (window.documentDetailInstance && window.documentDetailInstance.multilineLinkHandler) {
+                window.documentDetailInstance.multilineLinkHandler.recheckLinks();
+                // console.log(`🔗 Rechecked links after showing page ${pageNumber} for ${stateKey}`);
+            }
+        }, 50);
+
         // console.log(`✅ Showing page ${pageNumber} for ${stateKey} (rows ${startIndex + 1}-${Math.min(endIndex, rows.length)})`);
     }
 
