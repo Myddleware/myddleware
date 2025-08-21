@@ -60,7 +60,7 @@ export class DocumentDetailButtons {
                 <a class="btn_action_loading hover-button" href="${baseUrl}/rule/flux/readrecord/${documentId}">
                     <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" 
                             data-bs-placement="top" title="Re-execute the processing of this document">
-                        Read Record
+                        Run the same record
                     </button>
                 </a>
             `);
