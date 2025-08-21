@@ -1490,12 +1490,18 @@ $result = [];
             $targetDirectLink = null;
             try {
                 $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
-                $sourceSolution = $this->solutionManager->get($sourceSolutionName);
-                $sourceDirectLink = $sourceSolution->getDirectLink($rule, $document, 'source');
+                $allowedSolutions = ['suitecrm', 'airtable'];
+                
+                if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
+                    $sourceSolution = $this->solutionManager->get($sourceSolutionName);
+                    $sourceDirectLink = $sourceSolution->getDirectLink($rule, $document, 'source');
+                }
                 
                 $targetSolutionName = $rule->getConnectorTarget()->getSolution()->getName();
-                $targetSolution = $this->solutionManager->get($targetSolutionName);
-                $targetDirectLink = $targetSolution->getDirectLink($rule, $document, 'target');
+                if (in_array(strtolower($targetSolutionName), $allowedSolutions)) {
+                    $targetSolution = $this->solutionManager->get($targetSolutionName);
+                    $targetDirectLink = $targetSolution->getDirectLink($rule, $document, 'target');
+                }
             } catch (\Exception $e) {
                 error_log("getDocumentData: Error generating direct links: " . $e->getMessage());
             }
