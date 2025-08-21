@@ -48,7 +48,7 @@ $(document).ready(function () {
         SearchField: 'No',
         SearchValue: 'No',
         Subject: 'No',
-        Message: 'No',
+        Message: 'Yes',
         To: 'No',
         'Target Field': 'No',
         'New Value': 'No',

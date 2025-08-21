@@ -413,7 +413,7 @@ class WorkflowActionController extends AbstractController
                     ])
                     ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
                     ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
-                    ->add('message', TextareaType::class, ['required' => false])
+                    ->add('message', TextareaType::class, ['label' => 'Message', 'required' => false])
                     ->add('searchField', ChoiceType::class, [
                         'label' => 'Matching Field from Generating Rule',
                         'choices' => $sourceSearchValue,
@@ -1074,7 +1074,7 @@ class WorkflowActionController extends AbstractController
             $action = $workflowAction->getAction();
 
             if ($action == 'updateStatus') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue']);
             } elseif ($action == 'generateDocument') {
                 unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status']);
             } elseif ($action == 'sendNotification') {
