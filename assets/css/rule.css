@@ -513,9 +513,9 @@ color: #03c4eb!important;
 }
 
 .form-switch .form-check-input:checked {
-	background-color:  #03c4eb !important;
-	border-block-color: #03c4eb !important;
-	border-color: #03c4eb !important;
+	background-color:  #198BCA !important;
+	border-block-color: #198BCA !important;
+	border-color: #198BCA !important;
 }
 
 .workflow_status.form-check-input:checked {
