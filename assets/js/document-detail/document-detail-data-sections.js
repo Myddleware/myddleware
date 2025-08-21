@@ -115,8 +115,8 @@ export class DocumentDetailDataSections {
             <tr>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
-                <td>${sourceId}</td>
-                <td>${targetId}</td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
                 <td>${modificationDate}</td>
                 <td>${type}</td>
                 <td>
@@ -197,8 +197,8 @@ export class DocumentDetailDataSections {
             <tr>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
-                <td>${sourceId}</td>
-                <td>${targetId}</td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
                 <td>${modificationDate}</td>
                 <td>${type}</td>
                 <td>
@@ -279,8 +279,8 @@ export class DocumentDetailDataSections {
             <tr>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
-                <td>${sourceId}</td>
-                <td>${targetId}</td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
                 <td>${modificationDate}</td>
                 <td>${type}</td>
                 <td>
