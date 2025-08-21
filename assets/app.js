@@ -34,7 +34,7 @@ require('./js/regle.js')
 require('./js/historique.js')
 require('./js/rule-group.js')
 
-if (window.location.href.includes('rule/create/step3')) {
+if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
 }
 
