@@ -135,8 +135,13 @@
 	margin-left: -0.5rem;
 }
 
-.direct-link-document {
-	margin-left: -0.5rem;
+.direct-link-document.field-row .field-label .bi-box-arrow-up-right {
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.direct-link-document.field-row .field-label:hover .bi-box-arrow-up-right {
+	opacity: 1;
 }
 
 .direct-link-document-target {
@@ -373,7 +378,7 @@ li span {
 .data-wrapper.custom-section {
     display: block;
     width: 100%;
-    margin: 2rem auto;
+    margin: 6rem auto;
     max-width: 98%;
     text-align: center;
 }
@@ -387,7 +392,7 @@ li span {
 .data-wrapper.parent-documents-section {
     display: block;
     width: 100%;
-    margin: 2rem auto;
+    margin: 6rem auto;
     max-width: 98%;
     text-align: center;
 }
@@ -401,7 +406,7 @@ li span {
 .data-wrapper.child-documents-section {
     display: block;
     width: 100%;
-    margin: 2rem auto;
+    margin: 6rem auto;
     max-width: 98%;
     text-align: center;
 }
@@ -415,7 +420,7 @@ li span {
 .data-wrapper.logs-section {
     display: block;
     width: 100%;
-    margin: 2rem auto;
+    margin: 6rem auto;
     max-width: 98%;
     text-align: center;
 }
@@ -659,6 +664,35 @@ li span {
 /* Blue statuses: all others (new, transform, open, etc.) */
 .status-blue {
 	color: #0069B4 !important;
+	font-weight: bold;
+}
+
+/* Status badge classes - Higher specificity to override table text color */
+.custom-table .status-badge.status-error_checking,
+.custom-table .status-badge.status-error_sending,
+.custom-table .status-badge.status-error_transformed,
+.custom-table .status-badge.status-create_ko,
+.custom-table .status-badge.status-filter_ko,
+.custom-table .status-badge.status-predecessor_ko,
+.custom-table .status-badge.status-relate_ko,
+.custom-table .status-badge.status-not_found {
+	color: #dc3545 !important;  /* Red for error statuses */
+	font-weight: bold;
+}
+
+.custom-table .status-badge.status-cancel,
+.custom-table .status-badge.status-filter,
+.custom-table .status-badge.status-no_send,
+.custom-table .status-badge.status-error_expected {
+	color: #ffc107 !important;  /* Yellow for cancel statuses */
+	font-weight: bold;
+}
+
+.custom-table .status-badge.status-send,
+.custom-table .status-badge.status-close,
+.custom-table .status-badge.status-success,
+.custom-table .status-badge.status-found {
+	color: #28a745 !important;  /* Green for success statuses */
 	font-weight: bold;
 }
 
