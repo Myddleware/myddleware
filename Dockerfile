@@ -103,7 +103,7 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     echo "Yarn install completed. Node modules: $(ls -la node_modules | head -5)" && \
     echo "====[ YARN BUILD ]==== " && \
     echo "Running yarn build..." && \
-    php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json && \
+    echo "Skipping Symfony console command during build (requires runtime environment)" && \
     yarn build && \
     echo "Yarn build completed. Public directory: $(ls -la public)" && \
     echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"

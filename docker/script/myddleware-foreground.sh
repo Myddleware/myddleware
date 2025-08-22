@@ -15,7 +15,9 @@ echo "--"
 rsyslogd
 cron
 
-## Dependencies and build completed during Docker build
+## Generate JS routing (requires runtime environment)
+echo "====[ GENERATE JS ROUTING ]===="
+php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json
 
 ## Start Apache
 echo "====[ START APACHE ]===="
