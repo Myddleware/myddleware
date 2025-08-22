@@ -68,38 +68,12 @@ COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 
-# Create var directory and .env.local with proper permissions
+# Create var directory with proper permissions
 RUN echo "====[ CREATING VAR DIRECTORY ]==== " && \
-    echo "Current working directory: $(pwd)" && \
-    echo "User running this: $(whoami)" && \
-    echo "Contents before var creation:" && \
-    ls -la && \
     echo "Creating var directory..." && \
     mkdir -p var && \
-    echo "Var directory created, listing:" && \
-    ls -la | grep var && \
     chmod 775 var && \
-    echo "Set 775 permissions on var:" && \
-    ls -ld var && \
-    chown -R www-data:www-data var && \
-    echo "Set ownership to www-data:www-data on var:" && \
-    ls -ld var && \
-    echo "====[ CREATING .env.local ]==== " && \
-    echo "Creating .env.local file..." && \
-    echo "APP_ENV=dev" > .env.local && \
-    echo "APP_DEBUG=true" >> .env.local && \
-    echo ".env.local created, checking existence:" && \
-    ls -la .env.local && \
-    echo "Content of .env.local:" && \
-    cat .env.local && \
-    chmod 775 .env.local && \
-    echo "Set 775 permissions on .env.local:" && \
-    ls -la .env.local && \
-    chown www-data:www-data .env.local && \
-    echo "Set ownership to www-data:www-data on .env.local:" && \
-    ls -la .env.local && \
-    echo "====[ FINAL DIRECTORY CONTENTS ]==== " && \
-    ls -la
+    chown -R www-data:www-data var
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
@@ -121,7 +95,16 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     echo "Running encore production..." && \
     npx encore production --progress && \
     echo "Yarn build completed. Public directory: $(ls -la public)" && \
-    echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
+    echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')" && \
+    echo "====[ CREATING .env.local ]==== " && \
+    echo "Creating .env.local file for Docker environment..." && \
+    echo "APP_ENV=dev" > .env.local && \
+    echo "APP_DEBUG=true" >> .env.local && \
+    echo ".env.local created, checking existence and content:" && \
+    ls -la .env.local && \
+    cat .env.local && \
+    chmod 644 .env.local && \
+    chown www-data:www-data .env.local
 
 # Switch to non-root user
 USER www-data
