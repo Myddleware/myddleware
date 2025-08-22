@@ -1546,8 +1546,6 @@ class JobManager
 				$jobClosed = true;
             }
 
-			// If a job has been closed, we check every running instance value
-			if ($jobClosed) {
 				// Get all the open job, group and count them
 				$jobs = $this->entityManager->getRepository(Job::class)
 							->createQueryBuilder('j')
@@ -1597,7 +1595,6 @@ class JobManager
 						$this->setMessage('Running instance : set value  '.$newRunningInstances.' to cronjon '.$cronJob->getId().' ('.$cronJob->getCommand().') ');
 					}
 				}
-			}
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
