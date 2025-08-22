@@ -29,9 +29,6 @@ Encore
     .addEntry('filter', './assets/js/filter.js')
     .addEntry('crontab', './assets/js/crontab.js')
 
-    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
-    .enableStimulusBridge('./assets/controllers.json')
-
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
 
@@ -80,7 +77,14 @@ Encore
     //.enableIntegrityHashes(Encore.isProduction())
 
     // uncomment if you're having problems with a jQuery plugin
-    //.autoProvidejQuery()
+    .autoProvidejQuery()
 ;
+
+
+  Encore.configureTerserPlugin((options) => {
+    options.terserOptions = options.terserOptions || {};
+    options.terserOptions.compress = options.terserOptions.compress || {};
+    options.terserOptions.compress.drop_console = true;
+  });
 
 module.exports = Encore.getWebpackConfig();

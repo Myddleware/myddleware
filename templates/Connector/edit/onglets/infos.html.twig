@@ -30,6 +30,17 @@
 		<div class="row justify-content-center pb-5">
 			<div class="col">
 				{{form_start(form)}}
+				
+				{# Display flash messages #}
+				{% for type, messages in app.flashes %}
+					{% for message in messages %}
+						<div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+							{{ message }}
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+					{% endfor %}
+				{% endfor %}
+				
 				{% if error is defined %}
 					<div class="alert alert-danger">{{'create_connector.params_error'|trans}}</div>
 				{% endif %}
@@ -56,10 +67,12 @@
 								<td class="value">
 									{% if field.vars.value.name !='wsdl' and field.vars.value.name !='file' %}
 										{{ form_widget(field.value) }}
+										{{ form_rest(field) }}
 									{% else %}
 										<a id="link_wsdl" class="fancybox_upload" href="{{ path('upload', {'solution': field.vars.value.connector.solution.name }) }}?file={{ field.vars.value.value }}" data-fancybox-type="iframe">
-											{{ form_widget(field.value, {'id' : 'param_'~field.vars.value.name}) }}
+											{{ form_widget(field.value) }}
 										</a>
+										{{ form_rest(field) }}
 									{% endif %}
 								</td>
 							</tr>
@@ -92,6 +105,8 @@
 					</svg>
 					{{'error.connexion'|trans}} : <span class="error"></span>
 				</div>
+				
+				{{ form_end(form) }}
 			</div>
 		</div>
 	</div>

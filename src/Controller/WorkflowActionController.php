@@ -72,6 +72,7 @@ use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use App\Repository\WorkflowActionRepository;
+use App\Repository\WorkflowLogRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -91,6 +92,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 /**
  * @Route("/workflowAction")
@@ -114,6 +116,7 @@ class WorkflowActionController extends AbstractController
     private SolutionManager $solutionManager;
     private RuleManager $ruleManager;
     private DocumentManager $documentManager;
+    private WorkflowLogRepository $workflowLogRepository;
     protected Connection $connection;
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
@@ -137,6 +140,7 @@ class WorkflowActionController extends AbstractController
         ToolsManager $tools,
         JobManager $jobManager,
         TemplateManager $template,
+        WorkflowLogRepository $workflowLogRepository,
         ParameterBagInterface $params
     ) {
         $this->logger = $logger;
@@ -156,6 +160,7 @@ class WorkflowActionController extends AbstractController
         $this->tools = $tools;
         $this->jobManager = $jobManager;
         $this->template = $template;
+        $this->workflowLogRepository = $workflowLogRepository;
     }
 
     protected function getInstanceBdd() {}
@@ -164,7 +169,7 @@ class WorkflowActionController extends AbstractController
     // public function to delet the workflow by id (set deleted to 1)
     /**
      * @Route("/deleteAction/{id}", name="workflow_action_delete", methods={"POST", "DELETE"})
-     * * @IsGranted("ROLE_ADMIN")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
@@ -655,6 +660,81 @@ class WorkflowActionController extends AbstractController
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
+
+    /**
+     * @Route("/showAction/{id}/logs", name="workflow_action_show_logs", defaults={"page"=1})
+     * @Route("/showAction/{id}/logs/page-{page}", name="workflow_action_show_logs_page", requirements={"page"="\d+"})
+     */
+    public function WorkflowActionShowLogs(string $id, Request $request, int $page): Response
+    {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium_list');
+        }
+
+        try {
+            $em = $this->entityManager;
+            $workflowAction = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
+            
+            if (empty($workflowAction)) {
+                if ($request->isXmlHttpRequest()) {
+                    return $this->render(
+                        'WorkflowAction/_workflowaction_logs_table.html.twig',
+                        [
+                            'error' => 'Workflow Action not found'
+                        ]
+                    );
+                } else {
+                    $this->addFlash('error', 'Workflow Action not found');
+                    return $this->redirectToRoute('workflow_list');
+                }
+            }
+
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['action' => $id],
+                ['dateCreated' => 'DESC']
+            );
+            $query = $this->workflowLogRepository->findLogsByActionId($id);
+
+            $adapter = new QueryAdapter($query);
+            $pager = new Pagerfanta($adapter);
+            $pager->setMaxPerPage(10);
+            $pager->setCurrentPage($page);
+
+            $nb_workflow = count($workflowLogs);
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->render(
+                    'WorkflowAction/_workflowaction_logs_table.html.twig',
+                    [
+                        'workflowLogs' => $workflowLogs,
+                        'nb_workflow' => $nb_workflow,
+                        'pager' => $pager,
+                        'workflowAction' => $workflowAction,
+                    ]
+                );
+            } else {
+                // For direct navigation, redirect to the main workflow action page
+                return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
+            }
+        } catch (Exception $e) {
+            error_log('WorkflowActionShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            if ($request->isXmlHttpRequest()) {
+                return $this->render(
+                    'WorkflowAction/_workflowaction_logs_table.html.twig',
+                    [
+                        'workflowLogs' => [],
+                        'nb_workflow' => 0,
+                        'pager' => null,
+                        'workflowAction' => null,
+                        'error' => 'Error loading logs: ' . $e->getMessage()
+                    ]
+                );
+            } else {
+                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+            }
+        }
+    }
+
     // public function to edit a workflow
     /**
      * @Route("/editWorkflowAction/{id}", name="workflow_action_edit")

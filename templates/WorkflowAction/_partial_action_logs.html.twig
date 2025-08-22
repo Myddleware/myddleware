@@ -1,0 +1,32 @@
+{% for log in logs %}
+    <tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+        <td class="ctr">{{ log.id }}</td>
+        <td class="ctr">
+            <a href="{{ path('workflow_list') }}" class="help-link all-link">{{ log.workflow.id }}</a>
+        </td>
+        <td class="ctr">
+            <a href="{{ path('task_view', {'id': log.job.id}) }}" class="help-link all-link">{{ log.job.id }}</a>
+        </td>
+        <td class="ctr">
+            {% if log.triggerDocument is not null %}
+                <a href="{{ path('flux_info_page', {'id': log.triggerDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
+            {% else %}
+                <span></span>
+            {% endif %}
+        </td>
+        <td class="ctr">
+            {% if log.generateDocument is not null %}
+                <a href="{{ path('flux_info_page', {'id': log.generateDocument.id, 'page': 1, 'logPage': 1}) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
+            {% else %}
+                <span></span>
+            {% endif %}
+        </td>
+        <td class="ctr">{{ log.createdBy }}</td>
+        <td class="ctr">
+            <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+        </td>
+        <td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+        <td class="ctr">{{ log.getMessage }}</td>
+        <td class="ctr">{{ log.action.action }}</td>
+    </tr>
+{% endfor %}

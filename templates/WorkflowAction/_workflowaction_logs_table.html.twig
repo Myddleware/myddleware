@@ -1,0 +1,124 @@
+{% if error is defined %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% else %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ 'view_workflow.log_id'|trans }}</th>
+            <th>{{ 'view_workflow.workflow'|trans }}</th>
+            <th>{{ 'view_workflow.job'|trans }}</th>
+            <th>{{ 'view_workflow.trigger_document'|trans }}</th>
+            <th>{{ 'view_workflow.generate_document'|trans }}</th>
+            <th>{{ 'view_workflow.created_by'|trans }}</th>
+            <th>{{ 'view_workflow.status'|trans }}</th>
+            <th>{{ 'view_workflow.date_created'|trans }}</th>
+            <th>{{ 'view_workflow.message'|trans }}</th>
+            <th>{{ 'view_workflow.action_name'|trans }}</th>
+            <th>{{ 'view_workflow.action_type'|trans }}</th>
+        </tr>
+    </thead>
+    <tbody class="workflowaction-logs-collapse-body">
+        {% for log in pager.currentPageResults %}
+            <tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
+                <td class="ctr">{{ log.id }}</td>
+                <td class="ctr">
+                    <a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a>
+                </td>
+                <td class="ctr">
+                    <a href="{{ path('task_view',{'id' : log.job.id }) }}" class="help-link all-link">{{ log.job.id }}</a>
+                </td>
+                <td class="ctr">
+                    {% if log.triggerDocument is not null %}
+                        <a href="{{ path('flux_modern',{'id' : log.triggerDocument.id }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                </td>
+                <td class="ctr">
+                    {% if log.generateDocument is not null %}
+                        <a href="{{ path('flux_modern',{'id' : log.generateDocument.id }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                </td>
+                <td class="ctr">{{ log.createdBy }}</td>
+                <td class="ctr">
+                    <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
+                </td>
+                <td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+                <td class="ctr">{{ log.getMessage }}</td>
+                <td class="ctr">
+                    <a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>
+                </td>
+                <td class="ctr">{{ log.action.action }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if pager.haveToPaginate %}
+    <div id="logs-pagination">
+        {{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_action_show_logs_page', 'routeParams': {'id': workflowAction.id}}) }}
+    </div>
+
+    <form id="logs-page-form" method="get" class="form-inline mt-3" onsubmit="goToLogsPage(event)">
+        <div class="form-group" required style="width: 15em;">
+            <label for="logs-page-input" class="sr-only">Page</label>
+            <input type="number" name="page" id="logs-page-input" class="form-control" placeholder="Page number" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            const maxLogsPage = {{ pager.getNbPages() }};
+            
+            function goToLogsPage(event) {
+                event.preventDefault();
+                const page = document.getElementById('logs-page-input').value;
+                if (page < 1 || page > maxLogsPage) {
+                    alert('Please enter a valid page number between 1 and ' + maxLogsPage);
+                    return;
+                }
+                loadLogsPage(page);
+            }
+            
+            function loadLogsPage(page) {
+                $('#logs-table-container').html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading page ' + page + '...</p>');
+                
+                const baseUrl = "{{ path('workflow_action_show_logs', {'id': workflowAction.id}) }}";
+                const url = page === 1 ? baseUrl : baseUrl + '/page-' + page;
+                
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        $('#logs-table-container').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading logs page:', xhr.responseText || error);
+                        $('#logs-table-container').html('<div class="alert alert-danger text-center">Error loading page. Please try again.</div>');
+                    }
+                });
+            }
+            
+            // Handle pagination link clicks with AJAX
+            $(document).off('click', '#logs-pagination a').on('click', '#logs-pagination a', function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                const matches = url.match(/page-(\d+)/);
+                if (matches) {
+                    const page = matches[1];
+                    loadLogsPage(page);
+                }
+            });
+            
+            // Make the form submit handler available globally
+            window.goToLogsPage = goToLogsPage;
+        });
+    </script>
+{% endif %}
+{% endif %}
