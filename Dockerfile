@@ -72,7 +72,8 @@ RUN chmod +x /usr/local/bin/myddleware-*.sh
 RUN mkdir -p var && \
     chmod 775 var && \
     chown -R www-data:www-data var && \
-    touch .env.local && \
+    echo "APP_ENV=prod" > .env.local && \
+    echo "APP_DEBUG=false" >> .env.local && \
     chmod 775 .env.local && \
     chown www-data:www-data .env.local
 
