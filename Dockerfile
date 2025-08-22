@@ -86,8 +86,8 @@ RUN echo "====[ CREATING VAR DIRECTORY ]==== " && \
     ls -ld var && \
     echo "====[ CREATING .env.local ]==== " && \
     echo "Creating .env.local file..." && \
-    echo "APP_ENV=prod" > .env.local && \
-    echo "APP_DEBUG=false" >> .env.local && \
+    echo "APP_ENV=dev" > .env.local && \
+    echo "APP_DEBUG=true" >> .env.local && \
     echo ".env.local created, checking existence:" && \
     ls -la .env.local && \
     echo "Content of .env.local:" && \
