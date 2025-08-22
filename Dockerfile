@@ -102,7 +102,10 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     yarn install && \
     echo "Yarn install completed. Node modules: $(ls -la node_modules | head -5)" && \
     echo "====[ YARN BUILD ]==== " && \
-    echo "Running encore production (skipping Symfony console command)..." && \
+    echo "Creating placeholder JS routing file for webpack build..." && \
+    mkdir -p public/js && \
+    echo '{}' > public/js/fos_js_routes.json && \
+    echo "Running encore production..." && \
     npx encore production --progress && \
     echo "Yarn build completed. Public directory: $(ls -la public)" && \
     echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
