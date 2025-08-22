@@ -99,7 +99,7 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     echo "Composer install completed. Vendor directory: $(ls -la vendor | head -5)" && \
     echo "====[ YARN INSTALL ]==== " && \
     echo "Running yarn install..." && \
-    yarn install --production && \
+    yarn install && \
     echo "Yarn install completed. Node modules: $(ls -la node_modules | head -5)" && \
     echo "====[ YARN BUILD ]==== " && \
     echo "Running yarn build..." && \
