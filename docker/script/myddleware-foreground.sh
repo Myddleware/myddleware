@@ -15,10 +15,7 @@ echo "--"
 rsyslogd
 cron
 
-## Start yarn build
-composer install
-yarn install
-yarn run build
+## Dependencies and build completed during Docker build
 
 ## Start Apache
 echo "====[ START APACHE ]===="

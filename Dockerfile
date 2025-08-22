@@ -69,17 +69,44 @@ COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
 
 # Create var directory and .env.local with proper permissions
-RUN mkdir -p var && \
+RUN echo "====[ CREATING VAR DIRECTORY ]==== " && \
+    echo "Current working directory: $(pwd)" && \
+    echo "Contents before var creation: $(ls -la)" && \
+    mkdir -p var && \
+    echo "Created var directory, checking existence: $(ls -la | grep var)" && \
     chmod 775 var && \
+    echo "Set 775 permissions on var: $(ls -ld var)" && \
     chown -R www-data:www-data var && \
+    echo "Set ownership to www-data:www-data on var: $(ls -ld var)" && \
+    echo "====[ CREATING .env.local ]==== " && \
     echo "APP_ENV=prod" > .env.local && \
     echo "APP_DEBUG=false" >> .env.local && \
+    echo "Created .env.local with content: $(cat .env.local)" && \
     chmod 775 .env.local && \
-    chown www-data:www-data .env.local
+    echo "Set 775 permissions on .env.local: $(ls -la .env.local)" && \
+    chown www-data:www-data .env.local && \
+    echo "Set ownership to www-data:www-data on .env.local: $(ls -la .env.local)" && \
+    echo "Final directory contents: $(ls -la)"
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
+
+# Build dependencies and assets
+RUN echo "====[ COMPOSER INSTALL ]==== " && \
+    echo "Running composer install..." && \
+    composer install --no-dev --optimize-autoloader && \
+    echo "Composer install completed. Vendor directory: $(ls -la vendor | head -5)" && \
+    echo "====[ YARN INSTALL ]==== " && \
+    echo "Running yarn install..." && \
+    yarn install --production && \
+    echo "Yarn install completed. Node modules: $(ls -la node_modules | head -5)" && \
+    echo "====[ YARN BUILD ]==== " && \
+    echo "Running yarn build..." && \
+    php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json && \
+    yarn build && \
+    echo "Yarn build completed. Public directory: $(ls -la public)" && \
+    echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
 
 # Switch to non-root user
 USER www-data
