@@ -98,28 +98,14 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
 
 # Create .env.local file separately to ensure it's always created
-RUN echo "====[ CREATING .env.local ]==== " && \
-    echo "Current working directory: $(pwd)" && \
-    echo "Current user: $(whoami)" && \
-    echo "Directory contents before creation:" && \
-    ls -la | head -10 && \
-    echo "Creating .env.local file for Docker environment..." && \
-    echo "APP_ENV=dev" > .env.local && \
-    echo "APP_DEBUG=true" >> .env.local && \
-    echo "DATABASE_URL=\"mysql://root:root@mysql:3306/myddleware?serverVersion=8.0\"" >> .env.local && \
-    echo ".env.local creation completed. Verifying..." && \
-    ls -la .env.local && \
-    echo "Content of .env.local:" && \
-    cat .env.local && \
-    echo "Setting permissions..." && \
-    chmod 644 .env.local && \
-    chown www-data:www-data .env.local && \
-    echo "Final verification:" && \
-    ls -la .env.local && \
-    echo "Creating test file to verify file system works..." && \
-    echo "test" > test-file.txt && \
-    ls -la test-file.txt && \
-    echo "====[ END .env.local CREATION ]==== "
+RUN set -e && \
+    echo "====[ CREATING .env.local ]==== " && \
+    pwd && whoami && \
+    echo "APP_ENV=dev" > .env.local || { echo "Failed to create .env.local"; exit 1; } && \
+    echo "APP_DEBUG=true" >> .env.local || { echo "Failed to append to .env.local"; exit 1; } && \
+    ls -la .env.local || { echo ".env.local not found after creation"; exit 1; } && \
+    cat .env.local || { echo "Cannot read .env.local"; exit 1; } && \
+    echo "SUCCESS: .env.local created and verified"
 
 # Switch to non-root user
 USER www-data
