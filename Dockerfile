@@ -95,8 +95,10 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     echo "Running encore production..." && \
     npx encore production --progress && \
     echo "Yarn build completed. Public directory: $(ls -la public)" && \
-    echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')" && \
-    echo "====[ CREATING .env.local ]==== " && \
+    echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
+
+# Create .env.local file separately to ensure it's always created
+RUN echo "====[ CREATING .env.local ]==== " && \
     echo "Creating .env.local file for Docker environment..." && \
     echo "APP_ENV=dev" > .env.local && \
     echo "APP_DEBUG=true" >> .env.local && \
