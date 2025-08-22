@@ -102,9 +102,8 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
     yarn install && \
     echo "Yarn install completed. Node modules: $(ls -la node_modules | head -5)" && \
     echo "====[ YARN BUILD ]==== " && \
-    echo "Running yarn build..." && \
-    echo "Skipping Symfony console command during build (requires runtime environment)" && \
-    yarn build && \
+    echo "Running encore production (skipping Symfony console command)..." && \
+    npx encore production --progress && \
     echo "Yarn build completed. Public directory: $(ls -la public)" && \
     echo "Build assets: $(ls -la public/build 2>/dev/null || echo 'No build directory found')"
 
