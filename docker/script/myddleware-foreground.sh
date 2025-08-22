@@ -16,7 +16,7 @@ rsyslogd
 cron
 
 ## Start yarn build
-composer dump-autoload --optimize
+composer install
 yarn install
 yarn run build
 

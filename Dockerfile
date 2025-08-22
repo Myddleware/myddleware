@@ -59,7 +59,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 
 # Copy composer files first to leverage layer caching
 COPY composer.json composer.lock ./
-RUN composer install --no-scripts --no-autoloader
 
 # Copy application files
 COPY --chown=www-data:www-data . .
@@ -68,6 +67,14 @@ COPY --chown=www-data:www-data . .
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/myddleware-*.sh
+
+# Create var directory and .env.local with proper permissions
+RUN mkdir -p var && \
+    chmod 775 var && \
+    chown -R www-data:www-data var && \
+    touch .env.local && \
+    chmod 775 .env.local && \
+    chown www-data:www-data .env.local
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
