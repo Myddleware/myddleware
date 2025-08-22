@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+## Check for .env.local at startup
+echo "====[ STARTUP FILE CHECK ]===="
+echo "Checking for .env.local file at startup..."
+ls -la .env.local 2>/dev/null || echo ".env.local not found at startup!"
+echo "Checking for test file..."
+ls -la test-file.txt 2>/dev/null || echo "test-file.txt not found at startup!"
+echo "Current directory: $(pwd)"
+echo "Current user: $(whoami)"
+
 ## Extend Hosts
 echo "====[ UPDATE HOSTS ]===="
 cat hosts >> /etc/hosts

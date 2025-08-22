@@ -99,14 +99,27 @@ RUN echo "====[ COMPOSER INSTALL ]==== " && \
 
 # Create .env.local file separately to ensure it's always created
 RUN echo "====[ CREATING .env.local ]==== " && \
+    echo "Current working directory: $(pwd)" && \
+    echo "Current user: $(whoami)" && \
+    echo "Directory contents before creation:" && \
+    ls -la | head -10 && \
     echo "Creating .env.local file for Docker environment..." && \
     echo "APP_ENV=dev" > .env.local && \
     echo "APP_DEBUG=true" >> .env.local && \
-    echo ".env.local created, checking existence and content:" && \
+    echo "DATABASE_URL=\"mysql://root:root@mysql:3306/myddleware?serverVersion=8.0\"" >> .env.local && \
+    echo ".env.local creation completed. Verifying..." && \
     ls -la .env.local && \
+    echo "Content of .env.local:" && \
     cat .env.local && \
+    echo "Setting permissions..." && \
     chmod 644 .env.local && \
-    chown www-data:www-data .env.local
+    chown www-data:www-data .env.local && \
+    echo "Final verification:" && \
+    ls -la .env.local && \
+    echo "Creating test file to verify file system works..." && \
+    echo "test" > test-file.txt && \
+    ls -la test-file.txt && \
+    echo "====[ END .env.local CREATION ]==== "
 
 # Switch to non-root user
 USER www-data
