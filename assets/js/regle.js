@@ -96,7 +96,11 @@ $(function () {
   
   // Wait for jQuery UI to be loaded before initializing tabs
   function initializeTabs() {
-    if (typeof onglets !== "undefined" && onglets) {
+    if (
+    typeof onglets !== "undefined" &&
+    onglets &&
+    typeof $.fn.tabs === "function"
+  ) {
       console.log('Attempting to initialize tabs with:', onglets);
       console.log('jQuery available:', typeof $ !== 'undefined');
       console.log('jQuery UI available:', typeof $.ui !== 'undefined');
