@@ -368,7 +368,7 @@
 	margin-right: 10px;
 }
 
-#rule #tabs ul.ui-widget-header li {
+#rule .tabs ul.ui-widget-header li {
 	min-width: calc( (1200px / 5) + 1.8px );
 	max-width: calc( (1200px / 5) + 1.8px );
 }
