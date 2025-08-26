@@ -37,7 +37,7 @@
 /* Updates after SF4 upgrade */
 
 /* Title 'Creating a connector' */
-#tabs ul.ui-tabs-nav {
+.tabs ul.ui-tabs-nav {
 	display: flex;
 	justify-content: center;
 
