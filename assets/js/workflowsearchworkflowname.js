@@ -5,7 +5,7 @@ function fetchFilteredData() {
     workflowListUrl = workflowListUrl.replace("/workflow/workflow/", "/workflow/list/");
 
     $.ajax({
-      url: workflowListUrl,
+      url: workflowListUrl.replace("http://", "https://"),
       type: "GET",
       data: {
         workflow_name: workflowName,
