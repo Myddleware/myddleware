@@ -559,29 +559,18 @@ class ConnectorController extends AbstractController
      */
     public function connectorOpen(Request $request, $id)
     {
+        // Load connector with proper permissions check
         $qb = $this->entityManager->getRepository(Connector::class)->createQueryBuilder('c');
         $qb->select('c', 'cp')->leftjoin('c.connectorParams', 'cp');
 
         if ($this->getUser()->isAdmin()) {
-            $qb->where('c.id =:id AND c.deleted = 0')->setParameter('id', $id);
+            $qb->where('c.id = :id AND c.deleted = 0')->setParameter('id', $id);
         } else {
-            $qb->where('c.id =:id and c.createdBy =:createdBy AND c.deleted = 0')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
-        }
-        // Detecte si la session est le support ---------
-        // Infos du connecteur
-        $connector = $qb->getQuery()->getOneOrNullResult();
-
-        if (!$connector) {
-            throw $this->createNotFoundException("This connector doesn't exist");
+            $qb->where('c.id = :id and c.createdBy = :createdBy AND c.deleted = 0')
+               ->setParameter('id', $id)
+               ->setParameter('createdBy', $this->getUser()->getId());
         }
 
-        if ($this->getUser()->isAdmin()) {
-            $qb->where('c.id =:id')->setParameter('id', $id);
-        } else {
-            $qb->where('c.id =:id and c.createdBy =:createdBy')->setParameter(['id' => $id, 'createdBy' => $this->getUser()->getId()]);
-        }
-        // Detecte si la session est le support ---------
-        // Infos du connecteur
         $connector = $qb->getQuery()->getOneOrNullResult();
 
         if (!$connector) {
@@ -617,15 +606,30 @@ class ConnectorController extends AbstractController
                         ]);
                     }
                     
-                    $params = $connector->getConnectorParams();
-                    $connector->setDateModified(new \DateTime());
-                    $connector->setModifiedBy($this->getUser()->getId());
-                    
-                    $this->entityManager->persist($connector);
-                    $this->entityManager->flush();
-
-                    return $this->redirect($this->generateUrl('regle_connector_list'));
+                    try {
+                        $this->entityManager->beginTransaction();
+                        
+                        $params = $connector->getConnectorParams();
+                        $connector->setDateModified(new \DateTime());
+                        $connector->setModifiedBy($this->getUser()->getId());
+                        
+                        $this->entityManager->persist($connector);
+                        $this->entityManager->flush();
+                        
+                        $this->entityManager->commit();
+                        
+                        // Add success message
+                        $request->getSession()->getFlashBag()->add('success', 'Connector saved successfully');
+                        
+                        // Redirect to detail view after successful edit
+                        return $this->redirect($this->generateUrl('connector_detail', ['id' => $id]));
+                        
+                    } catch (Exception $e) {
+                        $this->entityManager->rollback();
+                        throw $e;
+                    }
                 } else {
+                    // Form is not valid, collect and display errors
                     $errors = [];
                     foreach ($form->getErrors(true) as $error) {
                         $errors[] = $error->getMessage();
@@ -633,33 +637,19 @@ class ConnectorController extends AbstractController
                     if (!empty($errors)) {
                         $request->getSession()->getFlashBag()->add('error', implode(', ', $errors));
                     }
-                    
-                    return $this->render('Connector/edit/fiche.html.twig', [
-                        'connector' => $connector,
-                        'form' => $form->createView(),
-                        'connector_name' => $connector->getName() ?: 'Unnamed',
-                    ]);
                 }
             } catch (Exception $e) {
                 $this->logger->error('Connector save error: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
                 $request->getSession()->getFlashBag()->add('error', 'Error saving connector: ' . $e->getMessage());
-                
-                return $this->render('Connector/edit/fiche.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form->createView(),
-                    'connector_name' => $connector->getName() ?: 'Unnamed',
-                ]);
             }
         }
-        // Display the connector
-        else {
-            return $this->render('Connector/edit/fiche.html.twig', [
-                'connector' => $connector,
-                'form' => $form->createView(),
-                'connector_name' => $connector->getName(),
-                ]
-            );
-        }
+
+        // Display the connector edit form
+        return $this->render('Connector/edit/fiche.html.twig', [
+            'connector' => $connector,
+            'form' => $form->createView(),
+            'connector_name' => $connector->getName(),
+        ]);
     }
 
     /* ******************************************************
