@@ -42,6 +42,15 @@
 						<input type="text" autocomplete='off' class="form-control mb-2" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
 						<input type="password" autocomplete='off' class="form-control mb-2" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
 						<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+						
+						{# Display flash messages for exceptions #}
+						{% for message in app.flashes('danger') %}
+							<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
+								<i class="fas fa-exclamation-triangle"></i>
+								<p class="ms-2">{{ message }}</p>
+							</div>
+						{% endfor %}
+						
 						{% if error %}
 							<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
 								<i class="fas fa-times"></i>
