@@ -2178,4 +2178,52 @@ $result = [];
             ], 500);
         }
     }
+
+    /**
+     * Document workflow logs API endpoint
+     * @Route("/api/flux/document-workflow-logs/{id}", name="api_flux_document_workflow_logs", methods={"GET"})
+     */
+    public function getDocumentWorkflowLogs($id): JsonResponse {
+        try {
+            error_log("getDocumentWorkflowLogs called with document ID: " . $id);
+            
+            $em = $this->entityManager;
+            
+            // Get workflow logs for this trigger document
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['triggerDocument' => $id],
+                ['id' => 'DESC']
+            );
+            
+            error_log("Found " . count($workflowLogs) . " workflow logs for document ID: " . $id);
+            
+            $workflowLogsData = [];
+            
+            foreach ($workflowLogs as $workflowLog) {
+                $workflowLogsData[] = [
+                    'id' => $workflowLog->getId(),
+                    'workflowName' => $workflowLog->getWorkflow() ? $workflowLog->getWorkflow()->getName() : 'N/A',
+                    'jobName' => $workflowLog->getJob() ? $workflowLog->getJob()->getId() : 'N/A',
+                    'actionName' => $workflowLog->getAction() ? $workflowLog->getAction()->getName() : 'N/A',
+                    'status' => $workflowLog->getStatus() ?? 'N/A',
+                    'dateCreated' => $workflowLog->getDateCreated()->format('Y-m-d H:i:s'),
+                    'message' => $workflowLog->getMessage() ?? '',
+                ];
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $workflowLogsData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Error in getDocumentWorkflowLogs: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Error retrieving workflow logs'
+            ], 500);
+        }
+    }
 }
