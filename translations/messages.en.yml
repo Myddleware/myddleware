@@ -610,6 +610,7 @@ view_workflow:
     cancel_edit: Cancel edit
     save: Save
     cancel: Cancel
+    loading_logs: Loading logs...
 edit_workflow:
     name_already_exists: Workflow name already exists
 view_workflow_action:
