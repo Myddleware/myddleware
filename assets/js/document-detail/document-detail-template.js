@@ -17,6 +17,7 @@ import {
 } from './document-detail-dynamic-data-extractor.js';
 
 import { getDocumentLogs } from './document-detail-data-extractor-logs.js';
+import { getDocumentWorkflowLogs } from './document-detail-data-extractor-workflow-logs.js';
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
 import { DocumentDetailButtons } from './document-detail-buttons.js';
 import { DocumentDetailPermissions } from './document-detail-permissions.js';
@@ -66,6 +67,20 @@ export class DocumentDetailTemplate {
             }
         });
 
+        // Initialize workflow logs payload and fetch workflow logs data
+        let myWorkflowLogsPayload = [];
+        // console.log('📋 Starting workflow logs data fetch for documentId:', documentId);
+        getDocumentWorkflowLogs(documentId, (workflowLogsData, error) => {
+            if (error) {
+                console.error('❌ Error fetching workflow logs data:', error);
+            } else {
+                // console.log('✅ Workflow logs data fetched successfully:', workflowLogsData?.length || 0, 'workflow logs');
+                myWorkflowLogsPayload = workflowLogsData || [];
+                // Update the workflow logs section with real data
+                DocumentDetailTemplate.updateWorkflowLogsSection(myWorkflowLogsPayload);
+            }
+        });
+
         // console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
         // First, return the template with placeholders
         const template = `
@@ -104,6 +119,7 @@ export class DocumentDetailTemplate {
                         ${DocumentDetailDataSections.generateParentDocumentsSection(myParentsPayload)}
                         ${DocumentDetailDataSections.generateChildDocumentsSection(myChildrenPayload)}
                         ${DocumentDetailDataSections.generateLogsSection(myLogsPayload)}
+                        ${DocumentDetailDataSections.generateWorkflowLogsSection([])}
                         `;
                         
         // After returning the template, load ALL document data with a single call
@@ -404,12 +420,65 @@ export class DocumentDetailTemplate {
             
             // Re-initialize the section state management for the new DOM elements
             // console.log('🔄 Re-initializing section state after logs update...');
-            DocumentDetailSectionState.setupCollapsible('logs-section', 'logs', 'logs');
-            DocumentDetailSectionState.setupPagination('logs-section', 'logs', logsData);
-            // console.log('✅ Logs section state re-initialized');
+            setTimeout(() => {
+                DocumentDetailSectionState.setupCollapsible('logs-section', 'logs', 'logs');
+                DocumentDetailSectionState.setupPagination('logs-section', 'logs', logsData);
+                // console.log('✅ Logs section state re-initialized');
+            }, 10);
             
         } catch (error) {
             console.error('❌ Error updating logs section:', error);
+            console.error('Error stack:', error.stack);
+        }
+    }
+
+    /**
+     * Updates the workflow logs section with real workflow logs data
+     * @param {Array} workflowLogsData - Array of workflow logs data
+     */
+    static updateWorkflowLogsSection(workflowLogsData) {
+        // console.log('📋 DocumentDetailTemplate.updateWorkflowLogsSection called with', workflowLogsData?.length || 0, 'workflow logs');
+        // console.log('📋 Sample workflow log data:', workflowLogsData?.[0]);
+        
+        try {
+            const workflowLogsContainer = document.querySelector('.workflow-logs-section');
+            // console.log('📋 Workflow logs container found:', !!workflowLogsContainer);
+            
+            if (!workflowLogsContainer) {
+                console.warn('⚠️ Workflow logs section container not found in DOM');
+                // Let's also check what containers do exist
+                const allDataWrappers = document.querySelectorAll('.data-wrapper');
+                // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
+                allDataWrappers.forEach((wrapper, index) => {
+                    // console.log(`📋 Container ${index}:`, wrapper.className);
+                });
+                return;
+            }
+
+            if (!workflowLogsData || workflowLogsData.length === 0) {
+                // console.log('📋 No workflow logs data available, keeping empty section');
+                return;
+            }
+
+            // Generate new workflow logs section HTML with real data
+            // console.log('📋 Generating new workflow logs HTML...');
+            const newWorkflowLogsHtml = DocumentDetailDataSections.generateWorkflowLogsSection(workflowLogsData);
+            // console.log('📋 Generated new workflow logs HTML, length:', newWorkflowLogsHtml.length);
+            
+            // Replace the existing workflow logs section
+            workflowLogsContainer.outerHTML = newWorkflowLogsHtml;
+            // console.log('✅ Workflow logs section updated successfully');
+            
+            // Re-initialize the section state management for the new DOM elements
+            // console.log('🔄 Re-initializing section state after workflow logs update...');
+            setTimeout(() => {
+                DocumentDetailSectionState.setupCollapsible('workflow-logs-section', 'workflow-logs', 'workflow-logs');
+                DocumentDetailSectionState.setupPagination('workflow-logs-section', 'workflow-logs', workflowLogsData);
+                // console.log('✅ Workflow logs section state re-initialized');
+            }, 10);
+            
+        } catch (error) {
+            console.error('❌ Error updating workflow logs section:', error);
             console.error('Error stack:', error.stack);
         }
     }
