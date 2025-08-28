@@ -416,6 +416,20 @@ li span {
     width: 100%;
 }
 
+/* Workflow Logs section styling */
+.data-wrapper.workflow-logs-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.workflow-logs-section .workflow-logs-content {
+    display: block;
+    width: 100%;
+}
+
 /* Logs section styling */
 .data-wrapper.logs-section {
     display: block;
