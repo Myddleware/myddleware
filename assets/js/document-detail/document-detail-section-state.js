@@ -64,6 +64,10 @@ export class DocumentDetailSectionState {
                 currentPage: 1,
                 isExpanded: true
             },
+            workflowLogs: {
+                currentPage: 1,
+                isExpanded: true
+            },
             logs: {
                 currentPage: 1,
                 isExpanded: true
@@ -215,6 +219,12 @@ export class DocumentDetailSectionState {
             return;
         }
 
+        // Remove existing event listeners to avoid duplicates
+        const existingToggleBtn = section.querySelector(`.${sectionName}-toggle-btn`);
+        if (existingToggleBtn && existingToggleBtn._collapseHandler) {
+            existingToggleBtn.removeEventListener('click', existingToggleBtn._collapseHandler);
+        }
+
         const header = section.querySelector(`.${sectionName}-header`);
         let content;
         
@@ -272,7 +282,7 @@ export class DocumentDetailSectionState {
         }
 
         // Add click handler
-        toggleBtn.addEventListener('click', () => {
+        const collapseHandler = () => {
             const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
             const newExpandedState = !isExpanded;
 
@@ -282,7 +292,11 @@ export class DocumentDetailSectionState {
 
             this.updateSectionState(stateKey, { isExpanded: newExpandedState });
             // console.log(`✅ Updated ${stateKey} expand state:`, newExpandedState);
-        });
+        };
+        
+        // Store handler reference for cleanup
+        toggleBtn._collapseHandler = collapseHandler;
+        toggleBtn.addEventListener('click', collapseHandler);
 
         // console.log(`✅ Collapsible setup complete for: ${stateKey}`);
     }
@@ -304,6 +318,10 @@ export class DocumentDetailSectionState {
         // Child Documents
         this.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
         this.setupPagination('child-documents-section', 'childDocuments', sectionsData.childDocuments || []);
+
+        // Workflow Logs
+        this.setupCollapsible('workflow-logs-section', 'workflow-logs', 'workflowLogs');
+        this.setupPagination('workflow-logs-section', 'workflowLogs', sectionsData.workflowLogs || []);
 
         // Logs
         this.setupCollapsible('logs-section', 'logs', 'logs');
