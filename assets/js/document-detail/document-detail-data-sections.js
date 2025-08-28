@@ -324,6 +324,81 @@ export class DocumentDetailDataSections {
     }
 
     /**
+     * Generates Workflow Logs section
+     * @param {Array<Object>} rows - Workflow logs data with id, workflowName, jobName, actionName, status, dateCreated, message
+     */
+    static generateWorkflowLogsSection(rows = []) {
+        if (!rows.length) {
+            return `
+            <div class="data-wrapper workflow-logs-section" data-section="workflow-logs">
+                <div class="workflow-logs-header">
+                    <h3>Workflow Logs</h3>
+                    <span class="workflow-logs-count">(0)</span>
+                    <button class="workflow-logs-toggle-btn" aria-expanded="true">-</button>
+                </div>
+
+                <div class="workflow-logs-content">
+                    <p>No workflow logs available</p>
+                </div>
+            </div>
+            `;
+        }
+
+        const body = rows
+        .map(({ id, workflowName, jobName, actionName, status, dateCreated, message }) => {
+            // Determine color based on status
+            let statusColor = '#28a745'; // default green for success
+            if (status && status.toLowerCase().includes('error')) {
+                statusColor = '#dc3545'; // red for errors
+            } else if (status && status.toLowerCase().includes('warning')) {
+                statusColor = '#ffc107'; // yellow for warnings
+            }
+
+            return `
+            <tr>
+                <td>${id}</td>
+                <td>${this.sanitizeString(workflowName)}</td>
+                <td>${this.sanitizeString(jobName)}</td>
+                <td>${this.sanitizeString(actionName)}</td>
+                <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
+                <td>${dateCreated}</td>
+                <td>${this.sanitizeString(message)}</td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper workflow-logs-section" data-section="workflow-logs">
+            <div class="workflow-logs-header">
+            <h3>Workflow Logs</h3>
+            <span class="workflow-logs-count">(${rows.length})</span>
+            <button class="workflow-logs-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="workflow-logs-content">
+            <table class="workflow-logs-table">
+            <thead>
+                <tr>
+                <th>Id</th>
+                <th>Workflow</th>
+                <th>Job</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Date Created</th>
+                <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
      * Generates Logs section
      * @param {Array<Object>} rows - Logs data with id, reference, job, creationDate, type, message
      */
