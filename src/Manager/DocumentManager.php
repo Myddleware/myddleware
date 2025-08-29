@@ -1349,16 +1349,16 @@ class DocumentManager
             if (empty($history)) {
                 return false;
             }
-            // We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
-            // This field can only exist in target data as it is created by Myddleware
-            if (!empty($target['Myddleware_element_id'])) {
-                $target['Myddleware_element_id'] = '';
-            }
 
             // For each target fields, we compare the data we want to send and the data already in the target solution
             // If one is different we stop the function
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
+					// We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
+					// This field can only exist in target data as it is created by Myddleware
+					if ($field['target_field_name'] == 'Myddleware_element_id') {
+                            continue;
+					}
 					// If one of the field isn't set then we return false
 					if (
 							!array_key_exists($field['target_field_name'], $history)
@@ -1413,6 +1413,7 @@ class DocumentManager
             return false;
         }
     }
+
 
     // Récupération des données dans la cible et sauvegarde dans la table d'historique
     protected function getDocumentHistory($searchFields)
