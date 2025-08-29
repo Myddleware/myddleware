@@ -158,7 +158,7 @@ class moodle extends solution
         parent::get_module_fields($module, $type);
         try {
             // Use Moodle metadata
-            require 'lib/moodle/metadata.php';
+			$moduleFields = $this->setMetadata();
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
@@ -802,5 +802,11 @@ class moodle extends solution
 				];
 			}
 		}
+	}
+	
+	// Set metadata
+	protected function setMetadata(){
+		require 'lib/moodle/metadata.php';
+		return $moduleFields;
 	}
 }

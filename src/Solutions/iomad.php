@@ -30,6 +30,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class iomad extends moodle
 {
+	protected $iomadModules = array('get_companies');
+	
     public function getFieldsLogin(): array
     {
         return [
@@ -44,11 +46,6 @@ class iomad extends moodle
                 'label' => 'solution.fields.token',
             ],
 			[
-                'name' => 'company',
-                'type' => TextType::class,
-                'label' => 'solution.fields.company',
-            ],
-			[
                 'name' => 'user_custom_fields',
                 'type' => TextType::class,
                 'label' => 'solution.fields.user_custom_fields',
@@ -60,4 +57,30 @@ class iomad extends moodle
             ],
         ];
     }
+	
+	public function get_modules($type = 'source'): array
+    {
+		// Moodle modules
+		$modules = parent::get_modules($type);
+		// Add Iomad modules
+		if ($type == 'source') {
+			$modules['get_companies'] = 'Get companies';
+		}
+		return $modules;
+	}
+		
+	// Set metadata
+	protected function setMetadata(){
+		require 'lib/iomad/metadata.php';
+		return $moduleFields;
+	}
+	
+	// Get the function name
+    protected function getFunctionName($param): string
+    {
+		if (in_array($param['module'], $this->iomadModules)) {
+			return 'local_myddleware_'.$param['module'];
+		}
+		return parent::getFunctionName($param);
+	}
 }
