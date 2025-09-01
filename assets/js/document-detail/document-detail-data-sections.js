@@ -462,8 +462,15 @@ export class DocumentDetailDataSections {
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
 
+            const rowStyle = type.startsWith('E')
+                ? ' style="background-color: #ffebee;"'
+                : type.startsWith('W')
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
+            
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td>${id}</td>
                 <td>${referenceLink}</td>
                 <td>${jobLink}</td>
