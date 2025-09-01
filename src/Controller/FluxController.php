@@ -1638,7 +1638,7 @@ $result = [];
         }
         
         // Red statuses: error, failed, ko, predecessor_ko
-        if (in_array($statusLower, ['e', 'error', 'failed', 'ko', 'predecessor_ko', 'error ✗']) || 
+        if (in_array($statusLower, ['not_found', 'e', 'error', 'failed', 'ko', 'predecessor_ko', 'error ✗']) || 
             strpos($statusLower, 'error') !== false || 
             strpos($statusLower, 'ko') !== false ||
             strpos($statusLower, 'fail') !== false) {
