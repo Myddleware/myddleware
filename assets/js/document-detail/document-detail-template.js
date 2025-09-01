@@ -208,15 +208,20 @@ export class DocumentDetailTemplate {
     }
     
     static updateDocumentType(typeInfo) {
-        if (!typeInfo) {
-            console.warn('⚠️ No type info available');
+        const typeElement = document.getElementById('document-type');
+        
+        if (!typeElement) {
+            console.warn('⚠️ Document type element not found');
             return;
         }
         
-        const typeElement = document.getElementById('document-type');
-        if (typeElement && typeInfo.type) {
+        if (!typeInfo || !typeInfo.type || typeInfo.type === '') {
+            // Handle empty or null type by showing empty string instead of "Loading..."
+            typeElement.textContent = '';
+            // console.log('✅ Updated document type to empty (type is null/empty)');
+        } else {
             typeElement.textContent = typeInfo.type;
-// console.log('✅ Updated document type');
+            // console.log('✅ Updated document type:', typeInfo.type);
         }
     }
     
