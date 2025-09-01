@@ -1197,6 +1197,7 @@ variable:
     view: Voir
   create_new: Créer une nouvelle variable
   list_title: Variables
+  detail_title: Variable
   confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
   no_variables: Aucune variable trouvée.
   table_headers:
