@@ -52,7 +52,6 @@ services:
       - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
 
   App\EventListener\ExceptionListener:
-    autowire: true
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
 
