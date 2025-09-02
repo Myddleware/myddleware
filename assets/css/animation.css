@@ -675,7 +675,10 @@ label[for="update_password_oldPassword"] {
 .log-reference,
 .log-job,
 .doc-id,
-.doc-name {
+.doc-name,
+.workflow-link,
+.job-link,
+.action-link {
     position: relative;
     display: inline;
     color: #0F66A9;
@@ -690,7 +693,10 @@ label[for="update_password_oldPassword"] {
 .log-reference.multiline-detected,
 .log-job.multiline-detected,
 .doc-id.multiline-detected,
-#rule-link.multiline-detected {
+#rule-link.multiline-detected,
+.workflow-link.multiline-detected,
+.job-link.multiline-detected,
+.action-link.multiline-detected {
     background: linear-gradient(to right, #337ab7 0%, #337ab7 100%);
     background-size: 0% 1.5px;
     background-position: 0% 100%;
@@ -721,7 +727,10 @@ label[for="update_password_oldPassword"] {
 .log-reference.single-line-detected::after,
 .log-job.single-line-detected::after,
 .doc-id.single-line-detected::after,
-.doc-name.single-line-detected::after {
+.doc-name.single-line-detected::after,
+.workflow-link.single-line-detected::after,
+.job-link.single-line-detected::after,
+.action-link.single-line-detected::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -737,7 +746,10 @@ label[for="update_password_oldPassword"] {
 .log-reference.multiline-detected::after,
 .log-job.multiline-detected::after,
 .doc-id.multiline-detected::after,
-#rule-link.multiline-detected::after {
+#rule-link.multiline-detected::after,
+.workflow-link.multiline-detected::after,
+.job-link.multiline-detected::after,
+.action-link.multiline-detected::after {
     display: none;
 }
 
@@ -746,7 +758,10 @@ label[for="update_password_oldPassword"] {
 .log-reference.single-line-detected:hover,
 .log-job.single-line-detected:hover,
 .doc-id.single-line-detected:hover,
-.doc-name.single-line-detected:hover {
+.doc-name.single-line-detected:hover,
+.workflow-link.single-line-detected:hover,
+.job-link.single-line-detected:hover,
+.action-link.single-line-detected:hover {
     color: #337ab7;
 }
 
@@ -754,7 +769,10 @@ label[for="update_password_oldPassword"] {
 .log-reference.single-line-detected:hover::after,
 .log-job.single-line-detected:hover::after,
 .doc-id.single-line-detected:hover::after,
-.doc-name.single-line-detected:hover::after {
+.doc-name.single-line-detected:hover::after,
+.workflow-link.single-line-detected:hover::after,
+.job-link.single-line-detected:hover::after,
+.action-link.single-line-detected:hover::after {
     width: 100%;
 }
 

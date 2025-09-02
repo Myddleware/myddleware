@@ -344,8 +344,14 @@ export class DocumentDetailDataSections {
             `;
         }
 
+        console.log('🔍 generateWorkflowLogsSection: Processing', rows.length, 'workflow log rows');
+        console.log('🔍 Sample workflow log data:', rows[0]);
+        console.log('🔍 All available fields in first row:', Object.keys(rows[0] || {}));
+
         const body = rows
-        .map(({ id, workflowName, jobName, actionName, status, dateCreated, message }) => {
+        .map(({ id, workflowName, jobName, actionName, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
+            console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, actionName, workflowId, jobId, actionId });
+            
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
             if (status && status.toLowerCase().includes('error')) {
@@ -354,12 +360,51 @@ export class DocumentDetailDataSections {
                 statusColor = '#ffc107'; // yellow for warnings
             }
 
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            }
+
+            console.log('🔍 Base URL:', baseUrl);
+
+            // Create clickable links for workflow, job, and action if IDs are available
+            let workflowLink = this.sanitizeString(workflowName);
+            if (workflowId) {
+                const workflowUrl = `${baseUrl}/workflow/show/${workflowId}`;
+                workflowLink = `<a href="${workflowUrl}" class="workflow-link single-line-detected">${this.sanitizeString(workflowName)}</a>`;
+                console.log('🔗 Created workflow link:', workflowLink);
+            } else {
+                console.log('❌ No workflowId for workflow:', workflowName);
+            }
+
+            let jobLink = this.sanitizeString(jobName);
+            if (jobId) {
+                const jobUrl = `${baseUrl}/rule/task/view/${jobId}/log`;
+                jobLink = `<a href="${jobUrl}" class="job-link single-line-detected">${this.sanitizeString(jobName)}</a>`;
+                console.log('🔗 Created job link:', jobLink);
+            } else {
+                console.log('❌ No jobId for job:', jobName);
+            }
+
+            let actionLink = this.sanitizeString(actionName);
+            if (actionId) {
+                const actionUrl = `${baseUrl}/workflowAction/showAction/${actionId}`;
+                actionLink = `<a href="${actionUrl}" class="action-link single-line-detected">${this.sanitizeString(actionName)}</a>`;
+                console.log('🔗 Created action link:', actionLink);
+            } else {
+                console.log('❌ No actionId for action:', actionName);
+            }
+
             return `
             <tr>
                 <td>${id}</td>
-                <td>${this.sanitizeString(workflowName)}</td>
-                <td>${this.sanitizeString(jobName)}</td>
-                <td>${this.sanitizeString(actionName)}</td>
+                <td>${workflowLink}</td>
+                <td>${jobLink}</td>
+                <td>${actionLink}</td>
                 <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
                 <td>${dateCreated}</td>
                 <td>${this.sanitizeString(message)}</td>
