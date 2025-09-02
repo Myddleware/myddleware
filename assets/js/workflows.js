@@ -334,6 +334,9 @@ $(document).ready(function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   function toggleIcon(button, content) {
+        if (!button || !content) {
+      return;
+    }
     if (content.classList.contains("show")) {
       button.innerHTML = '<i class="fa fa-minus"></i>';
     } else {
