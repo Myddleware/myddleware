@@ -73,13 +73,14 @@
 									<p class="px-4 detail-rule-title m-0 d-flex align-items-center">
 										<i class="fa fa-list me-2" aria-hidden="true"></i>
 										{{ 'view_rule.title.rule' | trans }}
+										
+										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm mx-4">
+											{{ 'view_rule.action.edit_rule' | trans }}
+										</a>
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
 											{{ 'view_rule.action.duplic_rule' | trans }}
-										</a>
-										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
-											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
 										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
 											{{ 'view_rule.action.delete_rule' | trans }}

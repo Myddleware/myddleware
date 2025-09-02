@@ -826,6 +826,10 @@ td .link-fit-rule-name {
     color: #6c757d; 
 }
 
+#tab_connector tr td{
+   padding-left: 20px;
+}
+
 table.table-rule-view th,
 table.table-rule-view td {
     border: none !important;
