@@ -1630,7 +1630,7 @@ $result = [];
         }
         
         // Green statuses: send, sent, success
-        if (in_array($statusLower, ['close', 's', 'send', 'sent', 'success', 'send ✓'])) {
+        if (in_array($statusLower, ['found', 'close', 's', 'send', 'sent', 'success', 'send ✓'])) {
             return [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-green'
