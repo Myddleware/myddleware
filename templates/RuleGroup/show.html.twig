@@ -34,7 +34,7 @@
 
         {% if rulegroup is not null %}
             <div class="container">
-                <h4>{{ 'rulegroup.details'| trans | upper }}</h4>
+                <h4>{{ 'rulegroup.title_one'| trans | upper }}</h4>
             </div>
 
             <div class="rulegroup-details container mt-4">
@@ -46,7 +46,7 @@
                         <i class="fa fa-minus"></i>
                     </button>
                 </div>
-                <div id="rulegroup-content" class="collapse show">
+                <div id="rulegroup-content" class="collapse show px-3">
                     <div class="rulegroup-row mb-2">
                         <div class="rulegroup-col mb-2">
                             <strong>{{ 'rulegroup.name'| trans | upper }}</strong>
@@ -70,7 +70,7 @@
                 <h4>{{ 'rulegroup.rules'| trans | upper }}</h4>
             </div> 
 
-            <div class="rulegroup-card-table">
+            <div class="rulegroup-card-table container">
             <div class="card-header card-title-rulegroup">
                 <button class="toggle-button btn btn-outline-secondary btn-sm float-end"
                         data-target="#rules-content"
