@@ -349,8 +349,8 @@ export class DocumentDetailDataSections {
         console.log('🔍 All available fields in first row:', Object.keys(rows[0] || {}));
 
         const body = rows
-        .map(({ id, workflowName, jobName, actionName, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
-            console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, actionName, workflowId, jobId, actionId });
+        .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
+            console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
             
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
@@ -390,6 +390,20 @@ export class DocumentDetailDataSections {
                 console.log('❌ No jobId for job:', jobName);
             }
 
+            // Create clickable link for trigger document if it exists
+            let triggerDocumentLink = this.sanitizeString(triggerDocument || '');
+            if (triggerDocument) {
+                const triggerDocUrl = `${baseUrl}/rule/flux/modern/${triggerDocument}`;
+                triggerDocumentLink = `<a href="${triggerDocUrl}" class="trigger-doc-link single-line-detected">${this.sanitizeString(triggerDocument)}</a>`;
+            }
+
+            // Create clickable link for generate document if it exists
+            let generateDocumentLink = this.sanitizeString(generateDocument || '');
+            if (generateDocument) {
+                const generateDocUrl = `${baseUrl}/rule/flux/modern/${generateDocument}`;
+                generateDocumentLink = `<a href="${generateDocUrl}" class="generate-doc-link single-line-detected">${this.sanitizeString(generateDocument)}</a>`;
+            }
+
             let actionLink = this.sanitizeString(actionName);
             if (actionId) {
                 const actionUrl = `${baseUrl}/workflowAction/showAction/${actionId}`;
@@ -404,10 +418,14 @@ export class DocumentDetailDataSections {
                 <td>${id}</td>
                 <td>${workflowLink}</td>
                 <td>${jobLink}</td>
-                <td>${actionLink}</td>
+                <td>${triggerDocumentLink}</td>
+                <td>${generateDocumentLink}</td>
+                <td>${this.sanitizeString(createdBy || '')}</td>
                 <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
                 <td>${dateCreated}</td>
                 <td>${this.sanitizeString(message)}</td>
+                <td>${actionLink}</td>
+                <td>${this.sanitizeString(actionType || '')}</td>
             </tr>
             `;
         })
@@ -428,10 +446,14 @@ export class DocumentDetailDataSections {
                 <th>Id</th>
                 <th>Workflow</th>
                 <th>Job</th>
-                <th>Action</th>
+                <th>Trigger Document</th>
+                <th>Generate Document</th>
+                <th>Created By</th>
                 <th>Status</th>
                 <th>Date Created</th>
                 <th>Message</th>
+                <th>Action Name</th>
+                <th>Action Type</th>
                 </tr>
             </thead>
             <tbody>
