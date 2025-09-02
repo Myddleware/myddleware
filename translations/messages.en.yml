@@ -49,7 +49,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
-        nb : Rule with error
+        nb : Rules with errors
     graph_histo:
         title: Documents history
     graph_job_histo:
@@ -1201,6 +1201,7 @@ variable:
     view: View
   create_new: Create a new variable
   list_title: Variables
+  detail_title: Variable
   confirm_delete: Are you sure you want to delete this variable?
   no_variables: No variables found.
   table_headers:

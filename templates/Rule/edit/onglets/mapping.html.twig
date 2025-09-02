@@ -49,8 +49,7 @@
 				<div class="card-body mapping-card-body">
 					<h4 class="card-title mapping-card-title">{{ f.getTarget }}</h4>
 					<p class="card-text mapping-card-text"></p>
-					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}
-					</p>
+					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}</p>
 					{% if f.getFormula %}
                         <p class="mapped-formula card-text mapping-card-text">
                             {{ 'view_rule.mapping.formula'|trans }} :
@@ -65,7 +64,6 @@
                     {% else %}
                         <p class="mapped-formula card-text mapping-card-text">{{ 'view_rule.mapping.formula_empty'|trans }}</p>
                     {% endif %}
-				</p>
 				<button type="button" class="btn btn-sm btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
 					<i class="fa fa-info-circle" aria-hidden="true"></i>
 				</button>
@@ -89,6 +87,7 @@
 {% else %}
 	<div>{{'help.view_rule.mapping.empty'|trans}}</div>
 {% endif %}
+</div>
 <div id="help-content-mapping" class="help-content">
     <h2>{{'help.title'|trans}}
         <i class="fa fa-info-circle" aria-hidden="true"></i>
