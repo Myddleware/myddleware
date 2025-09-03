@@ -499,7 +499,7 @@ export class DocumentDetailDataSections {
 
             // Build proper URL for reference link if reference exists
             let referenceLink = reference;
-            if (reference && reference !== 'N/A' && reference.trim() !== '') {
+            if (reference && reference !== '' && reference.trim() !== '') {
                 // Build proper URLs
                 const pathParts = window.location.pathname.split('/');
                 const publicIndex = pathParts.indexOf('public');
@@ -515,7 +515,7 @@ export class DocumentDetailDataSections {
 
             // Build proper URL for job link if job exists
             let jobLink = job;
-            if (job && job !== 'N/A' && job.trim() !== '') {
+            if (job && job !== '' && job.trim() !== '') {
                 // Build proper URLs
                 const pathParts = window.location.pathname.split('/');
                 const publicIndex = pathParts.indexOf('public');
