@@ -6,6 +6,7 @@ import { DocumentDetailFieldExpander } from './document-detail-field-expander.js
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
 import { MultilineLinkHandler } from '../multiline-links/multiline-link-handler.js';
 import { DocumentDetailTargetEditor } from './document-detail-target-editor.js';
+import { DocumentDetailFieldComparator } from './document-detail-field-comparator.js';
 
 export class DocumentDetail {
     constructor() {
@@ -20,6 +21,7 @@ export class DocumentDetail {
         this.createUIStructure();
         DocumentDetailEvents.setupEventListeners();
         DocumentDetailFieldExpander.init();
+        DocumentDetailFieldComparator.init();
         
         // Initialize multiline link handler and target editor after UI is created
         setTimeout(() => {

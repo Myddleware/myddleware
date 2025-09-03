@@ -375,6 +375,13 @@
   width: 100%;
 }
 
+/* Field value mismatch highlighting */
+.field-value-mismatch {
+  border: 2px solid #ffd700 !important;
+  border-radius: 4px !important;
+  background-color: rgba(255, 215, 0, 0.1) !important;
+}
+
 /* Workflow Logs section styling */
 .workflow-logs-header {
   display: flex;

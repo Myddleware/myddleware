@@ -309,6 +309,18 @@ export class DocumentDetailTemplate {
                 // Update direct links after data sections have been populated
                 setTimeout(() => {
                     DocumentDetailTemplate.updateDirectLinks(documentData);
+                    
+                    // Trigger field comparison after all data sections are updated
+                    setTimeout(() => {
+                        // Dispatch event to notify field comparator
+                        const event = new CustomEvent('fluxDataUpdated', {
+                            detail: { 
+                                source: 'DocumentDetailTemplate',
+                                timestamp: new Date().toISOString()
+                            }
+                        });
+                        document.dispatchEvent(event);
+                    }, 100);
                 }, 10); // Small delay to ensure content is rendered
             }, 50); // Small delay to ensure DOM sections are ready
             
