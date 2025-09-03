@@ -1805,14 +1805,27 @@ $result = [];
             }
             
             $qb = $this->entityManager->createQueryBuilder();
-            $qb->select('dr.sourceField', 'd.id as docId', 'd.source', 'd.target', 'd.dateModified', 'd.type', 'r.name as ruleName', 'r.id as ruleId')
+            $qb->select([
+                   'dr.sourceField',
+                   'd.id as docId',
+                   'd.source',
+                   'd.target', 
+                   'd.dateModified',
+                   'd.type',
+                   'COALESCE(r.name, :defaultRuleName) as ruleName',
+                   'r.id as ruleId'
+               ])
                ->from(DocumentRelationship::class, 'dr')
-               ->leftJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_rel_id')
+               ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_rel_id')
                ->leftJoin('d.rule', 'r')
-               ->where('dr.doc_id = :docId')
-               ->orderBy('dr.dateCreated', 'DESC')
+               ->where($qb->expr()->eq('dr.doc_id', ':docId'))
+               ->addOrderBy('dr.dateCreated', 'DESC')
+               ->addOrderBy('dr.id', 'DESC')
                ->setMaxResults(10)
-               ->setParameter('docId', $id);
+               ->setParameters([
+                   'docId' => (int) $id,
+                   'defaultRuleName' => 'Unknown Rule'
+               ]);
             
             $results = $qb->getQuery()->getArrayResult();
             
@@ -1824,7 +1837,7 @@ $result = [];
                     
                     $parentData[] = [
                         'docId' => $result['docId'],
-                        'name' => $result['ruleName'] ?: 'Unknown Rule',
+                        'name' => $result['ruleName'],
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
