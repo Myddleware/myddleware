@@ -490,5 +490,8 @@
 
 .error-link:hover, .exclamation-title-home {
     color: #198BCA !important;
+}
+
+.exclamation-title-home {
     margin-left: 33%;
 }
