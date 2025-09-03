@@ -1866,77 +1866,109 @@ $result = [];
      */
     public function getDocumentChildren($id): JsonResponse {
         try {
-            // error_log("getDocumentChildren called with document ID: " . $id);
-            
-            // Validate the document ID
             if (empty($id)) {
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
-            // Find the document by ID
-            $document = $this->entityManager->getRepository(Document::class)->find($id);
-            
-            if (!$document) {
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             $childData = [];
             
-            // POST DOCUMENT (Direct children via parentId)
-            $postDocuments = $this->entityManager->getRepository(Document::class)->findBy(
-                ['parentId' => $id],
-                ['dateCreated' => 'DESC'],    // order
-                10                                // limit
-            );
-            
-            foreach ($postDocuments as $postDocument) {
-                $rule = $postDocument->getRule();
-                $statusInfo = $this->getDocumentStatusInfo($postDocument);
+            // Direct children via parentId
+            $directChildrenQb = $this->entityManager->createQueryBuilder();
+            $directChildrenQb->select([
+                    'd.id as docId',
+                    'd.source',
+                    'd.target',
+                    'd.dateModified',
+                    'd.type',
+                    'COALESCE(r.name, :defaultRuleName) as ruleName',
+                    'r.id as ruleId'
+                ])
+                ->from(Document::class, 'd')
+                ->leftJoin('d.rule', 'r')
+                ->where($directChildrenQb->expr()->eq('d.parentId', ':parentId'))
+                ->addOrderBy('d.dateCreated', 'DESC')
+                ->addOrderBy('d.id', 'DESC')
+                ->setMaxResults(10)
+                ->setParameters([
+                    'parentId' => (int) $id,
+                    'defaultRuleName' => 'Unknown Rule'
+                ]);
                 
-                $childData[] = [
-                    'docId' => $postDocument->getId(),
-                    'name' => $rule ? $rule->getName() : 'Unknown Rule',
-                    'ruleId' => $rule ? $rule->getId() : null,
-                    'sourceId' => $postDocument->getSource(),
-                    'targetId' => $postDocument->getTarget(),
-                    'modificationDate' => $postDocument->getDateModified()->format('d/m/Y H:i:s'),
-                    'type' => $postDocument->getType(),
-                    'status' => $statusInfo['status'],
-                    'statusClass' => $statusInfo['status_class'],
-                    'relationshipType' => 'direct'
-                ];
-            }
+            // Related children via DocumentRelationship
+            $relatedChildrenQb = $this->entityManager->createQueryBuilder();
+            $relatedChildrenQb->select([
+                    'd.id as docId',
+                    'd.source',
+                    'd.target',
+                    'd.dateModified',
+                    'd.type',
+                    'COALESCE(r.name, :defaultRuleName) as ruleName',
+                    'r.id as ruleId',
+                    'dr.sourceField'
+                ])
+                ->from(DocumentRelationship::class, 'dr')
+                ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_id')
+                ->leftJoin('d.rule', 'r')
+                ->where($relatedChildrenQb->expr()->eq('dr.doc_rel_id', ':docRelId'))
+                ->addOrderBy('dr.dateCreated', 'DESC')
+                ->addOrderBy('dr.id', 'DESC')
+                ->setMaxResults(10)
+                ->setParameters([
+                    'docRelId' => (int) $id,
+                    'defaultRuleName' => 'Unknown Rule'
+                ]);
             
-            // CHILD RELATE DOCUMENT (Related children via DocumentRelationship)
-            $childRelationships = $this->entityManager->getRepository(DocumentRelationship::class)->findBy(
-                ['doc_rel_id' => $document->getId()],
-                ['dateCreated' => 'DESC'],            // order
-                10                                        // limit
-            );
+            // Execute both queries
+            $directResults = $directChildrenQb->getQuery()->getArrayResult();
+            $relatedResults = $relatedChildrenQb->getQuery()->getArrayResult();
             
-            foreach ($childRelationships as $childRelationship) {
-                $childDocument = $this->entityManager->getRepository(Document::class)->find($childRelationship->getDocId());
-                if ($childDocument) {
-                    $rule = $childDocument->getRule();
+            // Process direct children
+            foreach ($directResults as $result) {
+                if ($result['docId']) {
+                    $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($childDocument);
                     
                     $childData[] = [
-                        'docId' => $childDocument->getId(),
-                        'name' => $rule ? $rule->getName() : 'Unknown Rule',
-                        'ruleId' => $rule ? $rule->getId() : null,
-                        'sourceId' => $childDocument->getSource(),
-                        'targetId' => $childDocument->getTarget(),
-                        'modificationDate' => $childDocument->getDateModified()->format('d/m/Y H:i:s'),
-                        'type' => $childDocument->getType(),
+                        'docId' => $result['docId'],
+                        'name' => $result['ruleName'],
+                        'ruleId' => $result['ruleId'],
+                        'sourceId' => $result['source'],
+                        'targetId' => $result['target'],
+                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
-                        'sourceField' => $childRelationship->getSourceField(),
-                        'relationshipType' => 'related'
+                        'relationshipType' => 'direct',
+                        'sourceField' => null
                     ];
                 }
             }
             
-            // error_log("getDocumentChildren: Successfully retrieved " . count($childData) . " child documents for document ID: " . $id);
+            // Process related children
+            foreach ($relatedResults as $result) {
+                if ($result['docId']) {
+                    $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
+                    $statusInfo = $this->getDocumentStatusInfo($childDocument);
+                    
+                    $childData[] = [
+                        'docId' => $result['docId'],
+                        'name' => $result['ruleName'],
+                        'ruleId' => $result['ruleId'],
+                        'sourceId' => $result['source'],
+                        'targetId' => $result['target'],
+                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'type' => $result['type'],
+                        'status' => $statusInfo['status'],
+                        'statusClass' => $statusInfo['status_class'],
+                        'relationshipType' => 'related',
+                        'sourceField' => $result['sourceField']
+                    ];
+                }
+            }
             
             return new JsonResponse([
                 'success' => true,
@@ -1944,7 +1976,6 @@ $result = [];
             ]);
             
         } catch (\Exception $e) {
-            // error_log("getDocumentChildren: Exception occurred: " . $e->getMessage());
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }
