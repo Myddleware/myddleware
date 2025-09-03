@@ -536,7 +536,7 @@ class WorkflowController extends AbstractController
             $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
 
-            if ($workflow[0]) {
+            if (!empty($workflow) && !empty($workflow[0])) {
                 return $this->render(
                     'Workflow/show.html.twig',
                     [
