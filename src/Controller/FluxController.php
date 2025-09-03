@@ -1796,52 +1796,46 @@ $result = [];
      */
     public function getDocumentParents($id): JsonResponse {
         try {
-            // error_log("getDocumentParents called with document ID: " . $id);
-            
-            // Validate the document ID
             if (empty($id)) {
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
-            // Find the document by ID
-            $document = $this->entityManager->getRepository(Document::class)->find($id);
-            
-            if (!$document) {
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
             
-            // PARENT RELATE DOCUMENT
-            // Document link to other document, the parent ones
-            $parentRelationships = $this->entityManager->getRepository(DocumentRelationship::class)->findBy(
-                ['doc_id' => $document->getId()],
-                ['dateCreated' => 'DESC'],        // order
-                10                                    // limit
-            );
+            $qb = $this->entityManager->createQueryBuilder();
+            $qb->select('dr.sourceField', 'd.id as docId', 'd.source', 'd.target', 'd.dateModified', 'd.type', 'r.name as ruleName', 'r.id as ruleId')
+               ->from(DocumentRelationship::class, 'dr')
+               ->leftJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_rel_id')
+               ->leftJoin('d.rule', 'r')
+               ->where('dr.doc_id = :docId')
+               ->orderBy('dr.dateCreated', 'DESC')
+               ->setMaxResults(10)
+               ->setParameter('docId', $id);
             
-            // Get the detail of documents related
+            $results = $qb->getQuery()->getArrayResult();
+            
             $parentData = [];
-            foreach ($parentRelationships as $parentRelationship) {
-                $parentDocument = $this->entityManager->getRepository(Document::class)->find($parentRelationship->getDocRelId());
-                if ($parentDocument) {
-                    $rule = $parentDocument->getRule();
+            foreach ($results as $result) {
+                if ($result['docId']) {
+                    $parentDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($parentDocument);
                     
                     $parentData[] = [
-                        'docId' => $parentDocument->getId(),
-                        'name' => $rule ? $rule->getName() : 'Unknown Rule',
-                        'ruleId' => $rule ? $rule->getId() : null,
-                        'sourceId' => $parentDocument->getSource(),
-                        'targetId' => $parentDocument->getTarget(),
-                        'modificationDate' => $parentDocument->getDateModified()->format('d/m/Y H:i:s'),
-                        'type' => $parentDocument->getType(),
+                        'docId' => $result['docId'],
+                        'name' => $result['ruleName'] ?: 'Unknown Rule',
+                        'ruleId' => $result['ruleId'],
+                        'sourceId' => $result['source'],
+                        'targetId' => $result['target'],
+                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
-                        'sourceField' => $parentRelationship->getSourceField()
+                        'sourceField' => $result['sourceField']
                     ];
                 }
             }
-            
-            // error_log("getDocumentParents: Successfully retrieved " . count($parentData) . " parent documents for document ID: " . $id);
             
             return new JsonResponse([
                 'success' => true,
@@ -1849,7 +1843,6 @@ $result = [];
             ]);
             
         } catch (\Exception $e) {
-            // error_log("getDocumentParents: Exception occurred: " . $e->getMessage());
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
     }
