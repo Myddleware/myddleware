@@ -93,11 +93,17 @@ export class DocumentDetailDataSections {
     static generateDocumentHistory(rows = []) {
         if (!rows.length) return ``;
 
+        // Get current document ID from URL
+        const currentDocumentId = window.location.pathname.split('/').pop();
+
         // build each row's <tr>…
         const body = rows
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             // turn "Error_transformed" → "error_transformed" for class names
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Check if this is the current document
+            const isCurrentDocument = docId === currentDocumentId;
 
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
@@ -113,6 +119,9 @@ export class DocumentDetailDataSections {
 
             return `
             <tr>
+                <td>
+                    ${isCurrentDocument ? '<span class="current-document-checkmark">✓</span>' : ''}
+                </td>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
@@ -141,6 +150,7 @@ export class DocumentDetailDataSections {
             <table class="custom-table">
             <thead>
                 <tr>
+                <th></th>
                 <th>Doc Id</th>
                 <th>Name</th>
                 <th>Source id</th>

@@ -44,6 +44,19 @@
   background-color: rgba(0, 0, 0, 0.03);
 }
 
+/* Current document check mark styling */
+.custom-table th:first-child,
+.custom-table td:first-child {
+  width: 30px;
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+}
+.current-document-checkmark {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 16px;
+}
+
 /* ─── status badge ─────────────────────────────────────────────────────── */
 .status‑badge {
   display: inline-block;
