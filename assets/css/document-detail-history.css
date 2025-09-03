@@ -76,6 +76,10 @@
   color: #dc2626;
   background-color: rgba(220, 38, 38, 0.1);
 }
+.status‑not_found {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
 .status‑cancel {
   color: #d97706;
   background-color: rgba(217, 119, 6, 0.1);
