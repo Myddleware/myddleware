@@ -282,37 +282,23 @@
 					<tr>
 						<td class="value inner-table-workflow" colspan="3">
 							{% if variables is defined and variables|length > 0 %}
-								<table class="table table-rule-view">
-									<thead class="thead-light">
-										<tr>
-											<th class="text-left">{{ 'Nom' }}</th>
-											<th class="text-left">{{ 'Valeur' }}</th>
-											<th class="text-left">{{ 'Action' }}</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for variable in variables %}
-											<tr data-toggle="tooltip" title="{{ variable.description }}">
-												<td class="title rounded-table-down-left">{{ variable.name }}</td>
-												<td class="value">
-													<span id="var-value-{{ variable.id }}">{{ variable.value }}</span>
-													<input type="text" class="form-control d-none" id="input-var-{{ variable.id }}" value="{{ variable.value }}">
-												</td>
-												<td class="value rounded-table-down-right">
-													<button class="btn btn-sm btn-outline-secondary edit-var-btn" data-id="{{ variable.id }}">
-														<i class="fa fa-pencil-alt"></i>
-													</button>
-													<button class="btn btn-sm btn-success d-none save-var-btn" data-id="{{ variable.id }}">
-														<i class="fa fa-check"></i>
-													</button>
-												</td>
-											</tr>
-										{% endfor %}
-									</tbody>
-								</table>
+								{% for variable in variables %}
+								
+							<tr>
+								<td class="title_source rounded-table-down-left">
+									<a class="help-link all-link"
+										href="{{ path('variable_show', {'id': variable.id}) }}">
+										{{ variable.name }}
+									</a>
+								</td>
+								<td class="title_source rounded-table-down-left">
+									{{ variable.value }}
+								</td>
+							</tr>
+								{% endfor %}
 							{% else %}
-								<span class="p-3">No variable</span>
-							{% endif %}
+						<span class="p-3">No variable</span>
+					{% endif %}
 						</td>
 					</tr>
 				</table>
