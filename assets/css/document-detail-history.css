@@ -382,62 +382,6 @@
   background-color: rgba(255, 215, 0, 0.1) !important;
 }
 
-/* Whitespace mismatch (leading/trailing spaces) */
-.field-value-mismatch-whitespace {
-  border: 2px solid #ff9500 !important;
-  border-radius: 4px !important;
-  background-color: rgba(255, 149, 0, 0.15) !important;
-  position: relative;
-}
-
-.field-value-mismatch-whitespace::before {
-  content: "⚠️";
-  position: absolute;
-  left: -18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  z-index: 10;
-}
-
-/* Empty vs non-empty mismatch */
-.field-value-mismatch-empty {
-  border: 2px solid #dc3545 !important;
-  border-radius: 4px !important;
-  background-color: rgba(220, 53, 69, 0.1) !important;
-  position: relative;
-}
-
-.field-value-mismatch-empty::before {
-  content: "∅";
-  position: absolute;
-  left: -16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  color: #dc3545;
-  z-index: 10;
-}
-
-/* Character substitution mismatch */
-.field-value-mismatch-substitution {
-  border: 2px solid #6f42c1 !important;
-  border-radius: 4px !important;
-  background-color: rgba(111, 66, 193, 0.1) !important;
-  position: relative;
-}
-
-.field-value-mismatch-substitution::before {
-  content: "≠";
-  position: absolute;
-  left: -16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  color: #6f42c1;
-  font-weight: bold;
-  z-index: 10;
-}
 
 /* Workflow Logs section styling */
 .workflow-logs-header {
