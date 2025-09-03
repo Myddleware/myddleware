@@ -73,12 +73,11 @@
 									<p class="px-4 detail-rule-title m-0 d-flex align-items-center">
 										<i class="fa fa-list me-2" aria-hidden="true"></i>
 										{{ 'view_rule.title.rule' | trans }}
-										
-										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm mx-4">
+									</p>
+									<div class="d-flex gap-2 mt-2 mt-md-0">	
+										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
-									</p>
-									<div class="d-flex gap-2 mt-2 mt-md-0">
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
 											{{ 'view_rule.action.duplic_rule' | trans }}
 										</a>
@@ -177,37 +176,43 @@
 								{% endif %}
 							{% endfor %}
 						{% endif %}
+					{% set descriptionValue = '' %}
+					{% for p in rule.params %}
+						{% if p.name == 'description' %}
+							{% set descriptionValue = p.value %}
+						{% endif %}
+					{% endfor %}
+					<tr id="deletion-rule-tr-description">
+						<td id="deletion-rule-left-description" class="value rounded-table-down-left">
+							<div class="value">{{ 'solution.params.description' | trans }}</div>
+						</td>
+						<td id="deletion-rule-right-description" class="rounded-table-down-right">
+							<div class="description-field position-relative">
+								<div id="description-field-value" class="value description-collapsed">
+									{% if descriptionValue is not empty %}
+										{{ descriptionValue|nl2br }}
+									{% endif %}
+								</div>
+								<a href="#" class="edit-button-description me-2 mt-2" title="{{ 'Edit' | trans }}">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</a>
+								<a href="#" id="read-more-link"
+								class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
+									Read all description
+								</a>
+							</div>
+							<form class="edit-form edit-form-description-close mt-2" style="display: none;"
+								action="{{ path('update_rule_description') }}" method="post">
+								<button type="button" class="close-button-description">
+									<i class="fa fa-times close-icon" aria-hidden="true"></i>
+								</button>
+								<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ descriptionValue }}</textarea>
+								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+								<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
+							</form>
+						</td>
+					</tr>
 
-						{% for param in rule.params %}
-							{% if param.name == 'description' %}
-								<tr id="deletion-rule-tr-description">
-									<td id="deletion-rule-left-description" class="value rounded-table-down-left">
-										<div class="value">{{ 'solution.params.description' | trans }}</div>
-									</td>
-									<td id="deletion-rule-right-description" class="rounded-table-down-right">
-										<div class="description-field position-relative">
-											<div id="description-field-value" class="value description-collapsed">
-												{{ param.value|nl2br }}
-											</div>
-											<a href="#" class="edit-button-description me-2 mt-2" title="{{ 'Edit' | trans }}">
-												<i class="fa fa-pen" aria-hidden="true"></i>
-											</a>
-											<a href="#" id="read-more-link" class="read-more-link d-none">Read all description</a>
-										</div>
-
-										<form class="edit-form edit-form-description-close mt-2" style="display: none;" action="{{ path('update_rule_description') }}" method="post">
-											<button type="button" class="close-button-description">
-												<i class="fa fa-times close-icon" aria-hidden="true"></i>
-											</button>
-											<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
-											<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-											<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
-										</form>
-									</td>
-								</tr>
-								{% endif %}
-
-						{% endfor %}
 					</table>
 				</div>
 			</div>
@@ -241,8 +246,12 @@
 						<td class="value">{{ connector.lbl_target }}</td>
 					</tr>
 					<tr>
-						<td class="title_source rounded-table-down-left">{{ 'view_rule.connector.module' | trans }}</td>
-						<td class="title_source rounded-table-down-left">{{ 'view_rule.connector.module' | trans }}</td>
+						<td class="title_source rounded-table-down-left">
+							<strong>{{ 'view_rule.connector.module' | trans }}</strong>
+						</td>
+						<td class="title_source rounded-table-down-left">
+							<strong>{{ 'view_rule.connector.module' | trans }}</strong>
+						</td>
 					</tr>
 					<tr>
 						<td class="value">{{ rule.getModuleSource }}</td>
