@@ -38,9 +38,16 @@ export class DocumentDetailFieldComparator {
             if (targetValue !== undefined && historyValue !== targetValue) {
                 // Only compare if both values have meaningful content (at least 1 visible character)
                 if (this.hasVisibleContent(historyValue) && this.hasVisibleContent(targetValue)) {
-                    // Apply yellow border highlighting for visible content differences
-                    this.highlightMismatchedField(fieldName, 'history', 'general');
-                    console.log('🟨 Field mismatch found:', fieldName, 'History:', JSON.stringify(historyValue), 'Target:', JSON.stringify(targetValue));
+                    // Normalize whitespace and compare - ignore leading/trailing spaces
+                    const normalizedHistory = String(historyValue || '').trim();
+                    const normalizedTarget = String(targetValue || '').trim();
+                    
+                    // Only highlight if the normalized values are actually different
+                    if (normalizedHistory !== normalizedTarget) {
+                        // Apply yellow border highlighting for visible content differences
+                        this.highlightMismatchedField(fieldName, 'history', 'general');
+                        console.log('🟨 Field mismatch found:', fieldName, 'History:', JSON.stringify(historyValue), 'Target:', JSON.stringify(targetValue));
+                    }
                 }
             }
         });
