@@ -36,9 +36,12 @@ export class DocumentDetailFieldComparator {
             const targetValue = targetFields.get(fieldName);
             
             if (targetValue !== undefined && historyValue !== targetValue) {
-                // Values don't match - apply yellow border to history field
-                this.highlightMismatchedField(fieldName, 'history');
-                console.log('🟨 Field mismatch found:', fieldName, 'History:', historyValue, 'Target:', targetValue);
+                // Only compare if both values have meaningful content (at least 1 visible character)
+                if (this.hasVisibleContent(historyValue) && this.hasVisibleContent(targetValue)) {
+                    // Apply yellow border highlighting for visible content differences
+                    this.highlightMismatchedField(fieldName, 'history', 'general');
+                    console.log('🟨 Field mismatch found:', fieldName, 'History:', JSON.stringify(historyValue), 'Target:', JSON.stringify(targetValue));
+                }
             }
         });
     }
@@ -77,11 +80,22 @@ export class DocumentDetailFieldComparator {
     }
 
     /**
-     * Highlights a mismatched field with yellow border
+     * Checks if a value has visible content (at least 1 non-whitespace character)
+     * @param {string} value - Value to check
+     * @returns {boolean} True if value has meaningful visible content
+     */
+    static hasVisibleContent(value) {
+        const str = String(value || '');
+        return str.trim().length >= 1;
+    }
+
+    /**
+     * Highlights a mismatched field with appropriate styling
      * @param {string} fieldName - Name of the field to highlight
      * @param {string} sectionType - Section type ('history', 'target', etc.)
+     * @param {string} mismatchType - Type of mismatch ('whitespace', 'empty', 'substitution', 'general')
      */
-    static highlightMismatchedField(fieldName, sectionType) {
+    static highlightMismatchedField(fieldName, sectionType, mismatchType = 'general') {
         const sectionElement = document.querySelector(`.${sectionType}-data-content-body`);
         
         if (!sectionElement) {
@@ -97,6 +111,8 @@ export class DocumentDetailFieldComparator {
             if (labelElement && labelElement.textContent.trim() === fieldName) {
                 const valueElement = row.querySelector('.field-value');
                 if (valueElement) {
+                    // Clear any existing mismatch classes and add simple yellow border
+                    valueElement.classList.remove('field-value-mismatch', 'field-value-mismatch-whitespace', 'field-value-mismatch-empty', 'field-value-mismatch-substitution');
                     valueElement.classList.add('field-value-mismatch');
                 }
             }
