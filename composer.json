@@ -49,6 +49,7 @@
     "pagerfanta/pagerfanta": "^3.6",
     "phpdocumentor/reflection-docblock": "^5.3",
     "prestashop/prestashop-webservice-lib": "dev-master",
+    "sendinblue/api-v3-sdk": "^8.4",
     "roave/better-reflection": "^6.5",
     "sensio/framework-extra-bundle": "^6.0",
     "shapecode/cron-bundle": "^6.0",
