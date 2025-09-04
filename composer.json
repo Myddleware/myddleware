@@ -22,7 +22,7 @@
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-simplexml": "*",
-    "api-platform/core": "^2.7.18",
+    "api-platform/core": "^3.1",
     "automattic/woocommerce": "^3.1",
     "babdev/pagerfanta-bundle": "^3.7",
     "beberlei/doctrineextensions": "^1.3",
