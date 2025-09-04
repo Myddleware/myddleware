@@ -187,6 +187,7 @@ class salesforce extends solution {
 		}
 		catch (\Exception $e){
 			$error = $e->getMessage();
+			$this->logger->error($error);
 			return $error;
 		}
 	}
