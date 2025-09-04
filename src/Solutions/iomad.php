@@ -68,7 +68,21 @@ class iomad extends moodle
 		}
 		return $modules;
 	}
-		
+	
+	public function read($param): array
+    {
+		$records = parent::read($param);
+		if (!empty($records)) {
+			$functionName = $this->getFunctionName($param);
+			// No date modified returned by block_iomad_company_admin_get_companies, we set id by default
+			if (in_array($functionName, ['block_iomad_company_admin_get_companies'])) {
+				foreach($records as $key => $record) {
+					$records[$key]['date_modified'] = $record['id'];
+				}
+			}
+		}
+		return $records;
+	}
 	// Set metadata
 	protected function setMetadata(){
 		require 'lib/iomad/metadata.php';
@@ -79,8 +93,46 @@ class iomad extends moodle
     protected function getFunctionName($param): string
     {
 		if (in_array($param['module'], $this->iomadModules)) {
-			return 'local_myddleware_'.$param['module'];
+			return 'block_iomad_company_admin_'.$param['module'];
 		}
 		return parent::getFunctionName($param);
 	}
+	
+	protected function setParameters($param): array
+    {
+		$functionName = $this->getFunctionName($param);
+        // Search with empty criteria for company
+        if (in_array($functionName, ['block_iomad_company_admin_get_companies'])) {
+			$filters[] = ['key' => '', 'value' => ''];
+			return ['criteria' => $filters];
+		}
+        return parent::setParameters($param);
+    }
+	
+    // Format webservice result if needed
+    protected function formatResponse($method, $response, $param)
+    {
+        $xml = simplexml_load_string($response);
+        $functionName = $this->getFunctionName($param);
+        if ('read' == $method) {
+            if (in_array($functionName, ['block_iomad_company_admin_get_companies'])) {
+                return $xml->SINGLE->KEY[0];
+            }
+        }
+        return parent::formatResponse($method, $response, $param);
+    }
+	
+    public function getRefFieldName($param): string
+    {
+		$functionName = $this->getFunctionName($param);
+        switch ($functionName) {
+			// No date modified returned by the webservice get_companies, we set the id
+            case 'block_iomad_company_admin_get_companies':
+                return 'id';
+                break;
+            default:
+                return parent::getRefFieldName($param);
+                break;
+        }
+    }
 }
