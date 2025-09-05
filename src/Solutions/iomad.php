@@ -70,9 +70,12 @@ class iomad extends moodle
 		return $modules;
 	}
 	
+	// Read data from Iomad
 	public function read($param): array
     {
+		// Call Moodle read function
 		$records = parent::read($param);
+		// Redefine read action for Iomad modules
 		if (!empty($records)) {
 			$functionName = $this->getFunctionName($param);
 			// No date modified returned by block_iomad_company_admin_get_companies, we set id by default
@@ -87,40 +90,15 @@ class iomad extends moodle
 				}
 			}
 		}
-// print_r($records);
-// return array();
 		return $records;
 	}
+	
 	// Set metadata
 	protected function setMetadata(){
 		require 'lib/iomad/metadata.php';
 		return $moduleFields;
 	}
 	
-	
-	protected function formatRecord($param, $data){
-		$functionName = $this->getFunctionName($param);
-		// We can generate several document fr one company depending on the number of courses linked to the company
-		if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
-			$companyCourses = $this->xmlToArray($data);
-			if (!empty($companyCourses['courses'])) {
-				foreach($companyCourses['courses'] as $course) {
-					$row[]= array(
-						'id' => $companyCourses['id'].'_'.$course['id'],
-						'company_id' => $companyCourses['id'],
-						'company_name' => $companyCourses['name'],
-						'course_id' => $course['id'],
-						'course_name' => $course['fullname']
-					);
-				}
-			}
-			return $row; 
-		}
-		return parent::formatRecord($param, $data);
-	}
-	
-
-
 	// Get the function name
     protected function getFunctionName($param): string
     {
@@ -133,12 +111,13 @@ class iomad extends moodle
 	protected function setParameters($param): array
     {
 		$functionName = $this->getFunctionName($param);
-        // Search with empty criteria for company
+        // Search with empty criteria for company, we will retrieve all companies
         if (in_array($functionName, ['block_iomad_company_admin_get_companies'])) {
 			$filters[] = ['key' => '', 'value' => ''];
 			return ['criteria' => $filters];
 		}
 		if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
+			// We set 0 to get all companies
 			$filters[] = ['companyid' => '0'];
 			return ['criteria' => $filters];
 		}
@@ -158,6 +137,27 @@ class iomad extends moodle
         return parent::formatResponse($method, $response, $param);
     }
 	
+	protected function formatRecord($param, $data){
+		$functionName = $this->getFunctionName($param);
+		// We can generate several documents for one company depending on the number of courses linked to the company
+		if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
+			$companyCourses = $this->xmlToArray($data);
+			if (!empty($companyCourses['courses'])) {
+				foreach($companyCourses['courses'] as $course) {
+					$row[]= array(
+						'id' => $companyCourses['id'].'_'.$course['id'],
+						'company_id' => $companyCourses['id'],
+						'company_name' => $companyCourses['name'],
+						'course_id' => $course['id'],
+						'course_name' => $course['fullname']
+					);
+				}
+			}
+			return $row; 
+		}
+		return parent::formatRecord($param, $data);
+	}
+	
     public function getRefFieldName($param): string
     {
 		$functionName = $this->getFunctionName($param);
@@ -176,7 +176,7 @@ class iomad extends moodle
         }
     }
 	
-	// Transform xml to array
+	// Recursive function to transform xml to array
 	protected function xmlToArray($xml) {
 		$result = [];
 		if (isset($xml->KEY)) {
