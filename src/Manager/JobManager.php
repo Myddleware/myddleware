@@ -1126,7 +1126,9 @@ class JobManager
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
-				echo date('Y-m-d H:i:s').' - Rule '.$rule['name'].chr(10);
+				$message = 'Rule '.$rule['name'].chr(10);
+				echo date('Y-m-d H:i:s').' - '.$message;
+				$this->createLog($message);
                 // Calculate the date corresponding depending the rule parameters
                 $limitDate = new DateTime('now', new DateTimeZone('GMT'));
                 $limitDate->modify('-'.$rule['days'].' days');
@@ -1154,7 +1156,9 @@ class JobManager
 					// $this->connection->commit(); // -- COMMIT TRANSACTION
 				} catch (Exception $e) {
                     // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                    $this->message .= 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->message .= $error;
+					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
 				
@@ -1199,13 +1203,17 @@ class JobManager
 					}
                 } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                    $this->message .= 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$error = 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->message .= $error;
+					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
 				// Add log 
 				if ($count > 0) {
 					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. '.chr(10);
-					$this->message .= $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+					$message .= $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+					$this->message .= $message;
+					$this->createLog($message);
 				}
 
 				// Delete log
@@ -1230,7 +1238,9 @@ class JobManager
 					$resultDeleteLogSelection = $stmt->executeQuery();
 					$logIds = $resultDeleteLogSelection->fetchAllAssociative();
 				} catch (Exception $e) {
-                    $this->message .= 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->message .= $error;
+					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
 
@@ -1277,13 +1287,17 @@ class JobManager
 					} 
                 } catch (Exception $e) {
                     $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-                    $this->message .= 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$error = 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                    $this->message .= $error;
+					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
 				// Add log 
 				if ($count > 0) {
 					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Log for the rule '.$rule['name'].'. '.chr(10);
-					$this->message .= $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+					$message = $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+					$this->message .= $message;
+					$this->createLog($message);
 				}	  
             }
         }
@@ -1325,12 +1339,16 @@ class JobManager
 			
 			// Add log 
 			if ($count > 0) {
-				$this->message .= $count.' rows deleted in the table Job. ';
+				$message = $count.' rows deleted in the table Job. ';
+				$this->message .= $message;
+				$this->createLog($message);
 				echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Job. '.chr(10);
 			}
         } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            $this->message .= 'Failed to clear job: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$error = 'Failed to clear job: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->message .= $error;
+			$this->createLog($error, 'E');
             $this->logger->error($this->message);		
         }
     }
@@ -1604,5 +1622,21 @@ class JobManager
             return false;
         }
         return true;
+    }
+	
+	protected function createLog($message, $type = 'S')
+    {
+        try {
+            $now = gmdate('Y-m-d H:i:s');
+            $query_header = 'INSERT INTO log (created, type, msg, job_id) VALUES (:created,:typeError,:message,:job_id)';
+            $stmt = $this->connection->prepare($query_header);
+            $stmt->bindValue(':created', $now);
+            $stmt->bindValue(':typeError', $type);
+            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($message)));
+            $stmt->bindValue(':job_id', $this->id);
+            $result = $stmt->executeQuery();
+        } catch (\Exception $e) {
+            $this->logger->error($this->id.' - Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
     }
 }
