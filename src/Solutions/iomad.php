@@ -30,7 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class iomad extends moodle
 {
-	protected $iomadModules = array('get_companies');
+	protected $iomadModules = array('get_companies', 'get_company_courses');
 	
     public function getFieldsLogin(): array
     {
@@ -65,6 +65,7 @@ class iomad extends moodle
 		// Add Iomad modules
 		if ($type == 'source') {
 			$modules['get_companies'] = 'Get companies';
+			$modules['get_company_courses'] = 'Get relationship company courses';
 		}
 		return $modules;
 	}
@@ -80,7 +81,14 @@ class iomad extends moodle
 					$records[$key]['date_modified'] = $record['id'];
 				}
 			}
+			if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
+				foreach($records as $key => $record) {
+					$records[$key]['date_modified'] = str_replace('_','000',$record['id']);
+				}
+			}
 		}
+// print_r($records);
+// return array();
 		return $records;
 	}
 	// Set metadata
@@ -89,6 +97,30 @@ class iomad extends moodle
 		return $moduleFields;
 	}
 	
+	
+	protected function formatRecord($param, $data){
+		$functionName = $this->getFunctionName($param);
+		// We can generate several document fr one company depending on the number of courses linked to the company
+		if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
+			$companyCourses = $this->xmlToArray($data);
+			if (!empty($companyCourses['courses'])) {
+				foreach($companyCourses['courses'] as $course) {
+					$row[]= array(
+						'id' => $companyCourses['id'].'_'.$course['id'],
+						'company_id' => $companyCourses['id'],
+						'company_name' => $companyCourses['name'],
+						'course_id' => $course['id'],
+						'course_name' => $course['fullname']
+					);
+				}
+			}
+			return $row; 
+		}
+		return parent::formatRecord($param, $data);
+	}
+	
+
+
 	// Get the function name
     protected function getFunctionName($param): string
     {
@@ -106,6 +138,10 @@ class iomad extends moodle
 			$filters[] = ['key' => '', 'value' => ''];
 			return ['criteria' => $filters];
 		}
+		if (in_array($functionName, ['block_iomad_company_admin_get_company_courses'])) {
+			$filters[] = ['companyid' => '0'];
+			return ['criteria' => $filters];
+		}
         return parent::setParameters($param);
     }
 	
@@ -115,7 +151,7 @@ class iomad extends moodle
         $xml = simplexml_load_string($response);
         $functionName = $this->getFunctionName($param);
         if ('read' == $method) {
-            if (in_array($functionName, ['block_iomad_company_admin_get_companies'])) {
+            if (in_array($functionName, ['block_iomad_company_admin_get_companies', 'block_iomad_company_admin_get_company_courses'])) {
                 return $xml->SINGLE->KEY[0];
             }
         }
@@ -130,9 +166,36 @@ class iomad extends moodle
             case 'block_iomad_company_admin_get_companies':
                 return 'id';
                 break;
+			// No date modified returned by the webservice get_company_courses, we set the id
+            case 'block_iomad_company_admin_get_company_courses':
+                return 'id';
+                break;
             default:
                 return parent::getRefFieldName($param);
                 break;
         }
     }
+	
+	// Transform xml to array
+	protected function xmlToArray($xml) {
+		$result = [];
+		if (isset($xml->KEY)) {
+			foreach ($xml->KEY as $item) {
+				$attributes = $item->attributes();
+				$name = (string) $attributes['name'];
+				if (isset($item->VALUE)) {
+					$result[$name] = (string) $item->VALUE !== '' ? (string) $item->VALUE : null;
+				} elseif (isset($item->MULTIPLE)) {
+					$result[$name] = [];
+
+					if (isset($item->MULTIPLE->SINGLE)) {
+						foreach ($item->MULTIPLE->SINGLE as $single) {
+							$result[$name][] = $this->xmlToArray($single);
+						}
+					}
+				}
+			}
+		}
+		return $result;
+	}
 }

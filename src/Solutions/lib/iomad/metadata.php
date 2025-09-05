@@ -62,4 +62,11 @@ $moduleFields = [
 		'custom2' => ['label' => 'Company custom 2', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
 		'custom3' => ['label' => 'Company custom 3', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
     ],
+	'get_company_courses' => [
+		'id' => ['label' => 'Company course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'company_id' => ['label' => 'Companid ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        'course_id' => ['label' => 'Course ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'company_name' => ['label' => 'Company long name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+		'course_name' => ['label' => 'Course long name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+	],
 ];
