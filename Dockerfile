@@ -17,7 +17,9 @@ RUN apt-get update && apt-get upgrade -y && \
         libc-client-dev \
         libkrb5-dev \
         gnupg2 \
-        libaio1 && \
+        libaio1 \ 
+        unzip \
+        git && \
     docker-php-ext-configure intl && \
     docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
     docker-php-ext-install \
@@ -78,6 +80,26 @@ RUN echo "====[ CREATING VAR DIRECTORY ]==== " && \
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
+
+RUN mkdir -p /var/www/.composer && \
+    chown -R www-data:www-data /var/www
+
+RUN chown -R www-data:www-data /var/www/.composer
+
+RUN mkdir -p /home/www-data && chown -R www-data:www-data /home/www-data
+
+# Make sure Symfony cache & log directories exist and are writable
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log && \
+    chown -R www-data:www-data /var/www/html/var
+
+# make the directory safe for git otherwise while used in composer install, it won't accept it
+RUN git config --global --add safe.directory /var/www/html
+
+# vendor and node modules
+RUN mkdir -p /var/www/html/vendor /var/www/html/node_modules && \
+    chown -R www-data:www-data /var/www/html/vendor /var/www/html/node_modules
+
+USER root
 
 # Build dependencies and assets
 RUN echo "====[ COMPOSER INSTALL ]==== " && \

@@ -11,6 +11,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
     volumes:
       - .:/var/www/html:delegated
+      - vendor:/var/www/html/vendor
+      - node_modules:/var/www/html/node_modules
       - ./docker/tmp/composer:/root/.composer:delegated
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
     depends_on:
@@ -45,3 +47,5 @@ services:
 
 volumes:
   mysql_data:
+  vendor:
+  node_modules:

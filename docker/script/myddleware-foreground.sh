@@ -31,3 +31,15 @@ php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_rout
 ## Start Apache
 echo "====[ START APACHE ]===="
 apache2-foreground "$@"
+
+cd /var/www/html || exit 1
+
+# Check if vendor directory exists and is not empty
+if [ ! -d "vendor" ] || [ -z "$(ls -A vendor 2>/dev/null)" ]; then
+    echo "Vendor directory missing or empty. Installing dependencies..."
+    composer install
+    yarn install
+    yarn build
+else
+    echo "Vendor directory exists and is not empty. Skipping composer/yarn install."
+fi
