@@ -3291,42 +3291,39 @@ use Symfony\Component\Yaml\Yaml;
     /**
      * @Route("/rule/update_description", name="update_rule_description", methods={"POST"})
      */
-    public function updateDescription(Request $request): Response
+    public function updateDescription(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        // Extract form payload (fallback to empty string if missing)
         $ruleId = $request->request->get('ruleId');
-        $description = $request->request->get('description');
-        $entityManager = $this->entityManager;
-        $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
-            'rule' => $ruleId,
-            'name' => 'description'
-        ]);
-
-        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue() || $description === '    ') {
-            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
-        }
-
-        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
-
+        $description = (string) $request->request->get('description', '');
+        $rule = $em->getRepository(Rule::class)->find($ruleId);
         if (!$rule) {
-            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+            return new JsonResponse(['error' => 'Rule not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
-        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
-            'rule' => $rule->getRule(),
-            'name' => 'description'
+        // Fetch (or create) the "description" RuleParam for this rule
+        $param = $em->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule,
+            'name' => 'description',
         ]);
 
-        // Check if the description entity was found
-        if (!$descriptionRuleParam) {
-            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        if (!$param) {
+            // If not found, instantiate and link it to the rule
+            $param = new RuleParam();
+            $param->setRule($rule);
+            $param->setName('description');
+            $em->persist($param);
+        }
+        if ($param->getValue() === $description) {
+            return new JsonResponse(['ok' => true, 'unchanged' => true], Response::HTTP_OK);
         }
 
-        // Update the value of the description
-        $descriptionRuleParam->setValue($description);
-        $entityManager->flush();
+        // Update and flush changes
+        $param->setValue($description);
+        $em->flush();
 
-        return new Response('', Response::HTTP_OK);
+        // Return a simple success JSON payload
+        return new JsonResponse(['ok' => true], Response::HTTP_OK);
     }
 
     /**

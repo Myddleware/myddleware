@@ -142,7 +142,9 @@ $('.edit-button-description').on('click', function () {
 
     valueField.css('visibility', 'hidden');
     editForm.show();
-    newValueField.val(valueField.text().trim());
+    var currentHtml = valueField.html().trim();
+    var currentText = currentHtml.replace(/<br\s*\/?>/gi, '\n');
+    newValueField.val(currentText);
 });
 
 $('.close-button-description').on('click', function () {
@@ -164,6 +166,7 @@ $('.edit-form').off('submit').on('submit', function (event) {
     var ruleId = editForm.find('input[name="ruleId"]').val();
     var newValue = newValueField.val().trim();
     var updateUrl = editForm.attr('action');
+    var readMoreLink = field.find('.read-more-link');
 
     $.ajax({
         type: 'POST',
@@ -172,23 +175,28 @@ $('.edit-form').off('submit').on('submit', function (event) {
             ruleId: ruleId,
             description: newValue
         },
-		success: function (response) {
-			valueField.text(newValue);
-			valueField.css('visibility', 'visible');
-			editForm.hide();
-			field.find('.description-field').show();
-			if (valueField[0].scrollHeight > valueField[0].clientHeight) {
-				$('#read-more-link').removeClass('d-none');
-			} else {
-				$('#read-more-link').addClass('d-none');
-			}
-			valueField.addClass('description-collapsed');
-			$('#read-more-link').text("Read all description");
-		},
+        success: function () {
+            // Conserver les retours à la ligne en HTML
+            var htmlValue = newValue.replace(/\n/g, '<br>');
+            valueField.html(htmlValue);
 
+            valueField.css('visibility', 'visible');
+            editForm.hide();
+            field.find('.description-field').show();
+
+            // Afficher/cacher le "Read more" localement
+            if (valueField[0].scrollHeight > valueField[0].clientHeight) {
+                readMoreLink.removeClass('d-none');
+            } else {
+                readMoreLink.addClass('d-none');
+            }
+
+            valueField.addClass('description-collapsed');
+            readMoreLink.text("Read all description");
+        },
         error: function (error) {
             console.log(error);
-            alert("Une erreur s'est produite lors de la mise à jour.");
+            alert("Une erreur s'est produite lors de la mise à jour");
         }
     });
 });
