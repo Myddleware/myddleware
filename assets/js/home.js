@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     const list = document.querySelector(".error-list");
     const btn = document.getElementById("toggleErrorsBtn");
-    const maxVisible = 5;
+    const maxVisible = 4;
 
     if (list && btn) {
         const items = list.querySelectorAll("li");

@@ -53,6 +53,7 @@ use App\Repository\ConfigRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
+use App\Repository\RuleFieldRepository;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -80,6 +81,7 @@ use App\Entity\WorkflowAction;
 use App\Service\TwoFactorAuthService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\RuleGroup;
+use App\Repository\VariableRepository;
 use Symfony\Component\Yaml\Yaml;
 
     /**
@@ -108,7 +110,8 @@ use Symfony\Component\Yaml\Yaml;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
         private ConfigRepository $configRepository;
-        private TwoFactorAuthService $twoFactorAuthService;
+        private TwoFactorAuthService $twoFactorAuthService;      
+        private RuleFieldRepository $ruleFieldRepository;
 
         private RequestStack $requestStack;
 
@@ -121,6 +124,7 @@ use Symfony\Component\Yaml\Yaml;
             SessionService $sessionService,
             EntityManagerInterface $entityManager,
             RuleRepository $ruleRepository,
+            RuleFieldRepository $ruleFieldRepository,
             JobRepository $jobRepository,
             DocumentRepository $documentRepository,
             Connection $connection,
@@ -142,6 +146,7 @@ use Symfony\Component\Yaml\Yaml;
             $this->sessionService = $sessionService;
             $this->entityManager = $entityManager;
             $this->ruleRepository = $ruleRepository;
+            $this->ruleFieldRepository = $ruleFieldRepository;
             $this->jobRepository = $jobRepository;
             $this->documentRepository = $documentRepository;
             $this->connection = $connection;
@@ -1034,7 +1039,7 @@ use Symfony\Component\Yaml\Yaml;
          * @Route("/view/{id}", name="regle_open")
          * @throws Exception
          */
-        public function ruleOpenAction($id): Response
+        public function ruleOpenAction($id, RuleRepository $ruleRepository, VariableRepository $variableRepository): Response
         {
             if ($this->getUser()->isAdmin()) {
                 $list_fields_sql = ['id' => $id];
@@ -1090,6 +1095,40 @@ use Symfony\Component\Yaml\Yaml;
             $Params = $rule->getParams();
             $Fields = $rule->getFields();
             $Filters = $rule->getFilters();
+
+            $varNamesSet = [];
+            $pattern = '/\{?(mdwvar_[A-Za-z0-9_]+)\}?/';
+
+            if ($Fields) {
+                foreach ($Fields as $f) {
+                    $text = implode(' ', [
+                        (string) $f->getFormula(),
+                        (string) $f->getSource(),
+                        (string) $f->getTarget(),
+                        (string) $f->getComment(),
+                    ]);
+
+                    if (preg_match_all($pattern, $text, $m)) {
+                        foreach ($m[1] as $name) {
+                            $varNamesSet[$name] = true; 
+                        }
+                    }
+                }
+            }
+
+            $variables = [];
+            $varNames = array_keys($varNamesSet);
+
+            if (!empty($varNames)) {
+                // Doctrine gère IN(:names) avec un tableau
+                $variables = $variableRepository->createQueryBuilder('v')
+                    ->where('v.name IN (:names)')
+                    ->setParameter('names', $varNames)
+                    ->orderBy('v.name', 'ASC')
+                    ->getQuery()
+                    ->getResult();
+            }
+
             $ruleParam = RuleManager::getFieldsParamView();
             $params_suite = [];
             if ($Params) {
@@ -1152,6 +1191,7 @@ use Symfony\Component\Yaml\Yaml;
                 $workflows = [];
             }
 
+
             return $this->render('Rule/edit/fiche.html.twig', [
                 'rule' => $rule,
                 'connector' => $connector[0],
@@ -1164,6 +1204,7 @@ use Symfony\Component\Yaml\Yaml;
                 'id' => $id,
                 'hasWorkflows' => $hasWorkflows,
                 'workflows' => $workflows,
+                'variables' => $variables,
             ]
             );
         }

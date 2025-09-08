@@ -654,6 +654,7 @@ opacity: 0%;
 
 #deletion-rule-left-description {
 	border-bottom: none !important;
+	vertical-align: top;
 }
 
 .inner-table-workflow {
@@ -815,7 +816,7 @@ td .link-fit-rule-name {
 
 .table-rule-view:not(#tab_connector) tr > td:first-child {
     color: #6c757d;
-    padding-left: 45px;
+    padding-left: 2em;
 }
 
 #tab_connector tr:nth-child(even) td {
@@ -827,7 +828,7 @@ td .link-fit-rule-name {
 }
 
 #tab_connector tr td{
-   padding-left: 20px;
+   padding-left: 2em;
 }
 
 table.table-rule-view th,
@@ -1002,4 +1003,8 @@ table.table-rule-view tr:first-child th {
 
 .search-formula{
 	max-width: 295px;
+}
+
+.table-rule-view tr:last-child td {
+    padding-bottom: 1.5rem;
 }
