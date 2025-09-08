@@ -196,10 +196,6 @@
 								<a href="#" class="edit-button-description me-2 mt-2" title="{{ 'Edit' | trans }}">
 									<i class="fa fa-pen" aria-hidden="true"></i>
 								</a>
-								<a href="#" id="read-more-link"
-								class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
-									Read all description
-								</a>
 							</div>
 							<form class="edit-form edit-form-description-close mt-2" style="display: none;"
 								action="{{ path('update_rule_description') }}" method="post">
@@ -210,6 +206,9 @@
 								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
 								<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
 							</form>
+							<a href="#" id="read-more-link"	class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
+								Read all description
+							</a>
 						</td>
 					</tr>
 
@@ -280,26 +279,27 @@
 						</th>
 					</tr>
 					<tr>
-						<td class="value inner-table-workflow" colspan="3">
-							{% if variables is defined and variables|length > 0 %}
-								{% for variable in variables %}
-								
-							<tr>
-								<td class="title_source rounded-table-down-left">
-									<a class="help-link all-link"
-										href="{{ path('variable_show', {'id': variable.id}) }}">
-										{{ variable.name }}
-									</a>
+						{% if variables is defined and variables|length > 0 %}
+							{% for variable in variables %}
+								<td class="value inner-table-workflow pt-3" colspan="3">	
+									<tr>
+										<td class="title_source rounded-table-down-left">
+											<a class="help-link all-link"
+												href="{{ path('variable_show', {'id': variable.id}) }}">
+												{{ variable.name }}
+											</a>
+										</td>
+										<td class="title_source rounded-table-down-left">
+											{{ variable.value }}
+										</td>
+									</tr>		
 								</td>
-								<td class="title_source rounded-table-down-left">
-									{{ variable.value }}
-								</td>
-							</tr>
-								{% endfor %}
-							{% else %}
-						<span class="p-3">No variable</span>
-					{% endif %}
-						</td>
+							{% endfor %}
+						{% else %}
+							<td class="value inner-table-workflow p-3" colspan="3">	
+								<span>No variable</span>
+							</td>
+						{% endif %}
 					</tr>
 				</table>
 			</div>
@@ -312,7 +312,7 @@
 						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="4">{{ 'view_rule.infos.workflows' | trans }}</th>
 					</tr>
 					<tr>
-						<td class="value inner-table-workflow">
+						<td class="value inner-table-workflow p-3">
 							{% if hasWorkflows %}
 								{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
 

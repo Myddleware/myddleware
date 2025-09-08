@@ -31,7 +31,7 @@ if (typeof $.ui === 'undefined') {
   
   const jqueryUICSS = document.createElement('link');
   jqueryUICSS.rel = 'stylesheet';
-  jqueryUICSS.href = 'https://code.jquery.com/ui/1.14.1/themes/ui-lightness/jquery-ui.css';
+  // jqueryUICSS.href = 'https://code.jquery.com/ui/1.14.1/themes/ui-lightness/jquery-ui.css';
   document.head.appendChild(jqueryUICSS);
 }
 
