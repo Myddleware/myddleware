@@ -939,25 +939,44 @@ table.table-rule-view tr:first-child th {
   margin-left: 280px;
 }
 
-.description-collapsed {
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-height: 3.5em;
-	position: relative;
+.description-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  column-gap: .5rem;
+  width: 100%;
 }
+
+.description-field .value,
+#description-field-value {
+  min-width: 0;
+  display: block;
+  visibility: visible;
+}
+
+.description-collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3.5em;
+}
+
+.edit-button-description {
+  color: #337ab7;
+  margin: 0;
+  line-height: 1;
+}
+
 .read-more-link {
-	display: block;
-	color: #0a58ca;
-	text-align: center;
-	cursor: pointer;
-	margin-top: 0.3em;
+  display: inline-block;
+  color: #0a58ca;
+  cursor: pointer;
+  margin-top: 0.3em;
 }
 
 .edit-button-description{
-	margin-left: 90%;
 	color: #337ab7;
 }
 .info-toggle {
