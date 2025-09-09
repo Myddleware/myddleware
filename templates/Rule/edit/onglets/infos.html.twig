@@ -296,7 +296,7 @@
 								</td>
 							{% endfor %}
 						{% else %}
-							<td class="value inner-table-workflow p-3" colspan="3">	
+							<td class="value inner-table-workflow p-3 text-center" colspan="3">	
 								<span>No variable</span>
 							</td>
 						{% endif %}
@@ -307,55 +307,60 @@
 
 			{# TABLE WORKFLOW #}
 			<div class="custom-col">
-				<table id="tab_workflow" class="table table-rule-view">
-					<tr>
-						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="4">{{ 'view_rule.infos.workflows' | trans }}</th>
-					</tr>
-					<tr>
-						<td class="value inner-table-workflow p-3">
-							{% if hasWorkflows %}
-								{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
-
-								<table class="table table-rule-view">
-									<thead class="thead-light">
-										<tr>
-											<th class="text-left">{{ 'view_rule.infos.name' | trans }}</th>
-											<th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
-											<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for workflow in sorted_workflows %}
-											<tr class="border-bottom-workflow-none" data-toggle="tooltip" title="{{ workflow.description }}">
-												<td class="title rounded-table-down-left">
-													<a class="dropdown-item workflow-name-link-rule" href="{{ path('workflow_show', {'id': workflow.id}) }}">
-														{{ workflow.name }}
-													</a>
-												</td>
-												<td class="title">
-													<div class="workflow-order-table">
-														{{ workflow.order }}
-													</div>
-												</td>
-												<td class="value rounded-table-down-right switch-workflow-table">
-													<div class="form-check form-switch">
-														<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
-													</div>
-												</td>
-											</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							{% else %}
-								<span class="p-3">No workflow</span>
-							{% endif %}
-							<div class="workflow-btn-rule-info">
-								<a class="btn btn-primary mt-2 mb-2" href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
+					<table id="tab_workflow" class="table table-rule-view text-center mx-auto">
+					<thead>
+						<tr>
+							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color text-center" colspan="3">
+								{{ 'view_rule.infos.workflows' | trans }}
+							</th>
+						</tr>
+						{% if hasWorkflows %}
+							<tr class="thead-light">
+								<th class="text-center">{{ 'view_rule.infos.name' | trans }}</th>
+								<th class="text-center">{{ 'view_rule.infos.order' | trans }}</th>
+								<th class="text-center">{{ 'view_rule.infos.status' | trans }}</th>
+							</tr>
+						{% endif %}
+					</thead>
+					<tbody>
+						{% if hasWorkflows %}
+							{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
+							{% for workflow in sorted_workflows %}
+								<tr data-toggle="tooltip" title="{{ workflow.description }}">
+									<td class="title text-center">
+										<a class="dropdown-item workflow-name-link-rule"
+										href="{{ path('workflow_show', {'id': workflow.id}) }}">
+											{{ workflow.name }}
+										</a>
+									</td>
+									<td class="title text-center">
+										{{ workflow.order }}
+									</td>
+									<td class="value text-center">
+										<div class="form-check form-switch d-flex justify-content-center">
+											<input class="form-check-input" type="checkbox"
+												id="activeWorkflow_{{ workflow.id }}"
+												data-id="{{ workflow.id }}"
+												data-type="workflow"
+												{{ workflow.active ? 'checked' : '' }}>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td class="value p-3" colspan="3">No workflow</td>
+							</tr>
+						{% endif %}
+						<tr>
+							<td colspan="3" class="workflow-btn-rule-info text-center">
+								<a class="btn btn-primary mt-2 mb-2"
+								href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
 									{{ 'view_rule.infos.workflow_create' | trans }}
 								</a>
-							</div>
-						</td>
-					</tr>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>
