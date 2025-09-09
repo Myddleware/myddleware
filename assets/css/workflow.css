@@ -67,7 +67,7 @@
     text-align: center;
 }
 
-#workflowTableContainer{
+#workflowTableContainer, #rulegroups, .table-wrapper-variable{
     display: flex;
     justify-content: center;
 }
