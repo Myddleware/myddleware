@@ -70,7 +70,7 @@
 						<tr>
 							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="2">
 								<div class="d-flex justify-content-between align-items-center flex-wrap">
-									<p class="ps-3 detail-rule-title m-0 d-flex align-items-center">
+									<p class="detail-rule-title m-0 d-flex align-items-center">
 										<i class="fa fa-list me-2" aria-hidden="true"></i>
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
@@ -307,18 +307,18 @@
 
 			{# TABLE WORKFLOW #}
 			<div class="custom-col">
-					<table id="tab_workflow" class="table table-rule-view text-center mx-auto">
+					<table id="tab_workflow" class="table table-rule-view-workflows  mx-auto">
 					<thead>
 						<tr>
-							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color text-center" colspan="3">
+							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color " colspan="3">
 								{{ 'view_rule.infos.workflows' | trans }}
 							</th>
 						</tr>
 						{% if hasWorkflows %}
 							<tr class="thead-light">
-								<th class="text-center">{{ 'view_rule.infos.name' | trans }}</th>
-								<th class="text-center">{{ 'view_rule.infos.order' | trans }}</th>
-								<th class="text-center">{{ 'view_rule.infos.status' | trans }}</th>
+								<th class="text-left workflow-detail-th-td">{{ 'view_rule.infos.name' | trans }}</th>
+								<th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
+								<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
 							</tr>
 						{% endif %}
 					</thead>
@@ -327,17 +327,17 @@
 							{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
 							{% for workflow in sorted_workflows %}
 								<tr data-toggle="tooltip" title="{{ workflow.description }}">
-									<td class="title text-center">
+									<td class="title workflow-detail-th-td">
 										<a class="dropdown-item workflow-name-link-rule"
 										href="{{ path('workflow_show', {'id': workflow.id}) }}">
 											{{ workflow.name }}
 										</a>
 									</td>
-									<td class="title text-center">
+									<td class="title workflow-detail-th-td">
 										{{ workflow.order }}
 									</td>
-									<td class="value text-center">
-										<div class="form-check form-switch d-flex justify-content-center">
+									<td class="value workflow-detail-th-td">
+										<div class="form-check form-switch d-flex">
 											<input class="form-check-input" type="checkbox"
 												id="activeWorkflow_{{ workflow.id }}"
 												data-id="{{ workflow.id }}"

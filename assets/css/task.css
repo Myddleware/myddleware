@@ -22,7 +22,7 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#task, #workflows, #variables {
+#task, #workflows-details, #variables {
     padding: 20px 0;
     text-align: center;
 }

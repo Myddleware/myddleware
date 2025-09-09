@@ -795,12 +795,7 @@ td .link-fit-rule-name {
 	display: none;
 }
 
-.detail-rule-title{
-	display: inline;
-	padding-right: 90px;
-}
-
-.table-rule-view{
+.table-rule-view, .table-rule-view-workflows{
 	border-radius: 20px;
 	border: #333 solid 1px;
 	border-collapse: separate !important;
@@ -832,11 +827,13 @@ td .link-fit-rule-name {
 }
 
 table.table-rule-view th,
-table.table-rule-view td {
+table.table-rule-view td,
+table.table-rule-view-workflows th,
+table.table-rule-view-workflows td {
     border: none !important;
 }
 
-table.table-rule-view {
+table.table-rule-view, .table-rule-view-workflows {
     border: 1px solid #ccc;
     border-radius: 12px;
     border-collapse: separate !important;
@@ -844,7 +841,7 @@ table.table-rule-view {
     overflow: hidden;
 }
 
-table.table-rule-view tr:first-child th {
+table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:first-child th {
     border-bottom: 1px solid #ccc !important;
 }
 
@@ -868,11 +865,11 @@ table.table-rule-view tr:first-child th {
 	border: none !important;
 }
 
-.table-rule-view tr:first-child th {
+.table-rule-view tr:first-child th, .table-rule-view-workflows tr:first-child th {
 	border-bottom: 1px solid #ccc !important;
 }
 
-.table-rule-view {
+.table-rule-view, .table-rule-view-workflows {
 	border: 1px solid #ccc;
 	border-radius: 12px;
 	border-collapse: separate !important;
@@ -887,6 +884,7 @@ table.table-rule-view tr:first-child th {
 }
 
 .detail-rule-title {
+	padding-left: 0.8rem;
 	display: inline-block;
 	font-size: 1.1rem;
 	font-weight: 600;
@@ -1024,6 +1022,10 @@ table.table-rule-view tr:first-child th {
 	max-width: 295px;
 }
 
-.table-rule-view tr:last-child td {
+.table-rule-view tr:last-child td, .table-rule-view-workflows tr:last-child td {
     padding-bottom: 1.5rem;
+}
+
+.workflow-detail-th-td{
+	padding-left: 30px !important;
 }

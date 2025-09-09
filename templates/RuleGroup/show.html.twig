@@ -38,14 +38,6 @@
             </div>
 
             <div class="rulegroup-details container mt-4">
-                <div class="card-header mb-4 card-title-rulegroup">
-                    <button class="toggle-button btn btn-outline-secondary btn-sm float-end"
-                            data-target="#rulegroup-content"
-                            aria-expanded="true" 
-                            aria-controls="rulegroup-content">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                </div>
                 <div id="rulegroup-content" class="collapse show px-3">
                     <div class="rulegroup-row mb-2">
                         <div class="rulegroup-col mb-2">
@@ -82,7 +74,7 @@
             <div id="rules-content" class="collapse show">
                 {% if rulegroup.rules|length > 0 %}
                     <div class="table-responsive">
-                        <table class="table modern-rules-table">
+                        <table class="table rule-group-table">
                             <thead>
                                 <tr>
                                     <th class="text-start">{{ 'rulegroup.rule.name'|trans }}</th>
