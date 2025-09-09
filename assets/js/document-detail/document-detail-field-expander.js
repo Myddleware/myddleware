@@ -91,9 +91,9 @@ export class DocumentDetailFieldExpander {
         fieldValues.forEach((fieldValue, index) => {
             try {
                 if (!fieldValue.querySelector('.field-edit-icon')) {
-                    const icon = document.createElement('i');
-                    icon.className = 'fas fa-pencil-alt field-edit-icon';
-                    fieldValue.appendChild(icon);
+                    // const icon = document.createElement('i');
+                    // icon.className = 'fas fa-pencil-alt field-edit-icon';
+                    // fieldValue.appendChild(icon);
                     console.log(`✅ Added pencil icon to field ${index + 1}`);
                 } else {
                     console.log(`📌 Field ${index + 1} already has pencil icon`);
