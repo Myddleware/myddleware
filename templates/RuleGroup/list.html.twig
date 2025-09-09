@@ -39,7 +39,7 @@
 
 {% block body %}
 
-<div class="d-flex align-items-center justify-content-center mb-3 mt-3">
+<div class="d-flex align-items-center justify-content-center my-5">
     {% for message in app.flashes('success_rulegroup') %}
         <div class="alert alert-success">
             {{ message }}
@@ -48,9 +48,9 @@
     <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
 </div>
 <div id="rulegroups">
-	<div>
-		<table class="listepager table container table-hover align-middle shadow-table">
-			<thead>
+	<div class ="table-wrapper">
+		<table class="listepager table container">
+			<thead class="text-center">
 				<tr>
 					<th class="rounded-table-up-left">ID</th>
 					<th>Name</th>

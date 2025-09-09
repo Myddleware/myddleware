@@ -168,6 +168,8 @@ class DocumentManager
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
+            'Found' => 'flux.status.found',
+            'Not_found' => 'flux.status.not_found',
         ];
     }
 

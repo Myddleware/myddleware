@@ -258,11 +258,6 @@ li span {
     width: auto;
 }
 
-.table-wrapper-variable {
-    display: inline-block;
-	width: 70%;
-}
-
 .shadow-table {
     background-color: white;
     margin-bottom: 0 !important;

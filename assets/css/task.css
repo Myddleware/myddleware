@@ -27,7 +27,7 @@
     text-align: center;
 }
 
-#task th, #workflows th, #variables th {
+#task th, #workflows th{
     background: #F2F2F2;
 	height: 45px;
 	padding: 10px;
