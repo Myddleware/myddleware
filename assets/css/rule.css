@@ -1027,3 +1027,11 @@ table.table-rule-view tr:first-child th {
 .table-rule-view tr:last-child td {
     padding-bottom: 1.5rem;
 }
+
+.workflow-order-table{
+	padding-left: 32px;
+}
+
+.table td.switch-workflow-table.value {
+	padding-left: 29px;
+}
