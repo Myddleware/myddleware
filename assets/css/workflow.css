@@ -14,10 +14,6 @@
     border-left: 3px solid rgba(0, 0, 0, 0.03);
 }
 
-.workflow-details {
-    margin-top: 20px;
-}
-
 .workflow-row {
     margin-bottom: 10px;
     display: flex;
