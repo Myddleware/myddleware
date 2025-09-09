@@ -63,6 +63,7 @@ a.btn-sm {
 }
 
 .rulegroup-card-table{
+    padding-bottom: 2.5rem !important;
     margin: 30px 100px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
@@ -73,14 +74,13 @@ a.btn-sm {
     margin-left: 50%;
 }
 
-.modern-rules-table {
+.modern-rule-group-table {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #dee2e6;
 }
 
-.modern-rules-table thead th {
-    background-color: #f8f9fa;
+.rule-group-table thead th {
     text-transform: uppercase;
     font-size: 0.85rem;
     color: #495057;
@@ -88,12 +88,12 @@ a.btn-sm {
     padding: 12px;
 }
 
-.modern-rules-table tbody td {
+.modern-rule-group-table tbody td {
     vertical-align: middle;
     padding: 10px 12px;
 }
 
-.modern-rules-table tbody tr:hover {
+.modern-rule-group-table tbody tr:hover {
     background-color: #f5f9ff;
 }
 
