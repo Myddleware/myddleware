@@ -249,6 +249,9 @@ export class DocumentDetailTargetEditor {
             return;
         }
         
+        console.log('🔒 Pencil icon not added - document status is Error:', this.documentGlobalStatus);
+        
+        
         // Ensure the field element has relative positioning for absolute positioned icons
         const computedStyle = window.getComputedStyle(fieldElement);
         if (computedStyle.position === 'static') {
