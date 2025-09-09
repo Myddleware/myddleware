@@ -584,6 +584,8 @@ public function removeFilter(Request $request): JsonResponse
             'flux.status.error_transformed' => 'Error_transformed',
             'flux.status.error_checking' => 'Error_checking',
             'flux.status.error_sending' => 'Error_sending',
+            'flux.status.found' => 'Found',
+            'flux.status.not_found' => 'Not_found',
         ];
         
         return $statuses[$statusIndex];
