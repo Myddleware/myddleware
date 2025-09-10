@@ -9,10 +9,6 @@ services:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=myddleware
       - MYSQL_ROOT_PASSWORD=${mysql_root_password:-secret}
-    volumes:
-      - .:/var/www/html:delegated
-      - ./docker/tmp/composer:/root/.composer:delegated
-      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
     depends_on:
       mysql:
         condition: service_healthy
@@ -44,4 +40,4 @@ services:
     restart: always
 
 volumes:
-  mysql_data:
+  mysql_data: null
