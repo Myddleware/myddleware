@@ -25,7 +25,7 @@
         "dev-server": "encore dev-server",
         "dev": "encore dev",
         "watch": "php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json && encore dev --watch",
-        "build": "php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json && encore production --progress"
+        "build": "encore production --progress"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^6.7.2",
