@@ -36,6 +36,7 @@ class moodle extends solution
     protected array $required_fields = [
         'default' => ['id'],
         'get_users_statistics_by_date' => ['id', 'timemodified'],
+        'get_course_completion_percentage' => ['id', 'timecompleted', 'timemodified'],
         'get_users_completion' => ['id', 'timemodified'],
         'get_users_last_access' => ['id', 'lastaccess'],
         'get_course_completion_by_date' => ['id', 'timecompleted'],
@@ -121,6 +122,7 @@ class moodle extends solution
                     'get_users_completion' => 'Get course activity completion',
                     'get_users_last_access' => 'Get users last access',
                     'get_users_statistics_by_date' => 'Get users statistics',
+                    'get_course_completion_percentage' => 'Get course completion percentage',
                     'get_enrolments_by_date' => 'Get enrolments',
                     'get_course_completion_by_date' => 'Get course completion',
                     'get_user_compentencies_by_date' => 'Get user compentency',
@@ -156,7 +158,7 @@ class moodle extends solution
         parent::get_module_fields($module, $type);
         try {
             // Use Moodle metadata
-            require 'lib/moodle/metadata.php';
+			$moduleFields = $this->setMetadata();
             if (!empty($moduleFields[$module])) {
                 $this->moduleFields = array_merge($this->moduleFields, $moduleFields[$module]);
             }
@@ -221,10 +223,9 @@ class moodle extends solution
             // Init the attribute name and value for custom fields
             $attributeName = ($param['module'] == 'courses' || $param['module'] == 'groups' ? 'shortname' : 'name');
             $attributeValue = ($param['module'] == 'courses'? 'valueraw' : 'value');
-
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
-            $response = $this->moodleClient->post($serverurl, $parameters);
+            $response = $this->moodleClient->post($serverurl, $parameters);;
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error code $xml->ERRORCODE : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
@@ -233,46 +234,9 @@ class moodle extends solution
             if (!empty($xml->MULTIPLE->SINGLE)) {
                 foreach ($xml->MULTIPLE->SINGLE as $data) {
                     $row = array();
-                    // Init custom fields to empty because Moodle returns custom field only if they exist for the current record
-                    if (!empty($customFieldList)) {
-                        foreach($customFieldList as $custom) {
-                            $row[$custom] = '';
-                        }
-                    }
-                    foreach ($data as $field) {
-                        // Get all the requested fields
-                        if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {
-                            $row[$field->attributes()->__toString()] = $field->VALUE->__toString();
-                        }
-                        // Manage custom field
-                        elseif (
-                                $field->attributes()->__toString() == 'customfields'
-                            AND !empty($customFieldList)
-                        ) {
-                            // Get the curstom field values
-                            // Loop on each custom field returns by Moodle
-                            foreach($field->MULTIPLE->SINGLE as $customField) {
-                                // Get the name and the value of each field
-                                $customFieldValue = '';
-                                $customFieldName = '';
-                                foreach($customField->KEY as $customFieldValues) {
-                                    if ($customFieldValues->attributes()->__toString() == 'shortname') {
-                                        $customFieldName = $customFieldValues->VALUE->__toString();
-                                    } elseif ($customFieldValues->attributes()->__toString() == $attributeValue) {
-                                        $customFieldValue = $customFieldValues->VALUE->__toString();
-                                    }
-                                }
-                                // Set the custom value to the output result
-                                if (
-                                        !empty($customFieldName)
-                                    AND in_array($customFieldName, $customFieldList)
-                                ) {
-                                    $row[$customFieldName] = $customFieldValue;
-                                }
-                            }
-                        }
-                    }
-                    $result[] = $row;
+					// Generate row
+					$rows = $this->formatRecord($param, $data);
+					$result = array_merge($result, $rows);
                 }
             } elseif (!empty($xml->MESSAGE)) {
                 throw new \Exception("Error : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
@@ -283,8 +247,6 @@ class moodle extends solution
         }
         return $result;
     }
-
-    // Permet de créer des données
 
     /**
      * @throws \Doctrine\DBAL\Exception
@@ -302,23 +264,21 @@ class moodle extends solution
                 $dataSugar = [];
                 $obj = new \stdClass();
                 foreach ($data as $key => $value) {
-                    if (!empty($value)) {
-                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
-                        if (in_array($key, $customFieldList)) {
-                            $customField = new \stdClass();
-                            // Param names are differents depending on the module
-                            if($param['module'] == 'users') {
-                                $customField->type = $key;
-                            } elseif($param['module'] == 'courses') {
-                                $customField->shortname = $key; 
-                            }
-                            $customField->value = $value;
-                            $obj->customfields[] = $customField;
-                            
-                        } else {
-                            $obj->$key = $value;
-                        }
-                    }
+					// if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+					if (in_array($key, $customFieldList)) {
+						$customField = new \stdClass();
+						// Param names are differents depending on the module
+						if($param['module'] == 'users') {
+							$customField->type = $key;
+						} elseif($param['module'] == 'courses') {
+							$customField->shortname = $key; 
+						}
+						$customField->value = $value;
+						$obj->customfields[] = $customField;
+						
+					} else {
+						$obj->$key = $value;
+					}
                 }
                 switch ($param['module']) {
                     case 'users':
@@ -467,22 +427,20 @@ class moodle extends solution
                     if ('target_id' == $key) {
                         continue;
                     } 
-                    if (!empty($value)) {
-                        // if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
-                        if (in_array($key, $customFieldList)) {
-                            $customField = new \stdClass();
-                            // Param names are differents depending on the module
-                            if($param['module'] == 'users') {
-                                $customField->type = $key;
-                            } elseif($param['module'] == 'courses') {
-                                $customField->shortname = $key;
-                            }
-                            $customField->value = $value;
-                            $obj->customfields[] = $customField;
-                        } else {
-                            $obj->$key = $value;
-                        }
-                    }
+					// if $value belongs to $this->paramConnexion[user_custom_fields] then we add it to $obj->customfields
+					if (in_array($key, $customFieldList)) {
+						$customField = new \stdClass();
+						// Param names are differents depending on the module
+						if($param['module'] == 'users') {
+							$customField->type = $key;
+						} elseif($param['module'] == 'courses') {
+							$customField->shortname = $key;
+						}
+						$customField->value = $value;
+						$obj->customfields[] = $customField;
+					} else {
+						$obj->$key = $value;
+					}
                 }
 
                 // Fonctions et paramètres différents en fonction des appels webservice
@@ -576,6 +534,49 @@ class moodle extends solution
         return $result;
     }
 
+	protected function formatRecord($param, $data){
+		// Init custom fields to empty because Moodle returns custom field only if they exist for the current record
+		if (!empty($customFieldList)) {
+			foreach($customFieldList as $custom) {
+				$row[$custom] = '';
+			}
+		}
+		foreach ($data as $field) {
+			// Get all the requested fields
+			if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {
+				$row[$field->attributes()->__toString()] = $field->VALUE->__toString();
+			}
+			// Manage custom field
+			elseif (
+					$field->attributes()->__toString() == 'customfields'
+				AND !empty($customFieldList)
+			) {
+				// Get the curstom field values
+				// Loop on each custom field returns by Moodle
+				foreach($field->MULTIPLE->SINGLE as $customField) {
+					// Get the name and the value of each field
+					$customFieldValue = '';
+					$customFieldName = '';
+					foreach($customField->KEY as $customFieldValues) {
+						if ($customFieldValues->attributes()->__toString() == 'shortname') {
+							$customFieldName = $customFieldValues->VALUE->__toString();
+						} elseif ($customFieldValues->attributes()->__toString() == $attributeValue) {
+							$customFieldValue = $customFieldValues->VALUE->__toString();
+						}
+					}
+					// Set the custom value to the output result
+					if (
+							!empty($customFieldName)
+						AND in_array($customFieldName, $customFieldList)
+					) {
+						$row[$customFieldName] = $customFieldValue;
+					}
+				}
+			}
+		}
+		return array($row);
+	}
+	
 	// Check data before update
     // Add a throw exeption if error
     protected function checkDataBeforeUpdate($param, $data, $idDoc=null)
@@ -771,7 +772,7 @@ class moodle extends solution
             AND !empty($this->paramConnexion['course_custom_fields'])
         ) {
             return explode(',',$this->paramConnexion['course_custom_fields']);
-        } 
+        }
         return array();
     }
 
@@ -804,5 +805,11 @@ class moodle extends solution
 				];
 			}
 		}
+	}
+	
+	// Set metadata
+	protected function setMetadata(){
+		require 'lib/moodle/metadata.php';
+		return $moduleFields;
 	}
 }
