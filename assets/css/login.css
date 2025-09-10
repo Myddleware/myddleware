@@ -39,7 +39,7 @@
 }
 
 .login-logo {
-    background-image: url('../images/template/logo.jpg');
+    background-image: url('../build/images/template/logo.jpg');
     width: 236px;
     height: 96px;
     background-repeat: no-repeat;
