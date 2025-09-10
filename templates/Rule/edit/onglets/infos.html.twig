@@ -307,8 +307,7 @@
 
 			{# TABLE WORKFLOW #}
 			<div class="custom-col">
-					<table id="tab_workflow" class="table table-rule-view-workflows  mx-auto">
-					<thead>
+					<table id="tab_workflow" class="table table-rule-view-workflows table table-rule-view mx-auto">
 						<tr>
 							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color " colspan="3">
 								{{ 'view_rule.infos.workflows' | trans }}
@@ -321,7 +320,6 @@
 								<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
 							</tr>
 						{% endif %}
-					</thead>
 					<tbody>
 						{% if hasWorkflows %}
 							{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
@@ -349,7 +347,7 @@
 							{% endfor %}
 						{% else %}
 							<tr>
-								<td class="value p-3" colspan="3">No workflow</td>
+								<td class="value inner-table-workflow p-3 text-center" colspan="3">No workflow</td>
 							</tr>
 						{% endif %}
 						<tr>

@@ -1204,6 +1204,7 @@ variable:
     name: Nom
     value: Valeur
     actions: Actions
+    created_by: Créé par
     description: Description
 premium:
     upgrade:

@@ -1206,7 +1206,8 @@ variable:
   no_variables: No variables found.
   table_headers:
     name: Name
-    value: Value
+    value: Value   
+    created_by: Created By
     actions: Actions
     description: Description
 premium:
