@@ -1361,11 +1361,6 @@ class DocumentManager
 					if (!array_key_exists($field['target_field_name'], $history)){
 						return false;
 					}
-					// If the field isn't set in the target (even if set in the history) 
-					// then we don't return false because the field won't be sent to teh target so won't change the target
-					if (!array_key_exists($field['target_field_name'], $target)){
-						continue;
-					}
                     if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {
                         // Null text is considered as empty for comparaison
 						if ($target[$field['target_field_name']] === 'null') {
