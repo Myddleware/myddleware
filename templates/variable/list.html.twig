@@ -32,6 +32,7 @@
 								<th class="rounded-table-up-left p-4">{{ 'variable.table_headers.name'|trans }}</th>
 								<th class="p-4">{{ 'variable.table_headers.value'|trans }}</th>
 								<th class="p-4">{{ 'variable.table_headers.description'|trans }}</th>
+								<th class="p-4">{{ 'variable.table_headers.created_by'|trans }}</th>
 								<th class="rounded-table-up-right p-4">{{ 'variable.table_headers.actions'|trans }}</th>
 							</tr>
 						</thead>
@@ -43,6 +44,7 @@
 									</td>
 									<td>{{ variable.value }}</td>
 									<td>{{ variable.description }}</td>
+									<td>{{ variable.createdBy }}</td>
 									<td class="CRUD-icons">
 										<a href="{{ path('variable_show', {'id': variable.id}) }}" title="{{ variable.name }}" class="text-decoration-none btn btn-sm btn-outline-success">
 											<span class="btn-opt">
