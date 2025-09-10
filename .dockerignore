@@ -9,4 +9,3 @@ node_modules
 vendor
 var/cache
 var/log
-public/build
