@@ -1,14 +1,8 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const toggleButton = document.querySelector('.minus-workflow-logs');
-    const logsContent = document.getElementById('logs-content');
-    const logsTableBody = document.querySelector('.workflow-logs-collapse-body');
-    const icon = toggleButton?.querySelector('i.fa');
-    const logsUrl = logsTableBody?.dataset.url;
+// console.log('workflow-logs-collapse.js');
 
-    let logsLoaded = false;
-    const collapseInstance = new bootstrap.Collapse(logsContent, {
-        toggle: false
-    });
+// find the button with the class minus-workflow-logs
+const minusWorkflowLogsButton = document.querySelector('.minus-workflow-logs');
+// console.log('minusWorkflowLogsButton', minusWorkflowLogsButton);
 
 // Check if button exists before adding event listener
 if (!minusWorkflowLogsButton) {
