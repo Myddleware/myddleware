@@ -22,7 +22,7 @@ Myddleware is the customisable free open-source platform that facilitates data m
 
 ![Create Myddleware "Customer" Rule View with WooCommerce Customers & Vtiger Opportunities modules](docs/images/rule_create_woo_vtiger.png)
 
-[On our documentation website,](https://myddleware.github.io/myddleware-docs) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
+[On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
 This community is ours : let’s all contribute, make it a friendly, helpful space where we can all find what we’re looking for!
 
@@ -209,7 +209,7 @@ The MAILER_URL is optional. It is used by Myddleware to send you notification em
 <!-- tabs:end -->
 ## Contributing
 
-> Myddleware relies  on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
+> Myddleware relies on the [Symfony Framework](https://symfony.com/), a free open-source PHP framework. If you would like to contribute to our source code, you can first familiarise yourself with the [Symfony documentation](https://symfony.com/doc/current/index.html)
 
 Myddleware is an Open Source community project. All contributions are welcome, no matter how big or small. There are many ways to contribute to the project.
 You can of course help us improve and debug our source code, but you can also start by simply reporting issues & bugs or suggesting new features on our [GitHub Issues forum](https://github.com/Myddleware/myddleware/issues), or review and leave comments on [Pull Requests](https://github.com/Myddleware/myddleware/pulls).

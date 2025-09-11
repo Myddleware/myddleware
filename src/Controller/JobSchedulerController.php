@@ -337,13 +337,8 @@ class JobSchedulerController extends AbstractController
             $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
             
             // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
+            $formParam = $request->request->get('job_scheduler_cron');
             $form->handleRequest($request);
-            if ($form->isSubmitted()) {
-                $requestAll = $request->request->all();
-                $formParam = $requestAll['job_scheduler_cron'];
-            } else {
-                $formParam = $request->request->get('job_scheduler_cron');
-            }
         
             if ($form->isSubmitted() && $form->isValid()) {
                 // use the static method create because command can be set

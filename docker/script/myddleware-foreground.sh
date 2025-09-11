@@ -8,7 +8,7 @@ chown -R www-data:www-data var/log
 
 ## Extend Hosts
 echo "====[ UPDATE HOSTS ]===="
-cat hosts >> /etc/hosts 2>/dev/null || echo "No hosts file to append"
+cat hosts >> /etc/hosts
 cat /etc/hosts
 echo "--"
 

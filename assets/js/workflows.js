@@ -17,7 +17,7 @@ $(document).ready(function () {
     addFieldButton.style.display = "block";
     
     targetFieldsData.forEach(function (fieldData) {
-        addNewTargetFieldWithValue(fieldData.field, fieldData.value);
+      addNewTargetFieldWithValue(fieldData.field, fieldData.value);
     });
   }
   

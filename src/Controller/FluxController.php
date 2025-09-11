@@ -674,20 +674,14 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
             $parentDocuments = [];
             $parentDocumentsRule = [];
             foreach ($parentRelationships as $parentRelationship) {
-				$parentDocument = $em->getRepository(Document::class)->find($parentRelationship->getDocRelId());	
-				if (!empty($parentDocument)) {
-					$parentDocuments[$i] = $parentDocument;
-					$parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
-					++$i;
-				}
-            }
-
-			// Get the rule name of every relate doc
-			if (!empty($parentDocuments)) {
+                $parentDocuments[$i] = $em->getRepository(Document::class)->find($parentRelationship->getDocRelId());
+                $parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
+                // Get the rule name of every relate doc
                 foreach ($parentDocuments as $parentDocument) {
                     $parentDocumentsRule[$parentDocument->getId()] = $em->getRepository(Rule::class)->find($parentDocument->getRule())->getName();
                 }
-			}
+                ++$i;
+            }
 
             // CHILD RELATE DOCUMENT
             // Document link to other document, the child ones

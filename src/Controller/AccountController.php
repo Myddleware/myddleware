@@ -198,19 +198,6 @@ class AccountController extends AbstractController
             $this->entityManager->flush();
             return $this->redirectToRoute('my_account_old');
         }
-        
-        if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
-            // If SMTP is not configured, disable 2FA
-            if (!$smtpConfigured && $twoFactorAuth->isEnabled()) {
-                $twoFactorAuth->setEnabled(false);
-                $this->addFlash('error', 'Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key first.');
-            } else {
-                $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
-            }
-            
-            $this->entityManager->flush();
-            return $this->redirectToRoute('my_account');
-        }
 
         return $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
