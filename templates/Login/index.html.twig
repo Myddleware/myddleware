@@ -34,7 +34,9 @@
 		id="myd_login-container" class="d-flex">
 		<!-- Partie blanche pour le formulaire de connexion -->
 		<div class="col-md-6 login-box p-5">
-			<div class="login-logo"></div>
+			<div class="login-logo">
+			<img src="{{ asset('build/images/template/logo.jpg') }}" alt="">
+			</div>
 			<h2 class="login-title">Sign in</h2>
 			<form id="myd_login-form" method="post" class="form-inline" role="form" action="{{ path('login') }}">
 				{% if attempt < 6 %}
