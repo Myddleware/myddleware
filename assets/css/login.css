@@ -43,7 +43,11 @@
     height: 96px;
     background-repeat: no-repeat;
     background-size: contain;
-    margin: 16px auto 10px;
+    margin: 16px 10px 10px 2rem;
+}
+
+.login-logo img {
+    max-width: 20rem;
 }
 
 .login-title {
