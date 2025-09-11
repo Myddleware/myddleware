@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block titlesm %}
-    {{ 'variable.list_title'|trans }} <i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i> {{ variable.name }}
+    {{ 'variable.list_title'|trans }} <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i> {{ variable.name }}
 {% endblock %}
 
 {% block body %}
-    <div id="variables" class="container mt-5">
+    <div id="variables" class="container mt-4">
         <div>
             <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2">
                 {{ 'variable.back_to_list'|trans }}
@@ -24,10 +24,13 @@
             </a>
         </div>
 
-        <div class="variable-details container mt-4">
-            <div class="card-header mb-4">
-                {{ variable.name | upper}}
-            </div>
+
+        <div class="container text-left">
+            <h4>
+                {{ 'variable.detail_title' |trans|upper}}
+            </h4>
+        </div>
+        <div class="variable-details container mt-4 px-5">
             <div class="row mb-2">
                 <div class="col-md-6">
                     <strong>{{ 'variable.table_headers.name'|trans|upper }}</strong>

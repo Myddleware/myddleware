@@ -1,0 +1,178 @@
+/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  St�phane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  St�phane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com    
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
+.th-user-manager {
+    padding: 10px !important;
+    background-color: white !important;
+}
+
+#user-manager-wrapper {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+}
+
+#user-table-container {
+    transition: width 0.4s ease;
+    width: 100%;
+}
+
+#user-manager-edit-form-container {
+    width: 0;
+    transition: width 0.4s ease;
+    overflow: hidden;
+    background: #f8f9f9;
+    /* box-shadow: rgba(0, 0, 0, 0.06) 0px -1px 2px 2px inset; */
+}
+
+#user-manager-edit-form-container.visible {
+    width: 400px;
+}
+
+.user-manager-edit-form-content {
+    padding: 1rem;
+    border-left: 1px solid #dee2e6;
+    height: 100%;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+.user-manager-edit-form-content .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+}
+
+.user-manager-edit-form-content .close-btn:hover {
+    color: #000;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.user-manager-edit-form-content h4 {
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.user-manager-edit-form-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.user-manager-edit-form-content label {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.user-manager-edit-form-content input[type="text"],
+.user-manager-edit-form-content input[type="email"],
+.user-manager-edit-form-content select {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    background-color: #fff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.user-manager-edit-form-content input:focus,
+.user-manager-edit-form-content select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
+}
+
+.user-manager-edit-form-content select[multiple] {
+    height: 110px;
+}
+
+.user-manager-edit-form-content button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.3s, box-shadow 0.2s;
+}
+
+.user-manager-edit-form-content button[type="submit"]:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 10px rgba(0,123,255,0.2);
+}
+
+#user-manager-container .table > :not(:first-child){
+    border-top: 2px solid rgb(198 199 200 / 44%) !important;
+}
+.rounded-table {
+    border: 0.5px solid #dee2e6;
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+
+.rounded-table th,
+.rounded-table td {
+    border: 0.5px solid #dee2e6 !important;
+}
+
+/* Coins arrondis */
+.rounded-table thead tr:first-child th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.rounded-table thead tr:first-child th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.rounded-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+.rounded-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}

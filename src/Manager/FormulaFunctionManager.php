@@ -158,7 +158,7 @@ class FormulaFunctionManager
 				AND empty($direction)
 				AND	$ruleRef['conn_id_source'] == $ruleLink['conn_id_source']
 				AND	$ruleRef['conn_id_target'] == $ruleLink['conn_id_target']
-			) 
+			)  
 			// In case of the linked rule has the target connector = source connector, we use module to get the direction of the relationship 
 			OR (
 					!empty($ruleRef)

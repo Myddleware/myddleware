@@ -532,6 +532,31 @@ class airtable extends solution
         return $response;
     }
 
+        // Build the direct link to the record (used in data transfer view)
+    public function getDirectLink($rule, $document, $type): string
+    {
+
+        include 'lib/airtable/metadata.php';
+
+        // Get url, module and record ID depending on the type
+        if ('source' == $type) {
+            $url = "https://airtable.com";
+            $module = $rule->getModuleSource();
+            $projectID = $this->getConnectorParam($rule->getConnectorSource(), 'projectid');
+            $recordId = $document->getSource();
+        } else {
+            $url = "https://airtable.com";
+            $module = $rule->getModuleTarget();
+            $projectID = $this->getConnectorParam($rule->getConnectorTarget(), 'projectid');
+            $recordId = $document->gettarget();
+        }
+
+        $table = $tableMapping[$projectID][$module] ?? "";
+
+        // Build the URL (delete if exists / to be sure to not have 2 / in a row)
+        return $url. "/".$projectID."/".$table."/".$recordId;
+    }
+
     public function getDateRefName($moduleSource, $ruleMode): string
     {
 		// Search the field id

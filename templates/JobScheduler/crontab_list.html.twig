@@ -71,15 +71,7 @@
 				</thead>
 				<tbody>
 					{% for value in entity %}
-						<tr class="
-																																                    {% if value.runningInstances == value.maxInstances %}
-																																                        bg-danger
-																																                    {% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}
-																																                        bg-warning
-																																                    {% else %}
-																																                        bg-none
-																																                    {% endif %}
-																																                ">
+						<tr class="																																								                ">
 							<td class="value">
 								<div id="command-short-{{ loop.index }}">
 									{{ value.command|slice(0, 20) ~ '...' }}
@@ -96,7 +88,11 @@
 							<td class="value">{{ value.maxInstances  }}</td>
 							<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
 							<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
-							<td class="value">{{ value.enable }}</td>
+							<td class="text-center">
+								<div class="form-check form-switch">
+									<input class="form-check-input toggle-switch-crontab" type="checkbox" id="crontab-{{ value.id }}" data-id="{{ value.id }}" data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}" {{ value.isEnable() ? 'checked' : '' }}>
+								</div>
+							</td>
 							<td class="CRUD-icons">
 								<a class="btn btn-sm btn-outline-success" href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
 									<span class="btn-opt">
@@ -130,67 +126,20 @@
 				</tbody>
 			</table>
 		</div>
+		<div class="text-center m-3 p-3">
+			<div id="crontab-results-container">
+				<button id="toggle-crontab-result"
+					class="btn btn-outline-primary"
+					data-url="{{ path('crontab_results_partial') }}"
+					data-show-label="{{ 'crontab.see_results'|trans }}"
+					data-hide-label="{{ 'crontab.hide_results'|trans }}">
+				{{ 'crontab.see_results'|trans }}
+			</button>
+			</div>
+		</div>
 
 		<div class="container-fluid p-3">
-			<div id="cronjobresult_table">
-				<h6 class="display-6">
-					<h6 class="display-6">{{ 'crontab.title_cronjobresult'|trans }}</h6>
-				</h6>
-				<table class="table table-sm table-striped mt-5">
-					<thead>
-						<tr>
-							<th scope="col" class="title">
-								<label>Id</label>
-							</th>
-							<th scope="col" class="title">
-								<label>CronjobId</label>
-							</th>
-							<th scope="col" class="title">
-								<label>runAt</label>
-							</th>
-							<th scope="col" class="title">
-								<label>runTime</label>
-							</th>
-							<th scope="col" class="title">
-								<label>statusCode</label>
-							</th>
-							<th scope="col" class="title">
-								<label>output</label>
-							</th>
-							<th scope="col" class="title">
-								<label>createdAt</label>
-							</th>
-							<th scope="col" class="title">
-								<label>updatedAt</label>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for result in pager.currentPageResults %}
-							<tr>
-								<td class="value">{{ result.id }}</td>
-								<td class="value">{{ result.cronJob.id }}</td>
-								<td class="value">{{ result.runAt|date('d/m/Y H:i:s') }}</td>
-								<td class="value">{{ result.runTime }}</td>
-								<td class="value">{{ result.statusCode }}</td>
-								<td class="value">
-									<div id="output-short-{{ result.id }}">
-										...
-										<button onclick="document.getElementById('output-short-{{ result.id }}').style.display='none';document.getElementById('output-full-{{ result.id }}').style.display='block';">Show more</button>
-									</div>
-									<div id="output-full-{{ result.id }}" style="display: none;">
-										{{ result.output }}
-										<button onclick="document.getElementById('output-full-{{ result.id }}').style.display='none';document.getElementById('output-short-{{ result.id }}').style.display='block';">Show less</button>
-									</div>
-								</td>
-								<td class="value">{{ result.createdAt|date('d/m/Y H:i:s') }}</td>
-								<td class="value">{{ result.updatedAt|date('d/m/Y H:i:s') }}</td>
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-
-				<div class="navigation" id="workflows">
+			<div id="cronjobresult_table" class="">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'jobscheduler_cron_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
 
@@ -209,7 +158,7 @@
 							</div>
 							<button class="btn btn-primary mt-2" onclick="executeCommand()">Execute</button>
 							<div id="commandResult" class="mt-2 p-2 bg-light" style="display: none;"></div>
-						</div>
+						</div>				
 
 						<script>
 							const maxPage = {{ pager.getNbPages() }};

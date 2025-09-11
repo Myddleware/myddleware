@@ -10,43 +10,58 @@ document.addEventListener("DOMContentLoaded", function () {
         toggle: false
     });
 
-    if (!toggleButton || !logsContent || !logsTableBody || !logsUrl || !icon) {
-        console.error("Element not found in DOM.");
-        return;
+// Check if button exists before adding event listener
+if (!minusWorkflowLogsButton) {
+    console.log('workflow logs collapse button not found, skipping functionality');
+} else {
+    // Set logs table to collapsed by default
+    const workflowLogsCollapseBody = document.querySelector('.workflow-logs-collapse-body');
+    const icon = minusWorkflowLogsButton.querySelector('svg');
+    
+    if (workflowLogsCollapseBody) {
+        workflowLogsCollapseBody.style.display = 'none';
+        console.log('workflow logs table set to collapsed by default');
     }
- 
-    // Hide on startup
-    icon.classList.remove('fa-minus');
-    icon.classList.add('fa-plus');
-    logsTableBody.style.display = 'none';
+    
+    if (icon) {
+        icon.classList.remove('fa-minus');
+        icon.classList.add('fa-plus');
+    }
 
-    toggleButton.addEventListener('click', async function () {
-        const isOpen = logsContent.classList.contains('show');
+    // if that button is clicked, toggle the visibility
+    minusWorkflowLogsButton.addEventListener('click', function() {
+        // console.log('button clicked');
+        // find the tbody with the class workflow-logs-collapse-body
+        const workflowLogsCollapseBody = document.querySelector('.workflow-logs-collapse-body');
+        // console.log('workflowLogsCollapseBody', workflowLogsCollapseBody);
 
-        if (isOpen) {
-            collapseInstance.hide();
-            logsTableBody.style.display = 'none';
-            icon.classList.remove('fa-minus');
-            icon.classList.add('fa-plus');
+        // find the icon inside the button
+        const icon = minusWorkflowLogsButton.querySelector('svg');
+        // console.log('icon', icon);
+
+        if (!workflowLogsCollapseBody) {
+            console.log('workflow logs collapse body not found');
+            return;
+        }
+
+        // Check current display state
+        const isVisible = workflowLogsCollapseBody.style.display !== 'none';
+        // console.log('isVisible', isVisible);
+
+        if (isVisible) {
+            // If visible, hide it and change to plus
+            workflowLogsCollapseBody.style.display = 'none';
+            if (icon) {
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            }
         } else {
-            collapseInstance.show();
-            logsTableBody.style.display = 'table-row-group';
-            icon.classList.remove('fa-plus');
-            icon.classList.add('fa-minus');
-
-            if (!logsLoaded) {
-                try {
-                    const response = await fetch(logsUrl);
-                    if (!response.ok) throw new Error("Error loading");
-
-                    const html = await response.text();
-                    logsTableBody.innerHTML = html;
-                    logsLoaded = true;
-                } catch (error) {
-                    logsTableBody.innerHTML = `<tr><td colspan="11">Error loading logs</td></tr>`;
-                    console.error("Erreur :", error);
-                }
+            // If hidden, show it and change to minus
+            workflowLogsCollapseBody.style.display = 'table-row-group';
+            if (icon) {
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
             }
         }
     });
-});
+}

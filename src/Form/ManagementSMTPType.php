@@ -27,7 +27,10 @@ class ManagementSMTPType extends AbstractType
 
         $builder->add('host', TextType::class, ['required' => false]);
         $builder->add('port', IntegerType::class, ['required' => false]);
-        $builder->add('ApiKey', PasswordType::class, ['required' => false]);
+        $builder->add('ApiKey', PasswordType::class, [
+            'required' => false,
+            'attr' => ['autocomplete' => 'new-password']
+        ]);
         $builder->add('auth_mode', ChoiceType::class, [
             'empty_data' => null,
             'choices' => [

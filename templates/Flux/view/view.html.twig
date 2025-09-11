@@ -31,7 +31,7 @@
 {% endblock %}
 {% block titlesm %}
 	<a>{{'breadcrumb.transfert_list'|trans}}</a>
-	<i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
+	<i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i>
 	{{'title.flux.view'|trans}}
 	{{ doc.getId }}
 {% endblock titlesm %}
@@ -104,7 +104,7 @@
 						<td>
 							<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
 						</td>
-						{# <a href="{{ path('flux_info_page',{'id' : firstParentDocumentId, 'page' : 1, 'logPage' : 1 }) }}">{{ firstParentDocumentId }}</a #}
+						{# <a href="{{ path('flux_modern',{'id' : firstParentDocumentId }) }}">{{ firstParentDocumentId }}</a #}
 						<td class="ctr">
 							<div class="gblstatus_{{ doc.getGlobalStatus|lower }}">{{ doc.getStatus }}
 								{% if doc.getGlobalStatus|lower == 'close' %}
@@ -146,7 +146,7 @@
 						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s", timezone) }}</td>
 						{% if doc.getParentId %}
 							<td>
-								<a href="{{ path('flux_info_page',{'id' : doc.getParentId, 'page' : 1, 'logPage' : 1 }) }}" title="">{{ doc.getParentId }}</a>
+								<a href="{{ path('flux_modern',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a>
 							</td>
 						{% endif %}
 					</tr>
@@ -314,7 +314,7 @@
 								{% for flux in post_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+											<a href="{{ path('flux_modern',{'id' : flux.id }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(post_Documents_Rule,flux.id) }}</a>
@@ -362,7 +362,7 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -407,7 +407,7 @@
 													<path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
 												</svg>
 											{% endif %}
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+											<a href="{{ path('flux_modern',{'id' : flux.id }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : rule.getId }) }}" title="" class="help-link all-link">{{ rule.getName }}</a>
@@ -493,7 +493,7 @@
 								{% for flux in parent_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+											<a href="{{ path('flux_modern',{'id' : flux.id }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(parent_Documents_Rule,flux.id) }}</a>
@@ -541,7 +541,7 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex justify-content-center">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -577,7 +577,7 @@
 								{% for flux in child_documents %}
 									<tr class="fd_{{ flux.globalStatus|lower }}" data-id="{{ flux.id }}">
 										<td class="ctr">
-											<a href="{{ path('flux_info_page',{'id' : flux.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ flux.id }}</a>
+											<a href="{{ path('flux_modern',{'id' : flux.id }) }}" class="help-link all-link">{{ flux.id }}</a>
 										</td>
 										<td class="ctr">
 											<a href="{{ path('regle_open',{'id' : flux.rule }) }}" title="" class="help-link all-link">{{ attribute(child_Documents_Rule,flux.id) }}</a>
@@ -625,7 +625,7 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex justify-content-center">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId, 'page' : 1, 'logPage' : 1 }, 'routeName': 'flux_info_page' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -685,7 +685,7 @@
 										<td>
 
 											{% if log.getRef is not empty %}
-												<a onclick="window.open(this.href); return false;" href="{{ path('flux_info_page', {'id': log.getRef, 'page' : 1, 'logPage' : 1}) }}" class="help-link all-link">
+												<a onclick="window.open(this.href); return false;" href="{{ path('flux_modern', {'id': log.getRef }) }}" class="help-link all-link">
 													{{ log.getRef }}
 												</a>
 											{% else %}
@@ -842,14 +842,14 @@
 										<td class="ctr">{{ log.job.id }}</td>
 										<td class="ctr">
 											{% if log.triggerDocument is not null %}
-												<a href="{{ path('flux_info_page',{'id' : log.triggerDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
+												<a href="{{ path('flux_modern',{'id' : log.triggerDocument.id }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}
 										</td>
 										<td class="ctr">
 											{% if log.generateDocument is not null %}
-												<a href="{{ path('flux_info_page',{'id' : log.generateDocument.id, 'page' : 1, 'logPage' : 1 }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
+												<a href="{{ path('flux_modern',{'id' : log.generateDocument.id }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
 											{% else %}
 												<span></span>
 											{% endif %}

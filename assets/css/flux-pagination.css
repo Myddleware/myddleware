@@ -1,0 +1,21 @@
+.pagination-controls {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+.pagination-btn {
+  margin: 0 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.pagination-btn:hover {
+  background-color: #f3f4f6;
+}
+.pagination-btn.active {
+  background-color: #0f66a9;
+  color: #ffffff;
+  border-color: #1f2937;
+}

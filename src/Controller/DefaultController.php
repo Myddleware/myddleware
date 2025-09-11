@@ -53,6 +53,7 @@ use App\Repository\ConfigRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
+use App\Repository\RuleFieldRepository;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -80,6 +81,7 @@ use App\Entity\WorkflowAction;
 use App\Service\TwoFactorAuthService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\RuleGroup;
+use App\Repository\VariableRepository;
 use Symfony\Component\Yaml\Yaml;
 
     /**
@@ -108,7 +110,8 @@ use Symfony\Component\Yaml\Yaml;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
         private ConfigRepository $configRepository;
-        private TwoFactorAuthService $twoFactorAuthService;
+        private TwoFactorAuthService $twoFactorAuthService;      
+        private RuleFieldRepository $ruleFieldRepository;
 
         private RequestStack $requestStack;
 
@@ -121,6 +124,7 @@ use Symfony\Component\Yaml\Yaml;
             SessionService $sessionService,
             EntityManagerInterface $entityManager,
             RuleRepository $ruleRepository,
+            RuleFieldRepository $ruleFieldRepository,
             JobRepository $jobRepository,
             DocumentRepository $documentRepository,
             Connection $connection,
@@ -142,6 +146,7 @@ use Symfony\Component\Yaml\Yaml;
             $this->sessionService = $sessionService;
             $this->entityManager = $entityManager;
             $this->ruleRepository = $ruleRepository;
+            $this->ruleFieldRepository = $ruleFieldRepository;
             $this->jobRepository = $jobRepository;
             $this->documentRepository = $documentRepository;
             $this->connection = $connection;
@@ -1034,7 +1039,7 @@ use Symfony\Component\Yaml\Yaml;
          * @Route("/view/{id}", name="regle_open")
          * @throws Exception
          */
-        public function ruleOpenAction($id): Response
+        public function ruleOpenAction($id, RuleRepository $ruleRepository, VariableRepository $variableRepository): Response
         {
             if ($this->getUser()->isAdmin()) {
                 $list_fields_sql = ['id' => $id];
@@ -1090,6 +1095,40 @@ use Symfony\Component\Yaml\Yaml;
             $Params = $rule->getParams();
             $Fields = $rule->getFields();
             $Filters = $rule->getFilters();
+
+            $varNamesSet = [];
+            $pattern = '/\{?(mdwvar_[A-Za-z0-9_]+)\}?/';
+
+            if ($Fields) {
+                foreach ($Fields as $f) {
+                    $text = implode(' ', [
+                        (string) $f->getFormula(),
+                        (string) $f->getSource(),
+                        (string) $f->getTarget(),
+                        (string) $f->getComment(),
+                    ]);
+
+                    if (preg_match_all($pattern, $text, $m)) {
+                        foreach ($m[1] as $name) {
+                            $varNamesSet[$name] = true; 
+                        }
+                    }
+                }
+            }
+
+            $variables = [];
+            $varNames = array_keys($varNamesSet);
+
+            if (!empty($varNames)) {
+                // Doctrine gère IN(:names) avec un tableau
+                $variables = $variableRepository->createQueryBuilder('v')
+                    ->where('v.name IN (:names)')
+                    ->setParameter('names', $varNames)
+                    ->orderBy('v.name', 'ASC')
+                    ->getQuery()
+                    ->getResult();
+            }
+
             $ruleParam = RuleManager::getFieldsParamView();
             $params_suite = [];
             if ($Params) {
@@ -1152,6 +1191,7 @@ use Symfony\Component\Yaml\Yaml;
                 $workflows = [];
             }
 
+
             return $this->render('Rule/edit/fiche.html.twig', [
                 'rule' => $rule,
                 'connector' => $connector[0],
@@ -1164,6 +1204,7 @@ use Symfony\Component\Yaml\Yaml;
                 'id' => $id,
                 'hasWorkflows' => $hasWorkflows,
                 'workflows' => $workflows,
+                'variables' => $variables,
             ]
             );
         }
@@ -2549,6 +2590,29 @@ use Symfony\Component\Yaml\Yaml;
                         $p = array_merge($param['RuleParam'], $tab_new_rule['params']);
                     }
 
+                    // find in the database the id of the solution with the name dynamicsbusiness
+                    $solutionDynamicsBusiness = $this->entityManager->getRepository(Solution::class)->findOneBy(['name' => 'dynamicsbusiness']);
+
+                    // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
+                    if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                        $moduleSource = $oneRule->getModuleSource();
+
+                        // destructure $moduleSource to get $companyId and $apiModuleName
+                        list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
+
+                        $p['parentmoduleid'] = $companyId;
+                    }
+
+                    // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
+                    if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                        $moduleTarget = $oneRule->getModuleTarget();
+
+                        // destructure $moduleSource to get $companyId and $apiModuleName
+                        list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
+
+                        $p['parentmoduleid'] = $companyId;
+                    }
+
                     $bidirectional = '';
                     foreach ($p as $key => $value) {
                         // Value could be empty, for bidirectional parameter for example (we don't test empty because mode could be equal 0)
@@ -3227,42 +3291,39 @@ use Symfony\Component\Yaml\Yaml;
     /**
      * @Route("/rule/update_description", name="update_rule_description", methods={"POST"})
      */
-    public function updateDescription(Request $request): Response
+    public function updateDescription(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        // Extract form payload (fallback to empty string if missing)
         $ruleId = $request->request->get('ruleId');
-        $description = $request->request->get('description');
-        $entityManager = $this->entityManager;
-        $descriptionOriginal = $entityManager->getRepository(RuleParam::class)->findOneBy([
-            'rule' => $ruleId,
-            'name' => 'description'
-        ]);
-
-        if ($description === '0' || empty($description) || $description === $descriptionOriginal->getValue() || $description === '    ') {
-            return $this->redirect($this->generateUrl('regle_open', ['id' => $ruleId]));
-        }
-
-        $rule = $entityManager->getRepository(RuleParam::class)->findOneBy(['rule' => $ruleId]);
-
+        $description = (string) $request->request->get('description', '');
+        $rule = $em->getRepository(Rule::class)->find($ruleId);
         if (!$rule) {
-            throw $this->createNotFoundException('Couldn\'t find specified rule in database');
+            return new JsonResponse(['error' => 'Rule not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // Retrieve the RuleParam with the name "description" and the same rule as the previously retrieved entity
-        $descriptionRuleParam = $entityManager->getRepository(RuleParam::class)->findOneBy([
-            'rule' => $rule->getRule(),
-            'name' => 'description'
+        // Fetch (or create) the "description" RuleParam for this rule
+        $param = $em->getRepository(RuleParam::class)->findOneBy([
+            'rule' => $rule,
+            'name' => 'description',
         ]);
 
-        // Check if the description entity was found
-        if (!$descriptionRuleParam) {
-            throw $this->createNotFoundException('Couldn\'t find description rule parameter');
+        if (!$param) {
+            // If not found, instantiate and link it to the rule
+            $param = new RuleParam();
+            $param->setRule($rule);
+            $param->setName('description');
+            $em->persist($param);
+        }
+        if ($param->getValue() === $description) {
+            return new JsonResponse(['ok' => true, 'unchanged' => true], Response::HTTP_OK);
         }
 
-        // Update the value of the description
-        $descriptionRuleParam->setValue($description);
-        $entityManager->flush();
+        // Update and flush changes
+        $param->setValue($description);
+        $em->flush();
 
-        return new Response('', Response::HTTP_OK);
+        // Return a simple success JSON payload
+        return new JsonResponse(['ok' => true], Response::HTTP_OK);
     }
 
     /**

@@ -49,7 +49,7 @@ panel:
     list_job:
         title: Last jobs details
         duration: second(s)
-        nb : Documents with error
+        nb : Rules with errors
     graph_histo:
         title: Documents history
     graph_job_histo:
@@ -170,6 +170,7 @@ behavior_filters:
     error_empty: Error if empty
 
 view_rule:
+    go_connector: Go to connector
     action:
         exec_all: Execute all active rules
         confirm_exec_all: Do you want to execute all active rules?
@@ -185,13 +186,13 @@ view_rule:
         displayflux: Display the documents
         new_rule: Create a new rule
     tabs:
-        info: Information
-        mapping: Mapping of the fields
+        info: Overview
+        mapping: Field Mapping
         relation: Relations
         params: Parameters 
         filter: Filters
     title:
-        rule: Rule
+        rule: Details
         connector: Connectors
         source: Source
         target: Target
@@ -212,6 +213,7 @@ view_rule:
         status: Status
         workflows: Workflows
         workflow_create: Create a new workflow
+        variables: Variables
     connector:
         title: Connector
         solution: Solution
@@ -220,8 +222,8 @@ view_rule:
         empty: No field
         formula_empty: No formula
         formula: Formula
-        module_target: Target module
-        module_source: Source Module
+        module_target: Target
+        module_source: Source
         comment: Comment
         add_comment: Save
         comment_title: Add/Edit comment
@@ -255,6 +257,7 @@ rulegroup:
     create: Create a new rule group
     back: Back to the list
     title_one: Rule group
+    details: Details
     name: Name
     description: Description
     status: Status
@@ -263,7 +266,7 @@ rulegroup:
     delete: Delete
     edit: Editing of a Rule Group
     updated_successfully: Rule group updated successfully
-    rules: List of rules
+    rules: Rules
     rule_removed_successfully: Rule removed successfully
     no_rules: No rules in this group
     rule:
@@ -371,6 +374,7 @@ view_connector:
 list_flux:
     start: Start
     end: End
+    total: Number of documents
     total1: Number of
     total2: documents
     empty: No documents found
@@ -453,7 +457,7 @@ flux:
         error_transformed: Transformation error
         error_checking: Checking error
         error_sending: Sending error
-        not_found: Not found
+        Not_found: Not found
         Error_workflow: Workflow error
     type:
         update: Update
@@ -562,7 +566,7 @@ list_workflow:
     searchName: Search by name
     th:
         id: Id
-        ruleName: Rule name
+        RuleName: Rule name
         name: Name
         description: Description
         condition: Condition
@@ -606,6 +610,7 @@ view_workflow:
     cancel_edit: Cancel edit
     save: Save
     cancel: Cancel
+    loading_logs: Loading logs...
 edit_workflow:
     name_already_exists: Workflow name already exists
 view_workflow_action:
@@ -628,17 +633,52 @@ view_workflow_action:
     save: Save
     cancel: Cancel
 view_account:
-    title: My account
-    user_info: My information
-    change_password : Change password
+    title: My information
+    user_info: My Information
+    change_password: Change password
     profile_edit: Edit my profile
     support:
-        enabled: Support enabled 
+        enabled: Support enabled
         disabled: Support disabled
     label:
         language: Language
     popup:
-        locale: Please wait, the change of your language is under process. You will be redirected to the login page.
+        locale: Language change in progress, please wait. You will be redirected to the authentication page.
+    tabs:
+        general: General
+        security: Security
+    sections:
+        personal_info: Details
+        language_preferences: Language Preferences
+        logs: Logs
+        password: Password
+        twofa: Two-Factor Authentication
+    fields:
+        language: Language
+        timezone: Time Zone
+        date_format: Date Format
+        export_separator: Export Separator
+        charset: Charset
+        auth_method: Authentication Method
+    placeholder:
+        disabled_option: Option currently disabled
+    button:
+        save: Save
+        download_logs: Download Latest Logs
+        empty_logs: Empty Log File
+        reset_password: Reset Password
+        update_password: Update Password
+        save_2fa: Save 2FA Settings
+    tooltip:
+        disabled_option: Option currently disabled
+        download_logs: Download the most recent log files
+        empty_logs: Delete the contents of the current log file
+        choose_language: Choose your language
+    info:
+        password_description: Change your password to enhance your account security.
+        twofa_description: When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+    confirm:
+        empty_logs: Are you sure you want to empty the log file? This action cannot be undone.
 
 function:
     all: All
@@ -725,8 +765,13 @@ solution:
         applicationName: Application name
         hashkey: Hash key
         id_auth: Auth ID
+        authid: Auth ID
         user_custom_fields: User custom fields (shortname separated by coma)
         course_custom_fields: Course custom fields (shortname separated by coma)
+        tenant_id: Tenant ID
+        client_id: Client ID
+        client_secret: Client Secret
+        environment: Environment
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -854,6 +899,7 @@ menu_user:
     crontab: Crontab
     management_smtp: SMTP config
     logout: Logout
+    user_manager: UserManager
 
 help:
     title: Help
@@ -1009,7 +1055,10 @@ management_smtp:
     title : SMTP Management
     description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
     sendtestmail: Send test mail
-
+    success: SMTP config saved successfully
+    error: Failed to save SMTP config
+    api_key_already_in_env: This API key is already in the .env file.
+    api_key_too_short: The API key is too short. Are you sure it's an BREVO API key in the form ? Be careful about your browser autofilling.
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
@@ -1103,6 +1152,7 @@ crontab:
     number: Number
     success: Your scheduled task has been created
     incorrect: An error occurred while creating your scheduled task
+    correct: Your crontabs have been disabled
     disableAllCrons: Your crontabs have been disabled
     enableAllCrons: Your crontabs have been enable
     create: Create crontab
@@ -1114,6 +1164,16 @@ crontab:
     enableCron: On
     disableCron: Off
     title_cronjobresult: Crontab results
+    column_id: ID
+    column_cronjob_id: Cronjob ID
+    column_run_at: Run At
+    column_run_time: Runtime
+    column_status_code: Status Code
+    column_output: Output
+    column_created_at: Created At
+    column_updated_at: Updated At
+    see_results: Show Crontab Results
+    hide_results: Hide Crontab Results
     period_help: This is the time interval corresponding to the frequency of execution of your task. But here, the syntax to use is precise, (*/5 * * * *, in the order of writing, minute, hour, day of the month, day of the week, example, */5 * * * * corresponds to 5 min)
     max_instance_help: A maximum instance limit for new tasks
     help:  > 
@@ -1141,11 +1201,13 @@ variable:
     view: View
   create_new: Create a new variable
   list_title: Variables
+  detail_title: Variable
   confirm_delete: Are you sure you want to delete this variable?
   no_variables: No variables found.
   table_headers:
     name: Name
-    value: Value
+    value: Value   
+    created_by: Created By
     actions: Actions
     description: Description
 premium:
@@ -1159,3 +1221,19 @@ premium:
             benefit1: "Benefit 1 description"
             benefit2: "Benefit 2 description"
             benefit3: "Benefit 3 description"
+user_manager:
+    list: Users
+    table:
+        username: Username
+        email: Email
+        last_login: Last login
+        roles: Roles
+        timezone: Timezone
+        action: Action
+    create: Create user
+    edit: Edit user
+    password: Password
+success_create_user: User created successfully.
+success_update_user: User updated successfully.
+success_deleted_user: User deleted successfully.
+error_generic: An error occurred.

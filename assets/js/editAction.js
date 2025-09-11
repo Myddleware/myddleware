@@ -38,6 +38,7 @@ $(document).ready(function() {
             $('#form_message').parent().show();
         } else if ($(this).val() === 'updateStatus') {
             $('#form_status').parent().show();
+            $('#form_message').parent().show();
             $('#form_targetField').parent().hide();
             $('#form_targetFieldValueContainer').hide();
         } else if ($(this).val() === 'transformDocument') {

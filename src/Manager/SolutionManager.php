@@ -60,6 +60,7 @@ use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
+use App\Solutions\dynamicsbusiness;
 use Exception;
 
 /**
@@ -92,7 +93,8 @@ class SolutionManager
 							'internallist',
 							'yousign',
 							'brevo',
-							'acton'
+							'acton',
+							'dynamicsbusiness'
 						];
 
     public function __construct(
@@ -118,7 +120,8 @@ class SolutionManager
         internallist $internallist,
         yousign $yousign,
         brevo $brevo,
-        acton $acton
+        acton $acton,
+        dynamicsbusiness $dynamicsbusiness
     ) {
 		// Load the solution classes
 		if (!empty(self::$solutions)) {
