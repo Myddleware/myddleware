@@ -614,6 +614,7 @@ view_workflow:
 edit_workflow:
     name_already_exists: Workflow name already exists
 view_workflow_action:
+    no_actions: No workflow action
     title2: Workflow Action
     title: Workflow Action Details
     edit: Edit this Action

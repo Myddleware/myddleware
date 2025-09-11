@@ -112,7 +112,7 @@
                         <table class="table workflow-table">
                             <thead>
                                 <tr>
-                                    <th class="text-start">{{ 'view_workflow.name'|trans }}</th>
+                                    <th class="text-center">{{ 'view_workflow.name'|trans }}</th>
                                     <th class="text-center">{{ 'view_workflow.action'|trans }}</th>
                                     <th class="text-center">{{ 'view_workflow.description'|trans }}</th>
                                     <th class="text-center">{{ 'view_workflow.order'|trans }}</th>
@@ -184,7 +184,7 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted text-center">{{ 'view_workflow.no_actions'|trans|default('No action') }}</p>
+                    <p class="text-muted text-center">{{ 'view_workflow_action.no_actions'|trans|default('No action') }}</p>
                 {% endif %}
             </div>
         </div>

@@ -1,12 +1,7 @@
-#logo {
-    background-size: 209px;
-    height: 52px;
-    width: 240px;
-    display: inline-block;
-}
+
 
 #logo img {
-    max-width: 15rem;
+    max-width: 14rem;
 }
 
 menu .caret, #myd_top .caret {
