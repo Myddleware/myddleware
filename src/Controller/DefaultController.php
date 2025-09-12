@@ -2590,29 +2590,39 @@ use Symfony\Component\Yaml\Yaml;
                         $p = array_merge($param['RuleParam'], $tab_new_rule['params']);
                     }
 
-                    // find in the database the id of the solution with the name dynamicsbusiness
-                    $solutionDynamicsBusiness = $this->entityManager->getRepository(Solution::class)->findOneBy(['name' => 'dynamicsbusiness']);
+                // find in the database the id of the solution with the name dynamicsbusiness
+                $solutionDynamicsBusiness = $this->entityManager
+                    ->getRepository(Solution::class)
+                    ->findOneBy([
+                        'name' => 'dynamicsbusiness',
+                        'deleted' => 0,
+                    ]);
 
-                    // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
-                    if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-                        $moduleSource = $oneRule->getModuleSource();
 
-                        // destructure $moduleSource to get $companyId and $apiModuleName
-                        list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
-
-                        $p['parentmoduleid'] = $companyId;
-                    }
-
-                    // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
-                    if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-                        $moduleTarget = $oneRule->getModuleTarget();
-
-                        // destructure $moduleSource to get $companyId and $apiModuleName
-                        list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
-
-                        $p['parentmoduleid'] = $companyId;
-                    }
-
+                    if(!empty($solutionDynamicsBusiness))
+                    {
+                        // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
+                        if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                            $moduleSource = $oneRule->getModuleSource();
+    
+                            // destructure $moduleSource to get $companyId and $apiModuleName
+                            list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
+    
+                            $p['parentmoduleid'] = $companyId;
+                        }
+                        
+                        
+                        // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
+                        if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
+                            $moduleTarget = $oneRule->getModuleTarget();
+                            
+                            // destructure $moduleSource to get $companyId and $apiModuleName
+                            list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
+                            
+                            $p['parentmoduleid'] = $companyId;
+                        }
+                    } // end if dynamics business not null
+                        
                     $bidirectional = '';
                     foreach ($p as $key => $value) {
                         // Value could be empty, for bidirectional parameter for example (we don't test empty because mode could be equal 0)
