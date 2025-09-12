@@ -30,9 +30,9 @@ const $ = require('jquery');
 // Minimal fallback for status_online.png
 function setStatusOnlineImage(statusElement) {
 	const paths = [
-		path_img + "status_online.png",        // Primary: current path
-		"/build/images/status_online.png",     // Fallback: absolute path
-		"../build/images/status_online.png"    // Fallback: relative path
+		"/build/images/status_online.png",     // Docker: absolute path
+		"../../build/images/status_online.png", // Laragon: relative path  
+		path_img + "status_online.png"        // Original: current path
 	];
 	
 	let currentIndex = 0;
