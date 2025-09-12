@@ -35,7 +35,11 @@ if (typeof $.ui === 'undefined') {
   document.head.appendChild(jqueryUICSS);
 }
 
+if (window.location.pathname.includes("public")) {
 global.path_img = '../../build/images/';
+} else {
+  global.path_img = '/build/images/';
+}
 
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
