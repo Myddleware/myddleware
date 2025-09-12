@@ -2595,11 +2595,11 @@ use Symfony\Component\Yaml\Yaml;
                     ->getRepository(Solution::class)
                     ->findOneBy([
                         'name' => 'dynamicsbusiness',
-                        'deleted' => 0,
                     ]);
 
 
-                    if(!empty($solutionDynamicsBusiness))
+
+                    if(!empty($solutionDynamicsBusiness) && $solutionDynamicsBusiness->getConnector()->count() > 0)
                     {
                         // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
                         if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
