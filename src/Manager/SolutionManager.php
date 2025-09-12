@@ -53,6 +53,7 @@ use App\Solutions\sapcrm;
 use App\Solutions\sendinblue;
 use App\Solutions\sugarcrm;
 use App\Solutions\suitecrm;
+use App\Solutions\suitecrm8;
 use App\Solutions\vtigercrm;
 use App\Solutions\woocommerce;
 use App\Solutions\wooeventmanager;
@@ -89,6 +90,7 @@ class SolutionManager
 							'airtable',
 							'sendinblue',
 							'internallist',
+							'suitecrm8',
 							'yousign',
 							'brevo',
 							'acton',
@@ -116,6 +118,7 @@ class SolutionManager
         sendinblue $sendinblue,
         internallist $internallist,
         yousign $yousign,
+        suitecrm8 $suitecrm8,
         brevo $brevo,
         acton $acton,
         dynamicsbusiness $dynamicsbusiness
