@@ -47,9 +47,15 @@ class AccountManager {
     // });
     
     // Get base URL dynamically from current location
-    this.baseUrl = window.location.pathname.includes('/public/') 
-      ? window.location.pathname.split('/public/')[0] + '/public'
-      : '';
+    // In Docker/production environments, requests go through /index.php/
+    // In development with public/ folder, requests go directly
+    if (window.location.pathname.includes('/public/')) {
+      this.baseUrl = window.location.pathname.split('/public/')[0] + '/public';
+    } else if (window.location.pathname.includes('/index.php/')) {
+      this.baseUrl = '/index.php';
+    } else {
+      this.baseUrl = '';
+    }
     
     // console.log("Using base URL:", this.baseUrl);
     
