@@ -27,6 +27,38 @@ const $ = require('jquery');
 // WARNING - ALL ROUTING & IMAGES PATHS HAVE BEEN MODIFIED 'MANUALLY', THIS WILL NEED TO BE LOOKED INTO LATER
 // AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 
 
+// Minimal fallback for status_online.png
+function setStatusOnlineImage(statusElement) {
+	const paths = [
+		path_img + "status_online.png",        // Primary: current path
+		"/build/images/status_online.png",     // Fallback: absolute path
+		"../build/images/status_online.png"    // Fallback: relative path
+	];
+	
+	let currentIndex = 0;
+	
+	function tryNextPath() {
+		if (currentIndex >= paths.length) {
+			// All paths failed, show text fallback
+			statusElement.replaceWith('<span style="color: green; font-weight: bold;">ONLINE</span>');
+			return;
+		}
+		
+		const testImg = new Image();
+		testImg.onload = function() {
+			statusElement.attr("src", paths[currentIndex]);
+		};
+		testImg.onerror = function() {
+			currentIndex++;
+			tryNextPath();
+		};
+		testImg.src = paths[currentIndex];
+	}
+	
+	statusElement.removeAttr("src");
+	tryNextPath();
+}
+
 $( function() {
 	// Test connexion
 	$('#connexion').on('click', function(){
@@ -122,8 +154,7 @@ $( function() {
 										$('#msg_status').show();																												
 									}
 									else {									
-										status.removeAttr("src");
-										status.attr("src", path_img+"status_online.png");
+										setStatusOnlineImage(status);
 										$('#msg_status').hide();
 										$('#msg_status span.error').html('');	
 										$('#step_modules_confirme').removeAttr('disabled');					
@@ -139,8 +170,7 @@ $( function() {
 								$('#msg_status').show();
 							}
 							else{
-								status.removeAttr("src");
-								status.attr("src", path_img+"status_online.png");
+								setStatusOnlineImage(status);
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
 							}						
