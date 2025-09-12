@@ -35,7 +35,7 @@ if (typeof $.ui === 'undefined') {
   document.head.appendChild(jqueryUICSS);
 }
 
-global.path_img = '/build/images/';
+global.path_img = '../../build/images/';
 
 $(function () {
   // ----------------------------- AFFICHAGE DU LOADING LANCEMENT REGLE / ANNULER FLUX
@@ -175,7 +175,7 @@ $(function () {
       var solution = val2[0] ? val2[0] : val;
       // if we're creating the connector from the '+' button modal in rule creation view
       if (window.location.pathname.includes("createout")) {
-        path_img_modal = "/build/images/";
+        path_img_modal = "../../../build/images/";
         $(this)
           .parent()
           .find(".picture")
@@ -1543,7 +1543,7 @@ function verif(div_clock) {
       }
     });
 
-    var path_img_modal = "/build/images/";
+    var path_img_modal = "../../../build/images/";
     if (window.location.pathname.includes("createout")) {
       var urlInputs = "../../inputs";
       var urlCallback = "../../connector/callback/";
