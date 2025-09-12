@@ -27,38 +27,6 @@ const $ = require('jquery');
 // WARNING - ALL ROUTING & IMAGES PATHS HAVE BEEN MODIFIED 'MANUALLY', THIS WILL NEED TO BE LOOKED INTO LATER
 // AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 
 
-// Minimal fallback for status_online.png
-function setStatusOnlineImage(statusElement) {
-	const paths = [
-		"/build/images/status_online.png",     // Docker: absolute path
-		"../../build/images/status_online.png", // Laragon: relative path  
-		path_img + "status_online.png"        // Original: current path
-	];
-	
-	let currentIndex = 0;
-	
-	function tryNextPath() {
-		if (currentIndex >= paths.length) {
-			// All paths failed, show text fallback
-			statusElement.replaceWith('<span style="color: green; font-weight: bold;">ONLINE</span>');
-			return;
-		}
-		
-		const testImg = new Image();
-		testImg.onload = function() {
-			statusElement.attr("src", paths[currentIndex]);
-		};
-		testImg.onerror = function() {
-			currentIndex++;
-			tryNextPath();
-		};
-		testImg.src = paths[currentIndex];
-	}
-	
-	statusElement.removeAttr("src");
-	tryNextPath();
-}
-
 $( function() {
 	// Test connexion
 	$('#connexion').on('click', function(){
@@ -89,7 +57,7 @@ $( function() {
 			},	
 			beforeSend:	function() {				
 				status.removeAttr("src");
-				status.attr("src", path_img + "loader.gif");				
+				status.attr("src", "../" +path_img + "loader.gif");				
 			},				
 			success: function(json){
 				
@@ -97,7 +65,7 @@ $( function() {
 				// Si connexion echoue
 				if(!json.success) {							
 					status.removeAttr("src");
-					status.attr("src", path_img + "status_offline.png");
+					status.attr("src", "../" +path_img + "status_offline.png");
 					$('#msg_status span.error').html(json.message);
 					$('#msg_status').show();
 					return false;
@@ -149,12 +117,13 @@ $( function() {
 										r = data.split(';');							
 																	
 										status.removeAttr("src");
-										status.attr("src", path_img+"status_offline.png");
+										status.attr("src", "../" +path_img+"status_offline.png");
 										$('#msg_status span.error').html(r[0]);
 										$('#msg_status').show();																												
 									}
 									else {									
-										setStatusOnlineImage(status);
+										status.removeAttr("src");
+										status.attr("src", "../"+path_img+"status_online.png");
 										$('#msg_status').hide();
 										$('#msg_status span.error').html('');	
 										$('#step_modules_confirme').removeAttr('disabled');					
@@ -165,12 +134,13 @@ $( function() {
 						else {						
 							if(!json.success) {								
 								status.removeAttr("src");
-								status.attr("src", path_img+"status_offline.png");
+								status.attr("src","../" +path_img+"status_offline.png");
 								$('#msg_status span.error').html(r[0]);
 								$('#msg_status').show();
 							}
 							else{
-								setStatusOnlineImage(status);
+								status.removeAttr("src");
+								status.attr("src","../" +path_img+"status_online.png");
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
 							}						
