@@ -1880,29 +1880,7 @@ $result = [];
             
             $childData = [];
             
-            // Direct children via parentId
-            $directChildrenQb = $this->entityManager->createQueryBuilder();
-            $directChildrenQb->select([
-                    'd.id as docId',
-                    'd.source',
-                    'd.target',
-                    'd.dateModified',
-                    'd.type',
-                    'COALESCE(r.name, :defaultRuleName) as ruleName',
-                    'r.id as ruleId'
-                ])
-                ->from(Document::class, 'd')
-                ->leftJoin('d.rule', 'r')
-                ->where($directChildrenQb->expr()->eq('d.parentId', ':parentId'))
-                ->addOrderBy('d.dateCreated', 'DESC')
-                ->addOrderBy('d.id', 'DESC')
-                ->setMaxResults(10)
-                ->setParameters([
-                    'parentId' => (int) $id,
-                    'defaultRuleName' => 'Unknown Rule'
-                ]);
-                
-            // Related children via DocumentRelationship
+            // Related children via DocumentRelationship (same as fluxInfo)
             $relatedChildrenQb = $this->entityManager->createQueryBuilder();
             $relatedChildrenQb->select([
                     'd.id as docId',
@@ -1926,31 +1904,8 @@ $result = [];
                     'defaultRuleName' => 'Unknown Rule'
                 ]);
             
-            // Execute both queries
-            $directResults = $directChildrenQb->getQuery()->getArrayResult();
+            // Execute query
             $relatedResults = $relatedChildrenQb->getQuery()->getArrayResult();
-            
-            // Process direct children
-            foreach ($directResults as $result) {
-                if ($result['docId']) {
-                    $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
-                    $statusInfo = $this->getDocumentStatusInfo($childDocument);
-                    
-                    $childData[] = [
-                        'docId' => $result['docId'],
-                        'name' => $result['ruleName'],
-                        'ruleId' => $result['ruleId'],
-                        'sourceId' => $result['source'],
-                        'targetId' => $result['target'],
-                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
-                        'type' => $result['type'],
-                        'status' => $statusInfo['status'],
-                        'statusClass' => $statusInfo['status_class'],
-                        'relationshipType' => 'direct',
-                        'sourceField' => null
-                    ];
-                }
-            }
             
             // Process related children
             foreach ($relatedResults as $result) {
@@ -1968,7 +1923,6 @@ $result = [];
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
-                        'relationshipType' => 'related',
                         'sourceField' => $result['sourceField']
                     ];
                 }
