@@ -241,11 +241,9 @@ class ToolsManager
                 'sender' => [
                     'email' => !empty($this->configParams['email_from']) ? $this->configParams['email_from'] : 'no-reply@myddleware.com'
                 ],
-                'to' => [
-                    [
-                        'email' => $to[0]
-                    ]
-                ],
+                'to' => array_map(function($recipient) {
+                    return ['email' => $recipient];
+                }, (array)$to),
                 'subject' => $subject,
                 'htmlContent' => $message . "\n"
             ];
