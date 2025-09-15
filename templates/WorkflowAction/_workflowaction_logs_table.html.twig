@@ -1,7 +1,7 @@
 {% if error is defined %}
     <div class="alert alert-danger">{{ error }}</div>
 {% else %}
-<table class="table">
+<table class="table" border="1">
     <thead>
         <tr>
             <th>{{ 'view_workflow.log_id'|trans }}</th>
@@ -17,40 +17,40 @@
             <th>{{ 'view_workflow.action_type'|trans }}</th>
         </tr>
     </thead>
-    <tbody class="workflowaction-logs-collapse-body">
+    <tbody class="workflow-logs-collapse-body">
         {% for log in pager.currentPageResults %}
             <tr class="fd_{{ log.status|lower }}" data-id="{{ log.id }}">
-                <td class="ctr">{{ log.id }}</td>
-                <td class="ctr">
+                <td class="ctr log-message">{{ log.id }}</td>
+                <td class="ctr log-message">
                     <a href="{{ path('workflow_show', {'id': log.workflow.id}) }}" class="help-link all-link">{{ log.workflow.name }}</a>
                 </td>
-                <td class="ctr">
+                <td class="ctr log-message">
                     <a href="{{ path('task_view',{'id' : log.job.id }) }}" class="help-link all-link">{{ log.job.id }}</a>
                 </td>
-                <td class="ctr">
+                <td class="ctr log-message">
                     {% if log.triggerDocument is not null %}
                         <a href="{{ path('flux_modern',{'id' : log.triggerDocument.id }) }}" class="help-link all-link">{{ log.triggerDocument.id }}</a>
                     {% else %}
                         <span></span>
                     {% endif %}
                 </td>
-                <td class="ctr">
+                <td class="ctr log-message">
                     {% if log.generateDocument is not null %}
                         <a href="{{ path('flux_modern',{'id' : log.generateDocument.id }) }}" class="help-link all-link">{{ log.generateDocument.id }}</a>
                     {% else %}
                         <span></span>
                     {% endif %}
                 </td>
-                <td class="ctr">{{ log.createdBy }}</td>
-                <td class="ctr">
+                <td class="ctr log-message">{{ log.createdBy }}</td>
+                <td class="ctr log-message">
                     <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
                 </td>
-                <td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
-                <td class="ctr">{{ log.getMessage }}</td>
-                <td class="ctr">
+                <td class="ctr log-message">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+                <td class="ctr log-message">{{ log.getMessage }}</td>
+                <td class="ctr log-message">
                     <a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>
                 </td>
-                <td class="ctr">{{ log.action.action }}</td>
+                <td class="ctr log-message">{{ log.action.action }}</td>
             </tr>
         {% endfor %}
     </tbody>
