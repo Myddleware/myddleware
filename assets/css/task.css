@@ -28,7 +28,7 @@
 }
 
 #task th, #workflows th, #user-manager-list th{
-    background: #F2F2F2;
+    /* background: #F2F2F2; */
 	height: 45px;
 	padding: 10px;
     text-align: center;
