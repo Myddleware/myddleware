@@ -1827,7 +1827,7 @@ $result = [];
                ->addOrderBy('dr.id', 'DESC')
                ->setMaxResults(10)
                ->setParameters([
-                   'docId' => (int) $id,
+                   'docId' => $id,
                    'defaultRuleName' => 'Unknown Rule'
                ]);
             
@@ -1900,7 +1900,7 @@ $result = [];
                 ->addOrderBy('dr.id', 'DESC')
                 ->setMaxResults(10)
                 ->setParameters([
-                    'docRelId' => (int) $id,
+                    'docRelId' => $id,
                     'defaultRuleName' => 'Unknown Rule'
                 ]);
             
