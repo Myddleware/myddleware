@@ -430,6 +430,7 @@ class DocumentRepository extends ServiceEntityRepository
                 ->select('COUNT(d.id)')
                 ->andWhere('d.deleted = 0')
                 ->andWhere('d.status = :status')
+                ->andWhere('d.deleted = 0')
                 ->setParameter('status', 'send')
                 ->getQuery()
                 ->getSingleScalarResult();

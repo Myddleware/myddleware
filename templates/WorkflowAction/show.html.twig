@@ -123,7 +123,7 @@
 			<div class="container mt-5 pt-5 text-left">
 					<h4>{{ 'view_workflow.logs'| trans | upper }}</h4>
 			</div>
-			<div class="workflow-card-table container workflow-details">
+			<div class="workflow-action-card-table container workflow-details">
 				<div class="card-header card-title-workflow">
 					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" 
 							data-workflowaction-id="{{ workflow.id }}">
@@ -151,38 +151,53 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			let logsLoaded = false;
-			let logsVisible = false;
-			
+
 			$('#toggle-logs-btn').on('click', function() {
-				const workflowActionId = $(this).data('workflowaction-id');
-				const logsContent = $('#logs-content');
-				const toggleIcon = $(this).find('i');
-				
-				if (!logsVisible) {
-					logsContent.show();
-					toggleIcon.removeClass('fa-plus').addClass('fa-minus');
-					logsVisible = true;
-					
-					if (!logsLoaded) {
-						$.ajax({
-							url: "{{ path('workflow_action_show_logs', {'id': workflow.id}) }}",
-							type: 'GET',
-							headers: {
-								'X-Requested-With': 'XMLHttpRequest'
-							},
-							success: function(response) {
-								$('#logs-table-container').html(response.html || response);
-								logsLoaded = true;
-							},
-							error: function(xhr, status, error) {
-								$('#logs-table-container').html('<p class="text-danger text-center">Error loading logs: ' + error + '</p>');
-							}
-						});
+				const $btn = $(this);
+				const $logsContent = $('#logs-content');
+
+				function setIcon(isOpen) {
+				const $i = $btn.find('i');
+				const $svg = $btn.find('svg[data-icon]');
+
+				if ($i.length) {
+					$i.removeClass('fa-plus fa-minus fa-plus-circle fa-minus-circle');
+					$i.addClass(isOpen ? 'fa-minus' : 'fa-plus');
+					return;
+				}
+				if ($svg.length) {
+					$svg.attr('data-icon', isOpen ? 'minus' : 'plus');
+					return;
+				}
+				$btn.html(isOpen ? '<i class="fa fa-minus"></i>' : '<i class="fa fa-plus"></i>');
+				}
+
+				const isVisible = $logsContent.is(':visible');
+
+				if (isVisible) {
+				$logsContent.slideUp(200, function() {
+					setIcon(false);
+				});
+				return;
+				}
+
+				$logsContent.slideDown(200, function() {
+				setIcon(true);
+				});
+
+				if (!logsLoaded) {
+				$.ajax({
+					url: "{{ path('workflow_action_show_logs', {'id': workflow.id}) }}",
+					type: 'GET',
+					headers: { 'X-Requested-With': 'XMLHttpRequest' },
+					success: function(response) {
+					$('#logs-table-container').html(response.html || response);
+					logsLoaded = true;
+					},
+					error: function(xhr, status, error) {
+					$('#logs-table-container').html('<p class="text-danger text-center">Error loading logs: ' + error + '</p>');
 					}
-				} else {
-					logsContent.hide();
-					toggleIcon.removeClass('fa-minus').addClass('fa-plus');
-					logsVisible = false;
+				});
 				}
 			});
 		});

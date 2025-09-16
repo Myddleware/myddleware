@@ -948,6 +948,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .description-field .value,
 #description-field-value {
   min-width: 0;
+  max-height: 3em;
   display: block;
   visibility: visible;
 }

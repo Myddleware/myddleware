@@ -74,3 +74,24 @@
   white-space: normal;  
   max-width: 200px; 
 }
+
+#logs-table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: .25rem;
+}
+
+#logs-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#logs-table-container table {
+  min-width: 900px; 
+}
+
+.workflow-action-card-table {
+  overflow: visible;
+}
