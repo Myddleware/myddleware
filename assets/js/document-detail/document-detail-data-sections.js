@@ -678,7 +678,7 @@ export class DocumentDetailDataSections {
     static updateDataSection(sectionType, sectionData, sectionName) {
         const sectionBodyId = `${sectionType}-data-body`;
         const sectionElement = document.getElementById(sectionBodyId);
-        
+
         if (!sectionElement) {
             console.error(`❌ ${sectionName} section element not found:`, sectionBodyId);
             return;
@@ -693,12 +693,15 @@ export class DocumentDetailDataSections {
 
             const fieldsHtml = this.generateDataFields(sectionData, sectionType);
             sectionElement.innerHTML = fieldsHtml;
-            
+
+            // Add ID field for non-SuiteCRM solutions if not already present
+            this.ensureIdFieldExists(sectionElement, sectionType, sectionData);
+
             // Add click handlers for field expansion
             this.addFieldClickHandlers(sectionElement);
-            
+
             // console.log(`✅ ${sectionName} data updated successfully`);
-            
+
         } catch (error) {
             console.error(`❌ Error updating ${sectionName.toLowerCase()} data:`, error);
             sectionElement.innerHTML = this.generateErrorMessage(`Failed to load ${sectionName.toLowerCase()} data`);
@@ -798,12 +801,76 @@ export class DocumentDetailDataSections {
     }
 
     /**
+     * Ensures that an ID field exists for the section, adding one if missing
+     * @param {HTMLElement} sectionElement - The section container element
+     * @param {string} sectionType - Type of section (source, target, history)
+     * @param {Object} sectionData - Data object from API
+     */
+    static ensureIdFieldExists(sectionElement, sectionType, sectionData) {
+        // Check if there's already a direct link or ID field present
+        const existingDirectLink = sectionElement.querySelector('.direct-link-document');
+        const existingIdField = sectionElement.querySelector(`[id^="field-${sectionType}-id"]`);
+
+        if (existingDirectLink || existingIdField) {
+            // ID field already exists (either as direct link or regular field)
+            return;
+        }
+
+        // Get the document ID based on section type
+        let idValue = null;
+        if (sectionType === 'source') {
+            // Try to get source_id from the document data (passed from API)
+            idValue = this.getDocumentIdFromAPI(sectionType);
+        } else if (sectionType === 'target') {
+            // Try to get target_id from the document data (passed from API)
+            idValue = this.getDocumentIdFromAPI(sectionType);
+        }
+
+        // If we couldn't get the ID from API data, skip adding the field
+        if (!idValue) {
+            console.log(`ℹ️ No ${sectionType} ID available to display`);
+            return;
+        }
+
+        // Generate ID field HTML
+        const idFieldHtml = this.generateSingleField('id', idValue, sectionType);
+
+        // Insert the ID field at the beginning of the section
+        sectionElement.insertAdjacentHTML('afterbegin', idFieldHtml);
+
+        console.log(`✅ Added ID field to ${sectionType} section:`, idValue);
+    }
+
+    /**
+     * Gets the document ID from the API data that was stored globally
+     * @param {string} sectionType - Type of section (source, target)
+     * @returns {string|null} The ID value or null if not found
+     */
+    static getDocumentIdFromAPI(sectionType) {
+        try {
+            // Check if we have access to the document data that was loaded earlier
+            // We'll store this on window temporarily during the update process
+            if (window.currentDocumentData) {
+                if (sectionType === 'source') {
+                    return window.currentDocumentData.source_id || null;
+                } else if (sectionType === 'target') {
+                    return window.currentDocumentData.target_id || null;
+                }
+            }
+            return null;
+        } catch (error) {
+            console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
+            return null;
+        }
+    }
+
+    /**
      * Notifies the existing FluxFieldExpander system that new content has been loaded
      */
     static notifyFieldExpanderOfNewContent() {
         // Dispatch a custom event to let FluxFieldExpander know it should re-initialize
         const event = new CustomEvent('fluxDataUpdated', {
-            detail: { 
+            detail: {
                 source: 'FluxDataSections',
                 timestamp: new Date().toISOString()
             }

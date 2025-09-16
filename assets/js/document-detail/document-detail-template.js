@@ -293,28 +293,34 @@ export class DocumentDetailTemplate {
      */
     static updateDataSections(documentData) {
 // console.log('🔄 Updating all data sections with real data');
-        
+
         try {
+            // Store document data globally so that ID field generation can access it
+            window.currentDocumentData = documentData;
+
             // Extract data for each section
             const sourceData = DocumentDetailTemplate.extractSourceData(documentData);
             const targetData = DocumentDetailTemplate.extractTargetData(documentData);
             const historyData = DocumentDetailTemplate.extractHistoryData(documentData);
-            
+
             // Import FluxDataSections dynamically if needed, or call directly
             setTimeout(() => {
                 DocumentDetailDataSections.updateSourceData(sourceData);
                 DocumentDetailDataSections.updateTargetData(targetData);
                 DocumentDetailDataSections.updateHistoryData(historyData);
-                
+
                 // Update direct links after data sections have been populated
                 setTimeout(() => {
                     DocumentDetailTemplate.updateDirectLinks(documentData);
-                    
+
                     // Trigger field comparison after all data sections are updated
                     setTimeout(() => {
+                        // Clean up global reference
+                        window.currentDocumentData = null;
+
                         // Dispatch event to notify field comparator
                         const event = new CustomEvent('fluxDataUpdated', {
-                            detail: { 
+                            detail: {
                                 source: 'DocumentDetailTemplate',
                                 timestamp: new Date().toISOString()
                             }
@@ -323,9 +329,9 @@ export class DocumentDetailTemplate {
                     }, 100);
                 }, 10); // Small delay to ensure content is rendered
             }, 50); // Small delay to ensure DOM sections are ready
-            
+
 // console.log('✅ All data sections update initiated');
-            
+
         } catch (error) {
             console.error('❌ Error updating data sections:', error);
             DocumentDetailTemplate.showDataSectionErrors();
