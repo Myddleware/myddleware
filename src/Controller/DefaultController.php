@@ -2603,23 +2603,41 @@ use Symfony\Component\Yaml\Yaml;
                     {
                         // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
                         if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-                            $moduleSource = $oneRule->getModuleSource();
-    
-                            // destructure $moduleSource to get $companyId and $apiModuleName
-                            list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
-    
-                            $p['parentmoduleid'] = $companyId;
+                            // Check if parentmoduleid parameter already exists in the database
+                            $existingParam = $this->entityManager->getRepository(RuleParam::class)
+                                ->findOneBy([
+                                    'rule' => $oneRule->getId(),
+                                    'name' => 'parentmoduleid'
+                                ]);
+
+                            if (!$existingParam) {
+                                $moduleSource = $oneRule->getModuleSource();
+
+                                // destructure $moduleSource to get $companyId and $apiModuleName
+                                list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
+
+                                $p['parentmoduleid'] = $companyId;
+                            }
                         }
                         
                         
                         // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
                         if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-                            $moduleTarget = $oneRule->getModuleTarget();
-                            
-                            // destructure $moduleSource to get $companyId and $apiModuleName
-                            list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
-                            
-                            $p['parentmoduleid'] = $companyId;
+                            // Check if parentmoduleid parameter already exists in the database
+                            $existingParam = $this->entityManager->getRepository(RuleParam::class)
+                                ->findOneBy([
+                                    'rule' => $oneRule->getId(),
+                                    'name' => 'parentmoduleid'
+                                ]);
+
+                            if (!$existingParam) {
+                                $moduleTarget = $oneRule->getModuleTarget();
+
+                                // destructure $moduleSource to get $companyId and $apiModuleName
+                                list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
+
+                                $p['parentmoduleid'] = $companyId;
+                            }
                         }
                     } // end if dynamics business not null
                         
