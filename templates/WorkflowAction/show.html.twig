@@ -39,14 +39,11 @@
 			{% endfor %}
 
 			{% if workflow is not null %}
-				<div class="workflow-details container mt-4">
-					<div class="card-header mb-4 card-title-workflow">
-						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#workflow-content" aria-expanded="true" aria-controls="workflow-content">
-							<i class="fa fa-minus"></i>
-						</button>
-						ACTION
-					</div>
-					<div id="workflow-content" class="collapse show">
+				<div class="container text-left pt-3">
+					<h4>ACTION</h4>
+				</div>
+				<div class="workflow-details container mt-4 px-4">
+					<div id="workflow-content" class="collapse show mt-4">
 						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.name'|trans|upper }}</strong>
@@ -123,18 +120,20 @@
 				</div>
 			{% endif %}
 
-			<div class="container mt-5">
-				<div class="card-header mb-4 card-title-workflow">
+			<div class="container mt-5 pt-5 text-left">
+					<h4>{{ 'view_workflow.logs'| trans | upper }}</h4>
+			</div>
+			<div class="workflow-card-table container workflow-details">
+				<div class="card-header card-title-workflow">
 					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" 
 							data-workflowaction-id="{{ workflow.id }}">
 						<i class="fa fa-plus"></i>
 					</button>
-					{{ 'view_workflow.logs'|trans | upper }}
 				</div>
 
 				<div id="logs-content" class="collapse" style="display: none;">
 					<div id="logs-table-container">
-						<p class="text-center">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
+						<p class="text-center mb-0">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
 					</div>
 				</div>
 			</div>
