@@ -62,7 +62,7 @@ a.btn-sm {
     padding-top: 20px;
 }
 
-.rulegroup-card-table, .workflow-card-table{
+.rulegroup-card-table, .workflow-card-table, .workflow-action-card-table{
     padding-bottom: 2.5rem !important;
     margin: 30px 100px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
