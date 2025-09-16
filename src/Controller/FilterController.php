@@ -230,7 +230,7 @@ public function removeFilter(Request $request): JsonResponse
         // set the timezone
         $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
 
-        if ($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) {
+        if (($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) || $page == 1) {
            
             $form->handleRequest($request);
             $data = [];
@@ -307,12 +307,6 @@ public function removeFilter(Request $request): JsonResponse
             } else { // if form is not valid
                     $data = $this->getFluxFilterData();
 
-                if (
-                    count(array_filter($data)) === 0
-                    and $page == 1
-                ) {
-                    $doNotSearch = true;
-                }
             }
 
             // Return an empty array if the form is not valid so that there will be no documents to display
