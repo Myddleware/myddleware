@@ -9,7 +9,6 @@
             <th>{{ 'view_workflow.job'|trans }}</th>
             <th>{{ 'view_workflow.trigger_document'|trans }}</th>
             <th>{{ 'view_workflow.generate_document'|trans }}</th>
-            <th>{{ 'view_workflow.created_by'|trans }}</th>
             <th>{{ 'view_workflow.status'|trans }}</th>
             <th>{{ 'view_workflow.date_created'|trans }}</th>
             <th>{{ 'view_workflow.message'|trans }}</th>
@@ -41,7 +40,6 @@
                         <span></span>
                     {% endif %}
                 </td>
-                <td class="ctr log-message">{{ log.createdBy }}</td>
                 <td class="ctr log-message">
                     <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
                 </td>
