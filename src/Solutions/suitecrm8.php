@@ -365,7 +365,8 @@ class suitecrm8 extends solution
 				throw new \Exception('cURL error: ' . curl_error($ch));
 			}
 			$output = curl_exec($ch);
-			$response = json_decode($output,true);
+			preg_match('/(\{.*\})/s', $output, $matches);
+			$response = json_decode($matches[1], true);
 			
 			return $response;
         } catch (\Exception $e) {
