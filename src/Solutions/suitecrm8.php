@@ -134,8 +134,8 @@ class suitecrm8 extends solution
 				throw new \Exception('cURL error: ' . curl_error($ch));
 			}
 			$output = curl_exec($ch);
-			preg_match('/\{[^}]*"attributes"[^}]*\}/', $output, $matches);
-			$moduleData = json_decode($matches[0], true);
+			preg_match('/(\{.*\})/s', $output, $matches);
+			$moduleData = json_decode($matches[1], true);
 
 			if (!empty($moduleData['data']['attributes'])) {
 				foreach($moduleData['data']['attributes'] as $key => $module) {
