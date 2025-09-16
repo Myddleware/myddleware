@@ -117,7 +117,26 @@ class suitecrm8 extends solution
 	public function get_modules($type = 'source')
     {
         try {
-			$moduleData = $this->call('GET', 'V8/meta/modules'); 
+			$ch = curl_init();
+			$header = array(
+				'Accept: application/vnd.api+json',
+				'authorization: Bearer '.$this->accessToken,
+				'Content-type: application/vnd.api+json'
+			);
+
+			$url = rtrim($this->paramConnexion['url'], '/').'/public/legacy/Api/index.php/V8/meta/modules';
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+
+			if (curl_errno($ch)) {
+				throw new \Exception('cURL error: ' . curl_error($ch));
+			}
+			$output = curl_exec($ch);
+			preg_match('/\{[^}]*"attributes"[^}]*\}/', $output, $matches);
+			$moduleData = json_decode($matches[0], true);
+
 			if (!empty($moduleData['data']['attributes'])) {
 				foreach($moduleData['data']['attributes'] as $key => $module) {
 					$modules[$key] = $module['label'];
