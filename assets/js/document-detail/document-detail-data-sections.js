@@ -721,12 +721,23 @@ export class DocumentDetailDataSections {
         }
 
         const fieldEntries = Object.entries(fieldData);
-        
+
         if (fieldEntries.length === 0) {
             return this.generateEmptyDataMessage('fields');
         }
 
         return fieldEntries
+            .filter(([fieldName, fieldValue]) => {
+                // Skip 'id' field if there will be a direct link (SuiteCRM/Airtable)
+                if (fieldName.toLowerCase() === 'id') {
+                    const hasDirectLink = this.willHaveDirectLink(sectionType);
+                    if (hasDirectLink) {
+                        console.log(`✅ Filtering out redundant '${fieldName}' field for ${sectionType} (direct link available)`);
+                        return false;
+                    }
+                }
+                return true;
+            })
             .map(([fieldName, fieldValue]) => this.generateSingleField(fieldName, fieldValue, sectionType))
             .join('');
     }
@@ -861,6 +872,27 @@ export class DocumentDetailDataSections {
         } catch (error) {
             console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
             return null;
+        }
+    }
+
+    /**
+     * Checks if the section will have a direct link (SuiteCRM/Airtable solutions)
+     * @param {string} sectionType - Type of section (source, target)
+     * @returns {boolean} True if the section will have a direct link
+     */
+    static willHaveDirectLink(sectionType) {
+        try {
+            if (window.currentDocumentData) {
+                if (sectionType === 'source') {
+                    return !!window.currentDocumentData.source_direct_link;
+                } else if (sectionType === 'target') {
+                    return !!window.currentDocumentData.target_direct_link;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
+            return false;
         }
     }
 

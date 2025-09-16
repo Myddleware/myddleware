@@ -101,6 +101,14 @@ export class DocumentDetailDirectLinks {
         // Determine section type from selector
         const sectionType = sectionSelector.includes('source') ? 'source' : 'target';
 
+        // Also remove any regular ID field that might have been added for non-SuiteCRM solutions
+        // since we're about to add a direct link which replaces the need for a regular ID field
+        const existingRegularIdField = contentBody.querySelector(`#field-${sectionType}-id`);
+        if (existingRegularIdField && existingRegularIdField.closest('.field-row')) {
+            console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
+            existingRegularIdField.closest('.field-row').remove();
+        }
+
         // Create and add the direct link at the beginning of the content body
         const directLinkHtml = this.createDirectLink(directLinkUrl, idValue, sectionType);
         
