@@ -1,0 +1,15 @@
+{{ form_start(form, {
+    action: path('user_manager_create'),
+    method: 'POST',
+    attr: { class: 'user-create-form' }
+}) }}
+    {{ form_row(form.username) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.password) }}
+    {{ form_row(form.roles) }}
+    {{ form_row(form.timezone) }}
+
+    <button type="submit" class="btn btn-success mt-3">
+        {{ 'user_manager.create'|trans }}
+    </button>
+{{ form_end(form) }}

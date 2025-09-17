@@ -1,0 +1,369 @@
+/* Modern Account Page Styles */
+
+:root {
+  --primary-color: #0069B4;
+  --primary-hover: #004a80;
+  --secondary-color: #28a745;
+  --secondary-hover: #1e7e34;
+  --danger-color: #dc3545;
+  --danger-hover: #bd2130;
+  --warning-color: #ffc107;
+  --warning-hover: #e0a800;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --border-color: #e0e0e0;
+  --text-color: #333333;
+  --text-muted: #6c757d;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* Base styles */
+#account-container {
+  font-family: 'Roboto', Arial, sans-serif;
+  color: var(--text-color);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Header */
+.account-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.account-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+#three-container {
+  height: 150px;
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Tabbed Navigation */
+.account-tabs {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.account-tabs .nav-link {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  padding: 1rem 1.5rem;
+  margin-right: 0.5rem;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  transition: var(--transition);
+}
+
+.account-tabs .nav-link i {
+  margin-right: 0.5rem;
+}
+
+.account-tabs .nav-link:hover {
+  color: var(--primary-color);
+  background-color: rgba(0, 105, 180, 0.05);
+}
+
+.account-tabs .nav-link.active {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.account-tab-content {
+  background-color: transparent;
+  padding: 1rem 0;
+}
+
+/* Grid layout */
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+/* Section styling */
+.account-section {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.account-section:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.account-section h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+/* Forms */
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--dark-color);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 105, 180, 0.25);
+}
+
+/* Helper text */
+.helper-text {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 5px;
+  transition: var(--transition);
+  border: none;
+}
+
+.btn i {
+  margin-right: 0.5rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: var(--dark-color);
+}
+
+.btn-warning:hover {
+  background-color: var(--warning-hover);
+}
+
+.btn-light {
+  background-color: var(--light-color);
+  color: var(--dark-color);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Language buttons */
+.language-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.language-btn {
+  min-width: 120px;
+}
+
+/* Log management section */
+.buttons-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+/* Flash messages */
+.flash-messages {
+  margin-bottom: 2rem;
+}
+
+.alert {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: 4px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  border-left: 4px solid var(--danger-color);
+  color: var(--danger-color);
+}
+
+.alert i {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* Warning message */
+.warning-message {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid var(--warning-color);
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: 5px;
+  color: var(--dark-color);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Password strength meter */
+.password-strength-meter {
+  height: 5px;
+  background-color: var(--border-color);
+  margin-top: 0.5rem;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 60% !important;
+}
+
+.password-strength-meter div {
+  height: 100%;
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.strength-weak {
+  background-color: var(--danger-color);
+  width: 25% !important;
+}
+
+.strength-medium {
+  background-color: var(--warning-color);
+  width: 50% !important;
+}
+
+.strength-strong {
+  background-color: var(--secondary-color);
+  width: 100% !important;
+}
+
+/* Animation effects */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.account-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Make sure animations are staggered */
+#general .account-section:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+#general .account-section:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+#general .account-section:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+#security .account-section:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+#security .account-section:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #account-container {
+    padding: 1rem;
+  }
+  
+  .account-title {
+    font-size: 2rem;
+  }
+  
+  .account-section {
+    padding: 1rem;
+  }
+  
+  .account-tabs .nav-link {
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Three.js container responsiveness */
+@media (min-width: 992px) {
+  #three-container {
+    height: 200px;
+  }
+} 

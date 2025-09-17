@@ -135,8 +135,13 @@
 	margin-left: -0.5rem;
 }
 
-.direct-link-document {
-	margin-left: -0.5rem;
+.direct-link-document.field-row .field-label .bi-box-arrow-up-right {
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.direct-link-document.field-row .field-label:hover .bi-box-arrow-up-right {
+	opacity: 1;
 }
 
 .direct-link-document-target {
@@ -242,6 +247,7 @@ li span {
 }
 
 .table-wrapper {
+    border: 1px solid #ccc;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
@@ -250,11 +256,6 @@ li span {
 .table-wrapper-task, .table-wrapper-workflow{
     display: inline-block;
     width: auto;
-}
-
-.table-wrapper-variable {
-    display: inline-block;
-	width: 70%;
 }
 
 .shadow-table {
@@ -285,3 +286,610 @@ li span {
     border-left-color: #777777 !important;
     border-right-color: #777777 !important;
 }
+
+/* Flux Button Container Styling */
+#flux-button-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 20px;
+}
+
+#flux-button-container .btn {
+    border-radius: 25px !important;
+    padding: 8px 8px;
+    font-weight: 500;
+    font-size: 16px;
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+#flux-button-container .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Flux Table Styling */
+#flux-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+#flux-table th {
+    background: white;
+    height: 40px;
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ddd;
+}
+
+#flux-table th:last-child {
+    border-right: none;
+}
+
+#flux-table td {
+    padding: 12px;
+    text-align: center !important;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+#flux-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#flux-table .gblstatus_close {
+    color: #19ca42 !important;
+    font-weight: bold;
+}
+
+#flux-table a {
+    color: #0F66A9 !important;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#flux-table a:hover {
+    text-decoration: underline;
+}
+
+/* Data Wrapper and Logo Styling */
+.data-wrapper {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* Custom section (Documents history) should not participate in flex layout */
+.data-wrapper.custom-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.custom-section .custom-content {
+    display: block;
+    width: 100%;
+}
+
+/* Parent documents section styling */
+.data-wrapper.parent-documents-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.parent-documents-section .parent-documents-content {
+    display: block;
+    width: 100%;
+}
+
+/* Child documents section styling */
+.data-wrapper.child-documents-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.child-documents-section .child-documents-content {
+    display: block;
+    width: 100%;
+}
+
+/* Workflow Logs section styling */
+.data-wrapper.workflow-logs-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.workflow-logs-section .workflow-logs-content {
+    display: block;
+    width: 100%;
+}
+
+/* Logs section styling */
+.data-wrapper.logs-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.logs-section .logs-content {
+    display: block;
+    width: 100%;
+}
+
+.source-data, .target-data, .history-data {
+    flex: 1;
+    min-width: 300px;
+}
+
+.source-data-content, .target-data-content, .history-data-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.source-data-content-header, .target-data-content-header, .history-data-content-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    padding-left: 40px;
+}
+
+.source-logo-container, .target-logo-container, .history-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    height: 60px;
+    width: 60px;
+}
+
+.source-logo-container img, .target-logo-container img, .history-logo-container img {
+    max-width: 60px;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+.source-data-content-header h3, .target-data-content-header h3, .history-data-content-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.source-data-content-body, .target-data-content-body, .history-data-content-body {
+    /* background-color: #f8f9fa; */
+    /* border: 1px solid #dee2e6; */
+    /* we keep the 2 properties above for testing the limit of the container */
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 200px;
+}
+
+/* Field Layout Styling */
+.field-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    min-height: 20px;
+}
+
+.field-label {
+    width: 120px;
+    flex-shrink: 0;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.2;
+    padding-right: 10px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.field-separator {
+    width: 2px;
+    background-color: #ccc;
+    margin: 0 15px;
+    flex-shrink: 0;
+    height: 20px;
+}
+
+.field-value {
+    flex: 1;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.2;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.field-value:hover, .field-value.expanded {
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+    background-color: #f8f9fa;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: relative;
+    max-width: none;
+    width: auto;
+}
+
+.field-value.expanded {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+}
+
+.field-value {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.field-edit-icon {
+    position: absolute;
+    right: -25px;
+    top: 50%;
+    transform: translateY(15px) translateX(10px) rotate(45deg) scale(0);
+    opacity: 0;
+    color: #1976d2;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 15;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.logo-small-size {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.field-edit-icon.show {
+    animation: pencil-curve-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.field-edit-icon.hide {
+    animation: pencil-curve-out 0.4s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+@keyframes pencil-curve-in {
+    0% {
+        transform: translateY(15px) translateX(10px) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+    30% {
+        transform: translateY(8px) translateX(5px) rotate(25deg) scale(0.3);
+        opacity: 0.3;
+    }
+    70% {
+        transform: translateY(-5px) translateX(-2px) rotate(10deg) scale(0.8);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-50%) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pencil-curve-out {
+    0% {
+        transform: translateY(-50%) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    30% {
+        transform: translateY(-5px) translateX(3px) rotate(15deg) scale(0.7);
+        opacity: 0.7;
+    }
+    70% {
+        transform: translateY(8px) translateX(8px) rotate(35deg) scale(0.3);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(15px) translateX(10px) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+}
+
+.field-label:hover {
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+    background-color: #f8f9fa;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: relative;
+    max-width: none;
+}
+
+.field-label.expanded {
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: relative;
+    max-width: none;
+}
+
+/* Status Color Classes for Document Status and Global Status */
+
+/* Yellow statuses: cancel, filter, no send, error expected */
+.status-yellow {
+	color: #ffc107 !important;
+	font-weight: bold;
+}
+
+/* Green statuses: send, sent, success */
+.status-green {
+	color: #28a745 !important;
+	font-weight: bold;
+}
+
+/* Red statuses: error, failed, ko, predecessor_ko */
+.status-red {
+	color: #dc3545 !important;
+	font-weight: bold;
+}
+
+/* Blue statuses: all others (new, transform, open, etc.) */
+.status-blue {
+	color: #0069B4 !important;
+	font-weight: bold;
+}
+
+/* Status badge classes - Higher specificity to override table text color */
+.custom-table .status-badge.status-error_checking,
+.custom-table .status-badge.status-error_sending,
+.custom-table .status-badge.status-error_transformed,
+.custom-table .status-badge.status-create_ko,
+.custom-table .status-badge.status-filter_ko,
+.custom-table .status-badge.status-predecessor_ko,
+.custom-table .status-badge.status-relate_ko,
+.custom-table .status-badge.status-not_found {
+	color: #dc3545 !important;  /* Red for error statuses */
+	font-weight: bold;
+}
+
+.custom-table .status-badge.status-cancel,
+.custom-table .status-badge.status-filter,
+.custom-table .status-badge.status-no_send,
+.custom-table .status-badge.status-error_expected {
+	color: #ffc107 !important;  /* Yellow for cancel statuses */
+	font-weight: bold;
+}
+
+.custom-table .status-badge.status-send,
+.custom-table .status-badge.status-close,
+.custom-table .status-badge.status-success,
+.custom-table .status-badge.status-found {
+	color: #28a745 !important;  /* Green for success statuses */
+	font-weight: bold;
+}
+
+/* Hover effects for status colors */
+.status-yellow:hover {
+	color: #e0a800 !important;
+}
+
+.status-green:hover {
+	color: #1e7e34 !important;
+}
+
+.status-red:hover {
+	color: #c82333 !important;
+}
+
+.status-blue:hover {
+	color: #004085 !important;
+}
+
+/* Data Section States */
+
+.loading-message {
+	padding: 20px;
+	text-align: center;
+	color: #6c757d;
+	font-style: italic;
+}
+
+.empty-data-message {
+	padding: 20px;
+	text-align: center;
+	color: #6c757d;
+	background-color: #f8f9fa;
+	border-radius: 4px;
+	margin: 10px 0;
+}
+
+.error-data-message {
+	padding: 20px;
+	text-align: center;
+	background-color: #f8d7da;
+	border: 1px solid #f5c6cb;
+	border-radius: 4px;
+	margin: 10px 0;
+}
+
+.error-wrapper {
+	background-color: #f8d7da;
+	border: 1px solid #f5c6cb;
+	border-radius: 8px;
+}
+
+/* Target Field Editing Styles */
+.edit-icons-container {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 20;
+}
+
+.field-value:hover .edit-icons-container,
+.edit-icons-container.editing {
+    opacity: 1;
+}
+
+.edit-icon {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    user-select: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.edit-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.edit-icon.pencil-icon:hover {
+    background-color: #e3f2fd;
+    border-color: #1976d2;
+}
+
+.edit-icon.check-icon:hover {
+    background-color: #e8f5e8;
+    border-color: #28a745;
+}
+
+.edit-icon.cross-icon:hover {
+    background-color: #fdeaea;
+    border-color: #dc3545;
+}
+
+.field-edit-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 2px solid #fd7e14;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: #fff;
+    outline: none;
+}
+
+.field-edit-input:focus {
+    border-color: #fd7e14;
+    box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.2);
+}
+
+/* Field in editing state */
+.field-value.editing {
+    position: relative;
+    background-color: #ffc107 !important;
+    border: 2px solid #fd7e14 !important;
+    border-radius: 4px !important;
+    padding: 4px !important;
+    transition: all 0.3s ease;
+}
+
+/* Animation for edit icons appearance */
+.edit-icons-container.editing .edit-icon {
+    animation: icon-slide-in 0.3s ease forwards;
+}
+
+.edit-icons-container.editing .check-icon {
+    animation-delay: 0.1s;
+}
+
+.edit-icons-container.editing .cross-icon {
+    animation-delay: 0.2s;
+}
+
+@keyframes icon-slide-in {
+    from {
+        transform: translateX(10px) scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Field update notification styles */
+.field-edit-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: notification-slide-in 0.3s ease;
+}
+
+.field-edit-notification.success {
+    background-color: #28a745;
+}
+
+.field-edit-notification.error {
+    background-color: #dc3545;
+}
+
+.field-edit-notification.info {
+    background-color: #17a2b8;
+}
+
+@keyframes notification-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+

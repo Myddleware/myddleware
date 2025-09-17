@@ -54,7 +54,7 @@ class RuleParam
     /**
      * @ORM\Column(name="value", type="text", nullable=false)
      */
-    private string $value;
+    private string $value= '';
 
     public function getId(): int
     {

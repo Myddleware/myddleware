@@ -60,6 +60,7 @@ use App\Solutions\wooeventmanager;
 use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
+use App\Solutions\dynamicsbusiness;
 use Exception;
 
 /**
@@ -81,7 +82,6 @@ class SolutionManager
 							'mysql',
 							'vtigercrm',
 							'suitecrm',
-							'suitecrm8',
 							'mailchimp',
 							'prestashop',
 							'postgresql',
@@ -90,9 +90,11 @@ class SolutionManager
 							'airtable',
 							'sendinblue',
 							'internallist',
+							'suitecrm8',
 							'yousign',
 							'brevo',
-							'acton'
+							'acton',
+							'dynamicsbusiness'
 						];
 
     public function __construct(
@@ -107,7 +109,6 @@ class SolutionManager
         mysql $mysql,
         vtigercrm $vtigercrm,
         suitecrm $suitecrm,
-        suitecrm8 $suitecrm8,
         mailchimp $mailchimp,
         prestashop $prestashop,
         postgresql $postgresql,
@@ -117,8 +118,10 @@ class SolutionManager
         sendinblue $sendinblue,
         internallist $internallist,
         yousign $yousign,
+        suitecrm8 $suitecrm8,
         brevo $brevo,
-        acton $acton
+        acton $acton,
+        dynamicsbusiness $dynamicsbusiness
     ) {
 		// Load the solution classes
 		if (!empty(self::$solutions)) {

@@ -32,7 +32,7 @@ class suitecrm8 extends solution
 {
 	protected $accessToken;
 	protected $baseUrl;
-	protected $componentUrl = '/Api/';
+	protected $componentUrl = '/public/legacy/Api/index.php/';
 	
 	
 	protected array $required_fields = ['default' => ['id', 'date_modified', 'date_entered','deleted']];
@@ -69,7 +69,8 @@ class suitecrm8 extends solution
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 			$output = curl_exec($ch);
-			$authOut = json_decode($output,true);
+			preg_match('/\{[^}]*"access_token"[^}]*\}/', $output, $matches);
+			$authOut = json_decode($matches[0], true);
 			// Manage return : token or error
 			if (curl_errno($ch)) {
 				throw new \Exception('cURL error: ' . curl_error($ch));
@@ -345,7 +346,8 @@ class suitecrm8 extends solution
 				throw new \Exception('cURL error: ' . curl_error($ch));
 			}
 			$output = curl_exec($ch);
-			$response = json_decode($output,true);
+			preg_match('/(\{.*\})/s', $output, $matches);
+			$response = json_decode($matches[1], true);
 			
 			return $response;
         } catch (\Exception $e) {

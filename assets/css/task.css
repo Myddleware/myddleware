@@ -22,19 +22,19 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#task, #workflows, #variables {
+#task, #workflows-details, #variables, #user-manager-list {
     padding: 20px 0;
     text-align: center;
 }
 
-#task th, #workflows th, #variables th {
-    background: #ECECEC;
+#task th, #workflows th, #user-manager-list th{
+    /* background: #F2F2F2; */
 	height: 45px;
 	padding: 10px;
     text-align: center;
 }
 
-#task tr, #workflows tr, #variables tr {
+#task tr, #workflows tr, #variables tr, #user-manager-list tr{
     border-bottom: 1px solid #ccc;
 }
 

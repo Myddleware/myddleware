@@ -7,23 +7,28 @@
 {% endblock %}
 {% block titlesm %}
 	{{ 'view_workflow_action.title'|trans }}
-	<i class="fa-sharp fa-solid fa-arrow-right fa-flip"></i>
+	<i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i>
 	{{ workflow.name }}
 {% endblock titlesm %}
 
 {% block body %}
 	<div id="workflows">
-		<div>
-			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
-			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2">{{ 'view_workflow_action.edit'|trans }}</a>
-			<a href="{{ path('workflow_action_delete', {'id': workflow.id}) }}" onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" class="btn btn-outline-danger m-2">{{ 'view_workflow_action.delete'|trans }}</a>
-		</div>
-
-				<div class="link-help-view text-end mb-4 mx-4">
-			<a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=workflowaction">
+		<div class="link-help-view text-end mb-4 mx-4">
+			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=workflowaction">
 				<i class="fa fa-info-circle" aria-hidden="true"></i>
 				{{ 'rule.help' | trans }}
 			</a>
+		</div>
+		<div class="text-center pt-4 pb-4">
+			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
+			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2">{{ 'view_workflow_action.edit'|trans }}</a>
+			<form method="post" action="{{ path('workflow_action_delete', {'id': workflow.id}) }}" style="display: inline;">
+				<button type="submit" 
+						onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" 
+						class="btn btn-outline-danger m-2">
+					{{ 'view_workflow_action.delete'|trans }}
+				</button>
+			</form>
 		</div>
 
 		<div>
@@ -34,14 +39,11 @@
 			{% endfor %}
 
 			{% if workflow is not null %}
-				<div class="workflow-details container mt-4">
-					<div class="card-header mb-4 card-title-workflow">
-						<button class="toggle-button btn btn-outline-secondary btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#workflow-content" aria-expanded="true" aria-controls="workflow-content">
-							<i class="fa fa-minus"></i>
-						</button>
-						ACTION
-					</div>
-					<div id="workflow-content" class="collapse show">
+				<div class="container text-left pt-3">
+					<h4>ACTION</h4>
+				</div>
+				<div class="workflow-details container mt-4 px-4">
+					<div id="workflow-content" class="collapse show mt-4">
 						<div class="workflow-row mb-2">
 							<div class="workflow-col mb-2">
 								<strong>{{ 'view_workflow.name'|trans|upper }}</strong>
@@ -118,75 +120,20 @@
 				</div>
 			{% endif %}
 
-			{% if nb_workflow > 0 %}
-				<div id="fd-title-small" class="left">
-					<p>{{ 'view_workflow.logs'|trans }}</p>
-					<span class="nb">{{ nb_workflow }}</span>
+			<div class="container mt-5 pt-5 text-left">
+					<h4>{{ 'view_workflow.logs'| trans | upper }}</h4>
+			</div>
+			<div class="workflow-action-card-table container workflow-details">
+				<div class="card-header card-title-workflow">
+					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" 
+							data-workflowaction-id="{{ workflow.id }}">
+						<i class="fa fa-plus"></i>
+					</button>
 				</div>
-			{% endif %}
-			<div class="clr"></div>
-			<div class="workflow-logs container mt-4">
-				<div class="mt-4">
-					<div class="card-header mb-4 card-title-workflow">
-						<button class="minus-workflow-actions toggle-button btn btn-outline-secondary btn-sm float-end">
-							<i class="fa fa-plus"></i>
-						</button>
 
-
-						{{ 'view_workflow.logs'| trans | upper }}
-					</div>
-					{# templates/workflow/show.html.twig #}
-
-					<div id="actions-content" class="collapse">
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>{{ 'view_workflow.log_id'|trans }}</th>
-									<th>{{ 'view_workflow.workflow'|trans }}</th>
-									<th>{{ 'view_workflow.job'|trans }}</th>
-									<th>{{ 'view_workflow.trigger_document'|trans }}</th>
-									<th>{{ 'view_workflow.generate_document'|trans }}</th>
-									<th>{{ 'view_workflow.created_by'|trans }}</th>
-									<th>{{ 'view_workflow.status'|trans }}</th>
-									<th>{{ 'view_workflow.date_created'|trans }}</th>
-									<th>{{ 'view_workflow.message'|trans }}</th>
-									<th>{{ 'view_workflow.action_type'|trans }}</th>
-								</tr>
-							</thead>
-							<tbody class="workflow-actions-collapse-body" data-url="{{ path('workflow_actions_partial', {'id': workflow.id}) }}">
-								
-							</tbody>
-						</table>
-
-						{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_action_show_page', 'routeParams': {'id': workflow.id, 'page': app.request.get('page', 1)}}) }}
-											
-											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
-												<div class="form-group" required style="width: 15em;">
-													<label for="page" class="sr-only">Page</label>
-													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
-												</div>
-												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >Go to page</button>
-											</form>
-										
-											<script>
-											const maxPage = {{ pager.getNbPages() }};
-
-												function updateFormAction(event) {
-													event.preventDefault();
-													const page = document.getElementById('page').value;
-													if (page < 1 || page > maxPage) {
-														alert('Please enter a valid page number between 1 and ' + maxPage);
-														return;
-													}
-													const form = document.getElementById('pageForm');
-													const baseUrl = "{{ path('workflow_action_show_page', {'id': workflow.id, 'page': 1}) }}";
-													const action = baseUrl.replace('/page-1', '/page-' + page);
-													form.action = action;
-													form.submit();
-												}
-											</script>
-										{% endif %}
+				<div id="logs-content" class="collapse" style="display: none;">
+					<div id="logs-table-container">
+						<p class="text-center mb-0">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
 					</div>
 				</div>
 			</div>
@@ -200,4 +147,59 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			let logsLoaded = false;
+
+			$('#toggle-logs-btn').on('click', function() {
+				const $btn = $(this);
+				const $logsContent = $('#logs-content');
+
+				function setIcon(isOpen) {
+				const $i = $btn.find('i');
+				const $svg = $btn.find('svg[data-icon]');
+
+				if ($i.length) {
+					$i.removeClass('fa-plus fa-minus fa-plus-circle fa-minus-circle');
+					$i.addClass(isOpen ? 'fa-minus' : 'fa-plus');
+					return;
+				}
+				if ($svg.length) {
+					$svg.attr('data-icon', isOpen ? 'minus' : 'plus');
+					return;
+				}
+				$btn.html(isOpen ? '<i class="fa fa-minus"></i>' : '<i class="fa fa-plus"></i>');
+				}
+
+				const isVisible = $logsContent.is(':visible');
+
+				if (isVisible) {
+				$logsContent.slideUp(200, function() {
+					setIcon(false);
+				});
+				return;
+				}
+
+				$logsContent.slideDown(200, function() {
+				setIcon(true);
+				});
+
+				if (!logsLoaded) {
+				$.ajax({
+					url: "{{ path('workflow_action_show_logs', {'id': workflow.id}) }}",
+					type: 'GET',
+					headers: { 'X-Requested-With': 'XMLHttpRequest' },
+					success: function(response) {
+					$('#logs-table-container').html(response.html || response);
+					logsLoaded = true;
+					},
+					error: function(xhr, status, error) {
+					$('#logs-table-container').html('<p class="text-danger text-center">Error loading logs: ' + error + '</p>');
+					}
+				});
+				}
+			});
+		});
+	</script>
 {% endblock js %}

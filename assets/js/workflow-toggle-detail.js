@@ -17,6 +17,12 @@ $(document).ready(function() {
     const button = document.getElementById(buttonId);
     // console.log('button', button);
 
+    // Check if button exists before adding event listener
+    if (!button) {
+        console.log('activeWorkflow button not found, skipping toggle functionality');
+        return;
+    }
+
     // we add an event listener to the button
     button.addEventListener('click', function() {
         // console.log('button clicked');

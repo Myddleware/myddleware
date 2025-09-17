@@ -22,45 +22,49 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #}
 
+
 <div class="link-help-view text-end mx-4">
 	<a href="#help-content-mapping">
 		<i class="fa fa-info-circle" aria-hidden="true"></i>
 		{{'rule.help'|trans}}
 	</a>
 </div>
-
-<div id="fd-title" class="left">
-	<p>{{'view_rule.mapping.module_target'|trans}}
-		:
-		{{ rule.getModuleTarget }}
-	</p>
-	<p></p>
-	<p>{{'view_rule.mapping.module_source'|trans}}
-		:
-		{{ rule.getModuleSource }}
-	</p>
-	<p></p>
+<div id="info-toggle" class="info-toggle collapsed">
+    <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#03c4eb" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 5.5a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 5H14.5a.5.5 0 0 1 .5.5zm-14 5a.5.5 0 0 1 .5-.5h10.793l-2.147-2.146a.5.5 0 0 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L12.293 11H1.5a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+    </div>
+    <div class="text">
+        <strong>{{'view_rule.mapping.module_target'|trans}}</strong>: {{ rule.getModuleTarget }}<br />
+        <strong>{{'view_rule.mapping.module_source'|trans}}</strong>: {{ rule.getModuleSource }}
+    </div>
 </div>
-<div class="clr"></div>
+
+<input type="text" id="field-filter" class="form-control m-3 search-formula" placeholder="Search...">
 <div class="d-flex mapping-container flex-wrap p-5">
 	{% if fields %}
-		{% for c, f in fields %}
-			<div class="card mapping-card text-center">
+		{% for c, f in fields|sort((a, b) => a.getTarget <=> b.getTarget) %}
+			<div class="card mapping-card text-center" data-target="{{ f.getTarget|lower }}" data-source="{{ f.getSource|lower }}">
 				<div class="card-body mapping-card-body">
 					<h4 class="card-title mapping-card-title">{{ f.getTarget }}</h4>
 					<p class="card-text mapping-card-text"></p>
-					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}
-					</p>
+					<p class="mapped-fields card-text mapping-card-text">{{ f.getSource }}</p>
 					{% if f.getFormula %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula'|trans}}
-							:
-							{{ f.getFormula }}
-						</p>
-					{% else %}
-						<p class="mapped-formula card-text mapping-card-text">{{'view_rule.mapping.formula_empty'|trans}}</p>
-					{% endif %}
-				</p>
-				<button type="button" class="btn btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
+                        <p class="mapped-formula card-text mapping-card-text">
+                            {{ 'view_rule.mapping.formula'|trans }} :
+                            <span class="formula-preview">
+                                {{ f.getFormula|slice(0, 10) }}{% if f.getFormula|length > 10 %}...{% endif %}
+                            </span>
+                            {% if f.getFormula|length > 10 %}
+                                <span class="formula-full d-none">{{ f.getFormula }}</span>
+                                <button type="button" class="btn btn-sm btn-link toggle-formula" onclick="toggleFormula(this)"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <p class="mapped-formula card-text mapping-card-text">{{ 'view_rule.mapping.formula_empty'|trans }}</p>
+                    {% endif %}
+				<button type="button" class="btn btn-sm btn-icon tooltip-icon" onclick="toggleCommentBox(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ 'view_rule.mapping.comment_title'| trans }}">
 					<i class="fa fa-info-circle" aria-hidden="true"></i>
 				</button>
 				<div class="comment-box">
@@ -79,13 +83,17 @@
 	{% endfor %}
 	<div class="clr"></div>
 
+
 {% else %}
-	<div>{{'view_rule.mapping.empty'|trans}}</div>
-{% endif %}</div><div id="help-content-mapping" class="help-content">
-<h2>{{'help.title'|trans}}
-	<i class="fa fa-info-circle" aria-hidden="true"></i>
-</h2>
-<p>{{'help.viewrule.mapping'|trans|raw}}</p></div>
+	<div>{{'help.view_rule.mapping.empty'|trans}}</div>
+{% endif %}
+</div>
+<div id="help-content-mapping" class="help-content">
+    <h2>{{'help.title'|trans}}
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+    </h2>
+    <p>{{'help.viewrule.mapping'|trans|raw}}</p>
+</div>
 
 <script>
 

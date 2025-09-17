@@ -25,31 +25,31 @@
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\Rule;
 use App\Entity\Config;
-use App\Entity\Solution;
 use App\Entity\Connector;
-use Pagerfanta\Pagerfanta;
+use App\Entity\Rule;
+use App\Entity\Solution;
 use App\Form\ConnectorType;
 use App\Manager\permission;
-use Psr\Log\LoggerInterface;
-use App\Manager\ToolsManager;
-use App\Service\SessionService;
 use App\Manager\SolutionManager;
-use Symfony\Component\Yaml\Yaml;
+use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
-use Pagerfanta\Adapter\ArrayAdapter;
+use App\Service\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
+use Pagerfanta\Adapter\ArrayAdapter;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Exception\NotValidCurrentPageException;
+use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Pagerfanta\Exception\NotValidCurrentPageException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Route("/rule")
@@ -577,60 +577,45 @@ class ConnectorController extends AbstractController
             throw $this->createNotFoundException("This connector doesn't exist");
         }
 
-        // Get fields for the form
+        // Create connector form
+        // $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
+
         if (null != $connector->getSolution()) {
             $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
         } else {
             $fieldsLogin = [];
         }
 
-        // Create form
         $form = $this->createForm(ConnectorType::class, $connector, [
             'action' => $this->generateUrl('connector_open', ['id' => $id]),
             'method' => 'POST',
             'attr' => ['fieldsLogin' => $fieldsLogin, 'secret' => $this->getParameter('secret')],
         ]);
 
-        // Handle form submission
+        // If the connector has been changed
         if ('POST' == $request->getMethod()) {
             try {
                 $form->handleRequest($request);
-                
                 if ($form->isSubmitted() && $form->isValid()) {
-                    // Validate connector name is not empty
-                    if (empty(trim($connector->getName()))) {
+                    if (empty($connector->getName())) {
                         $request->getSession()->getFlashBag()->add('error', 'Connector name cannot be empty');
-                        
                         return $this->render('Connector/edit/fiche.html.twig', [
                             'connector' => $connector,
                             'form' => $form->createView(),
                             'connector_name' => $connector->getName() ?: 'Unnamed',
                         ]);
                     }
-
-                    // Begin transaction to ensure data consistency
-                    $this->entityManager->beginTransaction();
                     
                     try {
-                        // Update connector metadata
-                        $connector->setNameSlug($connector->getName());
+                        $this->entityManager->beginTransaction();
+                        
+                        $params = $connector->getConnectorParams();
                         $connector->setDateModified(new \DateTime());
                         $connector->setModifiedBy($this->getUser()->getId());
                         
-                        // Persist the connector
                         $this->entityManager->persist($connector);
-                        
-                        // Handle connector parameters
-                        $connectorParams = $connector->getConnectorParams();
-                        if ($connectorParams) {
-                            foreach ($connectorParams as $param) {
-                                $param->setConnector($connector);
-                                $this->entityManager->persist($param);
-                            }
-                        }
-                        
-                        // Flush all changes
                         $this->entityManager->flush();
+                        
                         $this->entityManager->commit();
                         
                         // Add success message

@@ -60,3 +60,17 @@
 .icon-warning {
     color: #ffc107;
   }
+
+
+  #cronjobresult_table {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+#cronjobresult_table.show {
+    max-height: 2000px;
+    opacity: 1;
+}
+

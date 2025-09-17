@@ -21,6 +21,14 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
+
+<div class="link-help-view text-end mb-4">
+	<a href="#help-content-info">
+		<i class="fa fa-info-circle" aria-hidden="true"></i>
+		{{ 'rule.help' | trans }}
+	</a>
+</div>
+
 <div class="row justify-content-center text-center">
 	<ul id="viewfilters">
 	{% if filters is empty %}	

@@ -36,6 +36,7 @@ class DuplicateRuleFormType extends AbstractType
                     return $er->createQueryBuilder('c')
                         ->leftJoin('c.solution', 's')
                          ->where('s.id = :solution_id')
+                         ->andWhere('c.deleted = 0')
                          ->setParameter('solution_id', $solutionSources);
                 },
             ])
@@ -47,6 +48,7 @@ class DuplicateRuleFormType extends AbstractType
                      return $er->createQueryBuilder('c')
                          ->leftJoin('c.solution', 's')
                          ->where('s.id = :solution_id')
+                         ->andWhere('c.deleted = 0')
                          ->setParameter('solution_id', $solutionTargets);
                  },
              ])

@@ -1,50 +1,34 @@
-document.addEventListener("DOMContentLoaded", function () {
+const workflowActionId = window.location.href
+    .replace('showAction', 'active')
+    .split('/')
+    .pop();
 
-    const toggleButton = document.querySelector('.minus-workflow-actions');
-    const actionsContent = document.getElementById('actions-content');
-    const actionsTableBody = document.querySelector('.workflow-actions-collapse-body');
-    const icon = toggleButton?.querySelector('i.fa');
-    const actionsUrl = actionsTableBody?.dataset.url;
+const apiUrl = window.location.href
+    .replace('showAction', 'active')
+    .replace(new RegExp(`${workflowActionId}/?$`), '');
 
-    let actionsLoaded = false;
-
-    const collapseInstance = new bootstrap.Collapse(actionsContent, {
-        toggle: false
-    });
-
-    if (!toggleButton || !actionsContent || !actionsTableBody || !actionsUrl || !icon) {
-        return;
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('activeWorkflow_' + workflowActionId);
+    
+    if (toggleButton) {
+        toggleButton.addEventListener('change', function(event) {
+            fetch(`${apiUrl}${workflowActionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ active: event.target.checked }),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) throw new Error(data.message);
+            })
+            .catch(() => {
+                event.target.checked = !event.target.checked;
+            });
+        });
     }
-
-    icon.classList.remove('fa-minus');
-    icon.classList.add('fa-plus');
-    actionsContent.classList.remove('show'); 
-
-    toggleButton.addEventListener('click', async function () {
-        const isOpen = actionsContent.classList.contains('show');
-
-        if (isOpen) {
-            collapseInstance.hide();
-            icon.classList.remove('fa-minus');
-            icon.classList.add('fa-plus');
-        } else {
-            collapseInstance.show();
-            icon.classList.remove('fa-plus');
-            icon.classList.add('fa-minus');
-
-            if (!actionsLoaded) {
-
-                try {
-                    const response = await fetch(actionsUrl);
-
-                    if (!response.ok) throw new Error("Erreur HTTP");
-                    const html = await response.text();
-                    actionsTableBody.innerHTML = html;
-                    actionsLoaded = true;
-                } catch (error) {
-                    actionsTableBody.innerHTML = `<tr><td colspan="10">Erreur logs.</td></tr>`;
-                }
-            }
-        }
-    });
 });

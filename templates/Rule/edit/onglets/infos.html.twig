@@ -22,279 +22,343 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #}
 {% block body %}
-	<div class="link-help-view text-end mb-4">
+	<div class="link-help-view text-end">
 		<a href="#help-content-info">
 			<i class="fa fa-info-circle" aria-hidden="true"></i>
 			{{ 'rule.help' | trans }}
 		</a>
 	</div>
 
-	<div class="block-btn-infos mb-4 d-flex justify-content-around">
-		<a class="btn_action_loading btn btn-outline-success mb-2" href="{{ path('regle_exec', {'id': rule.GetId }) }}" title="" role="button">
+	<div class="rule-details-buttons block-btn-infos mb-4">
+		<a class="btn_action_loading btn btn-outline-success mb-2 mx-3" href="{{ path('regle_exec', {'id': rule.GetId }) }}" role="button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewbox="0 0 16 16">
 				<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
 				<path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
 			</svg>
 			{{ 'view_rule.action.exec_rule' | trans }}
 		</a>
-		<a class="btn_action_loading btn btn-outline-success mb-2" href="{{ path('run_by_id', {'id': rule.GetId }) }}" title="" role="button">
+		<a class="btn_action_loading btn btn-outline-success mb-2" href="{{ path('run_by_id', {'id': rule.GetId }) }}" role="button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
 				<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
 				<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
 			</svg>
 			{{ 'Run the rule by id' }}
 		</a>
-		<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" title="" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success mb-2">
-			{{ 'view_rule.action.edit_rule' | trans }}
-		</a>
-		<a href="{{ path('regle_displayflux', {'id': rule.GetId }) }}" title="" role="button" class="btn btn-outline-success mb-2">
+	</div>
+
+	<div class="rule-connectors-buttons block-btn-infos mb-4 mx-3">
+		<a href="{{ path('regle_displayflux', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-success mb-2">
 			{{ 'view_rule.action.displayflux' | trans }}
 		</a>
-		<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" title="" role="button" class="btn btn-outline-success mb-2">
-			{{ 'view_rule.action.duplic_rule' | trans }}
-		</a>
 		{% if is_granted('ROLE_SUPER_ADMIN') %}
-			<a href="{{ path('rule_cancel_all_transfers', {'id': rule.GetId }) }}" title="" role="button" onclick="return(confirm('{{ 'list_flux.btn.mass_cancel_confirm' | trans }}'));" class="btn btn-outline-warning mb-2" id="canceltransfers">
+			<a href="{{ path('rule_cancel_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_cancel_confirm' | trans }}'));" role="button" class="btn btn-outline-warning mb-2 mx-3">
 				{{ 'list_flux.btn.cancel' | trans }}
 			</a>
-			<a href="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" title="" onclick="return(confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}'));" role="button" class="btn btn-outline-danger mb-2" id="deletetransfers">
+			<a href="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}'));" role="button" class="btn btn-outline-danger mb-2">
 				{{ 'list_flux.btn.delete' | trans }}
 			</a>
 		{% endif %}
-		<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" title="" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger mb-2">
-			{{ 'view_rule.action.delete_rule' | trans }}
-		</a>
 	</div>
 
-	<div class="container">
-		<div class="row edit-rule-overview">
+	<div class="container-fluid px-4">
+		<div class="custom-row gx-4 gy-4 rule-panel-wrapper">
 			<div
-				class="col">
+				class="custom-col">
 				{# TABLE RULE #}
 				<div class="table table-hover align-middle shadow-table">
-					<table id="tab_rule" class="table table-striped table-sm">
+					<table id="tab_rule" class="table table-rule-view">
 						<tr>
-						<th class="rounded-table-up-left rounded-table-up-right" colspan="2">{{ 'view_rule.title.rule' | trans }}</th>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.active' | trans }}</td>
-						<td class="value">
-							<div class="form-check form-switch">
-								<input class="form-check-input toggle-switch-rule" 
-									   type="checkbox" 
-									   id="activerule"
-									   {{ rule.GetActive ? 'checked' : '' }}>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.id' | trans }}</td>
-						<td class="value">{{ rule.GetId }}</td>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.name' | trans }}</td>
-						<td class="value"> <span class="detail-rule-name">{{ rule.GetName }}</span>
-							<a class="mx-3 edit-button-name">
-								<i class="fa fa-pen" aria-hidden="true"></i>
-							</a>
-							<form class="edit-form-name-rule" style="display:none;" action="{{ path('update_rule_name') }}" method="post">
-								<button type="button" class="close-button-name close-button-name-rule">
-									<i class="fa fa-times close-icon" aria-hidden="true"></i>
-								</button>
-								<input type="text" name="ruleName" class="form-control m-2" data-rule-id="{{ rule.id }}" value="{{ rule.GetName }}"/>
-								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-								<button type="submit" class="btn btn-success m-2">
-									{{ 'Save' | trans }}
-								</button>
-							</form>
-						</td>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.datecreated' | trans }}</td>
-						<td class="value">{{ rule.GetDateCreated | date("d-m-Y H:i:s") }}</td>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.datemodified' | trans }}</td>
-						<td class="value">{{ rule.GetDateModified | date("d-m-Y H:i:s") }}</td>
-					</tr>
-					<tr>
-						<td class="title">{{ 'view_rule.infos.mode' | trans }}</td>
-						<td class="value">
-							<span class="label label-default">{{ params_suite.mode }}</span>
-						</td>
-					</tr>
-					{% if rule.getReadJobLock is not empty %}
-						<tr class="job_lock_{{ rule.id }}">
-							<td class="title">{{ 'view_rule.infos.read_job_lock' | trans }}
-								-
-								<a href="{{ path('task_view',{'id' : rule.readJobLock }) }}">{{rule.readJobLock}}</a>
-							</td>
-							<td class="value" style="text-align: center !important;">
-								<button class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
-									<i class="fa fa-lock" aria-hidden="true"></i>
-									<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
-								</button>
-							</td>
+							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="2">
+								<div class="d-flex justify-content-between align-items-center flex-wrap">
+									<p class="detail-rule-title m-0 d-flex align-items-center">
+										<i class="fa fa-list me-2" aria-hidden="true"></i>
+										{{ 'view_rule.title.rule' | trans }}
+									</p>
+									<div class="d-flex gap-2 mt-2 mt-md-0">	
+										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
+											{{ 'view_rule.action.edit_rule' | trans }}
+										</a>
+										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
+											{{ 'view_rule.action.duplic_rule' | trans }}
+										</a>
+										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
+											{{ 'view_rule.action.delete_rule' | trans }}
+										</a>
+									</div>
+								</div>
+							</th>
+
 						</tr>
-					{% endif %}
-					{% if params_suite.bidirectional is defined and params_suite.bidirectional is not empty %}
 						<tr>
-							<td class="title">{{ 'view_rule.infos.bidirectional' | trans }}</td>
+							<td class="title">{{ 'view_rule.infos.active' | trans }}</td>
 							<td class="value">
-								<a href="{{ path('regle_open', {'id': params_suite.bidirectional }) }}">{{ params_suite.bidirectionalName }}</a>
+								<div class="form-check form-switch">
+									<input class="form-check-input toggle-switch-rule" type="checkbox" id="activerule" {{ rule.GetActive ? 'checked' : '' }}>
+								</div>
 							</td>
 						</tr>
-					{% endif %}
-					{% if duplicate_target is defined and duplicate_target is not empty %}
 						<tr>
-							<td class="title">{{ 'view_rule.infos.duplicate_fields' | trans }}</td>
+							<td class="title">{{ 'view_rule.infos.id' | trans }}</td>
+							<td class="value">{{ rule.GetId }}</td>
+						</tr>
+						<tr>
+							<td class="title">{{ 'view_rule.infos.name' | trans }}</td>
 							<td class="value">
-								<a href="{{ path('regle_open', {'id': duplicate_target }) }}">{{ duplicate_target }}</a>
+								<span class="detail-rule-name">{{ rule.GetName }}</span>
+								<a class="mx-3 edit-button-name">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</a>
+								<form class="edit-form-name-rule" style="display:none;" action="{{ path('update_rule_name') }}" method="post">
+									<button type="button" class="close-button-name close-button-name-rule">
+										<i class="fa fa-times close-icon" aria-hidden="true"></i>
+									</button>
+									<input type="text" name="ruleName" class="form-control m-2" data-rule-id="{{ rule.id }}" value="{{ rule.GetName }}"/>
+									<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+									<button type="submit" class="btn btn-success m-2">
+										{{ 'Save' | trans }}
+									</button>
+								</form>
 							</td>
 						</tr>
-					{% endif %}
-					{% if params_suite.customParams is defined and params_suite.customParams is not empty %}
-						{% for r in params_suite.customParams %}
-							<tr id="deletion-rule-tr-{{ r.name }}">
-								<td id="deletion-rule-left-{{ r.name }}" class="title rounded-table-down-left">{{ r.name }}</td>
-								<td id="deletion-rule-right-{{ r.name }}" class="value rounded-table-down-right">
-									<span class="label label-default">{{ r.value }}</span>
+						<tr>
+							<td class="title">{{ 'view_rule.infos.datecreated' | trans }}</td>
+							<td class="value">{{ rule.GetDateCreated | date("d-m-Y H:i:s") }}</td>
+						</tr>
+						<tr>
+							<td class="title">{{ 'view_rule.infos.datemodified' | trans }}</td>
+							<td class="value">{{ rule.GetDateModified | date("d-m-Y H:i:s") }}</td>
+						</tr>
+						<tr>
+							<td class="title">{{ 'view_rule.infos.mode' | trans }}</td>
+							<td class="value">
+								<span class="label label-default">{{ params_suite.mode }}</span>
+							</td>
+						</tr>
+						{% if rule.getReadJobLock is not empty %}
+							<tr class="job_lock_{{ rule.id }}">
+								<td class="title">{{ 'view_rule.infos.read_job_lock' | trans }}
+									-
+									<a href="{{ path('task_view',{'id' : rule.readJobLock }) }}">{{rule.readJobLock}}</a>
+								</td>
+								<td class="value" style="text-align: center !important;">
+									<button class="edit-button btn btn-outline-danger" data-job-id="{{ rule.id }}">
+										<i class="fa fa-lock" aria-hidden="true"></i>
+										<i class="fa fa-unlock" aria-hidden="true" style="display: none;"></i>
+									</button>
 								</td>
 							</tr>
-						{% endfor %}
-					{% endif %}
-				</table>
+						{% endif %}
+						{% if params_suite.bidirectional is defined and params_suite.bidirectional is not empty %}
+							<tr>
+								<td class="title">{{ 'view_rule.infos.bidirectional' | trans }}</td>
+								<td class="value">
+									<a href="{{ path('regle_open', {'id': params_suite.bidirectional }) }}">{{ params_suite.bidirectionalName }}</a>
+								</td>
+							</tr>
+						{% endif %}
+						{% if duplicate_target is defined and duplicate_target is not empty %}
+							<tr>
+								<td class="title">{{ 'view_rule.infos.duplicate_fields' | trans }}</td>
+								<td class="value">
+									<a href="{{ path('regle_open', {'id': duplicate_target }) }}">{{ duplicate_target }}</a>
+								</td>
+							</tr>
+						{% endif %}
+						{% if params_suite.customParams is defined and params_suite.customParams is not empty %}
+							{% for r in params_suite.customParams %}
+								{% if r.name != 'description' %}
+									<tr id="deletion-rule-tr-{{ r.name }}">
+										<td id="deletion-rule-left-{{ r.name }}" class="title rounded-table-down-left">{{ r.name }}</td>
+										<td id="deletion-rule-right-{{ r.name }}" class="value rounded-table-down-right">
+											<span class="label label-default">{{ r.value }}</span>
+										</td>
+									</tr>
+								{% endif %}
+							{% endfor %}
+						{% endif %}
+					{% set descriptionValue = '' %}
+					{% for p in rule.params %}
+						{% if p.name == 'description' %}
+							{% set descriptionValue = p.value %}
+						{% endif %}
+					{% endfor %}
+					<tr id="deletion-rule-tr-description">
+						<td id="deletion-rule-left-description" class="value rounded-table-down-left">
+							<div class="value pt-2">{{ 'solution.params.description' | trans }}</div>
+						</td>
+						<td id="deletion-rule-right-description" class="rounded-table-down-right">
+							<div class="description-field position-relative">
+								<div id="description-field-value" class="value pt-2 description-collapsed">
+									{% if descriptionValue is not empty %}
+										{{ descriptionValue|nl2br }}
+									{% endif %}
+								</div>
+								<a href="#" class="edit-button-description me-2 mt-2 pt-2" title="{{ 'Edit' | trans }}">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</a>
+							</div>
+							<form class="edit-form edit-form-description-close mt-2" style="display: none;"
+								action="{{ path('update_rule_description') }}" method="post">
+								<button type="button" class="close-button-description">
+									<i class="fa fa-times close-icon" aria-hidden="true"></i>
+								</button>
+								<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ descriptionValue }}</textarea>
+								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
+								<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
+							</form>
+							<a href="#" id="read-more-link"	class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
+								Read all description
+							</a>
+						</td>
+					</tr>
+
+					</table>
 				</div>
 			</div>
 			{# TABLE CONNECTOR #}
-			<div class="col">
-				<table id="tab_connector" class="table table-striped table-sm">
+			<div class="custom-col">
+				<table id="tab_connector" class="table table-rule-view">
 					<tr>
-						<th class="rounded-table-up-left rounded-table-up-right" colspan="4">{{ 'view_rule.title.connector' | trans }}</th>
+						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="4">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewbox="0 0 16 16">
+								<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+								<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+							</svg>
+							{{ 'view_rule.title.connector' | trans }}
+						</th>
 					</tr>
 					<tr>
-						<td class="title_source_ctr" colspan="2">{{ 'view_rule.title.source' | trans }}</td>
-						<td class="title_target_ctr" colspan="2">{{ 'view_rule.title.target' | trans }}</td>
-					</tr>
-					<tr>
-						<td class="title_source">{{ 'view_rule.connector.title' | trans }}</td>
-						<td class="value">
-							<a href="{{ path('connector_detail', {'id': connector.id_source }) }}">{{ connector.lbl_source }}</a>
+						<td class="value text-center">
+							<img class="vignette" src="{{ asset('build/images/solution/') }}{{ connector.solution_source }}.png" alt="{{ connector.solution_source }}"/>
 						</td>
-						<td class="title_target">{{ 'view_rule.connector.title' | trans }}</td>
-						<td class="value">
-							<a href="{{ path('connector_detail', {'id': connector.id_target }) }}">{{ connector.lbl_target }}</a>
+						<td class="value text-center">
+							<img class="vignette" src="{{ asset('build/images/solution/') }}{{ connector.solution_target }}.png" alt="{{ connector.solution_target }}"/>
 						</td>
 					</tr>
 					<tr>
-						<td class="title_source">{{ 'view_rule.connector.solution' | trans }}</td>
-						<td class="value">
-							<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{ connector.solution_source }}.png" alt="{{ connector.solution_source }}"/></p>
-							{{ connector.solution_source }}
+						<td class="title_source_ctr" >{{ 'view_rule.title.source' | trans }}</td>
+						<td class="title_target_ctr" >{{ 'view_rule.title.target' | trans }}</td>
+						
+					</tr>
+					<tr>
+						<td class="value">{{ connector.lbl_source }}</td>
+						<td class="value">{{ connector.lbl_target }}</td>
+					</tr>
+					<tr>
+						<td class="title_source rounded-table-down-left">
+							<strong>{{ 'view_rule.connector.module' | trans }}</strong>
 						</td>
-						<td class="title_target">{{ 'view_rule.connector.solution' | trans }}</td>
-						<td class="value">
-							<p><img class="vignette" src="{{ asset('build/images/solution/') }}{{ connector.solution_target }}.png" alt="{{ connector.solution_target }}"/></p>
-							{{ connector.solution_target }}
+						<td class="title_source rounded-table-down-left">
+							<strong>{{ 'view_rule.connector.module' | trans }}</strong>
 						</td>
 					</tr>
-					<tr class="border-bottom-connector-none">
-						<td class="title_source rounded-table-down-left">{{ 'view_rule.connector.module' | trans }}</td>
+					<tr>
 						<td class="value">{{ rule.getModuleSource }}</td>
-						<td class="title_target">{{ 'view_rule.connector.module' | trans }}</td>
-						<td class="value rounded-table-down-right">
-							{{ rule.getModuleTarget }}</td>
+						<td class="value rounded-table-down-right">{{ rule.getModuleTarget }}</td>
+					</tr>
+					<tr>
+						<td class="value link-rule-detail">
+							<i class="fa fa-arrow-right" aria-hidden="true"></i>
+							<a class="help-link all-link" href="{{ path('connector_detail', {'id': connector.id_source }) }}">{{ 'view_rule.go_connector' | trans }}</a>
+						</td>
+						<td class="value link-rule-detail">
+							<i class="fa fa-arrow-right" aria-hidden="true"></i>
+							<a class="help-link all-link" href="{{ path('connector_detail', {'id': connector.id_target }) }}">{{ 'view_rule.go_connector' | trans }}</a>
+						</td>
 					</tr>
 				</table>
 			</div>
 		</div>
-	</div>
-	{# TABLE DESCRIPTION #}
-	<div class="container mt-4">
-		<div class="row edit-rule-overview">
-			<div class="col">
-				<table id="tab_rule_params" class="table table-striped table-sm">
-					<thead class="thead-light">
-						<tr>
-							<th class="rounded-table-up-left rounded-table-up-right" colspan="4">{{ 'solution.params.description' | trans }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for param in rule.params %}
-							{% if param.name == 'description' %}
-								<tr id="deletion-rule-tr-description">
-									<td id="deletion-rule-left-description" class="value rounded-table-down-left ">
-										<div class="description-field">
-											<div id="description-field-value" class="value">{{ param.value }}</div>
-										</div>
-									</td>
-									<td id="deletion-rule-right-description" class="rounded-table-down-right">
-										<button class="edit-button-description btn btn-outline-primary mb-2 mt-1">{{ 'Edit' | trans }}</button>
-										<form class="edit-form edit-form-description-close" style="display:none;" action="{{ path('update_rule_description') }}" method="post">
-											<button type="button" class="close-button-description">
-												<i class="fa fa-times close-icon" aria-hidden="true"></i>
-											</button>
-											<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ param.value }}</textarea>
-											<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-											<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
-										</form>
-									</td>
-								</tr>
-							{% endif %}
-						{% endfor %}
-					</tbody>
+		{# TABLE VARIABLE #}
+		<div class="custom-row gx-4 gy-4 rule-panel-wrapper mt-3">
+			<div class="custom-col">
+				<table id="tab_variables" class="table table-rule-view">
+					<tr>
+						<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color" colspan="3">
+							{{ 'view_rule.infos.variables' | trans }}
+						</th>
+					</tr>
+					<tr>
+						{% if variables is defined and variables|length > 0 %}
+							{% for variable in variables %}
+								<td class="value inner-table-workflow pt-3" colspan="3">	
+									<tr>
+										<td class="title_source rounded-table-down-left">
+											<a class="help-link all-link"
+												href="{{ path('variable_show', {'id': variable.id}) }}">
+												{{ variable.name }}
+											</a>
+										</td>
+										<td class="title_source rounded-table-down-left">
+											{{ variable.value }}
+										</td>
+									</tr>		
+								</td>
+							{% endfor %}
+						{% else %}
+							<td class="value inner-table-workflow p-3 text-center" colspan="3">	
+								<span>No variable</span>
+							</td>
+						{% endif %}
+					</tr>
 				</table>
 			</div>
 
-			{# TABLE WORKFLOW #}
-			<div class="col">
-				<table id="tab_workflow" class="table table-striped table-sm">
-					<tr>
-						<th class="rounded-table-up-left rounded-table-up-right" colspan="4">{{ 'view_rule.infos.workflows' | trans }}</th>
-					</tr>
-					<tr>
-						<td class="value inner-table-workflow">
-							{% if hasWorkflows %}
-								{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
 
-								<table class="table table-sm table-striped">
-									<thead class="thead-light">
-										<tr>
-											<th class="text-left">{{ 'view_rule.infos.name' | trans }}</th>
-											<th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
-											<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for workflow in sorted_workflows %}
-											<tr class="border-bottom-workflow-none" data-toggle="tooltip" title="{{ workflow.description }}">
-												<td class="title rounded-table-down-left">
-													<a class="dropdown-item workflow-name-link-rule" href="{{ path('workflow_show', {'id': workflow.id}) }}">
-														{{ workflow.name }}
-													</a>
-												</td>
-												<td class="title">
-													{{ workflow.order }}
-												</td>
-												<td class="value rounded-table-down-right">
-													<div class="form-check form-switch">
-														<input class="form-check-input" type="checkbox" id="activeWorkflow_{{ workflow.id }}" data-id="{{ workflow.id }}" data-type="workflow" {{ workflow.active ? 'checked' : '' }}>
-													</div>
-												</td>
-											</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							{% else %}
-								<span>No workflow</span>
-							{% endif %}
-							<div class="workflow-btn-rule-info">
-								<a class="btn btn-primary mt-2 mb-2" href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
+			{# TABLE WORKFLOW #}
+			<div class="custom-col">
+					<table id="tab_workflow" class="table table-rule-view-workflows table table-rule-view mx-auto">
+						<tr>
+							<th class="rounded-table-up-left rounded-table-up-right force-clear-background-color " colspan="3">
+								{{ 'view_rule.infos.workflows' | trans }}
+							</th>
+						</tr>
+						{% if hasWorkflows %}
+							<tr class="thead-light">
+								<th class="text-left workflow-detail-th-td">{{ 'view_rule.infos.name' | trans }}</th>
+								<th class="text-left">{{ 'view_rule.infos.order' | trans }}</th>
+								<th class="text-left">{{ 'view_rule.infos.status' | trans }}</th>
+							</tr>
+						{% endif %}
+					<tbody>
+						{% if hasWorkflows %}
+							{% set sorted_workflows = workflows|sort((a, b) => b.order <=> a.order) %}
+							{% for workflow in sorted_workflows %}
+								<tr data-toggle="tooltip" title="{{ workflow.description }}">
+									<td class="title workflow-detail-th-td">
+										<a class="dropdown-item workflow-name-link-rule"
+										href="{{ path('workflow_show', {'id': workflow.id}) }}">
+											{{ workflow.name }}
+										</a>
+									</td>
+									<td class="title workflow-detail-th-td">
+										{{ workflow.order }}
+									</td>
+									<td class="value workflow-detail-th-td">
+										<div class="form-check form-switch d-flex">
+											<input class="form-check-input" type="checkbox"
+												id="activeWorkflow_{{ workflow.id }}"
+												data-id="{{ workflow.id }}"
+												data-type="workflow"
+												{{ workflow.active ? 'checked' : '' }}>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td class="value inner-table-workflow p-3 text-center" colspan="3">No workflow</td>
+							</tr>
+						{% endif %}
+						<tr>
+							<td colspan="3" class="workflow-btn-rule-info text-center">
+								<a class="btn btn-primary mt-2 mb-2"
+								href="{{ path('workflow_create_from_rule', {'rule_id': rule.id}) }}">
 									{{ 'view_rule.infos.workflow_create' | trans }}
 								</a>
-							</div>
-						</td>
-					</tr>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>
@@ -311,10 +375,9 @@
 	{% endblock %}
 	<script type="text/javascript">
 		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success' | trans }}";
-		var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
-		var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
-		var checkRuleNameUrl = "{{ path('check_rule_name') }}";
-		var workflowListUrl = "{{ path('workflow_list') }}";
-
+var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
+var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
+var checkRuleNameUrl = "{{ path('check_rule_name') }}";
+var workflowListUrl = "{{ path('workflow_list') }}";
 	</script>
 {% endblock %}

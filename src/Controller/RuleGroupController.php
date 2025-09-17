@@ -84,6 +84,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
+
 /**
  * @Route("/rulegroup")
  */
@@ -222,37 +223,6 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    // /**
-    //  * @Route("/list/rulegroup/{ruleId}", name="rulegroup_list_by_rule", defaults={"page"=1})
-    //  * @Route("/list/rulegroup/{ruleId}/page-{page}", name="rulegroup_list_by_rule_page", requirements={"page"="\d+"})
-    //  */
-    // public function RulegroupListByRuleAction(string $ruleId, int $page = 1, Request $request)
-    // {
-    //     try {
-
-
-    //         // Récupération des rulegroups par règle
-    //         $rulegroups = $this->entityManager->getRepository(Rulegroup::class)->findBy(
-    //             ['rule' => $ruleId, 'deleted' => 0],
-    //             ['order' => 'ASC']
-    //         );
-
-    //         // Pagination avec ArrayAdapter
-    //         $adapter = new ArrayAdapter($rulegroups);
-    //         $pager = new Pagerfanta($adapter);
-    //         $pager->setMaxPerPage(15);
-    //         $pager->setCurrentPage($page);
-
-    //         // Rendu des rulegroups paginés
-    //         return $this->render('Rulegroup/list.html.twig', [
-    //             'entities' => $pager->getCurrentPageResults(),
-    //             'nb_rulegroup' => $pager->getNbResults(),
-    //             'pager_rulegroup_list' => $pager,
-    //         ]);
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
-    //     }
-    // }
 
 
     // public function to delet the rulegroup by id (set deleted to 1)
@@ -287,141 +257,6 @@ class RuleGroupController extends AbstractController
             throw $this->createNotFoundException('Error : ' . $e);
         }
     }
-
-    // // public function to save the rulegroupAudit to the database
-    // public function saveRulegroupAudit($rulegroupId)
-    // {
-
-        
-
-    //     $em = $this->entityManager;
-    //     $rulegroupArray = $em->getRepository(Rulegroup::class)->findBy(['id' => $rulegroupId, 'deleted' => 0]);
-    //     $rulegroup = $rulegroupArray[0];
-
-    //     // get all the actions of the rulegroup
-    //     $actions = $rulegroup->getRulegroupActions();
-
-    //     $actionsArray = array_map(function ($action) {
-    //         return [
-    //             'id' => $action->getId(),
-    //             'rulegroup' => $action->getRulegroup()->getId(),
-    //             'dateCreated' => $action->getDateCreated()->format('Y-m-d H:i:s'),
-    //             'dateModified' => $action->getDateModified()->format('Y-m-d H:i:s'),
-    //             'createdBy' => $action->getCreatedBy()->getUsername(),
-    //             'modifiedBy' => $action->getModifiedBy()->getUsername(),
-    //             'name' => $action->getName(),
-    //             'action' => $action->getAction(),
-    //             'description' => $action->getDescription(),
-    //             'order' => $action->getOrder(),
-    //             'active' => $action->getActive(),
-    //             'deleted' => $action->getDeleted(),
-    //             'arguments' => $action->getArguments(),
-    //         ];
-    //     }, $actions->toArray());
-
-    //     // Encode every rulegroup parameters
-    //     $rulegroupdata = json_encode(
-    //         [
-    //             'rulegroupName' => $rulegroup->getName(),
-    //             'ruleId' => $rulegroup->getRule()->getId(),
-    //             'created_by' => $rulegroup->getCreatedBy()->getUsername(),
-    //             'rulegroupDescription' => $rulegroup->getDescription(),
-    //             'condition' => $rulegroup->getCondition(),
-    //             'active' => $rulegroup->getActive(),
-    //             'dateCreated' => $rulegroup->getDateCreated()->format('Y-m-d H:i:s'),
-    //             'dateModified' => $rulegroup->getDateModified()->format('Y-m-d H:i:s'),
-    //             'actions' => $actionsArray,
-    //         ]
-    //     );
-    //     // Save the rulegroup audit
-    //     $onerulegroupAudit = new RulegroupAudit();
-    //     $onerulegroupAudit->setrulegroup($rulegroup);
-    //     $onerulegroupAudit->setDateCreated(new \DateTime());
-    //     $onerulegroupAudit->setData($rulegroupdata);
-    //     $this->entityManager->persist($onerulegroupAudit);
-    //     $this->entityManager->flush();
-    // }
-
-    // // public function to set the rulegroup to active or inactive
-    // /**
-    //  * @Route("/active/{id}", name="rulegroup_active")
-    //  */
-    // public function RulegroupActiveAction(string $id, Request $request)
-    // {
-    //     try {
-
-            
-    //         $em = $this->entityManager;
-    //         $rulegroupResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupResult[0];
-
-
-    //         if ($rulegroup) {
-    //             $rulegroup->setActive($rulegroup->getActive() == 1 ? 0 : 1);
-    //             $em->persist($rulegroup);
-    //             $em->flush();
-    //             $this->addFlash('success', 'Rulegroup updated successfully');
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //         }
-
-    //         return $this->redirectToRoute('rulegroup_list');
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
-
-    // /**
-    //  * @Route("/active_show/{id}", name="rulegroup_active_show")
-    //  */
-    // public function RulegroupActiveShowAction(string $id, Request $request)
-    // {
-    //     try {
-
-            
-    //         $em = $this->entityManager;
-    //         $rulegroupResult = $em->getRepository(Rulegroup::class)->findBy(['id' => $id, 'deleted' => 0]);
-    //         $rulegroup = $rulegroupResult[0];
-
-    //         if ($rulegroup) {
-    //             $rulegroup->setActive($rulegroup->getActive() == 1 ? 0 : 1);
-    //             $em->persist($rulegroup);
-    //             $em->flush();
-    //             $this->addFlash('success', 'Rulegroup updated successfully');
-    //         } else {
-    //             $this->addFlash('error', 'Rulegroup not found');
-    //         }
-
-    //         return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
-    //     } catch (Exception $e) {
-    //         throw $this->createNotFoundException('Error : ' . $e);
-    //     }
-    // }
-
-    // // public function to toggle the rulegroup to active or inactive
-    // #[Route('/rulegroup/toggle/{id}', name: 'rulegroup_toggle', methods: ['POST'])]
-    // public function toggleRulegroup(Request $request, EntityManagerInterface $em, RulegroupRepository $rulegroupRepository, string $id): JsonResponse
-    // {
-
-
-    //     $rulegroup = $rulegroupRepository->find($id);
-
-    //     if (!$rulegroup) {
-    //         return new JsonResponse(['status' => 'error', 'message' => 'Rulegroup not found'], 404);
-    //     }
-
-    //     $rulegroup->setActive(!$rulegroup->getActive());
-    //     $rulegroup->setDateModified(new \DateTime());
-
-    //     try {
-    //         $em->persist($rulegroup);
-    //         $em->flush();
-    //     } catch (\Exception $e) {
-    //         return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la sauvegarde du rulegroup'], 500);
-    //     }
-
-    //     return new JsonResponse(['status' => 'success', 'active' => $rulegroup->getActive()]);
-    // }
 
     // public function to create a new rulegroup
     /**

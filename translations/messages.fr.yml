@@ -49,7 +49,7 @@ panel:
     list_job:
         title: Détail des derniers jobs
         duration: seconde(s)
-        nb : Documents en erreur
+        nb : Règles en erreur
     graph_histo:
         title: Historique des documents
     graph_job_histo:
@@ -79,7 +79,7 @@ create_rule:
         valid: Envoyer
     step3:
         filter: Filtre
-        filter_choice: n’a pas de filtre
+        filter_choice: n'a pas de filtre
         filter_fields: Rechercher un champ...
         empty_fields_target: Aucun champ trouvé dans cible
         empty_simulate: Attention il n'existe pas de donnée dans le serveur source ou de champs dans la solution cible
@@ -118,10 +118,16 @@ create_rule:
             compose: Composer votre formule
             confirm: Confirmer
             delete: Effacer
-            close: Fermer 
+            close: Fermer
+            function_wizard: Assistant de fonction
+            select_function: Select a function
+            select_function_title: Function
+            select_rule: Select related rule
+            select_rule_title: Select a lookup rule
+            select_field: Select related field
+            select_field_title: Select a field for lookup
+            toggle_tooltip: Toggle function description
             error: Votre règle comporte une ou plusieurs erreurs de syntaxe
-            select_rule: Sélectionnez une règle
-            select_field: Sélectionnez un champ
         confirm:
             success: Enregistrement avec succès
             error: Une erreur est survenue 
@@ -156,13 +162,14 @@ filter:
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules
-    notin: n’est pas compris dans le tableau suivant séparé par des points virgules
+    notin: n'est pas compris dans le tableau suivant séparé par des points virgules
 
 behavior_filters:
     error_missing: Erreur si non trouvé
     error_empty: Erreur si vide
             
 view_rule:
+    go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
         confirm_exec_all: Souhaitez-vous exécuter toutes les règles actives ?
@@ -171,6 +178,7 @@ view_rule:
         exec_rule: Exécuter la règle
         edit_rule: Editer la règle
         duplic_rule: Dupliquer la règle
+        exec_by_id: Entrer vos identifiants de documents
         confirm_edit_rule: Souhaitez-vous modifier cette règle ?
         delete_rule: Supprimer la règle
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
@@ -183,7 +191,7 @@ view_rule:
         params: Paramètres 
         filter: Filtres
     title:
-        rule: Règle
+        rule: Détails
         connector: Connecteurs
         source: Source
         target: Cible
@@ -204,6 +212,7 @@ view_rule:
         status: Statut
         workflows: Workflows
         workflow_create: Créer un nouveau workflow
+        variables: Variables
     connector:
         title: Connecteur
         solution: Solution
@@ -249,6 +258,7 @@ rulegroup:
     back: Retour à la liste
     title_one: Groupe de règles
     name: Nom
+    details: Détails
     description: Description
     status: Statut
     create_by: Créé par
@@ -256,7 +266,7 @@ rulegroup:
     delete: Supprimer
     edit: Édition d'un groupe de règles
     updated_successfully: Groupe de règles modifié avec succès
-    rules: Liste des règles
+    rules: Règles
     rule_removed_successfully: Règle supprimée avec succès
     no_rules: Aucune règle dans ce groupe
     rule:
@@ -364,6 +374,8 @@ list_flux:
     start: Début
     end: Fin
     total: Nombre de documents
+    total1: Nombre de
+    total2: documents
     empty: Aucun document trouvé
     btn:
         filter: Filtrer
@@ -464,7 +476,7 @@ view_flux:
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
-    nbWorflowLogs: Logs workflow
+    nbnbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct
     unlocked_successfully: Document déverrouillé avec succès
@@ -597,9 +609,11 @@ view_workflow:
     cancel_edit: Annuler l'édition
     save: Sauvegarder
     cancel: Annuler
+    loading_logs: Chargement des logs...
 edit_workflow:
     name_already_exists: Le nom du workflow existe déjà
 view_workflow_action:
+    no_actions: Aucun workflow action
     title2: Action du workflow
     title: Détail de l'action du workflow
     edit: Editer cette action
@@ -630,6 +644,41 @@ view_account:
         language: Langue
     popup:
         locale: Changement de la langue en cours, merci de bien vouloir patienter. Vous allez être redirigé(e) vers la page d'authentification.
+    tabs:
+        general: Général
+        security: Sécurité
+    sections:
+        personal_info: Informations personnelles
+        language_preferences: Préférences de langue
+        logs: Logs
+        password: Mot de passe
+        twofa: Double authentification
+    fields:
+        language: Langue
+        timezone: Fuseau horaire
+        date_format: Format de date
+        export_separator: Séparateur d'exportation
+        charset: Encodage
+        auth_method: Méthode d'authentification
+    placeholder:
+        disabled_option: Option désactivée pour le moment
+    button:
+        save: Sauvegarder
+        download_logs: Télécharger les derniers logs
+        empty_logs: Vider le fichier de logs
+        reset_password: Réinitialiser le mot de passe
+        update_password: Mettre à jour le mot de passe
+        save_2fa: Enregistrer les paramètres 2FA
+    tooltip:
+        disabled_option: Option désactivée pour le moment
+        download_logs: Télécharger les fichiers de logs les plus récents
+        empty_logs: Supprimer le contenu du fichier de logs actuel
+        choose_language: Choisissez votre langue
+    info:
+        password_description: Modifiez votre mot de passe pour renforcer la sécurité de votre compte.
+        twofa_description: When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+    confirm:
+        empty_logs: Êtes-vous sûr de vouloir vider le fichier de logs ? Cette action est irréversible.
 
 function:
     all: Toutes
@@ -715,6 +764,7 @@ solution:
         redirect_uri: URL de redirection
         applicationName: Nom de l'application
         hashkey: Clé de hachage
+        id_auth: Id auth
         authid: Id auth
         user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
         course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
@@ -846,6 +896,7 @@ menu_user:
     crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration SMTP
     logout: Déconnexion
+    user_manager: Gestion utilisateur
     
 help:
     title: Aide
@@ -950,8 +1001,21 @@ email_alert:
         %base_uri%</p>
 
         Bien cordialement,
+email_alert_same_doc_reference:
+    subject: Alerte Myddleware
+    body: |
+        Bonjour,
+        <p>Il existe plusieurs documents avec la même date de référence %reference_date% dans la même règle. Veuillez vérifier la règle %rule_id% ou la tâche %job_id%.</p>
+        %base_uri%
+
+        Bien cordialement,
 jobscheduler:
+    id: Id
     command: Commande
+    output: Sortie
+    run_at: Exécuté à
+    run_time: Temps d'exécution
+    status_code: Code statut
     date_created: Date création
     active: Active
     list: Liste
@@ -986,7 +1050,10 @@ management_smtp:
     title : Configuration SMTP
     description : "Vous pouvez configurez l'envoi des emails ici. Vous trouverez de la documentation ici : <a href='https://symfony.com/doc/4.4/email.html' target=_blank>https://symfony.com/doc/4.4/email.html</a>"
     sendtestmail: Envoyer un email de test
-
+    success: Configuration SMTP enregistrée avec succès
+    error: Impossible d'enregistrer la configuration SMTP
+    api_key_already_in_env: Cette clé API est déjà dans le fichier .env
+    api_key_too_short: La clé API est trop courte. Est-ce bien une clé API BREVO ? Attention au remplissage automatique de votre navigateur.
 management_smtp_sendmail:
     subject: Myddleware - Test de configuration email
     textMail: Ce message de test a été envoyé par Myddleware. 
@@ -1069,13 +1136,18 @@ install:
 crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
+    see_results: Résultats Crontab
+    hide_results: Fermer Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
     command: Commande
     period: Périodes
     arguments: Arguments
     description: Description
     running: Instance en cours
-    max_instance: Instance max
+    max_instance: Max instance
+    max_instances: Max instances
+    running_instances: Running instances
+    results: Résultats
     lastUse: Last use
     nextRun: Next run
     enable: Enable
@@ -1083,11 +1155,22 @@ crontab:
     success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     correct: Vos crontabs ont été désactivés
+    disableAllCrons: Vos crontabs ont été désactivés
+    enableAllCrons: Vos crontabs ont été activés
     create: Créer crontab
     massdisable: Désactiver toutes les tâches
     massenable: Activer toutes les tâches
-    enableCron: On/Off
-    title_cronjobresult: Résultats Crontab
+    enableCron: On
+    disableCron: Off
+    title_cronjobresult: Résultats Crontab   
+    column_id: Identifiant
+    column_cronjob_id: Tâche Cron
+    column_run_at: Exécuté le
+    column_run_time: Durée d'exécution
+    column_status_code: Code de statut
+    column_output: Sortie
+    column_created_at: Créé le
+    column_updated_at: Mis à jour le
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
     help: > 
@@ -1115,10 +1198,39 @@ variable:
     view: Voir
   create_new: Créer une nouvelle variable
   list_title: Variables
+  detail_title: Variable
   confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
   no_variables: Aucune variable trouvée.
   table_headers:
     name: Nom
     value: Valeur
     actions: Actions
+    created_by: Créé par
     description: Description
+premium:
+    upgrade:
+        title_main: "Passer à la version Premium"
+        title: "Débloquer les fonctionnalités exclusives et recevoir un support personnalisé"
+        description: "Accédez à des fonctionnalités avancées et bénéficiez d'un support personnalisé en passant à la version Premium de Myddleware."
+        button: "Acheter la version Premium"
+        benefits:
+            title: "Avantages Premium"
+            benefit1: "Description avantage 1"
+            benefit2: "Description avantage 2"
+            benefit3: "Description avantage 3"
+user_manager:
+    list: Liste des utilisateurs
+    table:
+        username: Nom d'utilisateur
+        email: Email
+        last_login: Dernière connexion
+        roles: Rôles
+        timezone: Fuseau horaire
+        action: Action
+    create: Créer un utilisateur
+    edit: Modifier un utilisateur
+    password: Mot de passe
+success_create_user: Utilisateur créé avec succès.
+success_update_user: Utilisateur mis à jour avec succès.
+success_deleted_user: Utilisateur supprimé avec succès.
+error_generic: Une erreur est survenue.

@@ -6,14 +6,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const image = document.getElementById('hoverImage');
     let hoverTimeout;
 
-    button.addEventListener('mouseenter', function() {
-        hoverTimeout = setTimeout(function() {
-            image.style.display = 'block';
-        }, 500); // 500 ms delay
-    });
+    if (button && image) {
+        button.addEventListener('mouseenter', function() {
+            hoverTimeout = setTimeout(function() {
+                image.style.display = 'block';
+            }, 500); // 500 ms delay
+        });
 
-    button.addEventListener('mouseleave', function() {
-        clearTimeout(hoverTimeout);
-        image.style.display = 'none';
-    });
+        button.addEventListener('mouseleave', function() {
+            clearTimeout(hoverTimeout);
+            image.style.display = 'none';
+        });
+    } else {
+        console.warn('hover-button or hoverImage not found in DOM');
+    }
 });

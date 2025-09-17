@@ -59,7 +59,9 @@
 					<ul class="nav nav-pills flex-nav">
 						<li class="dropdown logo-nav">
 							<a href="{{ path('regle_panel')}}">
-								<span id="logo" alt="logo Myddleware"></span>
+								<span id="logo" alt="logo Myddleware">
+								<img src="{{ asset('build/images/template/logo.jpg') }}" alt="">
+								</span>
 							</a>
 						</li>
 						<li class="dropdown">
@@ -157,7 +159,7 @@
 						</li>
 
 						<li class="dropdown icon_navbar">
-							<a class="title_section_menu {% if app.request.attributes.get('_route') in ['my_account', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
+							<a class="title_section_menu {% if app.request.attributes.get('_route') in ['account_modern', 'management_smtp_index', 'jobscheduler_cron_list', 'logout'] %}
 																																																active
 																																															{% endif %}" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle svg_user" viewbox="0 0 16 16">
@@ -170,12 +172,20 @@
 							</a>
 							<ul class="dropdown-menu sous_menu_navbar" aria-labelledby="dropdownMenuLink">
 								<li>
-									<a class="dropdown-item" href="{{ path('my_account') }}">
+									<a class="dropdown-item" href="{{ path('account_modern') }}">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewbox="0 0 16 16">
 											<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
 											<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
 										</svg>
 										{{ app.user.username | upper}}
+									</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="{{ path('user_manager') }}">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+											<path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+										</svg>
+										{{'user_manager.list'|trans}}
 									</a>
 								</li>
 								<li>
@@ -213,7 +223,7 @@
 		</div>
 	</body>
 </html></header><div id="notification">
-{% include "Layout/notification.html.twig" %}</div><div id="myd_title"> {% block titlesm %}{% endblock titlesm %}
+{% include "Layout/notification.html.twig" %}</div><div id="myd_title" class="new-bar-gradient"> {% block titlesm %}{% endblock titlesm %}
 </div>
 <section class="mx-auto">
 	{% block body %}

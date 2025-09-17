@@ -61,7 +61,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
-
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/rule")
@@ -624,7 +624,8 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
             if (!$this->getUser()->isAdmin()) {
                 if (
                     empty($doc[0])
-                    || $doc[0]->getCreatedBy() != $this->getUser()->getId()
+                    || !$doc[0]->getCreatedBy()
+                    || $doc[0]->getCreatedBy()->getId() != $this->getUser()->getId()
                 ) {
                     return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
                 }
@@ -673,20 +674,14 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
             $parentDocuments = [];
             $parentDocumentsRule = [];
             foreach ($parentRelationships as $parentRelationship) {
-				$parentDocument = $em->getRepository(Document::class)->find($parentRelationship->getDocRelId());	
-				if (!empty($parentDocument)) {
-					$parentDocuments[$i] = $parentDocument;
-					$parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
-					++$i;
-				}
-            }
-
-			// Get the rule name of every relate doc
-			if (!empty($parentDocuments)) {
+                $parentDocuments[$i] = $em->getRepository(Document::class)->find($parentRelationship->getDocRelId());
+                $parentDocuments[$i]->sourceField = $parentRelationship->getSourceField();
+                // Get the rule name of every relate doc
                 foreach ($parentDocuments as $parentDocument) {
                     $parentDocumentsRule[$parentDocument->getId()] = $em->getRepository(Rule::class)->find($parentDocument->getRule())->getName();
                 }
-			}
+                ++$i;
+            }
 
             // CHILD RELATE DOCUMENT
             // Document link to other document, the child ones
@@ -1041,7 +1036,7 @@ $result = [];
                 $this->jobManager->actionMassTransfer('rerun', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1057,7 +1052,7 @@ $result = [];
                 $this->jobManager->actionMassTransfer('cancel', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1083,7 +1078,7 @@ $result = [];
 				 
             }
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1099,7 +1094,7 @@ $result = [];
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
 
-        return $this->redirect($this->generateUrl('flux_info', ['id' => $id]));
+        return $this->redirect($this->generateUrl('flux_modern', ['id' => $id]));
     }
 
     /**
@@ -1293,7 +1288,7 @@ $result = [];
         try{
             $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
 
-            return $this->redirect($this->generateURL('flux_info', ['id' => $id]));
+            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
@@ -1337,6 +1332,900 @@ $result = [];
             return new JsonResponse(['status' => 'success', 'message' => 'Verrouillage effacé avec succès.']);
         } catch (Exception $e) {
             return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
+        }
+    }
+
+    /**
+     * Modern JavaScript-based flux page
+     * 
+     * @Route("/flux/modern/{id}", name="flux_modern", defaults={"id"=null})
+     */
+    public function fluxModern(?string $id = null): Response
+    {
+        return $this->render('Flux/flux-js.html.twig');
+    }
+
+    /**
+     * @Route("/api/flux/info/{id}", name="api_flux_info", methods={"GET"})
+     */
+    public function getFluxInfo(Request $request, ?string $id = null): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        }
+
+        // Get current locale
+        $locale = $request->getLocale();
+        
+        // Get translations for the current locale
+        $translations = [
+            'flux' => [
+                'title' => $this->translator->trans('view_flux.title'),
+                'sections' => [
+                    'general' => $this->translator->trans('view_flux.sections.general'),
+                    'logs' => $this->translator->trans('view_flux.sections.logs'),
+                    'mapping' => $this->translator->trans('view_flux.sections.mapping')
+                ],
+                'fields' => [
+                    'name' => $this->translator->trans('form.name'),
+                    'source' => $this->translator->trans('form.source'),
+                    'target' => $this->translator->trans('form.target'),
+                    'status' => $this->translator->trans('form.status')
+                ],
+                'buttons' => [
+                    'save' => $this->translator->trans('view_flux.button.save'),
+                    'download_logs' => $this->translator->trans('view_flux.button.download_logs'),
+                    'empty_logs' => $this->translator->trans('view_flux.button.empty_logs')
+                ]
+            ]
+        ];
+
+        // If an ID is provided, get the specific flux data
+        $fluxData = null;
+        if ($id) {
+            // Add your logic here to fetch the specific flux data
+            // This is just a placeholder structure
+            $fluxData = [
+                'id' => $id,
+                'name' => 'Sample Flux',
+                'source' => 'Source System',
+                'target' => 'Target System',
+                'status' => 'active'
+            ];
+        }
+
+        return new JsonResponse([
+            'translations' => $translations,
+            'fluxData' => $fluxData,
+            'currentLocale' => $locale
+        ]);
+    }
+
+    // function to get the rule name from the document id
+    /**
+     * @Route("/api/flux/rule-get/{id}", name="api_flux_rule", methods={"GET"})
+     */
+    public function getRuleName($id): JsonResponse {
+        try {
+            // Log the incoming request
+            error_log("getRuleName called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getRuleName: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID (not the rule directly)
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getRuleName: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                error_log("getRuleName: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            $ruleName = $rule->getName();
+            error_log("getRuleName: Successfully found rule name: " . $ruleName . " for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'rule_name' => $ruleName,
+                'rule_id' => $rule->getId(),
+                'document_id' => $id
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getRuleName: Exception occurred: " . $e->getMessage());
+            error_log("getRuleName: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Comprehensive document data API endpoint
+     * @Route("/api/flux/document-data/{id}", name="api_flux_document_data", methods={"GET"})
+     */
+    public function getDocumentData($id): JsonResponse {
+        try {
+            // error_log("getDocumentData called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getDocumentData: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getDocumentData: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                error_log("getDocumentData: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            // Get status display information
+            $statusInfo = $this->getDocumentStatusInfo($document);
+            
+            // Get document data (source, target, history)
+            $sourceData = $this->listeFluxTable($id, 'S');
+            $targetData = $this->listeFluxTable($id, 'T');
+            $historyData = $this->listeFluxTable($id, 'H');
+            
+            // Generate direct links to the record in the source and target applications
+            $sourceDirectLink = null;
+            $targetDirectLink = null;
+            try {
+                $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
+                $allowedSolutions = ['suitecrm', 'airtable'];
+                
+                if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
+                    $sourceSolution = $this->solutionManager->get($sourceSolutionName);
+                    $sourceDirectLink = $sourceSolution->getDirectLink($rule, $document, 'source');
+                }
+                
+                $targetSolutionName = $rule->getConnectorTarget()->getSolution()->getName();
+                if (in_array(strtolower($targetSolutionName), $allowedSolutions)) {
+                    $targetSolution = $this->solutionManager->get($targetSolutionName);
+                    $targetDirectLink = $targetSolution->getDirectLink($rule, $document, 'target');
+                }
+            } catch (\Exception $e) {
+                error_log("getDocumentData: Error generating direct links: " . $e->getMessage());
+            }
+            
+            // Get error message from logs if status is error
+            $errorMessage = null;
+            if ($document->getGlobalStatus() === 'Error') {
+                $errorMessage = $this->getLatestErrorMessage($document);
+            }
+            
+            // Get solution information for logos
+            $sourceSolution = null;
+            $targetSolution = null;
+            try {
+                $sourceSolution = $rule->getConnectorSource()->getSolution()->getName();
+                $targetSolution = $rule->getConnectorTarget()->getSolution()->getName();
+                error_log("getDocumentData: Found solutions - Source: " . $sourceSolution . ", Target: " . $targetSolution);
+            } catch (\Exception $e) {
+                error_log("getDocumentData: Error getting solution names: " . $e->getMessage());
+            }
+            
+            // Prepare comprehensive response
+            $responseData = [
+                // Rule information
+                'rule_name' => $rule->getName(),
+                'rule_id' => $rule->getId(),
+                'rule_url' => null, // Could be constructed if needed
+                
+                // Solution information for logos
+                'source_solution' => $sourceSolution,
+                'target_solution' => $targetSolution,
+                
+                // Document basic info
+                'document_id' => $id,
+                'status' => $document->getStatus(),
+                'global_status' => $document->getGlobalStatus(),
+                'type' => $document->getType(),
+                'mode' => $document->getMode(),
+                'attempt' => $document->getAttempt(),
+                'max_attempts' => null, // Could be fetched from rule config if available
+                
+                // Status display info with colors
+                'status_label' => $statusInfo['status'],
+                'status_class' => $statusInfo['status_class'],
+                'global_status_label' => $statusInfo['global_status'],
+                'global_status_class' => $statusInfo['global_status_class'],
+                
+                // Type display info
+                'type_label' => $this->getTypeLabel($document->getType()),
+                
+                // Dates and reference
+                'creation_date' => $document->getDateCreated()->format('Y-m-d H:i:s'),
+                'modification_date' => $document->getDateModified()->format('Y-m-d H:i:s'),
+                'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
+                
+                // IDs
+                'source_id' => $document->getSource(),
+                'target_id' => $document->getTarget(),
+                'parent_id' => $document->getParentId(),
+                
+                // Data sections
+                'source_data' => $sourceData,
+                'target_data' => $targetData,
+                'history_data' => $historyData,
+                
+                // Direct links to the records in source and target applications
+                'source_direct_link' => $sourceDirectLink,
+                'target_direct_link' => $targetDirectLink,
+                
+                // Error handling
+                'error_message' => $errorMessage,
+                'logs' => null, // Could be added if needed
+                
+                // Additional metadata
+                'deleted' => $document->getDeleted(),
+                'workflow_error' => $document->getWorkflowError(),
+                'job_lock' => $document->getJobLock()
+            ];
+            
+            // error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $responseData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getDocumentData: Exception occurred: " . $e->getMessage());
+            error_log("getDocumentData: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper method to get document status display information
+     */
+    private function getDocumentStatusInfo($document): array {
+        $status = $document->getStatus();
+        $globalStatus = $document->getGlobalStatus();
+        
+        // Get status info with color coding
+        $statusInfo = $this->getStatusDisplayInfo($status);
+        $globalStatusInfo = $this->getStatusDisplayInfo($globalStatus);
+        
+        return [
+            'status' => $statusInfo['status'],
+            'status_class' => $statusInfo['status_class'],
+            'global_status' => $globalStatusInfo['status'],
+            'global_status_class' => $globalStatusInfo['status_class']
+        ];
+    }
+
+    /**
+     * Helper method to get status display info with proper color coding
+     */
+    private function getStatusDisplayInfo($statusValue): array {
+        // Normalize status value for comparison
+        $statusLower = strtolower(trim($statusValue));
+        
+        // Yellow statuses: cancel, filter, no send, error expected
+        if (in_array($statusLower, ['c', 'cancel', 'cancelled', 'filter', 'no_send', 'error_expected', 'cancel !'])) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-yellow'
+            ];
+        }
+        
+        // Green statuses: send, sent, success
+        if (in_array($statusLower, ['found', 'close', 's', 'send', 'sent', 'success', 'send ✓'])) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-green'
+            ];
+        }
+        
+        // Red statuses: error, failed, ko, predecessor_ko
+        if (in_array($statusLower, ['not_found', 'e', 'error', 'failed', 'ko', 'predecessor_ko', 'error ✗']) || 
+            strpos($statusLower, 'error') !== false || 
+            strpos($statusLower, 'ko') !== false ||
+            strpos($statusLower, 'fail') !== false) {
+            return [
+                'status' => $this->getStatusLabel($statusValue),
+                'status_class' => 'status-red'
+            ];
+        }
+        
+        // Blue statuses: all others (new, transform, open, etc.)
+        return [
+            'status' => $this->getStatusLabel($statusValue),
+            'status_class' => 'status-blue'
+        ];
+    }
+
+    /**
+     * Helper method to get human-readable status labels
+     */
+    private function getStatusLabel($statusValue): string {
+        // Map common status codes to readable labels with icons
+        $statusLabels = [
+            'S' => 'Send ✓',
+            'C' => 'Cancel !',
+            'E' => 'Error ✗',
+            'T' => 'Transform ✓',
+            'N' => 'New',
+            'O' => 'Open',
+            'Error' => 'Error ✗',
+            'Open' => 'Open',
+            'Close' => 'Close ✓'
+        ];
+        
+        return $statusLabels[$statusValue] ?? $statusValue;
+    }
+
+    /**
+     * Helper method to get latest error message from logs
+     */
+    private function getLatestErrorMessage($document): ?string {
+        $logs = $document->getLogs();
+        
+        foreach ($logs as $log) {
+            if ($log->getType() === 'E') { // Error type
+                return $log->getMessage();
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Helper method to get type label
+     */
+    private function getTypeLabel($type): string {
+        // Map common type codes to readable labels with icons
+        $typeLabels = [
+            'S' => 'Send',
+            'C' => 'Cancel',
+            'E' => 'Error',
+            'T' => 'Transform',
+            'N' => 'New',
+            'O' => 'Open',
+            'Error' => 'Error',
+            'Open' => 'Open',
+            'Close' => 'Close'
+        ];
+        
+        return $typeLabels[$type] ?? $type;
+    }
+
+    /**
+     * Document history API endpoint
+     * @Route("/api/flux/document-history/{id}", name="api_flux_document_history", methods={"GET"})
+     */
+    public function getDocumentHistory($id): JsonResponse {
+        try {
+            // error_log("getDocumentHistory called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getDocumentHistory: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getDocumentHistory: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the rule from the document
+            $rule = $document->getRule();
+            
+            if (!$rule) {
+                // error_log("getDocumentHistory: No rule associated with document ID: " . $id);
+                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+            }
+            
+            // Get history documents (all documents for the same source and rule)
+            $historyDocuments = $this->entityManager->getRepository(Document::class)->findBy(
+                [
+                    'source' => $document->getSource(), 
+                    'rule' => $document->getRule(), 
+                    'deleted' => 0
+                ], 
+                ['dateModified' => 'DESC'], 
+                10 // limit to 10 most recent
+            );
+            
+            // If only one record, the history is the current document, so we remove it => no history
+            if (1 == count($historyDocuments)) {
+                $historyDocuments = [
+                    $document
+                ];
+            }
+            
+            // Build the response data
+            $historyData = [];
+            foreach ($historyDocuments as $histDoc) {
+                $statusInfo = $this->getDocumentStatusInfo($histDoc);
+                
+                $historyData[] = [
+                    'docId' => $histDoc->getId(),
+                    'name' => $rule->getName(),
+                    'ruleId' => $rule->getId(),
+                    'sourceId' => $histDoc->getSource(),
+                    'targetId' => $histDoc->getTarget(),
+                    'modificationDate' => $histDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'type' => $histDoc->getType(),
+                    'status' => $statusInfo['status'],
+                    'statusClass' => $statusInfo['status_class']
+                ];
+            }
+            
+            // error_log("getDocumentHistory: Successfully retrieved " . count($historyData) . " history documents for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $historyData
+            ]);
+            
+        } catch (\Exception $e) {
+            // error_log("getDocumentHistory: Exception occurred: " . $e->getMessage());
+            // error_log("getDocumentHistory: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Document parent documents API endpoint
+     * @Route("/api/flux/document-parents/{id}", name="api_flux_document_parents", methods={"GET"})
+     */
+    public function getDocumentParents($id): JsonResponse {
+        try {
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            $qb = $this->entityManager->createQueryBuilder();
+            $qb->select([
+                   'dr.sourceField',
+                   'd.id as docId',
+                   'd.source',
+                   'd.target', 
+                   'd.dateModified',
+                   'd.type',
+                   'COALESCE(r.name, :defaultRuleName) as ruleName',
+                   'r.id as ruleId'
+               ])
+               ->from(DocumentRelationship::class, 'dr')
+               ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_rel_id')
+               ->leftJoin('d.rule', 'r')
+               ->where($qb->expr()->eq('dr.doc_id', ':docId'))
+               ->addOrderBy('dr.dateCreated', 'DESC')
+               ->addOrderBy('dr.id', 'DESC')
+               ->setMaxResults(10)
+               ->setParameters([
+                   'docId' => $id,
+                   'defaultRuleName' => 'Unknown Rule'
+               ]);
+            
+            $results = $qb->getQuery()->getArrayResult();
+            
+            $parentData = [];
+            foreach ($results as $result) {
+                if ($result['docId']) {
+                    $parentDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
+                    $statusInfo = $this->getDocumentStatusInfo($parentDocument);
+                    
+                    $parentData[] = [
+                        'docId' => $result['docId'],
+                        'name' => $result['ruleName'],
+                        'ruleId' => $result['ruleId'],
+                        'sourceId' => $result['source'],
+                        'targetId' => $result['target'],
+                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'type' => $result['type'],
+                        'status' => $statusInfo['status'],
+                        'statusClass' => $statusInfo['status_class'],
+                        'sourceField' => $result['sourceField']
+                    ];
+                }
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $parentData
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Document child documents API endpoint
+     * @Route("/api/flux/document-children/{id}", name="api_flux_document_children", methods={"GET"})
+     */
+    public function getDocumentChildren($id): JsonResponse {
+        try {
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            $childData = [];
+            
+            // Related children via DocumentRelationship (same as fluxInfo)
+            $relatedChildrenQb = $this->entityManager->createQueryBuilder();
+            $relatedChildrenQb->select([
+                    'd.id as docId',
+                    'd.source',
+                    'd.target',
+                    'd.dateModified',
+                    'd.type',
+                    'COALESCE(r.name, :defaultRuleName) as ruleName',
+                    'r.id as ruleId',
+                    'dr.sourceField'
+                ])
+                ->from(DocumentRelationship::class, 'dr')
+                ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_id')
+                ->leftJoin('d.rule', 'r')
+                ->where($relatedChildrenQb->expr()->eq('dr.doc_rel_id', ':docRelId'))
+                ->addOrderBy('dr.dateCreated', 'DESC')
+                ->addOrderBy('dr.id', 'DESC')
+                ->setMaxResults(10)
+                ->setParameters([
+                    'docRelId' => $id,
+                    'defaultRuleName' => 'Unknown Rule'
+                ]);
+            
+            // Execute query
+            $relatedResults = $relatedChildrenQb->getQuery()->getArrayResult();
+            
+            // Process related children
+            foreach ($relatedResults as $result) {
+                if ($result['docId']) {
+                    $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
+                    $statusInfo = $this->getDocumentStatusInfo($childDocument);
+                    
+                    $childData[] = [
+                        'docId' => $result['docId'],
+                        'name' => $result['ruleName'],
+                        'ruleId' => $result['ruleId'],
+                        'sourceId' => $result['source'],
+                        'targetId' => $result['target'],
+                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'type' => $result['type'],
+                        'status' => $statusInfo['status'],
+                        'statusClass' => $statusInfo['status_class'],
+                        'sourceField' => $result['sourceField']
+                    ];
+                }
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $childData
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Document logs API endpoint
+     * @Route("/api/flux/document-logs/{id}", name="api_flux_document_logs", methods={"GET"})
+     */
+    public function getDocumentLogs($id): JsonResponse {
+        try {
+            error_log("getDocumentLogs called with document ID: " . $id);
+            
+            // Validate the document ID
+            if (empty($id)) {
+                error_log("getDocumentLogs: Empty document ID provided");
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+            
+            // Find the document by ID
+            $document = $this->entityManager->getRepository(Document::class)->find($id);
+            
+            if (!$document) {
+                error_log("getDocumentLogs: Document not found with ID: " . $id);
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+            
+            // Get the logs for this document
+            $logs = $this->entityManager->getRepository(Log::class)->findBy(
+                ['document' => $id],
+                ['id' => 'DESC'], // Most recent first
+                50 // Limit to 50 most recent logs
+            );
+            
+            error_log("getDocumentLogs: Found " . count($logs) . " logs for document ID: " . $id);
+            
+            // Build the response data
+            $logsData = [];
+            foreach ($logs as $log) {
+                $job = $log->getJob();
+                
+                // Format the log type with icon
+                $typeFormatted = $this->formatLogType($log->getType());
+                
+                $logsData[] = [
+                    'id' => $log->getId(),
+                    'reference' => $log->getRef() ?: '',
+                    'job' => $job ? $job->getId() : '',
+                    'creationDate' => $log->getCreated()->format('d/m/Y H:i:s'),
+                    'type' => $typeFormatted,
+                    'message' => $log->getMessage() ?: 'No message',
+                    'rawType' => $log->getType() // For frontend styling
+                ];
+            }
+            
+            error_log("getDocumentLogs: Successfully processed " . count($logsData) . " logs for document ID: " . $id);
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $logsData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("getDocumentLogs: Exception occurred: " . $e->getMessage());
+            error_log("getDocumentLogs: Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * User permissions API endpoint
+     * @Route("/api/flux/user-permissions", name="api_flux_user_permissions", methods={"GET"})
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function getUserPermissions(): JsonResponse {
+        try {
+            $user = $this->getUser();
+            
+            if (!$user) {
+                return new JsonResponse(['error' => 'User not authenticated'], 401);
+            }
+            
+            $permissions = [
+                'is_super_admin' => $user->hasRole('ROLE_SUPER_ADMIN'),
+                'is_admin' => $user->hasRole('ROLE_ADMIN'),
+                'roles' => $user->getRoles(),
+                'username' => $user->getUsername()
+            ];
+            
+            return new JsonResponse([
+                'success' => true,
+                'permissions' => $permissions
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper method to format log types with icons and colors
+     */
+    private function formatLogType($type): string {
+        switch (strtoupper($type)) {
+            case 'S':
+                return 'S ✓'; // Success - green
+            case 'E':
+                return 'E ✗'; // Error - red  
+            case 'W':
+                return 'W ⚠'; // Warning - yellow
+            case 'I':
+                return 'I ℹ'; // Info - blue
+            default:
+                return $type; // Return original if unknown
+        }
+    }
+
+    /**
+     * Update a specific field in document target data
+     * @Route("/flux/update-field", name="flux_update_field", methods={"POST"})
+     */
+    public function updateField(Request $request): JsonResponse {
+        try {
+            // Check if user is admin
+            if (!$this->getUser() || !$this->getUser()->isAdmin()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Insufficient permissions. Admin access required.'
+                ], 403);
+            }
+
+            // Get JSON data from request
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Invalid JSON data'
+                ], 400);
+            }
+
+            // Validate required fields
+            if (empty($data['documentId']) || empty($data['fieldName']) || !isset($data['fieldValue'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Missing required fields: documentId, fieldName, fieldValue'
+                ], 400);
+            }
+
+            $documentId = $data['documentId'];
+            $fieldName = trim($data['fieldName']);
+            $fieldValue = $data['fieldValue']; // Allow empty string
+
+            error_log("Updating field: Document ID = $documentId, Field = $fieldName, Value = $fieldValue");
+
+            // Get the document
+            $document = $this->entityManager->getRepository(Document::class)->find($documentId);
+            
+            if (!$document) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Document not found'
+                ], 404);
+            }
+
+            // Get target data for the document
+            $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
+                ->findOneBy([
+                    'doc_id' => $documentId,
+                    'type' => 'T',
+                ]);
+                
+            if (!$documentDataEntity) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Target data not found for this document'
+                ], 404);
+            }
+
+            // Decode current target data
+            $targetData = json_decode($documentDataEntity->getData(), true);
+            
+            if ($targetData === null) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Invalid target data format'
+                ], 500);
+            }
+
+            // Check if field exists in target data
+            if (!array_key_exists($fieldName, $targetData)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => "Field '$fieldName' not found in target data"
+                ], 404);
+            }
+
+            // Store the old value for audit
+            $oldValue = $targetData[$fieldName];
+            
+            // Update the field value
+            $targetData[$fieldName] = $fieldValue;
+            
+            // Save the updated data back to the entity
+            $documentDataEntity->setData(json_encode($targetData));
+            
+            // Create audit record
+            $documentAudit = new DocumentAudit();
+            $documentAudit->setDoc($documentId);
+            $documentAudit->setDateModified(new \DateTime());
+            $documentAudit->setBefore($oldValue);
+            $documentAudit->setAfter($fieldValue);
+            $documentAudit->setByUser($this->getUser()->getId());
+            $documentAudit->setName($fieldName);
+            
+            $this->entityManager->persist($documentAudit);
+            $this->entityManager->flush();
+
+            error_log("Field updated successfully: $fieldName changed from '$oldValue' to '$fieldValue'");
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Field updated successfully',
+                'data' => [
+                    'fieldName' => $fieldName,
+                    'oldValue' => $oldValue,
+                    'newValue' => $fieldValue
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Error updating field: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Internal server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Document workflow logs API endpoint
+     * @Route("/api/flux/document-workflow-logs/{id}", name="api_flux_document_workflow_logs", methods={"GET"})
+     */
+    public function getDocumentWorkflowLogs($id): JsonResponse {
+        try {
+            error_log("getDocumentWorkflowLogs called with document ID: " . $id);
+            
+            $em = $this->entityManager;
+            
+            // Get workflow logs for this trigger document
+            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                ['triggerDocument' => $id],
+                ['id' => 'DESC']
+            );
+            
+            error_log("Found " . count($workflowLogs) . " workflow logs for document ID: " . $id);
+            
+            $workflowLogsData = [];
+            
+            foreach ($workflowLogs as $workflowLog) {
+                $workflowLogsData[] = [
+                    'id' => $workflowLog->getId(),
+                    'workflowName' => $workflowLog->getWorkflow() ? $workflowLog->getWorkflow()->getName() : '',
+                    'workflowId' => $workflowLog->getWorkflow() ? $workflowLog->getWorkflow()->getId() : null,
+                    'jobName' => $workflowLog->getJob() ? $workflowLog->getJob()->getId() : '',
+                    'jobId' => $workflowLog->getJob() ? $workflowLog->getJob()->getId() : null,
+                    'triggerDocument' => $workflowLog->getTriggerDocument() ? $workflowLog->getTriggerDocument()->getId() : null,
+                    'generateDocument' => $workflowLog->getGenerateDocument() ? $workflowLog->getGenerateDocument()->getId() : null,
+                    'createdBy' => $workflowLog->getCreatedBy() ? $workflowLog->getCreatedBy()->getUsername() : '',
+                    'actionName' => $workflowLog->getAction() ? $workflowLog->getAction()->getName() : '',
+                    'actionId' => $workflowLog->getAction() ? $workflowLog->getAction()->getId() : null,
+                    'actionType' => $workflowLog->getAction() ? $workflowLog->getAction()->getAction() : '',
+                    'status' => $workflowLog->getStatus() ?? '',
+                    'dateCreated' => $workflowLog->getDateCreated()->format('Y-m-d H:i:s'),
+                    'message' => $workflowLog->getMessage() ?? '',
+                ];
+            }
+            
+            return new JsonResponse([
+                'success' => true,
+                'data' => $workflowLogsData
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Error in getDocumentWorkflowLogs: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Error retrieving workflow logs'
+            ], 500);
         }
     }
 }

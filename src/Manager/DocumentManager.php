@@ -168,6 +168,8 @@ class DocumentManager
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
+            'Found' => 'flux.status.found',
+            'Not_found' => 'flux.status.not_found',
         ];
     }
 
@@ -714,15 +716,14 @@ class DocumentManager
 								document.id,							
 								document.rule_id,
 								document.status,
-								document.global_status,										
-								document.job_lock											
+								document.global_status											
 							FROM document								
 							WHERE 
 									document.rule_id = :rule_id 
 								AND document.source_id = :source_id 
 								AND document.date_created < :date_created  
-								AND document.deleted = 0 
-								AND document.type <> 'D' 
+								AND document.deleted = 0
+                                AND document.type <> 'D'
 								AND document.global_status IN ('Error','Open')
 							LIMIT 1	
 							";
@@ -735,9 +736,6 @@ class DocumentManager
 
             // if id found, we stop to send an error, we cancel the predecessor and try again
             if (!empty($result['id'])) {
-				if (!empty($result['job_lock'])) {
-					throw new \Exception('The successor document '.$result['id'].' is locked. Failed to cancel it. The current document is stopped. ');
-				}
 				// Load the document that locks the current document
 				$paramCancel['id_doc_myddleware'] = $result['id'];
 				$paramCancel['jobId'] = $this->jobId;
@@ -1349,21 +1347,18 @@ class DocumentManager
             if (empty($history)) {
                 return false;
             }
-            // We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
-            // This field can only exist in target data as it is created by Myddleware
-            if (!empty($target['Myddleware_element_id'])) {
-                $target['Myddleware_element_id'] = '';
-            }
 
             // For each target fields, we compare the data we want to send and the data already in the target solution
             // If one is different we stop the function
             if (!empty($this->ruleFields)) {
                 foreach ($this->ruleFields as $field) {
-					// If one of the field isn't set then we return false
-					if (
-							!array_key_exists($field['target_field_name'], $history)
-						 OR !array_key_exists($field['target_field_name'], $target)
-					){
+                    // We don't compare field Myddleware_element_id as it can't exist in the history data (always empty if it exists)
+					// This field can only exist in target data as it is created by Myddleware
+					if ($field['target_field_name'] == 'Myddleware_element_id') {
+                            continue;
+					}
+					// If the field isn't set in the history then we return false because we don't know its value in the target application
+					if (!array_key_exists($field['target_field_name'], $history)){
 						return false;
 					}
                     if (stripslashes(trim($history[$field['target_field_name']])) != stripslashes(trim($target[$field['target_field_name']]))) {

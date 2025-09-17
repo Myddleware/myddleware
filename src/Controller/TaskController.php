@@ -87,13 +87,16 @@ class TaskController extends AbstractController
      */
     public function tasksList($page): Response
     {
-        // List of task limited to 1000 and rder by status (start first) and date begin
-        $jobs = $this->jobRepository->findBy([], ['status' => 'DESC', 'begin' => 'DESC'], 1000);
+        // Create QueryBuilder to allow proper pagination
+        $queryBuilder = $this->jobRepository->createQueryBuilder('j')
+            ->orderBy('j.status', 'DESC')
+            ->addOrderBy('j.begin', 'DESC');
+        
         $compact = $this->nav_pagination([
-            'adapter_em_repository' => $jobs,
+            'adapter_em_repository' => $queryBuilder,
             'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
-        ], false);
+        ], true);
 
         //Check the user timezone
         $timezone = $this->getUser()->getTimezone();
