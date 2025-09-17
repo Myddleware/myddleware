@@ -585,8 +585,6 @@ class FluxController extends AbstractController
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-
-
     public function extractDirectLink($sourceData): string {
 
         if (!isset($sourceData['direct_link'])) {
