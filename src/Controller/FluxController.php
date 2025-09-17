@@ -146,299 +146,299 @@ class FluxController extends AbstractController
         return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
     }
 
-    /**
-     * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
-     * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
-     */
-    public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
-    {
-        //--- Liste status traduction
-        $lstStatusTwig = DocumentManager::lstStatus();
-        foreach ($lstStatusTwig as $key => $value) {
-            $lstStatus[$this->translator->trans($value)] = $key;
-        }
-        asort($lstStatus);
-        //---
+    // /**
+    //  * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
+    //  * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
+    //  */
+    // public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
+    // {
+    //     //--- Liste status traduction
+    //     $lstStatusTwig = DocumentManager::lstStatus();
+    //     foreach ($lstStatusTwig as $key => $value) {
+    //         $lstStatus[$this->translator->trans($value)] = $key;
+    //     }
+    //     asort($lstStatus);
+    //     //---
 
-        //--- Liste Global status traduction
-        $lstGblStatusTwig = DocumentManager::lstGblStatus();
+    //     //--- Liste Global status traduction
+    //     $lstGblStatusTwig = DocumentManager::lstGblStatus();
 
-        foreach ($lstGblStatusTwig as $key => $value) {
-            $lstGblStatus[$this->translator->trans($value)] = $key;
-        }
-        asort($lstGblStatus);
-        //---
+    //     foreach ($lstGblStatusTwig as $key => $value) {
+    //         $lstGblStatus[$this->translator->trans($value)] = $key;
+    //     }
+    //     asort($lstGblStatus);
+    //     //---
 
-        //--- Liste type translation
-        $lstTypeTwig = DocumentManager::lstType();
+    //     //--- Liste type translation
+    //     $lstTypeTwig = DocumentManager::lstType();
 
-        foreach ($lstTypeTwig as $key => $value) {
-            $lstType[$this->translator->trans($value)] = $key;
-        }
-        //---
+    //     foreach ($lstTypeTwig as $key => $value) {
+    //         $lstType[$this->translator->trans($value)] = $key;
+    //     }
+    //     //---
 
-        $em = $this->entityManager;
+    //     $em = $this->entityManager;
 
-        if ($this->getUser()->isAdmin()) {
-            $rule = $this->entityManager
-                ->getRepository(Rule::class)
-                ->findBy(['deleted' => 0]);
-        } else {
-            $list_fields_sql =
-                [
-                    'createdBy' => $this->getUser()->getId(),
-                ];
+    //     if ($this->getUser()->isAdmin()) {
+    //         $rule = $this->entityManager
+    //             ->getRepository(Rule::class)
+    //             ->findBy(['deleted' => 0]);
+    //     } else {
+    //         $list_fields_sql =
+    //             [
+    //                 'createdBy' => $this->getUser()->getId(),
+    //             ];
 
-            $rule = $em->getRepository(Rule::class)->findBy($list_fields_sql);
-        }
-        // Detecte si la session est le support ---------
+    //         $rule = $em->getRepository(Rule::class)->findBy($list_fields_sql);
+    //     }
+    //     // Detecte si la session est le support ---------
 
-        // Liste des règles
-        $lstRuleName = [];
-        if ($rule) {
-            foreach ($rule as $r) {
-                $lstRuleName[$r->getName()] = $r->getName();
-            }
+    //     // Liste des règles
+    //     $lstRuleName = [];
+    //     if ($rule) {
+    //         foreach ($rule as $r) {
+    //             $lstRuleName[$r->getName()] = $r->getName();
+    //         }
 
-            asort($lstRuleName);
-        }
+    //         asort($lstRuleName);
+    //     }
 
-        $form = $this->createFormBuilder()
+    //     $form = $this->createFormBuilder()
 
-            /* ->add('date_create_start','text', array(
-                'data'=> ($this->sessionService->isFluxFilterCDateCreateStartExist() ? $this->sessionService->getFluxFilterDateCreateStart() : false),
-                'required'=> false,
-                'attr' => array('class' => 'calendar')))
+    //         /* ->add('date_create_start','text', array(
+    //             'data'=> ($this->sessionService->isFluxFilterCDateCreateStartExist() ? $this->sessionService->getFluxFilterDateCreateStart() : false),
+    //             'required'=> false,
+    //             'attr' => array('class' => 'calendar')))
 
-            ->add('date_create_end','text', array(
-                'data'=> ($this->sessionService->isFluxFilterCDateCreateEndExist() ? $this->sessionService->getFluxFilterDateCreateEnd() : false),
-                'required'=> false,
-                'attr' => array('class' => 'calendar'))) */
+    //         ->add('date_create_end','text', array(
+    //             'data'=> ($this->sessionService->isFluxFilterCDateCreateEndExist() ? $this->sessionService->getFluxFilterDateCreateEnd() : false),
+    //             'required'=> false,
+    //             'attr' => array('class' => 'calendar'))) */
 
-            ->add('source_content', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCSourceContentExist() ? $this->sessionService->getFluxFilterSourceContent() : false),
-                'required' => false,
-            ])
+    //         ->add('source_content', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCSourceContentExist() ? $this->sessionService->getFluxFilterSourceContent() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('target_content', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCTargetContentExist() ? $this->sessionService->getFluxFilterTargetContent() : false),
-                'required' => false,
-            ])
+    //         ->add('target_content', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCTargetContentExist() ? $this->sessionService->getFluxFilterTargetContent() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('date_modif_start', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCDateModifStartExist() ? $this->sessionService->getFluxFilterDateModifStart() : false),
-                'required' => false,
-                'attr' => ['class' => 'calendar'],
-            ])
+    //         ->add('date_modif_start', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCDateModifStartExist() ? $this->sessionService->getFluxFilterDateModifStart() : false),
+    //             'required' => false,
+    //             'attr' => ['class' => 'calendar'],
+    //         ])
 
-            ->add('date_modif_end', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCDateModifEndExist() ? $this->sessionService->getFluxFilterDateModifEnd() : false),
-                'required' => false,
-                'attr' => ['class' => 'calendar'],
-            ])
+    //         ->add('date_modif_end', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCDateModifEndExist() ? $this->sessionService->getFluxFilterDateModifEnd() : false),
+    //             'required' => false,
+    //             'attr' => ['class' => 'calendar'],
+    //         ])
 
-            ->add('rule', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
-                'required' => false,
-            ])
+    //         ->add('rule', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('rule', ChoiceType::class, [
-                'choices' => $lstRuleName,
-                'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
-                'required' => false,
-            ])
+    //         ->add('rule', ChoiceType::class, [
+    //             'choices' => $lstRuleName,
+    //             'data' => ($this->sessionService->isFluxFilterCRuleExist() ? $this->sessionService->getFluxFilterRuleName() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('status', ChoiceType::class, [
-                'choices' => $lstStatus,
-                'data' => ($this->sessionService->isFluxFilterCStatusExist() ? $this->sessionService->getFluxFilterStatus() : false),
-                'required' => false,
-            ])
+    //         ->add('status', ChoiceType::class, [
+    //             'choices' => $lstStatus,
+    //             'data' => ($this->sessionService->isFluxFilterCStatusExist() ? $this->sessionService->getFluxFilterStatus() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('gblstatus', ChoiceType::class, [
-                'choices' => $lstGblStatus,
-                'data' => ($this->sessionService->isFluxFilterCGblStatusExist() ? $this->sessionService->getFluxFilterGlobalStatus() : false),
-                'required' => false,
-            ])
+    //         ->add('gblstatus', ChoiceType::class, [
+    //             'choices' => $lstGblStatus,
+    //             'data' => ($this->sessionService->isFluxFilterCGblStatusExist() ? $this->sessionService->getFluxFilterGlobalStatus() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('type', ChoiceType::class, [
-                'choices' => $lstType,
-                'data' => ($this->sessionService->isFluxFilterTypeExist() ? $this->sessionService->getFluxFilterType() : false),
-                'required' => false,
-            ])
+    //         ->add('type', ChoiceType::class, [
+    //             'choices' => $lstType,
+    //             'data' => ($this->sessionService->isFluxFilterTypeExist() ? $this->sessionService->getFluxFilterType() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('source_id', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCSourceIdExist() ? $this->sessionService->getFluxFilterSourceId() : false),
-                'required' => false,
-            ])
+    //         ->add('source_id', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCSourceIdExist() ? $this->sessionService->getFluxFilterSourceId() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('target_id', TextType::class, [
-                'data' => ($this->sessionService->isFluxFilterCTargetIdExist() ? $this->sessionService->getFluxFilterTargetId() : false),
-                'required' => false,
-            ])
+    //         ->add('target_id', TextType::class, [
+    //             'data' => ($this->sessionService->isFluxFilterCTargetIdExist() ? $this->sessionService->getFluxFilterTargetId() : false),
+    //             'required' => false,
+    //         ])
 
-            ->add('click_filter', SubmitType::class, [
-                'attr' => [
-                    'class' => 'btn btn-primary ms-4 mt-4',
-                ],
-                'label' => $this->translator->trans('list_flux.btn.filter'),
-            ])
+    //         ->add('click_filter', SubmitType::class, [
+    //             'attr' => [
+    //                 'class' => 'btn btn-primary ms-4 mt-4',
+    //             ],
+    //             'label' => $this->translator->trans('list_flux.btn.filter'),
+    //         ])
 
-            ->getForm();
+    //         ->getForm();
 
-        $form->handleRequest($request);
-        // condition d'affichage
-        $data = [];
-        if (!empty($this->sessionService->getFluxFilterWhere())) {
-            $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
-            $this->sessionService->removeFluxFilter();
-        }
+    //     $form->handleRequest($request);
+    //     // condition d'affichage
+    //     $data = [];
+    //     if (!empty($this->sessionService->getFluxFilterWhere())) {
+    //         $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
+    //         $this->sessionService->removeFluxFilter();
+    //     }
 
-        // Get the limit parameter
-        $configRepository = $this->entityManager->getRepository(Config::class);
-        $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-        if (!empty($searchLimit)) {
-            $limit = $searchLimit->getValue();
-        }
+    //     // Get the limit parameter
+    //     $configRepository = $this->entityManager->getRepository(Config::class);
+    //     $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
+    //     if (!empty($searchLimit)) {
+    //         $limit = $searchLimit->getValue();
+    //     }
         
-        $conditions = 0;
-        $doNotSearch = false;
-        //---[ FORM ]-------------------------
-        if ($form->get('click_filter')->isClicked()) {
-            $data = $form->getData();
-            $data['user'] = $this->getUser();
-            $data['search'] = $search;
-            $data['page'] = $page;
+    //     $conditions = 0;
+    //     $doNotSearch = false;
+    //     //---[ FORM ]-------------------------
+    //     if ($form->get('click_filter')->isClicked()) {
+    //         $data = $form->getData();
+    //         $data['user'] = $this->getUser();
+    //         $data['search'] = $search;
+    //         $data['page'] = $page;
 
-            if (!empty($data['source_content']) && is_string($data['source_content'])) {
-                $this->sessionService->setFluxFilterSourceContent($data['source_content']);
-            } else {
-                $this->sessionService->removeFluxFilterSourceContent();
-            }
+    //         if (!empty($data['source_content']) && is_string($data['source_content'])) {
+    //             $this->sessionService->setFluxFilterSourceContent($data['source_content']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterSourceContent();
+    //         }
 
-            if (!empty($data['target_content']) && is_string($data['target_content'])) {
-                $this->sessionService->setFluxFilterTargetContent($data['target_content']);
-            } else {
-                $this->sessionService->removeFluxFilterTargetContent();
-            }
+    //         if (!empty($data['target_content']) && is_string($data['target_content'])) {
+    //             $this->sessionService->setFluxFilterTargetContent($data['target_content']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterTargetContent();
+    //         }
 
-            if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
-                $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
-            } else {
-                $this->sessionService->removeFluxFilterDateModifStart();
-            }
+    //         if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
+    //             $this->sessionService->setFluxFilterDateModifStart($data['date_modif_start']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterDateModifStart();
+    //         }
 
-            if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
-                $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
-            } else {
-                $this->sessionService->removeFluxFilterDateModifEnd();
-            }
+    //         if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
+    //             $this->sessionService->setFluxFilterDateModifEnd($data['date_modif_end']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterDateModifEnd();
+    //         }
 
-            if (!empty($data['rule']) && is_string($data['rule'])) {
-                $this->sessionService->setFluxFilterRuleName($data['rule']);
-            } else {
-                $this->sessionService->removeFluxFilterRuleName();
-            }
+    //         if (!empty($data['rule']) && is_string($data['rule'])) {
+    //             $this->sessionService->setFluxFilterRuleName($data['rule']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterRuleName();
+    //         }
 
-            if (!empty($data['status'])) {
-                $this->sessionService->setFluxFilterStatus($data['status']);
-            } else {
-                $this->sessionService->removeFluxFilterStatus();
-            }
+    //         if (!empty($data['status'])) {
+    //             $this->sessionService->setFluxFilterStatus($data['status']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterStatus();
+    //         }
 
-            if (!empty($data['gblstatus'])) {
-                $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
-            } else {
-                $this->sessionService->removeFluxFilterGblStatus();
-            }
+    //         if (!empty($data['gblstatus'])) {
+    //             $this->sessionService->setFluxFilterGlobalStatus($data['gblstatus']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterGblStatus();
+    //         }
 
-            if (!empty($data['type'])) {
-                $this->sessionService->setFluxFilterType($data['type']);
-            } else {
-                $this->sessionService->removeFluxFilterType();
-            }
+    //         if (!empty($data['type'])) {
+    //             $this->sessionService->setFluxFilterType($data['type']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterType();
+    //         }
 
-            if (!empty($data['target_id'])) {
-                $this->sessionService->setFluxFilterTargetId($data['target_id']);
-            } else {
-                $this->sessionService->removeFluxFilterTargetId();
-            }
+    //         if (!empty($data['target_id'])) {
+    //             $this->sessionService->setFluxFilterTargetId($data['target_id']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterTargetId();
+    //         }
 
-            if (!empty($data['source_id'])) {
-                $this->sessionService->setFluxFilterSourceId($data['source_id']);
-            } else {
-                $this->sessionService->removeFluxFilterSourceId();
-            }
-       } // end clicked
-        //---[ FORM ]-------------------------
-        // In case of pagination
-        else {
-            $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
-            $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
-            $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
-            $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
-            $data['rule']               = $this->sessionService->getFluxFilterRuleName();
-            $data['status']             = $this->sessionService->getFluxFilterStatus();
-            $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
-            $data['type']               = $this->sessionService->getFluxFilterType();
-            $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
-            $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
-            // No search if no filter and page = 1. 
-			// We keep searching if someone searched without filter and clicke on another page
-			if (
-                    count(array_filter($data)) === 0
-                AND $page == 1
-            ) {
-                $doNotSearch = true;
-            }
-        }
+    //         if (!empty($data['source_id'])) {
+    //             $this->sessionService->setFluxFilterSourceId($data['source_id']);
+    //         } else {
+    //             $this->sessionService->removeFluxFilterSourceId();
+    //         }
+    //    } // end clicked
+    //     //---[ FORM ]-------------------------
+    //     // In case of pagination
+    //     else {
+    //         $data['source_content']     = $this->sessionService->getFluxFilterSourceContent();
+    //         $data['target_content']     = $this->sessionService->getFluxFilterTargetContent();
+    //         $data['date_modif_start']   = $this->sessionService->getFluxFilterDateModifStart();
+    //         $data['date_modif_end']     = $this->sessionService->getFluxFilterDateModifEnd();
+    //         $data['rule']               = $this->sessionService->getFluxFilterRuleName();
+    //         $data['status']             = $this->sessionService->getFluxFilterStatus();
+    //         $data['gblstatus']          = $this->sessionService->getFluxFilterGlobalStatus();
+    //         $data['type']               = $this->sessionService->getFluxFilterType();
+    //         $data['target_id']          = $this->sessionService->getFluxFilterTargetId();
+    //         $data['source_id']          = $this->sessionService->getFluxFilterSourceId();
+    //         // No search if no filter and page = 1. 
+	// 		// We keep searching if someone searched without filter and clicke on another page
+	// 		if (
+    //                 count(array_filter($data)) === 0
+    //             AND $page == 1
+    //         ) {
+    //             $doNotSearch = true;
+    //         }
+    //     }
 
-        if (!$doNotSearch) {
-			$resultSearch = $this->searchDocuments($data, $page, $limit); 
-		} else {
-			$resultSearch = array();
-		}
+    //     if (!$doNotSearch) {
+	// 		$resultSearch = $this->searchDocuments($data, $page, $limit); 
+	// 	} else {
+	// 		$resultSearch = array();
+	// 	}
 
-        $compact = $this->nav_pagination([
-            'adapter_em_repository' => $resultSearch,
-            'maxPerPage' => $this->params['pager'] ?? 25,
-            'page' => $page,
-        ], false);
+    //     $compact = $this->nav_pagination([
+    //         'adapter_em_repository' => $resultSearch,
+    //         'maxPerPage' => $this->params['pager'] ?? 25,
+    //         'page' => $page,
+    //     ], false);
 
-        // Si tout se passe bien dans la pagination
-        if ($compact) {
-            // Si aucune règle
-            if ($compact['nb'] < 1 && !intval($compact['nb'])) {
-                $compact['entities'] = '';
-                $compact['pager'] = '';
-            }
+    //     // Si tout se passe bien dans la pagination
+    //     if ($compact) {
+    //         // Si aucune règle
+    //         if ($compact['nb'] < 1 && !intval($compact['nb'])) {
+    //             $compact['entities'] = '';
+    //             $compact['pager'] = '';
+    //         }
 
-            // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
-            if ($this->sessionService->isFluxFilterCExist()) {
-                $conditions = 1;
-            }
+    //         // affiche le bouton pour supprimer les filtres si les conditions proviennent du tableau de bord
+    //         if ($this->sessionService->isFluxFilterCExist()) {
+    //             $conditions = 1;
+    //         }
 
-            //Check the user timezone
-            if ($timezone = '') {
-                $timezone = 'UTC';
-            } else {
-                $timezone = $this->getUser()->getTimezone();
-            }
+    //         //Check the user timezone
+    //         if ($timezone = '') {
+    //             $timezone = 'UTC';
+    //         } else {
+    //             $timezone = $this->getUser()->getTimezone();
+    //         }
 
-            return $this->render(
-                'Flux/list.html.twig',
-                [
-                    'nb' => $compact['nb'],
-                    'entities' => $compact['entities'],
-                    'pager' => $compact['pager'],
-                    'form' => $form->createView(),
-                    'condition' => $conditions,
-                    'timezone' => $timezone,
-                ]
-            );
-        }
+    //         return $this->render(
+    //             'Flux/list.html.twig',
+    //             [
+    //                 'nb' => $compact['nb'],
+    //                 'entities' => $compact['entities'],
+    //                 'pager' => $compact['pager'],
+    //                 'form' => $form->createView(),
+    //                 'condition' => $conditions,
+    //                 'timezone' => $timezone,
+    //             ]
+    //         );
+    //     }
 
-        throw $this->createNotFoundException('Error');
-    }
+    //     throw $this->createNotFoundException('Error');
+    // }
 
     
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
@@ -585,17 +585,17 @@ class FluxController extends AbstractController
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")
-     */
-    public function fluxListDeleteFilter(): RedirectResponse
-    {
-        if ($this->sessionService->isFluxFilterExist()) {
-            $this->sessionService->removeFluxFilter();
-        }
+    // /**
+    //  * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")
+    //  */
+    // public function fluxListDeleteFilter(): RedirectResponse
+    // {
+    //     if ($this->sessionService->isFluxFilterExist()) {
+    //         $this->sessionService->removeFluxFilter();
+    //     }
 
-        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
-    }
+    //     return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
+    // }
 
 /**
  * @Route("/flux/{id}/log/{logPage}", name="flux_info", defaults={"page"=1, "logPage"=1})
