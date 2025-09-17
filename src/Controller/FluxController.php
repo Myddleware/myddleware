@@ -441,149 +441,149 @@ class FluxController extends AbstractController
     // }
 
     
-    protected function searchDocuments($data, $page = 1, $limit = 1000) {
-        $join = '';
-        $where = '';
+    // protected function searchDocuments($data, $page = 1, $limit = 1000) {
+    //     $join = '';
+    //     $where = '';
 
-        // Build the WHERE depending on $data
-        // Source content
-        if (!empty($data['source_content'])) {
-            $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
-            $where .= " AND document_data_source.data LIKE :source_content 
-                        AND document_data_source.type = 'S'";
-        }
-        // Target content
-        if (!empty($data['target_content'])) {
-            $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
-            $where .= " AND document_data_target.data LIKE :target_content 
-                        AND document_data_target.type = 'T'";
-        }
-        // Date modified (start) 
-        if (!empty($data['date_modif_start'])) {
-            $where .= " AND document.date_modified >= :dateModifiedStart ";
-        }
-        // Date modified (end)
-        if (!empty($data['date_modif_end'])) {
-            $where .= " AND document.date_modified <= :dateModifiedEnd ";
-        }
-        // Rule
-        if (
-                !empty($data['rule'])
-            OR !empty($data['customWhere']['rule'])
-        ) {
-            $where .= " AND rule.name = :ruleName ";
-        }
-        // Status
-        if (!empty($data['status'])) {
-            $where .= " AND document.status = :status ";
-        }
+    //     // Build the WHERE depending on $data
+    //     // Source content
+    //     if (!empty($data['source_content'])) {
+    //         $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
+    //         $where .= " AND document_data_source.data LIKE :source_content 
+    //                     AND document_data_source.type = 'S'";
+    //     }
+    //     // Target content
+    //     if (!empty($data['target_content'])) {
+    //         $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
+    //         $where .= " AND document_data_target.data LIKE :target_content 
+    //                     AND document_data_target.type = 'T'";
+    //     }
+    //     // Date modified (start) 
+    //     if (!empty($data['date_modif_start'])) {
+    //         $where .= " AND document.date_modified >= :dateModifiedStart ";
+    //     }
+    //     // Date modified (end)
+    //     if (!empty($data['date_modif_end'])) {
+    //         $where .= " AND document.date_modified <= :dateModifiedEnd ";
+    //     }
+    //     // Rule
+    //     if (
+    //             !empty($data['rule'])
+    //         OR !empty($data['customWhere']['rule'])
+    //     ) {
+    //         $where .= " AND rule.name = :ruleName ";
+    //     }
+    //     // Status
+    //     if (!empty($data['status'])) {
+    //         $where .= " AND document.status = :status ";
+    //     }
 
-        // customWhere can have several status (open and error from the error dashlet in the home page)
-        if (!empty($data['customWhere']['gblstatus'])) {
-            $i = 0;
-            $where .= " AND ( ";
-            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
-                $where .= " document.global_status = :gblstatus".$i." OR";
-                $i++;
-            }
-            $where = rtrim($where, 'OR').' )';
-        } elseif (!empty($data['gblstatus'])) {
-            $where .= " AND document.global_status = :gblstatus ";
-        }
+    //     // customWhere can have several status (open and error from the error dashlet in the home page)
+    //     if (!empty($data['customWhere']['gblstatus'])) {
+    //         $i = 0;
+    //         $where .= " AND ( ";
+    //         foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+    //             $where .= " document.global_status = :gblstatus".$i." OR";
+    //             $i++;
+    //         }
+    //         $where = rtrim($where, 'OR').' )';
+    //     } elseif (!empty($data['gblstatus'])) {
+    //         $where .= " AND document.global_status = :gblstatus ";
+    //     }
 
-        // Type
-        if (!empty($data['type'])) {
-            $where .= " AND document.type = :type ";
-        }
-        // Target ID
-        if (!empty($data['target_id'])) {
-            $where .= " AND document.target_id LIKE :target_id ";
-        }
-        // Source ID
-        if (!empty($data['source_id'])) {
-            $where .= " AND document.source_id LIKE :source_id ";
-        }
+    //     // Type
+    //     if (!empty($data['type'])) {
+    //         $where .= " AND document.type = :type ";
+    //     }
+    //     // Target ID
+    //     if (!empty($data['target_id'])) {
+    //         $where .= " AND document.target_id LIKE :target_id ";
+    //     }
+    //     // Source ID
+    //     if (!empty($data['source_id'])) {
+    //         $where .= " AND document.source_id LIKE :source_id ";
+    //     }
 
-        // Build query
-        $query = "
-            SELECT 
-                document.id, 
-                document.date_created, 
-                document.date_modified, 
-                document.status, 
-                document.source_id, 
-                document.target_id, 
-                document.source_date_modified, 
-                document.mode, 
-                document.type, 
-                document.attempt, 
-                document.global_status, 
-                rule.name as rule_name, 
-                rule.id as rule_id 
-            FROM document 
-                INNER JOIN rule	
-                    ON document.rule_id = rule.id "
-                .$join. 
-            " WHERE 
-                    document.deleted = 0 "
-                    .$where.
-            " ORDER BY document.date_modified DESC"
-            ." LIMIT ". $limit;
-        $stmt = $this->entityManager->getConnection()->prepare($query);
-        // Add parameters to the query
-        // Source content
-        if (!empty($data['source_content'])) {
-            $stmt->bindValue(':source_content', "%".$data['source_content']."%");
-        }
-        // Target content
-        if (!empty($data['target_content'])) {
-            $stmt->bindValue(':target_content', "%".$data['target_content']."%");
-        }
-        // Date modified start
-        if (!empty($data['date_modif_start'])) {
-            $stmt->bindValue(':dateModifiedStart', str_replace(',','',$data['date_modif_start']));
-        }
-        // Date modified end
-        if (!empty($data['date_modif_end'])) {
-            $stmt->bindValue(':dateModifiedEnd', $data['date_modif_end']);
-        }
-        // Rule
-        if (
-                !empty($data['rule'])
-             OR !empty($data['customWhere']['rule'])
-         ) {
-            $ruleFilter = trim((!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']));
-            $stmt->bindValue(':ruleName', $ruleFilter);
-        }
-        // Status
-        if (!empty($data['status'])) {
-            $stmt->bindValue(':status', $data['status']);
-        }
-        // customWhere can have several status (open and error from the error dashlet in the home page)
-        if (!empty($data['customWhere']['gblstatus'])) {
-            $i = 0;
-            foreach($data['customWhere']['gblstatus'] as $globalStatus) {
-                $stmt->bindValue(':gblstatus'.$i, $gblstatus);
-                $i++;
-            }
-        } elseif (!empty($data['gblstatus'])) {
-            $stmt->bindValue(':gblstatus', $data['gblstatus']);
-        }
-        // Type
-        if (!empty($data['type'])) {
-            $stmt->bindValue(':type', $data['type']);
-        }
-        // Target id
-        if (!empty($data['target_id'])) {
-            $stmt->bindValue(':target_id', $data['target_id']);
-        }
-        // Source id
-        if (!empty($data['source_id'])) {
-            $stmt->bindValue(':source_id', $data['source_id']);
-        }
-        // Run the query and return the results
-        return $stmt->executeQuery()->fetchAllAssociative();
-    }
+    //     // Build query
+    //     $query = "
+    //         SELECT 
+    //             document.id, 
+    //             document.date_created, 
+    //             document.date_modified, 
+    //             document.status, 
+    //             document.source_id, 
+    //             document.target_id, 
+    //             document.source_date_modified, 
+    //             document.mode, 
+    //             document.type, 
+    //             document.attempt, 
+    //             document.global_status, 
+    //             rule.name as rule_name, 
+    //             rule.id as rule_id 
+    //         FROM document 
+    //             INNER JOIN rule	
+    //                 ON document.rule_id = rule.id "
+    //             .$join. 
+    //         " WHERE 
+    //                 document.deleted = 0 "
+    //                 .$where.
+    //         " ORDER BY document.date_modified DESC"
+    //         ." LIMIT ". $limit;
+    //     $stmt = $this->entityManager->getConnection()->prepare($query);
+    //     // Add parameters to the query
+    //     // Source content
+    //     if (!empty($data['source_content'])) {
+    //         $stmt->bindValue(':source_content', "%".$data['source_content']."%");
+    //     }
+    //     // Target content
+    //     if (!empty($data['target_content'])) {
+    //         $stmt->bindValue(':target_content', "%".$data['target_content']."%");
+    //     }
+    //     // Date modified start
+    //     if (!empty($data['date_modif_start'])) {
+    //         $stmt->bindValue(':dateModifiedStart', str_replace(',','',$data['date_modif_start']));
+    //     }
+    //     // Date modified end
+    //     if (!empty($data['date_modif_end'])) {
+    //         $stmt->bindValue(':dateModifiedEnd', $data['date_modif_end']);
+    //     }
+    //     // Rule
+    //     if (
+    //             !empty($data['rule'])
+    //          OR !empty($data['customWhere']['rule'])
+    //      ) {
+    //         $ruleFilter = trim((!empty($data['customWhere']['rule']) ? $data['customWhere']['rule'] : $data['rule']));
+    //         $stmt->bindValue(':ruleName', $ruleFilter);
+    //     }
+    //     // Status
+    //     if (!empty($data['status'])) {
+    //         $stmt->bindValue(':status', $data['status']);
+    //     }
+    //     // customWhere can have several status (open and error from the error dashlet in the home page)
+    //     if (!empty($data['customWhere']['gblstatus'])) {
+    //         $i = 0;
+    //         foreach($data['customWhere']['gblstatus'] as $globalStatus) {
+    //             $stmt->bindValue(':gblstatus'.$i, $gblstatus);
+    //             $i++;
+    //         }
+    //     } elseif (!empty($data['gblstatus'])) {
+    //         $stmt->bindValue(':gblstatus', $data['gblstatus']);
+    //     }
+    //     // Type
+    //     if (!empty($data['type'])) {
+    //         $stmt->bindValue(':type', $data['type']);
+    //     }
+    //     // Target id
+    //     if (!empty($data['target_id'])) {
+    //         $stmt->bindValue(':target_id', $data['target_id']);
+    //     }
+    //     // Source id
+    //     if (!empty($data['source_id'])) {
+    //         $stmt->bindValue(':source_id', $data['source_id']);
+    //     }
+    //     // Run the query and return the results
+    //     return $stmt->executeQuery()->fetchAllAssociative();
+    // }
 
     public function extractDirectLink($sourceData): string {
 
@@ -831,122 +831,122 @@ $result = [];
         exit;
     }
 
-    /* *******************************************************
-        * METHODES PRATIQUES
-        ****************************************************** */
+    // /* *******************************************************
+    //     * METHODES PRATIQUES
+    //     ****************************************************** */
 
-    // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
-    private function nav_pagination($params, $orm = true)
-    {
-        /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
+    // // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
+    // private function nav_pagination($params, $orm = true)
+    // {
+    //     /*
+    //         * adapter_em_repository = requete
+    //         * maxPerPage = integer
+    //         * page = page en cours
+    //         */
 
-        if (is_array($params)) {
-            $compact = [];
-            if ($orm) {
-                $queryBuilder = $params['adapter_em_repository'];
-                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
-                $compact['pager'] = $pagerfanta;
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-            $maxPerPage = intval($params['maxPerPage']);
-            $currentPage = intval($params['page']);
-            $compact['pager']->setMaxPerPage($maxPerPage);
-            try {
-                $compact['pager']->setCurrentPage($currentPage);
-                $compact['nb'] = $compact['pager']->getNbResults();
-                $compact['entities'] = $compact['pager']->getCurrentPageResults();
-            } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            }
+    //     if (is_array($params)) {
+    //         $compact = [];
+    //         if ($orm) {
+    //             $queryBuilder = $params['adapter_em_repository'];
+    //             $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+    //             $compact['pager'] = $pagerfanta;
+    //         } else {
+    //             $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+    //         }
+    //         $maxPerPage = intval($params['maxPerPage']);
+    //         $currentPage = intval($params['page']);
+    //         $compact['pager']->setMaxPerPage($maxPerPage);
+    //         try {
+    //             $compact['pager']->setCurrentPage($currentPage);
+    //             $compact['nb'] = $compact['pager']->getNbResults();
+    //             $compact['entities'] = $compact['pager']->getCurrentPageResults();
+    //         } catch (NotValidCurrentPageException $e) {
+    //             throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+    //         }
 
-            return $compact;
-        }
+    //         return $compact;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
 
-    private function nav_pagination_documents($params, $orm = true)
-    {
-        /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
-        if (is_array($params)) {
+    // private function nav_pagination_documents($params, $orm = true)
+    // {
+    //     /*
+    //         * adapter_em_repository = requete
+    //         * maxPerPage = integer
+    //         * page = page en cours
+    //         */
+    //     if (is_array($params)) {
 
-            $pageParameterName = $params['pageParameterName'];
+    //         $pageParameterName = $params['pageParameterName'];
 
-            $compact = [];
-            if ($orm) {
-                $queryBuilder = $params['adapter_em_repository'];
-                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
-                $compact['pager'] = $pagerfanta;
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-            $maxPerPage = intval($params['maxPerPage']);
-            $currentPage = intval($params['page']);
-            $compact['pager']->setMaxPerPage($maxPerPage);
-            try {
-                $compact['pager']->setCurrentPage($currentPage);
-                $compact['nb'] = $compact['pager']->getNbResults();
-                $compact['entities'] = $compact['pager']->getCurrentPageResults();
-                $compact['pageParameterName'] = $pageParameterName;
+    //         $compact = [];
+    //         if ($orm) {
+    //             $queryBuilder = $params['adapter_em_repository'];
+    //             $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+    //             $compact['pager'] = $pagerfanta;
+    //         } else {
+    //             $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+    //         }
+    //         $maxPerPage = intval($params['maxPerPage']);
+    //         $currentPage = intval($params['page']);
+    //         $compact['pager']->setMaxPerPage($maxPerPage);
+    //         try {
+    //             $compact['pager']->setCurrentPage($currentPage);
+    //             $compact['nb'] = $compact['pager']->getNbResults();
+    //             $compact['entities'] = $compact['pager']->getCurrentPageResults();
+    //             $compact['pageParameterName'] = $pageParameterName;
                 
-            } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            }
+    //         } catch (NotValidCurrentPageException $e) {
+    //             throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+    //         }
 
-            return $compact;
-        }
+    //         return $compact;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
 
-    private function nav_pagination_logs($params, $orm = true)
-    {
-        /*
-            * adapter_em_repository = requete
-            * maxPerPage = integer
-            * page = page en cours
-            */
+    // private function nav_pagination_logs($params, $orm = true)
+    // {
+    //     /*
+    //         * adapter_em_repository = requete
+    //         * maxPerPage = integer
+    //         * page = page en cours
+    //         */
 
-        if (is_array($params)) {
+    //     if (is_array($params)) {
 
-            $pageParameterName = $params['pageParameterName'];
+    //         $pageParameterName = $params['pageParameterName'];
 
-            $compact = [];
-            if ($orm) {
-                $queryBuilder = $params['adapter_em_repository'];
-                $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
-                $compact['pager'] = $pagerfanta;
-            } else {
-                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
-            }
-            $maxPerPage = intval($params['maxPerPage']);
-            $currentPage = intval($params['page']);
-            $compact['pager']->setMaxPerPage($maxPerPage);
-            try {
-                $compact['pager']->setCurrentPage($currentPage);
-                $compact['nb'] = $compact['pager']->getNbResults();
-                $compact['entities'] = $compact['pager']->getCurrentPageResults();
-                $compact['pageParameterName'] = $pageParameterName;
-            } catch (NotValidCurrentPageException $e) {
-                throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
-            }
+    //         $compact = [];
+    //         if ($orm) {
+    //             $queryBuilder = $params['adapter_em_repository'];
+    //             $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+    //             $compact['pager'] = $pagerfanta;
+    //         } else {
+    //             $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+    //         }
+    //         $maxPerPage = intval($params['maxPerPage']);
+    //         $currentPage = intval($params['page']);
+    //         $compact['pager']->setMaxPerPage($maxPerPage);
+    //         try {
+    //             $compact['pager']->setCurrentPage($currentPage);
+    //             $compact['nb'] = $compact['pager']->getNbResults();
+    //             $compact['entities'] = $compact['pager']->getCurrentPageResults();
+    //             $compact['pageParameterName'] = $pageParameterName;
+    //         } catch (NotValidCurrentPageException $e) {
+    //             throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
+    //         }
 
-            return $compact;
-        }
+    //         return $compact;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     // Liste tous les flux d'un type
     private function listeFluxTable($id, $type)
