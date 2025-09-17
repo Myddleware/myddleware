@@ -146,35 +146,6 @@ class FluxController extends AbstractController
         return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
     }
 
-    public function extractDirectLink($sourceData): string {
-
-        if (!isset($sourceData['direct_link'])) {
-            return '';
-        }
-        $link = $sourceData['direct_link'];
-        $extractedLeftPortionOfLink = explode('#', $link);
-        $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
-
-        return $updatedLink;
-    }
-
-    public function generateLinkToSource($sourceData, $mappedData, $extractedDirectLink): array {
-
-$result = [];
-
-        // for each element of the array, we will generate a link to the source record
-        // we will use the rule to find the source module
-        foreach ($mappedData as $item) {
-            // get the rule of the item
-            $rule = $this->entityManager->getRepository(Rule::class)->find($item['rule']);
-            $module = strtolower($rule->getModuleSource());
-            $link = $extractedDirectLink . "#/" .$module.'/record/'. $sourceData[$item['field']];
-            $result[$item['field']] = $link;
-        }
-
-        return $result;
-    }
-
     function extractFieldAndRule($lookupData) {
         $result = [];
     
