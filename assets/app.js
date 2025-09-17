@@ -62,6 +62,11 @@ if (window.location.href.includes('workflow/list')) {
     require('./js/workflowsearchworkflowname.js')
 }
 
+// require('./js/variable.js')
+if (window.location.href.includes('variables')) {
+    require('./js/variable.js')
+}
+
 if (window.location.href.includes('rule/view')) {
     require('./js/rule-detail.js')
     require('./js/workflow-toggle-list.js')
