@@ -32,21 +32,21 @@ use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
 use App\Entity\Document;
-use App\Entity\Job;					
+// use App\Entity\Job;					
 use Pagerfanta\Pagerfanta;
 use App\Entity\WorkflowLog;
 use App\Manager\JobManager;
 use App\Entity\DocumentData;
 use App\Entity\DocumentAudit;
 use App\Service\SessionService;
-use App\Manager\DocumentManager;
+// use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Entity\DocumentRelationship;
 use Pagerfanta\Adapter\ArrayAdapter;
 use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use App\Form\Type\DocumentCommentType;							
+// use App\Form\Type\DocumentCommentType;							
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -54,10 +54,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+// use Symfony\Component\Form\Extension\Core\Type\TextType;
+// use Symfony\Component\HttpKernel\Exception\HttpException;
+// use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+// use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
@@ -75,14 +75,14 @@ class FluxController extends AbstractController
     private EntityManagerInterface $entityManager;
     private JobManager $jobManager;
     private SolutionManager $solutionManager;
-    private DocumentRepository $documentRepository;
+    // private DocumentRepository $documentRepository;
     private ToolsManager $toolsManager;
     public function __construct(
         SessionService $sessionService,
         TranslatorInterface $translator,
         JobManager $jobManager,
         SolutionManager $solutionManager,
-        DocumentRepository $documentRepository,
+        // DocumentRepository $documentRepository,
         EntityManagerInterface $entityManager,
         ToolsManager $toolsManager,
         Connection $connection
@@ -91,7 +91,7 @@ class FluxController extends AbstractController
         $this->translator = $translator;
         $this->jobManager = $jobManager;
         $this->solutionManager = $solutionManager;
-        $this->documentRepository = $documentRepository;
+        // $this->documentRepository = $documentRepository;
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
         $this->connection = $connection;
