@@ -601,11 +601,6 @@ margin-left: -0.5rem;
     margin-left: 0.5rem;
 }
 
-.sourceIdOfDocument,
-.targetIdOfDocument {
-    width: 19rem;
-}
-
 #relation_filter_field,
 #relation_filter_another_field,
 #relation_filter_textarea_field {
