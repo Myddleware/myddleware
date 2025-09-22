@@ -6,7 +6,7 @@
  * @param {function} callback - Callback function(logsData, error)
  */
 export function getDocumentWorkflowLogs(documentId, callback) {
-    // console.log('📋 getDocumentWorkflowLogs called for document:', documentId);
+// console.log('📋 getDocumentWorkflowLogs called for document:', documentId);
     
     if (!documentId) {
         console.error('❌ Document ID is required for workflow logs fetch');
@@ -33,7 +33,7 @@ export function getDocumentWorkflowLogs(documentId, callback) {
     }
     
     const apiUrl = `${baseUrl}/rule/api/flux/document-workflow-logs/${documentId}`;
-    // console.log('📋 Fetching workflow logs from:', apiUrl);
+// console.log('📋 Fetching workflow logs from:', apiUrl);
     
     fetch(apiUrl, {
         method: 'GET',
@@ -43,7 +43,7 @@ export function getDocumentWorkflowLogs(documentId, callback) {
         }
     })
     .then(response => {
-        // console.log('📋 Workflow logs API response status:', response.status);
+// console.log('📋 Workflow logs API response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,10 +52,10 @@ export function getDocumentWorkflowLogs(documentId, callback) {
         return response.json();
     })
     .then(data => {
-        // console.log('📋 Workflow logs API response data:', data);
+// console.log('📋 Workflow logs API response data:', data);
         
         if (data.success && data.data) {
-            // console.log('✅ Workflow logs data retrieved successfully:', data.data.length, 'logs');
+// console.log('✅ Workflow logs data retrieved successfully:', data.data.length, 'logs');
             callback(data.data, null);
         } else {
             console.warn('⚠️ Workflow logs API returned error:', data.error || 'Unknown error');

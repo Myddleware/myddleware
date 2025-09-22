@@ -2,7 +2,7 @@
 
 // ===== DOCUMENT LOGS FETCHER =====
 export function getDocumentLogs(documentId, callback) {
-    // console.log('getDocumentLogs called with documentId:', documentId);
+// console.log('getDocumentLogs called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -29,20 +29,20 @@ export function getDocumentLogs(documentId, callback) {
     }
     
     const url = `${baseUrl}/rule/api/flux/document-logs/${documentId}`;
-    // console.log('🚀 Fetching document logs from:', url);
+// console.log('🚀 Fetching document logs from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-            // console.log('📡 Sending request for document logs...');
+// console.log('📡 Sending request for document logs...');
         },
         success: function(response) {
-            // console.log('✅ Document logs request successful!');
-            // console.log('📊 Logs response:', response);
+// console.log('✅ Document logs request successful!');
+// console.log('📊 Logs response:', response);
             
             if (response && typeof response === 'object' && response.success) {
-                // console.log('📋 Logs data received:', response.data);
+// console.log('📋 Logs data received:', response.data);
                 callback(response.data, null);
             } else if (response && response.error) {
                 console.error('❌ Server returned error:', response.error);

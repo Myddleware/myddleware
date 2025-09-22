@@ -69,7 +69,7 @@ export class DocumentDetailDirectLinks {
      */
     static addDirectLinkToSection(sectionSelector, directLinkUrl, idValue = 'id') {
         if (!this.shouldCreateDirectLink(directLinkUrl)) {
-            console.log(`🔗 No direct link available for section: ${sectionSelector}`);
+            // console.log(`🔗 No direct link available for section: ${sectionSelector}`);
             return;
         }
 
@@ -105,7 +105,7 @@ export class DocumentDetailDirectLinks {
         // since we're about to add a direct link which replaces the need for a regular ID field
         const existingRegularIdField = contentBody.querySelector(`#field-${sectionType}-id`);
         if (existingRegularIdField && existingRegularIdField.closest('.field-row')) {
-            console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
+            // console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
             existingRegularIdField.closest('.field-row').remove();
         }
 
@@ -115,7 +115,7 @@ export class DocumentDetailDirectLinks {
         // Insert the direct link at the beginning of the content body
         contentBody.insertAdjacentHTML('afterbegin', directLinkHtml);
         
-        console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
+        // console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
     }
 
     /**
@@ -124,23 +124,23 @@ export class DocumentDetailDirectLinks {
      */
     static updateAllDirectLinks(documentData) {
         try {
-            console.log('🔗 Updating direct links for all sections');
+            // console.log('🔗 Updating direct links for all sections');
             
             // Add source direct link
             if (documentData.source_direct_link) {
                 const sourceId = documentData.source_id || 'id';
                 this.addDirectLinkToSection('.source-data', documentData.source_direct_link, sourceId);
-                console.log('✅ Source direct link added:', documentData.source_direct_link);
+                // console.log('✅ Source direct link added:', documentData.source_direct_link);
             }
             
             // Add target direct link  
             if (documentData.target_direct_link) {
                 const targetId = documentData.target_id || 'id';
                 this.addDirectLinkToSection('.target-data', documentData.target_direct_link, targetId);
-                console.log('✅ Target direct link added:', documentData.target_direct_link);
+                // console.log('✅ Target direct link added:', documentData.target_direct_link);
             }
             
-            console.log('✅ Direct links update completed');
+            // console.log('✅ Direct links update completed');
             
         } catch (error) {
             console.error('❌ Error updating direct links:', error);

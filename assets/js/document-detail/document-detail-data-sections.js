@@ -11,7 +11,7 @@ export class DocumentDetailDataSections {
      * @returns {string} HTML string for all data sections
      */
     static generateDataSections(sourceImagePath, targetImagePath, historyImagePath) {
-        // console.log('🏗️ Generating data sections with placeholder containers');
+// console.log('🏗️ Generating data sections with placeholder containers');
         
         try {
             return `
@@ -354,13 +354,13 @@ export class DocumentDetailDataSections {
             `;
         }
 
-        console.log('🔍 generateWorkflowLogsSection: Processing', rows.length, 'workflow log rows');
-        console.log('🔍 Sample workflow log data:', rows[0]);
-        console.log('🔍 All available fields in first row:', Object.keys(rows[0] || {}));
+        // console.log('🔍 generateWorkflowLogsSection: Processing', rows.length, 'workflow log rows');
+        // console.log('🔍 Sample workflow log data:', rows[0]);
+        // console.log('🔍 All available fields in first row:', Object.keys(rows[0] || {}));
 
         const body = rows
         .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
-            console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
+            // console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
             
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
@@ -379,25 +379,25 @@ export class DocumentDetailDataSections {
                 baseUrl = window.location.origin + baseParts.join('/');
             }
 
-            console.log('🔍 Base URL:', baseUrl);
+            // console.log('🔍 Base URL:', baseUrl);
 
             // Create clickable links for workflow, job, and action if IDs are available
             let workflowLink = this.sanitizeString(workflowName);
             if (workflowId) {
                 const workflowUrl = `${baseUrl}/workflow/show/${workflowId}`;
                 workflowLink = `<a href="${workflowUrl}" class="workflow-link single-line-detected">${this.sanitizeString(workflowName)}</a>`;
-                console.log('🔗 Created workflow link:', workflowLink);
+                // console.log('🔗 Created workflow link:', workflowLink);
             } else {
-                console.log('❌ No workflowId for workflow:', workflowName);
+                // console.log('❌ No workflowId for workflow:', workflowName);
             }
 
             let jobLink = this.sanitizeString(jobName);
             if (jobId) {
                 const jobUrl = `${baseUrl}/rule/task/view/${jobId}/log`;
                 jobLink = `<a href="${jobUrl}" class="job-link single-line-detected">${this.sanitizeString(jobName)}</a>`;
-                console.log('🔗 Created job link:', jobLink);
+                // console.log('🔗 Created job link:', jobLink);
             } else {
-                console.log('❌ No jobId for job:', jobName);
+                // console.log('❌ No jobId for job:', jobName);
             }
 
             // Create clickable link for trigger document if it exists
@@ -418,9 +418,9 @@ export class DocumentDetailDataSections {
             if (actionId) {
                 const actionUrl = `${baseUrl}/workflowAction/showAction/${actionId}`;
                 actionLink = `<a href="${actionUrl}" class="action-link single-line-detected">${this.sanitizeString(actionName)}</a>`;
-                console.log('🔗 Created action link:', actionLink);
+                // console.log('🔗 Created action link:', actionLink);
             } else {
-                console.log('❌ No actionId for action:', actionName);
+                // console.log('❌ No actionId for action:', actionName);
             }
 
             return `
@@ -647,7 +647,7 @@ export class DocumentDetailDataSections {
      * @param {Object|null} sourceData - Source data object from API
      */
     static updateSourceData(sourceData) {
-        // console.log('📊 Updating source data section');
+// console.log('📊 Updating source data section');
         this.updateDataSection('source', sourceData, 'Source');
     }
 
@@ -656,7 +656,7 @@ export class DocumentDetailDataSections {
      * @param {Object|null} targetData - Target data object from API
      */
     static updateTargetData(targetData) {
-        // console.log('🎯 Updating target data section');
+// console.log('🎯 Updating target data section');
         this.updateDataSection('target', targetData, 'Target');
     }
 
@@ -665,7 +665,7 @@ export class DocumentDetailDataSections {
      * @param {Object|null} historyData - History data object from API
      */
     static updateHistoryData(historyData) {
-        // console.log('📜 Updating history data section');
+// console.log('📜 Updating history data section');
         this.updateDataSection('history', historyData, 'History');
     }
 
@@ -700,7 +700,7 @@ export class DocumentDetailDataSections {
             // Add click handlers for field expansion
             this.addFieldClickHandlers(sectionElement);
 
-            // console.log(`✅ ${sectionName} data updated successfully`);
+// console.log(`✅ ${sectionName} data updated successfully`);
 
         } catch (error) {
             console.error(`❌ Error updating ${sectionName.toLowerCase()} data:`, error);
@@ -732,7 +732,7 @@ export class DocumentDetailDataSections {
                 if (fieldName.toLowerCase() === 'id') {
                     const hasDirectLink = this.willHaveDirectLink(sectionType);
                     if (hasDirectLink) {
-                        console.log(`✅ Filtering out redundant '${fieldName}' field for ${sectionType} (direct link available)`);
+                        // console.log(`✅ Filtering out redundant '${fieldName}' field for ${sectionType} (direct link available)`);
                         return false;
                     }
                 }
@@ -839,7 +839,7 @@ export class DocumentDetailDataSections {
 
         // If we couldn't get the ID from API data, skip adding the field
         if (!idValue) {
-            console.log(`ℹ️ No ${sectionType} ID available to display`);
+            // console.log(`ℹ️ No ${sectionType} ID available to display`);
             return;
         }
 
@@ -849,7 +849,7 @@ export class DocumentDetailDataSections {
         // Insert the ID field at the beginning of the section
         sectionElement.insertAdjacentHTML('afterbegin', idFieldHtml);
 
-        console.log(`✅ Added ID field to ${sectionType} section:`, idValue);
+        // console.log(`✅ Added ID field to ${sectionType} section:`, idValue);
     }
 
     /**
@@ -908,7 +908,7 @@ export class DocumentDetailDataSections {
             }
         });
         document.dispatchEvent(event);
-        // console.log('📢 Notified FluxFieldExpanner of new content');
+// console.log('📢 Notified FluxFieldExpanner of new content');
     }
 
     /**
