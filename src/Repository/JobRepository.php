@@ -121,8 +121,6 @@ class JobRepository extends ServiceEntityRepository
         $dateLimit->modify('-' . $daysLimit . ' days');
 
         return $this->createQueryBuilder('j')
-            ->select('j.id, j.status, j.begin, j.end, j.param, j.message, j.manual, j.api')
-            ->addSelect('j.open, j.close, j.cancel, j.error')
             ->where('j.begin >= :dateLimit')
             ->setParameter('dateLimit', $dateLimit)
             ->orderBy('j.status', 'DESC')
