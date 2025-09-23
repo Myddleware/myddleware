@@ -34,19 +34,15 @@ export function getDocumentData(documentId, callback) {
     let baseUrl;
     
     if (publicIndex !== -1) {
-        console.log('bi');
         const baseParts = pathParts.slice(0, publicIndex + 1);
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
         baseUrl = window.location.origin;
-        console.log('bou');
         baseUrl += '/index.php';
-        
     }
-    console.log('froufrou baseurl', baseUrl);
     
     const url = `${baseUrl}/rule/api/flux/document-data/${documentId}`;
-console.log('🚀 Fetching comprehensive document data from:', url);
+// console.log('🚀 Fetching comprehensive document data from:', url);
     
     $.ajax({
         url: url,
