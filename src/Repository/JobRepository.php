@@ -109,21 +109,22 @@ class JobRepository extends ServiceEntityRepository
 
     /**
      * Optimized query for task list pagination to prevent timeouts
-     * Filters recent jobs and uses proper indexing strategy
+     * Uses search_limit config and proper indexing strategy
      *
      * Recommended DB index for optimal performance:
      * CREATE INDEX idx_job_status_begin ON job (status DESC, begin DESC);
      * CREATE INDEX idx_job_begin_status ON job (begin DESC, status DESC);
      */
-    public function findRecentJobsForPagination(int $daysLimit = 30)
+    public function findJobsForPagination(int $limit = null)
     {
-        $dateLimit = new DateTime();
-        $dateLimit->modify('-' . $daysLimit . ' days');
-
-        return $this->createQueryBuilder('j')
-            ->where('j.begin >= :dateLimit')
-            ->setParameter('dateLimit', $dateLimit)
+        $queryBuilder = $this->createQueryBuilder('j')
             ->orderBy('j.status', 'DESC')
             ->addOrderBy('j.begin', 'DESC');
+
+        if ($limit !== null) {
+            $queryBuilder->setMaxResults($limit);
+        }
+
+        return $queryBuilder;
     }
 }
