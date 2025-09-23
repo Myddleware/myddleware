@@ -40,7 +40,7 @@ export function getDocumentData(documentId, callback) {
     } else {
         baseUrl = window.location.origin;
         console.log('bou');
-        baseUrl += '/public';
+        baseUrl += '/index.php';
         
     }
     console.log('froufrou baseurl', baseUrl);
