@@ -87,10 +87,8 @@ class TaskController extends AbstractController
      */
     public function tasksList($page): Response
     {
-        // Create QueryBuilder to allow proper pagination
-        $queryBuilder = $this->jobRepository->createQueryBuilder('j')
-            ->orderBy('j.status', 'DESC')
-            ->addOrderBy('j.begin', 'DESC');
+        // Use optimized query to prevent timeouts on large job tables
+        $queryBuilder = $this->jobRepository->findRecentJobsForPagination();
         
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $queryBuilder,
