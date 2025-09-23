@@ -133,7 +133,7 @@ export class DocumentDetailButtons {
             return window.location.origin + baseParts.join('/');
         }
         
-        return window.location.origin;
+        return window.location.origin + '/index.php';
     }
 
     /**
