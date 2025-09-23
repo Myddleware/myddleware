@@ -588,7 +588,13 @@ export class DocumentDetailTemplate {
                 return;
             }
 
-            const path_img_modal = "../../../build/images/solution/";
+            let path_img_modal = "../../../build/images/solution/";
+
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            if (publicIndex == -1) {
+                path_img_modal = "../../../../build/images/solution/";
+            }
             const sourceSolution = documentData.source_solution.toLowerCase();
             const targetSolution = documentData.target_solution.toLowerCase();
             
