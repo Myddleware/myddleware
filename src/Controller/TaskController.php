@@ -87,16 +87,19 @@ class TaskController extends AbstractController
      */
     public function tasksList($page): Response
     {
-        // Create QueryBuilder to allow proper pagination
-        $queryBuilder = $this->jobRepository->createQueryBuilder('j')
-            ->orderBy('j.status', 'DESC')
-            ->addOrderBy('j.begin', 'DESC');
-        
+        // Get the search limit from requesting the database for config 'search_limit'
+        $searchLimit = $this->params['search_limit'] ?? 1000;
+
+        // Execute query with limit to prevent timeouts on large job tables
+        $jobs = $this->jobRepository->findJobsForPagination($searchLimit)
+            ->getQuery()
+            ->getResult();
+
         $compact = $this->nav_pagination([
-            'adapter_em_repository' => $queryBuilder,
+            'adapter_em_repository' => $jobs,
             'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
-        ], true);
+        ], false);
 
         //Check the user timezone
         $timezone = $this->getUser()->getTimezone();
