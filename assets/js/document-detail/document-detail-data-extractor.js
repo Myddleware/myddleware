@@ -169,6 +169,7 @@ export function getDocumentHistory(documentId, callback) {
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
         baseUrl = window.location.origin;
+        baseUrl += '/index.php';
     }
     
     const url = `${baseUrl}/rule/api/flux/document-history/${documentId}`;
