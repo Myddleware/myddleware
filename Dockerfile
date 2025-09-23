@@ -29,11 +29,6 @@ RUN node --version
 
 COPY --chown=www-data:www-data . .
 
-# Create required directories with correct permissions
-RUN mkdir -p /var/www/html/var/cache/prod/myddleware/job && \
-    chown -R www-data:www-data /var/www/html/var/cache && \
-    chmod -R 755 /var/www/html/var/cache
-
 # Build packages with yarn
 RUN yarn install
 RUN yarn run build
