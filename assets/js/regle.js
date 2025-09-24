@@ -1107,6 +1107,46 @@ $("#validation").on("click", function () {
     }
   });
 
+  $("#flux_target").on("dblclick", "li", function () {
+  if (
+    $("#gblstatus").attr("data-gbl") == "error" ||
+    $("#gblstatus").attr("data-gbl") == "open"
+  ) {
+    verif = $(this).attr("class");
+    first = $("li:first", "#flux_target").attr("class");
+    classe = $(this).attr("class");
+
+    if (
+      typeof verif !== "undefined" &&
+      ((first === "undefined") != classe) !== "undefined"
+    ) {
+      // Check if an input element already exists
+      if ($(this).find('input').length > 0) {
+        // If it does, show an alert to the user
+        alert('Please close the first one before adding a new one.');
+      } else {
+        value = $(this).find(".value").text().trim();
+        $(this).find(".value").remove();
+        newElement = $(this).append(
+          '<input id="' +
+            classe +
+            '" type="text" value="' +
+            value +
+            '" /><button type="submit" data-value="' +
+            classe +
+            '" class="btn-group btn-group-xs load"><i class="fa fa-check-circle"></i ></button> '
+        );
+        $(this).append(newElement);
+      }
+    }
+  }
+});
+
+  // If the div in flux_target is clicked, then wec call the saveInputFlux function
+  $("#flux_target").on("click", ".load", function () {
+    saveInputFlux($(this), inputs_flux);
+  });
+
   // Rev 1.1.0 Upload Files ------------------------------
   // Fermeture de la fancybox
   $(".fancybox_upload").fancybox({
@@ -2406,6 +2446,37 @@ function toCamelCase(str) {
     return words[0] + words.slice(1).map(function(word) {
         return word.charAt(0).toUpperCase() + word.slice(1);
     }).join('');
+}
+
+// Save the modified field data by using an ajax request
+function saveInputFlux(div, link) {
+    // Trim the field name to remove any trailing spaces
+    fields = div.attr('data-value').trim();
+    
+    // Get the input element - look for it within the parent li element
+    var inputElement = div.closest('li').find('input');
+    
+    // Get the value from the input element
+    var inputValue = inputElement.val();
+
+    // Ajax request to save the data in the database
+    $.ajax({
+        type: "POST",
+        url: link,
+        data: {
+            flux: $('#flux_target').attr('data-id'),
+            rule: $('#flux_target').attr('data-rule'),
+            fields: fields,
+            value: inputValue
+        },
+        success: function (val) {
+            // Add the 'value' class to the span so it can be found for future edits
+            div.parent().append('<span class="value">' + val + '</span>');
+            div.remove();
+            inputElement.remove();
+        }
+    });
+
 }
 
 document.addEventListener('DOMContentLoaded', function () {

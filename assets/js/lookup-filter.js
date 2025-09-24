@@ -84,6 +84,19 @@ $(document).ready(function() {
   });
 });
 
+function getLookupruleFromFieldName(lookupFieldClassName, current_rule, callback) {
+  // do an ajax call to get the formula for the lookupfieldName
+  $.ajax({
+    url: lookup_rule_url,
+    type: 'GET',
+    data: { lookupfieldName: lookupFieldClassName, currentRule: current_rule },
+    success: function(response) {
+      if (callback) {
+        callback(response);
+      }
+    }
+  });
+}
 
 // Define an array of filters, each containing a name and selector
 var filters = [

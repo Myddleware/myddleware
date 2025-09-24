@@ -1082,7 +1082,6 @@ class SessionService
 
         $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
-
     public function getFluxFilterTargetId()
     {
         $myddlewareSession = $this->getMyddlewareSession();
@@ -1242,13 +1241,13 @@ class SessionService
         return $myddlewareSession['flux_filter']['c']['date_modif_end'] ?? null;
     }
 
-    // public function removeFluxFilter()
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
-    //     unset($myddlewareSession['flux_filter']);
+    public function removeFluxFilter()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']);
 
-    //     $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
-    // }
+        $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
 
     public function removeFluxFilterDateCreateStart()
     {
@@ -1414,19 +1413,19 @@ class SessionService
         $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
     }
 
-    // public function isFluxFilterCSourceIdExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCSourceIdExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['source_id']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['source_id']);
+    }
 
-    // public function isFluxFilterCTargetIdExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCTargetIdExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['target_id']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['target_id']);
+    }
 
     public function isFluxFilterCWhereExist(): bool
     {
@@ -1435,33 +1434,33 @@ class SessionService
         return isset($myddlewareSession['flux_filter']['c']['where']);
     }
 
-    // public function isFluxFilterCGblStatusExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCGblStatusExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['gblstatus']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['gblstatus']);
+    }
 
-    // public function isFluxFilterCStatusExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCStatusExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['status']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['status']);
+    }
 
-    // public function isFluxFilterTypeExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterTypeExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['type']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['type']);
+    }
 
-    // public function isFluxFilterCRuleExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCRuleExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['rule']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['rule']);
+    }
 
     public function isFluxFilterCExist(): bool
     {
@@ -1477,33 +1476,33 @@ class SessionService
         return isset($myddlewareSession['flux_filter']['c']['date_create_start']);
     }
 
-    // public function isFluxFilterCSourceContentExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCSourceContentExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['source_content']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['source_content']);
+    }
 
-    // public function isFluxFilterCTargetContentExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCTargetContentExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['target_content']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['target_content']);
+    }
 
-    // public function isFluxFilterCDateModifEndExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCDateModifEndExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['date_modif_end']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['date_modif_end']);
+    }
 
-    // public function isFluxFilterCDateModifStartExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterCDateModifStartExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']['c']['date_modif_start']);
-    // }
+        return isset($myddlewareSession['flux_filter']['c']['date_modif_start']);
+    }
 
     public function isFluxFilterCDateCreateEndExist(): bool
     {
@@ -1521,12 +1520,12 @@ class SessionService
     }
 
     
-    // public function isFluxFilterExist(): bool
-    // {
-    //     $myddlewareSession = $this->getMyddlewareSession();
+    public function isFluxFilterExist(): bool
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
 
-    //     return isset($myddlewareSession['flux_filter']);
-    // }
+        return isset($myddlewareSession['flux_filter']);
+    }
 
     //############ FLUX FILTER ###################
 

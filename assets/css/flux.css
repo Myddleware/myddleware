@@ -144,6 +144,10 @@
 	opacity: 1;
 }
 
+.direct-link-document-target {
+	margin-left: 1.5rem;
+}
+
 #flux #message tr {
 	height: 40px;
 }
