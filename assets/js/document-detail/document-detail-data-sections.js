@@ -113,12 +113,27 @@ export class DocumentDetailDataSections {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = status.toLowerCase().includes('error') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td>
                     ${isCurrentDocument ? '<span class="current-document-checkmark">✓</span>' : ''}
                 </td>
@@ -199,12 +214,27 @@ export class DocumentDetailDataSections {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = status.toLowerCase().includes('error') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
@@ -281,12 +311,27 @@ export class DocumentDetailDataSections {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = status.toLowerCase().includes('error') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
