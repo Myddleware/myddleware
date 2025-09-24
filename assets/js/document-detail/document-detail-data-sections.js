@@ -121,10 +121,11 @@ export class DocumentDetailDataSections {
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
             const isErrorStatus = status.toLowerCase().includes('error') ||
                                 status.toLowerCase().endsWith('_ko') ||
-                                status.toLowerCase() === 'not_found';
+                                status.tolowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
 
             // Cancel statuses: Cancel, Filter, No_send
-            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
 
             const rowStyle = isErrorStatus
                 ? ' style="background-color: #ffebee;"'
@@ -222,10 +223,11 @@ export class DocumentDetailDataSections {
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
             const isErrorStatus = status.toLowerCase().includes('error') ||
                                 status.toLowerCase().endsWith('_ko') ||
-                                status.toLowerCase() === 'not_found';
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
 
             // Cancel statuses: Cancel, Filter, No_send
-            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
 
             const rowStyle = isErrorStatus
                 ? ' style="background-color: #ffebee;"'
@@ -319,10 +321,11 @@ export class DocumentDetailDataSections {
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
             const isErrorStatus = status.toLowerCase().includes('error') ||
                                 status.toLowerCase().endsWith('_ko') ||
-                                status.toLowerCase() === 'not_found';
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
 
             // Cancel statuses: Cancel, Filter, No_send
-            const isCancelStatus = ['cancel', 'filter', 'no_send'].includes(status.toLowerCase());
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
 
             const rowStyle = isErrorStatus
                 ? ' style="background-color: #ffebee;"'
