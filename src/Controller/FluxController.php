@@ -845,8 +845,7 @@ class FluxController extends AbstractController
                     'rule' => $document->getRule(), 
                     'deleted' => 0
                 ], 
-                ['dateModified' => 'DESC'], 
-                10 // limit to 10 most recent
+                ['dateModified' => 'DESC']
             );
             
             // If only one record, the history is the current document, so we remove it => no history
