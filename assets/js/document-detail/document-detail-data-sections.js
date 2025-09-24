@@ -119,9 +119,9 @@ export class DocumentDetailDataSections {
 
             // Determine background color based on status (similar to logs section)
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
-            const isErrorStatus = status.toLowerCase().includes('error') ||
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
                                 status.toLowerCase().endsWith('_ko') ||
-                                status.tolowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'not_found' ||
                                 status.toLowerCase() === 'create_ko';
 
             // Cancel statuses: Cancel, Filter, No_send
@@ -221,7 +221,7 @@ export class DocumentDetailDataSections {
 
             // Determine background color based on status (similar to logs section)
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
-            const isErrorStatus = status.toLowerCase().includes('error') ||
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
                                 status.toLowerCase().endsWith('_ko') ||
                                 status.toLowerCase() === 'not_found' ||
                                 status.toLowerCase() === 'create_ko';
@@ -319,7 +319,7 @@ export class DocumentDetailDataSections {
 
             // Determine background color based on status (similar to logs section)
             // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
-            const isErrorStatus = status.toLowerCase().includes('error') ||
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
                                 status.toLowerCase().endsWith('_ko') ||
                                 status.toLowerCase() === 'not_found' ||
                                 status.toLowerCase() === 'create_ko';
