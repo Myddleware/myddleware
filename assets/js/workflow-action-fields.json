@@ -77,7 +77,7 @@
     {
       "Action": "changeData",
       "Status": "No",
-      "Rule": "Yes",
+      "Rule": "No",
       "SearchField": "No",
       "SearchValue": "No",
       "Subject": "No",
