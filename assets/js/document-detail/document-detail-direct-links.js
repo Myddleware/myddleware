@@ -75,7 +75,7 @@ export class DocumentDetailDirectLinks {
 
         const section = document.querySelector(sectionSelector);
         if (!section) {
-            console.warn(`⚠️ Section not found: ${sectionSelector}`);
+            // console.warn(`⚠️ Section not found: ${sectionSelector}`);
             return;
         }
 
@@ -88,7 +88,7 @@ export class DocumentDetailDirectLinks {
         }
 
         if (!contentBody) {
-            console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
+            // console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
             return;
         }
 
@@ -124,13 +124,12 @@ export class DocumentDetailDirectLinks {
      */
     static updateAllDirectLinks(documentData) {
         try {
-            // console.log('🔗 Updating direct links for all sections');
-            
             // Add source direct link
             if (documentData.source_direct_link) {
                 const sourceId = documentData.source_id || 'id';
                 this.addDirectLinkToSection('.source-data', documentData.source_direct_link, sourceId);
-                // console.log('✅ Source direct link added:', documentData.source_direct_link);
+            } else {
+                this.addDirectLinkToSection('.source-data', 'empty-id', documentData.source_id);
             }
             
             // Add target direct link  
@@ -160,7 +159,7 @@ export class DocumentDetailDirectLinks {
         // Basic URL validation - ensure it starts with http:// or https://
         const urlString = String(url).trim();
         if (!urlString.match(/^https?:\/\//)) {
-            console.warn('⚠️ Direct link URL does not start with http:// or https://:', urlString);
+            // console.warn('⚠️ Direct link URL does not start with http:// or https://:', urlString);
             return '#'; // Return safe fallback
         }
         
