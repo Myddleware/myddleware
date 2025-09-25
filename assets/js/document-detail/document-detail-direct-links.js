@@ -138,6 +138,8 @@ export class DocumentDetailDirectLinks {
                 const targetId = documentData.target_id || 'id';
                 this.addDirectLinkToSection('.target-data', documentData.target_direct_link, targetId);
                 // console.log('✅ Target direct link added:', documentData.target_direct_link);
+            } else {
+                this.addDirectLinkToSection('.target-data', 'empty-id', documentData.target_id);
             }
             
             // console.log('✅ Direct links update completed');
