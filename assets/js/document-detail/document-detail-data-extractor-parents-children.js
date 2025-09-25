@@ -26,6 +26,7 @@ export function getDocumentParents(documentId, callback) {
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
         baseUrl = window.location.origin;
+        baseUrl += '/index.php';
     }
     
     const url = `${baseUrl}/rule/api/flux/document-parents/${documentId}`;
@@ -95,6 +96,7 @@ export function getDocumentChildren(documentId, callback) {
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
         baseUrl = window.location.origin;
+        baseUrl += '/index.php';
     }
     
     const url = `${baseUrl}/rule/api/flux/document-children/${documentId}`;
