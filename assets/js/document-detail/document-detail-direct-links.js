@@ -124,21 +124,11 @@ export class DocumentDetailDirectLinks {
      */
     static updateAllDirectLinks(documentData) {
         try {
-            console.log('allods 003 update directlinks');
-
-            console.log('allods 004 documentData:', documentData);
-            console.log('allods 004.6 documentData:', documentData.source_id);
-            console.log('allods 004.6 documentData:', documentData.target_id);
-            // console.log('allods 007 documentData.:', documentData);
-            
             // Add source direct link
             if (documentData.source_direct_link) {
                 const sourceId = "documentData.source_id || 'id';"
-                console.log('allods 005 found source_direct_link:', documentData.source_direct_link);
                 this.addDirectLinkToSection('.source-data', documentData.source_direct_link, sourceId);
-                console.log('✅ Source direct link added:', documentData.source_direct_link);
             } else {
-                console.log('allods 006 no source_direct_link found');
                 this.addDirectLinkToSection('.source-data', 'empty-id', documentData.source_id);
             }
 

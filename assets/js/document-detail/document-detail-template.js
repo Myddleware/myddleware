@@ -292,8 +292,6 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateDataSections(documentData) {
-console.log('allods 001 update data sections for document');
-
         try {
             // Store document data globally so that ID field generation can access it
             window.currentDocumentData = documentData;
@@ -512,8 +510,6 @@ console.log('allods 001 update data sections for document');
      */
     static updateDirectLinks(documentData) {
         try {
-            console.log('allods 002 direct links for document');
-            
             // Use the DocumentDetailDirectLinks class to update all direct links
             DocumentDetailDirectLinks.updateAllDirectLinks(documentData);
             
