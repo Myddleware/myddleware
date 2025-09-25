@@ -191,8 +191,8 @@ export class DocumentDetailPermissions {
         if (publicIndex !== -1) {
             const baseParts = pathParts.slice(0, publicIndex + 1);
             return window.location.origin + baseParts.join('/');
+        } else {
+            return window.location.origin + "/index.php";
         }
-        
-        return window.location.origin;
     }
 }
