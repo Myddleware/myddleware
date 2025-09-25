@@ -297,6 +297,25 @@ class WorkflowActionController extends AbstractController
             $workflowAction->setDateModified(new \DateTime());
             $workflowAction->setDeleted(0);
 
+            $selectedWorkflow = $formData['Workflow'] ?? null;        
+            if (!$selectedWorkflow && isset($workflow) && $workflow instanceof \App\Entity\Workflow) {
+                $selectedWorkflow = $workflow; 
+            }
+
+            $ruleChoices  = [];
+            $ruleDefault  = null;
+
+            if ($selectedWorkflow instanceof \App\Entity\Workflow) {
+                $ruleDefault = $selectedWorkflow->getRule();
+                if ($ruleDefault) {
+                    $ruleChoices = [$ruleDefault];
+                }
+            }
+
+            if (!$ruleChoices) {
+                $ruleChoices = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+            }
+
             if ($workflowAction) {
                 $arguments = $workflowAction->getArguments();
 
@@ -398,13 +417,14 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
-                        'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
+                        'class'        => Rule::class,
+                        'choices'      => $ruleDefault ? [$ruleDefault] : [],
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false,
-                        'label' => 'Generating Rule',
-                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
+                        'required'     => false,
+                        'label'        => 'Generating Rule',
+                        'data'         => $ruleDefault,
+                        'placeholder'  => false,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -571,10 +591,13 @@ class WorkflowActionController extends AbstractController
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
+                $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
+
                 return $this->render(
                     'WorkflowAction/new.html.twig',
                     [
                         'form' => $form->createView(),
+                        'workflows' => $workflows,
                     ]
                 );
             } else {
