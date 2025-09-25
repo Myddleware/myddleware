@@ -200,6 +200,8 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
             
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
@@ -282,8 +284,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
@@ -379,6 +383,8 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
 
             // console.log('🔍 Base URL:', baseUrl);
@@ -519,6 +525,8 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                } else {
+                    baseUrl = window.location.origin + "/index.php";
                 }
                 
                 const referenceUrl = `${baseUrl}/rule/flux/modern/${reference}`;
@@ -535,8 +543,10 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                } else {
+                    baseUrl = window.location.origin + "/index.php";
                 }
-                
+
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
