@@ -90,7 +90,7 @@ Encore
   Encore.configureTerserPlugin((options) => {
     options.terserOptions = options.terserOptions || {};
     options.terserOptions.compress = options.terserOptions.compress || {};
-    options.terserOptions.compress.drop_console = true;
+    options.terserOptions.compress.drop_console = false;
   });
 
 module.exports = Encore.getWebpackConfig();

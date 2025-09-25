@@ -3308,6 +3308,17 @@ use Symfony\Component\Yaml\Yaml;
         if ($form->isSubmitted() && $form->isValid()) {
             $documentIdString = $form->get('id')->getData();
 
+            // replace line breaks with commas
+            $documentIdString = str_replace(["\r\n", "\r", "\n"], ',', $documentIdString);
+            // remove spaces
+            $documentIdString = str_replace(' ', '', $documentIdString);
+
+            //rtrim and ltrim to remove any leading or trailing commas
+            $documentIdString = trim($documentIdString, ',');
+
+            //rtrim and ltrim to remove any leading or trailing spaces or line break
+            $documentIdString = trim($documentIdString, " \r\n\t");
+
             // We will get to the runrecord commmand using the ids from the form.
             $this->ruleExecAction($id, $documentIdString);
         }

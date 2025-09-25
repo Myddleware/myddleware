@@ -131,7 +131,7 @@ export class DocumentDetailSectionState {
         const pageCount = Math.ceil(rows.length / this.PAGE_SIZE);
 
         if (pageCount <= 1) {
-            // console.log(`ℹ️ No pagination needed for ${stateKey} (${rows.length} rows)`);
+// console.log(`ℹ️ No pagination needed for ${stateKey} (${rows.length} rows)`);
             return; // No pagination needed
         }
 
@@ -152,7 +152,7 @@ export class DocumentDetailSectionState {
                 this.showPage(sectionClass, stateKey, i, rows);
                 this.updatePaginationButtons(controls, i);
                 this.updateSectionState(stateKey, { currentPage: i });
-                // console.log(`✅ Updated ${stateKey} to page:`, i);
+// console.log(`✅ Updated ${stateKey} to page:`, i);
             });
 
             controls.appendChild(btn);
@@ -165,7 +165,7 @@ export class DocumentDetailSectionState {
             
             // Show initial page
             this.showPage(sectionClass, stateKey, currentPage, rows);
-            // console.log(`✅ Pagination setup complete for: ${stateKey} (${pageCount} pages)`);
+// console.log(`✅ Pagination setup complete for: ${stateKey} (${pageCount} pages)`);
         } else {
             console.warn(`Section not found for pagination: .${sectionClass}`);
         }
@@ -192,11 +192,11 @@ export class DocumentDetailSectionState {
         setTimeout(() => {
             if (window.documentDetailInstance && window.documentDetailInstance.multilineLinkHandler) {
                 window.documentDetailInstance.multilineLinkHandler.recheckLinks();
-                // console.log(`🔗 Rechecked links after showing page ${pageNumber} for ${stateKey}`);
+// console.log(`🔗 Rechecked links after showing page ${pageNumber} for ${stateKey}`);
             }
         }, 50);
 
-        // console.log(`✅ Showing page ${pageNumber} for ${stateKey} (rows ${startIndex + 1}-${Math.min(endIndex, rows.length)})`);
+// console.log(`✅ Showing page ${pageNumber} for ${stateKey} (rows ${startIndex + 1}-${Math.min(endIndex, rows.length)})`);
     }
 
     /**
@@ -291,21 +291,21 @@ export class DocumentDetailSectionState {
             toggleBtn.setAttribute('aria-expanded', newExpandedState.toString());
 
             this.updateSectionState(stateKey, { isExpanded: newExpandedState });
-            // console.log(`✅ Updated ${stateKey} expand state:`, newExpandedState);
+// console.log(`✅ Updated ${stateKey} expand state:`, newExpandedState);
         };
         
         // Store handler reference for cleanup
         toggleBtn._collapseHandler = collapseHandler;
         toggleBtn.addEventListener('click', collapseHandler);
 
-        // console.log(`✅ Collapsible setup complete for: ${stateKey}`);
+// console.log(`✅ Collapsible setup complete for: ${stateKey}`);
     }
 
     /**
      * Initialize all sections with state management
      */
     static initializeSections(sectionsData) {
-        // console.log('🚀 Initializing sections with state management...');
+// console.log('🚀 Initializing sections with state management...');
         
         // Documents History
         this.setupCollapsible('custom-section', 'custom', 'documentsHistory');
@@ -327,7 +327,7 @@ export class DocumentDetailSectionState {
         this.setupCollapsible('logs-section', 'logs', 'logs');
         this.setupPagination('logs-section', 'logs', sectionsData.logs || []);
 
-        // console.log('✅ All sections initialized with independent state management');
+// console.log('✅ All sections initialized with independent state management');
     }
 
     /**
@@ -343,7 +343,7 @@ export class DocumentDetailSectionState {
                     const stored = JSON.parse(localStorage.getItem(key));
                     if (stored.expiresAt && currentTime > stored.expiresAt) {
                         localStorage.removeItem(key);
-                        // console.log(`🧹 Cleaned up expired state: ${key}`);
+// console.log(`🧹 Cleaned up expired state: ${key}`);
                     }
                 } catch (error) {
                     // Invalid JSON, remove it

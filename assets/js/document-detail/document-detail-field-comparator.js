@@ -29,7 +29,7 @@ export class DocumentDetailFieldComparator {
             return;
         }
 
-        console.log('🔍 Comparing fields - History:', historyFields.size, 'Target:', targetFields.size);
+        // console.log('🔍 Comparing fields - History:', historyFields.size, 'Target:', targetFields.size);
 
         // Compare each history field with corresponding target field
         historyFields.forEach((historyValue, fieldName) => {
@@ -46,7 +46,7 @@ export class DocumentDetailFieldComparator {
                     if (normalizedHistory !== normalizedTarget) {
                         // Apply yellow border highlighting for visible content differences
                         this.highlightMismatchedField(fieldName, 'history', 'general');
-                        console.log('🟨 Field mismatch found:', fieldName, 'History:', JSON.stringify(historyValue), 'Target:', JSON.stringify(targetValue));
+                        // console.log('🟨 Field mismatch found:', fieldName, 'History:', JSON.stringify(historyValue), 'Target:', JSON.stringify(targetValue));
                     }
                 }
             }
@@ -142,7 +142,7 @@ export class DocumentDetailFieldComparator {
     static init() {
         // Listen for data section updates
         document.addEventListener('fluxDataUpdated', () => {
-            console.log('📢 Field comparator received data update event');
+            // console.log('📢 Field comparator received data update event');
             this.compareAndHighlightFields();
         });
 

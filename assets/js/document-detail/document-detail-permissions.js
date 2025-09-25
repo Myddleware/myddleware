@@ -14,27 +14,27 @@ export class DocumentDetailPermissions {
             // 1. Try from API endpoint (primary source)
             const apiPermissions = await this.getPermissionsFromAPI();
             if (apiPermissions) {
-                console.log('✅ Got permissions from API');
+                // console.log('✅ Got permissions from API');
                 return apiPermissions;
             }
             
             // 2. Try from HTML meta tags (fallback)
             const metaPermissions = this.getPermissionsFromMeta();
             if (metaPermissions) {
-                console.log('✅ Got permissions from meta tags');
+                // console.log('✅ Got permissions from meta tags');
                 return metaPermissions;
             }
             
             // 3. Try from global JavaScript variables (fallback)
             const globalPermissions = this.getPermissionsFromGlobals();
             if (globalPermissions) {
-                console.log('✅ Got permissions from global variables');
+                // console.log('✅ Got permissions from global variables');
                 return globalPermissions;
             }
             
             // 4. Final fallback to checking URL patterns or other indicators
             const urlPermissions = this.getPermissionsFromContext();
-            console.log('⚠️ Using fallback permission detection');
+            // console.log('⚠️ Using fallback permission detection');
             return urlPermissions;
             
         } catch (error) {
@@ -116,7 +116,7 @@ export class DocumentDetailPermissions {
             const baseUrl = this.getBaseUrl();
             const apiUrl = `${baseUrl}/rule/api/flux/user-permissions`;
             
-            console.log('🔐 Requesting permissions from API:', apiUrl);
+            // console.log('🔐 Requesting permissions from API:', apiUrl);
             
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -139,7 +139,7 @@ export class DocumentDetailPermissions {
                 return null;
             }
             
-            console.log('🔐 API permissions response:', data.permissions);
+            // console.log('🔐 API permissions response:', data.permissions);
             return data.permissions;
             
         } catch (error) {
@@ -191,8 +191,8 @@ export class DocumentDetailPermissions {
         if (publicIndex !== -1) {
             const baseParts = pathParts.slice(0, publicIndex + 1);
             return window.location.origin + baseParts.join('/');
+        } else {
+            return window.location.origin + "/index.php";
         }
-        
-        return window.location.origin;
     }
 }
