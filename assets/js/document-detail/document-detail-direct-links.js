@@ -126,7 +126,7 @@ export class DocumentDetailDirectLinks {
         try {
             // Add source direct link
             if (documentData.source_direct_link) {
-                const sourceId = "documentData.source_id || 'id';"
+                const sourceId = documentData.source_id || 'id';
                 this.addDirectLinkToSection('.source-data', documentData.source_direct_link, sourceId);
             } else {
                 this.addDirectLinkToSection('.source-data', 'empty-id', documentData.source_id);
