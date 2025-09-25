@@ -379,6 +379,9 @@ class dynamicsbusiness extends solution
             $resultFinal = [];
             $nbRecords = 0;
 
+            // sort data[value] by lastModifiedDateTime ascending
+            usort($data['value'], fn($a, $b) => $a['lastModifiedDateTime'] <=> $b['lastModifiedDateTime']);
+
             foreach ($data['value'] as $record) {
                 // Stop the process if limit has been reached
                 if (isset($param['limit']) && $nbRecords >= $param['limit']) {
