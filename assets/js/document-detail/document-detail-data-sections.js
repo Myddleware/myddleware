@@ -314,6 +314,8 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
 
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
