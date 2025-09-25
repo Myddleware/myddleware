@@ -119,7 +119,7 @@ $(document).ready(function () {
       changeData: {
         Action: 'changeData',
         Status: 'No',
-        Rule: 'Yes',
+        Rule: 'No',
         SearchField: 'No',
         SearchValue: 'No',
         Subject: 'No',
@@ -614,4 +614,3 @@ $('#form_Workflow').on('change', function () {
     }
   }, 50);
 });
-
