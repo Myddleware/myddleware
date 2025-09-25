@@ -30,6 +30,8 @@ export class DocumentDetailTargetEditor {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
             
             const permissionsUrl = `${baseUrl}/rule/api/flux/user-permissions`;
@@ -362,8 +364,10 @@ export class DocumentDetailTargetEditor {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const updateUrl = `${baseUrl}/rule/flux/update-field`;
             // console.log('💾 Making field update request to:', updateUrl);
             
