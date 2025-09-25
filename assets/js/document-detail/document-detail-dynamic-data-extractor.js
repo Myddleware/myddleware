@@ -5,7 +5,7 @@ import { DocumentDetailSectionState } from './document-detail-section-state.js';
 
 export function extractDocumentHistory(documentId) {
 
-    // console.log('documentId: ', documentId);
+// console.log('documentId: ', documentId);
     
 
     // Return empty array initially - will be populated asynchronously
@@ -51,10 +51,10 @@ function updateDocumentHistorySection(historyData) {
                 mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
                 
                 // Re-initialize section state management for the new DOM elements
-                // console.log('🔄 Re-initializing document history section state (new insertion)...');
+// console.log('🔄 Re-initializing document history section state (new insertion)...');
                 DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
                 DocumentDetailSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
-                // console.log('✅ Document history section state initialized (new)');
+// console.log('✅ Document history section state initialized (new)');
                 return;
             }
         }
@@ -65,12 +65,12 @@ function updateDocumentHistorySection(historyData) {
             historySection.outerHTML = newHistoryHTML;
             
             // Re-initialize section state management for the new DOM elements
-            console.log('🔄 Re-initializing document history section state (replacement)...');
+            // console.log('🔄 Re-initializing document history section state (replacement)...');
             DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
             DocumentDetailSectionState.setupPagination('custom-section', 'documentsHistory', historyData);
-            console.log('✅ Document history section state re-initialized (replacement)');
+            // console.log('✅ Document history section state re-initialized (replacement)');
         } else {
-            console.warn('⚠️ Could not find appropriate location for document history section');
+            // console.warn('⚠️ Could not find appropriate location for document history section');
         }
     } catch (error) {
         console.error('❌ Error updating document history section:', error);
@@ -92,11 +92,11 @@ export function extractDocumentParents(documentId) {
             }
             
             if (data && data.length > 0) {
-                // console.log('🔄 About to update document parents section with', data.length, 'records');
+// console.log('🔄 About to update document parents section with', data.length, 'records');
                 // Update the document parents section with real data
                 updateDocumentParentsSection(data);
             } else {
-                // console.log('⚠️ No parent data received or data is empty');
+// console.log('⚠️ No parent data received or data is empty');
             }
         });
     }, 150);
@@ -106,7 +106,7 @@ export function extractDocumentParents(documentId) {
 }
 
 export function extractDocumentChildren(documentId) {
-    // console.log("calling extractDocumentChildren with id: ", documentId);
+// console.log("calling extractDocumentChildren with id: ", documentId);
     
     return new Promise((resolve) => {
         if (!documentId) {
@@ -124,7 +124,7 @@ export function extractDocumentChildren(documentId) {
                 }
                 
                 if (data && data.length > 0) {
-                    // console.log('🔄 About to update document children section with', data.length, 'records');
+// console.log('🔄 About to update document children section with', data.length, 'records');
                     // Update the document children section with real data
                     updateDocumentChildrenSection(data);
                     resolve(data);
@@ -142,26 +142,26 @@ export function extractDocumentChildren(documentId) {
  */
 function updateDocumentParentsSection(parentsData) {
     try {
-        // console.log('🔍 Looking for parent documents section in DOM...');
+// console.log('🔍 Looking for parent documents section in DOM...');
         // Find the existing parents section and update it
         const parentsSection = document.querySelector('[data-section="parent-documents"]');
-        // console.log('🔍 Found parents section in DOM:', parentsSection);
+// console.log('🔍 Found parents section in DOM:', parentsSection);
         if (parentsSection) {
             // Generate and update the section
-            // console.log('🔍 FluxDataSections module loaded for parents');
+// console.log('🔍 FluxDataSections module loaded for parents');
             const newParentsHTML = DocumentDetailDataSections.generateParentDocumentsSection(parentsData);
-            // console.log('🔍 Generated new parents HTML:', newParentsHTML);
+// console.log('🔍 Generated new parents HTML:', newParentsHTML);
             parentsSection.outerHTML = newParentsHTML;
-            // console.log('✅ Updated document parents section with', parentsData.length, 'records');
+// console.log('✅ Updated document parents section with', parentsData.length, 'records');
             
             // Re-initialize section state management for the new DOM elements
-            console.log('🔄 Re-initializing parent documents section state...');
+            // console.log('🔄 Re-initializing parent documents section state...');
             DocumentDetailSectionState.setupCollapsible('parent-documents-section', 'parent-documents', 'parentDocuments');
             DocumentDetailSectionState.setupPagination('parent-documents-section', 'parentDocuments', parentsData);
-            console.log('✅ Parent documents section state re-initialized');
+            // console.log('✅ Parent documents section state re-initialized');
         } else {
-            console.warn('⚠️ Document parents section not found in DOM');
-            console.log('🔍 Available sections in DOM:', document.querySelectorAll('[data-section]'));
+            // console.warn('⚠️ Document parents section not found in DOM');
+            // console.log('🔍 Available sections in DOM:', document.querySelectorAll('[data-section]'));
         }
     } catch (error) {
         console.error('❌ Error updating document parents section:', error);
@@ -173,26 +173,26 @@ function updateDocumentParentsSection(parentsData) {
  * @param {Array} childrenData - Array of child document objects
  */
 function updateDocumentChildrenSection(childrenData) {
-    // console.log('🔍 updateDocumentChildrenSection called with data:', childrenData);
+// console.log('🔍 updateDocumentChildrenSection called with data:', childrenData);
     try {
         // Find the existing children section and update it
         const childrenSection = document.querySelector('[data-section="child-documents"]');
-        // console.log('🔍 Found children section in DOM:', childrenSection);
+// console.log('🔍 Found children section in DOM:', childrenSection);
         if (childrenSection) {
             // Generate and update the section
-            // console.log('🔍 FluxDataSections module loaded');
+// console.log('🔍 FluxDataSections module loaded');
             const newChildrenHTML = DocumentDetailDataSections.generateChildDocumentsSection(childrenData);
-            // console.log('🔍 Generated new HTML:', newChildrenHTML);
+// console.log('🔍 Generated new HTML:', newChildrenHTML);
             childrenSection.outerHTML = newChildrenHTML;
-            // console.log('✅ Updated document children section with', childrenData.length, 'records');
+// console.log('✅ Updated document children section with', childrenData.length, 'records');
             
             // Re-initialize section state management for the new DOM elements
-            console.log('🔄 Re-initializing child documents section state...');
+            // console.log('🔄 Re-initializing child documents section state...');
             DocumentDetailSectionState.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
             DocumentDetailSectionState.setupPagination('child-documents-section', 'childDocuments', childrenData);
-            console.log('✅ Child documents section state re-initialized');
+            // console.log('✅ Child documents section state re-initialized');
         } else {
-            console.warn('⚠️ Document children section not found in DOM');
+            // console.warn('⚠️ Document children section not found in DOM');
         }
     } catch (error) {
         console.error('❌ Error updating document children section:', error);

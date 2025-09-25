@@ -102,7 +102,7 @@ export class DocumentDetailButtons {
     static updateButtons(documentData, permissions = {}) {
         const buttonContainer = document.getElementById('flux-button-container');
         if (!buttonContainer) {
-            console.warn('⚠️ Button container not found in DOM');
+            // console.warn('⚠️ Button container not found in DOM');
             return;
         }
 
@@ -110,7 +110,7 @@ export class DocumentDetailButtons {
             const newButtonsHTML = this.generateButtonsHTML(documentData, permissions);
             buttonContainer.outerHTML = newButtonsHTML;
             
-            console.log('✅ Document buttons updated based on status:', documentData.global_status);
+            // console.log('✅ Document buttons updated based on status:', documentData.global_status);
             
             // Initialize tooltips for new buttons if Bootstrap is available
             this.initializeTooltips();
@@ -147,14 +147,14 @@ export class DocumentDetailButtons {
                 tooltipElements.forEach(element => {
                     new bootstrap.Tooltip(element);
                 });
-                console.log('✅ Button tooltips initialized');
+                // console.log('✅ Button tooltips initialized');
             } else if (typeof $ !== 'undefined' && $.fn.tooltip) {
                 // Fallback to jQuery tooltips if available
                 $('[data-bs-toggle="tooltip"]').tooltip();
-                console.log('✅ Button tooltips initialized (jQuery fallback)');
+                // console.log('✅ Button tooltips initialized (jQuery fallback)');
             }
         } catch (error) {
-            console.warn('⚠️ Could not initialize tooltips:', error.message);
+            // console.warn('⚠️ Could not initialize tooltips:', error.message);
         }
     }
 
@@ -182,18 +182,18 @@ export class DocumentDetailButtons {
         
         const globalStatus = documentData.global_status?.toLowerCase() || '';
         
-        console.group('🔧 Document Button Logic Debug');
-        console.log('📋 Document ID:', documentData.id);
-        console.log('📊 Global Status:', globalStatus);
-        console.log('🔒 Job Lock:', documentData.job_lock || false);
-        console.log('📖 Read Record Button:', documentData.read_record_btn || false);
-        console.log('👑 Is Super Admin:', permissions.is_super_admin || false);
+        // console.group('🔧 Document Button Logic Debug');
+        // console.log('📋 Document ID:', documentData.id);
+        // console.log('📊 Global Status:', globalStatus);
+        // console.log('🔒 Job Lock:', documentData.job_lock || false);
+        // console.log('📖 Read Record Button:', documentData.read_record_btn || false);
+        // console.log('👑 Is Super Admin:', permissions.is_super_admin || false);
         
-        console.log('🚩 Button Conditions:');
-        console.log('  - Reload:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
-        console.log('  - Cancel:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
-        console.log('  - Read Record:', documentData.read_record_btn || permissions.is_super_admin);
-        console.log('  - Unlock:', documentData.job_lock || false);
+        // console.log('🚩 Button Conditions:');
+        // console.log('  - Reload:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
+        // console.log('  - Cancel:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
+        // console.log('  - Read Record:', documentData.read_record_btn || permissions.is_super_admin);
+        // console.log('  - Unlock:', documentData.job_lock || false);
         
         console.groupEnd();
     }

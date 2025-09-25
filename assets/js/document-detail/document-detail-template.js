@@ -38,29 +38,29 @@ export class DocumentDetailTemplate {
         // we need to get 6863a07946e8b9.3830685
         let documentId = window.location.pathname.split('/').pop();
 
-        // console.log('🚀 FluxTemplate.generateHTML called with documentId:', documentId);
+// console.log('🚀 FluxTemplate.generateHTML called with documentId:', documentId);
         
         const myHistoryPayload = extractDocumentHistory(documentId);
-        // console.log('📊 History payload extracted:', myHistoryPayload?.length || 0, 'items');
+// console.log('📊 History payload extracted:', myHistoryPayload?.length || 0, 'items');
         
         const myParentsPayload = extractDocumentParents(documentId);
-        // console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
+// console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
         
         // Handle the promise from extractDocumentChildren
         let myChildrenPayload = [];
         extractDocumentChildren(documentId).then(data => {
             myChildrenPayload = data;
-            // console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
+// console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
         });
         
         // Initialize logs payload and fetch logs data
         let myLogsPayload = [];
-        // console.log('📋 Starting logs data fetch for documentId:', documentId);
+// console.log('📋 Starting logs data fetch for documentId:', documentId);
         getDocumentLogs(documentId, (logsData, error) => {
             if (error) {
                 console.error('❌ Error fetching logs data:', error);
             } else {
-                // console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
+// console.log('✅ Logs data fetched successfully:', logsData?.length || 0, 'logs');
                 myLogsPayload = logsData || [];
                 // Update the logs section with real data
                 DocumentDetailTemplate.updateLogsSection(myLogsPayload);
@@ -69,19 +69,19 @@ export class DocumentDetailTemplate {
 
         // Initialize workflow logs payload and fetch workflow logs data
         let myWorkflowLogsPayload = [];
-        // console.log('📋 Starting workflow logs data fetch for documentId:', documentId);
+// console.log('📋 Starting workflow logs data fetch for documentId:', documentId);
         getDocumentWorkflowLogs(documentId, (workflowLogsData, error) => {
             if (error) {
                 console.error('❌ Error fetching workflow logs data:', error);
             } else {
-                // console.log('✅ Workflow logs data fetched successfully:', workflowLogsData?.length || 0, 'workflow logs');
+// console.log('✅ Workflow logs data fetched successfully:', workflowLogsData?.length || 0, 'workflow logs');
                 myWorkflowLogsPayload = workflowLogsData || [];
                 // Update the workflow logs section with real data
                 DocumentDetailTemplate.updateWorkflowLogsSection(myWorkflowLogsPayload);
             }
         });
 
-        // console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
+// console.log("🔍 About to generate template with myChildrenPayload:", myChildrenPayload);
         // First, return the template with placeholders
         const template = `
             ${DocumentDetailButtons.generateButtonsHTML()}
@@ -165,7 +165,7 @@ export class DocumentDetailTemplate {
     
     static updateRuleInfo(ruleInfo) {
         if (!ruleInfo || !ruleInfo.name) {
-            console.warn('⚠️ No rule info available');
+            // console.warn('⚠️ No rule info available');
             return;
         }
         
@@ -189,7 +189,7 @@ export class DocumentDetailTemplate {
     
     static updateDocumentStatus(statusInfo) {
         if (!statusInfo) {
-            console.warn('⚠️ No status info available');
+            // console.warn('⚠️ No status info available');
             return;
         }
         
@@ -211,23 +211,23 @@ export class DocumentDetailTemplate {
         const typeElement = document.getElementById('document-type');
         
         if (!typeElement) {
-            console.warn('⚠️ Document type element not found');
+            // console.warn('⚠️ Document type element not found');
             return;
         }
         
         if (!typeInfo || !typeInfo.type || typeInfo.type === '') {
             // Handle empty or null type by showing empty string instead of "Loading..."
             typeElement.textContent = '';
-            // console.log('✅ Updated document type to empty (type is null/empty)');
+// console.log('✅ Updated document type to empty (type is null/empty)');
         } else {
             typeElement.textContent = typeInfo.type;
-            // console.log('✅ Updated document type:', typeInfo.type);
+// console.log('✅ Updated document type:', typeInfo.type);
         }
     }
     
     static updateDocumentAttempts(attemptInfo) {
         if (!attemptInfo) {
-            console.warn('⚠️ No attempt info available');
+            // console.warn('⚠️ No attempt info available');
             return;
         }
         
@@ -244,7 +244,7 @@ export class DocumentDetailTemplate {
     
     static updateDocumentDates(dateInfo) {
         if (!dateInfo) {
-            console.warn('⚠️ No date info available');
+            // console.warn('⚠️ No date info available');
             return;
         }
         
@@ -292,7 +292,7 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateDataSections(documentData) {
-// console.log('🔄 Updating all data sections with real data');
+console.log('allods 001 update data sections for document');
 
         try {
             // Store document data globally so that ID field generation can access it
@@ -378,7 +378,7 @@ export class DocumentDetailTemplate {
     static extractHistoryData(documentData) {
         try {
             const historyData = documentData?.history_data;
-            // console.log('📜 Extracted history data:', historyData ? 'Available' : 'Not available');
+// console.log('📜 Extracted history data:', historyData ? 'Available' : 'Not available');
             return historyData || null;
         } catch (error) {
             console.error('❌ Error extracting history data:', error);
@@ -409,44 +409,44 @@ export class DocumentDetailTemplate {
      * @param {Array} logsData - Array of logs data
      */
     static updateLogsSection(logsData) {
-        // console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
-        // console.log('📋 Sample log data:', logsData?.[0]);
+// console.log('📋 FluxTemplate.updateLogsSection called with', logsData?.length || 0, 'logs');
+// console.log('📋 Sample log data:', logsData?.[0]);
         
         try {
             const logsContainer = document.querySelector('.logs-section');
-            // console.log('📋 Logs container found:', !!logsContainer);
+// console.log('📋 Logs container found:', !!logsContainer);
             
             if (!logsContainer) {
-                console.warn('⚠️ Logs section container not found in DOM');
+                // console.warn('⚠️ Logs section container not found in DOM');
                 // Let's also check what containers do exist
                 const allDataWrappers = document.querySelectorAll('.data-wrapper');
-                // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
+// console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
                 allDataWrappers.forEach((wrapper, index) => {
-                    // console.log(`📋 Container ${index}:`, wrapper.className);
+// console.log(`📋 Container ${index}:`, wrapper.className);
                 });
                 return;
             }
 
             if (!logsData || logsData.length === 0) {
-                // console.log('📋 No logs data available, keeping empty section');
+// console.log('📋 No logs data available, keeping empty section');
                 return;
             }
 
             // Generate new logs section HTML with real data
-            // console.log('📋 Generating new logs HTML...');
+// console.log('📋 Generating new logs HTML...');
             const newLogsHtml = DocumentDetailDataSections.generateLogsSection(logsData);
-            // console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
+// console.log('📋 Generated new logs HTML, length:', newLogsHtml.length);
             
             // Replace the existing logs section
             logsContainer.outerHTML = newLogsHtml;
-            // console.log('✅ Logs section updated successfully');
+// console.log('✅ Logs section updated successfully');
             
             // Re-initialize the section state management for the new DOM elements
-            // console.log('🔄 Re-initializing section state after logs update...');
+// console.log('🔄 Re-initializing section state after logs update...');
             setTimeout(() => {
                 DocumentDetailSectionState.setupCollapsible('logs-section', 'logs', 'logs');
                 DocumentDetailSectionState.setupPagination('logs-section', 'logs', logsData);
-                // console.log('✅ Logs section state re-initialized');
+// console.log('✅ Logs section state re-initialized');
             }, 10);
             
         } catch (error) {
@@ -460,44 +460,44 @@ export class DocumentDetailTemplate {
      * @param {Array} workflowLogsData - Array of workflow logs data
      */
     static updateWorkflowLogsSection(workflowLogsData) {
-        // console.log('📋 DocumentDetailTemplate.updateWorkflowLogsSection called with', workflowLogsData?.length || 0, 'workflow logs');
-        // console.log('📋 Sample workflow log data:', workflowLogsData?.[0]);
+// console.log('📋 DocumentDetailTemplate.updateWorkflowLogsSection called with', workflowLogsData?.length || 0, 'workflow logs');
+// console.log('📋 Sample workflow log data:', workflowLogsData?.[0]);
         
         try {
             const workflowLogsContainer = document.querySelector('.workflow-logs-section');
-            // console.log('📋 Workflow logs container found:', !!workflowLogsContainer);
+// console.log('📋 Workflow logs container found:', !!workflowLogsContainer);
             
             if (!workflowLogsContainer) {
-                console.warn('⚠️ Workflow logs section container not found in DOM');
+                // console.warn('⚠️ Workflow logs section container not found in DOM');
                 // Let's also check what containers do exist
                 const allDataWrappers = document.querySelectorAll('.data-wrapper');
-                // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
+// console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
                 allDataWrappers.forEach((wrapper, index) => {
-                    // console.log(`📋 Container ${index}:`, wrapper.className);
+// console.log(`📋 Container ${index}:`, wrapper.className);
                 });
                 return;
             }
 
             if (!workflowLogsData || workflowLogsData.length === 0) {
-                // console.log('📋 No workflow logs data available, keeping empty section');
+// console.log('📋 No workflow logs data available, keeping empty section');
                 return;
             }
 
             // Generate new workflow logs section HTML with real data
-            // console.log('📋 Generating new workflow logs HTML...');
+// console.log('📋 Generating new workflow logs HTML...');
             const newWorkflowLogsHtml = DocumentDetailDataSections.generateWorkflowLogsSection(workflowLogsData);
-            // console.log('📋 Generated new workflow logs HTML, length:', newWorkflowLogsHtml.length);
+// console.log('📋 Generated new workflow logs HTML, length:', newWorkflowLogsHtml.length);
             
             // Replace the existing workflow logs section
             workflowLogsContainer.outerHTML = newWorkflowLogsHtml;
-            // console.log('✅ Workflow logs section updated successfully');
+// console.log('✅ Workflow logs section updated successfully');
             
             // Re-initialize the section state management for the new DOM elements
-            // console.log('🔄 Re-initializing section state after workflow logs update...');
+// console.log('🔄 Re-initializing section state after workflow logs update...');
             setTimeout(() => {
                 DocumentDetailSectionState.setupCollapsible('workflow-logs-section', 'workflow-logs', 'workflow-logs');
                 DocumentDetailSectionState.setupPagination('workflow-logs-section', 'workflow-logs', workflowLogsData);
-                // console.log('✅ Workflow logs section state re-initialized');
+// console.log('✅ Workflow logs section state re-initialized');
             }, 10);
             
         } catch (error) {
@@ -512,7 +512,7 @@ export class DocumentDetailTemplate {
      */
     static updateDirectLinks(documentData) {
         try {
-            console.log('🔗 Updating direct links for document');
+            console.log('allods 002 direct links for document');
             
             // Use the DocumentDetailDirectLinks class to update all direct links
             DocumentDetailDirectLinks.updateAllDirectLinks(documentData);
@@ -532,15 +532,15 @@ export class DocumentDetailTemplate {
             if (window.documentDetailInstance && window.documentDetailInstance.targetEditor) {
                 const globalStatus = documentData.global_status;
                 window.documentDetailInstance.targetEditor.setDocumentGlobalStatus(globalStatus);
-                console.log('✅ Target editor updated with global status:', globalStatus);
+                // console.log('✅ Target editor updated with global status:', globalStatus);
             } else {
-                console.warn('⚠️ Target editor instance not found, will retry later');
+                // console.warn('⚠️ Target editor instance not found, will retry later');
                 // Retry after a short delay as the target editor might still be initializing
                 setTimeout(() => {
                     if (window.documentDetailInstance && window.documentDetailInstance.targetEditor) {
                         const globalStatus = documentData.global_status;
                         window.documentDetailInstance.targetEditor.setDocumentGlobalStatus(globalStatus);
-                        console.log('✅ Target editor updated with global status (retry):', globalStatus);
+                        // console.log('✅ Target editor updated with global status (retry):', globalStatus);
                     }
                 }, 1000);
             }
@@ -554,7 +554,7 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static async updateButtons(documentData) {
-        console.log('🔘 Updating document buttons based on status and permissions');
+        // console.log('🔘 Updating document buttons based on status and permissions');
         
         try {
             // Get current user permissions
@@ -580,11 +580,11 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateLogos(documentData) {
-        // console.log('🖼️ Updating logos with solution data');
+// console.log('🖼️ Updating logos with solution data');
         
         try {
             if (!documentData || !documentData.source_solution || !documentData.target_solution) {
-                console.warn('⚠️ Solution information not available in document data');
+                // console.warn('⚠️ Solution information not available in document data');
                 return;
             }
 
@@ -592,24 +592,24 @@ export class DocumentDetailTemplate {
             const sourceSolution = documentData.source_solution.toLowerCase();
             const targetSolution = documentData.target_solution.toLowerCase();
             
-            // console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
+// console.log('🖼️ Source solution:', sourceSolution, 'Target solution:', targetSolution);
 
             // Check what sections and logo elements exist in the DOM
             const dataSections = document.querySelectorAll('.data-wrapper, .source-section, .target-section, .history-section');
-            // console.log('🖼️ Data sections found:', dataSections.length);
+// console.log('🖼️ Data sections found:', dataSections.length);
             dataSections.forEach((section, index) => {
-                // console.log(`🖼️ Section ${index}:`, section.className);
+// console.log(`🖼️ Section ${index}:`, section.className);
             });
             
             const allLogos = document.querySelectorAll('img');
-            // console.log('🖼️ All images in DOM:', allLogos.length);
+// console.log('🖼️ All images in DOM:', allLogos.length);
             allLogos.forEach((img, index) => {
-                // console.log(`🖼️ Image ${index}:`, img.className, img.src);
+// console.log(`🖼️ Image ${index}:`, img.className, img.src);
             });
 
             // Update all logo images (they all have logo-small-size class)
             const logoImages = document.querySelectorAll('.logo-small-size');
-            // console.log('🖼️ Found', logoImages.length, 'logo images to update');
+// console.log('🖼️ Found', logoImages.length, 'logo images to update');
             
             logoImages.forEach((img, index) => {
                 let solutionName, logoType;
@@ -635,12 +635,12 @@ export class DocumentDetailTemplate {
                 }
                 
                 const logoPath = `${path_img_modal}${solutionName}.png`;
-                // console.log(`🖼️ Updating ${logoType} logo (index ${index}):`, logoPath);
+// console.log(`🖼️ Updating ${logoType} logo (index ${index}):`, logoPath);
                 
                 img.src = logoPath;
                 img.alt = `${solutionName} logo`;
                 
-                // console.log(`✅ Updated ${logoType} logo:`, logoPath);
+// console.log(`✅ Updated ${logoType} logo:`, logoPath);
             });
 
         } catch (error) {

@@ -1763,7 +1763,7 @@ function prepareDrag() {
         collapsible: true,
         heightStyle: "content",
       }); // liste des modules : source
-      console.log('✅ Accordion initialized successfully');
+      // console.log('✅ Accordion initialized successfully');
       return true; // Stop retrying
     } else {
       console.warn('$.fn.accordion is not available, retrying...');

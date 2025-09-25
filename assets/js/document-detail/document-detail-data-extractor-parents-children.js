@@ -2,7 +2,7 @@
 
 // ===== DOCUMENT PARENTS FETCHER =====
 export function getDocumentParents(documentId, callback) {
-    // console.log('getDocumentParents called with documentId:', documentId);
+// console.log('getDocumentParents called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -29,17 +29,17 @@ export function getDocumentParents(documentId, callback) {
     }
     
     const url = `${baseUrl}/rule/api/flux/document-parents/${documentId}`;
-    // console.log('🚀 Fetching document parents from:', url);
+// console.log('🚀 Fetching document parents from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-            // console.log('📡 Sending request for document parents...');
+// console.log('📡 Sending request for document parents...');
         },
         success: function(response) {
-            // console.log('✅ Document parents request successful!');
-            // console.log('Response:', response);
+// console.log('✅ Document parents request successful!');
+// console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
@@ -71,7 +71,7 @@ export function getDocumentParents(documentId, callback) {
 
 // ===== DOCUMENT CHILDREN FETCHER =====
 export function getDocumentChildren(documentId, callback) {
-    // console.log('getDocumentChildren called with documentId:', documentId);
+// console.log('getDocumentChildren called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -98,17 +98,17 @@ export function getDocumentChildren(documentId, callback) {
     }
     
     const url = `${baseUrl}/rule/api/flux/document-children/${documentId}`;
-    // console.log('🚀 Fetching document children from:', url);
+// console.log('🚀 Fetching document children from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-            // console.log('📡 Sending request for document children...');
+// console.log('📡 Sending request for document children...');
         },
         success: function(response) {
-            // console.log('✅ Document children request successful!');
-            // console.log('Response:', response);
+// console.log('✅ Document children request successful!');
+// console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);

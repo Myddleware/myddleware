@@ -69,13 +69,13 @@ export class DocumentDetailDirectLinks {
      */
     static addDirectLinkToSection(sectionSelector, directLinkUrl, idValue = 'id') {
         if (!this.shouldCreateDirectLink(directLinkUrl)) {
-            console.log(`🔗 No direct link available for section: ${sectionSelector}`);
+            // console.log(`🔗 No direct link available for section: ${sectionSelector}`);
             return;
         }
 
         const section = document.querySelector(sectionSelector);
         if (!section) {
-            console.warn(`⚠️ Section not found: ${sectionSelector}`);
+            // console.warn(`⚠️ Section not found: ${sectionSelector}`);
             return;
         }
 
@@ -88,7 +88,7 @@ export class DocumentDetailDirectLinks {
         }
 
         if (!contentBody) {
-            console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
+            // console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
             return;
         }
 
@@ -105,7 +105,7 @@ export class DocumentDetailDirectLinks {
         // since we're about to add a direct link which replaces the need for a regular ID field
         const existingRegularIdField = contentBody.querySelector(`#field-${sectionType}-id`);
         if (existingRegularIdField && existingRegularIdField.closest('.field-row')) {
-            console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
+            // console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
             existingRegularIdField.closest('.field-row').remove();
         }
 
@@ -115,7 +115,7 @@ export class DocumentDetailDirectLinks {
         // Insert the direct link at the beginning of the content body
         contentBody.insertAdjacentHTML('afterbegin', directLinkHtml);
         
-        console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
+        // console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
     }
 
     /**
@@ -124,22 +124,32 @@ export class DocumentDetailDirectLinks {
      */
     static updateAllDirectLinks(documentData) {
         try {
-            console.log('🔗 Updating direct links for all sections');
+            console.log('allods 003 update directlinks');
+
+            console.log('allods 004 documentData:', documentData);
+            console.log('allods 004.6 documentData:', documentData.source_id);
+            console.log('allods 004.6 documentData:', documentData.target_id);
+            // console.log('allods 007 documentData.:', documentData);
             
             // Add source direct link
             if (documentData.source_direct_link) {
-                const sourceId = documentData.source_id || 'id';
+                const sourceId = "documentData.source_id || 'id';"
+                console.log('allods 005 found source_direct_link:', documentData.source_direct_link);
                 this.addDirectLinkToSection('.source-data', documentData.source_direct_link, sourceId);
                 console.log('✅ Source direct link added:', documentData.source_direct_link);
             } else {
+                console.log('allods 006 no source_direct_link found');
                 this.addDirectLinkToSection('.source-data', 'empty-id', documentData.source_id);
             }
+
+
             
             // Add target direct link  
             if (documentData.target_direct_link) {
+                // console.log('fifi found target_direct_link:', documentData.target_direct_link);
                 const targetId = documentData.target_id || 'id';
                 this.addDirectLinkToSection('.target-data', documentData.target_direct_link, targetId);
-                console.log('✅ Target direct link added:', documentData.target_direct_link);
+                // console.log('✅ Target direct link added:', documentData.target_direct_link);
             } else {
                 this.addDirectLinkToSection('.target-data', 'empty-id', documentData.target_id);
             }
@@ -162,7 +172,7 @@ export class DocumentDetailDirectLinks {
         // Basic URL validation - ensure it starts with http:// or https://
         const urlString = String(url).trim();
         if (!urlString.match(/^https?:\/\//)) {
-            console.warn('⚠️ Direct link URL does not start with http:// or https://:', urlString);
+            // console.warn('⚠️ Direct link URL does not start with http:// or https://:', urlString);
             return '#'; // Return safe fallback
         }
         

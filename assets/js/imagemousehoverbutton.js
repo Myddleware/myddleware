@@ -18,6 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
             image.style.display = 'none';
         });
     } else {
-        console.warn('hover-button or hoverImage not found in DOM');
+        // console.warn('hover-button or hoverImage not found in DOM');
     }
 });
