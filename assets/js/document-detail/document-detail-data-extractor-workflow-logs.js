@@ -30,6 +30,7 @@ export function getDocumentWorkflowLogs(documentId, callback) {
         baseUrl = window.location.origin + baseParts.join('/');
     } else {
         baseUrl = window.location.origin;
+        baseUrl += '/index.php';
     }
     
     const apiUrl = `${baseUrl}/rule/api/flux/document-workflow-logs/${documentId}`;
