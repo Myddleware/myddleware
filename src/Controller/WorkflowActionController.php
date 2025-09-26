@@ -932,7 +932,7 @@ class WorkflowActionController extends AbstractController
                             'D' => 'D',
                             'S' => 'S',
                         ],
-                        'mapped' => false,
+                        'mapped' => true,
                         'required' => false
                     ])
                     ->add('targetFields', CollectionType::class, [
