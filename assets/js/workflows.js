@@ -34,7 +34,8 @@ $(document).ready(function () {
     'Multiple run',
     'Active',
     'Target Field',
-    'New Value'
+    'New Value',
+    'documentType'
   ];
 
   // Function to get field configuration for an action
@@ -130,6 +131,22 @@ $(document).ready(function () {
         Rerun: 'No',
         'Multiple run': 'Yes',
         Active: 'Yes'
+      },
+      updateType: {
+        Action: 'updateType',
+        Status: 'No',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes',
+        documentType: 'Yes'
       }
     };
 
@@ -156,6 +173,7 @@ $(document).ready(function () {
       case 'Active': return '#active-container';
       case 'Target Field': return '#targetFieldContainer';
       case 'New Value': return '#targetFieldValueContainer';
+      case 'documentType': return '#document-type-container';
       default: return null;
     }
   }

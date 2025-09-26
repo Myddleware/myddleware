@@ -66,7 +66,8 @@ class WorkflowActionType extends AbstractType
                     'generateDocument' => 'generateDocument',
                     'transformDocument' => 'transformDocument',
                     'changeData' => 'changeData',
-                    'rerun' => 'rerun'
+                    'rerun' => 'rerun',
+                    'updateType' => 'updateType',
                 ],
                 'attr' => [
                     'class' => 'form-control',
@@ -124,6 +125,20 @@ class WorkflowActionType extends AbstractType
                     'Yes' => 1,
                     'No' => 0,
                 ],
+                'attr' => [
+                    'class' => 'form-control',
+                    ],
+            ])
+            ->add('documentType', ChoiceType::class, [
+                'label' => 'Document Type',
+                'choices' => [
+                    'C' => 'C',
+                    'U' => 'U',
+                    'D' => 'D',
+                    'S' => 'S',
+                ],
+                'mapped' => false, 
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     ],

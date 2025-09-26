@@ -50,6 +50,8 @@ $(document).ready(function() {
             $('#form_rule').parent().show();
             $('#form_targetField').parent().hide();
             $('#form_targetFieldValueContainer').hide();
+        } else if ($(this).val() === 'updateType') {
+            $('#form_documentType').parent().show();
         }
 
     }).trigger('change');
