@@ -138,24 +138,37 @@ export class DocumentDetailSectionState {
         // Create pagination controls
         const controls = document.createElement('div');
         controls.className = 'pagination-controls';
-        
-        for (let i = 1; i <= pageCount; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            btn.className = 'pagination-btn';
-            
-            if (i === currentPage) {
-                btn.classList.add('active');
+
+        // If 5 pages or less, show all buttons
+        if (pageCount <= 5) {
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = this.createPaginationButton(i, currentPage, sectionClass, stateKey, rows, controls);
+                controls.appendChild(btn);
             }
+        } else {
+            // For more than 5 pages, show condensed view: 1, 2 ... N-1, N
 
-            btn.addEventListener('click', () => {
-                this.showPage(sectionClass, stateKey, i, rows);
-                this.updatePaginationButtons(controls, i);
-                this.updateSectionState(stateKey, { currentPage: i });
-// console.log(`✅ Updated ${stateKey} to page:`, i);
-            });
+            // Always show page 1
+            const btn1 = this.createPaginationButton(1, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btn1);
 
-            controls.appendChild(btn);
+            // Always show page 2
+            const btn2 = this.createPaginationButton(2, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btn2);
+
+            // Add ellipsis
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.className = 'pagination-ellipsis';
+            controls.appendChild(ellipsis);
+
+            // Always show second to last page
+            const btnSecondLast = this.createPaginationButton(pageCount - 1, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btnSecondLast);
+
+            // Always show last page
+            const btnLast = this.createPaginationButton(pageCount, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btnLast);
         }
 
         // Add controls to section
@@ -200,12 +213,36 @@ export class DocumentDetailSectionState {
     }
 
     /**
+     * Create a pagination button
+     */
+    static createPaginationButton(pageNumber, currentPage, sectionClass, stateKey, rows, controls) {
+        const btn = document.createElement('button');
+        btn.textContent = pageNumber;
+        btn.className = 'pagination-btn';
+        btn.dataset.page = pageNumber;
+
+        if (pageNumber === currentPage) {
+            btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => {
+            this.showPage(sectionClass, stateKey, pageNumber, rows);
+            this.updatePaginationButtons(controls, pageNumber);
+            this.updateSectionState(stateKey, { currentPage: pageNumber });
+// console.log(`✅ Updated ${stateKey} to page:`, pageNumber);
+        });
+
+        return btn;
+    }
+
+    /**
      * Update pagination button states
      */
     static updatePaginationButtons(controls, activePage) {
         const buttons = controls.querySelectorAll('.pagination-btn');
-        buttons.forEach((btn, index) => {
-            btn.classList.toggle('active', index + 1 === activePage);
+        buttons.forEach(btn => {
+            const pageNumber = parseInt(btn.dataset.page);
+            btn.classList.toggle('active', pageNumber === activePage);
         });
     }
 
