@@ -413,6 +413,7 @@ class WorkflowActionController extends AbstractController
                             'transformDocument' => 'transformDocument',
                             'rerun' => 'rerun',
                             'changeData' => 'changeData',
+                            'updateType' => 'updateType',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
@@ -867,6 +868,7 @@ class WorkflowActionController extends AbstractController
                             'transformDocument' => 'transformDocument',
                             'rerun' => 'rerun',
                             'changeData' => 'changeData',
+                            'updateType' => 'updateType',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
