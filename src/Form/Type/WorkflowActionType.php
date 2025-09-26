@@ -63,7 +63,6 @@ class WorkflowActionType extends AbstractType
                     'updateStatus' => 'updateStatus',
                     'generateDocument' => 'generateDocument',
                     'sendNotification' => 'sendNotification',
-                    'generateDocument' => 'generateDocument',
                     'transformDocument' => 'transformDocument',
                     'changeData' => 'changeData',
                     'rerun' => 'rerun',
