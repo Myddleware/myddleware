@@ -578,6 +578,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = $rerun;
                     }
 
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
+                    }
+
                     $formData = $request->request->all();
                     $targetFields = $formData['targetFields'] ?? [];
                     $targetFieldValues = $formData['targetFieldValues'] ?? [];
@@ -851,7 +856,8 @@ class WorkflowActionController extends AbstractController
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
                     'multipleRuns' => $workflowAction->getMultipleRuns(),
-                    'rerun' => $arguments['rerun'] ?? 0
+                    'rerun' => $arguments['rerun'] ?? 0,
+                    'documentType' => $arguments['type'] ?? null
                     // Add other WorkflowAction fields here as needed
                 ];
 
@@ -1046,6 +1052,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = 0;
                     }
 
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
+                    }
+
                     $formData = $request->request->all();
 
                     $targetFields = $formData['targetFields'] ?? null;
@@ -1119,15 +1130,19 @@ class WorkflowActionController extends AbstractController
             $action = $workflowAction->getAction();
 
             if ($action == 'updateStatus') {
-                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'generateDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['type']);
             } elseif ($action == 'sendNotification') {
-                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'transformDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'rerun') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+            } elseif ($action == 'changeData') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+            } elseif ($action == 'updateType') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
             }
 
             $workflowAction->setArguments($arguments);
