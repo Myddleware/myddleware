@@ -220,9 +220,6 @@ class moodle extends solution
             $functionName = $this->getFunctionName($param);
             // Get the custom fields set in the connector
             $customFieldList = $this->getCustomFields($param);
-            // Init the attribute name and value for custom fields
-            $attributeName = ($param['module'] == 'courses' || $param['module'] == 'groups' ? 'shortname' : 'name');
-            $attributeValue = ($param['module'] == 'courses'? 'valueraw' : 'value');
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
             $response = $this->moodleClient->post($serverurl, $parameters);;
@@ -536,11 +533,13 @@ class moodle extends solution
 
 	protected function formatRecord($param, $data){
 		// Init custom fields to empty because Moodle returns custom field only if they exist for the current record
+		$customFieldList = $this->getCustomFields($param);
 		if (!empty($customFieldList)) {
 			foreach($customFieldList as $custom) {
 				$row[$custom] = '';
 			}
 		}
+		$attributeValue = ($param['module'] == 'courses'? 'valueraw' : 'value');
 		foreach ($data as $field) {
 			// Get all the requested fields
 			if (array_search($field->attributes()->__toString(), $param['fields']) !== false) {

@@ -29,7 +29,7 @@ use App\Entity\DocumentRelationship as DocumentRelationship;
 
 class FormulaFunctionManager
 {
-    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup'];
+    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup','getRecord'];
     protected string $path = "App\Manager\FormulaFunctionManager::";
 	
     public function getNamesFunctions(): array
@@ -325,4 +325,98 @@ class FormulaFunctionManager
         }
         return null;
     }
+	
+	public static function getRecord($entityManager, $connection, $solutionManager, $connectorId, $module, $fields, $searchValue, $searchField = 'id', $errorIgnore = false)
+	{
+		try {
+			// Connect to the application using the connector
+			$connectionSolution = self::connectionSolution($entityManager, $connection, $solutionManager, $connectorId);
+			if (empty($connectionSolution['connexion_valide'])) {
+				throw new \Exception('getRecord : Failed to connect to the solution to read record '.$module.' with value '.$searchValue.'.');
+			}
+			// Prepare parameters t read the data
+			$read['module'] = $module;
+			$read['fields'] = explode(',',$fields);
+			$read['offset'] = 0;
+			$read['limit'] = 1;
+			// Get all the searchFields and searchValues (we can have several search filter separated by commas)
+			$searchFields = explode(',',$searchField);
+			$searchValues = explode(',',$searchValue);
+			// Error if the number of filters is different than the number od values
+			if (count($searchFields) != count($searchValues)) {
+				throw new \Exception('Number of search fields and search values has to be the same. You have '.count($searchFields).' searchFields and '.count($searchValues).' searchValues.');
+			}
+			// Build the query criteria
+			if (!empty($searchFields)) {
+				foreach($searchFields as $key => $field) {
+					$read['query'][$field] = $searchValues[$key];				
+				}
+			}
+			$read['fields'] = array_unique(array_merge($read['fields'], $searchFields));
+			$read['call_type'] = 'getRecord';
+			$read['ruleParams']['mode'] = '0';
+			$read['ruleParams']['fieldId'] = $searchField[0];
+			// Not used because query is used but required for some solutions 
+			$read['ruleParams']['fieldDateRef'] = $searchField[0]; 
+			// Read data from the solution
+			$data = $connectionSolution['solution']->readData($read);
+			if (empty($data['values'])) {
+				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
+			}
+			return json_encode(current($data['values']));
+        } catch (\Exception $e) {
+            $this->logger->error('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			if (!$errorIgnore) {
+				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			}
+        }
+		return null;
+	}
+	
+	// Connect to the source or target application
+	private static function connectionSolution($entityManager, $connection, $solutionManager, $connectorId) {
+		try {
+			// Get the name of the application			
+		    $sql = "SELECT solution.name  
+		    		FROM connector
+						INNER JOIN solution 
+							ON solution.id  = connector.sol_id
+		    		WHERE connector.id = :connId";
+		    $stmt = $connection->prepare($sql);
+			$stmt->bindValue(":connId", $connectorId);
+			$result = $stmt->executeQuery();
+            $r = $result->fetchAssociative();
+			$solutionName = $r['name'];
+		
+ 			// Get params connection
+		    $sql = "SELECT id, conn_id, name, value
+		    		FROM connectorparam 
+		    		WHERE conn_id = :connId";
+		    $stmt = $connection->prepare($sql);
+			$stmt->bindValue(":connId", $connectorId);
+		    $stmt->execute();	    
+			$resultConn = $stmt->executeQuery();
+            $tab_params = $resultConn->fetchAllAssociative();
+			
+			// Prepare the parameters
+			$params = array();
+			if(!empty($tab_params)) {
+				foreach ($tab_params as $key => $value) {
+					$params[$value['name']] = $value['value'];
+					$params['ids'][$value['name']] = array('id' => $value['id'],'conn_id' => $value['conn_id']);
+				}			
+			}
+			// Login to the application
+			$solution = $solutionManager->get($r['name']);			
+            $solution->setApi(0);			
+            $loginResult = $solution->login($params);		
+            $c = (($solution->connexion_valide) ? true : false);
+			return array('connexion_valide' => $c, 'solution' => $solution);	 
+		} catch (\Exception $e) {
+			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+			$this->logger->error($error);
+			throw new \Exception($error);
+		}	
+		return $connexion_valide;		
+	}
 }
