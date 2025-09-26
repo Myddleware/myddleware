@@ -815,7 +815,8 @@ class dynamicsbusiness extends solution
         }
 
         $dto = new \DateTime($dateTime);
-        // Return date with milliseconds
+        // Add 1 second to account for milliseconds precision loss
+        $dto->add(new \DateInterval('PT1S'));
         return $dto->format('Y-m-d\TH:i:s\Z');
     }
 
