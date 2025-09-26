@@ -452,6 +452,17 @@ class WorkflowActionController extends AbstractController
                         ],
                         'required' => false
                     ])
+                    ->add('documentType', ChoiceType::class, [
+                        'label' => 'Document Type',
+                        'choices' => [
+                            'C' => 'C',
+                            'U' => 'U',
+                            'D' => 'D',
+                            'S' => 'S',
+                        ],
+                        'mapped' => false,
+                        'required' => false
+                    ])
 
                     ->add('targetField', ChoiceType::class, [
                         'label' => 'Target Field',
@@ -905,6 +916,17 @@ class WorkflowActionController extends AbstractController
                             'Yes' => true,
                             'No' => false,
                         ],
+                        'required' => false
+                    ])
+                    ->add('documentType', ChoiceType::class, [
+                        'label' => 'Document Type',
+                        'choices' => [
+                            'C' => 'C',
+                            'U' => 'U',
+                            'D' => 'D',
+                            'S' => 'S',
+                        ],
+                        'mapped' => false,
                         'required' => false
                     ])
                     ->add('targetFields', CollectionType::class, [
