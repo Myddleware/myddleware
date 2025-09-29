@@ -195,28 +195,31 @@
                 <i class="fa fa-plus"></i> {{ 'view_workflow.add_action'| trans }}
             </a>
         </div>
-        <div class="data-wrapper logs-section" id="workflow-logs" data-workflow-id="{{ workflow.id }}">
-        <div class="logs-header">
-            <h3 class="logs-title mx-3">{{ 'view_workflow.logs'|trans|default('Logs') }}</h3>
-            <button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end"
-                    data-workflow-id="{{ workflow.id }}" data-target="#logs-content"
-                    aria-expanded="false" aria-controls="logs-content">
-            <i class="fa fa-plus"></i>
-            </button>
+
+        <div class="container mt-5 pt-5 text-left">
+            <h4>{{ 'view_workflow.logs'| trans | upper }}</h4>
         </div>
 
-        <div id="logs-content" class="logs-content" style="display: none;">
-            <div id="logs-table-container" class="logs-table-container">
-            <div class="text-center py-3 logs-loading">
-                <div class="spinner-border spinner-border-sm" role="status" aria-label="Loading"></div>
-                <span class="ms-2">{{ 'view_workflow.loading_logs'|trans|default('Loading…') }}</span>
+        <div class="workflow-card-table container workflow-details">
+            <div class="card-header card-title-workflow">
+                <button id="toggle-logs-btn"
+                        class="toggle-button btn btn-outline-secondary btn-sm float-end" data-workflow-id="{{ workflow.id }}" data-target="#logs-content" aria-expanded="false" aria-controls="logs-content">
+                    <i class="fa fa-plus"></i>
+                </button>
             </div>
+
+            <div id="logs-content" class="collapse" style="display: none;">
+                <div id="logs-table-container" class="p-3 text-center">
+                    <div class="spinner-border spinner-border-sm" role="status" aria-label="Loading"></div>
+                    <span class="ms-2">{{ 'view_workflow.loading_logs'|trans|default('Loading…') }}</span>
+                </div>
             </div>
         </div>
-        </div>
+
     {% else %}
         <p class="display-6">{{ 'list_workflow.empty'|trans }}</p>
     {% endif %}
+
 
     {% block js %}
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
