@@ -179,41 +179,6 @@ class AccountManager {
             <option value="it">Italiano</option>
             </select>
             </div>
-            <h3>${t.sections.preferences || 'Format preferences'}</h3>
-            
-            <div class="form-group">
-              <label for="timezone">${t.fields.timezone}</label>
-              <select id="timezone" name="timezone" class="form-control"></select>
-            </div>
-
-            <div class="form-group">
-              <label for="date-format">${t.fields.date_format}</label>
-              <select id="date-format" name="date-format" class="form-control">
-                <option value="Y-m-d">YYYY-MM-DD</option>
-                <option value="d/m/Y">DD/MM/YYYY</option>
-                <option value="m/d/Y">MM/DD/YYYY</option>
-                <option value="d.m.Y">DD.MM.YYYY</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="export-separator">${t.fields.export_separator}</label>
-              <select id="export-separator" name="export-separator" class="form-control">
-                <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
-                <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
-                <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
-                <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="encoding">${t.fields.charset}</label>
-              <select id="encoding" name="encoding" class="form-control">
-                <option value="UTF-8">UTF-8</option>
-                <option value="ISO-8859-1">ISO-8859-1</option>
-                <option value="Windows-1252">Windows-1252</option>
-              </select>
-            </div>
             
             
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
@@ -422,7 +387,6 @@ class AccountManager {
       this.user = response.data;
       this.updateUIWithTranslations();
       this.populateUserData();
-      this.populateTimezones();
       this.populateLanguages();
       this.populatePreferencesTimezones();
       
@@ -517,7 +481,6 @@ class AccountManager {
     
     document.getElementById('username').value = this.user.username || '';
     document.getElementById('email').value = this.user.email || '';
-    document.getElementById('timezone').value = this.user.timezone || 'UTC';
     
     // Configure two-factor toggle
     const twofaToggle = document.getElementById('twofa-enabled');
@@ -530,10 +493,6 @@ class AccountManager {
       // console.log('twofaToggle not found in populateUserData in account.js in assets/js');
     }
     
-    // Set default values for new fields if not present in user data
-    document.getElementById('date-format').value = this.user.dateFormat || 'Y-m-d';
-    document.getElementById('export-separator').value = this.user.exportSeparator || ',';
-    document.getElementById('encoding').value = this.user.encoding || 'UTF-8';
 
     // Populate preferences settings
     const timezonePref = document.getElementById('timezone-pref');
@@ -563,29 +522,6 @@ class AccountManager {
     }
   }
   
-  /**
-   * Populate timezone dropdown
-   */
-  populateTimezones() {
-    // console.log('populateTimezones in account.js in assets/js');
-    const timezoneSelect = document.getElementById('timezone');
-    const timezones = [
-      'UTC', 'Europe/Paris', 'Europe/London', 'America/New_York', 'America/Los_Angeles',
-      'Asia/Tokyo', 'Australia/Sydney', 'Pacific/Auckland'
-      // Add more timezones as needed
-    ];
-    
-    timezoneSelect.innerHTML = '';
-    timezones.forEach(tz => {
-      const option = document.createElement('option');
-      option.value = tz;
-      option.textContent = tz;
-      if (this.user && this.user.timezone === tz) {
-        option.selected = true;
-      }
-      timezoneSelect.appendChild(option);
-    });
-  }
   
   /**
    * Populate timezone dropdown for preferences tab
@@ -807,11 +743,7 @@ class AccountManager {
     const profileData = {
       username: document.getElementById('username').value,
       email: document.getElementById('email').value,
-      timezone: document.getElementById('timezone').value,
-      dateFormat: document.getElementById('date-format').value,
-      exportSeparator: document.getElementById('export-separator').value,
-      encoding: document.getElementById('encoding').value,
-      language: document.getElementById('language').value // Add language to profile data
+      language: document.getElementById('language').value
     };
     
     try {
