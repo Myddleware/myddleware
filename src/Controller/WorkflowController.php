@@ -108,12 +108,12 @@ class WorkflowController extends AbstractController
     private RuleManager $ruleManager;
     private DocumentManager $documentManager;
     private WorkflowLogRepository $workflowLogRepository;
+    private ConfigRepository $configRepository;
 
 
     protected Connection $connection;
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
-    private ConfigRepository $configRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -134,7 +134,8 @@ class WorkflowController extends AbstractController
         JobManager $jobManager,
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $params
+        ParameterBagInterface $params,
+        ConfigRepository $configRepository
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -154,6 +155,7 @@ class WorkflowController extends AbstractController
         $this->jobManager = $jobManager;
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
+        $this->configRepository = $configRepository;
     }
 
     protected function getInstanceBdd() {}
@@ -567,7 +569,11 @@ class WorkflowController extends AbstractController
         try {
             $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
-            
+             $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
+            $defaultPage = 100;
+            if (!$conf) {
+                return $defaultPage;
+            }
             if (empty($workflow)) {
                 if ($request->isXmlHttpRequest()) {
                     return $this->render(
@@ -590,7 +596,7 @@ class WorkflowController extends AbstractController
 
             $adapter = new QueryAdapter($query);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+            $pager->setMaxPerPage($conf->getValue());
             $pager->setCurrentPage($page);
 
             $nb_workflow = count($workflowLogs);

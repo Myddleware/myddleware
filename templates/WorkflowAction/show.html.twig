@@ -120,24 +120,22 @@
 				</div>
 			{% endif %}
 
-			<div class="container mt-5 pt-5 text-left">
-					<h4>{{ 'view_workflow.logs'| trans | upper }}</h4>
-			</div>
-			<div class="workflow-action-card-table container workflow-details">
-				<div class="card-header card-title-workflow">
-					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" 
-							data-workflowaction-id="{{ workflow.id }}">
+			<div class="data-wrapper logs-section" data-workflowaction-id="{{ workflow.id }}">
+				<div class="logs-header">
+					<h3 class="logs-title mx-3">{{ 'view_workflow.logs'| trans| upper | default('Logs') }}</h3>
+					{# <span class="logs-count">({{ nb_workflow|default(0) }})</span> #}
+					<button id="toggle-logs-btn" class="toggle-button btn btn-outline-secondary btn-sm float-end" data-workflowaction-id="{{ workflow.id }}">
 						<i class="fa fa-plus"></i>
 					</button>
 				</div>
-
-				<div id="logs-content" class="collapse" style="display: none;">
-					<div id="logs-table-container">
-						<p class="text-center mb-0">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
+					<div id="logs-content" class="collapse" style="display: none;">
+						<div id="logs-table-container" class="text-center py-3 logs-loading">
+							<div class="spinner-border spinner-border-sm" role="status" aria-label="Loading"></div>
+							<p class="logs-loading text-center mb-0">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
+						</div>
 					</div>
 				</div>
 			</div>
-
 		</div>
 	</div>
 {% endblock %}
