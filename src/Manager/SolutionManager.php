@@ -61,6 +61,7 @@ use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
 use App\Solutions\dynamicsbusiness;
+use App\Solutions\iomad;
 use Exception;
 
 /**
@@ -94,7 +95,8 @@ class SolutionManager
 							'yousign',
 							'brevo',
 							'acton',
-							'dynamicsbusiness'
+							'dynamicsbusiness',
+							'iomad'
 						];
 
     public function __construct(
@@ -121,7 +123,8 @@ class SolutionManager
         suitecrm8 $suitecrm8,
         brevo $brevo,
         acton $acton,
-        dynamicsbusiness $dynamicsbusiness
+        dynamicsbusiness $dynamicsbusiness,
+        iomad $iomad
     ) {
 		// Load the solution classes
 		if (!empty(self::$solutions)) {
