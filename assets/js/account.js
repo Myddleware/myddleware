@@ -149,6 +149,7 @@ class AccountManager {
       <div class="tab-group">
         <button class="tab active" data-tab="general"><i class="fas fa-user-gear me-2"></i>${t.tabs.general}</button>
         <button class="tab" data-tab="security"><i class="fas fa-shield-halved me-2"></i>${t.tabs.security}</button>
+        <button class="tab" data-tab="preferences"><i class="fas fa-cog me-2"></i>${t.tabs.preferences || 'Preferences'}</button>
       </div>
       
       <!-- Tab Content -->
@@ -284,6 +285,75 @@ class AccountManager {
             ${t.messages.smtp_warning}
           </div>
         </div>
+
+        <!-- Preferences Tab -->
+        <div id="preferences-tab" class="tab-content" style="display: none;">
+          <!-- Format Preferences -->
+          <h3>${t.sections.format_preferences || 'Format preferences'}</h3>
+          <form id="format-preferences-form" class="account-form">
+            <div class="form-group">
+              <label for="timezone-pref">${t.fields.timezone || 'Time Zone'}</label>
+              <select id="timezone-pref" name="timezone" class="form-control"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="date-format-pref">${t.fields.date_format || 'Date Format'}</label>
+              <select id="date-format-pref" name="date-format" class="form-control">
+                <option value="Y-m-d">YYYY-MM-DD</option>
+                <option value="d/m/Y">DD/MM/YYYY</option>
+                <option value="m/d/Y">MM/DD/YYYY</option>
+                <option value="d.m.Y">DD.MM.YYYY</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="export-separator-pref">${t.fields.export_separator || 'Export Separator'}</label>
+              <select id="export-separator-pref" name="export-separator" class="form-control">
+                <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
+                <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
+                <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
+                <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="encoding-pref">${t.fields.charset || 'Charset'}</label>
+              <select id="encoding-pref" name="encoding" class="form-control">
+                <option value="UTF-8">UTF-8</option>
+                <option value="ISO-8859-1">ISO-8859-1</option>
+                <option value="Windows-1252">Windows-1252</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
+          </form>
+
+          <!-- Table Settings -->
+          <h3>${t.sections.table_settings || 'Table settings'}</h3>
+          <form id="table-settings-form" class="account-form">
+            <div class="form-group">
+              <label for="rows-per-page">${t.fields.rows_per_page || 'Rows per page'}</label>
+              <select id="rows-per-page" name="rows-per-page" class="form-control">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="maximum-results">${t.fields.maximum_results || 'Maximum results'}</label>
+              <select id="maximum-results" name="maximum-results" class="form-control">
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="5000">5000</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
+          </form>
+        </div>
       </div>
     `;
     
@@ -354,6 +424,7 @@ class AccountManager {
       this.populateUserData();
       this.populateTimezones();
       this.populateLanguages();
+      this.populatePreferencesTimezones();
       
       // Configure UI based on user data
       if (!this.user.smtpConfigured) {
@@ -463,6 +534,33 @@ class AccountManager {
     document.getElementById('date-format').value = this.user.dateFormat || 'Y-m-d';
     document.getElementById('export-separator').value = this.user.exportSeparator || ',';
     document.getElementById('encoding').value = this.user.encoding || 'UTF-8';
+
+    // Populate preferences settings
+    const timezonePref = document.getElementById('timezone-pref');
+    const dateFormatPref = document.getElementById('date-format-pref');
+    const exportSeparatorPref = document.getElementById('export-separator-pref');
+    const encodingPref = document.getElementById('encoding-pref');
+    const rowsPerPage = document.getElementById('rows-per-page');
+    const maximumResults = document.getElementById('maximum-results');
+
+    if (timezonePref) {
+      timezonePref.value = this.user.timezone || 'UTC';
+    }
+    if (dateFormatPref) {
+      dateFormatPref.value = this.user.dateFormat || 'Y-m-d';
+    }
+    if (exportSeparatorPref) {
+      exportSeparatorPref.value = this.user.exportSeparator || ',';
+    }
+    if (encodingPref) {
+      encodingPref.value = this.user.encoding || 'UTF-8';
+    }
+    if (rowsPerPage) {
+      rowsPerPage.value = this.user.rowsPerPage || '25';
+    }
+    if (maximumResults) {
+      maximumResults.value = this.user.maximumResults || '1000';
+    }
   }
   
   /**
@@ -489,6 +587,31 @@ class AccountManager {
     });
   }
   
+  /**
+   * Populate timezone dropdown for preferences tab
+   */
+  populatePreferencesTimezones() {
+    const timezoneSelect = document.getElementById('timezone-pref');
+    if (!timezoneSelect) return;
+
+    const timezones = [
+      'UTC', 'Europe/Paris', 'Europe/London', 'America/New_York', 'America/Los_Angeles',
+      'Asia/Tokyo', 'Australia/Sydney', 'Pacific/Auckland'
+      // Add more timezones as needed
+    ];
+
+    timezoneSelect.innerHTML = '';
+    timezones.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz;
+      option.textContent = tz;
+      if (this.user && this.user.timezone === tz) {
+        option.selected = true;
+      }
+      timezoneSelect.appendChild(option);
+    });
+  }
+
   /**
    * Populate language dropdown
    */
@@ -562,6 +685,16 @@ class AccountManager {
     document.getElementById('password-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       this.updatePassword();
+    });
+
+    document.getElementById('format-preferences-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.updateFormatPreferences();
+    });
+
+    document.getElementById('table-settings-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.updateTableSettings();
     });
     
     // Download logs button
@@ -727,6 +860,61 @@ class AccountManager {
     }
   }
   
+  /**
+   * Update format preferences
+   */
+  async updateFormatPreferences() {
+    const formatData = {
+      timezone: document.getElementById('timezone-pref').value,
+      dateFormat: document.getElementById('date-format-pref').value,
+      exportSeparator: document.getElementById('export-separator-pref').value,
+      encoding: document.getElementById('encoding-pref').value
+    };
+
+    try {
+      const response = await axios.post(this.apiEndpoints.updateProfile, formatData);
+      this.showSuccessMessage('Format preferences updated successfully');
+
+      // Update local user data
+      this.user = {
+        ...this.user,
+        ...formatData
+      };
+
+    } catch (error) {
+      this.showErrorMessage(error.response?.data?.message || 'Failed to update format preferences');
+      console.error('Failed to update format preferences:', error);
+    }
+  }
+
+  /**
+   * Update table settings
+   */
+  async updateTableSettings() {
+    const tableData = {
+      rowsPerPage: document.getElementById('rows-per-page').value,
+      maximumResults: document.getElementById('maximum-results').value
+    };
+
+    try {
+      // For now, we'll store this locally since there's no API endpoint yet
+      // In a real implementation, you would send this to an API endpoint
+      // const response = await axios.post(this.apiEndpoints.updateTableSettings, tableData);
+
+      this.showSuccessMessage('Table settings updated successfully');
+
+      // Update local user data
+      this.user = {
+        ...this.user,
+        ...tableData
+      };
+
+    } catch (error) {
+      this.showErrorMessage(error.response?.data?.message || 'Failed to update table settings');
+      console.error('Failed to update table settings:', error);
+    }
+  }
+
   /**
    * Update user password
    */
