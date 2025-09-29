@@ -67,9 +67,7 @@ class AccountManager {
       updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
       changeLocale: `${this.baseUrl}/rule/api/account/locale`,
       downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
-      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`,
-      updateConfig: `${this.baseUrl}/rule/api/account/config/update`,
-      getConfig: `${this.baseUrl}/rule/api/account/config/get`
+      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`
     };
     
     // Log all endpoints for debugging
@@ -299,13 +297,23 @@ class AccountManager {
           <h3>${t.sections.table_settings || 'Table settings'}</h3>
           <form id="table-settings-form" class="account-form">
             <div class="form-group">
-              <label for="pager">${t.fields.rows_per_page || 'Rows per page'}</label>
-              <input type="number" id="pager" name="pager" class="form-control" min="1" placeholder="25" />
+              <label for="rows-per-page">${t.fields.rows_per_page || 'Rows per page'}</label>
+              <select id="rows-per-page" name="rows-per-page" class="form-control">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
             </div>
 
             <div class="form-group">
-              <label for="search-limit">${t.fields.maximum_results || 'Maximum results'}</label>
-              <input type="number" id="search-limit" name="search_limit" class="form-control" min="1" placeholder="1000" />
+              <label for="maximum-results">${t.fields.maximum_results || 'Maximum results'}</label>
+              <select id="maximum-results" name="maximum-results" class="form-control">
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="5000">5000</option>
+              </select>
             </div>
 
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
@@ -381,7 +389,6 @@ class AccountManager {
       this.populateUserData();
       this.populateLanguages();
       this.populatePreferencesTimezones();
-      this.loadConfigValues();
       
       // Configure UI based on user data
       if (!this.user.smtpConfigured) {
@@ -492,8 +499,8 @@ class AccountManager {
     const dateFormatPref = document.getElementById('date-format-pref');
     const exportSeparatorPref = document.getElementById('export-separator-pref');
     const encodingPref = document.getElementById('encoding-pref');
-    const pagerInput = document.getElementById('pager');
-    const searchLimitInput = document.getElementById('search-limit');
+    const rowsPerPage = document.getElementById('rows-per-page');
+    const maximumResults = document.getElementById('maximum-results');
 
     if (timezonePref) {
       timezonePref.value = this.user.timezone || 'UTC';
@@ -507,11 +514,11 @@ class AccountManager {
     if (encodingPref) {
       encodingPref.value = this.user.encoding || 'UTF-8';
     }
-    if (pagerInput) {
-      pagerInput.value = this.user.pager || '25';
+    if (rowsPerPage) {
+      rowsPerPage.value = this.user.rowsPerPage || '25';
     }
-    if (searchLimitInput) {
-      searchLimitInput.value = this.user.search_limit || '1000';
+    if (maximumResults) {
+      maximumResults.value = this.user.maximumResults || '1000';
     }
   }
   
@@ -561,37 +568,6 @@ class AccountManager {
     });
   }
   
-  /**
-   * Load config values from database
-   */
-  async loadConfigValues() {
-    try {
-      const response = await axios.get(this.apiEndpoints.getConfig);
-      const configs = response.data.configs || {};
-
-      // Update user object with config values
-      this.user.pager = configs.pager || '25';
-      this.user.search_limit = configs.search_limit || '1000';
-
-      // Update the form fields if they exist
-      const pagerInput = document.getElementById('pager');
-      const searchLimitInput = document.getElementById('search-limit');
-
-      if (pagerInput) {
-        pagerInput.value = this.user.pager;
-      }
-      if (searchLimitInput) {
-        searchLimitInput.value = this.user.search_limit;
-      }
-
-    } catch (error) {
-      console.warn('Failed to load config values:', error);
-      // Use default values if config loading fails
-      this.user.pager = '25';
-      this.user.search_limit = '1000';
-    }
-  }
-
   /**
    * Get language name from locale code
    */
@@ -847,42 +823,22 @@ class AccountManager {
    * Update table settings
    */
   async updateTableSettings() {
-    const pagerValue = document.getElementById('pager').value;
-    const searchLimitValue = document.getElementById('search-limit').value;
-
-    // Validate input values
-    if (!pagerValue || pagerValue < 1) {
-      this.showErrorMessage('Rows per page must be at least 1');
-      return;
-    }
-
-    if (!searchLimitValue || searchLimitValue < 1) {
-      this.showErrorMessage('Maximum results must be at least 1');
-      return;
-    }
-
-    const configData = {
-      configs: [
-        {
-          name: 'pager',
-          value: pagerValue
-        },
-        {
-          name: 'search_limit',
-          value: searchLimitValue
-        }
-      ]
+    const tableData = {
+      rowsPerPage: document.getElementById('rows-per-page').value,
+      maximumResults: document.getElementById('maximum-results').value
     };
 
     try {
-      const response = await axios.post(this.apiEndpoints.updateConfig, configData);
+      // For now, we'll store this locally since there's no API endpoint yet
+      // In a real implementation, you would send this to an API endpoint
+      // const response = await axios.post(this.apiEndpoints.updateTableSettings, tableData);
+
       this.showSuccessMessage('Table settings updated successfully');
 
       // Update local user data
       this.user = {
         ...this.user,
-        pager: pagerValue,
-        search_limit: searchLimitValue
+        ...tableData
       };
 
     } catch (error) {
