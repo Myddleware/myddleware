@@ -165,6 +165,9 @@ export class DocumentDetailDataSections {
             </div>
 
             <div class="custom-content">
+            <button type="button" class="btn btn-warning" onclick="console.log('hello')" style="margin-bottom: 10px;">
+                Cancel History
+            </button>
             <table class="custom-table">
             <thead>
                 <tr>
