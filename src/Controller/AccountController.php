@@ -564,6 +564,22 @@ class AccountController extends AbstractController
         return new JsonResponse(['success' => true, 'message' => 'Password updated successfully']);
     }
 
+    // get config from the table config
+
+    /**
+     * @Route("/api/account/config", name="api_account_config", methods={"GET"})
+     */
+    public function getConfig(Request $request): JsonResponse
+    {
+        // get the pager from the config repository
+        $config = [];
+        $config['pager'] = $this->entityManager->getRepository('App:Config')->findPager()['value'] ?? '20';
+        // get the search limit from the config repository
+        $config['search_limit'] = $this->entityManager->getRepository('App:Config')->getSearchLimit()['value'] ?? '1000';
+
+        return new JsonResponse(['success' => true, 'config' => $config]);
+    }
+
     /**
      * @Route("/api/account/twofactor/update", name="api_account_twofactor_update", methods={"POST"})
      */
