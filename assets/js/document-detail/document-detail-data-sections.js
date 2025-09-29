@@ -156,7 +156,7 @@ export class DocumentDetailDataSections {
         })
         .join(``);
 
-        return `
+        const historyHtml = `
         <div class="data-wrapper custom-section">
             <div class="custom-header">
             <h3>Documents history</h3>
@@ -165,7 +165,7 @@ export class DocumentDetailDataSections {
             </div>
 
             <div class="custom-content">
-            <button type="button" class="btn btn-warning" onclick="console.log('hello')" style="margin-bottom: 10px;">
+            <button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-bottom: 10px;">
                 Cancel History
             </button>
             <table class="custom-table">
@@ -188,6 +188,13 @@ export class DocumentDetailDataSections {
         </div>
         </div>
         `;
+
+        // Set up event listener for the cancel history button after a small delay
+        setTimeout(() => {
+            DocumentDetailDataSections.setupCancelHistoryButton();
+        }, 100);
+
+        return historyHtml;
     }
 
     /**
@@ -1014,4 +1021,102 @@ export class DocumentDetailDataSections {
             </div>
         `;
     }
+
+    /**
+     * Sets up the event listener for the cancel history button
+     */
+    static setupCancelHistoryButton() {
+        const cancelButton = document.getElementById('cancel-history-btn');
+        if (cancelButton && !cancelButton.hasAttribute('data-listener-attached')) {
+            cancelButton.addEventListener('click', () => {
+                DocumentDetailDataSections.cancelHistoryDocuments();
+            });
+            cancelButton.setAttribute('data-listener-attached', 'true');
+            // console.log('✅ Cancel history button event listener attached');
+        }
+    }
+
+    /**
+     * Cancels all documents in the history table using mass action
+     */
+    static cancelHistoryDocuments() {
+        try {
+            // Get all document IDs from the history table
+            const historyTable = document.querySelector('.custom-table tbody');
+            if (!historyTable) {
+                console.error('❌ History table not found');
+                return;
+            }
+
+            const documentIds = [];
+            const rows = historyTable.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
+                if (docIdLink) {
+                    const docId = docIdLink.textContent.trim();
+                    if (docId) {
+                        documentIds.push(docId);
+                    }
+                }
+            });
+
+            if (documentIds.length === 0) {
+                console.warn('⚠️ No document IDs found in history table');
+                return;
+            }
+
+            console.log('📋 Found document IDs:', documentIds);
+
+            // Get base URL for the API call
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const apiUrl = `${baseUrl}/rule/flux/masscancel`;
+
+            // Prepare the payload for mass cancel (form data format)
+            const formData = new FormData();
+            documentIds.forEach(id => {
+                formData.append('ids[]', id);
+            });
+
+            console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
+
+            // Make the API call
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // The mass cancel endpoint doesn't return JSON, just success if we get here
+                console.log('✅ Mass cancel completed successfully');
+                alert(`Mass cancel action initiated for ${documentIds.length} documents. Check the task list for progress.`);
+            })
+            .catch(error => {
+                console.error('❌ Error calling mass action API:', error);
+                alert('Error initiating mass cancel action. Please check the console for details.');
+            });
+
+        } catch (error) {
+            console.error('❌ Error in cancelHistoryDocuments:', error);
+            alert('Error initiating mass cancel action. Please check the console for details.');
+        }
+    }
 }
+
+// Make the class available globally
+window.DocumentDetailDataSections = DocumentDetailDataSections;
