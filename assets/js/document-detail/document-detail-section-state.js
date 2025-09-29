@@ -139,6 +139,27 @@ export class DocumentDetailSectionState {
         const controls = document.createElement('div');
         controls.className = 'pagination-controls';
 
+        // Add page input field
+        const pageInputContainer = document.createElement('div');
+        pageInputContainer.className = 'page-input-container';
+        pageInputContainer.innerHTML = `
+            <span>Go to page:</span>
+            <input type="number" class="page-input" min="1" max="${pageCount}" value="${currentPage}" />
+            <span>of ${pageCount}</span>
+        `;
+        controls.appendChild(pageInputContainer);
+
+        // Add page input event listener
+        const pageInput = pageInputContainer.querySelector('.page-input');
+        pageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount);
+            }
+        });
+        pageInput.addEventListener('blur', () => {
+            this.handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount);
+        });
+
         // If 5 pages or less, show all buttons
         if (pageCount <= 5) {
             for (let i = 1; i <= pageCount; i++) {
@@ -244,6 +265,34 @@ export class DocumentDetailSectionState {
             const pageNumber = parseInt(btn.dataset.page);
             btn.classList.toggle('active', pageNumber === activePage);
         });
+
+        // Update page input field value
+        const pageInput = controls.querySelector('.page-input');
+        if (pageInput) {
+            pageInput.value = activePage;
+        }
+    }
+
+    /**
+     * Handle page input field changes
+     */
+    static handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount) {
+        let pageNumber = parseInt(pageInput.value);
+
+        // Validate input
+        if (isNaN(pageNumber) || pageNumber < 1) {
+            pageNumber = 1;
+        } else if (pageNumber > pageCount) {
+            pageNumber = pageCount;
+        }
+
+        // Update input field with validated value
+        pageInput.value = pageNumber;
+
+        // Navigate to the page
+        this.showPage(sectionClass, stateKey, pageNumber, rows);
+        this.updatePaginationButtons(controls, pageNumber);
+        this.updateSectionState(stateKey, { currentPage: pageNumber });
     }
 
     /**

@@ -893,3 +893,8 @@ li span {
     }
 }
 
+/* margin for pagination in document detail view */
+.page-input-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
