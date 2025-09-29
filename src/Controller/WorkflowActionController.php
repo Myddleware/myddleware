@@ -141,7 +141,8 @@ class WorkflowActionController extends AbstractController
         JobManager $jobManager,
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $params
+        ParameterBagInterface $paramsprivate,
+        ConfigRepository $configRepository
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -161,6 +162,7 @@ class WorkflowActionController extends AbstractController
         $this->jobManager = $jobManager;
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
+        $this->configRepository = $configRepository;
     }
 
     protected function getInstanceBdd() {}
@@ -733,10 +735,15 @@ class WorkflowActionController extends AbstractController
                 ['dateCreated' => 'DESC']
             );
             $query = $this->workflowLogRepository->findLogsByActionId($id);
+            $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
+            $defaultPage = 100;
+            if (!$conf) {
+                return $defaultPage;
+            }
 
             $adapter = new QueryAdapter($query);
             $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+            $pager->setMaxPerPage($conf->getValue());
             $pager->setCurrentPage($page);
 
             $nb_workflow = count($workflowLogs);
