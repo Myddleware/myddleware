@@ -5,7 +5,7 @@
         "@babel/preset-env": "^7.16.0",
         "@hotwired/stimulus": "^3.0.0",
         "@symfony/stimulus-bridge": "^3.2.0",
-        "@symfony/webpack-encore": "^4.0.0",
+        "@symfony/webpack-encore": "^5.2.0",
         "core-js": "^3.23.0",
         "css-loader": "^7.1.2",
         "file-loader": "^6.0.0",
@@ -16,7 +16,7 @@
         "sass-loader": "^16.0.5",
         "stimulus": "2.0.0",
         "webpack": "^5.76.0",
-        "webpack-cli": "^4.10.0",
+        "webpack-cli": "^6.0.1",
         "webpack-notifier": "^1.15.0"
     },
     "license": "UNLICENSED",
