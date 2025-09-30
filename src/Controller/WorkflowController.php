@@ -569,69 +569,57 @@ class WorkflowController extends AbstractController
         try {
             $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
-             $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
-            $defaultPage = 100;
-            if (!$conf) {
-                return $defaultPage;
-            }
+
             if (empty($workflow)) {
                 if ($request->isXmlHttpRequest()) {
-                    return $this->render(
-                        'Workflow/_workflow_logs_table.html.twig',
-                        [
-                            'error' => 'Workflow not found'
-                        ]
-                    );
-                } else {
-                    $this->addFlash('error', 'Workflow not found');
-                    return $this->redirectToRoute('workflow_list');
+                    return $this->render('Workflow/_workflow_logs_table.html.twig', [
+                        'error' => 'Workflow not found'
+                    ]);
                 }
+                $this->addFlash('error', 'Workflow not found');
+                return $this->redirectToRoute('workflow_list');
             }
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['workflow' => $id],
-                ['dateCreated' => 'DESC']
-            );
-            $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
+            $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
+            $limit = $conf ? (int) $conf->getValue() : null;
 
-            $adapter = new QueryAdapter($query);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage($conf->getValue());
+            $query = $this->workflowLogRepository->findLogsByWorkflowId($id);
+            if ($limit !== null && $limit > 0) {
+                $query->setMaxResults($limit);
+            }
+            $logs = $query->getResult();
+
+            $pager = new Pagerfanta(new ArrayAdapter($logs));
+            $pager->setMaxPerPage(20);
             $pager->setCurrentPage($page);
 
-            $nb_workflow = count($workflowLogs);
+            $workflowLogs = iterator_to_array($pager->getCurrentPageResults());
+            $nb_workflow = count($logs);
 
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'Workflow/_workflow_logs_table.html.twig',
-                    [
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
-                        'pager' => $pager,
-                        'workflow' => $workflow[0],
-                    ]
-                );
-            } else {
-                // For direct navigation, redirect to the main workflow page
-                return $this->redirectToRoute('workflow_show', ['id' => $id]);
+                return $this->render('Workflow/_workflow_logs_table.html.twig', [
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow' => $nb_workflow,
+                    'pager' => $pager,
+                    'workflow' => $workflow[0],
+                ]);
             }
+
+            return $this->redirectToRoute('workflow_show', ['id' => $id]);
         } catch (Exception $e) {
             error_log('WorkflowShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'Workflow/_workflow_logs_table.html.twig',
-                    [
-                        'workflowLogs' => [],
-                        'nb_workflow' => 0,
-                        'pager' => null,
-                        'workflow' => null,
-                        'error' => 'Error loading logs: ' . $e->getMessage()
-                    ]
-                );
-            } else {
-                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+                return $this->render('Workflow/_workflow_logs_table.html.twig', [
+                    'workflowLogs' => [],
+                    'nb_workflow' => 0,
+                    'pager' => null,
+                    'workflow' => null,
+                    'error' => 'Error loading logs: ' . $e->getMessage()
+                ]);
             }
+            throw $this->createNotFoundException('Error: ' . $e->getMessage());
         }
+
     }
 
 
