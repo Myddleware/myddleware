@@ -308,6 +308,77 @@
   width: 100%;
 }
 
+.post-documents-header {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+
+.post-documents-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.post-documents-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.post-documents-toggle-btn {
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.post-documents-toggle-btn:hover {
+  background: #d1d5db;
+}
+
+.post-documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.post-documents-table th,
+.post-documents-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #000000;
+}
+
+.post-documents-table thead th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+.post-documents-table tbody td {
+  color: #000000;
+}
+
+.post-documents-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.data-wrapper.post-documents-section .pagination-controls {
+  text-align: center;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
 .logs-header {
   display: flex;
   justify-content: center;

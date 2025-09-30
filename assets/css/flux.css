@@ -411,6 +411,20 @@ li span {
     width: 100%;
 }
 
+/* Post documents section styling */
+.data-wrapper.post-documents-section {
+    display: block;
+    width: 100%;
+    margin: 6rem auto;
+    max-width: 98%;
+    text-align: center;
+}
+
+.data-wrapper.post-documents-section .post-documents-content {
+    display: block;
+    width: 100%;
+}
+
 /* Workflow Logs section styling */
 .data-wrapper.workflow-logs-section {
     display: block;
