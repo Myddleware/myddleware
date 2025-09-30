@@ -92,12 +92,12 @@ class AccountManager {
     // console.log('init in account.js in assets/js');
     // Create the basic UI structure
     this.createUIStructure();
-    
+
+    // Load config data first
+    await this.loadConfig();
+
     // Load user data
     await this.loadUserData();
-
-    // Load config data
-    await this.loadConfig();
 
     // Setup event listeners
     this.setupEventListeners();
@@ -472,11 +472,7 @@ class AccountManager {
    */
   async loadConfig() {
     try {
-      console.log('allods 001');
       const response = await axios.get(this.apiEndpoints.getConfig);
-      console.log('allods 002 response received:', response);
-      console.log('allods 003 Config data received:', response.data);
-      console.log('allods 004 Config received:', response.data.config);
       this.config = response.data.config;
     } catch (error) {
       console.error("Failed to load config data:", error);
@@ -531,8 +527,7 @@ class AccountManager {
       encodingPref.value = this.user.encoding || 'UTF-8';
     }
     if (rowsPerPage) {
-      console.log('allods 005', rowsPerPage, this.config);
-      rowsPerPage.value = this.config ? this.config.pager : '38';
+      rowsPerPage.value = this.config ? this.config.pager : '25';
     }
     if (maximumResults) {
       maximumResults.value = this.config ? this.config.search_limit : '1000';
