@@ -1938,6 +1938,55 @@ $result = [];
     }
 
     /**
+     * Document post documents API endpoint
+     * @Route("/api/flux/document-posts/{id}", name="api_flux_document_posts", methods={"GET"})
+     */
+    public function getDocumentPosts($id): JsonResponse {
+        try {
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+
+            // Get post documents where parentId equals the current document ID
+            $postDocuments = $this->entityManager->getRepository(Document::class)->findBy(
+                ['parentId' => $id],
+                ['dateCreated' => 'DESC'],
+                10
+            );
+
+            $postData = [];
+            foreach ($postDocuments as $postDoc) {
+                $statusInfo = $this->getDocumentStatusInfo($postDoc);
+                $rule = $postDoc->getRule();
+
+                $postData[] = [
+                    'docId' => $postDoc->getId(),
+                    'name' => $rule ? $rule->getName() : 'Unknown Rule',
+                    'ruleId' => $rule ? $rule->getId() : null,
+                    'sourceId' => $postDoc->getSource(),
+                    'targetId' => $postDoc->getTarget(),
+                    'modificationDate' => $postDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'type' => $postDoc->getType(),
+                    'status' => $statusInfo['status'],
+                    'statusClass' => $statusInfo['status_class']
+                ];
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'data' => $postData
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Document logs API endpoint
      * @Route("/api/flux/document-logs/{id}", name="api_flux_document_logs", methods={"GET"})
      */

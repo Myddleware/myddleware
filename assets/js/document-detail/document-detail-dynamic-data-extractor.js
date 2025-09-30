@@ -1,5 +1,5 @@
 import { getDocumentHistory } from './document-detail-data-extractor.js';
-import { getDocumentParents, getDocumentChildren } from './document-detail-data-extractor-parents-children.js';
+import { getDocumentParents, getDocumentChildren, getDocumentPosts } from './document-detail-data-extractor-parents-children.js';
 import { DocumentDetailDataSections } from './document-detail-data-sections.js';
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
 
@@ -185,7 +185,7 @@ function updateDocumentChildrenSection(childrenData) {
 // console.log('🔍 Generated new HTML:', newChildrenHTML);
             childrenSection.outerHTML = newChildrenHTML;
 // console.log('✅ Updated document children section with', childrenData.length, 'records');
-            
+
             // Re-initialize section state management for the new DOM elements
             // console.log('🔄 Re-initializing child documents section state...');
             DocumentDetailSectionState.setupCollapsible('child-documents-section', 'child-documents', 'childDocuments');
@@ -196,5 +196,58 @@ function updateDocumentChildrenSection(childrenData) {
         }
     } catch (error) {
         console.error('❌ Error updating document children section:', error);
+    }
+}
+
+export function extractDocumentPosts(documentId) {
+    // Return empty array initially - will be populated asynchronously
+    if (!documentId) {
+        return [];
+    }
+
+    // Start async fetch immediately - this will update the DOM when ready
+    setTimeout(() => {
+        getDocumentPosts(documentId, function(data, error) {
+            if (error) {
+                console.error('❌ Could not get document posts:', error);
+                return;
+            }
+
+            if (data && data.length > 0) {
+// console.log('🔄 About to update document posts section with', data.length, 'records');
+                // Update the document posts section with real data
+                updateDocumentPostsSection(data);
+            } else {
+// console.log('⚠️ No post data received or data is empty');
+            }
+        });
+    }, 250);
+
+    // Return empty array for now - the async call will populate the DOM
+    return [];
+}
+
+/**
+ * Updates the document posts section with real data
+ * @param {Array} postsData - Array of post document objects
+ */
+function updateDocumentPostsSection(postsData) {
+    try {
+        // Find the existing posts section and update it
+        const postsSection = document.querySelector('[data-section="post-documents"]');
+        if (postsSection) {
+            // Generate and update the section
+            const newPostsHTML = DocumentDetailDataSections.generatePostDocumentsSection(postsData);
+            postsSection.outerHTML = newPostsHTML;
+// console.log('✅ Updated document posts section with', postsData.length, 'records');
+
+            // Re-initialize section state management for the new DOM elements
+            DocumentDetailSectionState.setupCollapsible('post-documents-section', 'post-documents', 'postDocuments');
+            DocumentDetailSectionState.setupPagination('post-documents-section', 'postDocuments', postsData);
+        } else {
+            // console.warn('⚠️ Document posts section not found in DOM');
+        }
+    } catch (error) {
+        console.error('❌ Error updating document posts section:', error);
     }
 }

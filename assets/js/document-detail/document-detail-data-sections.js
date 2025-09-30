@@ -396,6 +396,104 @@ export class DocumentDetailDataSections {
     }
 
     /**
+     * Generates Post Documents section
+     * @param {Array<Object>} rows - Post documents data
+     */
+    static generatePostDocumentsSection(rows = []) {
+        if (!rows.length) {
+            return `
+            <div class="data-wrapper post-documents-section" data-section="post-documents">
+                <div class="post-documents-header">
+                    <h3>📄 Post Documents</h3>
+                </div>
+                <div class="post-documents-content">
+                    <p>No post document</p>
+                </div>
+            </div>
+            `;
+        }
+
+        const body = rows
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
+
+            // Determine background color based on status
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
+            return `
+            <tr${rowStyle}>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
+                <td>${modificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper post-documents-section" data-section="post-documents">
+            <div class="post-documents-header">
+            <h3>Post documents</h3>
+            <span class="post-documents-count">(${rows.length})</span>
+            <button class="post-documents-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="post-documents-content">
+            <table class="post-documents-table">
+            <thead>
+                <tr>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
      * Generates Workflow Logs section
      * @param {Array<Object>} rows - Workflow logs data with id, workflowName, jobName, actionName, status, dateCreated, message
      */
