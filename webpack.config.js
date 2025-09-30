@@ -65,6 +65,10 @@ Encore
     // enables Sass/SCSS support
     .enableSassLoader(options => {
         options.sourceMap = true;
+        options.sassOptions = {
+            quietDeps: true,
+            silenceDeprecations: ['import', 'global-builtin', 'color-functions']
+        };
     }, {
         resolveUrlLoader: true
     })
