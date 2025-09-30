@@ -48,6 +48,7 @@ use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Entity\Config;
 
 
 /**
@@ -573,9 +574,9 @@ class AccountController extends AbstractController
     {
         // get the pager from the config repository
         $config = [];
-        $config['pager'] = $this->entityManager->getRepository('App:Config')->findPager()['value'] ?? '20';
+        $config['pager'] = $this->entityManager->getRepository(Config::class)->findPager()['value'] ?? '20';
         // get the search limit from the config repository
-        $config['search_limit'] = $this->entityManager->getRepository('App:Config')->getSearchLimit()['value'] ?? '1000';
+        $config['search_limit'] = $this->entityManager->getRepository(Config::class)->getSearchLimit()['value'] ?? '1000';
 
         return new JsonResponse(['success' => true, 'config' => $config]);
     }

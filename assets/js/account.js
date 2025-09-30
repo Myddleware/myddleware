@@ -67,13 +67,15 @@ class AccountManager {
       updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
       changeLocale: `${this.baseUrl}/rule/api/account/locale`,
       downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
-      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`
+      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`,
+      getConfig: `${this.baseUrl}/rule/api/account/config`
     };
     
     // Log all endpoints for debugging
     // console.log("API Endpoints:", this.apiEndpoints);
     
     this.user = null;
+    this.config = null;
     this.threeJsContainer = null;
     this.scene = null;
     this.camera = null;
@@ -93,7 +95,10 @@ class AccountManager {
     
     // Load user data
     await this.loadUserData();
-    
+
+    // Load config data
+    await this.loadConfig();
+
     // Setup event listeners
     this.setupEventListeners();
     
@@ -298,22 +303,12 @@ class AccountManager {
           <form id="table-settings-form" class="account-form">
             <div class="form-group">
               <label for="rows-per-page">${t.fields.rows_per_page || 'Rows per page'}</label>
-              <select id="rows-per-page" name="rows-per-page" class="form-control">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
+              <input type="number" id="rows-per-page" name="rows-per-page" class="form-control" min="1" />
             </div>
 
             <div class="form-group">
               <label for="maximum-results">${t.fields.maximum_results || 'Maximum results'}</label>
-              <select id="maximum-results" name="maximum-results" class="form-control">
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-                <option value="5000">5000</option>
-              </select>
+              <input type="number" id="maximum-results" name="maximum-results" class="form-control" min="1" />
             </div>
 
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
@@ -399,11 +394,11 @@ class AccountManager {
       }
       
       const emptyLogsBtn = document.getElementById('empty-logs');
-      console.log('emptyLogsBtn 1 in account.js in assets/js', emptyLogsBtn);
+      // console.log('emptyLogsBtn 1 in account.js in assets/js', emptyLogsBtn);
       if (emptyLogsBtn) {
-        console.log('emptyLogsBtn 2 in account.js in assets/js', emptyLogsBtn);
+        // console.log('emptyLogsBtn 2 in account.js in assets/js', emptyLogsBtn);
         emptyLogsBtn.style.display = this.user.roles?.includes('ROLE_SUPER_ADMIN') ? 'block' : 'none';
-        console.log('emptyLogsBtn 3 in account.js in assets/js', emptyLogsBtn);
+        // console.log('emptyLogsBtn 3 in account.js in assets/js', emptyLogsBtn);
       }
       
     } catch (error) {
@@ -471,7 +466,28 @@ class AccountManager {
       }
     }
   }
-  
+
+  /**
+   * Load config data from API
+   */
+  async loadConfig() {
+    try {
+      console.log('allods 001');
+      const response = await axios.get(this.apiEndpoints.getConfig);
+      console.log('allods 002 response received:', response);
+      console.log('allods 003 Config data received:', response.data);
+      console.log('allods 004 Config received:', response.data.config);
+      this.config = response.data.config;
+    } catch (error) {
+      console.error("Failed to load config data:", error);
+      // Set defaults if config loading fails
+      this.config = {
+        pager: '25',
+        search_limit: '1000'
+      };
+    }
+  }
+
   /**
    * Populate form fields with user data
    */
@@ -515,10 +531,11 @@ class AccountManager {
       encodingPref.value = this.user.encoding || 'UTF-8';
     }
     if (rowsPerPage) {
-      rowsPerPage.value = this.user.rowsPerPage || '25';
+      console.log('allods 005', rowsPerPage, this.config);
+      rowsPerPage.value = this.config ? this.config.pager : '38';
     }
     if (maximumResults) {
-      maximumResults.value = this.user.maximumResults || '1000';
+      maximumResults.value = this.config ? this.config.search_limit : '1000';
     }
   }
   
