@@ -729,13 +729,13 @@ class AccountController extends AbstractController
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             return new JsonResponse(['error' => 'Permission denied'], 403);
         }
-        
+
         if ($this->env === "dev") {
             $logType = 'dev.log';
         } else {
             $logType = 'prod.log';
         }
-        
+
         $cwd = getcwd();
         $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
         $varPath = "\\var\log\\".$logType;
@@ -760,10 +760,50 @@ class AccountController extends AbstractController
 
             // Close the file
             fclose($handle);
-            
+
             return new JsonResponse(['success' => true, 'message' => 'Log file emptied successfully']);
         }
-        
+
         return new JsonResponse(['error' => 'Failed to empty log file'], 500);
+    }
+
+    /**
+     * @Route("/api/account/config/update", name="api_account_config_update", methods={"POST"})
+     */
+    public function updateConfig(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+        }
+
+        $configRepository = $this->entityManager->getRepository(Config::class);
+
+        // Update pager (rows per page)
+        if (isset($data['rowsPerPage'])) {
+            $rowsPerPage = intval($data['rowsPerPage']);
+            if ($rowsPerPage < 1) {
+                return new JsonResponse(['error' => 'Rows per page must be at least 1'], 400);
+            }
+            $configRepository->setPager($rowsPerPage);
+        }
+
+        // Update search limit (maximum results)
+        if (isset($data['maximumResults'])) {
+            $maximumResults = intval($data['maximumResults']);
+            if ($maximumResults < 1) {
+                return new JsonResponse(['error' => 'Maximum results must be at least 1'], 400);
+            }
+            $configRepository->setSearchLimit($maximumResults);
+        }
+
+        return new JsonResponse(['success' => true, 'message' => 'Configuration updated successfully']);
     }
 }

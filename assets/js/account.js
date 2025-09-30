@@ -68,7 +68,8 @@ class AccountManager {
       changeLocale: `${this.baseUrl}/rule/api/account/locale`,
       downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
       emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`,
-      getConfig: `${this.baseUrl}/rule/api/account/config`
+      getConfig: `${this.baseUrl}/rule/api/account/config`,
+      updateConfig: `${this.baseUrl}/rule/api/account/config/update`
     };
     
     // Log all endpoints for debugging
@@ -841,20 +842,17 @@ class AccountManager {
     };
 
     try {
-      // For now, we'll store this locally since there's no API endpoint yet
-      // In a real implementation, you would send this to an API endpoint
-      // const response = await axios.post(this.apiEndpoints.updateTableSettings, tableData);
-
+      const response = await axios.post(this.apiEndpoints.updateConfig, tableData);
       this.showSuccessMessage('Table settings updated successfully');
 
-      // Update local user data
-      this.user = {
-        ...this.user,
-        ...tableData
-      };
+      // Update local config data
+      if (this.config) {
+        this.config.pager = tableData.rowsPerPage;
+        this.config.search_limit = tableData.maximumResults;
+      }
 
     } catch (error) {
-      this.showErrorMessage(error.response?.data?.message || 'Failed to update table settings');
+      this.showErrorMessage(error.response?.data?.error || error.response?.data?.message || 'Failed to update table settings');
       console.error('Failed to update table settings:', error);
     }
   }
