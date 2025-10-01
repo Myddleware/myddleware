@@ -78,14 +78,14 @@
 							{% if task.getBegin is null %}
 								-
 							{% else %}
-								{{ task.getBegin|date("d/m/Y H:i:s", timezone) }}
+								{{ task.getBegin|date("d/m/Y : H:i:s", app.user.timezone) }}
 							{% endif %}
 						</td>
 						<td class="ctr">
 							{% if task.getEnd is null %}
 								-
 							{% else %}
-								{{ task.getEnd|date("d/m/Y H:i:s", timezone) }}
+								{{ task.getEnd|date("d/m/Y : H:i:s", app.user.timezone) }}
 							{% endif %}
 						</td>
 						<td class="ctr">{{ task.getOpen }}</td>
@@ -151,7 +151,7 @@
 								<a href="{{ path('flux_modern', {'id': log.getDocument.id }) }}">{{ log.getDocument.id }}</a>
 							{% endif %}
 						</td>					     					     			     			     	
-						<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
+						<td>{{ log.getCreated|date("d/m/Y : H:i:s", app.user.timezone) }}</td>
 						<td class="ctr">
 							<div class="log_{{ log.getType|lower }}">{{ log.getType }}
 							{% if log.getType|lower == 's' %}
