@@ -962,6 +962,11 @@ public function removeFilter(Request $request): JsonResponse
         $myUser = $this->getUser();
         $mySeparator = $myUser->getCsvSeparator() ?? ',';
 
+        // Convert string '\t' to actual tab character
+        if ($mySeparator === '\t' || $mySeparator === '\\t') {
+            $mySeparator = "\t";
+        }
+
         if (!(isset($_POST['csvdocumentids']))) {
             throw $this->createNotFoundException('No document selected');
         }
