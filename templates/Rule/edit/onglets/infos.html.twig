@@ -122,11 +122,11 @@
 						</tr>
 						<tr>
 							<td class="title">{{ 'view_rule.infos.datecreated' | trans }}</td>
-							<td class="value">{{ rule.GetDateCreated | date("d-m-Y H:i:s") }}</td>
+							<td class="value">{{ rule.GetDateCreated | date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 						</tr>
 						<tr>
 							<td class="title">{{ 'view_rule.infos.datemodified' | trans }}</td>
-							<td class="value">{{ rule.GetDateModified | date("d-m-Y H:i:s") }}</td>
+							<td class="value">{{ rule.GetDateModified | date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 						</tr>
 						<tr>
 							<td class="title">{{ 'view_rule.infos.mode' | trans }}</td>
