@@ -88,8 +88,8 @@
 								<span class="label label-warning">{{ task.status }}</span>
 								{% endif %}
 							</td>    
-							<td class="date_task_list">{{ task.begin|date("d/m/Y : H:i:s", app.user.timezone) }}</td>
-							<td class="date_task_list">{{ task.end|date("d/m/Y : H:i:s", app.user.timezone) }}</td>
+							<td class="date_task_list">{{ task.begin|date("d/m/Y H:i:s", app.user.timezone) }}</td>
+							<td class="date_task_list">{{ task.end|date("d/m/Y H:i:s", app.user.timezone) }}</td>
 							<td class="count">{{ task.open }}</td>    
 							<td class="count">{{ task.close }}</td>
 							<td class="count">{{ task.cancel }}</td> 
