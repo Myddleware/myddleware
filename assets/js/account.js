@@ -282,7 +282,7 @@ class AccountManager {
               <select id="export-separator-pref" name="export-separator" class="form-control">
                 <option value=",">${t.fields.export_separator_comma || 'Comma (,)'}</option>
                 <option value=";">${t.fields.export_separator_semicolon || 'Semicolon (;)'}</option>
-                <option value="\t">${t.fields.export_separator_tab || 'Tab'}</option>
+                <option value="\\t">${t.fields.export_separator_tab || 'Tab'}</option>
                 <option value="|">${t.fields.export_separator_pipe || 'Pipe (|)'}</option>
               </select>
             </div>
@@ -522,7 +522,12 @@ class AccountManager {
       dateFormatPref.value = this.user.dateFormat || 'Y-m-d';
     }
     if (exportSeparatorPref) {
-      exportSeparatorPref.value = this.user.exportSeparator || ',';
+      // Convert actual tab character to string '\t' for the dropdown
+      let separator = this.user.exportSeparator || ',';
+      if (separator === '\t') {
+        separator = '\\t';
+      }
+      exportSeparatorPref.value = separator;
     }
     if (encodingPref) {
       encodingPref.value = this.user.encoding || 'UTF-8';
@@ -809,10 +814,17 @@ class AccountManager {
    * Update format preferences
    */
   async updateFormatPreferences() {
+    let exportSeparator = document.getElementById('export-separator-pref').value;
+
+    // Convert string '\t' to actual tab character for backend
+    if (exportSeparator === '\\t') {
+      exportSeparator = '\t';
+    }
+
     const formatData = {
       timezone: document.getElementById('timezone-pref').value,
       dateFormat: document.getElementById('date-format-pref').value,
-      exportSeparator: document.getElementById('export-separator-pref').value,
+      exportSeparator: exportSeparator,
       encoding: document.getElementById('encoding-pref').value
     };
 

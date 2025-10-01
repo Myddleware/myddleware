@@ -428,7 +428,7 @@ class AccountController extends AbstractController
         
         // Get user preferences from session or defaults
         $dateFormat = $request->getSession()->get('_date_format', 'Y-m-d');
-        $exportSeparator = $request->getSession()->get('_export_separator', ',');
+        $exportSeparator = $user->getCsvSeparator() ?? ',';
         $encoding = $request->getSession()->get('_encoding', 'UTF-8');
         
         return new JsonResponse([
@@ -508,6 +508,7 @@ class AccountController extends AbstractController
             // Validate export separator
             $validSeparators = [',', ';', "\t", '|'];
             if (in_array($data['exportSeparator'], $validSeparators)) {
+                $user->setCsvSeparator($data['exportSeparator']);
                 $request->getSession()->set('_export_separator', $data['exportSeparator']);
             }
         }
