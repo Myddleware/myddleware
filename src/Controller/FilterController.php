@@ -957,6 +957,11 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function exportDocumentsToCsv(): Response
     {
+
+        $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+        $myUser = $this->getUser();
+        $mySeparator = $myUser->getCsvSeparator() ?? ',';
+
         if (!(isset($_POST['csvdocumentids']))) {
             throw $this->createNotFoundException('No document selected');
         }
@@ -1038,7 +1043,7 @@ public function removeFilter(Request $request): JsonResponse
         ];
 
         // writes the header in the csv file
-        fputcsv($fp, $header);
+        fputcsv($fp, $header, $mySeparator);
 
         // the results are serialized, so we need to unserialize them
         foreach ($results as $key => $row) {
@@ -1077,7 +1082,7 @@ public function removeFilter(Request $request): JsonResponse
                 $row['target_data'] ?? '',
                 $row['history_data'] ?? ''
             ];
-            fputcsv($fp, $csvRow);
+            fputcsv($fp, $csvRow, $mySeparator);
         }
 
         rewind($fp);
