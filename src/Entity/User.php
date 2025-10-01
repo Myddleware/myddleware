@@ -116,6 +116,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
      */
     protected string $timezone;
 
+    // csv_separator is a string of length max 10 and in the table users it is defined as csv_separator varchar(5)
+    /**
+     * @ORM\Column(name="csv_separator", type="string", length=5, options={"default"=";"})
+     */
+    protected string $csv_separator = ',';
+
     public function __construct()
     {
         $this->enabled = false;
@@ -526,5 +532,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
     public function getUserIdentifier(): string
     {
         return $this->username;
+    }
+
+    public function getCsvSeparator(): string
+    {
+        return $this->csv_separator;
+    }
+
+    public function setCsvSeparator(string $csv_separator): self
+    {
+        $this->csv_separator = $csv_separator;
+
+        return $this;
     }
 }
