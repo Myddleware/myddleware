@@ -191,24 +191,32 @@ header{
     color: gold;
     position: relative;
     top: 8px;
+	z-index: 2;
+	display: inline-block;
 }
 
-.star-icon-btn-filter{
-    top: 13px !important;
-    left: 10px;
+.star-icon-btn-filter { 
+	top: 13px !important; 
+	left: 10px; 
+}
+
+.star-cron { 
+	font-size: 12px !important; 
+	margin-left: -76px !important; 
+	top: 7px !important; 
 }
 
 .title_section_menu:hover .star-icon {
-	transform: rotate(20deg) scale(1.5);
+  transform: rotate(20deg) scale(1.5);
+  z-index: 10; 
 }
 
-.star-cron{
-	font-size: 12px !important;
-	margin-left: -76px !important;
-	top: 7px !important;
+.sous_menu_navbar .dropdown-item:hover .star-icon,
+.sous_menu_navbar .dropdown-item:focus .star-icon,
+.sous_menu_navbar .dropdown-item:focus-visible .star-icon {
+  transform: rotate(20deg) scale(1.2);
 }
-.star-cron:hover{
-	font-size: 12px !important;
-	margin-left: -76px !important;
-	top: 7px !important;
+
+.star-icon:hover { 
+	transform: rotate(20deg) scale(1.2); 
 }

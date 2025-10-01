@@ -106,31 +106,14 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				{% if pager.haveToPaginate %}
-					<nav aria-label="Page navigation">
-						<ul class="pagination">
-							{% if pager.hasPreviousPage %}
-								<li class="page-item">
-									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.previousPage }) }}" aria-label="Previous">
-										<span aria-hidden="true">&laquo;</span>
-									</a>
-								</li>
-							{% endif %}
-							{% for page in 1..pager.nbPages %}
-								<li class="page-item{% if page == pager.currentPage %} active{% endif %}">
-									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': page }) }}">{{ page }}</a>
-								</li>
-							{% endfor %}
-							{% if pager.hasNextPage %}
-								<li class="page-item">
-									<a class="page-link" href="{{ path('crontab_show_page', { 'id': entity.id, 'page': pager.nextPage }) }}" aria-label="Next">
-										<span aria-hidden="true">&raquo;</span>
-									</a>
-								</li>
-							{% endif %}
-						</ul>
-					</nav>
-				{% endif %}
+				<div class="d-flex justify-content-center mt-4">
+					{% if pager.haveToPaginate %}
+						{{ pagerfanta(
+							pager, 'twitter_bootstrap4',{ 'routeName': 'crontab_show_page', 'routeParams': { 'id': entity.id }, 'proximity': 2 }
+						) }}
+					{% endif %}
+				</div>
+
 			</div>
 		</div>
 	</div>
