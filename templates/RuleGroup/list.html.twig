@@ -68,8 +68,8 @@
 						<td>
 							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}" class="help-link all-link">{{ ruleGroup.name }}</a>
 						</td>
-						<td>{{ ruleGroup.dateCreated|date('Y-m-d H:i:s') }}</td>
-						<td>{{ ruleGroup.dateModified|date('Y-m-d H:i:s') }}</td>
+						<td>{{ ruleGroup.dateCreated|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+						<td>{{ ruleGroup.dateModified|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 						<td>{{ ruleGroup.createdBy.username }}</td>
 						<td>{{ ruleGroup.modifiedBy.username }}</td>
 						<td>{{ ruleGroup.description }}</td>

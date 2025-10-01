@@ -43,7 +43,7 @@
                 <td class="ctr log-message">
                     <div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
                 </td>
-                <td class="ctr log-message">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+                <td class="ctr log-message">{{ log.dateCreated|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
                 <td class="ctr log-message">{{ log.getMessage }}</td>
                 <td class="ctr log-message">
                     <a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>

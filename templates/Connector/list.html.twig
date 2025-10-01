@@ -72,7 +72,7 @@
 													</div>
 												</td>
 												<td class="creation-date">
-													{{connector.0.getDateCreated|date("d/m/Y", app.user.timezone) }}
+													{{connector.0.getDateCreated|date(app.user.dateFormat, app.user.timezone) }}
 													{% if app.user.getUsername == 'support' %}
 														<p>
 															<span class="label label-default">{{ connector.0.getCreatedBy.username }}</span>

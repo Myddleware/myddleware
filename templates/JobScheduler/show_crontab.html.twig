@@ -18,13 +18,13 @@
 							<td class="title">
 								<label>{{ 'jobscheduler.date_created'|trans }}</label>
 							</td>
-							<td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
+							<td class="value">{{ entity.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 						</tr>
 						<tr>
 							<td class="title">
 								<label>{{ 'jobscheduler.date_modified'|trans }}</label>
 							</td>
-							<td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
+							<td class="value">{{ entity.updatedAt|date(app.user.dateFormat, app.user.timezone) }}</td>
 						</tr>
 						<tr>
 							<td class="title">
@@ -96,10 +96,10 @@
 						{% for result in pager.currentPageResults %}
 							<tr>
 								<td>{{ result.id }}</td>
-								<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
-								<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+								<td>{{ result.updatedAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 								<td>{{ result.output|raw }}</td>
-								<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
+								<td>{{ result.runAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 								<td>{{ result.runTime }}</td>
 								<td>{{ result.statusCode }}</td>
 							</tr>
