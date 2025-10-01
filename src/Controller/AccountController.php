@@ -426,8 +426,8 @@ class AccountController extends AbstractController
             $locales = ['en', 'fr'];
         }
         
-        // Get user preferences from session or defaults
-        $dateFormat = $request->getSession()->get('_date_format', 'Y-m-d');
+        // Get user preferences from database or defaults
+        $dateFormat = $user->getDateFormat() ?? 'Y-m-d';
         $exportSeparator = $user->getCsvSeparator() ?? ',';
         $encoding = $request->getSession()->get('_encoding', 'UTF-8');
         
@@ -495,12 +495,12 @@ class AccountController extends AbstractController
             }
         }
         
-        // Store additional preferences in session
+        // Store date format in database
         if (isset($data['dateFormat'])) {
             // Validate date format
             $validFormats = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'd.m.Y'];
             if (in_array($data['dateFormat'], $validFormats)) {
-                $request->getSession()->set('_date_format', $data['dateFormat']);
+                $user->setDateFormat($data['dateFormat']);
             }
         }
         
