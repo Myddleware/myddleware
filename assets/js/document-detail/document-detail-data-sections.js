@@ -90,12 +90,18 @@ export class DocumentDetailDataSections {
      * @param {Array<Object>} rows
      *   Each row should have: docId, name, ruleId, sourceId, targetId,
      *   modificationDate, type, status
+     * @param {Object} permissions - Optional user permissions object
      */
-    static generateDocumentHistory(rows = []) {
+    static generateDocumentHistory(rows = [], permissions = {}) {
         if (!rows.length) return ``;
 
         // Get current document ID from URL
         const currentDocumentId = window.location.pathname.split('/').pop();
+
+        // Check if user is super admin
+        const isSuperAdmin = permissions.is_super_admin ||
+                           permissions.roles?.includes('ROLE_SUPER_ADMIN') ||
+                           false;
 
         // build each row's <tr>…
         const body = rows
@@ -169,9 +175,9 @@ export class DocumentDetailDataSections {
             </div>
 
             <div class="custom-content">
-            <button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-bottom: 10px;">
+            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-bottom: 10px;">
                 Cancel History
-            </button>
+            </button>` : ''}
             <table class="custom-table">
             <thead>
                 <tr>

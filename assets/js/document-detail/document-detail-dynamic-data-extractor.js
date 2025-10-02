@@ -2,6 +2,7 @@ import { getDocumentHistory } from './document-detail-data-extractor.js';
 import { getDocumentParents, getDocumentChildren, getDocumentPosts } from './document-detail-data-extractor-parents-children.js';
 import { DocumentDetailDataSections } from './document-detail-data-sections.js';
 import { DocumentDetailSectionState } from './document-detail-section-state.js';
+import { DocumentDetailPermissions } from './document-detail-permissions.js';
 
 export function extractDocumentHistory(documentId) {
 
@@ -36,20 +37,23 @@ export function extractDocumentHistory(documentId) {
  * Updates the document history section with real data
  * @param {Array} historyData - Array of history document objects
  */
-function updateDocumentHistorySection(historyData) {
+async function updateDocumentHistorySection(historyData) {
     try {
+        // Get user permissions
+        const permissions = await DocumentDetailPermissions.getCurrentUserPermissions();
+
         // Look for existing document history section first
         let historySection = document.querySelector('.data-wrapper.custom-section');
-        
+
         if (!historySection) {
             // If no existing history section, find where to insert it
             // Look for the main data-wrapper that contains source/target/history sections
             const mainDataWrapper = document.querySelector('.data-wrapper');
             if (mainDataWrapper) {
                 // Insert the history section after the main data wrapper
-                const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData);
+                const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData, permissions);
                 mainDataWrapper.insertAdjacentHTML('afterend', newHistoryHTML);
-                
+
                 // Re-initialize section state management for the new DOM elements
 // console.log('🔄 Re-initializing document history section state (new insertion)...');
                 DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
@@ -58,12 +62,12 @@ function updateDocumentHistorySection(historyData) {
                 return;
             }
         }
-        
+
         if (historySection) {
             // Replace existing history section
-            const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData);
+            const newHistoryHTML = DocumentDetailDataSections.generateDocumentHistory(historyData, permissions);
             historySection.outerHTML = newHistoryHTML;
-            
+
             // Re-initialize section state management for the new DOM elements
             // console.log('🔄 Re-initializing document history section state (replacement)...');
             DocumentDetailSectionState.setupCollapsible('custom-section', 'custom', 'documentsHistory');
