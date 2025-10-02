@@ -123,6 +123,7 @@ $( function() {
 									}
 									else {									
 										status.removeAttr("src");
+                                        console.log('003 myddleware status online')
 										status.attr("src", "../"+path_img+"status_online.png");
 										$('#msg_status').hide();
 										$('#msg_status span.error').html('');	
@@ -140,6 +141,7 @@ $( function() {
 							}
 							else{
 								status.removeAttr("src");
+                                        console.log('004 myddleware status online')
 								status.attr("src","../" +path_img+"status_online.png");
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
