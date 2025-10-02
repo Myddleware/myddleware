@@ -1787,14 +1787,14 @@ $result = [];
             $historyData = [];
             foreach ($historyDocuments as $histDoc) {
                 $statusInfo = $this->getDocumentStatusInfo($histDoc);
-                
+
                 $historyData[] = [
                     'docId' => $histDoc->getId(),
                     'name' => $rule->getName(),
                     'ruleId' => $rule->getId(),
                     'sourceId' => $histDoc->getSource(),
                     'targetId' => $histDoc->getTarget(),
-                    'modificationDate' => $histDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'modificationDate' => $this->formatDateInUserTimezone($histDoc->getDateModified()),
                     'type' => $histDoc->getType(),
                     'status' => $statusInfo['status'],
                     'statusClass' => $statusInfo['status_class']
@@ -1859,14 +1859,14 @@ $result = [];
                 if ($result['docId']) {
                     $parentDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($parentDocument);
-                    
+
                     $parentData[] = [
                         'docId' => $result['docId'],
                         'name' => $result['ruleName'],
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -1933,14 +1933,14 @@ $result = [];
                 if ($result['docId']) {
                     $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($childDocument);
-                    
+
                     $childData[] = [
                         'docId' => $result['docId'],
                         'name' => $result['ruleName'],
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -1991,7 +1991,7 @@ $result = [];
                     'ruleId' => $rule ? $rule->getId() : null,
                     'sourceId' => $postDoc->getSource(),
                     'targetId' => $postDoc->getTarget(),
-                    'modificationDate' => $postDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'modificationDate' => $this->formatDateInUserTimezone($postDoc->getDateModified()),
                     'type' => $postDoc->getType(),
                     'status' => $statusInfo['status'],
                     'statusClass' => $statusInfo['status_class']
@@ -2051,7 +2051,7 @@ $result = [];
                     'id' => $log->getId(),
                     'reference' => $log->getRef() ?: '',
                     'job' => $job ? $job->getId() : '',
-                    'creationDate' => $log->getCreated()->format('d/m/Y H:i:s'),
+                    'creationDate' => $this->formatDateInUserTimezone($log->getCreated()),
                     'type' => $typeFormatted,
                     'message' => $log->getMessage() ?: 'No message',
                     'rawType' => $log->getType() // For frontend styling
@@ -2278,7 +2278,7 @@ $result = [];
                     'actionId' => $workflowLog->getAction() ? $workflowLog->getAction()->getId() : null,
                     'actionType' => $workflowLog->getAction() ? $workflowLog->getAction()->getAction() : '',
                     'status' => $workflowLog->getStatus() ?? '',
-                    'dateCreated' => $workflowLog->getDateCreated()->format('Y-m-d H:i:s'),
+                    'dateCreated' => $this->formatDateInUserTimezone($workflowLog->getDateCreated()),
                     'message' => $workflowLog->getMessage() ?? '',
                 ];
             }
