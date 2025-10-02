@@ -14,8 +14,7 @@ import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js
 import {
     extractDocumentHistory,
     extractDocumentParents,
-    extractDocumentChildren,
-    extractDocumentPosts
+    extractDocumentChildren
 } from './document-detail-dynamic-data-extractor.js';
 
 import { getDocumentLogs } from './document-detail-data-extractor-logs.js';
@@ -54,9 +53,6 @@ export class DocumentDetailTemplate {
             myChildrenPayload = data;
 // console.log("🔍 myChildrenPayload resolved:", myChildrenPayload?.length || 0, 'items');
         });
-
-        const myPostsPayload = extractDocumentPosts(documentId);
-// console.log('📬 Posts payload extracted:', myPostsPayload?.length || 0, 'items');
         
         // Initialize logs payload and fetch logs data
         let myLogsPayload = [];
@@ -123,7 +119,6 @@ export class DocumentDetailTemplate {
                         ${DocumentDetailDataSections.generateDocumentHistory(myHistoryPayload)}
                         ${DocumentDetailDataSections.generateParentDocumentsSection(myParentsPayload)}
                         ${DocumentDetailDataSections.generateChildDocumentsSection(myChildrenPayload)}
-                        ${DocumentDetailDataSections.generatePostDocumentsSection(myPostsPayload)}
                         ${DocumentDetailDataSections.generateLogsSection(myLogsPayload)}
                         ${DocumentDetailDataSections.generateWorkflowLogsSection([])}
                         `;
