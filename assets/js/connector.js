@@ -140,9 +140,14 @@ $( function() {
 								$('#msg_status').show();
 							}
 							else{
+								let pathString = "../";
+                                // if the window path contains index.php (docker)
+                                if (window.location.pathname.includes("index.php")) {
+                                    pathString = "../../../../";
+                                }	
 								status.removeAttr("src");
                                         console.log('004 myddleware status online')
-								status.attr("src","../" +path_img+"status_online.png");
+								status.attr("src", pathString + path_img + "status_online.png");
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
 							}						
