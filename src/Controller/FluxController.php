@@ -1555,11 +1555,11 @@ $result = [];
                 
                 // Type display info
                 'type_label' => $this->getTypeLabel($document->getType()),
-                
-                // Dates and reference
-                'creation_date' => $document->getDateCreated()->format('Y-m-d H:i:s'),
-                'modification_date' => $document->getDateModified()->format('Y-m-d H:i:s'),
-                'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
+
+                // Dates and reference - convert to user's timezone before formatting
+                'creation_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
+                'modification_date' => $this->formatDateInUserTimezone($document->getDateModified()),
+                'reference' => $document->getSourceDateModified() ? $this->formatDateInUserTimezone($document->getSourceDateModified()) : null,
 
                 // Pass user timezone and date format for client-side formatting
                 'user_timezone' => $this->getUser()->getTimezone(),
@@ -1601,6 +1601,24 @@ $result = [];
             error_log("getDocumentData: Stack trace: " . $e->getTraceAsString());
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Helper method to format a DateTime object in the user's timezone
+     * @param \DateTime $date - The date to format
+     * @return string - Formatted date string in Y-m-d H:i:s format
+     */
+    private function formatDateInUserTimezone(\DateTime $date): string {
+        $userTimezone = $this->getUser()->getTimezone();
+
+        // Clone the date to avoid modifying the original
+        $dateInUserTz = clone $date;
+
+        // Convert to user's timezone
+        $dateInUserTz->setTimezone(new \DateTimeZone($userTimezone));
+
+        // Return formatted string
+        return $dateInUserTz->format('Y-m-d H:i:s');
     }
 
     /**

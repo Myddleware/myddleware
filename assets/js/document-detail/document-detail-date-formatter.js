@@ -33,8 +33,9 @@ export class DocumentDetailDateFormatter {
 
     /**
      * Format a date string according to user preferences
-     * @param {string} dateString - Date string in Y-m-d H:i:s format
-     * @param {string} userTimezone - User's timezone (e.g., 'Europe/Paris', 'America/New_York')
+     * NOTE: Dates from the API are already in the user's timezone, we just need to reformat them
+     * @param {string} dateString - Date string in Y-m-d H:i:s format (already in user's timezone)
+     * @param {string} userTimezone - User's timezone (not used, kept for compatibility)
      * @param {string} userDateFormat - User's date format in PHP format (e.g., 'd/m/Y')
      * @returns {string} - Formatted date string
      */
@@ -44,47 +45,29 @@ export class DocumentDetailDateFormatter {
         }
 
         try {
-            // Parse the date string (assuming it's in UTC or server timezone)
-            const date = new Date(dateString);
+            // Parse the date string (format: YYYY-MM-DD HH:mm:ss)
+            // The date is already in the user's timezone from the backend
+            const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
 
-            if (isNaN(date.getTime())) {
-                console.warn('Invalid date:', dateString);
+            if (!match) {
+                console.warn('Invalid date format:', dateString);
                 return dateString;
             }
 
-            // Convert to user's timezone using Intl.DateTimeFormat
-            const options = {
-                timeZone: userTimezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            };
-
-            const formatter = new Intl.DateTimeFormat('en-GB', options);
-            const parts = formatter.formatToParts(date);
-
-            // Extract parts
-            const dateParts = {};
-            parts.forEach(part => {
-                dateParts[part.type] = part.value;
-            });
+            const [, year, month, day, hour, minute, second] = match;
 
             // Build formatted date according to user's format
             let formattedDate = userDateFormat;
 
             // Replace PHP format characters with actual values
             formattedDate = formattedDate
-                .replace(/d/g, dateParts.day)
-                .replace(/m/g, dateParts.month)
-                .replace(/Y/g, dateParts.year)
-                .replace(/y/g, dateParts.year.slice(-2));
+                .replace(/d/g, day)
+                .replace(/m/g, month)
+                .replace(/Y/g, year)
+                .replace(/y/g, year.slice(-2));
 
             // Add time in H:i:s format
-            const timeString = `${dateParts.hour}:${dateParts.minute}:${dateParts.second}`;
+            const timeString = `${hour}:${minute}:${second}`;
 
             return `${formattedDate} ${timeString}`;
 
