@@ -52,7 +52,7 @@ export class DocumentDetailFieldExpander {
             const icon = fieldValueElement.querySelector('.field-edit-icon');
             
             if (!icon) {
-                console.warn('⚠️ No edit icon found for field value');
+                // console.warn('⚠️ No edit icon found for field value');
                 return;
             }
             
@@ -81,7 +81,7 @@ export class DocumentDetailFieldExpander {
         // Only create pencil icons for field values in target data section
         const targetDataContainer = document.querySelector('.target-data-content');
         if (!targetDataContainer) {
-            console.warn('⚠️ Target data container not found, skipping pencil icon creation');
+            // console.warn('⚠️ Target data container not found, skipping pencil icon creation');
             return;
         }
         

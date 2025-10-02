@@ -12,7 +12,8 @@
       "New Value": "No",
       "Rerun": "No",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
     },
     {
       "Action": "generateDocument",
@@ -27,7 +28,8 @@
       "New Value": "No",
       "Rerun": "Yes",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
     },
     {
       "Action": "sendNotification",
@@ -42,7 +44,8 @@
       "New Value": "No",
       "Rerun": "No",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
     },
     {
       "Action": "transformDocument",
@@ -57,7 +60,8 @@
       "New Value": "No",
       "Rerun": "No",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
     },
     {
       "Action": "rerun",
@@ -72,12 +76,13 @@
       "New Value": "No",
       "Rerun": "No",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
     },
     {
       "Action": "changeData",
       "Status": "No",
-      "Rule": "Yes",
+      "Rule": "No",
       "SearchField": "No",
       "SearchValue": "No",
       "Subject": "No",
@@ -87,7 +92,24 @@
       "New Value": "Yes",
       "Rerun": "No",
       "Multiple run": "Yes",
-      "Active": "Yes"
+      "Active": "Yes",
+      "documentType": "No"
+    },
+    {
+      "Action": "updateType",
+      "Status": "No",
+      "Rule": "No",
+      "SearchField": "No",
+      "SearchValue": "No",
+      "Subject": "No",
+      "Message": "No",
+      "To": "No",
+      "Target Field": "Yes",
+      "New Value": "Yes",
+      "Rerun": "No",
+      "Multiple run": "Yes",
+      "Active": "Yes",
+      "documentType": "Yes"
     }
   ]
   

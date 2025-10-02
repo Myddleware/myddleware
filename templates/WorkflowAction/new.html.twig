@@ -113,6 +113,13 @@
 						</div>
 					</div>
 				</div>
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action" id="document-type-container">
+							{{ form_row(form.documentType) }}
+						</div>
+					</div>
+				</div>
 				<div class="row mb-4" style="display: none;">
 					<div class="col-md-6" id="targetFieldContainer">
 						<div class="workflow-field-container form-group-workflow-action">
@@ -138,6 +145,33 @@
 
 	<script type="text/javascript">
 		var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+		 window.workflowRuleMap = {
+		{% for wf in workflows %}
+		"{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
+		{% endfor %}
+		};
+
+		function syncRuleFromWorkflow(source){
+			var wfId = document.getElementById('form_Workflow')?.value || '';
+			var ruleId = (window.workflowRuleMap && window.workflowRuleMap[wfId]) ? window.workflowRuleMap[wfId] : '';
+
+			var ruleSelect = document.getElementById('form_ruleId');
+
+			ruleSelect.value = ruleId || '';
+			var evt = new Event('change', { bubbles: true });
+			ruleSelect.dispatchEvent(evt);
+		}
+		document.addEventListener('DOMContentLoaded', function(){
+			var wf = document.getElementById('form_Workflow');
+			if (wf) {
+			syncRuleFromWorkflow('DOMContentLoaded');
+			wf.addEventListener('change', function(){
+				if (!window.workflowRuleMap) {
+				}
+				syncRuleFromWorkflow('change');
+			});
+			}
+		});
 	</script>
 
 {% endblock %}

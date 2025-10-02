@@ -59,7 +59,7 @@ export function getDocumentWorkflowLogs(documentId, callback) {
 // console.log('✅ Workflow logs data retrieved successfully:', data.data.length, 'logs');
             callback(data.data, null);
         } else {
-            console.warn('⚠️ Workflow logs API returned error:', data.error || 'Unknown error');
+            // console.warn('⚠️ Workflow logs API returned error:', data.error || 'Unknown error');
             callback([], data.error || 'Unknown error');
         }
     })

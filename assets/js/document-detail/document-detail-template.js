@@ -1,14 +1,15 @@
 import { DocumentDetailDataSections } from './document-detail-data-sections.js';
-import { 
-    getDocumentData, 
-    extractRuleInfo, 
-    extractDocumentStatus, 
-    extractDocumentType, 
-    extractDocumentAttempts, 
+import {
+    getDocumentData,
+    extractRuleInfo,
+    extractDocumentStatus,
+    extractDocumentType,
+    extractDocumentAttempts,
     extractDocumentDates,
     getDocumentHistory
 } from './document-detail-data-extractor.js';
 import { DocumentDetailDirectLinks } from './document-detail-direct-links.js';
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
 
 import {
     extractDocumentHistory,
@@ -45,7 +46,7 @@ export class DocumentDetailTemplate {
         
         const myParentsPayload = extractDocumentParents(documentId);
 // console.log('👪 Parents payload extracted:', myParentsPayload?.length || 0, 'items');
-        
+
         // Handle the promise from extractDocumentChildren
         let myChildrenPayload = [];
         extractDocumentChildren(documentId).then(data => {
@@ -165,7 +166,7 @@ export class DocumentDetailTemplate {
     
     static updateRuleInfo(ruleInfo) {
         if (!ruleInfo || !ruleInfo.name) {
-            console.warn('⚠️ No rule info available');
+            // console.warn('⚠️ No rule info available');
             return;
         }
         
@@ -191,7 +192,7 @@ export class DocumentDetailTemplate {
     
     static updateDocumentStatus(statusInfo) {
         if (!statusInfo) {
-            console.warn('⚠️ No status info available');
+            // console.warn('⚠️ No status info available');
             return;
         }
         
@@ -213,7 +214,7 @@ export class DocumentDetailTemplate {
         const typeElement = document.getElementById('document-type');
         
         if (!typeElement) {
-            console.warn('⚠️ Document type element not found');
+            // console.warn('⚠️ Document type element not found');
             return;
         }
         
@@ -229,7 +230,7 @@ export class DocumentDetailTemplate {
     
     static updateDocumentAttempts(attemptInfo) {
         if (!attemptInfo) {
-            console.warn('⚠️ No attempt info available');
+            // console.warn('⚠️ No attempt info available');
             return;
         }
         
@@ -246,7 +247,7 @@ export class DocumentDetailTemplate {
     
     static updateDocumentDates(dateInfo) {
         if (!dateInfo) {
-            console.warn('⚠️ No date info available');
+            // console.warn('⚠️ No date info available');
             return;
         }
         
@@ -294,8 +295,6 @@ export class DocumentDetailTemplate {
      * @param {Object} documentData - Complete document data from API
      */
     static updateDataSections(documentData) {
-// console.log('🔄 Updating all data sections with real data');
-
         try {
             // Store document data globally so that ID field generation can access it
             window.currentDocumentData = documentData;
@@ -419,7 +418,7 @@ export class DocumentDetailTemplate {
 // console.log('📋 Logs container found:', !!logsContainer);
             
             if (!logsContainer) {
-                console.warn('⚠️ Logs section container not found in DOM');
+                // console.warn('⚠️ Logs section container not found in DOM');
                 // Let's also check what containers do exist
                 const allDataWrappers = document.querySelectorAll('.data-wrapper');
 // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
@@ -470,7 +469,7 @@ export class DocumentDetailTemplate {
 // console.log('📋 Workflow logs container found:', !!workflowLogsContainer);
             
             if (!workflowLogsContainer) {
-                console.warn('⚠️ Workflow logs section container not found in DOM');
+                // console.warn('⚠️ Workflow logs section container not found in DOM');
                 // Let's also check what containers do exist
                 const allDataWrappers = document.querySelectorAll('.data-wrapper');
 // console.log('📋 Available data-wrapper containers:', allDataWrappers.length);
@@ -514,8 +513,6 @@ export class DocumentDetailTemplate {
      */
     static updateDirectLinks(documentData) {
         try {
-            // console.log('🔗 Updating direct links for document');
-            
             // Use the DocumentDetailDirectLinks class to update all direct links
             DocumentDetailDirectLinks.updateAllDirectLinks(documentData);
             
@@ -536,7 +533,7 @@ export class DocumentDetailTemplate {
                 window.documentDetailInstance.targetEditor.setDocumentGlobalStatus(globalStatus);
                 // console.log('✅ Target editor updated with global status:', globalStatus);
             } else {
-                console.warn('⚠️ Target editor instance not found, will retry later');
+                // console.warn('⚠️ Target editor instance not found, will retry later');
                 // Retry after a short delay as the target editor might still be initializing
                 setTimeout(() => {
                     if (window.documentDetailInstance && window.documentDetailInstance.targetEditor) {
@@ -586,7 +583,7 @@ export class DocumentDetailTemplate {
         
         try {
             if (!documentData || !documentData.source_solution || !documentData.target_solution) {
-                console.warn('⚠️ Solution information not available in document data');
+                // console.warn('⚠️ Solution information not available in document data');
                 return;
             }
 

@@ -65,13 +65,13 @@ export class DocumentDetailPermissions {
                 try {
                     return JSON.parse(userPermsMeta.getAttribute('content'));
                 } catch (e) {
-                    console.warn('⚠️ Could not parse permissions from meta tag');
+                    // console.warn('⚠️ Could not parse permissions from meta tag');
                 }
             }
             
             return null;
         } catch (error) {
-            console.warn('⚠️ Error getting permissions from meta tags:', error.message);
+            // console.warn('⚠️ Error getting permissions from meta tags:', error.message);
             return null;
         }
     }
@@ -101,7 +101,7 @@ export class DocumentDetailPermissions {
             
             return null;
         } catch (error) {
-            console.warn('⚠️ Error getting permissions from globals:', error.message);
+            // console.warn('⚠️ Error getting permissions from globals:', error.message);
             return null;
         }
     }
@@ -128,14 +128,14 @@ export class DocumentDetailPermissions {
             });
             
             if (!response.ok) {
-                console.warn(`⚠️ API permissions request failed: ${response.status}`);
+                // console.warn(`⚠️ API permissions request failed: ${response.status}`);
                 return null;
             }
             
             const data = await response.json();
             
             if (!data.success) {
-                console.warn('⚠️ API permissions request failed:', data.error);
+                // console.warn('⚠️ API permissions request failed:', data.error);
                 return null;
             }
             
@@ -143,7 +143,7 @@ export class DocumentDetailPermissions {
             return data.permissions;
             
         } catch (error) {
-            console.warn('⚠️ Error getting permissions from API:', error.message);
+            // console.warn('⚠️ Error getting permissions from API:', error.message);
             return null;
         }
     }
@@ -175,7 +175,7 @@ export class DocumentDetailPermissions {
             return basicPermissions;
             
         } catch (error) {
-            console.warn('⚠️ Error getting permissions from context:', error.message);
+            // console.warn('⚠️ Error getting permissions from context:', error.message);
             return { role: 'ROLE_USER', is_super_admin: false, roles: ['ROLE_USER'] };
         }
     }

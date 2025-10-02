@@ -93,7 +93,13 @@ class VariableController extends AbstractController
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
                 'attr' => [
-                    'class' => 'form-control',
+                    'class' => 'form-control variable-name-input',
+                    'pattern' => '^[A-Za-z0-9_]+$',
+                    'title' => 'Only letters, numbers, and “_” are allowed (no spaces, periods, or commas)',
+                    'maxlength' => 128,
+                    'spellcheck' => 'false',
+                    'autocapitalize' => 'none',
+                    'autocomplete' => 'off',
                 ],
             ])
             ->add('description', TextareaType::class, [
@@ -129,9 +135,6 @@ class VariableController extends AbstractController
                 $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_create');
             }
-
-            // replace the spaces in the name of the variable with underscores
-            $variable->setName(str_replace(' ', '_', $variable->getName()));
 
             $em->persist($variable);
             $em->flush();
@@ -169,7 +172,13 @@ class VariableController extends AbstractController
             ->add('name', TextType::class, [
                 'label' => $translator->trans('variable.table_headers.name'),
                 'attr' => [
-                    'class' => 'form-control',
+                    'class' => 'form-control variable-name-input',
+                    'pattern' => '^[A-Za-z0-9_]+$',
+                    'title' => 'Only letters, numbers, and “_” are allowed (no spaces, periods, or commas)',
+                    'maxlength' => 128,
+                    'spellcheck' => 'false',
+                    'autocapitalize' => 'none',
+                    'autocomplete' => 'off',
                 ],
             ])
             ->add('description', TextareaType::class, [
@@ -206,9 +215,6 @@ class VariableController extends AbstractController
                 $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
             }
-
-            // replace the spaces in the name of the variable with underscores
-            $variable->setName(str_replace(' ', '_', $variable->getName()));
             // Create an audit entry
             $audit = new VariableAudit();
             $audit->setVariableId($variable->getId());

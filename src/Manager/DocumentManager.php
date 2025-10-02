@@ -2522,7 +2522,10 @@ class DocumentManager
             $stmt->bindValue(':workflowError', $workflowError);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            $this->message .= 'Workflow error set to '.$workflowError;
+            if ((int)$workflowError !== 0) {
+                $this->message .= 'Workflow error set to '.$workflowError;
+                $this->createDocLog();
+            }
             $this->createDocLog();
         } catch (\Exception $e) {
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

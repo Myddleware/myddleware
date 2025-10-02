@@ -1,6 +1,7 @@
 // console.log('flux-data-sections.js loaded');
 
 import { DocumentDetailLookupLinks } from './document-detail-lookup-links.js';
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
 
 export class DocumentDetailDataSections {
     /**
@@ -89,12 +90,18 @@ export class DocumentDetailDataSections {
      * @param {Array<Object>} rows
      *   Each row should have: docId, name, ruleId, sourceId, targetId,
      *   modificationDate, type, status
+     * @param {Object} permissions - Optional user permissions object
      */
-    static generateDocumentHistory(rows = []) {
+    static generateDocumentHistory(rows = [], permissions = {}) {
         if (!rows.length) return ``;
 
         // Get current document ID from URL
         const currentDocumentId = window.location.pathname.split('/').pop();
+
+        // Check if user is super admin
+        const isSuperAdmin = permissions.is_super_admin ||
+                           permissions.roles?.includes('ROLE_SUPER_ADMIN') ||
+                           false;
 
         // build each row's <tr>…
         const body = rows
@@ -104,6 +111,9 @@ export class DocumentDetailDataSections {
 
             // Check if this is the current document
             const isCurrentDocument = docId === currentDocumentId;
+
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
@@ -115,12 +125,28 @@ export class DocumentDetailDataSections {
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td>
                     ${isCurrentDocument ? '<span class="current-document-checkmark">✓</span>' : ''}
                 </td>
@@ -128,7 +154,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -140,7 +166,7 @@ export class DocumentDetailDataSections {
         })
         .join(``);
 
-        return `
+        const historyHtml = `
         <div class="data-wrapper custom-section">
             <div class="custom-header">
             <h3>Documents history</h3>
@@ -149,6 +175,9 @@ export class DocumentDetailDataSections {
             </div>
 
             <div class="custom-content">
+            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-bottom: 10px;">
+                Cancel History
+            </button>` : ''}
             <table class="custom-table">
             <thead>
                 <tr>
@@ -169,6 +198,13 @@ export class DocumentDetailDataSections {
         </div>
         </div>
         `;
+
+        // Set up event listener for the cancel history button after a small delay
+        setTimeout(() => {
+            DocumentDetailDataSections.setupCancelHistoryButton();
+        }, 100);
+
+        return historyHtml;
     }
 
     /**
@@ -193,6 +229,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -200,20 +239,34 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
-            } else {
-                baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -277,6 +330,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -291,13 +347,29 @@ export class DocumentDetailDataSections {
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -319,6 +391,107 @@ export class DocumentDetailDataSections {
 
             <div class="child-documents-content">
             <table class="child-documents-table">
+            <thead>
+                <tr>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
+     * Generates Post Documents section
+     * @param {Array<Object>} rows - Post documents data
+     */
+    static generatePostDocumentsSection(rows = []) {
+        if (!rows.length) {
+            return `
+            <div class="data-wrapper post-documents-section" data-section="post-documents">
+                <div class="post-documents-header">
+                    <h3>📄 Post Documents</h3>
+                </div>
+                <div class="post-documents-content">
+                    <p>No post document</p>
+                </div>
+            </div>
+            `;
+        }
+
+        const body = rows
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
+
+            // Determine background color based on status
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
+            return `
+            <tr${rowStyle}>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
+                <td>${formattedModificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper post-documents-section" data-section="post-documents">
+            <div class="post-documents-header">
+            <h3>Post documents</h3>
+            <span class="post-documents-count">(${rows.length})</span>
+            <button class="post-documents-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="post-documents-content">
+            <table class="post-documents-table">
             <thead>
                 <tr>
                 <th>Doc Id</th>
@@ -367,7 +540,10 @@ export class DocumentDetailDataSections {
         const body = rows
         .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
             // console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
-            
+
+            // Format date created using user preferences
+            const formattedDateCreated = DocumentDetailDateFormatter.formatWithUserPreferences(dateCreated);
+
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
             if (status && status.toLowerCase().includes('error')) {
@@ -440,7 +616,7 @@ export class DocumentDetailDataSections {
                 <td>${generateDocumentLink}</td>
                 <td>${this.sanitizeString(createdBy || '')}</td>
                 <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
-                <td>${dateCreated}</td>
+                <td>${formattedDateCreated}</td>
                 <td>${this.sanitizeString(message)}</td>
                 <td>${actionLink}</td>
                 <td>${this.sanitizeString(actionType || '')}</td>
@@ -507,6 +683,9 @@ export class DocumentDetailDataSections {
 
         const body = rows
         .map(({ id, reference, job, creationDate, type, message }) => {
+            // Format creation date using user preferences
+            const formattedCreationDate = DocumentDetailDateFormatter.formatWithUserPreferences(creationDate);
+
             // Determine color based on type
             let typeColor = '#28a745'; // default green for 'S ✓'
             if (type.startsWith('W')) {
@@ -546,7 +725,7 @@ export class DocumentDetailDataSections {
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-
+                
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
@@ -563,7 +742,7 @@ export class DocumentDetailDataSections {
                 <td>${id}</td>
                 <td>${referenceLink}</td>
                 <td>${jobLink}</td>
-                <td>${creationDate}</td>
+                <td>${formattedCreationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
             </tr>
@@ -699,7 +878,7 @@ export class DocumentDetailDataSections {
         try {
             if (!sectionData || Object.keys(sectionData).length === 0) {
                 sectionElement.innerHTML = this.generateEmptyDataMessage(sectionName);
-                console.warn(`⚠️ No ${sectionName.toLowerCase()} data available`);
+                // console.warn(`⚠️ No ${sectionName.toLowerCase()} data available`);
                 return;
             }
 
@@ -728,7 +907,7 @@ export class DocumentDetailDataSections {
      */
     static generateDataFields(fieldData, sectionType) {
         if (!fieldData || typeof fieldData !== 'object') {
-            console.warn('⚠️ Invalid field data provided:', fieldData);
+            // console.warn('⚠️ Invalid field data provided:', fieldData);
             return this.generateEmptyDataMessage('data');
         }
 
@@ -882,7 +1061,7 @@ export class DocumentDetailDataSections {
             }
             return null;
         } catch (error) {
-            console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
+            // console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
             return null;
         }
     }
@@ -903,7 +1082,7 @@ export class DocumentDetailDataSections {
             }
             return false;
         } catch (error) {
-            console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
+            // console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
             return false;
         }
     }
@@ -965,4 +1144,102 @@ export class DocumentDetailDataSections {
             </div>
         `;
     }
+
+    /**
+     * Sets up the event listener for the cancel history button
+     */
+    static setupCancelHistoryButton() {
+        const cancelButton = document.getElementById('cancel-history-btn');
+        if (cancelButton && !cancelButton.hasAttribute('data-listener-attached')) {
+            cancelButton.addEventListener('click', () => {
+                DocumentDetailDataSections.cancelHistoryDocuments();
+            });
+            cancelButton.setAttribute('data-listener-attached', 'true');
+            // console.log('✅ Cancel history button event listener attached');
+        }
+    }
+
+    /**
+     * Cancels all documents in the history table using mass action
+     */
+    static cancelHistoryDocuments() {
+        try {
+            // Get all document IDs from the history table
+            const historyTable = document.querySelector('.custom-table tbody');
+            if (!historyTable) {
+                console.error('❌ History table not found');
+                return;
+            }
+
+            const documentIds = [];
+            const rows = historyTable.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
+                if (docIdLink) {
+                    const docId = docIdLink.textContent.trim();
+                    if (docId) {
+                        documentIds.push(docId);
+                    }
+                }
+            });
+
+            if (documentIds.length === 0) {
+                console.warn('⚠️ No document IDs found in history table');
+                return;
+            }
+
+            console.log('📋 Found document IDs:', documentIds);
+
+            // Get base URL for the API call
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const apiUrl = `${baseUrl}/rule/flux/masscancel`;
+
+            // Prepare the payload for mass cancel (form data format)
+            const formData = new FormData();
+            documentIds.forEach(id => {
+                formData.append('ids[]', id);
+            });
+
+            console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
+
+            // Make the API call
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // The mass cancel endpoint doesn't return JSON, just success if we get here
+                console.log('✅ Mass cancel completed successfully');
+                alert(`Mass cancel action initiated for ${documentIds.length} documents. Check the task list for progress.`);
+            })
+            .catch(error => {
+                console.error('❌ Error calling mass action API:', error);
+                alert('Error initiating mass cancel action. Please check the console for details.');
+            });
+
+        } catch (error) {
+            console.error('❌ Error in cancelHistoryDocuments:', error);
+            alert('Error initiating mass cancel action. Please check the console for details.');
+        }
+    }
 }
+
+// Make the class available globally
+window.DocumentDetailDataSections = DocumentDetailDataSections;

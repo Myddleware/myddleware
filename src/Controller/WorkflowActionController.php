@@ -141,7 +141,8 @@ class WorkflowActionController extends AbstractController
         JobManager $jobManager,
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $params
+        ParameterBagInterface $paramsprivate,
+        ConfigRepository $configRepository
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -161,6 +162,7 @@ class WorkflowActionController extends AbstractController
         $this->jobManager = $jobManager;
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
+        $this->configRepository = $configRepository;
     }
 
     protected function getInstanceBdd() {}
@@ -297,6 +299,25 @@ class WorkflowActionController extends AbstractController
             $workflowAction->setDateModified(new \DateTime());
             $workflowAction->setDeleted(0);
 
+            $selectedWorkflow = $formData['Workflow'] ?? null;        
+            if (!$selectedWorkflow && isset($workflow) && $workflow instanceof \App\Entity\Workflow) {
+                $selectedWorkflow = $workflow; 
+            }
+
+            $ruleChoices  = [];
+            $ruleDefault  = null;
+
+            if ($selectedWorkflow instanceof \App\Entity\Workflow) {
+                $ruleDefault = $selectedWorkflow->getRule();
+                if ($ruleDefault) {
+                    $ruleChoices = [$ruleDefault];
+                }
+            }
+
+            if (!$ruleChoices) {
+                $ruleChoices = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+            }
+
             if ($workflowAction) {
                 $arguments = $workflowAction->getArguments();
 
@@ -391,20 +412,21 @@ class WorkflowActionController extends AbstractController
                             'updateStatus' => 'updateStatus',
                             'generateDocument' => 'generateDocument',
                             'sendNotification' => 'sendNotification',
-                            'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
                             'rerun' => 'rerun',
                             'changeData' => 'changeData',
+                            'updateType' => 'updateType',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
-                        'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
+                        'class'        => Rule::class,
+                        'choices'      => $ruleDefault ? [$ruleDefault] : [],
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false,
-                        'label' => 'Generating Rule',
-                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
+                        'required'     => false,
+                        'label'        => 'Generating Rule',
+                        'data'         => $ruleDefault,
+                        'placeholder'  => false,
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -430,6 +452,17 @@ class WorkflowActionController extends AbstractController
                             'Yes' => true,
                             'No' => false,
                         ],
+                        'required' => false
+                    ])
+                    ->add('documentType', ChoiceType::class, [
+                        'label' => 'Document Type',
+                        'choices' => [
+                            'C' => 'C',
+                            'U' => 'U',
+                            'D' => 'D',
+                            'S' => 'S',
+                        ],
+                        'mapped' => false,
                         'required' => false
                     ])
 
@@ -547,6 +580,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = $rerun;
                     }
 
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
+                    }
+
                     $formData = $request->request->all();
                     $targetFields = $formData['targetFields'] ?? [];
                     $targetFieldValues = $formData['targetFieldValues'] ?? [];
@@ -571,10 +609,13 @@ class WorkflowActionController extends AbstractController
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
+                $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
+
                 return $this->render(
                     'WorkflowAction/new.html.twig',
                     [
                         'form' => $form->createView(),
+                        'workflows' => $workflows,
                     ]
                 );
             } else {
@@ -671,67 +712,57 @@ class WorkflowActionController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        try {
+       try {
             $em = $this->entityManager;
             $workflowAction = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
-            
-            if (empty($workflowAction)) {
+
+            if (!$workflowAction) {
                 if ($request->isXmlHttpRequest()) {
-                    return $this->render(
-                        'WorkflowAction/_workflowaction_logs_table.html.twig',
-                        [
-                            'error' => 'Workflow Action not found'
-                        ]
-                    );
-                } else {
-                    $this->addFlash('error', 'Workflow Action not found');
-                    return $this->redirectToRoute('workflow_list');
+                    return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                        'error' => 'Workflow Action not found'
+                    ]);
                 }
+                $this->addFlash('error', 'Workflow Action not found');
+                return $this->redirectToRoute('workflow_list');
             }
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['action' => $id],
-                ['dateCreated' => 'DESC']
-            );
-            $query = $this->workflowLogRepository->findLogsByActionId($id);
+            $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
+            $limit = $conf ? (int) $conf->getValue() : null;
 
-            $adapter = new QueryAdapter($query);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+            $query = $this->workflowLogRepository->findLogsByActionId($id);
+            if ($limit !== null && $limit > 0) {
+                $query->setMaxResults($limit);
+            }
+            $logs = $query->getResult();
+            
+            $pager = new Pagerfanta(new ArrayAdapter($logs));
+            $pager->setMaxPerPage(20);
             $pager->setCurrentPage($page);
 
-            $nb_workflow = count($workflowLogs);
+            $workflowLogs = iterator_to_array($pager->getCurrentPageResults());
+            $nb_workflow = count($logs);
 
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'WorkflowAction/_workflowaction_logs_table.html.twig',
-                    [
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
-                        'pager' => $pager,
-                        'workflowAction' => $workflowAction,
-                    ]
-                );
-            } else {
-                // For direct navigation, redirect to the main workflow action page
-                return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
+                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow' => $nb_workflow,
+                    'pager' => $pager,
+                    'workflowAction' => $workflowAction,
+                ]);
             }
+            return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
         } catch (Exception $e) {
             error_log('WorkflowActionShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'WorkflowAction/_workflowaction_logs_table.html.twig',
-                    [
-                        'workflowLogs' => [],
-                        'nb_workflow' => 0,
-                        'pager' => null,
-                        'workflowAction' => null,
-                        'error' => 'Error loading logs: ' . $e->getMessage()
-                    ]
-                );
-            } else {
-                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                    'workflowLogs' => [],
+                    'nb_workflow' => 0,
+                    'pager' => null,
+                    'workflowAction' => null,
+                    'error' => 'Error loading logs: ' . $e->getMessage()
+                ]);
             }
+            throw $this->createNotFoundException('Error: ' . $e->getMessage());
         }
     }
 
@@ -817,7 +848,8 @@ class WorkflowActionController extends AbstractController
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
                     'multipleRuns' => $workflowAction->getMultipleRuns(),
-                    'rerun' => $arguments['rerun'] ?? 0
+                    'rerun' => $arguments['rerun'] ?? 0,
+                    'documentType' => $arguments['type'] ?? null
                     // Add other WorkflowAction fields here as needed
                 ];
 
@@ -842,10 +874,10 @@ class WorkflowActionController extends AbstractController
                             'updateStatus' => 'updateStatus',
                             'generateDocument' => 'generateDocument',
                             'sendNotification' => 'sendNotification',
-                            'generateDocument' => 'generateDocument',
                             'transformDocument' => 'transformDocument',
                             'rerun' => 'rerun',
                             'changeData' => 'changeData',
+                            'updateType' => 'updateType',
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
@@ -882,6 +914,17 @@ class WorkflowActionController extends AbstractController
                             'Yes' => true,
                             'No' => false,
                         ],
+                        'required' => false
+                    ])
+                    ->add('documentType', ChoiceType::class, [
+                        'label' => 'Document Type',
+                        'choices' => [
+                            'C' => 'C',
+                            'U' => 'U',
+                            'D' => 'D',
+                            'S' => 'S',
+                        ],
+                        'mapped' => true,
                         'required' => false
                     ])
                     ->add('targetFields', CollectionType::class, [
@@ -1001,6 +1044,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = 0;
                     }
 
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
+                    }
+
                     $formData = $request->request->all();
 
                     $targetFields = $formData['targetFields'] ?? null;
@@ -1074,15 +1122,19 @@ class WorkflowActionController extends AbstractController
             $action = $workflowAction->getAction();
 
             if ($action == 'updateStatus') {
-                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'generateDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['type']);
             } elseif ($action == 'sendNotification') {
-                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'transformDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'rerun') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+            } elseif ($action == 'changeData') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+            } elseif ($action == 'updateType') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
             }
 
             $workflowAction->setArguments($arguments);

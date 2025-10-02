@@ -34,7 +34,8 @@ $(document).ready(function () {
     'Multiple run',
     'Active',
     'Target Field',
-    'New Value'
+    'New Value',
+    'documentType'
   ];
 
   // Function to get field configuration for an action
@@ -119,7 +120,7 @@ $(document).ready(function () {
       changeData: {
         Action: 'changeData',
         Status: 'No',
-        Rule: 'Yes',
+        Rule: 'No',
         SearchField: 'No',
         SearchValue: 'No',
         Subject: 'No',
@@ -130,6 +131,22 @@ $(document).ready(function () {
         Rerun: 'No',
         'Multiple run': 'Yes',
         Active: 'Yes'
+      },
+      updateType: {
+        Action: 'updateType',
+        Status: 'No',
+        Rule: 'No',
+        SearchField: 'No',
+        SearchValue: 'No',
+        Subject: 'No',
+        Message: 'No',
+        To: 'No',
+        'Target Field': 'No',
+        'New Value': 'No',
+        Rerun: 'No',
+        'Multiple run': 'Yes',
+        Active: 'Yes',
+        documentType: 'Yes'
       }
     };
 
@@ -156,6 +173,7 @@ $(document).ready(function () {
       case 'Active': return '#active-container';
       case 'Target Field': return '#targetFieldContainer';
       case 'New Value': return '#targetFieldValueContainer';
+      case 'documentType': return '#document-type-container';
       default: return null;
     }
   }
@@ -317,19 +335,32 @@ $(document).ready(function () {
   }
   
   // Handle action change
-  $("#form_action").on("change", function () {
-    const actionValue = $(this).val();
-// console.log('\n=== ACTION CHANGED ===');
-// console.log('New Action:', actionValue);
-    const config = getFieldConfig(actionValue);
-    toggleFieldVisibility(config);
-    
-    if (!isEditMode || isEditModeValue) {
-      $("#form_ruleId").val('');
-    }
-    isEditModeValue = true;
-  });
+$("#form_action").on("change", function () {
+  const actionValue = $(this).val();
+  const config = getFieldConfig(actionValue);
+  toggleFieldVisibility(config);
 
+  if ((!isEditMode || isEditModeValue) && actionValue !== 'changeData') {
+    $("#form_ruleId").val('').trigger('change');
+  }
+  isEditModeValue = true;
+
+  if (actionValue === 'changeData' && window.workflowRuleMap) {
+    const wfId = $('#form_Workflow').val();
+    const ruleId = wfId ? (window.workflowRuleMap[wfId] || '') : '';
+    if (ruleId) {
+      setRuleFieldValue(ruleId);
+    }
+  }
+
+  if (actionValue === 'changeData' && window.workflowRuleMap) {
+    const wfId = $('#form_Workflow').val();
+    const ruleId = wfId ? (window.workflowRuleMap[wfId] || '') : '';
+    if (ruleId) {
+      setRuleFieldValue(ruleId);
+    }
+  }
+});
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -566,4 +597,38 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     console.log("addFieldButton or form_ruleId element not found, skipping add field listener");
   }
+});
+
+function setRuleFieldValue(ruleId) {
+  const $rule = $('#form_ruleId');
+  if (!$rule.length) {
+    return;
+  }
+  if (ruleId && !$rule.find('option[value="' + ruleId + '"]').length) {
+    $rule.append($('<option>', { value: ruleId, text: '(auto) ' + ruleId }));
+  }
+
+  $rule.val(ruleId || '');
+
+  if ($rule.data('select2')) $rule.trigger('change.select2');  
+  else $rule.trigger('change');
+}
+
+$('#form_Workflow').on('change', function () {
+  const wfId = $(this).val();
+
+  if (!window.workflowRuleMap) {
+   return;
+  }
+
+  const ruleId = window.workflowRuleMap[wfId] || '';
+
+  setRuleFieldValue(ruleId);
+
+  setTimeout(() => {
+    const cur = $('#form_ruleId').val();
+    if (cur !== (ruleId || '')) {
+      setRuleFieldValue(ruleId);
+    }
+  }, 50);
 });

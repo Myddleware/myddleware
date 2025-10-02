@@ -32,3 +32,7 @@
     font-size: 0.9rem;
     padding: 6px 12px;
 }
+
+input[pattern]:invalid {
+    border: 2px solid red;
+}

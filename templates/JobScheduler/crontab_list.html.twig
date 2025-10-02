@@ -86,8 +86,8 @@
 							<td class="value col-2">{{ value.description  }}</td>
 							<td class="value">{{ value.runningInstances  }}</td>
 							<td class="value">{{ value.maxInstances  }}</td>
-							<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
-							<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
+							<td>{{ value.lastUse|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+							<td>{{ value.nextRun|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 							<td class="text-center">
 								<div class="form-check form-switch">
 									<input class="form-check-input toggle-switch-crontab" type="checkbox" id="crontab-{{ value.id }}" data-id="{{ value.id }}" data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}" {{ value.isEnable() ? 'checked' : '' }}>

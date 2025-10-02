@@ -125,7 +125,7 @@ export function getDocumentChildren(documentId, callback) {
         error: function(xhr, status, error) {
             console.error('❌ Document children request failed!');
             console.error('Status:', status, 'Error:', error);
-            
+
             let errorMessage = `AJAX Error: ${status} - ${error}`;
             if (xhr.status === 404) {
                 errorMessage = 'Document children endpoint not found (404)';
@@ -134,7 +134,77 @@ export function getDocumentChildren(documentId, callback) {
             } else if (xhr.status === 500) {
                 errorMessage = 'Server error (500)';
             }
-            
+
+            callback(null, errorMessage);
+        }
+    });
+}
+
+// ===== DOCUMENT POSTS FETCHER =====
+export function getDocumentPosts(documentId, callback) {
+// console.log('getDocumentPosts called with documentId:', documentId);
+
+    // Validate parameters
+    if (!documentId) {
+        console.error('getDocumentPosts: documentId is required');
+        if (callback) callback(null, 'Document ID is required');
+        return;
+    }
+
+    if (!callback || typeof callback !== 'function') {
+        console.error('getDocumentPosts: callback function is required');
+        return;
+    }
+
+    // Build URL for document posts
+    const pathParts = window.location.pathname.split('/');
+    const publicIndex = pathParts.indexOf('public');
+    let baseUrl;
+
+    if (publicIndex !== -1) {
+        const baseParts = pathParts.slice(0, publicIndex + 1);
+        baseUrl = window.location.origin + baseParts.join('/');
+    } else {
+        baseUrl = window.location.origin;
+        baseUrl += '/index.php';
+    }
+
+    const url = `${baseUrl}/rule/api/flux/document-posts/${documentId}`;
+// console.log('🚀 Fetching document posts from:', url);
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        beforeSend: function(xhr) {
+// console.log('📡 Sending request for document posts...');
+        },
+        success: function(response) {
+// console.log('✅ Document posts request successful!');
+// console.log('Response:', response);
+
+            if (response && typeof response === 'object' && response.success) {
+                callback(response.data, null);
+            } else if (response && response.error) {
+                console.error('❌ Server returned error:', response.error);
+                callback(null, response.error);
+            } else {
+                console.error('❌ Unexpected response format');
+                callback(null, 'Unexpected response format');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Document posts request failed!');
+            console.error('Status:', status, 'Error:', error);
+
+            let errorMessage = `AJAX Error: ${status} - ${error}`;
+            if (xhr.status === 404) {
+                errorMessage = 'Document posts endpoint not found (404)';
+            } else if (xhr.status === 403) {
+                errorMessage = 'Access forbidden (403)';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Server error (500)';
+            }
+
             callback(null, errorMessage);
         }
     });

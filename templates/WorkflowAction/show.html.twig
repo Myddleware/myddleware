@@ -132,8 +132,9 @@
 				</div>
 
 				<div id="logs-content" class="collapse" style="display: none;">
-					<div id="logs-table-container">
-						<p class="text-center mb-0">{{ 'view_workflow.loading_logs'|trans|default('Loading logs...') }}</p>
+					<div id="logs-table-container" class="p-3 text-center">
+						<div class="spinner-border spinner-border-sm" role="status" aria-label="Loading"></div>
+        				<span class="ms-2">{{ 'view_workflow.loading_logs'|trans|default('Loading…') }}</span>
 					</div>
 				</div>
 			</div>

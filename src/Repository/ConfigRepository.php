@@ -71,33 +71,51 @@ class ConfigRepository extends ServiceEntityRepository
     }
 }
 
-
-    // /**
-    //  * @return Config[] Returns an array of Config objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findPager()
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
+            ->select('c.value')
+            ->where('c.name = :name')
+            ->setParameter('name', 'pager')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getOneOrNullResult();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Config
+    public function setPager($newPager)
+    {
+        $entityManager = $this->getEntityManager();
+
+        // Supposons que votre entité de configuration s'appelle Config
+        $config = $this->findOneBy(['name' => 'pager']);
+
+        if ($config) {
+            $config->setValue($newPager);
+            $entityManager->persist($config);
+            $entityManager->flush();
+        }
+    }
+
+    public function getSearchLimit()
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
+            ->select('c.value')
+            ->where('c.name = :name')
+            ->setParameter('name', 'search_limit')
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getOneOrNullResult();
     }
-    */
+
+    public function setSearchLimit($newLimit)
+    {
+        $entityManager = $this->getEntityManager();
+
+        // Supposons que votre entité de configuration s'appelle Config
+        $config = $this->findOneBy(['name' => 'search_limit']);
+
+        if ($config) {
+            $config->setValue($newLimit);
+            $entityManager->persist($config);
+            $entityManager->flush();
+        }
+    }
 }

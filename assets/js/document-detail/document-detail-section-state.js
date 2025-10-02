@@ -138,24 +138,58 @@ export class DocumentDetailSectionState {
         // Create pagination controls
         const controls = document.createElement('div');
         controls.className = 'pagination-controls';
-        
-        for (let i = 1; i <= pageCount; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            btn.className = 'pagination-btn';
-            
-            if (i === currentPage) {
-                btn.classList.add('active');
+
+        // Add page input field
+        const pageInputContainer = document.createElement('div');
+        pageInputContainer.className = 'page-input-container';
+        pageInputContainer.innerHTML = `
+            <span>Go to page:</span>
+            <input type="number" class="page-input" min="1" max="${pageCount}" value="${currentPage}" />
+            <span>of ${pageCount}</span>
+        `;
+        controls.appendChild(pageInputContainer);
+
+        // Add page input event listener
+        const pageInput = pageInputContainer.querySelector('.page-input');
+        pageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount);
             }
+        });
+        pageInput.addEventListener('blur', () => {
+            this.handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount);
+        });
 
-            btn.addEventListener('click', () => {
-                this.showPage(sectionClass, stateKey, i, rows);
-                this.updatePaginationButtons(controls, i);
-                this.updateSectionState(stateKey, { currentPage: i });
-// console.log(`✅ Updated ${stateKey} to page:`, i);
-            });
+        // If 5 pages or less, show all buttons
+        if (pageCount <= 5) {
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = this.createPaginationButton(i, currentPage, sectionClass, stateKey, rows, controls);
+                controls.appendChild(btn);
+            }
+        } else {
+            // For more than 5 pages, show condensed view: 1, 2 ... N-1, N
 
-            controls.appendChild(btn);
+            // Always show page 1
+            const btn1 = this.createPaginationButton(1, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btn1);
+
+            // Always show page 2
+            const btn2 = this.createPaginationButton(2, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btn2);
+
+            // Add ellipsis
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.className = 'pagination-ellipsis';
+            controls.appendChild(ellipsis);
+
+            // Always show second to last page
+            const btnSecondLast = this.createPaginationButton(pageCount - 1, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btnSecondLast);
+
+            // Always show last page
+            const btnLast = this.createPaginationButton(pageCount, currentPage, sectionClass, stateKey, rows, controls);
+            controls.appendChild(btnLast);
         }
 
         // Add controls to section
@@ -167,7 +201,7 @@ export class DocumentDetailSectionState {
             this.showPage(sectionClass, stateKey, currentPage, rows);
 // console.log(`✅ Pagination setup complete for: ${stateKey} (${pageCount} pages)`);
         } else {
-            console.warn(`Section not found for pagination: .${sectionClass}`);
+            // console.warn(`Section not found for pagination: .${sectionClass}`);
         }
     }
 
@@ -200,13 +234,65 @@ export class DocumentDetailSectionState {
     }
 
     /**
+     * Create a pagination button
+     */
+    static createPaginationButton(pageNumber, currentPage, sectionClass, stateKey, rows, controls) {
+        const btn = document.createElement('button');
+        btn.textContent = pageNumber;
+        btn.className = 'pagination-btn';
+        btn.dataset.page = pageNumber;
+
+        if (pageNumber === currentPage) {
+            btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => {
+            this.showPage(sectionClass, stateKey, pageNumber, rows);
+            this.updatePaginationButtons(controls, pageNumber);
+            this.updateSectionState(stateKey, { currentPage: pageNumber });
+// console.log(`✅ Updated ${stateKey} to page:`, pageNumber);
+        });
+
+        return btn;
+    }
+
+    /**
      * Update pagination button states
      */
     static updatePaginationButtons(controls, activePage) {
         const buttons = controls.querySelectorAll('.pagination-btn');
-        buttons.forEach((btn, index) => {
-            btn.classList.toggle('active', index + 1 === activePage);
+        buttons.forEach(btn => {
+            const pageNumber = parseInt(btn.dataset.page);
+            btn.classList.toggle('active', pageNumber === activePage);
         });
+
+        // Update page input field value
+        const pageInput = controls.querySelector('.page-input');
+        if (pageInput) {
+            pageInput.value = activePage;
+        }
+    }
+
+    /**
+     * Handle page input field changes
+     */
+    static handlePageInput(pageInput, sectionClass, stateKey, rows, controls, pageCount) {
+        let pageNumber = parseInt(pageInput.value);
+
+        // Validate input
+        if (isNaN(pageNumber) || pageNumber < 1) {
+            pageNumber = 1;
+        } else if (pageNumber > pageCount) {
+            pageNumber = pageCount;
+        }
+
+        // Update input field with validated value
+        pageInput.value = pageNumber;
+
+        // Navigate to the page
+        this.showPage(sectionClass, stateKey, pageNumber, rows);
+        this.updatePaginationButtons(controls, pageNumber);
+        this.updateSectionState(stateKey, { currentPage: pageNumber });
     }
 
     /**
@@ -215,7 +301,7 @@ export class DocumentDetailSectionState {
     static setupCollapsible(sectionClass, sectionName, stateKey) {
         const section = document.querySelector(`.${sectionClass}`);
         if (!section) {
-            console.warn(`Section not found: .${sectionClass}`);
+            // console.warn(`Section not found: .${sectionClass}`);
             return;
         }
 
@@ -244,8 +330,8 @@ export class DocumentDetailSectionState {
         }
 
         if (!header || !content || !toggleBtn) {
-            console.warn(`Elements not found for section: ${sectionName}`);
-            console.warn('Header:', !!header, 'Content:', !!content, 'ToggleBtn:', !!toggleBtn);
+            // console.warn(`Elements not found for section: ${sectionName}`);
+            // console.warn('Header:', !!header, 'Content:', !!content, 'ToggleBtn:', !!toggleBtn);
             return;
         }
 

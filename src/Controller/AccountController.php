@@ -48,6 +48,7 @@ use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Entity\Config;
 
 
 /**
@@ -425,9 +426,9 @@ class AccountController extends AbstractController
             $locales = ['en', 'fr'];
         }
         
-        // Get user preferences from session or defaults
-        $dateFormat = $request->getSession()->get('_date_format', 'Y-m-d');
-        $exportSeparator = $request->getSession()->get('_export_separator', ',');
+        // Get user preferences from database or defaults
+        $dateFormat = $user->getDateFormat() ?? 'Y-m-d';
+        $exportSeparator = $user->getCsvSeparator() ?? ',';
         $encoding = $request->getSession()->get('_encoding', 'UTF-8');
         
         return new JsonResponse([
@@ -494,12 +495,12 @@ class AccountController extends AbstractController
             }
         }
         
-        // Store additional preferences in session
+        // Store date format in database
         if (isset($data['dateFormat'])) {
             // Validate date format
             $validFormats = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'd.m.Y'];
             if (in_array($data['dateFormat'], $validFormats)) {
-                $request->getSession()->set('_date_format', $data['dateFormat']);
+                $user->setDateFormat($data['dateFormat']);
             }
         }
         
@@ -507,6 +508,7 @@ class AccountController extends AbstractController
             // Validate export separator
             $validSeparators = [',', ';', "\t", '|'];
             if (in_array($data['exportSeparator'], $validSeparators)) {
+                $user->setCsvSeparator($data['exportSeparator']);
                 $request->getSession()->set('_export_separator', $data['exportSeparator']);
             }
         }
@@ -562,6 +564,22 @@ class AccountController extends AbstractController
         $this->entityManager->flush();
         
         return new JsonResponse(['success' => true, 'message' => 'Password updated successfully']);
+    }
+
+    // get config from the table config
+
+    /**
+     * @Route("/api/account/config", name="api_account_config", methods={"GET"})
+     */
+    public function getConfig(Request $request): JsonResponse
+    {
+        // get the pager from the config repository
+        $config = [];
+        $config['pager'] = $this->entityManager->getRepository(Config::class)->findPager()['value'] ?? '20';
+        // get the search limit from the config repository
+        $config['search_limit'] = $this->entityManager->getRepository(Config::class)->getSearchLimit()['value'] ?? '1000';
+
+        return new JsonResponse(['success' => true, 'config' => $config]);
     }
 
     /**
@@ -712,13 +730,13 @@ class AccountController extends AbstractController
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             return new JsonResponse(['error' => 'Permission denied'], 403);
         }
-        
+
         if ($this->env === "dev") {
             $logType = 'dev.log';
         } else {
             $logType = 'prod.log';
         }
-        
+
         $cwd = getcwd();
         $cwdWithoutPublic = preg_replace('/\\\\public$/', '', $cwd);
         $varPath = "\\var\log\\".$logType;
@@ -743,10 +761,50 @@ class AccountController extends AbstractController
 
             // Close the file
             fclose($handle);
-            
+
             return new JsonResponse(['success' => true, 'message' => 'Log file emptied successfully']);
         }
-        
+
         return new JsonResponse(['error' => 'Failed to empty log file'], 500);
+    }
+
+    /**
+     * @Route("/api/account/config/update", name="api_account_config_update", methods={"POST"})
+     */
+    public function updateConfig(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+        }
+
+        $configRepository = $this->entityManager->getRepository(Config::class);
+
+        // Update pager (rows per page)
+        if (isset($data['rowsPerPage'])) {
+            $rowsPerPage = intval($data['rowsPerPage']);
+            if ($rowsPerPage < 1) {
+                return new JsonResponse(['error' => 'Rows per page must be at least 1'], 400);
+            }
+            $configRepository->setPager($rowsPerPage);
+        }
+
+        // Update search limit (maximum results)
+        if (isset($data['maximumResults'])) {
+            $maximumResults = intval($data['maximumResults']);
+            if ($maximumResults < 1) {
+                return new JsonResponse(['error' => 'Maximum results must be at least 1'], 400);
+            }
+            $configRepository->setSearchLimit($maximumResults);
+        }
+
+        return new JsonResponse(['success' => true, 'message' => 'Configuration updated successfully']);
     }
 }

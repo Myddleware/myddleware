@@ -30,11 +30,11 @@ export class DocumentDetailButtons {
         // Get base URL for button links
         const baseUrl = this.getBaseUrl();
 
-        // 1. Reload/Rerun button (Success) - Show if not cancelled/closed OR if super admin
-        if ((globalStatus !== 'cancel' && globalStatus !== 'close') || isSuperAdmin) {
+        // 1. Reload/Rerun button (Success) - Show only for 'open' and 'error' status OR if super admin
+        if ((globalStatus === 'open' || globalStatus === 'error') || isSuperAdmin) {
             buttons.push(`
                 <a href="${baseUrl}/rule/flux/rerun/${documentId}">
-                    <button type="button" class="btn btn-success" data-bs-toggle="tooltip" 
+                    <button type="button" class="btn btn-success" data-bs-toggle="tooltip"
                             data-bs-placement="top" title="Reload the synchronization of this document">
                         Reload
                     </button>
@@ -42,11 +42,11 @@ export class DocumentDetailButtons {
             `);
         }
 
-        // 2. Cancel button (Warning) - Show if not cancelled/closed OR if super admin
-        if ((globalStatus !== 'cancel' && globalStatus !== 'close') || isSuperAdmin) {
+        // 2. Cancel button (Warning) - Show only for 'open' and 'error' status OR if super admin
+        if ((globalStatus === 'open' || globalStatus === 'error') || isSuperAdmin) {
             buttons.push(`
                 <a class="btn_action_loading" href="${baseUrl}/rule/flux/cancel/${documentId}">
-                    <button type="button" class="btn btn-warning" data-bs-toggle="tooltip" 
+                    <button type="button" class="btn btn-warning" data-bs-toggle="tooltip"
                             data-bs-placement="top" title="Cancel execution of this document">
                         Cancel
                     </button>
@@ -54,17 +54,15 @@ export class DocumentDetailButtons {
             `);
         }
 
-        // 3. Read Record button (Primary) - Show if read_record_btn flag is true OR if super admin
-        if (readRecordBtn || isSuperAdmin) {
-            buttons.push(`
-                <a class="btn_action_loading hover-button" href="${baseUrl}/rule/flux/readrecord/${documentId}">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" 
-                            data-bs-placement="top" title="Re-execute the processing of this document">
-                        Run the same record
-                    </button>
-                </a>
-            `);
-        }
+        // 3. Read Record button (Primary) - Always show for all statuses
+        buttons.push(`
+            <a class="btn_action_loading hover-button" href="${baseUrl}/rule/flux/readrecord/${documentId}">
+                <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Re-execute the processing of this document">
+                    Run the same record
+                </button>
+            </a>
+        `);
 
         // 4. Unlock button (Danger) - Show if document has job lock
         if (hasJobLock) {
@@ -102,7 +100,7 @@ export class DocumentDetailButtons {
     static updateButtons(documentData, permissions = {}) {
         const buttonContainer = document.getElementById('flux-button-container');
         if (!buttonContainer) {
-            console.warn('⚠️ Button container not found in DOM');
+            // console.warn('⚠️ Button container not found in DOM');
             return;
         }
 
@@ -154,7 +152,7 @@ export class DocumentDetailButtons {
                 // console.log('✅ Button tooltips initialized (jQuery fallback)');
             }
         } catch (error) {
-            console.warn('⚠️ Could not initialize tooltips:', error.message);
+            // console.warn('⚠️ Could not initialize tooltips:', error.message);
         }
     }
 

@@ -1,6 +1,8 @@
 // file that handle the extraction of data from the document
 // console.log('flux-data-extractor.js loaded');
 
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
+
 // Cache for document data to avoid repeated API calls
 let documentDataCache = new Map();
 
@@ -136,11 +138,24 @@ export function extractDocumentAttempts(documentData) {
 
 export function extractDocumentDates(documentData) {
     if (!documentData) return null;
-    
+
+    // Format dates using user preferences
+    const creationDate = documentData.creation_date
+        ? DocumentDetailDateFormatter.formatWithUserPreferences(documentData.creation_date, documentData)
+        : null;
+
+    const modificationDate = documentData.modification_date
+        ? DocumentDetailDateFormatter.formatWithUserPreferences(documentData.modification_date, documentData)
+        : null;
+
+    const reference = documentData.reference
+        ? DocumentDetailDateFormatter.formatWithUserPreferences(documentData.reference, documentData)
+        : null;
+
     return {
-        creationDate: documentData.creation_date || null,
-        modificationDate: documentData.modification_date || null,
-        reference: documentData.reference || null
+        creationDate,
+        modificationDate,
+        reference
     };
 }
 
