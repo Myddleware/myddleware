@@ -1,14 +1,15 @@
 import { DocumentDetailDataSections } from './document-detail-data-sections.js';
-import { 
-    getDocumentData, 
-    extractRuleInfo, 
-    extractDocumentStatus, 
-    extractDocumentType, 
-    extractDocumentAttempts, 
+import {
+    getDocumentData,
+    extractRuleInfo,
+    extractDocumentStatus,
+    extractDocumentType,
+    extractDocumentAttempts,
     extractDocumentDates,
     getDocumentHistory
 } from './document-detail-data-extractor.js';
 import { DocumentDetailDirectLinks } from './document-detail-direct-links.js';
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
 
 import {
     extractDocumentHistory,

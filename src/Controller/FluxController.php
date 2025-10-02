@@ -1560,6 +1560,10 @@ $result = [];
                 'creation_date' => $document->getDateCreated()->format('Y-m-d H:i:s'),
                 'modification_date' => $document->getDateModified()->format('Y-m-d H:i:s'),
                 'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
+
+                // Pass user timezone and date format for client-side formatting
+                'user_timezone' => $this->getUser()->getTimezone(),
+                'user_date_format' => $this->getUser()->getDateFormat(),
                 
                 // IDs
                 'source_id' => $document->getSource(),

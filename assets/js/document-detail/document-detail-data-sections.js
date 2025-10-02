@@ -1,6 +1,7 @@
 // console.log('flux-data-sections.js loaded');
 
 import { DocumentDetailLookupLinks } from './document-detail-lookup-links.js';
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
 
 export class DocumentDetailDataSections {
     /**
@@ -105,6 +106,9 @@ export class DocumentDetailDataSections {
             // Check if this is the current document
             const isCurrentDocument = docId === currentDocumentId;
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -144,7 +148,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -219,6 +223,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -253,7 +260,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -317,6 +324,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -353,7 +363,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -417,6 +427,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -451,7 +464,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -521,7 +534,10 @@ export class DocumentDetailDataSections {
         const body = rows
         .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
             // console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
-            
+
+            // Format date created using user preferences
+            const formattedDateCreated = DocumentDetailDateFormatter.formatWithUserPreferences(dateCreated);
+
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
             if (status && status.toLowerCase().includes('error')) {
@@ -594,7 +610,7 @@ export class DocumentDetailDataSections {
                 <td>${generateDocumentLink}</td>
                 <td>${this.sanitizeString(createdBy || '')}</td>
                 <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
-                <td>${dateCreated}</td>
+                <td>${formattedDateCreated}</td>
                 <td>${this.sanitizeString(message)}</td>
                 <td>${actionLink}</td>
                 <td>${this.sanitizeString(actionType || '')}</td>
@@ -661,6 +677,9 @@ export class DocumentDetailDataSections {
 
         const body = rows
         .map(({ id, reference, job, creationDate, type, message }) => {
+            // Format creation date using user preferences
+            const formattedCreationDate = DocumentDetailDateFormatter.formatWithUserPreferences(creationDate);
+
             // Determine color based on type
             let typeColor = '#28a745'; // default green for 'S ✓'
             if (type.startsWith('W')) {
@@ -717,7 +736,7 @@ export class DocumentDetailDataSections {
                 <td>${id}</td>
                 <td>${referenceLink}</td>
                 <td>${jobLink}</td>
-                <td>${creationDate}</td>
+                <td>${formattedCreationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
             </tr>
