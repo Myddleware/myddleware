@@ -237,7 +237,6 @@ $(function () {
               $("#" + parent + "_msg span").html(r[0]);
               $("#" + parent + "_msg").show();
             } else {
-              console.log('005 myddleware status online')
               $("#" + parent + "_status img").removeAttr("src");
               $("#" + parent + "_status img").attr(
                 "src",
@@ -1506,7 +1505,6 @@ function notification() {
 
 // Préparation de l'étape suivante
 function next_step(error) {
-  console.log('006 myddleware status online')
 
   $(".status")
     .find("img")
@@ -1651,7 +1649,6 @@ function verif(div_clock) {
                     $("#msg_status").show();
                   } else {
                     $(status).removeAttr("src");
-                    console.log('007 myddleware status online')
                     $(status).attr("src", path_img + "status_online.png");
                     $("#msg_status").hide();
                     $("#msg_status span.error").html("");
@@ -1673,11 +1670,9 @@ function verif(div_clock) {
               } else {
                 $(status).removeAttr("src");
                 if (window.location.pathname.includes("createout")) {
-                console.log('008 myddleware status online')
 
                   $(status).attr("src", path_img_modal + "status_online.png");
                 } else {
-                  console.log('009 myddleware status online')
                   $(status).attr("src", path_img + "status_online.png");
                 }
                 $("#msg_status").hide();
