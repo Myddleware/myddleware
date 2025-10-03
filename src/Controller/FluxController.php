@@ -1109,7 +1109,9 @@ $result = [];
         }
 
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
-            $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+            $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+            // Return the task ID so the frontend can create a direct link
+            echo $taskId;
         }
 
         exit;

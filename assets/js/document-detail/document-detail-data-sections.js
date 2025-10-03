@@ -1225,19 +1225,232 @@ export class DocumentDetailDataSections {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                // The mass cancel endpoint doesn't return JSON, just success if we get here
+                return response.text();
+            })
+            .then(responseText => {
                 console.log('✅ Mass cancel completed successfully');
-                alert(`Mass cancel action initiated for ${documentIds.length} documents. Check the task list for progress.`);
+
+                // The response contains the task ID directly
+                const taskId = responseText.trim();
+                console.log('📋 Task ID:', taskId);
+
+                // Show styled notification
+                this.showTaskNotification(documentIds.length, taskId, baseUrl);
             })
             .catch(error => {
                 console.error('❌ Error calling mass action API:', error);
-                alert('Error initiating mass cancel action. Please check the console for details.');
+                this.showErrorNotification('Error initiating mass cancel action. Please try again.');
             });
 
         } catch (error) {
             console.error('❌ Error in cancelHistoryDocuments:', error);
-            alert('Error initiating mass cancel action. Please check the console for details.');
+            this.showErrorNotification('Error initiating mass cancel action. Please check the console for details.');
         }
+    }
+
+    /**
+     * Shows a styled notification message for task creation
+     * @param {number} documentCount - Number of documents being cancelled
+     * @param {string|null} taskId - The task ID if available
+     * @param {string} baseUrl - Base URL for building links
+     */
+    static showTaskNotification(documentCount, taskId, baseUrl) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.task-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'task-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            background-color: #BFE2FC;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px 20px;
+            margin: 20px;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+
+        // Create icon
+        const icon = document.createElement('span');
+        icon.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background-color: #0c5460;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        `;
+        icon.textContent = 'i';
+
+        // Create message content
+        const messageContent = document.createElement('div');
+        messageContent.style.cssText = `
+            color: #0c5460;
+            flex: 1;
+        `;
+
+        if (taskId) {
+            const taskUrl = `${baseUrl}/rule/task/view/${taskId}/log`;
+            messageContent.innerHTML = `
+                You just launched a new task. You can see the details by clicking on
+                <a href="${taskUrl}" style="color: #0c5460; text-decoration: underline; font-weight: bold;">this link</a>.
+                If you want to follow it, just refresh the page until it gets the status 'end'.
+            `;
+        } else {
+            messageContent.innerHTML = `
+                Mass cancel action initiated for ${documentCount} document${documentCount > 1 ? 's' : ''}.
+                Check the <a href="${baseUrl}/rule/task" style="color: #0c5460; text-decoration: underline; font-weight: bold;">task list</a> for progress.
+            `;
+        }
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #0c5460;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        `;
+        closeButton.onclick = () => notification.remove();
+
+        // Assemble notification
+        notification.appendChild(icon);
+        notification.appendChild(messageContent);
+        notification.appendChild(closeButton);
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.transition = 'opacity 0.3s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 10000);
+    }
+
+    /**
+     * Shows an error notification
+     * @param {string} message - Error message to display
+     */
+    static showErrorNotification(message) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.task-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'task-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px 20px;
+            margin: 20px;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+
+        // Create icon
+        const icon = document.createElement('span');
+        icon.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background-color: #721c24;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        `;
+        icon.textContent = '!';
+
+        // Create message content
+        const messageContent = document.createElement('div');
+        messageContent.style.cssText = `
+            color: #721c24;
+            flex: 1;
+        `;
+        messageContent.textContent = message;
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #721c24;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        `;
+        closeButton.onclick = () => notification.remove();
+
+        // Assemble notification
+        notification.appendChild(icon);
+        notification.appendChild(messageContent);
+        notification.appendChild(closeButton);
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.transition = 'opacity 0.3s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 8000);
     }
 }
 
