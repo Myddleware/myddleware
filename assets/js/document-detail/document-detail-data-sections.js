@@ -172,12 +172,12 @@ export class DocumentDetailDataSections {
             <h3>Documents history</h3>
             <span class="custom-count">(${rows.length})</span>
             <button class="toggle-btn" aria-expanded="true">-</button>
+            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-left: auto;">
+                Cancel History
+            </button>` : ''}
             </div>
 
             <div class="custom-content">
-            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-bottom: 10px;">
-                Cancel History
-            </button>` : ''}
             <table class="custom-table">
             <thead>
                 <tr>
