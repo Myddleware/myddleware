@@ -455,7 +455,14 @@ class JobManager
             // Get the request from RequestStack
             $session = $this->requestStack->getSession();
         }
+
+        $isCancelHistory = (strpos($_SERVER["HTTP_REFERER"], 'flux') !== false && strpos($_SERVER['REDIRECT_URL'], 'masscancel') !== false);
+
+
+        if (!$isCancelHistory) {
             $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
+        }
+
 
             return $idJob;
         } catch (Exception $e) {
