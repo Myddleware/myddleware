@@ -525,7 +525,7 @@ class WorkflowController extends AbstractController
         }
     }
 
-    /**
+   /**
      * @Route("/show/{id}", name="workflow_show")
      */
     public function WorkflowShowAction(string $id, Request $request): Response
@@ -536,34 +536,28 @@ class WorkflowController extends AbstractController
 
         try {
             $em = $this->entityManager;
-            $workflow = $em->getRepository(Workflow::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflow = $em->getRepository(Workflow::class)->findOneBy(['id' => $id, 'deleted' => 0]);
 
-            if (!empty($workflow) && !empty($workflow[0])) {
+            if ($workflow) {
                 return $this->render(
-                    'Workflow/_workflow_logs_table.html.twig',
-                    [
-                        'workflow' => $workflow[0],
+                        'Workflow/show.html.twig', [
+                        'workflow' => $workflow,
                     ]
                 );
-            } else {
-                // For direct navigation, redirect to the main workflow page
-                return $this->redirectToRoute('workflow_show', ['id' => $id]);
             }
+            return $this->redirectToRoute('workflow_list');
         } catch (Exception $e) {
-            error_log('WorkflowShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'Workflow/_workflow_logs_table.html.twig',
-                    [
-                        'workflowLogs' => [],
-                        'nb_workflow' => 0,
-                        'pager' => null,
-                        'workflow' => null,
-                        'error' => 'Error loading logs: ' . $e->getMessage()
-                    ]
+                return $this->render('Workflow/_workflow_logs_table.html.twig', [
+                    'workflowLogs' => [],
+                    'nb_workflow'  => 0,
+                    'pager'        => null,
+                    'workflow'     => null,
+                    'error'        => 'Error loading logs: ' . $e->getMessage(),
+                ]
                 );
             } else {
-                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+            throw $this->createNotFoundException('Error: ' . $e->getMessage());
             }
         }
     }
