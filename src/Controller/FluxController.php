@@ -1108,10 +1108,14 @@ $result = [];
             exit;
         }
 
-        if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
+        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux
+        if (isset($_POST['ids']) && count($_POST['ids']) > 0 && strpos($_SERVER["HTTP_REFERER"], 'flux') !== false) {
             $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
             // Return the task ID so the frontend can create a direct link
             echo $taskId;
+        } else {
+            // default behaviour
+            $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
         }
 
         exit;
