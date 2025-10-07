@@ -239,7 +239,7 @@ view_rule:
         simule: Simulate documents
         result: Estimated documents
         details: " Represents the number of documents that will be created for the next launch of this rule. This number can't be greater than the rule limit you have set up (default 100) and the API limit of your source application."
-
+        daterefence: Date of the data in the source application
 rule:
     source: Source
     target: Target  

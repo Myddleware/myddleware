@@ -326,7 +326,7 @@
 							{% for workflow in sorted_workflows %}
 								<tr data-toggle="tooltip" title="{{ workflow.description }}">
 									<td class="title workflow-detail-th-td">
-										<a class="dropdown-item workflow-name-link-rule"
+										<a class="workflow-name-link-rule"
 										href="{{ path('workflow_show', {'id': workflow.id}) }}">
 											{{ workflow.name }}
 										</a>

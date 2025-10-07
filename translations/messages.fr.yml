@@ -239,7 +239,7 @@ view_rule:
         simule: Simuler documents
         result: Nombre de documents estimé
         details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
-
+        daterefence: Date de la donnée dans l’application source
 rule:
     source: Source
     target: Cible  
