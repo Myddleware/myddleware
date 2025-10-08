@@ -50,6 +50,28 @@ class SynchroCommand extends Command
 
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'myddleware:synchro';
+    protected array $statusLevel = [
+        'Create_KO' 		=> 0,
+        'New' 				=> 10,
+        'Filter_KO' 		=> 20,
+        'Filter' 			=> 30,
+        'Filter_OK' 		=> 40,
+        'Predecessor_KO' 	=> 50,
+        'Predecessor_OK' 	=> 60,
+        'Relate_KO' 		=> 70,
+        'Relate_OK' 		=> 80,
+        'Error_transformed' => 90,
+        'Transformed' 		=> 100,
+        'Not_found' 		=> 110,
+        'Found'				=> 120,
+        'Error_checking' 	=> 130,
+        'Ready_to_send' 	=> 140,
+        'No_send' 			=> 150,
+        'Error_sending' 	=> 160,
+        'Send' 				=> 170,
+        'Cancel' 			=> 180,
+        'Error_expected' 	=> 190,
+    ];
 
     public function __construct(
         LoggerInterface $logger,
@@ -78,6 +100,7 @@ class SynchroCommand extends Command
             ->setName('myddleware:synchro')
             ->setDescription('Execute all active Myddleware transfer rules')
             ->addArgument('rule', InputArgument::REQUIRED, 'Rule id, you can put several rule id separated by coma')
+			->addArgument('fromStatus', InputArgument::OPTIONAL, 'Set the status from where you want the rule to start.')
             ->addArgument('force', InputArgument::OPTIONAL, 'Force run even if the rule is inactive.')
             ->addArgument('api', InputArgument::OPTIONAL, 'Call from API')
         ;
@@ -86,6 +109,7 @@ class SynchroCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $step = 1;
+		$fromStatusLevel = 0;
         try {
             // Source -------------------------------------------------
             // alias de la règle en params
@@ -94,6 +118,16 @@ class SynchroCommand extends Command
             $force = $input->getArgument('force');
             if (empty($force)) {
                 $force = false;
+            }
+			$fromStatus = $input->getArgument('fromStatus');
+            if (!empty($fromStatus)) {
+				if (!empty($this->statusLevel[$fromStatus])) {
+					$fromStatusLevel = $this->statusLevel[$fromStatus];
+				} else {
+					$output->writeln('1;<error>'.$fromStatus.' is not a valid status.</error>');
+					$this->logger->error($fromStatus.' is not a valid status.');
+					return 1;
+				}
             }
             // Récupération du Job
             // $job = $this->jobManager;
@@ -140,24 +174,37 @@ class SynchroCommand extends Command
                                 if ($this->jobManager->setRule($value)) {
 									try {
 										// Sauvegarde des données sources dans les tables de myddleware
-										$output->writeln($value.' : Create documents.');
-										$nb = $this->jobManager->createDocuments();
-										$output->writeln($value.' : Number of documents created : '.$nb);
+										if ($fromStatusLevel <= 0) {
+											$output->writeln($value.' : Create documents.');
+											$nb = $this->jobManager->createDocuments();
+											$output->writeln($value.' : Number of documents created : '.$nb);
+										}
+										
 										// Permet de filtrer les documents
-										$this->jobManager->filterDocuments();
-
+										if ($fromStatusLevel <= 20) {
+											$this->jobManager->filterDocuments();
+										}
+										
 										// Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
-										$this->jobManager->checkPredecessorDocuments();
-
+										if ($fromStatusLevel <= 50) {
+											$this->jobManager->checkPredecessorDocuments();
+										}
+										
 										// Permet de valider qu'au moins un document parent(relation père) est existant
-										$this->jobManager->checkParentDocuments();
-
+										if ($fromStatusLevel <= 70) {
+											$this->jobManager->checkParentDocuments();
+										}
+										
 										// Permet de transformer les docuement avant d'être envoyés à la cible
-										$this->jobManager->transformDocuments();
-
+										if ($fromStatusLevel <= 90) {
+											$this->jobManager->transformDocuments();
+										}
+										
 										// Historisation des données avant modification dans la cible
-										$this->jobManager->getTargetDataDocuments();
-
+										if ($fromStatusLevel <= 130) {
+											$this->jobManager->getTargetDataDocuments();
+										}
+										
 										// Envoi des documents à la cible
 										$this->jobManager->sendDocuments();
 									} catch (\Exception $e) {
