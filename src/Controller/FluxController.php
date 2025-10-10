@@ -1562,10 +1562,10 @@ $result = [];
                 // Type display info
                 'type_label' => $this->getTypeLabel($document->getType()),
 
-                // Dates and reference - convert to user's timezone before formatting
+                // Dates and reference - convert to user's timezone before formatting (except reference which stays in UTC)
                 'creation_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
                 'modification_date' => $this->formatDateInUserTimezone($document->getDateModified()),
-                'reference' => $document->getSourceDateModified() ? $this->formatDateInUserTimezone($document->getSourceDateModified()) : null,
+                'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
 
                 // Pass user timezone and date format for client-side formatting
                 'user_timezone' => $this->getUser()->getTimezone(),
