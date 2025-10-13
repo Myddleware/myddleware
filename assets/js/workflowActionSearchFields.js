@@ -31,12 +31,10 @@ $(document).ready(function () {
     $searchField.data('original-options', $searchField.html());
 
     // Handle initial load
-    const ruleName = $('#form_ruleId option:selected').text();
-    updateSearchFields(ruleName);
-
+    const ruleName = $('#form_ruleGenerate option:selected').text();
     // Listen for changes to the rule select
-    $('#form_ruleId').on('change', function() {
-        const ruleName = $('#form_ruleId option:selected').text();
+    $('#form_ruleGenerate').on('change', function() {
+        const ruleName = $('#form_ruleGenerate option:selected').text();
         updateSearchFields(ruleName);
     });
 });
