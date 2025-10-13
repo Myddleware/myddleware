@@ -4,6 +4,11 @@ use Symfony\Component\Dotenv\Dotenv;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
+// Force PHP to use UTC timezone for all date operations
+// This ensures that Doctrine reads datetime fields from the database as UTC
+// since the database stores all dates in UTC without timezone information
+date_default_timezone_set('UTC');
+
 if (!class_exists(Dotenv::class)) {
     throw new LogicException('Please run "composer require symfony/dotenv" to load the ".env" files configuring the application.');
 }
