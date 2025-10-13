@@ -1225,13 +1225,13 @@ export class DocumentDetailDataSections {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return response.text();
+                return response.json();
             })
-            .then(responseText => {
+            .then(data => {
                 console.log('✅ Mass cancel completed successfully');
 
-                // The response contains the task ID directly
-                const taskId = responseText.trim();
+                // Extract the task ID from the JSON response
+                const taskId = data.taskId;
                 console.log('📋 Task ID:', taskId);
 
                 // Show styled notification
