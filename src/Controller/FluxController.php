@@ -1114,11 +1114,11 @@ $result = [];
             exit;
         }
 
-        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux and the $_SERVER['REDIRECT_URL'] contains the substring masscancel    
+        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux and the $_SERVER['REDIRECT_URL'] contains the substring masscancel
         if (isset($_POST['ids']) && count($_POST['ids']) > 0 && strpos($_SERVER["HTTP_REFERER"], 'flux') !== false && strpos($_SERVER['REDIRECT_URL'], 'masscancel') !== false) {
             $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
             // Return the task ID so the frontend can create a direct link
-            echo $taskId;
+            return new JsonResponse(['taskId' => $taskId]);
         } else {
             // default behaviour
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
