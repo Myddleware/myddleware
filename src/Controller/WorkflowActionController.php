@@ -299,24 +299,8 @@ class WorkflowActionController extends AbstractController
             $workflowAction->setDateModified(new \DateTime());
             $workflowAction->setDeleted(0);
 
-            $selectedWorkflow = $formData['Workflow'] ?? null;        
-            if (!$selectedWorkflow && isset($workflow) && $workflow instanceof \App\Entity\Workflow) {
-                $selectedWorkflow = $workflow; 
-            }
-
-            $ruleChoices  = [];
-            $ruleDefault  = null;
-
-            if ($selectedWorkflow instanceof \App\Entity\Workflow) {
-                $ruleDefault = $selectedWorkflow->getRule();
-                if ($ruleDefault) {
-                    $ruleChoices = [$ruleDefault];
-                }
-            }
-
-            if (!$ruleChoices) {
-                $ruleChoices = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
-            }
+            $ruleDefault = $workflow->getRule();
+            $allRules    = $em->getRepository(Rule::class)->findBy(['deleted' => 0], ['name' => 'ASC']);
 
             if ($workflowAction) {
                 $arguments = $workflowAction->getArguments();
@@ -418,15 +402,34 @@ class WorkflowActionController extends AbstractController
                             'updateType' => 'updateType',
                         ],
                     ])
-                    ->add('ruleId', EntityType::class, [
+                    ->add('ruleChangeData', EntityType::class, [
                         'class'        => Rule::class,
                         'choices'      => $ruleDefault ? [$ruleDefault] : [],
                         'choice_label' => 'name',
                         'choice_value' => 'id',
+                        'label'        => false,
+                        'data'         => $ruleDefault,
+                        'mapped'       => false,
+                        'disabled'     => true,
+                        'required'     => false,
+                        'attr'         => [
+                            'id' => 'form_ruleChangeData',
+                            'class' => 'd-none'
+                        ],
+                        'row_attr'     => [
+                            'id' => 'rule-change-container'
+                        ],
+                    ])
+                    ->add('ruleGenerate', EntityType::class, [
+                        'class'        => Rule::class,
+                        'choices'      => $allRules,
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
                         'required'     => false,
                         'label'        => 'Generating Rule',
-                        'data'         => $ruleDefault,
-                        'placeholder'  => false,
+                        'placeholder'  => 'Select a rule',
+                        'attr'         => ['id' => 'form_ruleGenerate'],
+                        'row_attr'     => ['id' => 'rule-generate-container'],
                     ])
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
@@ -550,10 +553,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('ruleId')->getData();
-                    if ($rule !== null) {
-                        $ruleIdForArgument = $rule->getId();
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                    if ($action === 'generateDocument') {
+                        $genRule = $form->get('ruleGenerate')->getData();
+                        if ($genRule) {
+                            $arguments['ruleId'] = $genRule->getId();
+                        }
                     }
 
                     // set the status
@@ -818,7 +822,9 @@ class WorkflowActionController extends AbstractController
                 $sourceSearchValue = [];
                 // create an array of all the rules
 
-                $rules = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+                $rules       = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+                $ruleDefault = $workflowAction->getWorkflow()->getRule();
+                $allRules    = $em->getRepository(Rule::class)->findBy(['deleted' => 0], ['name' => 'ASC']);
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
@@ -888,7 +894,44 @@ class WorkflowActionController extends AbstractController
                         'required' => false,
                         'label' => 'Rule',
                         'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
+                    ])  
+                    ->add('ruleChangeData', EntityType::class, [
+                        'class'        => Rule::class,
+                        'choices'      => $ruleDefault ? [$ruleDefault] : [],
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'data'         => $ruleDefault,
+                        'label'        => false,
+                        'mapped'       => false,
+                        'disabled'     => true,
+                        'required'     => false,
+                        'attr'         => [
+                            'id' => 'form_ruleChangeData',
+                            'class' => 'd-none'
+                        ],
+                        'row_attr'     => [
+                            'id' => 'rule-change-container'
+                        ],
                     ])
+                    ->add('ruleGenerate', EntityType::class, [
+                        'class'        => Rule::class,
+                        'choices'      => $allRules,
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'required'     => false,
+                        'label'        => 'Generating Rule',
+                        'placeholder'  => 'Select a rule',
+                        'data'         => !empty($arguments['ruleId'])
+                                            ? $em->getRepository(Rule::class)->find($arguments['ruleId'])
+                                            : null,
+                        'attr'         => [
+                            'id' => 'form_ruleGenerate'
+                        ],
+                        'row_attr'     => [
+                            'id' => 'rule-generate-container'
+                        ],
+                    ])
+
                     ->add('status', ChoiceType::class, [
                         'label' => 'Status',
                         'choices' => $StringStatus,
@@ -1012,10 +1055,13 @@ class WorkflowActionController extends AbstractController
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('ruleId')->getData();
-                    if ($rule !== null) {
-                        $ruleIdForArgument = $rule->getId();
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                    if ($action === 'generateDocument') {
+                        $genRule = $form->get('ruleGenerate')->getData();
+                        if ($genRule) {
+                            $arguments['ruleId'] = $genRule->getId();
+                        }
+                    } elseif ($action === 'changeData') {
+                        $arguments['ruleId'] = $workflowAction->getWorkflow()->getRule()->getId();
                     }
 
                     // set the status
@@ -1038,10 +1084,10 @@ class WorkflowActionController extends AbstractController
                     }
 
                     $rerun = $form->get('rerun')->getData();
-                    if (!empty($rerun)) {
-                        $arguments['rerun'] = $rerun;
+                    if ($action === 'generateDocument' && $rerun !== null && $rerun !== '') {
+                        $arguments['rerun'] = (bool) $rerun;
                     } else {
-                        $arguments['rerun'] = 0;
+                        unset($arguments['rerun']);
                     }
 
                     $documentType = $form->get('documentType')->getData();
@@ -1092,7 +1138,8 @@ class WorkflowActionController extends AbstractController
                     [
                         'form' => $form->createView(),
                         'targetFieldsData' => $targetFieldsData,
-                        'workflowAction' => $workflowAction,
+                        'workflowAction' => $workflowAction, 
+                        'workflows' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
                     ]
                 );
             } else {
@@ -1132,7 +1179,7 @@ class WorkflowActionController extends AbstractController
             } elseif ($action == 'rerun') {
                 unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'changeData') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type'], $arguments['rerun']);
             } elseif ($action == 'updateType') {
                 unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
             }

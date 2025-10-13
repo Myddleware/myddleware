@@ -91,29 +91,34 @@
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-rule" id="rule-container">
-							{{ form_row(form.ruleId) }}
+						<div class="workflow-field-container form-group-workflow-action" id="rule-change-container">
+							{{ form_row(form.ruleChangeData) }}
 						</div>
 					</div>
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action" id="rule-generate-container">
+							{{ form_row(form.ruleGenerate) }}
+						</div>
+					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchfield" id="search-field-container">
 							{{ form_row(form.searchField) }}
 						</div>
 					</div>
-				</div>
-				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchvalue" id="search-value-container">
 							{{ form_row(form.searchValue) }}
 						</div>
 					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="rerun-container">
 							{{ form_row(form.rerun) }}
 						</div>
 					</div>
-				</div>
-				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="document-type-container">
 							{{ form_row(form.documentType) }}
@@ -145,32 +150,40 @@
 
 	<script type="text/javascript">
 		var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
-		 window.workflowRuleMap = {
+		window.workflowRuleMap = {
 		{% for wf in workflows %}
-		"{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
+			"{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
 		{% endfor %}
 		};
 
-		function syncRuleFromWorkflow(source){
-			var wfId = document.getElementById('form_Workflow')?.value || '';
-			var ruleId = (window.workflowRuleMap && window.workflowRuleMap[wfId]) ? window.workflowRuleMap[wfId] : '';
-
-			var ruleSelect = document.getElementById('form_ruleId');
-
-			ruleSelect.value = ruleId || '';
-			var evt = new Event('change', { bubbles: true });
-			ruleSelect.dispatchEvent(evt);
+		function syncRuleFromWorkflow(){
+			var wf = document.getElementById('form_Workflow');
+			var rid = (wf && window.workflowRuleMap) ? (window.workflowRuleMap[wf.value] || '') : '';
+			var selChange = document.getElementById('form_ruleChangeData');
+			if (selChange) {
+				selChange.value = rid || '';
+				selChange.dispatchEvent(new Event('change', { bubbles: true }));
+			}
 		}
+
+		function toggleRuleRows(){
+			var action = document.getElementById('form_action');
+			var genRow = document.getElementById('rule-generate-container');
+			var chgRow = document.getElementById('rule-change-container');
+			if (!action || !genRow || !chgRow) return;
+			var v = action.value;
+			genRow.style.display = (v === 'generateDocument') ? '' : 'none';
+			chgRow.style.display = (v === 'changeData') ? '' : 'none';
+			if (v === 'changeData') syncRuleFromWorkflow();
+		}
+
 		document.addEventListener('DOMContentLoaded', function(){
 			var wf = document.getElementById('form_Workflow');
-			if (wf) {
-			syncRuleFromWorkflow('DOMContentLoaded');
-			wf.addEventListener('change', function(){
-				if (!window.workflowRuleMap) {
-				}
-				syncRuleFromWorkflow('change');
-			});
-			}
+			var action = document.getElementById('form_action');
+			if (wf) wf.addEventListener('change', syncRuleFromWorkflow);
+			if (action) action.addEventListener('change', toggleRuleRows);
+			syncRuleFromWorkflow();
+			toggleRuleRows();
 		});
 	</script>
 

@@ -101,7 +101,6 @@ if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
 
 if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
     require('./js/workflowActionSearchFields.js')
-    require('./js/workflow-action-label-rule-change.js')
 }
 
 
