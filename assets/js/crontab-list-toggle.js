@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const id = checkbox.dataset.id;
     const enable = checkbox.checked ? 1 : 0;
-    const template = checkbox.dataset.url; // ex: .../enable_crontab/ID_PLACEHOLDER/ENABLE_PLACEHOLDER
+    const template = checkbox.dataset.url;
 
     if (!template || !id) {
       console.warn('toggle-switch-crontab: data-url ou data-id manquant');
@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
       .replace('ID_PLACEHOLDER', encodeURIComponent(id))
       .replace('ENABLE_PLACEHOLDER', encodeURIComponent(enable));
 
-    // Désactiver le switch le temps de l’appel; rollback en cas d’échec
     checkbox.disabled = true;
     const previous = !checkbox.checked;
 
