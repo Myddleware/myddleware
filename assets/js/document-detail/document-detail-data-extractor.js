@@ -149,7 +149,10 @@ export function extractDocumentDates(documentData) {
         : null;
 
     // Reference should remain in UTC as it is in the database (no timezone adjustment)
-    const reference = documentData.reference || null;
+    const { dateFormat } = DocumentDetailDateFormatter.getUserPreferences(documentData);
+    const reference = documentData.reference
+    ? DocumentDetailDateFormatter.formatDate(documentData.reference, 'UTC', dateFormat)
+    : null;
 
     return {
         creationDate,
