@@ -32,7 +32,7 @@ class iomad extends moodle
 {
 	protected $iomadModules = array('get_companies', 'get_company_courses');
 	
-    public function getFieldsLogin(): array
+    public function getFieldsLogin(): array 
     {
         return [
             [
