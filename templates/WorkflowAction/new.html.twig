@@ -69,6 +69,11 @@
 							{{ form_row(form.active) }}
 						</div>
 					</div>
+					<div class="col-md-6">
+						<div class="workflow-field-container form-group-workflow-action" id="rule-change-container">
+							{{ form_row(form.ruleChangeData) }}
+						</div>
+					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
@@ -91,34 +96,29 @@
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="rule-change-container">
-							{{ form_row(form.ruleChangeData) }}
-						</div>
-					</div>
-					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="rule-generate-container">
 							{{ form_row(form.ruleGenerate) }}
 						</div>
 					</div>
-				</div>
-				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchfield" id="search-field-container">
 							{{ form_row(form.searchField) }}
 						</div>
 					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchvalue" id="search-value-container">
 							{{ form_row(form.searchValue) }}
 						</div>
 					</div>
-				</div>
-				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="rerun-container">
 							{{ form_row(form.rerun) }}
 						</div>
 					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6">
 						<div class="workflow-field-container form-group-workflow-action" id="document-type-container">
 							{{ form_row(form.documentType) }}
