@@ -72,6 +72,9 @@
 					<div class="col-md-6 form-group-workflow-action" id="active-container">
 						{{ form_row(form.active) }}
 					</div>
+					<div class="col-md-6 form-group-workflow-action workflow-action-edit-rule" id="rule-change-container">
+						{{ form_row(form.ruleChangeData) }}
+					</div>
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6 form-group-workflow-action workflow-action-edit-to" id="to-container">
@@ -90,7 +93,7 @@
 				</div>
 				<div class="row mb-4">
 					<div class="col-md-6 form-group-workflow-action workflow-action-edit-rule" id="rule-container">
-						{{ form_row(form.ruleId) }}
+						{{ form_row(form.ruleGenerate) }}
 					</div>
 					<div class="col-md-6 form-group-workflow-action workflow-action-edit-searchfield" id="search-field-container">
 						{{ form_row(form.searchField) }}
@@ -100,11 +103,11 @@
 					<div class="col-md-6 form-group-workflow-action workflow-action-edit-searchvalue" id="search-value-container">
 						{{ form_row(form.searchValue) }}
 					</div>
-				</div>
-				<div class="row mb-4">
 					<div class="col-md-6 form-group-workflow-action" id="rerun-container">
 						{{ form_row(form.rerun) }}
 					</div>
+				</div>
+				<div class="row mb-4">
 					<div class="col-md-6 form-group-workflow-action" id="document-type-container">
 						{{ form_row(form.documentType) }}
 					</div>
@@ -127,7 +130,6 @@
 		</div>
 		{{ form_end(form, {'render_rest': false}) }}
 
-		<!-- Delete form - separate from main edit form -->
 		<div class="text-center mt-3">
 			<form method="post" action="{{ path('workflow_action_delete', {'id': workflowAction.id}) }}" style="display: inline;">
 				<button type="submit" 
@@ -141,6 +143,38 @@
 		<script type="text/javascript">
 			var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
 			var targetFieldsData = {{ targetFieldsData|json_encode()|raw }};
+				window.workflowRuleMap = {
+				{% for wf in workflows %}
+					"{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
+				{% endfor %}
+				};
+
+				function syncChangeRuleFromWorkflow() {
+					var wf = document.getElementById('form_Workflow');
+					var sel = document.getElementById('form_ruleChangeData');
+					if (!wf || !sel) return;
+					var rid = (window.workflowRuleMap && window.workflowRuleMap[wf.value]) ? window.workflowRuleMap[wf.value] : '';
+					var opt = sel.options[0];
+					if (!opt) {
+					opt = document.createElement('option');
+					sel.appendChild(opt);
+					}
+					opt.value = rid;
+					opt.text  = (rid ? rid : '');
+					sel.value = rid;
+					if (window.jQuery && jQuery(sel).data('select2')) {
+					jQuery(sel).trigger('change.select2');
+					} else {
+					sel.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+				}
+
+				document.addEventListener('DOMContentLoaded', function () {
+					syncChangeRuleFromWorkflow();
+					var wf = document.getElementById('form_Workflow');
+					if (wf) wf.addEventListener('change', syncChangeRuleFromWorkflow);
+				});
+
 		</script>
 	</div>
 {% endblock %}

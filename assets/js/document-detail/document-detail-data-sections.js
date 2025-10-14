@@ -1203,6 +1203,7 @@ export class DocumentDetailDataSections {
             }
 
             const apiUrl = `${baseUrl}/rule/flux/masscancel`;
+            console.log('test 870 7:', apiUrl);
 
             // Prepare the payload for mass cancel (form data format)
             const formData = new FormData();
@@ -1224,26 +1225,28 @@ export class DocumentDetailDataSections {
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
+                    console.error('test 870 1 Mass cancel API response not OK:', response);
                 }
-                return response.text();
+                console.log('test 870 2 ✅ Mass cancel API response OK:', response);
+                return response.json();
             })
-            .then(responseText => {
-                console.log('✅ Mass cancel completed successfully');
+            .then(data => {
+                console.log('test 870 3 Mass cancel completed successfully');
 
-                // The response contains the task ID directly
-                const taskId = responseText.trim();
+                // Extract the task ID from the JSON response
+                const taskId = data.taskId;
                 console.log('📋 Task ID:', taskId);
 
                 // Show styled notification
                 this.showTaskNotification(documentIds.length, taskId, baseUrl);
             })
             .catch(error => {
-                console.error('❌ Error calling mass action API:', error);
+                console.error('❌ Error 4 calling mass action API:', error);
                 this.showErrorNotification('Error initiating mass cancel action. Please try again.');
             });
 
         } catch (error) {
-            console.error('❌ Error in cancelHistoryDocuments:', error);
+            console.error('❌ Error 5 in cancelHistoryDocuments:', error);
             this.showErrorNotification('Error initiating mass cancel action. Please check the console for details.');
         }
     }

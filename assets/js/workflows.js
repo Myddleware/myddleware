@@ -427,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // WORKFLOWACTION TARGETFIELD
-  const ruleIdField = document.getElementById("form_ruleId");
+  const ruleIdField = document.getElementById("form_ruleChangeData");
   const targetFieldContainer = document.getElementById("targetFieldContainer");
   const targetFieldValueContainer = document.getElementById("targetFieldValueContainer");
   const addFieldButton = document.getElementById('addFieldButton');
@@ -595,12 +595,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     });
   } else {
-    console.log("addFieldButton or form_ruleId element not found, skipping add field listener");
+    console.log("addFieldButton or form_ruleChangeData element not found, skipping add field listener");
   }
 });
 
 function setRuleFieldValue(ruleId) {
-  const $rule = $('#form_ruleId');
+  const $rule = $('#form_ruleChangeData');
   if (!$rule.length) {
     return;
   }

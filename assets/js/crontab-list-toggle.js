@@ -48,5 +48,52 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+    document.addEventListener('change', async function (evt) {
+    const checkbox = evt.target.closest('.toggle-switch-crontab');
+    if (!checkbox) return;
+
+    const id = checkbox.dataset.id;
+    const enable = checkbox.checked ? 1 : 0;
+    const template = checkbox.dataset.url;
+
+    if (!template || !id) {
+      console.warn('toggle-switch-crontab: data-url ou data-id manquant');
+      return;
+    }
+
+    const url = template
+      .replace('ID_PLACEHOLDER', encodeURIComponent(id))
+      .replace('ENABLE_PLACEHOLDER', encodeURIComponent(enable));
+
+    checkbox.disabled = true;
+    const previous = !checkbox.checked;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+
+      if (!res.ok) {
+        checkbox.checked = previous;
+        const txt = await res.text().catch(() => '');
+        console.error('HTTP error', res.status, txt);
+        alert('Échec de la mise à jour (HTTP ' + res.status + ').');
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      if (!data.success) {
+        checkbox.checked = previous;
+        alert(data.message || 'Mise à jour refusée.');
+      }
+    } catch (err) {
+      checkbox.checked = previous;
+      console.error(err);
+      alert('Erreur réseau.');
+    } finally {
+      checkbox.disabled = false;
+    }
+  });
 });
 

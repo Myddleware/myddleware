@@ -62,6 +62,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Psr\Log\LoggerInterface;
 
 /**
  * @Route("/rule")
@@ -77,6 +78,8 @@ class FluxController extends AbstractController
     private SolutionManager $solutionManager;
     private DocumentRepository $documentRepository;
     private ToolsManager $toolsManager;
+    private LoggerInterface $logger;
+
     public function __construct(
         SessionService $sessionService,
         TranslatorInterface $translator,
@@ -85,7 +88,8 @@ class FluxController extends AbstractController
         DocumentRepository $documentRepository,
         EntityManagerInterface $entityManager,
         ToolsManager $toolsManager,
-        Connection $connection
+        Connection $connection,
+        LoggerInterface $logger
     ) {
         $this->sessionService = $sessionService;
         $this->translator = $translator;
@@ -95,6 +99,8 @@ class FluxController extends AbstractController
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
         $this->connection = $connection;
+        $this->logger = $logger;
+
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -1108,11 +1114,11 @@ $result = [];
             exit;
         }
 
-        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux and the $_SERVER['REDIRECT_URL'] contains the substring masscancel    
+        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux and the $_SERVER['REDIRECT_URL'] contains the substring masscancel
         if (isset($_POST['ids']) && count($_POST['ids']) > 0 && strpos($_SERVER["HTTP_REFERER"], 'flux') !== false && strpos($_SERVER['REDIRECT_URL'], 'masscancel') !== false) {
             $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
             // Return the task ID so the frontend can create a direct link
-            echo $taskId;
+            return new JsonResponse(['taskId' => $taskId]);
         } else {
             // default behaviour
             $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
@@ -1463,27 +1469,36 @@ $result = [];
      */
     public function getDocumentData($id): JsonResponse {
         try {
-            // error_log("getDocumentData called with document ID: " . $id);
-            
+            $this->logger->critical("[DATE-FLOW-PHP-1] getDocumentData called with document ID: " . $id);
+
             // Validate the document ID
             if (empty($id)) {
-                error_log("getDocumentData: Empty document ID provided");
+                $this->logger->critical("[DATE-FLOW-PHP-1] Empty document ID provided");
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
-            
+
             // Find the document by ID
             $document = $this->entityManager->getRepository(Document::class)->find($id);
-            
+
             if (!$document) {
-                error_log("getDocumentData: Document not found with ID: " . $id);
+                $this->logger->critical("[DATE-FLOW-PHP-1] Document not found with ID: " . $id);
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
-            
+
+            // Log raw date values from database
+            $this->logger->critical("[DATE-FLOW-PHP-1] Raw dates from database:");
+            $this->logger->critical("  - getDateCreated(): " . ($document->getDateCreated() ? $document->getDateCreated()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getDateCreated() timezone: " . ($document->getDateCreated() ? $document->getDateCreated()->getTimezone()->getName() : 'N/A'));
+            $this->logger->critical("  - getDateModified(): " . ($document->getDateModified() ? $document->getDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getDateModified() timezone: " . ($document->getDateModified() ? $document->getDateModified()->getTimezone()->getName() : 'N/A'));
+            $this->logger->critical("  - getSourceDateModified(): " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getSourceDateModified() timezone: " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->getTimezone()->getName() : 'N/A'));
+
             // Get the rule from the document
             $rule = $document->getRule();
-            
+
             if (!$rule) {
-                error_log("getDocumentData: No rule associated with document ID: " . $id);
+                $this->logger->critical("[DATE-FLOW-PHP-1] No rule associated with document ID: " . $id);
                 return new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
@@ -1562,10 +1577,10 @@ $result = [];
                 // Type display info
                 'type_label' => $this->getTypeLabel($document->getType()),
 
-                // Dates and reference - convert to user's timezone before formatting
+                // Dates and reference - convert to user's timezone before formatting (except reference which stays in UTC)
                 'creation_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
                 'modification_date' => $this->formatDateInUserTimezone($document->getDateModified()),
-                'reference' => $document->getSourceDateModified() ? $this->formatDateInUserTimezone($document->getSourceDateModified()) : null,
+                'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
 
                 // Pass user timezone and date format for client-side formatting
                 'user_timezone' => $this->getUser()->getTimezone(),
@@ -1594,9 +1609,16 @@ $result = [];
                 'workflow_error' => $document->getWorkflowError(),
                 'job_lock' => $document->getJobLock()
             ];
-            
-            // error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
-            
+
+            $this->logger->critical("[DATE-FLOW-PHP-1] Prepared response data with dates:");
+            $this->logger->critical("  - creation_date: " . $responseData['creation_date']);
+            $this->logger->critical("  - modification_date: " . $responseData['modification_date']);
+            $this->logger->critical("  - reference: " . $responseData['reference']);
+            $this->logger->critical("  - user_timezone: " . $responseData['user_timezone']);
+            $this->logger->critical("  - user_date_format: " . $responseData['user_date_format']);
+
+            $this->logger->critical("[DATE-FLOW-PHP-1] Successfully retrieved comprehensive data for document ID: " . $id);
+
             return new JsonResponse([
                 'success' => true,
                 'data' => $responseData
@@ -1616,6 +1638,10 @@ $result = [];
      */
     private function formatDateInUserTimezone(\DateTime $date): string {
         $userTimezone = $this->getUser()->getTimezone();
+        $this->logger->critical("[DATE-FLOW-PHP-2] formatDateInUserTimezone called:");
+        $this->logger->critical("  - Input date: " . $date->format('Y-m-d H:i:s T'));
+        $this->logger->critical("  - Input timezone: " . $date->getTimezone()->getName());
+        $this->logger->critical("  - User timezone: " . $userTimezone);
 
         // Clone the date to avoid modifying the original
         $dateInUserTz = clone $date;
@@ -1623,8 +1649,14 @@ $result = [];
         // Convert to user's timezone
         $dateInUserTz->setTimezone(new \DateTimeZone($userTimezone));
 
+        $this->logger->critical("  - After conversion: " . $dateInUserTz->format('Y-m-d H:i:s T'));
+        $this->logger->critical("  - After conversion timezone: " . $dateInUserTz->getTimezone()->getName());
+
         // Return formatted string
-        return $dateInUserTz->format('Y-m-d H:i:s');
+        $result = $dateInUserTz->format('Y-m-d H:i:s');
+        $this->logger->critical("  - Final formatted result: " . $result);
+
+        return $result;
     }
 
     /**

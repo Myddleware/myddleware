@@ -96,7 +96,7 @@ export class DocumentDetailTemplate {
                             <th>Type</th>
                             <th>Attempt</th>
                             <th>Global status</th>
-                            <th>Reference</th>
+                            <th>Reference <i class="fa fa-exclamation-circle" style="color: #0F66A9; cursor: help;" title="Date of data in the source application"></i></th>
                             <th>Creation date</th>
                             <th class="rounded-table-up-right">Modification Date</th>
                         </tr>

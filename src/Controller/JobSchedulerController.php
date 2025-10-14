@@ -329,46 +329,57 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        try {
-            $command = '';
-            $period = ' */5 * * * *';
-            $crontabForm = new CronJob($command, $period);     
-            $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
-            $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
-            
-            // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
-            $formParam = $request->request->get('job_scheduler_cron');
-            $form->handleRequest($request);
-        
-            if ($form->isSubmitted() && $form->isValid()) {
+         $command = '';
+        $period = '*/5 * * * *';
+        $crontabForm = new CronJob($command, $period);
+        $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+        $form = $this->createForm(JobSchedulerCronType::class, $crontabForm);
+         
+        // get the data from the request as command aren't available from the form (command is private and can't be set using the custom method setCommand)
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
                 // use the static method create because command can be set
-                $crontab = CronJob::create($formParam['command'], $formParam['period']);  
-                $crontab->setDescription($formParam['description']);
-                
-                for ($i = 0; $i < $formParam['runningInstances']; $i++) {
-                    $crontab->increaseRunningInstances();
-                }
-                
-                $crontab->setMaxInstances((int) $formParam['maxInstances']);
-                
-                $this->entityManager->persist($crontab);
-                $this->entityManager->flush();
-                $success = $translator->trans('crontab.success');
-                $this->addFlash('success', $success);
-            
-                return $this->redirectToRoute('jobscheduler_cron_list');
-            } else {
+
+            $command          = $form->get('command')->getData();
+            $period           = $form->get('period')->getData();
+            $description      = $form->get('description')->getData();
+            $enable           = $form->get('enable')->getData();
+            $runningInstances = $form->get('runningInstances')->getData();
+            $maxInstances     = $form->get('maxInstances')->getData();
+
+            if ($command === '' || $period === '') {
+                $this->addFlash('error', $translator->trans('crontab.incorrect'));
                 return $this->render('JobScheduler/crontab.html.twig', [
                     'entity' => $entity,
                     'form' => $form->createView(),
                 ]);
             }
-        } catch (Exception $e) {
-            $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
-                        
-            return $this->redirectToRoute('jobscheduler_cron_list');
+
+            try {
+                $crontab = CronJob::create($command, $period);
+                if (method_exists($crontab, 'setDescription'))    $crontab->setDescription($description);
+                if (method_exists($crontab, 'setEnable'))        $crontab->setEnable($enable);
+                if (method_exists($crontab, 'setMaxInstances'))   $crontab->setMaxInstances($maxInstances);
+                if (method_exists($crontab, 'increaseRunningInstances')) {
+                    for ($i = 0; $i < $runningInstances; $i++) {
+                        $crontab->increaseRunningInstances();
+                    }
+                }
+
+                $this->entityManager->persist($crontab);
+                $this->entityManager->flush();
+
+                $this->addFlash('success', $translator->trans('crontab.success'));
+                return $this->redirectToRoute('jobscheduler_cron_list');
+            } catch (\Throwable $e) {
+                $this->addFlash('error', $translator->trans('crontab.incorrect'));
+            }
         }
+        return $this->render('JobScheduler/crontab.html.twig', [
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
