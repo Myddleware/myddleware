@@ -449,44 +449,6 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 
 /* workflow action fields */
 
-input#form_name,
-textarea#form_description,
-input#form_order,
-input#form_multipleRuns,
-input#form_status,
-input#form_active,
-input#form_subject,
-input#form_message,
-input#form_to,
-input#form_targetField,
-input#form_targetFieldValue,
-input#form_rerun,
-input#form_ruleId,
-input#form_searchField,
-input#form_searchValue,
-select#form_name,
-select#form_Workflow,
-select#form_description,
-select#form_action,
-select#form_order,
-select#form_multipleRuns,
-select#form_status,
-select#form_active,
-select#form_subject,
-select#form_message,
-select#form_to,
-select#form_targetField,
-select#form_targetFieldValue,
-select#form_rerun,
-select#form_ruleId,
-select#form_searchField,
-select#form_searchValue {
-	border: 1px solid #dfdddd;
-    border-radius: 4px;
-	margin-bottom: 3px;
-	margin-left: 10px;
-}
-
   .form-group-workflow-action {
     display: grid;
     grid-template-columns: 150px 1fr;
@@ -496,6 +458,7 @@ select#form_searchValue {
   }
 
   .form-group-workflow-action label {
+    width: max-content;
     font-weight: 600;
   }
 
@@ -512,8 +475,6 @@ select#form_searchValue {
   .form-group-workflow-action label {
 	margin-bottom: 0.4rem;
 	font-weight: 600;
-	/* 👇 This aligns label start with input */
-	padding-left: 10px;
   }
 
   .form-actions-workflow-action {
