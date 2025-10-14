@@ -96,7 +96,11 @@ export class DocumentDetailTemplate {
                             <th>Type</th>
                             <th>Attempt</th>
                             <th>Global status</th>
-                            <th>Reference <i class="fa fa-exclamation-circle" style="color: #0F66A9; cursor: help;" title="Date of data in the source application"></i></th>
+                            <th>Reference 
+                                <button type="button" class="help-pop" data-help="Date of data in the source application" aria-label="Help" style="background:none;border:0;padding:0;cursor:pointer;">
+                                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                                </button>
+                            </th>
                             <th>Creation date</th>
                             <th class="rounded-table-up-right">Modification Date</th>
                         </tr>
@@ -652,4 +656,37 @@ export class DocumentDetailTemplate {
             console.error('❌ Error updating logos:', error);
         }
     }
+}
+if (!window.__helpPopBound) {
+    window.__helpPopBound = true;
+
+    let __pop = null;
+    const __close = () => { if (__pop) { __pop.remove(); __pop = null; } };
+    const __show = (anchor, html) => {
+        __close();
+        // Position the popover just below the clicked icon, accounting for page scroll
+        const r = anchor.getBoundingClientRect(), px = window.scrollX, py = window.scrollY;
+        __pop = document.createElement('div');
+        __pop.className = 'popover';
+        __pop.innerHTML = `<button class="close-x" aria-label="Close">&times;</button>${html || ''}`;
+        Object.assign(__pop.style, {
+        position: 'absolute', left: (r.left + px - 10) + 'px', top: (r.bottom + py + 10) + 'px', zIndex: 9999
+        });
+        document.body.appendChild(__pop);
+        __pop.querySelector('.close-x').addEventListener('click', __close, { once: true });
+        
+        // Close on outside click or Escape for good UX and a11y
+        setTimeout(() => document.addEventListener('click', (e) => {
+        if (__pop && !__pop.contains(e.target)) __close();
+        }, { once: true }), 0);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') __close(); }, { once: true });
+    };
+
+    // Event delegation: handle clicks on any .help-pop (even if added dynamically)
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.help-pop[data-help]');
+        if (!btn) return;
+        e.preventDefault(); e.stopPropagation();
+        __show(btn, btn.getAttribute('data-help') || '');
+    });
 }

@@ -252,5 +252,35 @@ $(document).ready(function() {
       allowClear: true,
       width: 'resolve' 
   });
+
+    let pop=null; 
+    const close=()=>{ if(pop){ pop.remove(); pop=null; } };
+    const esc=(e)=>{ if(e.key==='Escape') close(); };
+    const outside=(e)=>{ if(pop && !pop.contains(e.target)) close(); };
+
+function show(anchor, text){
+    close();
+    pop=document.createElement('div');
+    pop.className='popover';
+    pop.innerHTML=`<button class="close-x" aria-label="Close">&times;</button>${text}`;
+    document.body.appendChild(pop);
+
+    const r=anchor.getBoundingClientRect();
+    const px=window.scrollX, py=window.scrollY;
+    pop.style.left=(r.left+px - 10)+'px';
+    pop.style.top =(r.bottom+py + 10)+'px';
+
+    pop.querySelector('.close-x').addEventListener('click', close, {once:true});
+    setTimeout(()=>document.addEventListener('click', outside, {once:true}),0);
+    document.addEventListener('keydown', esc, {once:true});
+  }
+
+  document.addEventListener('click', e=>{
+    const icon=e.target.closest('.help-pop[data-help]');
+    if(!icon) return;
+    e.preventDefault(); e.stopPropagation();
+    show(icon, icon.getAttribute('data-help')||'');
+  });
+
 });
 

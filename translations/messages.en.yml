@@ -430,7 +430,7 @@ list_flux:
         type: Type
         source_field: Field linked
         reference: Reference
-
+        helppop: Date of data in the source application
 flux:
     gbl_status:
         open: Opened
