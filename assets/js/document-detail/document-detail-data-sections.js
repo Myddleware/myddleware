@@ -1222,22 +1222,38 @@ export class DocumentDetailDataSections {
                 credentials: 'same-origin',
                 body: formData
             })
-            .then(response => {
+            .then(async response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
-                    console.error('test 870 1 Mass cancel API response not OK:', response);
                 }
                 console.log('test 870 2 ✅ Mass cancel API response OK:', response);
-                return response.json();
+
+                // Check if response has content before trying to parse JSON
+                const text = await response.text();
+                if (!text || text.trim() === '') {
+                    console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
+                    return { taskId: null };
+                }
+
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.warn('⚠️ Response is not valid JSON:', text);
+                    return { taskId: null };
+                }
             })
             .then(data => {
                 console.log('test 870 3 Mass cancel completed successfully');
 
-                // Extract the task ID from the JSON response
-                const taskId = data.taskId;
-                console.log('📋 Task ID:', taskId);
+                // Extract the task ID from the JSON response (might be null)
+                const taskId = data.taskId || null;
+                if (taskId) {
+                    console.log('📋 Task ID:', taskId);
+                } else {
+                    console.log('⚠️ No task ID returned (backend may not support task ID in response)');
+                }
 
-                // Show styled notification
+                // Show styled notification (works with or without task ID)
                 this.showTaskNotification(documentIds.length, taskId, baseUrl);
             })
             .catch(error => {
