@@ -1639,10 +1639,18 @@ $result = [];
         $this->logger->critical("  - Input timezone: " . $date->getTimezone()->getName());
         $this->logger->critical("  - User timezone: " . $userTimezone);
 
-        // Clone the date to avoid modifying the original
-        $dateInUserTz = clone $date;
+        // COMPENSATION FIX: Database stores dates in UTC, but Doctrine reads them with server timezone
+        // We need to treat the date/time values as if they were always UTC
+        // Step 1: Get the raw date/time values (ignoring the incorrect server timezone)
+        $dateString = $date->format('Y-m-d H:i:s');
 
-        // Convert to user's timezone
+        // Step 2: Create a new DateTime object, explicitly setting it to UTC
+        $dateInUtc = new \DateTime($dateString, new \DateTimeZone('UTC'));
+
+        $this->logger->critical("  - After UTC compensation: " . $dateInUtc->format('Y-m-d H:i:s T'));
+
+        // Step 3: Now convert from UTC to user's timezone
+        $dateInUserTz = clone $dateInUtc;
         $dateInUserTz->setTimezone(new \DateTimeZone($userTimezone));
 
         $this->logger->critical("  - After conversion: " . $dateInUserTz->format('Y-m-d H:i:s T'));
