@@ -69,7 +69,9 @@ class moodle extends solution
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
             $response = $this->moodleClient->post($serverurl, $params);
             $xml = simplexml_load_string($response);
-
+			// Add a hook de get site information
+			$this->getSiteInfo($xml);
+			
             if (!empty($xml->SINGLE->KEY[0]->VALUE)) {
                 $this->connexion_valide = true;
             } elseif (!empty($xml->ERRORCODE)) {
@@ -222,7 +224,7 @@ class moodle extends solution
             $customFieldList = $this->getCustomFields($param);
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
-            $response = $this->moodleClient->post($serverurl, $parameters);;
+            $response = $this->moodleClient->post($serverurl, $parameters);
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error code $xml->ERRORCODE : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
@@ -398,7 +400,6 @@ class moodle extends solution
             // Modification du statut du flux
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
-
         return $result;
     }
 
@@ -811,4 +812,9 @@ class moodle extends solution
 		require 'lib/moodle/metadata.php';
 		return $moduleFields;
 	}
+	
+	protected function getSiteInfo($xml){
+	}
+	
+	
 }
