@@ -1218,7 +1218,7 @@ export class DocumentDetailDataSections {
         }
 
 
-            console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
+            // console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
 
             // Make the API call
             fetch(apiUrl, {
@@ -1233,12 +1233,12 @@ export class DocumentDetailDataSections {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                console.log('test 870 2 ✅ Mass cancel API response OK:', response);
+                // console.log('test 870 2 ✅ Mass cancel API response OK:', response);
 
                 // Check if response has content before trying to parse JSON
                 const text = await response.text();
                 if (!text || text.trim() === '') {
-                    console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
+                    // console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
                     return { taskId: null };
                 }
 
@@ -1250,14 +1250,14 @@ export class DocumentDetailDataSections {
                 }
             })
             .then(data => {
-                console.log('test 870 3 Mass cancel completed successfully');
+                // console.log('test 870 3 Mass cancel completed successfully');
 
                 // Extract the task ID from the JSON response (might be null)
                 const taskId = data.taskId || null;
                 if (taskId) {
-                    console.log('📋 Task ID:', taskId);
+                    // console.log('📋 Task ID:', taskId);
                 } else {
-                    console.log('⚠️ No task ID returned (backend may not support task ID in response)');
+                    // console.log('⚠️ No task ID returned (backend may not support task ID in response)');
                 }
 
                 // Show styled notification (works with or without task ID)
