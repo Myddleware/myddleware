@@ -144,7 +144,7 @@ export class DocumentDetailDirectLinks {
                 this.addDirectLinkToSection('.target-data', 'empty-id', documentData.target_id);
             }
             
-            console.log('✅ Direct links update completed');
+            // console.log('✅ Direct links update completed');
             
         } catch (error) {
             console.error('❌ Error updating direct links:', error);
