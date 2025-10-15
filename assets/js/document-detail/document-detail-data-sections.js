@@ -172,7 +172,7 @@ export class DocumentDetailDataSections {
             <h3>Documents history</h3>
             <span class="custom-count">(${rows.length})</span>
             <button class="toggle-btn" aria-expanded="true" style="margin-left: 30px;">-</button>
-            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-left: 30px;">
+            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-left: 30px;" data-action="cancel-history">
                 Cancel History
             </button>` : ''}
             </div>
@@ -1210,6 +1210,13 @@ export class DocumentDetailDataSections {
             documentIds.forEach(id => {
                 formData.append('ids[]', id);
             });
+
+        // Add action info from the button (if available)
+        const cancelBtn = document.getElementById('cancel-history-btn');
+        if (cancelBtn) {
+            formData.append('action', cancelBtn.dataset.action);
+        }
+
 
             console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
 

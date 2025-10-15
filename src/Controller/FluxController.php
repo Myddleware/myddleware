@@ -1106,7 +1106,7 @@ $result = [];
     /**
      * @Route("/flux/masscancel", name="flux_mass_cancel")
      */
-    public function fluxMassCancelAction()
+    public function fluxMassCancelAction(?Request $request = null)
     {
 
         // if we are not premium, then return
