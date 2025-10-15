@@ -529,3 +529,36 @@
   margin-top: 1.5rem;
   width: 100%;
 }
+
+.pagination-controls { 
+    display:flex;
+    justify-content:center;
+    margin-top:10px;
+}
+
+.pagination-list {
+    display:flex;
+    gap:6px;
+    padding:0;
+    margin:0;
+    align-items:center;
+    list-style:none;
+    flex-wrap:wrap;
+}
+
+.pagination-btn {
+    border:1px solid #dee2e6;
+    background:#fff;
+    padding:6px 10px;
+    border-radius:8px;
+    line-height:1;
+    cursor:pointer;
+}
+.pagination-btn.active {
+    background:#198BCA;
+    color:#fff;
+    border-color:#198BCA;
+}
+.pagination-ellipsis {
+    padding:0 6px;
+}
