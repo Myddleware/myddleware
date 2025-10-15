@@ -429,6 +429,7 @@ list_flux:
         type: Type
         source_field: Champ lié
         reference: Référence
+        helppop: Date des données dans l'application source
         
 flux:
     gbl_status:
