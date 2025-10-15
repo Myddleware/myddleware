@@ -1114,20 +1114,10 @@ $result = [];
             exit;
         }
 
-        // added condition where $_SERVER["HTTP_REFERER"] contains the substring flux
-        // Check REQUEST_URI (more reliable than REDIRECT_URL which is Apache-specific)
-        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-        $redirectUrl = $_SERVER['REDIRECT_URL'] ?? '';
-
-        if (isset($_POST['ids']) && count($_POST['ids']) > 0 &&
-            strpos($_SERVER["HTTP_REFERER"], 'flux') !== false &&
-            (strpos($requestUri, 'masscancel') !== false || strpos($redirectUrl, 'masscancel') !== false)) {
+        if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
             $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
             // Return the task ID so the frontend can create a direct link
             return new JsonResponse(['taskId' => $taskId]);
-        } else {
-            // default behaviour
-            $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
         }
 
         exit;
