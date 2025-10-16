@@ -8,15 +8,20 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 
 class DocFilterType extends AbstractType
 {
+    public function __construct(private Security $security) {}
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $entityManager = $options['entityManager'];
+        $em = $options['entityManager'];
+        $user = $this->security->getUser();
+        $userTz = $user->getTimezone();
+
         $builder
             ->add('status',Filters\ChoiceFilterType::class, [
                 'choices'  => DocumentManager::lstStatus(),
@@ -33,7 +38,7 @@ class DocFilterType extends AbstractType
                     'id' => 'globalStatus',
                     'placeholder' => 'Global Status',
                 ],
-                'multiple' => true, // enable multiple choices
+                'multiple' => true,
             ])
             ->add('sourceId',  TextType::class, [
                 'attr' => [
@@ -80,27 +85,29 @@ class DocFilterType extends AbstractType
                     'id' => 'type'
                 ],
             ])
-            ->add('date_modif_start', DateTimeType::class, [
+             ->add('date_modif_start', DateTimeType::class, [
                 'widget' => 'single_text',
                 'required' => false,
+                'view_timezone'  => $userTz,
+                'model_timezone' => 'UTC', 
                 'attr' => [
                     'placeholder' => 'Date of modification Start',
                     'class' => 'form-control mt-2 calendar',
-                    'id' => 'date_modif_start'
+                    'id' => 'date_modif_start',
                 ],
             ])
             ->add('date_modif_end', DateTimeType::class, [
                 'widget' => 'single_text',
                 'required' => false,
+                'view_timezone'  => $userTz,
+                'model_timezone' => 'UTC',
                 'attr' => [
                     'placeholder' => 'Date of modification End',
                     'class' => 'form-control mt-2 calendar',
-                    'id' => 'date_modif_end'
+                    'id' => 'date_modif_end',
                 ],
-            ]);
-
-
-           
+            ]
+        );
     }
 
     public function getBlockPrefix()

@@ -451,7 +451,6 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 
   .form-group-workflow-action {
     display: grid;
-    grid-template-columns: 150px 1fr;
     gap: 10px;
     align-items: center;
     margin-bottom: 1rem;
@@ -460,16 +459,6 @@ label[for^="connector_connectorParams_"][for$="_value"] {
   .form-group-workflow-action label {
     width: max-content;
     font-weight: 600;
-  }
-
-  .form-group-workflow-action input,
-  .form-group-workflow-action select,
-  .form-group-workflow-action textarea {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
   }
 
   .form-group-workflow-action label {
@@ -495,35 +484,4 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 
 .flex-center-rule-name {
 	margin-left: 4rem;
-}
-
-.workflow-action-new-name div #form_name,
-.workflow-action-edit-name div #form_name,
-.workflow-action-new-workflow div #form_Workflow,
-.workflow-action-edit-workflow div #form_Workflow,
-.workflow-action-new-action div #form_action,
-.workflow-action-edit-action div #form_action,
-.workflow-action-edit-status div #form_status,
-.workflow-action-new-status div #form_status,
-.workflow-action-new-rule div #form_ruleId,
-.workflow-action-edit-rule div #form_ruleId,
-.workflow-action-new-searchfield div #form_searchField,
-.workflow-action-edit-searchfield div #form_searchField,
-.workflow-action-new-searchvalue div #form_searchValue,
-.workflow-action-edit-searchvalue div #form_searchValue,
-.workflow-action-new-to div #form_to,
-.workflow-action-edit-to div #form_to,
-.workflow-action-new-subject div #form_subject,
-.workflow-action-edit-subject div #form_subject {
-	width: 200%;
-}
-
-.workflow-action-new-description div #form_description,
-.workflow-action-edit-description div #form_description {
-	width: 350%;
-}
-
-.workflow-action-new-message div #form_message,
-.workflow-action-edit-message div #form_message {
-	width: 400% !important;
 }
