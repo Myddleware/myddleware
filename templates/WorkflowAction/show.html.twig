@@ -94,7 +94,11 @@
 															{% endfor %}
 														</ul>
 													{% else %}
-														{{ argument }}
+														{% if key == 'rerun' %}
+															{{ argument ? '1' : '0' }}
+														{% else %}
+															{{ argument }}
+														{% endif %}
 													{% endif %}
 												</li>
 											{% endfor %}
