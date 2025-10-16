@@ -25,8 +25,7 @@ $(document).ready(function() {
             $('#form_searchValue').val('');
             $('#form_rerun').val('');
         }
-
-        $('#form_ruleGenerate').val('');
+        
 
         $('#form_targetField').val('');
         $('#form_targetFieldValue').val('');
@@ -49,8 +48,7 @@ $(document).ready(function() {
             $('#form_searchField').parent().show();
             $('#form_searchValue').parent().show();
             $('#form_ruleGenerate').parent().show();
-            $('#form_targetField').parent().hide();
-            $('#form_targetFieldValueContainer').hide();
+            filterSearchFieldByGeneratingRule();
         } else if ($(this).val() === 'updateType') {
             $('#form_documentType').parent().show();
         }
@@ -58,11 +56,66 @@ $(document).ready(function() {
     }).trigger('change');
 });
 
-$(document).ready(function() {
-    $('#form_rule').change(function() {
-        var selectedRule = $(this).val();
-        $('#form_searchField optgroup').hide();
+function filterSearchFieldByGeneratingRule() {
 
-        $('#form_searchField optgroup[label="' + selectedRule + '"]').show();
-    }).trigger('change');
-});
+    var $ruleGen = $('#form_ruleGenerate');
+    var $searchField = $('#form_searchField');
+    var ruleVal = $ruleGen.val();
+    var selectedRuleLabel = $ruleGen.find('option:selected').text().trim();
+
+    if (!selectedRuleLabel) {
+        $searchField.find('optgroup').hide();
+        return;
+    }
+
+    $searchField.find('optgroup').hide();
+    var selector = 'optgroup[label="' + selectedRuleLabel.replace(/"/g, '\\"') + '"]';
+    var $visibleGroup = $searchField.find(selector);
+    $visibleGroup.show();
+
+    var currentVal = $searchField.val();
+    if (currentVal) {
+        var safeVal = currentVal.replace(/"/g, '\\"');
+        var existsInVisible = $visibleGroup.find('option[value="' + safeVal + '"]').length > 0;
+
+        if (!existsInVisible) {
+            var $ownerGroup = $searchField.find('optgroup').filter(function(){
+                return $(this).find('option[value="' + safeVal + '"]').length > 0;
+            }).first();
+
+            if ($ownerGroup.length) {
+                var ownerLabel = $ownerGroup.attr('label');
+                var $matchingRuleOption = $ruleGen.find('option').filter(function(){
+                    return $(this).text().trim() === ownerLabel;
+                }).first();
+
+                if ($matchingRuleOption.length) {
+                    $ruleGen.val($matchingRuleOption.val());
+                    $searchField.find('optgroup').hide();
+                    $ownerGroup.show();
+
+                    if ($ruleGen.data('select2')) {
+                        $ruleGen.trigger('change.select2'); 
+                        } else {
+                            $ruleGen.trigger('change'); 
+                        }
+                    if ($searchField.data('select2')) {
+                        $searchField.trigger('change.select2'); } else {
+                            $searchField.trigger('change'); 
+                        }
+                    return;
+                } else {
+                    $searchField.val('');
+                }
+            } else {
+                $searchField.val('');
+            }
+        }
+    }
+
+    if ($searchField.data('select2')) {
+        $searchField.trigger('change.select2');
+    } else {
+        $searchField.trigger('change');
+    }
+}
