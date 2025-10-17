@@ -318,7 +318,7 @@ class JobSchedulerController extends AbstractController
         return $paramsCommand;
     }
 
-    /**
+     /**
      * New creates job scheduler with cron.
      *
      * @Route("/crontab", name="crontab")
