@@ -45,13 +45,18 @@ class WorkflowLogRepository extends ServiceEntityRepository
             ->getQuery();
     }
 
-    public function findLogsByActionId(string $actionId)
+    public function findLogsByActionId(string $actionId, ?int $limit = null)
     {
-        return $this->createQueryBuilder('wl')
+        $qb = $this->createQueryBuilder('wl')
             ->where('wl.action = :actionId')
             ->setParameter('actionId', $actionId)
-            ->orderBy('wl.dateCreated', 'DESC')
-            ->getQuery();
+            ->orderBy('wl.dateCreated', 'DESC');
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->getQuery();
     }
 }
 

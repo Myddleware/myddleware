@@ -141,7 +141,8 @@ class WorkflowActionController extends AbstractController
         JobManager $jobManager,
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $params
+        ParameterBagInterface $paramsprivate,
+        ConfigRepository $configRepository
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -161,6 +162,7 @@ class WorkflowActionController extends AbstractController
         $this->jobManager = $jobManager;
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
+        $this->configRepository = $configRepository;
     }
 
     protected function getInstanceBdd() {}
@@ -297,6 +299,9 @@ class WorkflowActionController extends AbstractController
             $workflowAction->setDateModified(new \DateTime());
             $workflowAction->setDeleted(0);
 
+            $ruleDefault = $workflow->getRule();
+            $allRules    = $em->getRepository(Rule::class)->findBy(['deleted' => 0], ['name' => 'ASC']);
+
             if ($workflowAction) {
                 $arguments = $workflowAction->getArguments();
 
@@ -371,108 +376,332 @@ class WorkflowActionController extends AbstractController
                 ];
 
                 $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
-                    ->add('name', TextType::class, [
-                        'label' => 'Action Name',
-                        'required' => true,
-                    ])
-                    ->add('description', TextareaType::class, ['label' => 'Description'])
-                    ->add('Workflow', EntityType::class, [
-                        'class' => Workflow::class,
-                        'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
-                        'choice_label' => 'name',
-                        'choice_value' => 'id',
-                        'constraints' => [
-                            new NotBlank(),
-                        ],
-                    ])
-                    ->add('action', ChoiceType::class, [
-                        'label' => 'Action',
-                        'choices' => [
-                            'updateStatus' => 'updateStatus',
-                            'generateDocument' => 'generateDocument',
-                            'sendNotification' => 'sendNotification',
-                            'generateDocument' => 'generateDocument',
-                            'transformDocument' => 'transformDocument',
-                            'rerun' => 'rerun',
-                            'changeData' => 'changeData',
-                        ],
-                    ])
-                    ->add('ruleId', EntityType::class, [
-                        'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
-                        'choice_label' => 'name',
-                        'choice_value' => 'id',
-                        'required' => false,
-                        'label' => 'Generating Rule',
-                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
-                    ])
-                    ->add('status', ChoiceType::class, [
-                        'label' => 'Status',
-                        'choices' => $StringStatus,
-                        'required' => false
-                    ])
-                    ->add('to', TextType::class, ['label' => 'To', 'mapped' => false, 'required' => false])
-                    ->add('subject', TextType::class, ['label' => 'Subject', 'mapped' => false, 'required' => false])
-                    ->add('message', TextareaType::class, ['label' => 'Message', 'required' => false])
-                    ->add('searchField', ChoiceType::class, [
-                        'label' => 'Matching Field from Generating Rule',
-                        'choices' => $sourceSearchValue,
-                        'required' => false
-                    ])
-                    ->add('searchValue', ChoiceType::class, [
-                        'label' => 'Matching Field from Current Rule',
-                        'choices' => $sourceFields,
-                        'required' => false
-                    ])
-                    ->add('rerun', ChoiceType::class, [
-                        'label' => 'Rerun',
-                        'choices' => [
-                            'Yes' => true,
-                            'No' => false,
-                        ],
-                        'required' => false
-                    ])
-
-                    ->add('targetField', ChoiceType::class, [
-                        'label' => 'Target Field',
-                        'choices' => [],
-                        'required' => false,
-                        'mapped' => false,
-                    ])
-                    ->add('targetFieldValues', CollectionType::class, [
-                        'entry_type' => TextType::class,
-                        'allow_add' => true,
-                        'allow_delete' => true,
-                        'mapped' => false,
-                    ])
-
-                    ->add('order', IntegerType::class, [
-                        'label' => 'Order',
-                        'constraints' => [
-                            new Range([
-                                'min' => 0,
-                                'max' => 50,
+                        ->add('name', TextType::class, [
+                            'label'      => 'Action Name',
+                            'required'   => true,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control'
+                            ],
+                        ])
+                        ->add('description', TextareaType::class, [
+                            'label'      => 'Description',
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control', 'rows' => 4
+                            ],
+                        ])
+                        ->add('Workflow', EntityType::class, [
+                            'class'        => Workflow::class,
+                            'choices'      => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
+                            'choice_label' => 'name',
+                            'choice_value' => 'id',
+                            'constraints'  => [new NotBlank()],
+                            'label'        => 'Workflow',
+                            'row_attr'     => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr'   => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'         => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'  => 'Select a workflow',
+                        ])
+                        ->add('action', ChoiceType::class, [
+                            'label'      => 'Action',
+                            'choices'    => [
+                                'updateStatus'     => 'updateStatus',
+                                'generateDocument' => 'generateDocument',
+                                'sendNotification' => 'sendNotification',
+                                'transformDocument'=> 'transformDocument',
+                                'rerun'            => 'rerun',
+                                'changeData'       => 'changeData',
+                                'updateType'       => 'updateType',
+                            ],
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select an action',
+                        ])
+                        ->add('ruleChangeData', EntityType::class, [
+                            'class'        => Rule::class,
+                            'choices'      => $ruleDefault ? [$ruleDefault] : [],
+                            'choice_label' => 'name',
+                            'choice_value' => 'id',
+                            'label'        => false,
+                            'data'         => $ruleDefault,
+                            'mapped'       => false,
+                            'disabled'     => true,
+                            'required'     => false,
+                            'attr'         => [
+                                'id'    => 'form_ruleChangeData',
+                                'class' => 'd-none form-select',
+                            ],
+                            'row_attr'     => [
+                                'id'    => 'rule-change-container',
+                                'class' => 'mb-3',
+                            ],
+                        ])
+                        ->add('ruleGenerate', EntityType::class, [
+                            'class'        => Rule::class,
+                            'choices'      => $allRules,
+                            'choice_label' => 'name',
+                            'choice_value' => 'id',
+                            'required'     => false,
+                            'label'        => 'Generating Rule',
+                            'placeholder'  => 'Select a rule',
+                            'attr'         => [
+                                'id' => 'form_ruleGenerate',
+                                'class' => 'form-select'
+                            ],
+                            'row_attr'     => [
+                                'id' => 'rule-generate-container',
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr'   => [
+                                'class' => 'form-label'
+                            ],
+                        ])
+                        ->add('status', ChoiceType::class, [
+                            'label'      => 'Status',
+                            'choices'    => $StringStatus,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select a status',
+                        ])
+                        ->add('to', TextType::class, [
+                            'label'      => 'To',
+                            'mapped'     => false,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control'
+                            ],
+                        ])
+                        ->add('subject', TextType::class, [
+                            'label'      => 'Subject',
+                            'mapped'     => false,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control'
+                            ],
+                        ])
+                        ->add('message', TextareaType::class, [
+                            'label'      => 'Message',
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control',
+                                'rows' => 5
+                            ],
+                        ])
+                        ->add('searchField', ChoiceType::class, [
+                            'label'      => 'Matching Field from Generating Rule',
+                            'choices'    => $sourceSearchValue,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select a field',
+                        ])
+                        ->add('searchValue', ChoiceType::class, [
+                            'label'      => 'Matching Field from Current Rule',
+                            'choices'    => $sourceFields,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select a field',
+                        ])
+                        ->add('rerun', ChoiceType::class, [
+                            'label'      => 'Rerun',
+                            'choices'    => [
+                                'Yes' => true,
+                                'No' => false
+                            ],
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                        ])
+                        ->add('documentType', ChoiceType::class, [
+                            'label'      => 'Document Type',
+                            'choices'    => [
+                                'C' => 'C',
+                                'U' => 'U',
+                                'D' => 'D',
+                                'S' => 'S'
+                            ],
+                            'mapped'     => false,
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select a type',
+                        ])
+                        ->add('targetField', ChoiceType::class, [
+                            'label'      => 'Target Field',
+                            'choices'    => [],
+                            'required'   => false,
+                            'mapped'     => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                            'placeholder'=> 'Select a field',
+                        ])
+                        ->add('targetFieldValues', CollectionType::class, [
+                            'entry_type'    => TextType::class,
+                            'allow_add'     => true,
+                            'allow_delete'  => true,
+                            'mapped'        => false,
+                            'row_attr'      => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr'    => [
+                                'class' => 'form-label'
+                            ],
+                            'entry_options' => [
+                                'attr'       => [
+                                    'class' => 'form-control mb-2'
+                                ],
+                                'label'      => false,
+                            ],
+                            'attr'          => [
+                                'class' => 'd-block'
+                            ],
+                        ])
+                        ->add('order', IntegerType::class, [
+                            'label'      => 'Order',
+                            'constraints'=> [new Range([
+                                'min' => 0, 'max' => 50,
                                 'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
-                            ]),
-                        ],
-                    ])
-                    ->add('active', ChoiceType::class, [
-                        'label' => 'Active',
-                        'choices' => [
-                            'Yes' => 1,
-                            'No' => 0,
-                        ],
-                    ])
-                    ->add('multipleRuns', ChoiceType::class, [
-                        'label' => 'Multiple Runs',
-                        'choices' => [
-                            'Yes' => 1,
-                            'No' => 0,
-                        ],
-                        'required' => false,
-                    ])
-                    ->add('submit', SubmitType::class, ['label' => 'Save', 'attr' => ['class' => 'btn btn-success mt-2']])
-                    ->getForm();
+                            ])],
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-control'
+                            ],
+                        ])
+                        ->add('active', ChoiceType::class, [
+                            'label'      => 'Active',
+                            'choices'    => [
+                                'Yes' => 1,
+                                'No' => 0
+                            ],
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                        ])
+                        ->add('multipleRuns', ChoiceType::class, [
+                            'label'      => 'Multiple Runs',
+                            'choices'    => [
+                                'Yes' => 1,
+                                'No' => 0
+                            ],
+                            'required'   => false,
+                            'row_attr'   => [
+                                'class' => 'mb-3'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                            'attr'       => [
+                                'class' => 'form-select'
+                            ],
+                        ])
+                        ->add('submit', SubmitType::class, [
+                            'label' => 'Save',
+                            'attr'  => [
+                                'class' => 'btn btn-success mt-2'
+                            ],
+                            'row_attr' => [
+                                'class' => 'mt-2'
+                            ],
+                        ])
+                        ->getForm();
+
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted()) {
@@ -517,10 +746,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('ruleId')->getData();
-                    if ($rule !== null) {
-                        $ruleIdForArgument = $rule->getId();
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                    if ($action === 'generateDocument') {
+                        $genRule = $form->get('ruleGenerate')->getData();
+                        if ($genRule) {
+                            $arguments['ruleId'] = $genRule->getId();
+                        }
                     }
 
                     // set the status
@@ -547,6 +777,11 @@ class WorkflowActionController extends AbstractController
                         $arguments['rerun'] = $rerun;
                     }
 
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
+                    }
+
                     $formData = $request->request->all();
                     $targetFields = $formData['targetFields'] ?? [];
                     $targetFieldValues = $formData['targetFieldValues'] ?? [];
@@ -571,10 +806,13 @@ class WorkflowActionController extends AbstractController
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
+                $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
+
                 return $this->render(
                     'WorkflowAction/new.html.twig',
                     [
                         'form' => $form->createView(),
+                        'workflows' => $workflows,
                     ]
                 );
             } else {
@@ -671,67 +909,57 @@ class WorkflowActionController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        try {
+       try {
             $em = $this->entityManager;
             $workflowAction = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
-            
-            if (empty($workflowAction)) {
+
+            if (!$workflowAction) {
                 if ($request->isXmlHttpRequest()) {
-                    return $this->render(
-                        'WorkflowAction/_workflowaction_logs_table.html.twig',
-                        [
-                            'error' => 'Workflow Action not found'
-                        ]
-                    );
-                } else {
-                    $this->addFlash('error', 'Workflow Action not found');
-                    return $this->redirectToRoute('workflow_list');
+                    return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                        'error' => 'Workflow Action not found'
+                    ]);
                 }
+                $this->addFlash('error', 'Workflow Action not found');
+                return $this->redirectToRoute('workflow_list');
             }
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['action' => $id],
-                ['dateCreated' => 'DESC']
-            );
-            $query = $this->workflowLogRepository->findLogsByActionId($id);
+            $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
+            $limit = $conf ? (int) $conf->getValue() : null;
 
-            $adapter = new QueryAdapter($query);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
+            $query = $this->workflowLogRepository->findLogsByActionId($id);
+            if ($limit !== null && $limit > 0) {
+                $query->setMaxResults($limit);
+            }
+            $logs = $query->getResult();
+            
+            $pager = new Pagerfanta(new ArrayAdapter($logs));
+            $pager->setMaxPerPage(20);
             $pager->setCurrentPage($page);
 
-            $nb_workflow = count($workflowLogs);
+            $workflowLogs = iterator_to_array($pager->getCurrentPageResults());
+            $nb_workflow = count($logs);
 
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'WorkflowAction/_workflowaction_logs_table.html.twig',
-                    [
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
-                        'pager' => $pager,
-                        'workflowAction' => $workflowAction,
-                    ]
-                );
-            } else {
-                // For direct navigation, redirect to the main workflow action page
-                return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
+                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                    'workflowLogs' => $workflowLogs,
+                    'nb_workflow' => $nb_workflow,
+                    'pager' => $pager,
+                    'workflowAction' => $workflowAction,
+                ]);
             }
+            return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
         } catch (Exception $e) {
             error_log('WorkflowActionShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             if ($request->isXmlHttpRequest()) {
-                return $this->render(
-                    'WorkflowAction/_workflowaction_logs_table.html.twig',
-                    [
-                        'workflowLogs' => [],
-                        'nb_workflow' => 0,
-                        'pager' => null,
-                        'workflowAction' => null,
-                        'error' => 'Error loading logs: ' . $e->getMessage()
-                    ]
-                );
-            } else {
-                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                    'workflowLogs' => [],
+                    'nb_workflow' => 0,
+                    'pager' => null,
+                    'workflowAction' => null,
+                    'error' => 'Error loading logs: ' . $e->getMessage()
+                ]);
             }
+            throw $this->createNotFoundException('Error: ' . $e->getMessage());
         }
     }
 
@@ -787,7 +1015,9 @@ class WorkflowActionController extends AbstractController
                 $sourceSearchValue = [];
                 // create an array of all the rules
 
-                $rules = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+                $rules       = $em->getRepository(Rule::class)->findBy(['deleted' => 0]);
+                $ruleDefault = $workflowAction->getWorkflow()->getRule();
+                $allRules    = $em->getRepository(Rule::class)->findBy(['deleted' => 0], ['name' => 'ASC']);
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
@@ -817,113 +1047,351 @@ class WorkflowActionController extends AbstractController
                     'subject' => $arguments['subject'] ?? null,
                     'message' => $arguments['message'] ?? null,
                     'multipleRuns' => $workflowAction->getMultipleRuns(),
-                    'rerun' => $arguments['rerun'] ?? 0
+                    'rerun' => $arguments['rerun'] ?? 0,
+                    'documentType' => $arguments['type'] ?? null
                     // Add other WorkflowAction fields here as needed
                 ];
 
                 $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                     ->add('name', TextType::class, [
-                        'label' => 'Action Name',
-                        'required' => true,
+                        'label'      => 'Action Name',
+                        'required'   => true,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-control'
+                        ],
                     ])
-                    ->add('description', TextareaType::class, ['label' => 'Description'])
+                    ->add('description', TextareaType::class, [
+                        'label'      => 'Description',
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-control',
+                            'rows'  => 3,
+                        ],
+                    ])
                     ->add('Workflow', EntityType::class, [
-                        'class' => Workflow::class,
-                        'choices' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
+                        'class'        => Workflow::class,
+                        'choices'      => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'constraints' => [
-                            new NotBlank(),
+                        'constraints'  => [new NotBlank()],
+                        'label_attr'   => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'     => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'         => [
+                            'class' => 'form-select'
                         ],
                     ])
                     ->add('action', ChoiceType::class, [
-                        'label' => 'Action',
-                        'choices' => [
-                            'updateStatus' => 'updateStatus',
+                        'label'      => 'Action',
+                        'choices'    => [
+                            'updateStatus'     => 'updateStatus',
                             'generateDocument' => 'generateDocument',
                             'sendNotification' => 'sendNotification',
-                            'generateDocument' => 'generateDocument',
-                            'transformDocument' => 'transformDocument',
-                            'rerun' => 'rerun',
-                            'changeData' => 'changeData',
+                            'transformDocument'=> 'transformDocument',
+                            'rerun'            => 'rerun',
+                            'changeData'       => 'changeData',
+                            'updateType'       => 'updateType',
+                        ],
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
                         ],
                     ])
                     ->add('ruleId', EntityType::class, [
-                        'class' => Rule::class,
-                        'choices' => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
+                        'class'        => Rule::class,
+                        'choices'      => $em->getRepository(Rule::class)->findBy(['deleted' => 0]),
                         'choice_label' => 'name',
                         'choice_value' => 'id',
-                        'required' => false,
-                        'label' => 'Rule',
-                        'data' => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
+                        'required'     => false,
+                        'label'        => 'Rule',
+                        'data'         => $formData['ruleId'] ? $em->getRepository(Rule::class)->find($formData['ruleId']) : null,
+                        'label_attr'   => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'     => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'         => [
+                            'class' => 'form-select'
+                        ],
+                    ])
+                    ->add('ruleChangeData', EntityType::class, [
+                        'class'        => Rule::class,
+                        'choices'      => $ruleDefault ? [$ruleDefault] : [],
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'data'         => $ruleDefault,
+                        'label'        => false,
+                        'mapped'       => false,
+                        'disabled'     => true,
+                        'required'     => false,
+                        'attr'         => [
+                            'id'    => 'form_ruleChangeData',
+                            'class' => 'd-none form-select',
+                        ],
+                        'row_attr'     => [
+                            'id'    => 'rule-change-container',
+                            'class' => 'mb-3',
+                        ],
+                    ])
+                    ->add('ruleGenerate', EntityType::class, [
+                        'class'        => Rule::class,
+                        'choices'      => $allRules,
+                        'choice_label' => 'name',
+                        'choice_value' => 'id',
+                        'required'     => false,
+                        'label'        => 'Generating Rule',
+                        'placeholder'  => 'Select a rule',
+                        'data'         => !empty($arguments['ruleId'])
+                                            ? $em->getRepository(Rule::class)->find($arguments['ruleId'])
+                                            : null,
+                        'label_attr'   => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'     => [
+                            'id'    => 'rule-generate-container',
+                            'class' => 'mb-3',
+                        ],
+                        'attr'         => [
+                            'id'    => 'form_ruleGenerate',
+                            'class' => 'form-select',
+                        ],
                     ])
                     ->add('status', ChoiceType::class, [
-                        'label' => 'Status',
-                        'choices' => $StringStatus,
-                        'required' => false
+                        'label'      => 'Status',
+                        'choices'    => $StringStatus,
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
                     ])
-                    ->add('to', TextareaType::class, ['label' => 'To', 'required' => false, 'attr' => ['class' => 'form-control', 'rows' => 1, 'cols' => 7]])
-                    ->add('subject', TextType::class, ['label' => 'Subject', 'required' => false])
-                    // make a large default area for the message
-                    ->add('message', TextareaType::class, ['required' => false, 'attr' => ['class' => 'form-control', 'rows' => 2, 'cols' => 5]])
+                    ->add('to', TextareaType::class, [
+                        'label'      => 'To',
+                        'required'   => false,
+                        'mapped'     => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-control',
+                            'rows'  => 1,
+                            'cols'  => 7,
+                        ],
+                    ])
+                    ->add('subject', TextType::class, [
+                        'label'      => 'Subject',
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-control'
+                        ],
+                    ])
+                    ->add('message', TextareaType::class, [
+                        'required'   => false,
+                        'label'      => 'Message',
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-control',
+                            'rows'  => 2,
+                            'cols'  => 5,
+                        ],
+                    ])
                     ->add('searchField', ChoiceType::class, [
-                        'label' => 'Matching Field from Generating Rule',
-                        'choices' => $sourceSearchValue,
-                        'required' => false
+                        'label'      => 'Matching Field from Generating Rule',
+                        'choices'    => $sourceSearchValue,
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
                     ])
                     ->add('searchValue', ChoiceType::class, [
-                        'label' => 'Matching field From Current Rule',
-                        'choices' => $sourceFields,
-                        'required' => false
+                        'label'      => 'Matching field From Current Rule',
+                        'choices'    => $sourceFields,
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
                     ])
                     ->add('rerun', ChoiceType::class, [
-                        'label' => 'Rerun',
-                        'choices' => [
+                        'label'      => 'Rerun',
+                        'choices'    => [
                             'Yes' => true,
-                            'No' => false,
+                            'No'  => false,
                         ],
-                        'required' => false
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
+                    ])
+                    ->add('documentType', ChoiceType::class, [
+                        'label'      => 'Document Type',
+                        'choices'    => [
+                            'C' => 'C',
+                            'U' => 'U',
+                            'D' => 'D',
+                            'S' => 'S',
+                        ],
+                        'mapped'     => true,
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
                     ])
                     ->add('targetFields', CollectionType::class, [
-                        'entry_type' => TextType::class,
-                        'allow_add' => true,
-                        'allow_delete' => true,
-                        'mapped' => false,
+                        'entry_type'    => TextType::class,
+                        'allow_add'     => true,
+                        'allow_delete'  => true,
+                        'mapped'        => false,
+                        'row_attr'      => [
+                            'class' => 'mb-3'
+                        ],
+                        'entry_options' => [
+                            'attr'       => [
+                                'class' => 'form-control mb-2'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                        ],
                     ])
                     ->add('targetFieldValues', CollectionType::class, [
-                        'entry_type' => TextType::class,
-                        'allow_add' => true,
-                        'allow_delete' => true,
-                        'mapped' => false,
-                        'prototype' => false,
+                        'entry_type'    => TextType::class,
+                        'allow_add'     => true,
+                        'allow_delete'  => true,
+                        'mapped'        => false,
+                        'prototype'     => false,
+                        'row_attr'      => [
+                            'class' => 'mb-3'
+                        ],
+                        'entry_options' => [
+                            'attr'       => [
+                                'class' => 'form-control mb-2'
+                            ],
+                            'label_attr' => [
+                                'class' => 'form-label'
+                            ],
+                        ],
                     ])
-
                     ->add('order', IntegerType::class, [
-                        'label' => 'Order',
+                        'label'       => 'Order',
                         'constraints' => [
                             new Range([
-                                'min' => 0,
-                                'max' => 50,
+                                'min'               => 0,
+                                'max'               => 50,
                                 'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
                             ]),
                         ],
+                        'label_attr'  => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'    => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'        => [
+                            'class' => 'form-control'
+                        ],
                     ])
                     ->add('active', ChoiceType::class, [
-                        'label' => 'Active',
-                        'choices' => [
+                        'label'      => 'Active',
+                        'choices'    => [
                             'Yes' => 1,
-                            'No' => 0,
+                            'No'  => 0,
+                        ],
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
                         ],
                     ])
                     ->add('multipleRuns', ChoiceType::class, [
-                        'label' => 'Multiple Runs',
-                        'choices' => [
+                        'label'      => 'Multiple Runs',
+                        'choices'    => [
                             'Yes' => 1,
-                            'No' => 0,
+                            'No'  => 0,
                         ],
-                        'required' => false,
+                        'required'   => false,
+                        'label_attr' => [
+                            'class' => 'form-label'
+                        ],
+                        'row_attr'   => [
+                            'class' => 'mb-3'
+                        ],
+                        'attr'       => [
+                            'class' => 'form-select'
+                        ],
                     ])
-                    ->add('submit', SubmitType::class, ['label' => 'Save', 'attr' => ['class' => 'btn btn-success mt-2']])
+                    ->add('submit', SubmitType::class, [
+                        'label' => 'Save',
+                        'attr'  => [
+                            'class' => 'btn btn-success mt-2'
+                        ],
+                    ])
                     ->getForm();
                 $form->handleRequest($request);
 
@@ -969,10 +1437,13 @@ class WorkflowActionController extends AbstractController
                         $arguments['message'] = $message;
                     }
 
-                    $rule = $form->get('ruleId')->getData();
-                    if ($rule !== null) {
-                        $ruleIdForArgument = $rule->getId();
-                        $arguments['ruleId'] = $ruleIdForArgument;
+                    if ($action === 'generateDocument') {
+                        $genRule = $form->get('ruleGenerate')->getData();
+                        if ($genRule) {
+                            $arguments['ruleId'] = $genRule->getId();
+                        }
+                    } elseif ($action === 'changeData') {
+                        $arguments['ruleId'] = $workflowAction->getWorkflow()->getRule()->getId();
                     }
 
                     // set the status
@@ -995,10 +1466,15 @@ class WorkflowActionController extends AbstractController
                     }
 
                     $rerun = $form->get('rerun')->getData();
-                    if (!empty($rerun)) {
-                        $arguments['rerun'] = $rerun;
+                    if ($action === 'generateDocument' && $rerun !== null && $rerun !== '') {
+                        $arguments['rerun'] = (bool) $rerun;
                     } else {
-                        $arguments['rerun'] = 0;
+                        unset($arguments['rerun']);
+                    }
+
+                    $documentType = $form->get('documentType')->getData();
+                    if (!empty($documentType)) {
+                        $arguments['type'] = $documentType;
                     }
 
                     $formData = $request->request->all();
@@ -1044,7 +1520,8 @@ class WorkflowActionController extends AbstractController
                     [
                         'form' => $form->createView(),
                         'targetFieldsData' => $targetFieldsData,
-                        'workflowAction' => $workflowAction,
+                        'workflowAction' => $workflowAction, 
+                        'workflows' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
                     ]
                 );
             } else {
@@ -1074,15 +1551,19 @@ class WorkflowActionController extends AbstractController
             $action = $workflowAction->getAction();
 
             if ($action == 'updateStatus') {
-                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'generateDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['type']);
             } elseif ($action == 'sendNotification') {
-                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'transformDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
             } elseif ($action == 'rerun') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue']);
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+            } elseif ($action == 'changeData') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type'], $arguments['rerun']);
+            } elseif ($action == 'updateType') {
+                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
             }
 
             $workflowAction->setArguments($arguments);

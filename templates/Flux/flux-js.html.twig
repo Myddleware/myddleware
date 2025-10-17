@@ -13,6 +13,11 @@
 {% block titlesm %}Document Detail{% endblock titlesm %}
 
 {% block body %}
+<script>
+    // Make user timezone and date format available to JavaScript
+    window.userTimezone = "{{ app.user.timezone }}";
+    window.userDateFormat = "{{ app.user.dateFormat }}";
+</script>
 <div id="flux-container">
     <div class="flux-card">
         <!-- Our JavaScript will dynamically render the content here -->

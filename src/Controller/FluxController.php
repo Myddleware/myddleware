@@ -62,6 +62,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Psr\Log\LoggerInterface;
 
 /**
  * @Route("/rule")
@@ -77,6 +78,8 @@ class FluxController extends AbstractController
     private SolutionManager $solutionManager;
     private DocumentRepository $documentRepository;
     private ToolsManager $toolsManager;
+    private LoggerInterface $logger;
+
     public function __construct(
         SessionService $sessionService,
         TranslatorInterface $translator,
@@ -85,7 +88,8 @@ class FluxController extends AbstractController
         DocumentRepository $documentRepository,
         EntityManagerInterface $entityManager,
         ToolsManager $toolsManager,
-        Connection $connection
+        Connection $connection,
+        LoggerInterface $logger
     ) {
         $this->sessionService = $sessionService;
         $this->translator = $translator;
@@ -95,6 +99,8 @@ class FluxController extends AbstractController
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
         $this->connection = $connection;
+        $this->logger = $logger;
+
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
@@ -1100,7 +1106,7 @@ $result = [];
     /**
      * @Route("/flux/masscancel", name="flux_mass_cancel")
      */
-    public function fluxMassCancelAction()
+    public function fluxMassCancelAction(?Request $request = null)
     {
 
         // if we are not premium, then return
@@ -1109,7 +1115,9 @@ $result = [];
         }
 
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
-            $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+            $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+            // Return the task ID so the frontend can create a direct link
+            return new JsonResponse(['taskId' => $taskId]);
         }
 
         exit;
@@ -1457,27 +1465,36 @@ $result = [];
      */
     public function getDocumentData($id): JsonResponse {
         try {
-            // error_log("getDocumentData called with document ID: " . $id);
-            
+            $this->logger->critical("[DATE-FLOW-PHP-1] getDocumentData called with document ID: " . $id);
+
             // Validate the document ID
             if (empty($id)) {
-                error_log("getDocumentData: Empty document ID provided");
+                $this->logger->critical("[DATE-FLOW-PHP-1] Empty document ID provided");
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
-            
+
             // Find the document by ID
             $document = $this->entityManager->getRepository(Document::class)->find($id);
-            
+
             if (!$document) {
-                error_log("getDocumentData: Document not found with ID: " . $id);
+                $this->logger->critical("[DATE-FLOW-PHP-1] Document not found with ID: " . $id);
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
-            
+
+            // Log raw date values from database
+            $this->logger->critical("[DATE-FLOW-PHP-1] Raw dates from database:");
+            $this->logger->critical("  - getDateCreated(): " . ($document->getDateCreated() ? $document->getDateCreated()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getDateCreated() timezone: " . ($document->getDateCreated() ? $document->getDateCreated()->getTimezone()->getName() : 'N/A'));
+            $this->logger->critical("  - getDateModified(): " . ($document->getDateModified() ? $document->getDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getDateModified() timezone: " . ($document->getDateModified() ? $document->getDateModified()->getTimezone()->getName() : 'N/A'));
+            $this->logger->critical("  - getSourceDateModified(): " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
+            $this->logger->critical("  - getSourceDateModified() timezone: " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->getTimezone()->getName() : 'N/A'));
+
             // Get the rule from the document
             $rule = $document->getRule();
-            
+
             if (!$rule) {
-                error_log("getDocumentData: No rule associated with document ID: " . $id);
+                $this->logger->critical("[DATE-FLOW-PHP-1] No rule associated with document ID: " . $id);
                 return new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
@@ -1494,7 +1511,7 @@ $result = [];
             $targetDirectLink = null;
             try {
                 $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
-                $allowedSolutions = ['suitecrm', 'airtable'];
+                $allowedSolutions = ['suitecrm', 'airtable', 'sugarcrm'];
                 
                 if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
                     $sourceSolution = $this->solutionManager->get($sourceSolutionName);
@@ -1555,11 +1572,15 @@ $result = [];
                 
                 // Type display info
                 'type_label' => $this->getTypeLabel($document->getType()),
-                
-                // Dates and reference
-                'creation_date' => $document->getDateCreated()->format('Y-m-d H:i:s'),
-                'modification_date' => $document->getDateModified()->format('Y-m-d H:i:s'),
+
+                // Dates and reference - convert to user's timezone before formatting (except reference which stays in UTC)
+                'creation_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
+                'modification_date' => $this->formatDateInUserTimezone($document->getDateModified()),
                 'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
+
+                // Pass user timezone and date format for client-side formatting
+                'user_timezone' => $this->getUser()->getTimezone(),
+                'user_date_format' => $this->getUser()->getDateFormat(),
                 
                 // IDs
                 'source_id' => $document->getSource(),
@@ -1584,9 +1605,16 @@ $result = [];
                 'workflow_error' => $document->getWorkflowError(),
                 'job_lock' => $document->getJobLock()
             ];
-            
-            // error_log("getDocumentData: Successfully retrieved comprehensive data for document ID: " . $id);
-            
+
+            $this->logger->critical("[DATE-FLOW-PHP-1] Prepared response data with dates:");
+            $this->logger->critical("  - creation_date: " . $responseData['creation_date']);
+            $this->logger->critical("  - modification_date: " . $responseData['modification_date']);
+            $this->logger->critical("  - reference: " . $responseData['reference']);
+            $this->logger->critical("  - user_timezone: " . $responseData['user_timezone']);
+            $this->logger->critical("  - user_date_format: " . $responseData['user_date_format']);
+
+            $this->logger->critical("[DATE-FLOW-PHP-1] Successfully retrieved comprehensive data for document ID: " . $id);
+
             return new JsonResponse([
                 'success' => true,
                 'data' => $responseData
@@ -1597,6 +1625,42 @@ $result = [];
             error_log("getDocumentData: Stack trace: " . $e->getTraceAsString());
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Helper method to format a DateTime object in the user's timezone
+     * @param \DateTime $date - The date to format
+     * @return string - Formatted date string in Y-m-d H:i:s format
+     */
+    private function formatDateInUserTimezone(\DateTime $date): string {
+        $userTimezone = $this->getUser()->getTimezone();
+        $this->logger->critical("[DATE-FLOW-PHP-2] formatDateInUserTimezone called:");
+        $this->logger->critical("  - Input date: " . $date->format('Y-m-d H:i:s T'));
+        $this->logger->critical("  - Input timezone: " . $date->getTimezone()->getName());
+        $this->logger->critical("  - User timezone: " . $userTimezone);
+
+        // COMPENSATION FIX: Database stores dates in UTC, but Doctrine reads them with server timezone
+        // We need to treat the date/time values as if they were always UTC
+        // Step 1: Get the raw date/time values (ignoring the incorrect server timezone)
+        $dateString = $date->format('Y-m-d H:i:s');
+
+        // Step 2: Create a new DateTime object, explicitly setting it to UTC
+        $dateInUtc = new \DateTime($dateString, new \DateTimeZone('UTC'));
+
+        $this->logger->critical("  - After UTC compensation: " . $dateInUtc->format('Y-m-d H:i:s T'));
+
+        // Step 3: Now convert from UTC to user's timezone
+        $dateInUserTz = clone $dateInUtc;
+        $dateInUserTz->setTimezone(new \DateTimeZone($userTimezone));
+
+        $this->logger->critical("  - After conversion: " . $dateInUserTz->format('Y-m-d H:i:s T'));
+        $this->logger->critical("  - After conversion timezone: " . $dateInUserTz->getTimezone()->getName());
+
+        // Return formatted string
+        $result = $dateInUserTz->format('Y-m-d H:i:s');
+        $this->logger->critical("  - Final formatted result: " . $result);
+
+        return $result;
     }
 
     /**
@@ -1765,14 +1829,14 @@ $result = [];
             $historyData = [];
             foreach ($historyDocuments as $histDoc) {
                 $statusInfo = $this->getDocumentStatusInfo($histDoc);
-                
+
                 $historyData[] = [
                     'docId' => $histDoc->getId(),
                     'name' => $rule->getName(),
                     'ruleId' => $rule->getId(),
                     'sourceId' => $histDoc->getSource(),
                     'targetId' => $histDoc->getTarget(),
-                    'modificationDate' => $histDoc->getDateModified()->format('d/m/Y H:i:s'),
+                    'modificationDate' => $this->formatDateInUserTimezone($histDoc->getDateModified()),
                     'type' => $histDoc->getType(),
                     'status' => $statusInfo['status'],
                     'statusClass' => $statusInfo['status_class']
@@ -1837,14 +1901,14 @@ $result = [];
                 if ($result['docId']) {
                     $parentDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($parentDocument);
-                    
+
                     $parentData[] = [
                         'docId' => $result['docId'],
                         'name' => $result['ruleName'],
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -1911,14 +1975,14 @@ $result = [];
                 if ($result['docId']) {
                     $childDocument = $this->entityManager->getRepository(Document::class)->find($result['docId']);
                     $statusInfo = $this->getDocumentStatusInfo($childDocument);
-                    
+
                     $childData[] = [
                         'docId' => $result['docId'],
                         'name' => $result['ruleName'],
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $result['dateModified']->format('d/m/Y H:i:s'),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -1932,6 +1996,55 @@ $result = [];
                 'data' => $childData
             ]);
             
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Document post documents API endpoint
+     * @Route("/api/flux/document-posts/{id}", name="api_flux_document_posts", methods={"GET"})
+     */
+    public function getDocumentPosts($id): JsonResponse {
+        try {
+            if (empty($id)) {
+                return new JsonResponse(['error' => 'Document ID is required'], 400);
+            }
+
+            if (!$this->entityManager->getRepository(Document::class)->find($id)) {
+                return new JsonResponse(['error' => 'Document not found'], 404);
+            }
+
+            // Get post documents where parentId equals the current document ID
+            $postDocuments = $this->entityManager->getRepository(Document::class)->findBy(
+                ['parentId' => $id],
+                ['dateCreated' => 'DESC'],
+                10
+            );
+
+            $postData = [];
+            foreach ($postDocuments as $postDoc) {
+                $statusInfo = $this->getDocumentStatusInfo($postDoc);
+                $rule = $postDoc->getRule();
+
+                $postData[] = [
+                    'docId' => $postDoc->getId(),
+                    'name' => $rule ? $rule->getName() : 'Unknown Rule',
+                    'ruleId' => $rule ? $rule->getId() : null,
+                    'sourceId' => $postDoc->getSource(),
+                    'targetId' => $postDoc->getTarget(),
+                    'modificationDate' => $this->formatDateInUserTimezone($postDoc->getDateModified()),
+                    'type' => $postDoc->getType(),
+                    'status' => $statusInfo['status'],
+                    'statusClass' => $statusInfo['status_class']
+                ];
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'data' => $postData
+            ]);
+
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
@@ -1980,7 +2093,7 @@ $result = [];
                     'id' => $log->getId(),
                     'reference' => $log->getRef() ?: '',
                     'job' => $job ? $job->getId() : '',
-                    'creationDate' => $log->getCreated()->format('d/m/Y H:i:s'),
+                    'creationDate' => $this->formatDateInUserTimezone($log->getCreated()),
                     'type' => $typeFormatted,
                     'message' => $log->getMessage() ?: 'No message',
                     'rawType' => $log->getType() // For frontend styling
@@ -2207,7 +2320,7 @@ $result = [];
                     'actionId' => $workflowLog->getAction() ? $workflowLog->getAction()->getId() : null,
                     'actionType' => $workflowLog->getAction() ? $workflowLog->getAction()->getAction() : '',
                     'status' => $workflowLog->getStatus() ?? '',
-                    'dateCreated' => $workflowLog->getDateCreated()->format('Y-m-d H:i:s'),
+                    'dateCreated' => $this->formatDateInUserTimezone($workflowLog->getDateCreated()),
                     'message' => $workflowLog->getMessage() ?? '',
                 ];
             }

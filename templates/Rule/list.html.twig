@@ -125,7 +125,7 @@
 												</div>
 											</td>
 											<td class="text-center">
-												{{rule.dateCreated|date("d/m/Y") }}
+												{{rule.dateCreated|date(app.user.dateFormat, app.user.timezone) }}
 												{% if app.user.getUsername == 'support' %}
 													<p>
 														<span class="label label-default">{{ rule.createdBy.username }}</span>

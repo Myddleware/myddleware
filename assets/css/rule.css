@@ -1028,4 +1028,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .workflow-detail-th-td{
 	padding-left: 30px !important;
+    white-space: normal !important;
+    word-wrap: break-word;
+    max-width: 150px;
 }

@@ -67,14 +67,15 @@
 						</tbody>
 					</table>
 				</div>
+			{% else %}
+				<p class="display-6">{{ 'variable.no_variables'|trans }}</p>
+			{% endif %}
+		</div>
+		
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'variable_list_page'}) }}
 					{% endif %}
 				</div>
-			{% else %}
-				<p class="display-6">{{ 'variable.no_variables'|trans }}</p>
-			{% endif %}
-		</div>
 	</div>
 {% endblock %}

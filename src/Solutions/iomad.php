@@ -31,6 +31,22 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class iomad extends moodle
 {
 	protected $iomadModules = array('get_companies', 'get_company_courses');
+	protected $currentUserId;
+	protected $currentUserCompanyId;
+		
+	protected function getSiteInfo($xml){
+		parent::getSiteInfo($xml);
+		// Get the userID
+		if (!empty($xml->SINGLE->KEY)) {
+			foreach ($xml->SINGLE->KEY as $keyElement) {
+				// Get the userId
+				if ((string)$keyElement['name'] === 'userid') {
+					$this->currentUserId = (string)$keyElement->VALUE;
+					break; // Stop the loop if we found the userId
+				}
+			}
+		}
+	}
 	
     public function getFieldsLogin(): array
     {
@@ -91,6 +107,55 @@ class iomad extends moodle
 			}
 		}
 		return $records;
+	}
+	
+	// public function createData($param): array 
+	public function createData($param): array 
+	{
+		// Call Moodle function
+		$result = parent::createData($param);
+		if ($param['module'] != 'users') {
+			return $result;
+		}
+		if (empty($result)) {
+			return $result;
+		}
+		// Enroll the new user in the company of the user linked to the token
+		// Get the company of the user linked to the token
+		if (empty($this->currentUserCompanyId)) {
+			$parameters['userid'] = $this->currentUserId;
+			$functionName = 'block_iomad_company_admin_get_user_companies';
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+			$response = $this->moodleClient->post($serverurl, $parameters);
+			$xml = $this->formatResponse('read', $response, $param);
+			 
+			if (!empty($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY)) {
+				foreach ($xml->SINGLE->KEY->MULTIPLE->SINGLE->KEY as $keyElement) {
+					// Get the userId
+					if ((string)$keyElement['name'] === 'id') {
+						$this->currentUserCompanyId = (string)$keyElement->VALUE;
+						break; // Stop the loop if we found the userId
+					}
+				}
+			}
+		}
+		$parameters = [];
+		// Enrol the user to the company
+		foreach($result as $idDoc => $record) {		
+			$parameters['users'][0]['userid'] = current($record['id']);
+			$parameters['users'][0]['companyid'] = $this->currentUserCompanyId;		
+			$functionName = 'block_iomad_company_admin_assign_users';
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+			$response = $this->moodleClient->post($serverurl, $parameters);
+			$xml = $this->formatResponse('read', $response, $param);
+			// Manage error
+			if (!empty($xml->ERRORCODE)) {
+				$result[$idDoc]['error'] = $xml->ERRORCODE.' : '.$xml->MESSAGE;
+				// Change status
+				$this->updateDocumentStatus($idDoc, $result[$idDoc], $param, 'Error_sending');
+			}
+		}	
+		return $result;
 	}
 	
 	// Set metadata

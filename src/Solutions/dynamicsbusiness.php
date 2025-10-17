@@ -797,8 +797,8 @@ class dynamicsbusiness extends solution
             throw new \Exception("Date time is empty");
         }
         $dto = new \DateTime($dateTime);
-        // Return date with milliseconds
-        return $dto->format('Y-m-d H:i:s');
+        // Return date with milliseconds (microseconds truncated to 3 digits)
+        return $dto->format('Y-m-d H:i:s.v');
     }
 
     /**
@@ -815,8 +815,8 @@ class dynamicsbusiness extends solution
         }
 
         $dto = new \DateTime($dateTime);
-        // Return date with milliseconds
-        return $dto->format('Y-m-d\TH:i:s\Z');
+        // Return with milliseconds in ISO 8601 format (Z indicates UTC)
+        return $dto->format('Y-m-d\TH:i:s.v\Z');
     }
 
     /**

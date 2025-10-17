@@ -72,3 +72,7 @@ services:
   App\Manager\JobManager:
     arguments:
       $requestStack: '@request_stack'
+
+  # Register Twig extension for date compensation
+  App\Twig\DateCompensationExtension:
+    tags: ['twig.extension']

@@ -1,6 +1,7 @@
 // console.log('flux-data-sections.js loaded');
 
 import { DocumentDetailLookupLinks } from './document-detail-lookup-links.js';
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
 
 export class DocumentDetailDataSections {
     /**
@@ -89,12 +90,18 @@ export class DocumentDetailDataSections {
      * @param {Array<Object>} rows
      *   Each row should have: docId, name, ruleId, sourceId, targetId,
      *   modificationDate, type, status
+     * @param {Object} permissions - Optional user permissions object
      */
-    static generateDocumentHistory(rows = []) {
+    static generateDocumentHistory(rows = [], permissions = {}) {
         if (!rows.length) return ``;
 
         // Get current document ID from URL
         const currentDocumentId = window.location.pathname.split('/').pop();
+
+        // Check if user is super admin
+        const isSuperAdmin = permissions.is_super_admin ||
+                           permissions.roles?.includes('ROLE_SUPER_ADMIN') ||
+                           false;
 
         // build each row's <tr>…
         const body = rows
@@ -104,6 +111,9 @@ export class DocumentDetailDataSections {
 
             // Check if this is the current document
             const isCurrentDocument = docId === currentDocumentId;
+
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
@@ -115,12 +125,28 @@ export class DocumentDetailDataSections {
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td>
                     ${isCurrentDocument ? '<span class="current-document-checkmark">✓</span>' : ''}
                 </td>
@@ -128,7 +154,7 @@ export class DocumentDetailDataSections {
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -140,12 +166,15 @@ export class DocumentDetailDataSections {
         })
         .join(``);
 
-        return `
+        const historyHtml = `
         <div class="data-wrapper custom-section">
             <div class="custom-header">
             <h3>Documents history</h3>
             <span class="custom-count">(${rows.length})</span>
-            <button class="toggle-btn" aria-expanded="true">-</button>
+            <button class="toggle-btn" aria-expanded="true" style="margin-left: 30px;">-</button>
+            ${isSuperAdmin ? `<button type="button" class="btn btn-warning" id="cancel-history-btn" style="margin-left: 30px;" data-action="cancel-history">
+                Cancel History
+            </button>` : ''}
             </div>
 
             <div class="custom-content">
@@ -169,6 +198,13 @@ export class DocumentDetailDataSections {
         </div>
         </div>
         `;
+
+        // Set up event listener for the cancel history button after a small delay
+        setTimeout(() => {
+            DocumentDetailDataSections.setupCancelHistoryButton();
+        }, 100);
+
+        return historyHtml;
     }
 
     /**
@@ -193,6 +229,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -200,20 +239,34 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
-            } else {
-                baseUrl = window.location.origin + "/index.php";
             }
-            
+
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -277,6 +330,9 @@ export class DocumentDetailDataSections {
         .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
             const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
 
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
             // Build proper URLs
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
@@ -291,13 +347,29 @@ export class DocumentDetailDataSections {
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
+            // Determine background color based on status (similar to logs section)
+            // Error statuses: all statuses containing 'error' or ending with '_ko' or 'not_found'
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            // Cancel statuses: Cancel, Filter, No_send
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
             return `
-            <tr>
+            <tr${rowStyle}>
                 <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
                 <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
                 <td>${this.sanitizeString(sourceId)}</td>
                 <td>${this.sanitizeString(targetId)}</td>
-                <td>${modificationDate}</td>
+                <td>${formattedModificationDate}</td>
                 <td>${type}</td>
                 <td>
                 <span class="status‑badge status‑${statusClass}">
@@ -319,6 +391,107 @@ export class DocumentDetailDataSections {
 
             <div class="child-documents-content">
             <table class="child-documents-table">
+            <thead>
+                <tr>
+                <th>Doc Id</th>
+                <th>Name</th>
+                <th>Source id</th>
+                <th>Target id</th>
+                <th>Modification date</th>
+                <th>Type</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+            </table>
+        </div>
+        </div>
+        `;
+    }
+
+    /**
+     * Generates Post Documents section
+     * @param {Array<Object>} rows - Post documents data
+     */
+    static generatePostDocumentsSection(rows = []) {
+        if (!rows.length) {
+            return `
+            <div class="data-wrapper post-documents-section" data-section="post-documents">
+                <div class="post-documents-header">
+                    <h3>📄 Post Documents</h3>
+                </div>
+                <div class="post-documents-content">
+                    <p>No post document</p>
+                </div>
+            </div>
+            `;
+        }
+
+        const body = rows
+        .map(({ docId, name, ruleId, sourceId, targetId, modificationDate, type, status }) => {
+            const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, `_`);
+
+            // Format modification date using user preferences
+            const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
+
+            // Build proper URLs
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
+            const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
+
+            // Determine background color based on status
+            const isErrorStatus = (status.toLowerCase().includes('error') && status.toLowerCase() !== 'error_expected') ||
+                                status.toLowerCase().endsWith('_ko') ||
+                                status.toLowerCase() === 'not_found' ||
+                                status.toLowerCase() === 'create_ko';
+
+            const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status.toLowerCase());
+
+            const rowStyle = isErrorStatus
+                ? ' style="background-color: #ffebee;"'
+                : isCancelStatus
+                    ? ' style="background-color: #F9EEDF;"'
+                    : '';
+
+            return `
+            <tr${rowStyle}>
+                <td><a href="${documentUrl}" class="doc-id" style="color: #0F66A9; text-decoration: none;">${docId}</a></td>
+                <td><a href="${ruleUrl}" class="doc-name" style="color: #0F66A9; text-decoration: none;">${name}</a></td>
+                <td>${this.sanitizeString(sourceId)}</td>
+                <td>${this.sanitizeString(targetId)}</td>
+                <td>${formattedModificationDate}</td>
+                <td>${type}</td>
+                <td>
+                <span class="status‑badge status‑${statusClass}">
+                    ${status}
+                </span>
+                </td>
+            </tr>
+            `;
+        })
+        .join(``);
+
+        return `
+        <div class="data-wrapper post-documents-section" data-section="post-documents">
+            <div class="post-documents-header">
+            <h3>Post documents</h3>
+            <span class="post-documents-count">(${rows.length})</span>
+            <button class="post-documents-toggle-btn" aria-expanded="true">-</button>
+            </div>
+
+            <div class="post-documents-content">
+            <table class="post-documents-table">
             <thead>
                 <tr>
                 <th>Doc Id</th>
@@ -367,7 +540,10 @@ export class DocumentDetailDataSections {
         const body = rows
         .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
             // console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
-            
+
+            // Format date created using user preferences
+            const formattedDateCreated = DocumentDetailDateFormatter.formatWithUserPreferences(dateCreated);
+
             // Determine color based on status
             let statusColor = '#28a745'; // default green for success
             if (status && status.toLowerCase().includes('error')) {
@@ -440,7 +616,7 @@ export class DocumentDetailDataSections {
                 <td>${generateDocumentLink}</td>
                 <td>${this.sanitizeString(createdBy || '')}</td>
                 <td><span style="color: ${statusColor}; font-weight: bold;">${this.sanitizeString(status)}</span></td>
-                <td>${dateCreated}</td>
+                <td>${formattedDateCreated}</td>
                 <td>${this.sanitizeString(message)}</td>
                 <td>${actionLink}</td>
                 <td>${this.sanitizeString(actionType || '')}</td>
@@ -507,6 +683,9 @@ export class DocumentDetailDataSections {
 
         const body = rows
         .map(({ id, reference, job, creationDate, type, message }) => {
+            // Format creation date using user preferences
+            const formattedCreationDate = DocumentDetailDateFormatter.formatWithUserPreferences(creationDate);
+
             // Determine color based on type
             let typeColor = '#28a745'; // default green for 'S ✓'
             if (type.startsWith('W')) {
@@ -546,7 +725,7 @@ export class DocumentDetailDataSections {
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-
+                
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
@@ -563,7 +742,7 @@ export class DocumentDetailDataSections {
                 <td>${id}</td>
                 <td>${referenceLink}</td>
                 <td>${jobLink}</td>
-                <td>${creationDate}</td>
+                <td>${formattedCreationDate}</td>
                 <td><span style="color: ${typeColor}; font-weight: bold;">${type}</span></td>
                 <td>${message}</td>
             </tr>
@@ -699,7 +878,7 @@ export class DocumentDetailDataSections {
         try {
             if (!sectionData || Object.keys(sectionData).length === 0) {
                 sectionElement.innerHTML = this.generateEmptyDataMessage(sectionName);
-                console.warn(`⚠️ No ${sectionName.toLowerCase()} data available`);
+                // console.warn(`⚠️ No ${sectionName.toLowerCase()} data available`);
                 return;
             }
 
@@ -728,7 +907,7 @@ export class DocumentDetailDataSections {
      */
     static generateDataFields(fieldData, sectionType) {
         if (!fieldData || typeof fieldData !== 'object') {
-            console.warn('⚠️ Invalid field data provided:', fieldData);
+            // console.warn('⚠️ Invalid field data provided:', fieldData);
             return this.generateEmptyDataMessage('data');
         }
 
@@ -882,7 +1061,7 @@ export class DocumentDetailDataSections {
             }
             return null;
         } catch (error) {
-            console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
+            // console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
             return null;
         }
     }
@@ -903,7 +1082,7 @@ export class DocumentDetailDataSections {
             }
             return false;
         } catch (error) {
-            console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
+            // console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
             return false;
         }
     }
@@ -965,4 +1144,341 @@ export class DocumentDetailDataSections {
             </div>
         `;
     }
+
+    /**
+     * Sets up the event listener for the cancel history button
+     */
+    static setupCancelHistoryButton() {
+        const cancelButton = document.getElementById('cancel-history-btn');
+        if (cancelButton && !cancelButton.hasAttribute('data-listener-attached')) {
+            cancelButton.addEventListener('click', () => {
+                DocumentDetailDataSections.cancelHistoryDocuments();
+            });
+            cancelButton.setAttribute('data-listener-attached', 'true');
+            // console.log('✅ Cancel history button event listener attached');
+        }
+    }
+
+    /**
+     * Cancels all documents in the history table using mass action
+     */
+    static cancelHistoryDocuments() {
+        try {
+            // Get all document IDs from the history table
+            const historyTable = document.querySelector('.custom-table tbody');
+            if (!historyTable) {
+                console.error('❌ History table not found');
+                return;
+            }
+
+            const documentIds = [];
+            const rows = historyTable.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
+                if (docIdLink) {
+                    const docId = docIdLink.textContent.trim();
+                    if (docId) {
+                        documentIds.push(docId);
+                    }
+                }
+            });
+
+            if (documentIds.length === 0) {
+                console.warn('⚠️ No document IDs found in history table');
+                return;
+            }
+
+            console.log('📋 Found document IDs:', documentIds);
+
+            // Get base URL for the API call
+            const pathParts = window.location.pathname.split('/');
+            const publicIndex = pathParts.indexOf('public');
+            let baseUrl = window.location.origin;
+            if (publicIndex !== -1) {
+                const baseParts = pathParts.slice(0, publicIndex + 1);
+                baseUrl = window.location.origin + baseParts.join('/');
+            } else {
+                baseUrl = window.location.origin + "/index.php";
+            }
+
+            const apiUrl = `${baseUrl}/rule/flux/masscancel`;
+            console.log('test 870 7:', apiUrl);
+
+            // Prepare the payload for mass cancel (form data format)
+            const formData = new FormData();
+            documentIds.forEach(id => {
+                formData.append('ids[]', id);
+            });
+
+        // Add action info from the button (if available)
+        const cancelBtn = document.getElementById('cancel-history-btn');
+        if (cancelBtn) {
+            formData.append('action', cancelBtn.dataset.action);
+        }
+
+
+            // console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
+
+            // Make the API call
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: formData
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // console.log('test 870 2 ✅ Mass cancel API response OK:', response);
+
+                // Check if response has content before trying to parse JSON
+                const text = await response.text();
+                if (!text || text.trim() === '') {
+                    // console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
+                    return { taskId: null };
+                }
+
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.warn('⚠️ Response is not valid JSON:', text);
+                    return { taskId: null };
+                }
+            })
+            .then(data => {
+                // console.log('test 870 3 Mass cancel completed successfully');
+
+                // Extract the task ID from the JSON response (might be null)
+                const taskId = data.taskId || null;
+                if (taskId) {
+                    // console.log('📋 Task ID:', taskId);
+                } else {
+                    // console.log('⚠️ No task ID returned (backend may not support task ID in response)');
+                }
+
+                // Show styled notification (works with or without task ID)
+                this.showTaskNotification(documentIds.length, taskId, baseUrl);
+            })
+            .catch(error => {
+                console.error('❌ Error 4 calling mass action API:', error);
+                this.showErrorNotification('Error initiating mass cancel action. Please try again.');
+            });
+
+        } catch (error) {
+            console.error('❌ Error 5 in cancelHistoryDocuments:', error);
+            this.showErrorNotification('Error initiating mass cancel action. Please check the console for details.');
+        }
+    }
+
+    /**
+     * Shows a styled notification message for task creation
+     * @param {number} documentCount - Number of documents being cancelled
+     * @param {string|null} taskId - The task ID if available
+     * @param {string} baseUrl - Base URL for building links
+     */
+    static showTaskNotification(documentCount, taskId, baseUrl) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.task-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'task-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            background-color: #BFE2FC;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px 20px;
+            margin: 20px;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+
+        // Create icon
+        const icon = document.createElement('span');
+        icon.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background-color: #0c5460;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        `;
+        icon.textContent = 'i';
+
+        // Create message content
+        const messageContent = document.createElement('div');
+        messageContent.style.cssText = `
+            color: #0c5460;
+            flex: 1;
+        `;
+
+        if (taskId) {
+            const taskUrl = `${baseUrl}/rule/task/view/${taskId}/log`;
+            messageContent.innerHTML = `
+                You just launched a new task. You can see the details by clicking on
+                <a href="${taskUrl}" style="color: #0c5460; text-decoration: underline; font-weight: bold;">this link</a>.
+                If you want to follow it, just refresh the page until it gets the status 'end'.
+            `;
+        } else {
+            messageContent.innerHTML = `
+                Mass cancel action initiated for ${documentCount} document${documentCount > 1 ? 's' : ''}.
+                Check the <a href="${baseUrl}/rule/task" style="color: #0c5460; text-decoration: underline; font-weight: bold;">task list</a> for progress.
+            `;
+        }
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #0c5460;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        `;
+        closeButton.onclick = () => notification.remove();
+
+        // Assemble notification
+        notification.appendChild(icon);
+        notification.appendChild(messageContent);
+        notification.appendChild(closeButton);
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.transition = 'opacity 0.3s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 10000);
+    }
+
+    /**
+     * Shows an error notification
+     * @param {string} message - Error message to display
+     */
+    static showErrorNotification(message) {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.task-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'task-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px 20px;
+            margin: 20px;
+            z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+
+        // Create icon
+        const icon = document.createElement('span');
+        icon.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background-color: #721c24;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        `;
+        icon.textContent = '!';
+
+        // Create message content
+        const messageContent = document.createElement('div');
+        messageContent.style.cssText = `
+            color: #721c24;
+            flex: 1;
+        `;
+        messageContent.textContent = message;
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #721c24;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        `;
+        closeButton.onclick = () => notification.remove();
+
+        // Assemble notification
+        notification.appendChild(icon);
+        notification.appendChild(messageContent);
+        notification.appendChild(closeButton);
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.transition = 'opacity 0.3s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 8000);
+    }
 }
+
+// Make the class available globally
+window.DocumentDetailDataSections = DocumentDetailDataSections;

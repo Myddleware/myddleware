@@ -55,7 +55,7 @@
                         <td>{{ user.email }}</td>
                         <td>
                             {% if user.lastLogin %}
-                                {{ user.lastLogin|date('d/m/Y H:i') }}
+                                {{ user.lastLogin|date(app.user.dateFormat ~ ' H:i', app.user.timezone) }}
                             {% else %}
                                 -
                             {% endif %}

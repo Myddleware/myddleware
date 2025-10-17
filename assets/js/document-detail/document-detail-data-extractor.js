@@ -1,6 +1,8 @@
 // file that handle the extraction of data from the document
 // console.log('flux-data-extractor.js loaded');
 
+import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
+
 // Cache for document data to avoid repeated API calls
 let documentDataCache = new Map();
 
@@ -136,11 +138,26 @@ export function extractDocumentAttempts(documentData) {
 
 export function extractDocumentDates(documentData) {
     if (!documentData) return null;
-    
+
+    // Format dates using user preferences
+    const creationDate = documentData.creation_date
+        ? DocumentDetailDateFormatter.formatWithUserPreferences(documentData.creation_date, documentData)
+        : null;
+
+    const modificationDate = documentData.modification_date
+        ? DocumentDetailDateFormatter.formatWithUserPreferences(documentData.modification_date, documentData)
+        : null;
+
+    // Reference should remain in UTC as it is in the database (no timezone adjustment)
+    const { dateFormat } = DocumentDetailDateFormatter.getUserPreferences(documentData);
+    const reference = documentData.reference
+    ? DocumentDetailDateFormatter.formatDate(documentData.reference, 'UTC', dateFormat)
+    : null;
+
     return {
-        creationDate: documentData.creation_date || null,
-        modificationDate: documentData.modification_date || null,
-        reference: documentData.reference || null
+        creationDate,
+        modificationDate,
+        reference
     };
 }
 

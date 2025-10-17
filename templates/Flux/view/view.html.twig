@@ -141,9 +141,9 @@
 								{% endif %}
 							</div>
 						</td>
-						<td class="ctr">{{ doc.getSourceDateModified|date("d/m/Y H:i:s") }}</td>
-						<td class="ctr">{{ doc.getDateCreated|date("d/m/Y H:i:s", timezone) }}</td>
-						<td class="ctr">{{ doc.getDateModified|date("d/m/Y H:i:s", timezone) }}</td>
+						<td class="ctr">{{ doc.getSourceDateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+						<td class="ctr">{{ doc.getDateCreated|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+						<td class="ctr">{{ doc.getDateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 						{% if doc.getParentId %}
 							<td>
 								<a href="{{ path('flux_modern',{'id' : doc.getParentId }) }}" title="">{{ doc.getParentId }}</a>
@@ -321,7 +321,7 @@
 										</td>
 										<td class="ctr">{{ flux.source }}</td>
 										<td class="ctr">{{ flux.target }}</td>
-										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+										<td class="ctr">{{ flux.dateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 										<td class="ctr">{{ flux.type }}</td>
 										<td class="ctr">
 											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
@@ -414,7 +414,7 @@
 										</td>
 										<td class="ctr">{{ flux.source }}</td>
 										<td class="ctr">{{ flux.target }}</td>
-										<td class="ctr">{{ flux.sourceDateModified|date("d/m/Y H:i:s", timezone) }}</td>
+										<td class="ctr">{{ flux.sourceDateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 										<td class="ctr">{{ flux.type }}</td>
 										<td class="ctr">
 											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
@@ -500,7 +500,7 @@
 										</td>
 										<td class="ctr">{{ flux.sourceField }}</td>
 										<td class="ctr">{{ flux.source }}</td>
-										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+										<td class="ctr">{{ flux.dateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 										<td class="ctr">{{ flux.type }}</td>
 										<td class="ctr">
 											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
@@ -584,7 +584,7 @@
 										</td>
 										<td class="ctr">id</td>
 										<td class="ctr">{{ flux.source }}</td>
-										<td class="ctr">{{ flux.dateModified|date("d/m/Y H:i:s") }}</td>
+										<td class="ctr">{{ flux.dateModified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 										<td class="ctr">{{ flux.type }}</td>
 										<td class="ctr">
 											<div class="gblstatus_{{ flux.globalStatus|lower }}">{{ flux.status }}
@@ -697,7 +697,7 @@
 												<a href="{{ path('task_view', {'id':log.getJob.id}) }}" class="help-link all-link">{{ log.getJob.id }}</a>
 											{% endif %}
 										</td>
-										<td>{{ log.getCreated|date("d/m/Y H:i:s", timezone) }}</td>
+										<td>{{ log.getCreated|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 										<td class="ctr">
 											<div class="log_{{ log.getType|lower }}">{{ log.getType }}
 												{% if log.getType|lower == 's' %}
@@ -858,7 +858,7 @@
 										<td class="ctr">
 											<div class="gblstatus_{{ log.status|lower }}">{{ log.status }}</div>
 										</td>
-										<td class="ctr">{{ log.dateCreated|date('Y-m-d H:i:s') }}</td>
+										<td class="ctr">{{ log.dateCreated|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 										<td class="ctr">{{ log.getMessage }}</td>
 										<td class="ctr">
 											<a href="{{ path('workflow_action_show', {'id': log.action.id}) }}" class="help-link all-link">{{ log.action.name }}</a>

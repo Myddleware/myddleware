@@ -158,8 +158,8 @@
 								</td>
 								<td>{{ flux.source_id }}</td>
 								<td>{{ flux.target_id }}</td>
-								<td>{{ flux.source_date_modified|date("d/m/Y H:i:s") }}</td>
-								<td>{{ flux.date_modified|date("d/m/Y H:i:s", timezone) }}</td>
+								<td>{{ flux.source_date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+								<td>{{ flux.date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 								<td class="ctr">
 									<div class="gblstatus_{{ flux.global_status|lower }}">{{ flux.status }}
 										{% if flux.global_status|lower == 'close' %}

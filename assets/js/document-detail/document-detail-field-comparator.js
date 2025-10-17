@@ -25,7 +25,7 @@ export class DocumentDetailFieldComparator {
         const targetFields = this.getFieldsFromSection('target');
         
         if (!historyFields || !targetFields) {
-            console.warn('⚠️ History or target fields not found for comparison');
+            // console.warn('⚠️ History or target fields not found for comparison');
             return;
         }
 
@@ -65,7 +65,7 @@ export class DocumentDetailFieldComparator {
         const sectionElement = document.querySelector(`.${sectionType}-data-content-body`);
         
         if (!sectionElement) {
-            console.warn(`⚠️ ${sectionType} section not found`);
+            // console.warn(`⚠️ ${sectionType} section not found`);
             return null;
         }
 

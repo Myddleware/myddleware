@@ -311,11 +311,13 @@
 							<i class='fas fa-angle-down typeIcon'></i>
 						</span>
 					</th>
-					<th>{{ 'list_flux.tab.source_date_modified'|trans }}
-						<span data-sort="source_date_modified">
-							<i class='fas fa-angle-down source_date_modifiedIcon'></i>
-						</span>
-					</th>
+					<th>
+                        {{ 'list_flux.tab.source_date_modified'|trans }}
+                        <i class="fa fa-exclamation-circle help-pop" data-help="{{ 'list_flux.tab.helppop'|trans }}" aria-label="Help" role="button" tabindex="0"></i>
+                        <span data-sort="source_date_modified">
+                            <i class="fas fa-angle-down source_date_modifiedIcon"></i>
+                        </span>
+                    </th>
 				</tr>
 			</thead>
 			<tbody>
@@ -335,8 +337,8 @@
 							<td>
 								<a href="{{ path('regle_open',{'id' : document.rule_id }) }}" title="" class="help-link all-link">{{ document.rule_name }}</a>
 							</td>
-							<td>{{ document.date_created|date('Y-m-d H:i:s') }}</td>
-							<td>{{ document.date_modified|date('Y-m-d H:i:s') }}</td>
+							<td>{{ document.date_created|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+							<td>{{ document.date_modified|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 							<td class="ctr" id="documents_filters">
 								<div class="gblstatus_{{ document.global_status|lower }}">
 									{{ document.status }}
@@ -367,7 +369,7 @@
 							<td>{{ document.source_id }}</td>
 							<td>{{ document.target_id }}</td>
 							<td>{{ document.type }}</td>
-							<td>{{ document.source_date_modified }}</td>
+							<td>{{ document.source_date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 						</tr>
 					{% endfor %}
 				{% else %}

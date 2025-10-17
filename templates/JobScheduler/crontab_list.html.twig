@@ -86,8 +86,8 @@
 							<td class="value col-2">{{ value.description  }}</td>
 							<td class="value">{{ value.runningInstances  }}</td>
 							<td class="value">{{ value.maxInstances  }}</td>
-							<td>{{ value.lastUse|date("d/m/Y H:i:s", timezone) }}</td>
-							<td>{{ value.nextRun|date("d/m/Y H:i:s", timezone) }}</td>
+							<td>{{ value.lastUse|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+							<td>{{ value.nextRun|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 							<td class="text-center">
 								<div class="form-check form-switch">
 									<input class="form-check-input toggle-switch-crontab" type="checkbox" id="crontab-{{ value.id }}" data-id="{{ value.id }}" data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}" {{ value.isEnable() ? 'checked' : '' }}>
@@ -163,52 +163,54 @@
 						<script>
 							const maxPage = {{ pager.getNbPages() }};
 
-function updateFormAction(event) {
-event.preventDefault();
-const page = document.getElementById('page').value;
-if (page < 1 || page > maxPage) {
-alert('Please enter a valid page number between 1 and ' + maxPage);
-return;
-}
-const form = document.getElementById('pageForm');
-const baseUrl = "{{ path('jobscheduler_cron_list_page', {'page': 1}) }}";
-const action = baseUrl.replace('/page-1', '/page-' + page);
-form.action = action;
-form.submit();
-}
+						function updateFormAction(event) {
+						event.preventDefault();
+						const page = document.getElementById('page').value;
+						if (page < 1 || page > maxPage) {
+						alert('Please enter a valid page number between 1 and ' + maxPage);
+						return;
+						}
+						const form = document.getElementById('pageForm');
+						const baseUrl = "{{ path('jobscheduler_cron_list_page', {'page': 1}) }}";
+						const action = baseUrl.replace('/page-1', '/page-' + page);
+						form.action = action;
+						form.submit();
+						}
 
-function toggleTerminalForm() {
-	const form = document.getElementById('terminalCommandForm');
-	form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
+						function toggleTerminalForm() {
+							const form = document.getElementById('terminalCommandForm');
+							form.style.display = form.style.display === 'none' ? 'block' : 'none';
+						}
 
-function executeCommand() {
-	const command = document.getElementById('commandInput').value;
-	const resultDiv = document.getElementById('commandResult');
-	resultDiv.style.display = 'block';
-	resultDiv.textContent = 'Executing command...';
-	
-	fetch('{{ path('executeTerminalCommand') }}', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: 'command=' + encodeURIComponent(command)
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			resultDiv.textContent = 'Error: ' + data.error;
-		} else {
-			resultDiv.innerHTML = (data.result || 'No output').replace(/\n/g, '<br>');
-		}
-		resultDiv.style.display = 'block';
-	})
-	.catch(error => {
-		resultDiv.textContent = 'Error executing command: ' + error;
-		resultDiv.style.display = 'block';
-	});
-}
+						function executeCommand() {
+							const command = document.getElementById('commandInput').value;
+							const resultDiv = document.getElementById('commandResult');
+							resultDiv.style.display = 'block';
+							resultDiv.textContent = 'Executing command...';
+							
+							fetch('{{ path('executeTerminalCommand') }}', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/x-www-form-urlencoded',
+								},
+								body: 'command=' + encodeURIComponent(command)
+							})
+							.then(response => response.json())
+							.then(data => {
+								if (data.error) {
+									resultDiv.textContent = 'Error: ' + data.error;
+								} else {
+									resultDiv.innerHTML = (data.result || 'No output').replace(/\n/g, '<br>');
+								}
+								resultDiv.style.display = 'block';
+							})
+							.catch(error => {
+								resultDiv.textContent = 'Error executing command: ' + error;
+								resultDiv.style.display = 'block';
+							});
+						}
+					
+
 						</script>
 					{% endif %}
 				</div>

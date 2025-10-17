@@ -1505,6 +1505,7 @@ function notification() {
 
 // Préparation de l'étape suivante
 function next_step(error) {
+
   $(".status")
     .find("img")
     .each(function () {
@@ -1669,6 +1670,7 @@ function verif(div_clock) {
               } else {
                 $(status).removeAttr("src");
                 if (window.location.pathname.includes("createout")) {
+
                   $(status).attr("src", path_img_modal + "status_online.png");
                 } else {
                   $(status).attr("src", path_img + "status_online.png");
@@ -1763,7 +1765,7 @@ function prepareDrag() {
         collapsible: true,
         heightStyle: "content",
       }); // liste des modules : source
-      console.log('✅ Accordion initialized successfully');
+      // console.log('✅ Accordion initialized successfully');
       return true; // Stop retrying
     } else {
       console.warn('$.fn.accordion is not available, retrying...');

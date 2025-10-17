@@ -131,9 +131,12 @@ export class DocumentDetailDirectLinks {
             } else {
                 this.addDirectLinkToSection('.source-data', 'empty-id', documentData.source_id);
             }
+
+
             
             // Add target direct link  
             if (documentData.target_direct_link) {
+                // console.log('fifi found target_direct_link:', documentData.target_direct_link);
                 const targetId = documentData.target_id || 'id';
                 this.addDirectLinkToSection('.target-data', documentData.target_direct_link, targetId);
                 // console.log('✅ Target direct link added:', documentData.target_direct_link);
