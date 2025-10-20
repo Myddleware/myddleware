@@ -76,11 +76,14 @@
 					<a href="{{ path('regle_connector_list') }}" class="btn btn-outline-primary ms-2">
 						{{ 'view_connector.btn.back'|trans }}
 					</a>
-					<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
-						<button type="button" class="btn btn-danger ms-2">
+					<form method="post" action="{{ path('connector_delete',{'id' : connector.id }) }}" style="display: inline;">
+						<button type="submit"
+								class="btn btn-danger ms-2"
+								onclick="return confirm('{{'view_connector.btn.confirm_delete'|trans}}');"
+								title="{{'view_connector.btn.delete'|trans}}">
 							{{'view_connector.btn.delete'|trans}}
 						</button>
-					</a>
+					</form>
 				</div>
 			</div>
 			<div id="msg_status" class="alert alert-danger" role="alert">

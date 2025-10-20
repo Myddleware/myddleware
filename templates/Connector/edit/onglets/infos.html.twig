@@ -91,11 +91,14 @@
 						<div id="validation"></div>
 					</div>
 					<div class="col">
-						<a href="{{ path('connector_delete',{'id' : connector.id }) }}" title="" onclick="return(confirm('{{'view_connector.btn.confirm_delete'|trans}}'));">
-							<button type="button" class="btn btn-danger">
+						<form method="post" action="{{ path('connector_delete',{'id' : connector.id }) }}" style="display: inline;">
+							<button type="submit"
+									class="btn btn-danger"
+									onclick="return confirm('{{'view_connector.btn.confirm_delete'|trans}}');"
+									title="{{'view_connector.btn.delete'|trans}}">
 								{{'view_connector.btn.delete'|trans}}
-							</button> 
-						</a>
+							</button>
+						</form>
 					</div>
 				</div>
 			
