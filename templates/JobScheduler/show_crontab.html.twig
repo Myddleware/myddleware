@@ -5,107 +5,111 @@
 {% block body %}
 	<div class="p-5">
 		<div id="info" class='container'>
-			<div id="jobsceduler_table">
-				<table class="table table-light table-hover">
-					<tbody>
-						<tr>
-							<td class="title">
-								<label>Id</label>
-							</td>
-							<td class="value">{{ entity.id }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'jobscheduler.date_created'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'jobscheduler.date_modified'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.updatedAt|date(app.user.dateFormat, app.user.timezone) }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.command'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.command }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.arguments'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.arguments }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.description'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.description }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.running'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.runningInstances }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.max_instance'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.maxInstances }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'crontab.number'|trans }}</label>
-							</td>
-							<td class="value">{{ entity.number }}</td>
-						</tr>
-						<tr>
-							<td class="title">
-								<label>{{ 'jobscheduler.active'|trans }}</label>
-							</td>
-							<td class="value">
-								{% if entity.enable %}
-									true
-								{% else %}
-									false
-								{% endif %}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div id="jobschedulerresulttable">
-				<h4 class="mt-5">{{ 'crontab.results'|trans }}</h4>
-				<h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
-				<table class="table table-light table-hover" id="myTable">
-					<thead>
-						<tr>
-							<th class="table-head-result">{{ 'jobscheduler.id'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.date_created'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.date_modified'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.output'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.run_at'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.run_time'|trans }}</th>
-							<th class="table-head-result">{{ 'jobscheduler.status_code'|trans }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for result in pager.currentPageResults %}
+			<div id="jobsceduler_table_show">
+    			<div class ="table-wrapper">
+					<table class="listepager table">
+						<tbody>
 							<tr>
-								<td>{{ result.id }}</td>
-								<td>{{ result.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-								<td>{{ result.updatedAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-								<td>{{ result.output|raw }}</td>
-								<td>{{ result.runAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-								<td>{{ result.runTime }}</td>
-								<td>{{ result.statusCode }}</td>
+								<td class="title">
+									<label><strong>{{ 'jobscheduler.id'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.id }}</td>
 							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'jobscheduler.date_created'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'jobscheduler.date_modified'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.command'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.command }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.arguments'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.arguments }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.description'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.description }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.running'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.runningInstances }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.max_instance'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.maxInstances }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'crontab.number'|trans }}</strong></label>
+								</td>
+								<td class="value">{{ entity.number }}</td>
+							</tr>
+							<tr>
+								<td class="title">
+									<label><strong>{{ 'jobscheduler.active'|trans }}</strong></label>
+								</td>
+								<td class="value">
+									{% if entity.enable %}
+										true
+									{% else %}
+										false
+									{% endif %}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<h4 class="mt-5">{{ 'crontab.results'|trans }}</h4>
+			<h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
+			<div id="jobschedulerresulttable">
+    			<div class ="table-wrapper">
+					<table class="listepager table" id="myTable">
+						<thead>
+							<tr>
+								<th class="table-head-result text-center">{{ 'jobscheduler.id'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.date_created'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.date_modified'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.output'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.run_at'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.run_time'|trans }}</th>
+								<th class="table-head-result text-center">{{ 'jobscheduler.status_code'|trans }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for result in pager.currentPageResults %}
+								<tr>
+									<td>{{ result.id }}</td>
+									<td>{{ result.createdAt|date('Y-m-d H:i:s') }}</td>
+									<td>{{ result.updatedAt|date('Y-m-d H:i:s') }}</td>
+									<td>{{ result.output|raw }}</td>
+									<td>{{ result.runAt|date('Y-m-d H:i:s') }}</td>
+									<td>{{ result.runTime }}</td>
+									<td>{{ result.statusCode }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(

@@ -109,23 +109,24 @@
 	right: 31px;
 	border-width: 8px 7px;
 }
+
 #rule .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
 	margin-left: 0;
 }
 
 
-#rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th {
+#rule th, #connector th, #jobscheduler th, #workflowTableContainer th, #rulegroups th, #crontabList th {
 	background: #ffffff;
 	height: 45px;
 	padding: 20px;
 	text-align: center;
 }
 
-#rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr, #rulegroups tr {
+#rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr, #rulegroups tr, #crontabList tr {
 	border-bottom: 1px solid #ccc;	
 }
 
-#rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a, #rulegroups td.lft > a{
+#rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a, #rulegroups td.lft > a, #crontabList td.lft > a{
 	color: black;
 }
 

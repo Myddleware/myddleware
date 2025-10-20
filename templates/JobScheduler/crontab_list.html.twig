@@ -27,8 +27,18 @@
 		<p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
 	</div>
 
-	<div class="container-fluid p-3">
-		<div id="jobsceduler_table">
+	<div class="container-fluid p-3">	
+		<div class="text-center">
+			<a href="{{path('crontab')}}" class="btn btn-primary m-4">
+				{{ 'crontab.create'|trans }}
+			</a>
+			<a href="{{path('massdisable')}}" class="btn btn-danger m-4">
+				{{ 'crontab.massdisable'|trans }}
+			</a>
+			<a href="{{path('massenable')}}" class="btn btn-success m-4">
+				{{ 'crontab.massenable'|trans }}
+			</a>
+		</div>
 			{% for message in app.flashes('success') %}
 				<div class="alert alert-success">
 					{{ message }}
@@ -39,92 +49,84 @@
 					{{ message }}
 				</div>
 			{% endfor %}
-			<table class="table table-sm table-striped mt-5">
-				<thead>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.command'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.period'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.description'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.running_instances'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.max_instances'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.lastUse'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.nextRun'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'crontab.enable'|trans }}</label>
-					</th>
-					<th scope="col" class="title">
-						<label>{{ 'jobscheduler.actions'|trans }}</label>
-					</th>
-				</thead>
-				<tbody>
-					{% for value in entity %}
-						<tr class="																																								                ">
-							<td class="value">
-								<div id="command-short-{{ loop.index }}">
-									{{ value.command|slice(0, 20) ~ '...' }}
-									<button class="button_plus_message" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">+</button>
-								</div>
-								<div id="command-full-{{ loop.index }}" style="display: none;">
-									{{ value.command }}
-									<button class="button_minus_message" onclick="document.getElementById('command-full-{{ loop.index }}').style.display='none';document.getElementById('command-short-{{ loop.index }}').style.display='block';">-</button>
-								</div>
-							</td>
-							<td class="value">{{ value.period }}</td>
-							<td class="value col-2">{{ value.description  }}</td>
-							<td class="value">{{ value.runningInstances  }}</td>
-							<td class="value">{{ value.maxInstances  }}</td>
-							<td>{{ value.lastUse|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-							<td>{{ value.nextRun|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-							<td class="text-center">
-								<div class="form-check form-switch">
-									<input class="form-check-input toggle-switch-crontab" type="checkbox" id="crontab-{{ value.id }}" data-id="{{ value.id }}" data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}" {{ value.isEnable() ? 'checked' : '' }}>
-								</div>
-							</td>
-							<td class="CRUD-icons">
-								<a class="btn btn-sm btn-outline-success" href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
-									<span class="btn-opt">
-										<i class="fa fa-eye {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
-									</span>
-								</a>
-								<a class="btn btn-sm btn-outline-primary" href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
-									<span class="btn-opt">
-										<i class="fa fa-pen  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %} " aria-hidden="true"></i>
-									</span>
-								</a>
-								<a class="delete delete btn btn-sm btn-outline-danger" href="{{ path('crontab_delete',{'id' : value.id }) }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
-									<span class="btn-opt">
-										<i class="fa fa-trash  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
-									</span>
-								</a>
-							</td>
-						</tr>
-					{% endfor %}
-					<div class="col-md-6">
-						<a href="{{path('crontab')}}" class="btn btn-primary m-4">
-							{{ 'crontab.create'|trans }}
-						</a>
-						<a href="{{path('massdisable')}}" class="btn btn-danger m-4">
-							{{ 'crontab.massdisable'|trans }}
-						</a>
-						<a href="{{path('massenable')}}" class="btn btn-success m-4">
-							{{ 'crontab.massenable'|trans }}
-						</a>
-					</div>
-				</tbody>
-			</table>
+			<div id="crontabList" >
+				<div class ="table-wrapper">
+					<table class="listepager table">
+						<thead class="text-center">
+						<th scope="col" class="title">
+							<label>{{ 'crontab.command'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.period'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.description'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.running_instances'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.max_instances'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.lastUse'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.nextRun'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'crontab.enable'|trans }}</label>
+						</th>
+						<th scope="col" class="title">
+							<label>{{ 'jobscheduler.actions'|trans }}</label>
+						</th>
+					</thead>
+					<tbody>
+						{% for value in entity %}
+							<tr class="																																								                ">
+								<td class="value">
+									<div id="command-short-{{ loop.index }}">
+										{{ value.command|slice(0, 20) ~ '...' }}
+										<button class="button_plus_message" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">+</button>
+									</div>
+									<div id="command-full-{{ loop.index }}" style="display: none;">
+										{{ value.command }}
+										<button class="button_minus_message" onclick="document.getElementById('command-full-{{ loop.index }}').style.display='none';document.getElementById('command-short-{{ loop.index }}').style.display='block';">-</button>
+									</div>
+								</td>
+								<td class="value">{{ value.period }}</td>
+								<td class="value col-2">{{ value.description  }}</td>
+								<td class="value">{{ value.runningInstances  }}</td>
+								<td class="value">{{ value.maxInstances  }}</td>
+								<td>{{ value.lastUse|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+								<td>{{ value.nextRun|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+								<td class="text-center">
+									<div class="form-check form-switch">
+										<input class="form-check-input toggle-switch-crontab" type="checkbox" id="crontab-{{ value.id }}" data-id="{{ value.id }}" data-url="{{ path('enable_crontab', {'id': 'ID_PLACEHOLDER', 'enable': 'ENABLE_PLACEHOLDER'}) }}" {{ value.isEnable() ? 'checked' : '' }}>
+									</div>
+								</td>
+								<td class="CRUD-icons">
+									<a class="btn btn-sm btn-outline-success" href="{{ path('crontab_show',{'id' : value.id }) }}" title="{{ 'list_rule.btn.view'|trans }}">
+										<span class="btn-opt">
+											<i class="fa fa-eye {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
+										</span>
+									</a>
+									<a class="btn btn-sm btn-outline-primary" href="{{ path('crontab_edit',{'id' : value.id }) }}" title="{{ 'list_rule.btn.edit'|trans }}">
+										<span class="btn-opt">
+											<i class="fa fa-pen  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %} " aria-hidden="true"></i>
+										</span>
+									</a>
+									<a class="delete delete btn btn-sm btn-outline-danger" href="{{ path('crontab_delete',{'id' : value.id }) }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
+										<span class="btn-opt">
+											<i class="fa fa-trash  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
+										</span>
+									</a>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
 		</div>
 		<div class="text-center m-3 p-3">
 			<div id="crontab-results-container">
@@ -139,7 +141,7 @@
 		</div>
 
 		<div class="container-fluid p-3">
-			<div id="cronjobresult_table" class="">
+			<div id="cronjobresult_table">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'jobscheduler_cron_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
 
