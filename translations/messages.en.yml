@@ -170,6 +170,9 @@ behavior_filters:
     error_empty: Error if empty
 
 view_rule:
+    execute_id:
+        title: Execute a rule by id
+        run: Run the rule with these ids
     go_connector: Go to connector
     action:
         exec_all: Execute all active rules
@@ -1238,3 +1241,18 @@ success_create_user: User created successfully.
 success_update_user: User updated successfully.
 success_deleted_user: User deleted successfully.
 error_generic: An error occurred.
+document:
+  filters:
+    label: "Filters"
+    default: "- Select your filters -"
+    reference: "Reference"
+    date_modif_start: "Date of modification (start)"
+    date_modif_end: "Date of modification (end)"
+    module_source: "Source module"
+    module_target: "Target module"
+    target: "Target ID"
+    status: "Status"
+    type: "Type"
+    source_content: "Source content"
+    target_content: "Target content"
+    message: "Message"

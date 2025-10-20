@@ -169,6 +169,9 @@ behavior_filters:
     error_empty: Erreur si vide
             
 view_rule:
+    execute_id:
+        title: Executer une règle par id
+        run: Run the rule with these ids
     go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
@@ -1235,3 +1238,18 @@ success_create_user: Utilisateur créé avec succès.
 success_update_user: Utilisateur mis à jour avec succès.
 success_deleted_user: Utilisateur supprimé avec succès.
 error_generic: Une erreur est survenue.
+document:
+  filters:
+    label: "Filtres"
+    default: "- Sélectionnez vos filtres -"
+    reference: "Référence"
+    date_modif_start: "Date de modification (début)"
+    date_modif_end: "Date de modification (fin)"
+    module_source: "Module source"
+    module_target: "Module cible"
+    target: "ID cible"
+    status: "Statut"
+    type: "Type"
+    source_content: "Contenu source"
+    target_content: "Contenu cible"
+    message: "Message"
