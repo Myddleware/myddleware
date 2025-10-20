@@ -493,7 +493,8 @@ class ConnectorController extends AbstractController
     /**
      * SUPPRESSION DU CONNECTEUR.
      *
-     * @Route("/connector/delete/{id}", name="connector_delete")
+     * @Route("/connector/delete/{id}", name="connector_delete", methods={"DELETE","POST"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function connectorDelete(Request $request, $id): RedirectResponse
     {
