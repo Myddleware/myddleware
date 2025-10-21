@@ -1256,6 +1256,7 @@ premium:
             benefit3: "Description avantage 3"
 user_manager:
     list: Liste des utilisateurs
+    no_user: Pas d'utilisateur
     table:
         username: Nom d'utilisateur
         email: Email
@@ -1269,6 +1270,8 @@ user_manager:
 success_create_user: Utilisateur créé avec succès.
 success_update_user: Utilisateur mis à jour avec succès.
 success_deleted_user: Utilisateur supprimé avec succès.
+failed_deleted_user: Échec de la suppression de l'utilisateur
+not_found_user: Utilisateur non trouvée
 error_generic: Une erreur est survenue.
 document:
   filters:
