@@ -255,7 +255,16 @@ rule:
     select_group: Select a group
     select_value: Select a value
 
-rulegroup:
+rulegroup:  
+  created_successfully: "Rule group created successfully."
+  updated_successfully: "Rule group updated successfully."
+  deleted_successfully: "Rule group deleted successfully."
+  not_found: "Rule group not found."
+  no_available_rules: "No available rules to add to this group."
+  rule_removed_successfully: "Rule removed from the group successfully."
+  rule_added_successfully: "Rule added to the group successfully."
+  confirm_transfer_title: "Confirm rule transfer"
+  confirm_transfer_text: "This rule already belongs to another group. Do you want to transfer it to this group?"
   title_one: "Rule group"
   back: "Back to list"
   edit: "Edit a rule group"
@@ -1292,3 +1301,12 @@ document:
     source_content: "Source content"
     target_content: "Target content"
     message: "Message"
+account:
+  profile:
+    updated_successfully: "Profile updated successfully."
+  twofa:
+    updated_successfully: "Two-factor authentication settings updated successfully."
+    smtp_required: "Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first."
+  password:
+    success: "Password updated successfully."
+    danger: "An error occurred while updating the password."

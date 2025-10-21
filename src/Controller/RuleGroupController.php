@@ -27,56 +27,32 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Rule;
-use App\Entity\User;
-use App\Entity\FuncCat;
-use App\Entity\Document;
-use App\Entity\Solution;
 use App\Entity\RuleGroup;
-use App\Entity\Connector;
-use App\Entity\Functions;
-use App\Entity\RuleAudit;
-use App\Entity\RuleField;
-use App\Entity\RuleParam;
-use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
-use App\Entity\RuleGroupLog;
-use App\Form\ConnectorType;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
 use App\Manager\RuleManager;
-use Doctrine\ORM\Mapping\Id;
 use Psr\Log\LoggerInterface;
-use App\Entity\RuleGroupAudit;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
-use App\Entity\ConnectorParam;
-use App\Entity\RuleParamAudit;
-use App\Entity\RuleGroupAction;
 use App\Form\Type\RuleGroupType;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
-use App\Entity\RuleRelationShip;
 use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use App\Form\DuplicateRuleFormType;
 use App\Repository\ConfigRepository;
-use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Form\Type\RelationFilterType;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleGroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -90,70 +66,22 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
  */
 class RuleGroupController extends AbstractController
 {
-    private FormulaManager $formuleManager;
-    private SessionService $sessionService;
-    private ParameterBagInterface $params;
     private EntityManagerInterface $entityManager;
-    private HomeManager $home;
-    private ToolsManager $tools;
     private TranslatorInterface $translator;
-    private AuthorizationCheckerInterface $authorizationChecker;
-    private JobManager $jobManager;
-    private LoggerInterface $logger;
-    private TemplateManager $template;
-    private RuleRepository $ruleRepository;
-    private JobRepository $jobRepository;
-    private DocumentRepository $documentRepository;
-    private SolutionManager $solutionManager;
-    private RuleManager $ruleManager;
-    private DocumentManager $documentManager;
-    private RulegroupRepository $RuleGroupRepository;
     private ToolsManager $toolsManager;
     protected Connection $connection;
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
-    private ConfigRepository $configRepository;
 
     public function __construct(
-        LoggerInterface $logger,
-        RuleManager $ruleManager,
-        FormulaManager $formuleManager,
-        SolutionManager $solutionManager,
-        DocumentManager $documentManager,
-        SessionService $sessionService,
         EntityManagerInterface $entityManager,
-        RuleRepository $ruleRepository,
-        JobRepository $jobRepository,
-        DocumentRepository $documentRepository,
         Connection $connection,
         TranslatorInterface $translator,
-        AuthorizationCheckerInterface $authorizationChecker,
-        HomeManager $home,
-        ToolsManager $tools,
-        JobManager $jobManager,
-        TemplateManager $template,
-        RulegroupRepository $RuleGroupRepository,
-        ParameterBagInterface $params,
         ToolsManager $toolsManager
     ) {
-        $this->logger = $logger;
-        $this->ruleManager = $ruleManager;
-        $this->formuleManager = $formuleManager;
-        $this->solutionManager = $solutionManager;
-        $this->documentManager = $documentManager;
-        $this->sessionService = $sessionService;
         $this->entityManager = $entityManager;
-        $this->ruleRepository = $ruleRepository;
-        $this->jobRepository = $jobRepository;
-        $this->documentRepository = $documentRepository;
         $this->connection = $connection;
         $this->translator = $translator;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->home = $home;
-        $this->tools = $tools;
-        $this->jobManager = $jobManager;
-        $this->template = $template;
-        $this->RuleGroupRepository = $RuleGroupRepository;
         $this->toolsManager = $toolsManager;
     }
 
@@ -247,9 +175,9 @@ class RuleGroupController extends AbstractController
                 $rulegroup->setDeleted(1);
                 $em->persist($rulegroup);
                 $em->flush();
-                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.deleted_successfully'));
+                $this->addFlash('rulegroup.delete.success', $translator->trans('rulegroup.deleted_successfully'));
             } else {
-                $this->addFlash('error', 'Rulegroup not found');
+                $this->addFlash('rulegroup.delete.danger', $translator->trans('rulegroup.not_found'));
             }
 
             return $this->redirectToRoute('rulegroup_list');
@@ -289,7 +217,7 @@ class RuleGroupController extends AbstractController
                 $em->persist($rulegroup);
                 $em->flush();
 
-                $this->addFlash('success_rulegroup', $translator->trans('rulegroup.created_successfully'));
+                $this->addFlash('rulegroup.create.success', $translator->trans('rulegroup.created_successfully'));
 
                 return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
             }
@@ -330,7 +258,7 @@ class RuleGroupController extends AbstractController
                     ]
                 );
             } else {
-                $this->addFlash('error', 'Rulegroup not found');
+                $this->addFlash('rulegroup.show.danger', $this->translator->trans('rulegroup.not_found'));
                 return $this->redirectToRoute('rulegroup_list');
             }
         } catch (Exception $e) {
@@ -366,7 +294,7 @@ class RuleGroupController extends AbstractController
                     $rulegroup->setDateModified(new \DateTime());
                     $em->persist($rulegroup);
                     $em->flush();
-                    $this->addFlash('success_rulegroup', $translator->trans('rulegroup.updated_successfully'));
+                    $this->addFlash('rulegroup.edit.success', $translator->trans('rulegroup.updated_successfully'));
 
                     return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
                 }
@@ -379,8 +307,7 @@ class RuleGroupController extends AbstractController
                     ]
                 );
             } else {
-                $this->addFlash('error', 'Rulegroup not found');
-
+                $this->addFlash('rulegroup.edit.danger', $translator->trans('rulegroup.not_found'));
                 return $this->redirectToRoute('rulegroup_list');
             }
         } catch (Exception $e) {
@@ -415,8 +342,7 @@ class RuleGroupController extends AbstractController
         $rule->setGroup(null);
         $entityManager->flush();
 
-        $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_removed_successfully'));
-
+        $this->addFlash('rulegroup.remove_rule.success', $this->translator->trans('rulegroup.rule_removed_successfully'));
         return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
     }
 
@@ -455,7 +381,7 @@ class RuleGroupController extends AbstractController
             ->getResult();
 
         if (empty($availableRules)) {
-            $this->addFlash('warning_rulegroup', $this->translator->trans('rulegroup.no_available_rules'));
+            $this->addFlash('rulegroup.add_rule.warning', $this->translator->trans('rulegroup.no_available_rules'));
             return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
@@ -512,7 +438,7 @@ class RuleGroupController extends AbstractController
             $this->entityManager->persist($rule);
             $this->entityManager->flush();
 
-            $this->addFlash('success_rulegroup', $this->translator->trans('rulegroup.rule_added_successfully'));
+            $this->addFlash('rulegroup.add_rule.success', $this->translator->trans('rulegroup.rule_added_successfully'));
             return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
@@ -521,6 +447,4 @@ class RuleGroupController extends AbstractController
             'rulegroup' => $ruleGroup
         ]);
     }
-
-    
 }

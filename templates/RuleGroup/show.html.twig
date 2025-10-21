@@ -23,14 +23,8 @@
             </button>
         </form>
     </div>
-
-    <div>
-        {% for message in app.flashes('success_rulegroup') %}
-            <div class="alert alert-success" role="alert">{{ message }}</div>
-        {% endfor %}
-        {% for message in app.flashes('warning_rulegroup') %}
-            <div class="alert alert-warning" role="alert">{{ message }}</div>
-        {% endfor %}
+    <div>  
+        {% include '_notifications.html.twig' with { filter_prefix: 'rulegroup.' } %}
 
         {% if rulegroup is not null %}
             <div class="container">

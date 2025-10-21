@@ -40,13 +40,9 @@
 {% block body %}
 
 <div class="d-flex align-items-center justify-content-center my-5">
-    {% for message in app.flashes('success_rulegroup') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
-    {% endfor %}
-        <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'rulegroup.create_new'|trans }}</a>
+    <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'rulegroup.create_new'|trans }}</a>
 </div>
+{% include '_notifications.html.twig' with { filter_prefix: 'rulegroup.' } %}
 <div id="rulegroups">
 	<div class ="table-wrapper">
 		<table class="listepager table container">

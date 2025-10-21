@@ -256,6 +256,15 @@ rule:
     select_value: Choisir une valeur
 
 rulegroup:
+  created_successfully: "Groupe de règles créé avec succès."
+  updated_successfully: "Groupe de règles mis à jour avec succès."
+  deleted_successfully: "Groupe de règles supprimé avec succès."
+  not_found: "Groupe de règles introuvable."
+  no_available_rules: "Aucune règle disponible à ajouter à ce groupe."
+  rule_removed_successfully: "Règle retirée du groupe avec succès."
+  rule_added_successfully: "Règle ajoutée au groupe avec succès."
+  confirm_transfer_title: "Confirmer le transfert de la règle"
+  confirm_transfer_text: "Cette règle appartient déjà à un autre groupe. Voulez-vous la transférer dans ce groupe ?"
   title_one: "Groupe de règles"
   back: "Retour à la liste"
   edit: "Édition d’un groupe de règles"
@@ -1288,3 +1297,12 @@ document:
     source_content: "Contenu source"
     target_content: "Contenu cible"
     message: "Message"
+account:
+  profile:
+    updated_successfully: "Profil mis à jour avec succès."
+  twofa:
+    updated_successfully: "Paramètres de l’authentification à deux facteurs mis à jour avec succès."
+    smtp_required: "L’authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
+  password:
+    success: "Mot de passe mis à jour avec succès."
+    danger: "Une erreur est survenue lors de la mise à jour du mot de passe."
