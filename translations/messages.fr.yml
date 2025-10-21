@@ -1219,6 +1219,9 @@ duplicate_rule:
     success_duplicate: Votre règle a été bien dupliquée
 banner: Crontab est désactivé
 variable:
+  created_successfully: "Variable créée avec succès."
+  updated_successfully: "Variable mise à jour avec succès."
+  deleted_successfully: "Variable supprimée avec succès."
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   edit: Modification de la variable
   back_to_list: Retour à la liste des variables

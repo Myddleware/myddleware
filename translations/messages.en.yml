@@ -1223,6 +1223,9 @@ duplicate_rule:
     success_duplicate: Your rule has been well duplicated
 banner: Crontab is disabled
 variable:
+  created_successfully: "Variable created successfully."
+  updated_successfully: "Variable updated successfully."
+  deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
   edit: Editing of a variable
   back_to_list: Back to the list

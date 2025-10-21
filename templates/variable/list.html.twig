@@ -16,13 +16,10 @@
 		<div>
 			<a href="{{ path('variable_create') }}" class="btn btn-primary mt-5 mb-5">{{ 'variable.create_new'|trans }}</a>
 		</div>
+{% include '_notifications.html.twig' with { filter_prefix: 'variable.' } %}
 
 		<div class="table-wrapper-variable">
-			{% for message in app.flashes('success') %}
-				<div class="alert alert-success" role="alert">
-					{{ message }}
-				</div>
-			{% endfor %}
+
 
 			{% if nb_variables > 0 %}
 				<div class ="table-wrapper">
