@@ -497,7 +497,7 @@ class WorkflowActionController extends AbstractController
                         ])
                         ->add('to', TextType::class, [
                             'label'      => 'To',
-                            'mapped'     => false,
+                            'mapped'     => true,
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -511,7 +511,6 @@ class WorkflowActionController extends AbstractController
                         ])
                         ->add('subject', TextType::class, [
                             'label'      => 'Subject',
-                            'mapped'     => false,
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -1193,7 +1192,7 @@ class WorkflowActionController extends AbstractController
                     ->add('to', TextareaType::class, [
                         'label'      => 'To',
                         'required'   => false,
-                        'mapped'     => false,
+                        'mapped'   => true,
                         'label_attr' => [
                             'class' => 'form-label'
                         ],
