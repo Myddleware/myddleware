@@ -256,55 +256,84 @@ rule:
     select_value: Select a value
 
 rulegroup:
-    list: Rule groups
-    title: Rule groups
-    create: Create a new rule group
-    back: Back to the list
-    title_one: Rule group
-    details: Details
-    name: Name
-    description: Description
-    status: Status
-    create_by: Created by
-    modified_by: Modified by
-    delete: Delete
-    edit: Editing of a Rule Group
-    updated_successfully: Rule group updated successfully
-    rules: Rules
-    rule_removed_successfully: Rule removed successfully
-    no_rules: No rules in this group
+  title_one: "Rule group"
+  back: "Back to list"
+  edit: "Edit a rule group"
+  delete: "Delete"
+  name: "Name"
+  create_by: "Created by"
+  description: "Description"
+  rules: "Rules"
+  no_rules: "No rules in this group"
+  add_rule: "Add a rule"
+  confirm_delete: "Are you sure you want to delete the rule group \"%name%\"?"
+  remove_rule: "Remove the rule from the group"
+  list: "Rule groups"
+  create_new: "Create a rule group"
+  rulegroup_name : Rule Group Name
+  table:
+    id: "ID"
+    name: "Name"
+    date_created: "Creation date"
+    date_modified: "Modification date"
+    created_by: "Created by"
+    modified_by: "Modified by"
+    description: "Description"
+    title: "Rule groups"
+    create: "Create a new rule group"
+    back: "Back to list"
+    title_one: "Rule group"
+    details: "Details"
+    status: "Status"
+    create_by: "Created by"
+    delete: "Delete"
+    edit: "Edit a rule group"
+    updated_successfully: "Rule group updated successfully"
+    rules: "Rules"
+    rule_removed_successfully: "Rule removed successfully"
+    no_rules: "No rules in this group"
     rule:
-        name: Name
-        module_source: Source module
-        module_target: Target module
-        active: Active
-        confirm_remove_rule: Are you sure you want to remove this rule from the group?
-    add_rule: 'Add Rule'
-    select_rule: 'Select Rule'
-    rule_added_successfully: 'Rule added successfully'
-    confirm_transfer_title: 'Confirm Rule Transfer'
-    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
-    confirm_transfer: 'Yes, transfer rule'
-    confirm_transfer_final: 'Confirm and transfer rule'
-    cancel: 'Cancel'
-    no_available_rules: 'No available rules'
+      name: "Name"
+      module_source: "Source module"
+      module_target: "Target module"
+      active: "Active"
+      confirm_remove_rule: "Are you sure you want to remove this rule from the group?"
+    add_rule: "Add a rule"
+    select_rule: "Select a rule"
+    rule_added_successfully: "Rule added successfully"
+    confirm_transfer_title: "Confirm rule transfer"
+    confirm_transfer_message: "The rule \"%rule%\" is currently in the group \"%currentGroup%\". Do you want to transfer it to \"%newGroup%\"?"
+    confirm_transfer: "Yes, transfer the rule"
+    cancel: "Cancel"
+    no_available_rules: "No available rules"
+    confirm_transfer_final: "Confirm and transfer the rule"
 
 list_rule:
-    title: Rules
-    total: Number of rules
-    empty: You do not have any rules yet !
-    delete: Are you sure you want to delete this rule?
-    create_first_rule:  You can create your first rule
-    th: 
-        name: Name
-        version: Version
-        active: Activation
-        date_created: Creation date
-        option: Options
-    btn:
-        delete: Delete
-        edit: Edit
-        view: Refer to the form
+  title: "Rules"
+  total: "Number of rules"
+  empty: "You don't have any rules yet!"
+  delete: "Are you sure you want to delete this rule?"
+  save: "Save"
+  create_first_rule: "You can create your first rule"
+  th:
+    name: "Name"
+    version: "Version"
+    active: "Active"
+    date_created: "Creation date"
+    option: "Options"
+  btn:
+    delete: "Delete"
+    edit: "Edit"
+    view: "View"
+
+list_rulegroup:
+  empty: "You don't have any rule group yet!"
+  th:
+    name: "Name"
+    description: "Description"
+
+actions: "Actions"
+
 
 animate:
     rulename: Name of your rule 

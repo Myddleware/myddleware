@@ -478,15 +478,15 @@ class RuleGroupController extends AbstractController
                 'choices' => $availableRules,
                 'choice_label' => 'name',
                 'required' => true,
-                'label' => 'rulegroup.select_rule',
+                'label' => 'rulegroup.table.select_rule',
                 'attr' => [ 
-                    'class' => 'form-control',
+                    'class' => 'form-control mt-3',
                 ],
             ])
             ->add('confirm', SubmitType::class, [
                 'label' => $request->query->get('confirm') ? 'rulegroup.confirm_transfer_final' : 'rulegroup.add_rule',
                 'attr' => [
-                    'class' => 'btn btn-primary',
+                    'class' => 'btn btn-primary mt-3',
                 ],
             ])
             ->getForm();

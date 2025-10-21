@@ -45,20 +45,20 @@
             {{ message }}
         </div>
     {% endfor %}
-    <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'Create new rule group'|trans }}</a>
+        <a href="{{ path('rulegroup_create') }}" class="btn btn-primary">{{ 'rulegroup.create_new'|trans }}</a>
 </div>
 <div id="rulegroups">
 	<div class ="table-wrapper">
 		<table class="listepager table container">
 			<thead class="text-center">
 				<tr>
-					<th class="rounded-table-up-left">ID</th>
-					<th>Name</th>
-					<th>Date Created</th>
-					<th>Date Modified</th>
-					<th>Created By</th>
-					<th>Modified By</th>
-					<th class="rounded-table-up-right">Description</th>
+					<th class="rounded-table-up-left">{{ 'rulegroup.table.id'|trans }}</th>
+					<th>{{ 'rulegroup.table.name'|trans }}</th>
+					<th>{{ 'rulegroup.table.date_created'|trans }}</th>
+					<th>{{ 'rulegroup.table.date_modified'|trans }}</th>
+					<th>{{ 'rulegroup.table.created_by'|trans }}</th>
+					<th>{{ 'rulegroup.table.modified_by'|trans }}</th>
+					<th class="rounded-table-up-right">{{ 'rulegroup.table.description'|trans }}</th>
 				</tr>
 			</thead>
 			<tbody>
