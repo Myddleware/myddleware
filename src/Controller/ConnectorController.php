@@ -311,11 +311,14 @@ class ConnectorController extends AbstractController
      */
     public function create(): Response
     {
-        $solution = $this->entityManager->getRepository(Solution::class)->solutionActive();
+        $solutions = $this->entityManager->getRepository(Solution::class)->solutionActive();
         $lstArray = [];
-        if ($solution) {
-            foreach ($solution as $s) {
-                $lstArray[$s->getName()] = ucfirst($s->getName());
+        if (!empty($solutions)) {
+            foreach ($solutions as $s) {
+                $name = (string) $s->getName();
+                if ($name !== '') {
+                    $lstArray[$name] = ucfirst($name);
+                }
             }
         }
 
@@ -323,11 +326,11 @@ class ConnectorController extends AbstractController
         $this->sessionService->setConnectorAnimation(false);
         $this->sessionService->setConnectorAddMessage('list');
 
-            // use yaml file which is assets/controller-config.yaml
-            $nonRequiredFields = $this->getNonRequiredFields();
+        // use yaml file which is assets/controller-config.yaml
+        $nonRequiredFields = $this->getNonRequiredFields();
 
         return $this->render('Connector/index.html.twig', [
-            'solutions' => $lst_solution,
+            'solutions'         => $lst_solution,
             'nonRequiredFields' => $nonRequiredFields,
         ]);
     }
@@ -393,6 +396,12 @@ class ConnectorController extends AbstractController
                         }
                     }
 
+                    $name = trim((string) $connector->getName());
+                    if ($this->entityManager->getRepository(Connector::class)->existsActiveName($name)) {
+                        $this->addFlash('error', $this->translator->trans('create_rule.error_name'));
+                        return $this->redirect($this->generateUrl('connector_open'));
+                    }
+
                     $connectorParams = $connector->getConnectorParams();
                     $connector->setConnectorParams(null);
                     $connector->setNameSlug($connector->getName());
@@ -442,9 +451,6 @@ class ConnectorController extends AbstractController
                 $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
                 throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             }
-        } else {
-            $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
-            throw $this->createNotFoundException('Error');
         }
     }
 
@@ -613,6 +619,16 @@ class ConnectorController extends AbstractController
                         $params = $connector->getConnectorParams();
                         $connector->setDateModified(new \DateTime());
                         $connector->setModifiedBy($this->getUser()->getId());
+                        $name = trim((string) $connector->getName());
+
+                        if ($this->entityManager->getRepository(Connector::class)->existsActiveName($name, $connector->getId())) {
+                                $this->addFlash('danger', $this->translator->trans('create_rule.error_name'));
+                                return $this->render('Connector/edit/fiche.html.twig', [
+                                'connector' => $connector,
+                                'form' => $form->createView(),
+                                'connector_name' => $connector->getName() ?: 'Unnamed',
+                            ]);
+                        }
                         
                         $this->entityManager->persist($connector);
                         $this->entityManager->flush();
@@ -780,40 +796,40 @@ class ConnectorController extends AbstractController
         return false;
     }
 
-/**
- * @Route("/connector/{id}/detail", name="connector_detail")
- */
-public function detailAction(int $id)
-{
-    $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
+    /**
+     * @Route("/connector/{id}/detail", name="connector_detail")
+     */
+    public function detailAction(int $id)
+    {
+        $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
+        
+        $connector = $this->entityManager->getRepository(Connector::class)->find($id);
+
+        if (!$connector) {
+            throw $this->createNotFoundException('The connector does not exist');
+        }
+
+        $paramConnexion = [];
     
-    $connector = $this->entityManager->getRepository(Connector::class)->find($id);
-
-    if (!$connector) {
-        throw $this->createNotFoundException('The connector does not exist');
-    }
-
-    $paramConnexion = [];
-   
-    foreach ($connector->getConnectorParams() as $param) {
-        $paramConnexion[$param->getName()] = $param->getValue();
-    }
-    $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
-    foreach ($paramConnexion as $key => $value) {
-        if (is_string($value)) {
-            try {
-                $paramConnexion[$key] = $encrypter->decrypt($value);
-            } catch (\Exception $e) {
-              
+        foreach ($connector->getConnectorParams() as $param) {
+            $paramConnexion[$param->getName()] = $param->getValue();
+        }
+        $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
+        foreach ($paramConnexion as $key => $value) {
+            if (is_string($value)) {
+                try {
+                    $paramConnexion[$key] = $encrypter->decrypt($value);
+                } catch (\Exception $e) {
+                
+                }
             }
         }
-    }
 
-    // Passez les paramètres décryptés à la vue
-    return $this->render('Connector/detail/detail.html.twig', [
-        'connector' => $connector,
-        'paramConnexion' => $paramConnexion, 
-        'sensitiveFields' => $sensitiveFields,
-    ]);
-}
+        // Passez les paramètres décryptés à la vue
+        return $this->render('Connector/detail/detail.html.twig', [
+            'connector' => $connector,
+            'paramConnexion' => $paramConnexion, 
+            'sensitiveFields' => $sensitiveFields,
+        ]);
+    }
 }

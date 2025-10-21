@@ -55,6 +55,7 @@ panel:
     graph_job_histo:
         title: Historique des jobs
 create_rule:
+    error_name: Un connecteur porte déjà ce nom.
     tabs:
         one: Connexion
         two: Choix des modules
