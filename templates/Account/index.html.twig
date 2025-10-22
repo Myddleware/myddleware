@@ -35,14 +35,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
     <div class="account-card">
         <h1 class="text-center mb-4">{{ 'view_account.user_info'|trans }}</h1>
         
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
-                    <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
-                    <p class="ms-2">{{ message }}</p>
-                </div>
-            {% endfor %}
-        {% endfor %}
+        {% include '_notifications.html.twig' with { filter_prefix: 'account.' } %}
         
         <!-- Tab Navigation -->
         <div class="tab-group">

@@ -78,4 +78,19 @@ class ConnectorRepository extends ServiceEntityRepository
 
         return $qb->getQuery();
     }
+    
+    public function existsActiveName(string $name, ?int $excludeId = null): bool
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('1')
+            ->where('LOWER(c.name) = LOWER(:name)')
+            ->andWhere('c.deleted = 0')
+            ->setMaxResults(1)
+            ->setParameter('name', trim($name));
+
+        if ($excludeId) {
+            $qb->andWhere('c.id != :id')->setParameter('id', $excludeId);
+        }
+        return (bool) $qb->getQuery()->getOneOrNullResult();
+    }
 }

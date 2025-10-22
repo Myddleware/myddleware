@@ -14,27 +14,28 @@ class FilterType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('filter', Filters\ChoiceFilterType::class, [               
+           ->add('filter', Filters\ChoiceFilterType::class, [
+                'label' => 'document.filters.label',
                 'choices' => [
-                    '- Select your filters -' => 'default',
-                    'Reference' => 'reference',
-                    'Date of modification Start' => 'date_modif_start',
-                    'Date of modification End' => 'date_modif_end',
-                    'Module source' => 'moduleSource',
-                    'Module target' => 'moduleTarget',
-                    'Target id' => 'target',
-                    'Status' => 'status',
-                    'Type' => 'type',
-                    'Source Content' => 'sourceContent',
-                    'Target Content' => 'targetContent',
-                    'Message' => 'message',
+                    'document.filters.default' => 'default',
+                    'document.filters.reference' => 'reference',
+                    'document.filters.date_modif_start' => 'date_modif_start',
+                    'document.filters.date_modif_end' => 'date_modif_end',
+                    'document.filters.module_source' => 'moduleSource',
+                    'document.filters.module_target' => 'moduleTarget',
+                    'document.filters.target' => 'target',
+                    'document.filters.status' => 'status',
+                    'document.filters.type' => 'type',
+                    'document.filters.source_content' => 'sourceContent',
+                    'document.filters.target_content' => 'targetContent',
+                    'document.filters.message' => 'message',
                 ],
+                'choice_translation_domain' => 'messages',
                 'data' => 'default',
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ]);
-
     }
 
     public function getBlockPrefix()

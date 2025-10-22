@@ -26,12 +26,13 @@ class UserManagerController extends AbstractController
         ]);
     }
     #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
-    public function edit(UserRepository $userRepository, int $id): Response
+    public function edit(UserRepository $userRepository, int $id, TranslatorInterface $translator): Response
     {
         $user = $userRepository->find($id);
 
         if (!$user) {
-            return new Response('<div class="alert alert-danger">Utilisateur introuvable</div>', 404);
+            $this->addFlash('user_manager.edit.danger', $translator->trans('user.not_found'));
+            return $this->redirectToRoute('user_manager');
         }
 
         $form = $this->createForm(UserType::class, $user, [
@@ -53,8 +54,11 @@ class UserManagerController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-             $this->addFlash('success_update_user', $translator->trans('success_update_user'));
+            $this->addFlash('user_manager.edit.success', $translator->trans('success_update_user'));
             return $this->redirectToRoute('user_manager');
+        }
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('user_manager.edit.danger', $translator->trans('form.invalid'));
         }
 
         return $this->render('UserManager/edit.html.twig', [
@@ -84,8 +88,11 @@ class UserManagerController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success_create_user', $translator->trans('success_create_user'));
+            $this->addFlash('user_manager.create.success', $translator->trans('success_create_user'));
             return $this->redirectToRoute('user_manager');
+        }
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('user_manager.create.danger', $translator->trans('form.invalid'));
         }
 
         return $this->render('UserManager/create.html.twig', [
@@ -96,10 +103,14 @@ class UserManagerController extends AbstractController
     #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['GET'])]
     public function delete(User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
-        $em->remove($user);
-        $em->flush();
+        try {
+            $em->remove($user);
+            $em->flush();
 
-          $this->addFlash('success_deleted_user', $translator->trans('success_deleted_user'));
+            $this->addFlash('user_manager.delete.success', $translator->trans('success_deleted_user'));
+        } catch (\Throwable $e) {
+            $this->addFlash('user_manager.delete.danger', $translator->trans('failed_deleted_user'));
+        }
         return $this->redirectToRoute('user_manager');
     }
 }

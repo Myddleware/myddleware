@@ -791,7 +791,7 @@ li span {
 .edit-icon {
     cursor: pointer;
     font-size: 14px;
-    padding: 2px 4px;
+    padding: 2px 9px;
     border-radius: 3px;
     transition: all 0.3s ease;
     user-select: none;

@@ -18,21 +18,21 @@ class RuleGroupType extends AbstractType
         $entityManager = $options['entityManager'];
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Rule Group Name',
+                'label' => 'rulegroup.rulegroup_name',
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ])
             ->add('description', TextType::class, [
-                'label' => 'Description',
+                'label' => 'rulegroup.table.description',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Save',
+                'label' => 'list_rule.save',
                 'attr' => [
                     'class' => 'mt-2 btn btn-primary',
                     ],

@@ -1,8 +1,11 @@
 <h4>{{ 'user_manager.edit'|trans }}</h4>
+
+{% include '_notifications.html.twig' with { filter_prefix: 'user_manager.edit' } %}
+
 {{ form_start(form, { attr: { id: 'user-edit-form' } }) }}
     {{ form_row(form.username) }}
     {{ form_row(form.email) }}
     {{ form_row(form.roles) }}
     {{ form_row(form.timezone) }}
-    <button type="submit" class="btn btn-primary mt-2">Save</button>
+    <button type="submit" class="btn btn-primary mt-2">{{ 'save' | trans }}</button>
 {{ form_end(form) }}

@@ -12,22 +12,8 @@
 {% block body %}
 <div id="user-manager-wrapper" class="d-flex">
     <div id="user-table-container" class="flex-grow-1 transition-width">
-    <div class="container mt-5">
-	    {% for message in app.flashes('success_deleted_user') %}
-			<div class="alert alert-success" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
-        {% for message in app.flashes('success_create_user') %}
-            <div class="alert alert-success" role="alert">
-                <i class="fa fa-check-circle me-2"></i> {{ message }}
-            </div>
-        {% endfor %}
-        {% for message in app.flashes('success_update_user') %}
-            <div class="alert alert-primary" role="alert">
-                <i class="fa fa-edit me-2"></i> {{ message }}
-            </div>
-        {% endfor %}
+    <div class="container mt-5"> 
+        {% include '_notifications.html.twig' with { filter_prefix: 'user_manager.' } %}
     	<div id="user-manager-list">
             <div>
                 <button class="btn btn-primary mt-4 mb-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
@@ -97,7 +83,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="6" class="text-center">Aucun utilisateur</td>
+                        <td colspan="6" class="text-center">{{ 'user_manager.no_user'|trans }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -55,6 +55,7 @@ panel:
     graph_job_histo:
         title: Historique des jobs
 create_rule:
+    error_name: Un connecteur porte déjà ce nom.
     tabs:
         one: Connexion
         two: Choix des modules
@@ -169,6 +170,9 @@ behavior_filters:
     error_empty: Erreur si vide
             
 view_rule:
+    execute_id:
+        title: Executer une règle par id
+        run: Run the rule with these ids
     go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
@@ -252,54 +256,91 @@ rule:
     select_value: Choisir une valeur
 
 rulegroup:
-    list: Groupes de règles
-    title: Groupes de règles
-    create: Créer un nouveau groupe de règles
-    back: Retour à la liste
-    title_one: Groupe de règles
-    name: Nom
-    details: Détails
-    description: Description
-    status: Statut
-    create_by: Créé par
-    modified_by: Modifié par
-    delete: Supprimer
-    edit: Édition d'un groupe de règles
-    updated_successfully: Groupe de règles modifié avec succès
-    rules: Règles
-    rule_removed_successfully: Règle supprimée avec succès
-    no_rules: Aucune règle dans ce groupe
+  created_successfully: "Groupe de règles créé avec succès."
+  updated_successfully: "Groupe de règles mis à jour avec succès."
+  deleted_successfully: "Groupe de règles supprimé avec succès."
+  not_found: "Groupe de règles introuvable."
+  no_available_rules: "Aucune règle disponible à ajouter à ce groupe."
+  rule_removed_successfully: "Règle retirée du groupe avec succès."
+  rule_added_successfully: "Règle ajoutée au groupe avec succès."
+  confirm_transfer_title: "Confirmer le transfert de la règle"
+  confirm_transfer_text: "Cette règle appartient déjà à un autre groupe. Voulez-vous la transférer dans ce groupe ?"
+  title_one: "Groupe de règles"
+  back: "Retour à la liste"
+  edit: "Édition d’un groupe de règles"
+  delete: "Supprimer"
+  name: "Nom"
+  create_by: "Créé par"
+  description: "Description"
+  rules: "Règles"
+  no_rules: "Aucune règle dans ce groupe"
+  add_rule: "Ajouter une règle"
+  confirm_delete: "Êtes-vous sûr de vouloir supprimer le groupe de règles « %name% » ?"
+  remove_rule: "Retirer la règle du groupe"
+  list: "Groupes de règles"
+  create_new: "Créer un groupe de règles"
+  rulegroup_name: Nom du groupe de règles
+  table:
+    id: "ID"
+    name: "Nom"
+    date_created: "Date de création"
+    date_modified: "Date de modification"
+    created_by: "Créé par"
+    modified_by: "Modifié par"
+    description: "Description"
+    title: "Groupes de règles"
+    create: "Créer un nouveau groupe de règles"
+    back: "Retour à la liste"
+    title_one: "Groupe de règles"
+    details: "Détails"
+    status: "Statut"
+    create_by: "Créé par"
+    delete: "Supprimer"
+    edit: "Édition d’un groupe de règles"
+    updated_successfully: "Groupe de règles mis à jour avec succès"
+    rules: "Règles"
+    rule_removed_successfully: "Règle supprimée avec succès"
+    no_rules: "Aucune règle dans ce groupe"
     rule:
-        name: Nom
-        module_source: Module source
-        module_target: Module cible
-        active: Activation
-        confirm_remove_rule: Êtes-vous sûr de vouloir supprimer cette règle du groupe ?
-    add_rule: Ajouter une règle
-    select_rule: Sélectionner une règle
-    rule_added_successfully: Règle ajoutée avec succès
-    confirm_transfer_title: Confirmer le transfert de la règle
-    confirm_transfer_message: La règle "%rule%" est actuellement dans le groupe "%currentGroup%". Voulez-vous la transférer dans "%newGroup%"?
-    confirm_transfer: Oui, transférer la règle
-    cancel: Annuler
-    no_available_rules: Aucune règle disponible
-    confirm_transfer_final: Confirmer et transférer la règle
+      name: "Nom"
+      module_source: "Module source"
+      module_target: "Module cible"
+      active: "Activation"
+      confirm_remove_rule: "Êtes-vous sûr de vouloir supprimer cette règle du groupe ?"
+    add_rule: "Ajouter une règle"
+    select_rule: "Sélectionner une règle"
+    rule_added_successfully: "Règle ajoutée avec succès"
+    confirm_transfer_title: "Confirmer le transfert de la règle"
+    confirm_transfer_message: "La règle \"%rule%\" est actuellement dans le groupe \"%currentGroup%\". Voulez-vous la transférer dans \"%newGroup%\"?"
+    confirm_transfer: "Oui, transférer la règle"
+    cancel: "Annuler"
+    no_available_rules: "Aucune règle disponible"
+    confirm_transfer_final: "Confirmer et transférer la règle"
+
 list_rule:
-    title: Règles
-    total: Nombre de règles
-    empty: Vous n'avez pas encore de règle !
-    delete: Etes-vous sûr de vouloir supprimer cette règle ?
-    create_first_rule:  Vous pouvez créer votre première règle
-    th: 
-        name: Nom
-        version: Version
-        active: Activation
-        date_created: Date de création
-        option: Options
-    btn:
-        delete: Supprimer
-        edit: Editer
-        view: Voir la fiche
+  title: "Règles"
+  total: "Nombre de règles"
+  empty: "Vous n'avez pas encore de règle !"
+  delete: "Êtes-vous sûr de vouloir supprimer cette règle ?"
+  save: "Sauvegarder"
+  create_first_rule: "Vous pouvez créer votre première règle"
+  th:
+    name: "Nom"
+    version: "Version"
+    active: "Activation"
+    date_created: "Date de création"
+    option: "Options"
+  btn:
+    delete: "Supprimer"
+    edit: "Éditer"
+    view: "Voir la fiche"
+
+list_rulegroup:
+  empty: "Vous n'avez pas encore de groupe de règles !"
+  th:
+    name: "Nom"
+    description: "Description"
+actions: "Actions"
 
 animate:
     rulename: Nom de votre règle 
@@ -1187,6 +1228,9 @@ duplicate_rule:
     success_duplicate: Votre règle a été bien dupliquée
 banner: Crontab est désactivé
 variable:
+  created_successfully: "Variable créée avec succès."
+  updated_successfully: "Variable mise à jour avec succès."
+  deleted_successfully: "Variable supprimée avec succès."
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   edit: Modification de la variable
   back_to_list: Retour à la liste des variables
@@ -1221,6 +1265,7 @@ premium:
             benefit3: "Description avantage 3"
 user_manager:
     list: Liste des utilisateurs
+    no_user: Pas d'utilisateur
     table:
         username: Nom d'utilisateur
         email: Email
@@ -1234,4 +1279,30 @@ user_manager:
 success_create_user: Utilisateur créé avec succès.
 success_update_user: Utilisateur mis à jour avec succès.
 success_deleted_user: Utilisateur supprimé avec succès.
+failed_deleted_user: Échec de la suppression de l'utilisateur
+not_found_user: Utilisateur non trouvée
 error_generic: Une erreur est survenue.
+document:
+  filters:
+    label: "Filtres"
+    default: "- Sélectionnez vos filtres -"
+    reference: "Référence"
+    date_modif_start: "Date de modification (début)"
+    date_modif_end: "Date de modification (fin)"
+    module_source: "Module source"
+    module_target: "Module cible"
+    target: "ID cible"
+    status: "Statut"
+    type: "Type"
+    source_content: "Contenu source"
+    target_content: "Contenu cible"
+    message: "Message"
+account:
+  profile:
+    updated_successfully: "Profil mis à jour avec succès."
+  twofa:
+    updated_successfully: "Paramètres de l’authentification à deux facteurs mis à jour avec succès."
+    smtp_required: "L’authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
+  password:
+    success: "Mot de passe mis à jour avec succès."
+    danger: "Une erreur est survenue lors de la mise à jour du mot de passe."

@@ -132,9 +132,11 @@ class VariableController extends AbstractController
             $name = $variable->getName();
             $variableExists = $this->verifyIfVariableNameExists($em, $name);
             if ($variableExists) {
-                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
+                $this->addFlash('variable.create.danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_create');
             }
+
+            $this->addFlash('variable.create.success', $translator->trans('variable.created_successfully'));
 
             $em->persist($variable);
             $em->flush();
@@ -212,7 +214,7 @@ class VariableController extends AbstractController
             $name = $variable->getName();
             $variableExists = $this->verifyIfVariableNameExists($em, $name, $variable->getId());
             if ($variableExists) {
-                $this->addFlash('danger', $translator->trans('variable.name_already_exists'));
+                $this->addFlash('variable.edit.danger', $translator->trans('variable.name_already_exists'));
                 return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
             }
             // Create an audit entry
@@ -223,6 +225,7 @@ class VariableController extends AbstractController
             $audit->setAfter($variable->getValue());
             $audit->setByUser($this->getUser()->getUsername());
 
+            $this->addFlash('variable.edit.success', $translator->trans('variable.updated_successfully'));
             $em->persist($audit);
             $em->flush();
 
@@ -261,7 +264,7 @@ class VariableController extends AbstractController
     /**
      * @Route("/variables/{id}/delete", name="variable_delete")
      */
-    public function delete(EntityManagerInterface $em, Variable $variable): Response
+    public function delete(EntityManagerInterface $em, Variable $variable, TranslatorInterface $translator): Response
     {
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
@@ -276,9 +279,9 @@ class VariableController extends AbstractController
         $audit->setByUser($this->getUser()->getUsername());
 
         $em->persist($audit);
-
         $em->remove($variable);
         $em->flush();
+        $this->addFlash('variable.delete.success', $translator->trans('variable.deleted_successfully'));
 
         return $this->redirectToRoute('variable_list');
     }

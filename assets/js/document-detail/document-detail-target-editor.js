@@ -265,7 +265,7 @@ export class DocumentDetailTargetEditor {
         iconContainer.className = 'edit-icons-container';
         iconContainer.innerHTML = `
             <span class="edit-icon pencil-icon" title="Edit field">
-                ✏️
+                <i class="fa fa-pen" aria-hidden="true"></i>
             </span>
         `;
         
@@ -315,10 +315,10 @@ export class DocumentDetailTargetEditor {
         iconsContainer.className = 'edit-icons-container editing';
         iconsContainer.innerHTML = `
             <span class="edit-icon check-icon" title="Save changes">
-                ✅
+                <i class="fa fa-check text-success"></i>
             </span>
             <span class="edit-icon cross-icon" title="Cancel editing">
-                ❌
+                <i class="fa fa-times text-danger"></i>
             </span>
         `;
         
