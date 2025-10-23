@@ -180,6 +180,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
     {
         try {
             $ruleName = $request->query->get('rule_name');
+
+            // get the session and display the flash messages if any
+            $session = $request->getSession();
+
+            foreach ($session->getFlashBag()->all() as $label => $flashes) {
+                foreach ($flashes as $flash) {
+                    $this->addFlash($label, $flash);
+                }
+            }
             
             // Initialize compact array early
             $compact = [
