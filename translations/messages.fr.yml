@@ -345,6 +345,7 @@ actions: "Actions"
 animate:
     rulename: Nom de votre règle 
     wait: Veuillez patienter...
+    title: Détail de la règle
     solution:
         source: Source
         target: Cible

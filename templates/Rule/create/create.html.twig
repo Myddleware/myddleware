@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'title.rule.create'|trans }}{% endblock %}
+{% block titlesm %}{{ 'title.rule.create'|trans }}{% endblock %}
+
+{% block body %}
+
+  <div class="container py-4" id="rule-create">
+
+    {# --- SECTION 1 : Rule Details (sans "Rule folder") --- #}
+    {% include 'Rule/create/_details.html.twig' %}
+
+  </div>
+  <script>
+    var path_new_solution           = "{{ path('regle_connector_insert_solution') }}";
+    var path_img                    = "{{ asset('build/images/regle/') }}";
+    var path_connector_by_solution  = "{{ path('regle_connector_by_solution') }}";
+    var path_module                 = "{{ path('regle_list_module') }}";
+    var path_rulename               = "{{ path('regle_inputs_name_unique') }}";
+    var path_template               = "{{ path('regle_template') }}";
+    var path_submodules             = "{{ path('regle_submodules') }}";
+    var path_validation             = "{{ path('regle_validation_animation') }}";
+    var path_view_detail            = "{{ path('regle_open', {'id': 'placeholder_id'}) }}";
+    var path_mapping                = "{{ path('regle_stepthree') }}";
+    var path_listrule               = "{{ path('regle_list') }}";
+    var wait                        = "{{ 'animate.wait'|trans }}";
+    var trans_btn_mapping           = "{{ 'create_rule.step1.btn_mapping'|trans }}";
+    var trans_btn_confirm           = "{{ 'create_rule.step1.btn_confirm'|trans }}";
+  </script>
+
+  {# Mini JS pour la vérif d’unicité du nom (compat : id #rulename) #}
+  <script>
+    (function () {
+      const input = document.getElementById('rulename');
+      const badge = document.getElementById('rulename-feedback');
+
+      if (!input) return;
+
+      let t;
+      input.addEventListener('input', function () {
+        clearTimeout(t);
+        const name = this.value.trim();
+        if (name.length < 3) {
+          badge.textContent = '';
+          badge.className = 'form-text';
+          return;
+        }
+        t = setTimeout(() => {
+          fetch("{{ path('regle_inputs_name_unique') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ name })
+          })
+          .then(r => r.json())
+          .then(existsFlag => {
+            // ancien endpoint renvoie 0 (dispo) / 1 (existe)
+            if (existsFlag === 0 || existsFlag === "0") {
+              badge.textContent = "{{ 'animate.rulename_available'|trans|e('js') }}";
+              badge.className = 'form-text text-success';
+            } else {
+              badge.textContent = "{{ 'animate.rulename_exists'|trans|e('js') }}";
+              badge.className = 'form-text text-danger';
+            }
+          })
+          .catch(() => {
+            badge.textContent = '';
+            badge.className = 'form-text';
+          });
+        }, 300);
+      });
+    })();
+  </script>
+{% endblock %}

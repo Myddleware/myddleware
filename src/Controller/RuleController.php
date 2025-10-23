@@ -2732,168 +2732,70 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         return $yaml['non-required-fields'];
     }
 
-    /**
-     * ANIMATION
-     * No more submodule in Myddleware. We return a response 0 for the js (animation.js.
-     */
-    #[Route('/submodules', name: 'regle_submodules', methods: ['POST'])]
-    public function listSubModulesAction(): Response
-    {
-        return new Response(0);
-    }
+    // /**
+    //  * LISTE DES TEMPLATES.
+    //  */
+    // #[Route('/list/template', name: 'regle_template')]
+    // public function listTemplateAction(): Response
+    // {
+    //     $key = $this->sessionService->getParamRuleLastKey();
+    //     $solutionSourceName = $this->sessionService->getParamRuleSourceSolution($key);
+    //     $solutionTargetName = $this->sessionService->getParamRuleCibleSolution($key);
+    //     $templates = $this->template->getTemplates($solutionSourceName, $solutionTargetName);
+    //     if (!empty($templates)) {
+    //         $rows = '';
+    //         foreach ($templates as $t) {
+    //             $rows .= '<tr>
+    //                     <td>
+    //                         <span data-id="'.$t['name'].'">
+    //                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-list" viewBox="0 0 16 16">
+    //                             <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+    //                             <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-1-5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zM4 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+    //                             </svg>
+    //                         </span>
+    //                     </td>
+    //                     <td>'.$t['name'].'</td>
+    //                     <td>'.$t['description'].'</td>
+    //                 </tr>';
+    //             }
 
-    /**
-     * VALIDATION DE L'ANIMATION.
-     */
-    #[Route('/validation', name: 'regle_validation_animation')]
-    public function validationAnimationAction(Request $request): Response
-    {
-        $key = $this->sessionService->getParamRuleLastKey();
+    //             return new Response('<table class="table table-striped">
+    //             <thead>
+    //                 <tr>
+    //                     <th>#</th>
+    //                     <th>'.$this->translator->trans('animate.choice.name').'</th>
+    //                     <th>'.$this->translator->trans('animate.choice.description').'</th>
+    //                 </tr>
+    //             </thead>
+    //             <tbody>
+	// 			'.$rows.'
+    //             </tbody>
+    //         </table>');
+    //     }
+    // }
 
-        try {
-            $choiceSelect = $request->get('choice_select', null);
-            if (null != $choiceSelect) {
-                if ('module' == $choiceSelect) {
-                    // si le nom de la règle est inferieur à 3 caractères :
-                    if (empty($this->sessionService->getParamRuleSourceSolution($key)) || strlen($this->sessionService->getParamRuleName($key)) < 3) {
-                        $this->sessionService->setParamRuleNameValid($key, false);
-                    } else {
-                        $this->sessionService->setParamRuleNameValid($key, true);
-                    }
-                    $this->sessionService->setParamRuleSourceModule($key, $request->get('module_source'));
-                    $this->sessionService->setParamRuleCibleModule($key, $request->get('module_target'));
-
-                    return new Response('module');
-                } elseif ('template' == $choiceSelect) {
-                    // Rule creation with the template selected in parameter
-                    $ruleName = $request->get('name');
-                    $templateName = $request->get('template');
-
-                    $connectorSourceId = (int) $this->sessionService->getParamRuleConnectorSourceId($key);
-                    $connectorTargetId = (int) $this->sessionService->getParamRuleConnectorCibleId($key);
-                    /** @var User $user */
-                    $user = $this->getUser();
-                    try {
-                        $this->template->convertTemplate($ruleName, $templateName, $connectorSourceId, $connectorTargetId, $user);
-                    } catch (Exception $e) {
-                        $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
-                        return new Response('error');
-                    }
-                    // Sort the rules
-                    $this->jobManager->orderRules();
-                    // We return to the list of rule even in case of error (session messages will be displyed in the UI)/: See animation.js function animConfirm
-                    return new Response('template');
-                }
-
-                return new Response(0);
-            }
-
-            return new Response(0);
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
-
-            return new Response($e->getMessage());
-        }
-    }
-
-    /**
-     * LISTE DES TEMPLATES.
-     */
-    #[Route('/list/template', name: 'regle_template')]
-    public function listTemplateAction(): Response
-    {
-        $key = $this->sessionService->getParamRuleLastKey();
-        $solutionSourceName = $this->sessionService->getParamRuleSourceSolution($key);
-        $solutionTargetName = $this->sessionService->getParamRuleCibleSolution($key);
-        $templates = $this->template->getTemplates($solutionSourceName, $solutionTargetName);
-        if (!empty($templates)) {
-            $rows = '';
-            foreach ($templates as $t) {
-                $rows .= '<tr>
-                        <td>
-                            <span data-id="'.$t['name'].'">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-list" viewBox="0 0 16 16">
-                                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
-                                <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-1-5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zM4 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm0 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
-                                </svg>
-                            </span>
-                        </td>
-                        <td>'.$t['name'].'</td>
-                        <td>'.$t['description'].'</td>
-                    </tr>';
-                }
-
-                return new Response('<table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>'.$this->translator->trans('animate.choice.name').'</th>
-                        <th>'.$this->translator->trans('animate.choice.description').'</th>
-                    </tr>
-                </thead>
-                <tbody>
-				'.$rows.'
-                </tbody>
-            </table>');
-        }
-    }
-
-    /**
-     * CREATION - STEP ONE - ANIMATION.
-     */
-    #[Route('/create', name: 'regle_stepone_animation')]
+   #[Route('/create', name: 'regle_stepone_animation', methods: ['GET'])]
     public function ruleStepOneAnimation(): Response
     {
+        // uniquement les new rule
         if ($this->sessionService->isConnectorExist()) {
             $this->sessionService->removeMyddlewareConnector();
         }
 
-        // New Rule
+        // Initialise une nouvelle rule en session
         $this->sessionService->setParamRuleLastKey(0);
-
         $key = $this->sessionService->getParamRuleLastKey();
-
-        // Détecte s'il existe des erreurs
+        
+        $error = false;
         if ($this->sessionService->isErrorNotEmpty($key, SessionService::ERROR_CREATE_RULE_INDEX)) {
             $error = $this->sessionService->getCreateRuleError($key);
             $this->sessionService->removeError($key, SessionService::ERROR_CREATE_RULE_INDEX);
-        } else {
-            $error = false;
         }
 
-        // Liste source : solution avec au moins 1 connecteur
-        $this->getInstanceBdd();
-
-        $solutionSource = $this->entityManager->getRepository(Solution::class)
-            ->solutionConnector('source', $this->getUser()->isAdmin(), $this->getUser()->getId());
-
-        if (!empty($solutionSource)) {
-            foreach ($solutionSource as $s) {
-                $source[] = $s->getName();
-            }
-            $this->sessionService->setParamConnectorSolutionSource($key, $source);
-        }
-
-        // Liste target : solution avec au moins 1 connecteur
-        $solutionTarget = $this->entityManager->getRepository(Solution::class)
-            ->solutionConnector('target', $this->getUser()->isAdmin(), $this->getUser()->getId());
-
-        if (!empty($solutionTarget)) {
-            foreach ($solutionTarget as $t) {
-                $target[] = $t->getName();
-            }
-            $this->sessionService->setParamConnectorSolutionTarget($key, $target);
-        }
-
-        return $this->render('Rule/create/step1simply.html.twig', [
-            'source' => $solutionSource,
-            'target' => $solutionTarget,
+        return $this->render('Rule/create/create.html.twig', [
             'error' => $error,
-        ]
-        );
+        ]);
     }
-
     /**
      * LISTE DES MODULES POUR ANIMATION.
      * @throws Exception

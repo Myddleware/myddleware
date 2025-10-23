@@ -345,7 +345,8 @@ actions: "Actions"
 
 
 animate:
-    rulename: Name of your rule 
+    rulename: Name of your rule
+    title: Rule Details
     wait: Please wait...
     solution:
         source: Source
