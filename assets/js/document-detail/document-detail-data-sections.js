@@ -1175,21 +1175,32 @@ export class DocumentDetailDataSections {
             const rows = historyTable.querySelectorAll('tr');
 
             rows.forEach(row => {
-                const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
-                if (docIdLink) {
-                    const docId = docIdLink.textContent.trim();
-                    if (docId) {
-                        documentIds.push(docId);
+                // Get the status from the last td's span element
+                const statusSpan = row.querySelector('td:last-child span.status-badge');
+                const status = statusSpan ? statusSpan.textContent.trim().toLowerCase() : '';
+
+                // Define cancel statuses (matching the same logic from generateDocumentHistory)
+                const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status);
+
+                // Only collect IDs of documents NOT already in cancel status
+                if (!isCancelStatus) {
+                    const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
+                    if (docIdLink) {
+                        const docId = docIdLink.textContent.trim();
+                        if (docId) {
+                            documentIds.push(docId);
+                        }
                     }
                 }
             });
 
             if (documentIds.length === 0) {
-                console.warn('⚠️ No document IDs found in history table');
+                console.warn('⚠️ No documents to cancel (all documents are already in cancel status or table is empty)');
+                this.showErrorNotification('All documents are already in cancel status. Nothing to cancel.');
                 return;
             }
 
-            console.log('📋 Found document IDs:', documentIds);
+            console.log('📋 Found document IDs to cancel:', documentIds);
 
             // Get base URL for the API call
             const pathParts = window.location.pathname.split('/');
