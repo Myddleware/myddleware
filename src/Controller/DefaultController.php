@@ -671,7 +671,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
         /**
          * DELETE ALL TRANSFERS FOR ONE RULE.
          *
-         * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers")
+         * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers", methods={"DELETE","POST"})
+         * @IsGranted("ROLE_ADMIN")
          */
         public function deleteRuleTransfers($id)
         {

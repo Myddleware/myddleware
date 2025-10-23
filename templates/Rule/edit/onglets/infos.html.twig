@@ -54,9 +54,14 @@
 			<a href="{{ path('rule_cancel_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_cancel_confirm' | trans }}'));" role="button" class="btn btn-outline-warning mb-2 mx-3">
 				{{ 'list_flux.btn.cancel' | trans }}
 			</a>
-			<a href="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}'));" role="button" class="btn btn-outline-danger mb-2">
-				{{ 'list_flux.btn.delete' | trans }}
-			</a>
+			<form method="post" action="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" style="display: inline;">
+				<button type="submit"
+						class="btn btn-outline-danger mb-2"
+						onclick="return confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}');"
+						title="{{'list_flux.btn.delete'|trans}}">
+					{{ 'list_flux.btn.delete' | trans }}
+				</button>
+			</form>
 		{% endif %}
 	</div>
 
