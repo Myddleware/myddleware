@@ -42,7 +42,7 @@ class ExceptionListener
             $referer = $request->headers->get('referer');
 
             // Redirect to the referring page, or home if no referer
-            $url = $referer ?: $this->router->generate('home');
+            $url = $referer ?: $this->router->generate('regle_panel');
             $response = new RedirectResponse($url);
             $event->setResponse($response);
         }
