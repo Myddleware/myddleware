@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+{% block titlesm %}
+	{{ 'crontab.title'|trans }}
+	({{ entity | length }})
+{% endblock %}
+{% block body %}
+
+	<div class="text-center mt-5">
+		<h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
+		{% for entityCron in entitiesCron %}
+			{% if entityCron.value == true %}
+				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger ">
+					{{ 'crontab.disableCron'|trans }}
+				</a>
+				<a href="{{path('massenableCron')}}" class="btn btn-outline-success disabled">
+					{{ 'crontab.enableCron'|trans }}
+				</a>
+			{% else %}
+				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger disabled">
+					{{ 'crontab.disableCron'|trans }}
+				</a>
+				<a href="{{path('massenableCron')}}" class="btn btn-outline-success">
+					{{ 'crontab.enableCron'|trans }}
+				</a>
+			{% endif %}
+		{% endfor %}
+		<p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
+	</div>
+
+	<div class="container-fluid p-3">	
+		<div class="text-center">
+			<a href="{{path('crontab')}}" class="btn btn-primary m-4">
+				{{ 'crontab.create'|trans }}
+			</a>
+			<a href="{{path('massdisable')}}" class="btn btn-danger m-4">
+				{{ 'crontab.massdisable'|trans }}
+			</a>
+			<a href="{{path('massenable')}}" class="btn btn-success m-4">
+				{{ 'crontab.massenable'|trans }}
+			</a>
+		</div>
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-success">
+					{{ message }}
+				</div>
+			{% endfor %}
+			{% for message in app.flashes('error') %}
+				<div class="alert alert-danger">
+					{{ message }}
+				</div>
+			{% endfor %}
+			{% for message in app.flashes('error-permission') %}
+				<div class="alert alert-danger alert-dismissible fade show">
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					{{ message }}
+				</div>
+			{% endfor %}

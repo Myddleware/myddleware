@@ -27,7 +27,7 @@
 		<p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
 	</div>
 
-	<div class="container-fluid p-3">	
+	<div class="container-fluid p-3">
 		<div class="text-center">
 			<a href="{{path('crontab')}}" class="btn btn-primary m-4">
 				{{ 'crontab.create'|trans }}
@@ -46,6 +46,12 @@
 			{% endfor %}
 			{% for message in app.flashes('error') %}
 				<div class="alert alert-danger">
+					{{ message }}
+				</div>
+			{% endfor %}
+			{% for message in app.flashes('error-permission') %}
+				<div class="alert alert-danger alert-dismissible fade show">
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 					{{ message }}
 				</div>
 			{% endfor %}
@@ -165,7 +171,7 @@
 							</div>
 							<button class="btn btn-primary mt-2" onclick="executeCommand()">Execute</button>
 							<div id="commandResult" class="mt-2 p-2 bg-light" style="display: none;"></div>
-						</div>				
+						</div>
 
 						<script>
 							const maxPage = {{ pager.getNbPages() }};
@@ -194,7 +200,7 @@
 							const resultDiv = document.getElementById('commandResult');
 							resultDiv.style.display = 'block';
 							resultDiv.textContent = 'Executing command...';
-							
+
 							fetch('{{ path('executeTerminalCommand') }}', {
 								method: 'POST',
 								headers: {
@@ -216,7 +222,7 @@
 								resultDiv.style.display = 'block';
 							});
 						}
-					
+
 
 						</script>
 					{% endif %}

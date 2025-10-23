@@ -9,6 +9,21 @@
 {% endblock %}
 
 {% block body %}
+    {# success message #}
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ flash }}
+        </div>
+    {% endfor %}
+
+    {# error message for permission denied #}
+    {% for flash in app.flashes('error-permission') %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ flash }}
+        </div>
+    {% endfor %}
+
     <div id="variables" class="container mt-4">
         <div>
             <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2">
