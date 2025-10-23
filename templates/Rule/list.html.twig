@@ -38,26 +38,18 @@
 {% endblock titlesm %}
 {% block body %}
 	{# success message if the rule has been duplicated  #}
-	{% for label, flashes in app.session.flashbag.all %}
-		{% for flash in flashes %}
-			{% if ( label == 'success' ) %}
-				<div class="alert alert-success alert-dismissible fade show">
-					{{ flash }}
-				</div>
-			{% endif %}
-		{% endfor %}
+	{% for flash in app.flashes('success') %}
+		<div class="alert alert-success alert-dismissible fade show">
+			{{ flash }}
+		</div>
 	{% endfor %}
 
 	{# error message for permission denied #}
-	{% for label, flashes in app.session.flashbag.all %}
-		{% for flash in flashes %}
-			{% if ( label == 'error-permission' ) %}
-				<div class="alert alert-danger alert-dismissible fade show">
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-					{{ flash }}
-				</div>
-			{% endif %}
-		{% endfor %}
+	{% for flash in app.flashes('error-permission') %}
+		<div class="alert alert-danger alert-dismissible fade show">
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			{{ flash }}
+		</div>
 	{% endfor %}
 
 	<div id="rule">
