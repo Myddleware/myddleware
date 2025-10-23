@@ -116,11 +116,16 @@
 											<i class="fa fa-pen  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %} " aria-hidden="true"></i>
 										</span>
 									</a>
-									<a class="delete delete btn btn-sm btn-outline-danger" href="{{ path('crontab_delete',{'id' : value.id }) }}" onclick="return(confirm('{{ 'list_rule.delete'|trans }}'));">
-										<span class="btn-opt">
-											<i class="fa fa-trash  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
-										</span>
-									</a>
+									<form method="post" action="{{ path('crontab_delete',{'id' : value.id }) }}" style="display: inline;">
+										<button type="submit"
+												class="delete delete btn btn-sm btn-outline-danger"
+												onclick="return confirm('{{ 'list_rule.delete'|trans }}');"
+												title="{{ 'list_rule.btn.delete'|trans }}">
+											<span class="btn-opt">
+												<i class="fa fa-trash  {% if value.runningInstances == value.maxInstances %}icon-danger{% elseif value.runningInstances == value.maxInstances - 1 and value.maxInstances > 1 %}icon-warning{% endif %}" aria-hidden="true"></i>
+											</span>
+										</button>
+									</form>
 								</td>
 							</tr>
 						{% endfor %}

@@ -29,6 +29,7 @@ use App\Command\SynchroCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -250,7 +251,8 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/delete", name="jobscheduler_delete", methods={"GET", "DELETE"})
+     * @Route("/{id}/delete", name="jobscheduler_delete", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
@@ -427,7 +429,8 @@ class JobSchedulerController extends AbstractController
     /**
      * Deletes a Crontab entity.
      *
-     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"GET", "DELETE"})
+     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
