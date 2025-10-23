@@ -882,6 +882,7 @@ title:
         edit: Editing the rule
         list: Rules
         view: Rule
+        success_edit_params:
     connector:
         create: Creation of a connector
         edit: Editing the connector
