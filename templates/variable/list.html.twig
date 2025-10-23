@@ -53,11 +53,16 @@
 												<i class="fa fa-pen" aria-hidden="true"></i>
 											</span>
 										</a>
-										<a class="delete btn btn-sm btn-outline-danger" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
-											<span class="btn-opt">
-												<i class="fa fa-trash" aria-hidden="true"></i>
-											</span>
-										</a>
+										<form method="post" action="{{ path('variable_delete', {'id': variable.id}) }}" style="display: inline;">
+											<button type="submit"
+													class="delete btn btn-sm btn-outline-danger"
+													onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');"
+													title="{{ 'variable.btn.delete'|trans }}">
+												<span class="btn-opt">
+													<i class="fa fa-trash" aria-hidden="true"></i>
+												</span>
+											</button>
+										</form>
 									</td>
 								</tr>
 							{% endfor %}

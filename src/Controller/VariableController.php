@@ -40,6 +40,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Exception;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class VariableController extends AbstractController
 {
     protected ToolsManager $tools;
@@ -263,6 +264,7 @@ class VariableController extends AbstractController
 
     /**
      * @Route("/variables/{id}/delete", name="variable_delete")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function delete(EntityManagerInterface $em, Variable $variable, TranslatorInterface $translator): Response
     {

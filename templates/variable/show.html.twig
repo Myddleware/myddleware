@@ -17,11 +17,14 @@
             <a href="{{ path('variable_edit', {'id': variable.id}) }}" class="btn btn-outline-success m-2">
                 {{ 'variable.btn.edit'|trans }}
             </a>
-            <a href="{{ path('variable_delete', {'id': variable.id}) }}" 
-               onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');" 
-               class="btn btn-outline-danger m-2">
-                {{ 'variable.btn.delete'|trans }}
-            </a>
+            <form method="post" action="{{ path('variable_delete', {'id': variable.id}) }}" style="display: inline;">
+                <button type="submit"
+                        class="btn btn-outline-danger m-2"
+                        onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');"
+                        title="{{ 'variable.btn.delete'|trans }}">
+                    {{ 'variable.btn.delete'|trans }}
+                </button>
+            </form>
         </div>
 
 
