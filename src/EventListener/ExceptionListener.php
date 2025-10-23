@@ -7,6 +7,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ExceptionListener
 {
@@ -26,6 +27,13 @@ class ExceptionListener
             $urlInstall = $this->router->generate('install_requirements');
             // redirect to installation page
             $response = new RedirectResponse($urlInstall);
+            $event->setResponse($response);
+        }
+
+        // Gracefully redirect on access denied HTTP exceptions
+        if ($exception instanceof AccessDeniedHttpException) {
+            $url = $this->router->generate('regle_panel');
+            $response = new RedirectResponse($url);
             $event->setResponse($response);
         }
     }

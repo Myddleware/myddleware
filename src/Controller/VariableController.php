@@ -263,7 +263,7 @@ class VariableController extends AbstractController
     }
 
     /**
-     * @Route("/variables/{id}/delete", name="variable_delete")
+     * @Route("/variables/{id}/delete", name="variable_delete", methods={"POST","DELETE"})
      * @IsGranted("ROLE_ADMIN")
      */
     public function delete(EntityManagerInterface $em, Variable $variable, TranslatorInterface $translator): Response
