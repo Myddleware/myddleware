@@ -1176,11 +1176,12 @@ export class DocumentDetailDataSections {
 
             rows.forEach(row => {
                 // Get the status from the last td's span element
-                const statusSpan = row.querySelector('td:last-child span.status-badge');
+                // Note: The span class uses a special Unicode character (‑) instead of a regular hyphen
+                const statusSpan = row.querySelector('td:last-child span[class*="status"]');
                 const status = statusSpan ? statusSpan.textContent.trim().toLowerCase() : '';
 
                 // Define cancel statuses (matching the same logic from generateDocumentHistory)
-                const isCancelStatus = ['cancel', 'filter', 'no_send', 'error_expected'].includes(status);
+                const isCancelStatus = ['cancel'].includes(status);
 
                 // Only collect IDs of documents NOT already in cancel status
                 if (!isCancelStatus) {
