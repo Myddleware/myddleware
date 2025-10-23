@@ -143,11 +143,16 @@
 														<i class="fa fa-pen" aria-hidden="true"></i>
 													</span>
 												</a>
-												<a class="delete text-decoration-none btn btn-sm btn-outline-danger" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
-													<span class="btn-opt">
-														<i class="fa fa-trash" aria-hidden="true"></i>
-													</span>
-												</a>
+												<form method="post" action="{{ path('regle_delete',{'id' : rule.id }) }}" style="display: inline;">
+													<button type="submit"
+															class="delete text-decoration-none btn btn-sm btn-outline-danger"
+															onclick="return confirm('{{'list_rule.delete'|trans}}');"
+															title="{{'list_rule.btn.delete'|trans}}">
+														<span class="btn-opt">
+															<i class="fa fa-trash" aria-hidden="true"></i>
+														</span>
+													</button>
+												</form>
 											</td>
 										</tr>
 									{% endfor %}

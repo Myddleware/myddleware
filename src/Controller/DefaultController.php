@@ -83,6 +83,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\RuleGroup;
 use App\Repository\VariableRepository;
 use Symfony\Component\Yaml\Yaml;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
     /**
      * @Route("/rule")
@@ -236,7 +237,8 @@ use Symfony\Component\Yaml\Yaml;
         /**
          * SUPPRESSION D'UNE REGLE.
          *
-         * @Route("/delete/{id}", name="regle_delete")
+         * @Route("/delete/{id}", name="regle_delete", methods={"DELETE","POST"})
+         * @IsGranted("ROLE_ADMIN")
          */
         public function deleteRule(Request $request, $id): RedirectResponse
         {

@@ -81,9 +81,14 @@
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
 											{{ 'view_rule.action.duplic_rule' | trans }}
 										</a>
-										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
-											{{ 'view_rule.action.delete_rule' | trans }}
-										</a>
+										<form method="post" action="{{ path('regle_delete', {'id': rule.GetId }) }}" style="display: inline;">
+											<button type="submit"
+													class="btn btn-outline-danger btn-sm"
+													onclick="return confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}');"
+													title="{{'view_rule.action.delete_rule'|trans}}">
+												{{ 'view_rule.action.delete_rule' | trans }}
+											</button>
+										</form>
 									</div>
 								</div>
 							</th>
