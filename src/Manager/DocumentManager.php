@@ -741,7 +741,10 @@ class DocumentManager
 				$paramCancel['jobId'] = $this->jobId;
 				$docCancel = clone $this;
 				// Cancel the documents that locks the current document
-				$docCancel->setParam($paramCancel, true);
+				if ($docCancel->setParam($paramCancel, true) === false) {
+					// Stop the process of the current document if the other document couldn't be cancelled
+					throw new \Exception('The document '.$result['id'].' is locked and cannot be cancelled. This document is queued. ');
+				}
 				$docCancel->docIdRefError = $this->id;
 				$docCancel->setMessage('This document is cancelled because a predecessor document has been generated (same source_id for the same rule). ');
 				// Set status predecessor_ko if the ref document couldn't be cancelled. 
