@@ -70,14 +70,27 @@
                                 ('ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles)
                             ) %}
 
-                            <a class="btn btn-sm btn-outline-danger {{ can_delete ? '' : 'disabled opacity-50' }}"
-                            href="{{ can_delete ? path('user_manager_delete', {'id': user.id}) : '#' }}"
-                            title="{{ 'delete'|trans }}"
-                            {% if not can_delete %}onclick="return false;"{% else %}onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"{% endif %}>
-                                <span class="btn-opt">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </span>
-                            </a>
+                            {% if can_delete %}
+                                <form method="post" action="{{ path('user_manager_delete', {'id': user.id}) }}" style="display: inline;">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"
+                                            title="{{ 'delete'|trans }}">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger disabled opacity-50"
+                                        title="{{ 'delete'|trans }}"
+                                        disabled>
+                                    <span class="btn-opt">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% endif %}
                         </td>
 
                     </tr>

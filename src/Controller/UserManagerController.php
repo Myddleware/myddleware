@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class UserManagerController extends AbstractController
 {
@@ -100,7 +101,8 @@ class UserManagerController extends AbstractController
         ]);
     }
 
-    #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['GET'])]
+    #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['DELETE', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
         try {
