@@ -189,8 +189,13 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        $clearStorageScript = null;
 
         if ($request->query->has('source_id')) {
+            // remove all the filters first
+            $this->sessionService->removeAllFluxFilters();
+            // get the script to clear localStorage and pass it to the template
+            $clearStorageScript = $this->sessionService->getClearStoredFluxFiltersScript();
             // set the session service source_id
             $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
         }
@@ -384,6 +389,7 @@ public function removeFilter(Request $request): JsonResponse
             'timezone' => $timezone,
             'csvdocumentids' => $csvdocumentids,
             'nbDocuments' => $nbDocuments,
+            'clearStorageScript' => $clearStorageScript,
         ]);
     }
 

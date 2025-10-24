@@ -1527,6 +1527,38 @@ class SessionService
         return isset($myddlewareSession['flux_filter']);
     }
 
+    /**
+     * Remove all flux filters
+     * Clears all filter criteria including rule name, status, type, dates, content, and sort options
+     */
+    public function removeAllFluxFilters()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+
+        if (isset($myddlewareSession['flux_filter']['c'])) {
+            $myddlewareSession['flux_filter']['c'] = [];
+        }
+
+        $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
+    /**
+     * Return JavaScript code to clear the storedFilters from browser localStorage
+     * This clears the client-side filter persistence that is separate from server session
+     *
+     * @return string JavaScript code to clear localStorage storedFilters
+     */
+    public function getClearStoredFluxFiltersScript(): string
+    {
+        return <<<'JS'
+        (function() {
+            if (typeof(Storage) !== "undefined") {
+                localStorage.removeItem("storedFilters");
+            }
+        })();
+        JS;
+    }
+
     //############ FLUX FILTER ###################
 
     //############ ERROR ###################
