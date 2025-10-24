@@ -1551,7 +1551,7 @@ class SessionService
     public function getClearStoredFluxFiltersScript(): string
     {
         return <<<'JS'
-        (function() {
+        (function() {;
             if (typeof(Storage) !== "undefined") {
                 localStorage.removeItem("storedFilters");
             }

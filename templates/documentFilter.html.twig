@@ -448,7 +448,7 @@ var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
 });
 
 // Clear localStorage storedFilters if the script is provided
-{% if clearStorageScript %}
+{% if clearStorageScript is not null and clearStorageScript is not empty %}
     {{ clearStorageScript|raw }}
 {% endif %}
 	</script>

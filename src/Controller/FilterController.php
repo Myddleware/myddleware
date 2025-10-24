@@ -162,6 +162,7 @@ public function emptySearchAction(Request $request): Response
         'timezone' => $timezone,
         'csvdocumentids' => '',
         'nbDocuments' => 0,
+        'clearStorageScript' => null,
     ]);
 }
 
