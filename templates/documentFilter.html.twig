@@ -446,6 +446,11 @@ var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
         }
     });
 });
+
+// Clear localStorage storedFilters if the script is provided
+{% if clearStorageScript %}
+    {{ clearStorageScript|raw }}
+{% endif %}
 	</script>
 {% endblock javascript %}{% endblock %}{% block cssin %}
 {{ encore_entry_link_tags('app') }}
