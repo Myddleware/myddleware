@@ -1,0 +1,45 @@
+<section class="mb-5">
+  <h2 class="h3 fw-bold mb-4">{{ 'animate.ruleconnection'|trans({'default':'Rule Connection'}) }}</h2>
+
+  <div class="row gy-5">
+    <div class="col-12 col-lg-6">
+      <h3 class="h5 mb-3">Source</h3>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Connector</label>
+          <select id="source-connector" class="form-select form-select-lg">
+            {% for s in source %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Object</label>
+          <select id="source-object" class="form-select form-select-lg">
+            <option value="" disabled selected>—</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <h3 class="h5 mb-3">Target</h3>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Connector</label>
+          <select id="target-connector" class="form-select form-select-lg">
+            {% for t in target %}
+              <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Object</label>
+          <select id="target-object" class="form-select form-select-lg">
+            <option value="" disabled selected>—</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

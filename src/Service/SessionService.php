@@ -409,6 +409,14 @@ class SessionService
         return isset($myddlewareSession['param']['myddleware']['connector']['values']);
     }
 
+    public function setParamRuleDescription(int $key, ?string $description): void
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        $myddlewareSession['param']['rule'][$key]['description'] = $description ?? '';
+
+        $session = $this->getSession();
+        $session->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
     //############ CONNECTOR ###################
 
     //############ MAILCHIMP ###################

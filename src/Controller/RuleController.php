@@ -37,7 +37,6 @@ use App\Entity\Connector;
 use App\Entity\Functions;
 use App\Entity\RuleAudit;
 use App\Entity\RuleField;
-use App\Entity\RuleGroup;
 use App\Entity\RuleParam;
 use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
@@ -45,14 +44,11 @@ use App\Form\ConnectorType;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
 use App\Manager\RuleManager;
-use Doctrine\ORM\Mapping\Id;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
 use App\Entity\ConnectorParam;
 use App\Entity\RuleParamAudit;
-use App\Entity\WorkflowAction;
-
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
 use App\Entity\RuleRelationShip;
@@ -66,7 +62,6 @@ use App\Form\DuplicateRuleFormType;
 use App\Service\RuleCleanupService;
 use App\Repository\ConfigRepository;
 use Illuminate\Encryption\Encrypter;
-use Pagerfanta\Adapter\ArrayAdapter;
 use App\Form\Type\RelationFilterType;
 use App\Service\TwoFactorAuthService;
 use App\Service\RuleDuplicateService;
@@ -81,10 +76,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -97,20 +90,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         private FormulaManager $formuleManager;
         private SessionService $sessionService;
-        private ParameterBagInterface $params;
         private EntityManagerInterface $entityManager;
-        private HomeManager $home;
         private ToolsManager $tools;
         private TranslatorInterface $translator;
         private AuthorizationCheckerInterface $authorizationChecker;
         private JobManager $jobManager;
         private LoggerInterface $logger;
-        private TemplateManager $template;
         private RuleCleanupService $ruleCleanupService;
         private RuleDuplicateService $ruleDuplicateService;
         private RuleSimulationService $ruleSimulationService;
         private RuleRepository $ruleRepository;
-        private JobRepository $jobRepository;
         private DocumentRepository $documentRepository;
         private SolutionManager $solutionManager;
         private RuleManager $ruleManager;
@@ -118,10 +107,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         protected Connection $connection;
         // To allow sending a specific record ID to rule simulation
         protected $simulationQueryField;
-        private ConfigRepository $configRepository;
-        private TwoFactorAuthService $twoFactorAuthService;      
-        private RuleFieldRepository $ruleFieldRepository;
-
+        private TwoFactorAuthService $twoFactorAuthService;
         private RequestStack $requestStack;
 
         public function __construct(
@@ -146,7 +132,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             ToolsManager $tools,
             JobManager $jobManager,
             TemplateManager $template,
-            ParameterBagInterface $params,
             TwoFactorAuthService $twoFactorAuthService,
             RequestStack $requestStack
         ) {
@@ -161,16 +146,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->ruleDuplicateService = $ruleDuplicateService;
             $this->ruleSimulationService = $ruleSimulationService;
             $this->ruleRepository = $ruleRepository;
-            $this->ruleFieldRepository = $ruleFieldRepository;
-            $this->jobRepository = $jobRepository;
             $this->documentRepository = $documentRepository;
             $this->connection = $connection;
             $this->translator = $translator;
             $this->authorizationChecker = $authorizationChecker;
-            $this->home = $home;
             $this->tools = $tools;
             $this->jobManager = $jobManager;
-            $this->template = $template;
             $this->twoFactorAuthService = $twoFactorAuthService;
             $this->requestStack = $requestStack;
         }
@@ -2796,55 +2777,41 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             'error' => $error,
         ]);
     }
+
     /**
-     * LISTE DES MODULES POUR ANIMATION.
+     * LISTE DES MODULES
      * @throws Exception
      */
-    #[Route('/list/module', name: 'regle_list_module')]
-    public function ruleListModule(Request $request): Response
+   #[Route('/create/step1', name: 'regle_stepone_animation_save', methods: ['POST'])]
+    public function ruleStepOneAnimationSave(Request $request): JsonResponse
     {
-        try {
-            $id_connector = $request->get('id');
-            $type = $request->get('type');
-            $key = $this->sessionService->getParamRuleLastKey(); // It's a new rule, last key = 0
+        $payload = json_decode($request->getContent(), true) ?? [];
+        $name = trim($payload['name'] ?? '');
+        $description = trim($payload['description'] ?? '');
 
-            // Control the request
-            if (!in_array($type, ['source', 'cible']) || !is_numeric($id_connector)) {
-                throw $this->createAccessDeniedException();
-            }
-            $id_connector = (int) $id_connector;
-
-            $this->getInstanceBdd();
-            $connector = $this->entityManager->getRepository(Connector::class)
-                ->find($id_connector); // infos connector
-
-            $connectorParams = $this->entityManager->getRepository(ConnectorParam::class)
-                ->findBy(['connector' => $id_connector]);    // infos params connector
-
-            foreach ($connectorParams as $p) {
-                $this->sessionService->setParamRuleParentName($key, $type, $p->getName(), $p->getValue()); // params connector
-            }
-            $this->sessionService->setParamRuleConnectorParent($key, $type, $id_connector); // id connector
-            $this->sessionService->setParamRuleParentName($key, $type, 'solution', $connector->getSolution()->getName()); // nom de la solution
-
-            $solution = $this->solutionManager->get($this->sessionService->getParamRuleParentName($key, $type, 'solution'));
-
-            $params_connexion = $this->decrypt_params($this->sessionService->getParamParentRule($key, $type));
-            $params_connexion['idConnector'] = $id_connector;
-
-            $solution->login($params_connexion);
-
-            $t = (('source' == $type) ? 'source' : 'target');
-
-            $liste_modules = ToolsManager::composeListHtml($solution->get_modules($t), $this->translator->trans('create_rule.step1.choose_module'));
-
-            return new Response($liste_modules);
-        } catch (Exception $e) {
-            $error = $e->getMessage().' '.$e->getLine().' '.$e->getFile();
-            $this->logger->error($error);
-            return new Response('<option value="">Aucun module pour ce connecteur</option>');
+        if ($name === '' || mb_strlen($name) < 3 || mb_strlen($name) > 40) {
+            return new JsonResponse(['ok'=>false,'errors'=>['rulename'=>'3–40 caractères']], 400);
         }
+
+        $key = $this->sessionService->getParamRuleLastKey();
+        $this->sessionService->setParamRuleName($key, $name);
+        $this->sessionService->setParamRuleDescription($key, $description);
+
+        $this->getInstanceBdd();
+        $solutionSource = $this->entityManager->getRepository(Solution::class)
+            ->solutionConnector('source', $this->getUser()->isAdmin(), $this->getUser()->getId());
+        $solutionTarget = $this->entityManager->getRepository(Solution::class)
+            ->solutionConnector('target', $this->getUser()->isAdmin(), $this->getUser()->getId());
+
+        $html = $this->renderView('Rule/create/_connection.html.twig', [
+            'source' => $solutionSource,
+            'target' => $solutionTarget,
+        ]);
+
+        return new JsonResponse(['ok'=>true,'html'=>$html]);
     }
+
+    
 
     /* ******************************************************
         * METHODES PRATIQUES

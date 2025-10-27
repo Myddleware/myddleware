@@ -1,18 +1,25 @@
 <section class="mb-4">
-  <h2 class="h5 mb-3">{{'animate.title'|trans}}</h2>
+  <h2 class="h5 mb-3">{{ 'animate.title'|trans }}</h2>
 
-  <div class="row g-4">
-    <div class="col-12 col-lg-6">
-      <label for="rulename" class="form-label">{{ 'animate.rulename'|trans({'default': 'Name of your rule'}) }}</label>
-      <input id="rulename" type="text" class="form-control" placeholder="{{ 'animate.rulename'|trans({'default': 'Name here'}) }}" maxlength="40" autocomplete="off">
-      <div id="rulename-feedback" class="form-text"></div>
+  <form id="step1-form" novalidate>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <label for="rulename" class="form-label">
+          {{ 'animate.rulename'|trans({'default': 'Name of your rule'}) }}
+        </label>
+        <input id="rulename" type="text" class="form-control"
+               placeholder="{{ 'animate.rulename'|trans({'default': 'Name here'}) }}"
+               maxlength="40" autocomplete="off" required>
+        <div id="rulename-feedback" class="form-text"></div>
+      </div>
+
+      <div class="col-12">
+        <label for="ruledescription" class="form-label">
+          {{ 'animate.choice.description'|trans({'default': 'Description'}) }}
+        </label>
+        <textarea id="ruledescription" class="form-control" rows="4"
+                  placeholder="{{ 'animate.choice.description'|trans({'default': 'Description here'}) }}"></textarea>
+      </div>
     </div>
-    <div class="col-12">
-      <label for="ruledescription" class="form-label">{{ 'animate.choice.description'|trans({'default': 'Description'}) }}</label>
-      <textarea id="ruledescription"
-                class="form-control"
-                rows="4"
-                placeholder="{{ 'animate.choice.description'|trans({'default': 'Description here'}) }}"></textarea>
-    </div>
-  </div>
+  </form>
 </section>
