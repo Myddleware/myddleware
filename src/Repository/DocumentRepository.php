@@ -423,16 +423,16 @@ class DocumentRepository extends ServiceEntityRepository
         $q->execute();
 	}
 
-    public function countNbDocuments(): int 
+public function countNbDocuments(): int 
     {
 
-        return (int) $this->createQueryBuilder('d')
-                ->select('COUNT(d.id)')
-                ->andWhere('d.deleted = 0')
-                ->andWhere('d.status = :status')
-                ->andWhere('d.deleted = 0')
-                ->setParameter('status', 'send')
-                ->getQuery()
-                ->getSingleScalarResult();
+        $query = "EXPLAIN SELECT * FROM document WHERE document.deleted = 0 AND document.global_status = 'Close';";
+
+        $result = $this->getEntityManager()->getConnection()->executeQuery($query);
+        $result = $result->fetchAllAssociative();
+
+        $rows = $result[0]['rows'];
+
+        return $rows;
     }
 }
