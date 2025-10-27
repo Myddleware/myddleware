@@ -1276,6 +1276,7 @@ user_manager:
     create: Créer un utilisateur
     edit: Modifier un utilisateur
     password: Mot de passe
+    confirm_delete: Êtes-vous sûr de vouloir supprimer cet utilisateur ?
 success_create_user: Utilisateur créé avec succès.
 success_update_user: Utilisateur mis à jour avec succès.
 success_deleted_user: Utilisateur supprimé avec succès.
