@@ -5,9 +5,9 @@
  # * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  # * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
  # * @link http://www.myddleware.com
- 
+
  # This file is part of Myddleware.
- 
+
  # Myddleware is free software: you can redistribute it and/or modify
  # it under the terms of the GNU General Public License as published by
  # the Free Software Foundation, either version 3 of the License, or
@@ -28,13 +28,13 @@ panel:
         title: Débloquer de nouvelles fonctionnalités avec Myddleware Premium
     contact:
         title: Contactez-nous
-        title2 : Besoin d'assistance technique
-        text1 : Pour tout problème technique, bogue ou question relative au développement, n'hésitez pas à nous contacter par les canaux suivants
-        text2 : Contact technique 
-        text3 : Dépôt GitHub, voir ou signaler des problèmes directement sur notre GitHub
-        title3 : Nouveaux projets ou opportunités d'affaires ?
-        text4 : Pour discuter d'un nouveau projet, d'une collaboration ou d'une opportunité commerciale, veuillez nous contacter à l'adresse suivante
-        text5 : Contact professionnel
+        title2: Besoin d'assistance technique
+        text1: Pour tout problème technique, bogue ou question relative au développement, n'hésitez pas à nous contacter par les canaux suivants
+        text2: Contact technique
+        text3: Dépôt GitHub, voir ou signaler des problèmes directement sur notre GitHub
+        title3: Nouveaux projets ou opportunités d'affaires ?
+        text4: Pour discuter d'un nouveau projet, d'une collaboration ou d'une opportunité commerciale, veuillez nous contacter à l'adresse suivante
+        text5: Contact professionnel
     documents:
         title: Documents envoyés par Myddleware
     solutions:
@@ -63,7 +63,7 @@ create_rule:
         four: Simulation
         five: Relations
         six: Filtres
-        seven: Validation   
+        seven: Validation
     step1:
         list_empty: Aucune solution
         list_selected: Choix
@@ -76,7 +76,7 @@ create_rule:
         connector: Votre connecteur a bien été créé
     step2:
         title: Choix des modules
-        choice_module: Veuillez choisir un module  
+        choice_module: Veuillez choisir un module
         valid: Envoyer
     step3:
         filter: Filtre
@@ -101,17 +101,17 @@ create_rule:
             update_only: Mise à jour de données seulement
         deletion:
             label: Activer la suppression dans l'application cible
-            yes: Oui     
+            yes: Oui
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici
         info_fields: Liste des valeurs possibles
         addfield:
-            custom: Ajouter un champ personnalisé        
-        alert: 
+            custom: Ajouter un champ personnalisé
+        alert:
             fields: Il existe des champs obligatoires qui sont actuellement vides. Il vous est possible de renseigner plusieurs champs source vers un champ cible.
             fields_title: Champs obligatoires
-        formula: 
+        formula:
             fields: "Sélectionnez un champ(s) pour la formule"
             select_picklist: "Sélectionnez une valeur de liste"
             function: Fonctions
@@ -120,19 +120,19 @@ create_rule:
             confirm: Confirmer
             delete: Effacer
             close: Fermer
-            function_wizard: Assistant de fonction
-            select_function: Select a function
-            select_function_title: Function
-            select_rule: Select related rule
-            select_rule_title: Select a lookup rule
-            select_field: Select related field
-            select_field_title: Select a field for lookup
-            toggle_tooltip: Toggle function description
             error: Votre règle comporte une ou plusieurs erreurs de syntaxe
+            function_wizard: Assistant de fonction
+            select_function: Sélectionnez une fonction
+            select_function_title: Fonction
+            select_rule: Sélectionnez la règle associée
+            select_rule_title: Sélectionnez une règle de recherche
+            select_field: Sélectionnez le champ associé
+            select_field_title: Sélectionnez un champ pour la recherche
+            toggle_tooltip: Afficher/Masquer la description de la fonction
         confirm:
             success: Enregistrement avec succès
-            error: Une erreur est survenue 
-            valid: Valider   
+            error: Une erreur est survenue
+            valid: Valider
         relation:
             empty: Aucune relation
             select: Aucune règle
@@ -146,10 +146,11 @@ create_rule:
             yes: Oui
             no : Non
             behavior: Comportement
+
         params:
             duplicate: Champs pour éviter les doublons
             sync: Synchronisation bidirectionnelle
-        save_wait: Veuillez patienter... 
+        save_wait: Veuillez patienter...
 
 filter:
     content: contient
@@ -159,7 +160,7 @@ filter:
     gt: est supérieur à
     lt: est inférieur à
     equal: est égale à
-    different: n'est pas égal à 
+    different: n'est pas égal à
     gteq: est supérieur ou égal à
     lteq: est inférieur ou égal à
     in: est compris dans le tableau suivant séparé par des points virgules
@@ -168,11 +169,11 @@ filter:
 behavior_filters:
     error_missing: Erreur si non trouvé
     error_empty: Erreur si vide
-            
+
 view_rule:
     execute_id:
         title: Executer une règle par id
-        run: Run the rule with these ids
+        run: Exécuter la règle avec ces ids
     go_connector: Aller au connecteur
     action:
         exec_all: Exéc. les règles actives
@@ -192,7 +193,7 @@ view_rule:
         info: Informations
         mapping: Mapping des champs
         relation: Relations
-        params: Paramètres 
+        params: Paramètres
         filter: Filtres
     title:
         rule: Détails
@@ -237,17 +238,16 @@ view_rule:
         rule : Règles
     filters:
         empty: Aucun filtre
-
     params:
         save: Sauvegarder
         simule: Simuler documents
         result: Nombre de documents estimé
         details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
-        daterefence: Date de la donnée dans l’application source
+        daterefence: Date de la donnée dans l'application source
 rule:
     source: Source
-    target: Cible  
-    open: Ouvrir  
+    target: Cible
+    open: Ouvrir
     workon: Vous travaillez sur la règle
     yoursource: Votre solution source
     yourtarget: Votre solution cible
@@ -256,6 +256,7 @@ rule:
     select_value: Choisir une valeur
 
 rulegroup:
+  create: "Créer un groupe de règles"
   created_successfully: "Groupe de règles créé avec succès."
   updated_successfully: "Groupe de règles mis à jour avec succès."
   deleted_successfully: "Groupe de règles supprimé avec succès."
@@ -267,7 +268,7 @@ rulegroup:
   confirm_transfer_text: "Cette règle appartient déjà à un autre groupe. Voulez-vous la transférer dans ce groupe ?"
   title_one: "Groupe de règles"
   back: "Retour à la liste"
-  edit: "Édition d’un groupe de règles"
+  edit: "Édition d'un groupe de règles"
   delete: "Supprimer"
   name: "Nom"
   create_by: "Créé par"
@@ -279,7 +280,7 @@ rulegroup:
   remove_rule: "Retirer la règle du groupe"
   list: "Groupes de règles"
   create_new: "Créer un groupe de règles"
-  rulegroup_name: Nom du groupe de règles
+  rulegroup_name : Nom du groupe de règles
   table:
     id: "ID"
     name: "Nom"
@@ -296,7 +297,7 @@ rulegroup:
     status: "Statut"
     create_by: "Créé par"
     delete: "Supprimer"
-    edit: "Édition d’un groupe de règles"
+    edit: "Édition d'un groupe de règles"
     updated_successfully: "Groupe de règles mis à jour avec succès"
     rules: "Règles"
     rule_removed_successfully: "Règle supprimée avec succès"
@@ -340,10 +341,12 @@ list_rulegroup:
   th:
     name: "Nom"
     description: "Description"
+
 actions: "Actions"
 
+
 animate:
-    rulename: Nom de votre règle 
+    rulename: Nom de votre règle
     wait: Veuillez patienter...
     solution:
         source: Source
@@ -355,13 +358,13 @@ animate:
         module: Choix des modules
         template: Choix des modèles prédéfinis
         name: Nom
-        description: Description 
+        description: Description
         empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
     tutoriel:
         link: "https://myddleware.github.io/myddleware/#/basic_usage"
         textlink: "Besoin d'aide ? Lisez notre tutoriel."
 
-create_connector:    
+create_connector:
     title: Création d'un connecteur
     save: Enregistrer la connexion
     connexion: Nom de la connexion
@@ -369,9 +372,9 @@ create_connector:
     valid: Cliquez-ici pour créer un autre connecteur
     help: "Besoin d'aide ?"
     source: Source
-    target: Cible  
-    upload_placeholder: Sélectionner votre fichier 
-    upload_btn: Transférer 
+    target: Cible
+    upload_placeholder: Sélectionner votre fichier
+    upload_btn: Transférer
     upload_error: Le fichier n'a pas pu être enregistré sur le serveur
     upload_error_ext: L'extension n'est pas autorisée
     upload_success: Le fichier a bien été transféré
@@ -382,17 +385,17 @@ create_connector:
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
     delete: "Désirez-vous supprimer ce connecteur ?"
-    total: Nombre de 
+    total: Nombre de
     total2: connecteurs
     create_first_connector:  Vous pouvez créer votre premier connecteur
-    th: 
+    th:
         name: Nom
         date_created: Date de création
         option: Options
     btn:
         delete: Supprimer
         edit: Editer
-        view: Voir la fiche            
+        view: Voir la fiche
 
 view_connector:
     btn:
@@ -404,13 +407,13 @@ view_connector:
     info:
         title: Paramètres de connexion
         solution: solution
-    tabs: 
+    tabs:
         info: Informations
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
         link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
-        
+
 list_flux:
     start: Début
     end: Fin
@@ -423,9 +426,9 @@ list_flux:
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
         cancel_tooltip: Cela annule les documents, ils ne seront pas envoyés.
+        reloadcancel: Annuler et relancer les documents
         unlockall: Débloquer les documents
         mass_unlock_confirm: Débloquer les documents sélectionnés ?
-        reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
         reload_tooltip: Cela relance les documents avec les mêmes données et le même identifiant, rien ne change.
@@ -441,7 +444,7 @@ list_flux:
         date_modified_end: Date de modification (fin)
         rule: Règle
         status: Statut
-        global_status: Statut global 
+        global_status: Statut global
         type: Type
         id: Identifiant
         source_id: Id source
@@ -471,7 +474,6 @@ list_flux:
         source_field: Champ lié
         reference: Référence
         helppop: Date des données dans l'application source
-        
 flux:
     gbl_status:
         open: Ouvert
@@ -501,11 +503,11 @@ flux:
         Not_found: Non trouvée
         Error_workflow: Workflow en erreur
     type:
-        update: Update
-        create: Create
-        search: Search
-        delete: Delete
- 
+        update: Mise à jour
+        create: Création
+        search: Recherche
+        delete: Suppression
+
 view_flux:
     empty: Pas de données
     empty_log: Aucune log
@@ -514,23 +516,23 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
-    comment: Ajouter un journal
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
     nbnbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct
+    comment: Ajouter un journal
     unlocked_successfully: Document déverrouillé avec succès
     btn:
         reload: Relancer le document
-        cancel: Annuler le document 
-        readrecord: Lancer la même donnée 
+        cancel: Annuler le document
+        readrecord: Lancer la même donnée
         unlock: Débloquer le document
         tooltip:
             reload: Relancer la synchronisation de ce document
             cancel: Annuler l'exécution de ce document
-            readrecord: Re-execute the processing of this document
+            readrecord: Re-exécuter le traitement de ce document
     header:
         rule: Règle
         statut: Status
@@ -549,20 +551,19 @@ view_flux:
         job: Job
         date_created: Date de création
         type: Type
-        msg: Message    
+        msg: Message
     workflow_log:
-        id: Id
-        workflow: Workflow
-        job: Job
-        trigger_document: Document déclencheur
-        generate_document: Document généré
-        created_by: Créé par
-        status: Statut
-        date_created: Date de création
-        message: Message
-        action_name: Nom de l'action
-        action_type: Type d'action
-
+        id: "ID"
+        workflow: "Workflow"
+        job: "Job"
+        trigger_document: "Document déclencheur"
+        generate_document: "Document généré"
+        created_by: "Créé par"
+        status: "Statut"
+        date_created: "Date de création"
+        message: "Message"
+        action_name: "Nom de l'action"
+        action_type: "Type d'action"
 
 list_task:
     total: Total de tâches
@@ -580,25 +581,26 @@ list_task:
         manual: Manuelle
         api: Api
         error: Erreur
-        
+
+
 view_task:
-    empty_log: Aucune log  
+    empty_log: Aucune log
     task_stop: ARRET DE LA TACHE
     refresh: RAFRAICHIR
-    nblogs: Nombre de logs  
+    nblogs: Nombre de logs
     header:
         id: Identifiant
         status: Statut
         begin: Date de début
         end: Date de fin
-        message: Message   
+        message: Message
     log:
         id: Id
         ref: Référence
         transfer: Document
         date_created: Date de création
         type: Type
-        msg: Message     
+        msg: Message
 
 list_workflow:
     total: Total des workflows
@@ -677,7 +679,7 @@ view_workflow_action:
 view_account:
     title: Mon compte
     user_info: Mes informations
-    change_password : Changer mot de passe
+    change_password: Changer mot de passe
     profile_edit: Editer mon profil
     support:
         enabled: Support activé
@@ -718,7 +720,7 @@ view_account:
         choose_language: Choisissez votre langue
     info:
         password_description: Modifiez votre mot de passe pour renforcer la sécurité de votre compte.
-        twofa_description: When enabled, you'll be asked to enter a verification code sent to your email after logging in.
+        twofa_description: Quand elle est activée, vous devrez entrer un code de vérification envoyé à votre email après vous être connecté.
     confirm:
         empty_logs: Êtes-vous sûr de vouloir vider le fichier de logs ? Cette action est irréversible.
 
@@ -728,39 +730,39 @@ function:
         mathematical: Fonction
         text: Texte
         date: Date et heure
-        constant: Constante 
+        constant: Constante
     description:
-        text: 
-            trim:  "Supprime les espaces (ou d'autres caractères) en début et fin de chaîne. Exemple: trim('Hello World') retourne 'Hello World'"
-            ltrim:  "Supprime les espaces (ou d'autres caractères) en début de chaîne. Exemple: ltrim('   Hello') retourne 'Hello'"
-            rtrim:  "Supprime les espaces (ou d'autres caractères) en fin de chaîne. Exemple: rtrim('Hello   ') retourne 'Hello'"
-            lower:  "Met tous les caractères en minuscules. Exemple: lower('Hello World') retourne 'hello world'"
-            upper:  "Met tous les caractères en majuscules. Exemple: upper('Hello World') retourne 'HELLO WORLD'"
-            substr:  "Retourne un segment de chaîne. Exemple: substr('Hello World', 0, 5) retourne 'Hello'"
-            striptags:  "Supprime les balises HTML et PHP d'une chaîne. Exemple: striptags('<p>Hello</p>') retourne 'Hello'"
-            changeValue:  "Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple: changeValue({FIELD}, '('active':'1', 'inactive':'0')') convertit 'active' en '1'"
-            htmlEntityDecode:  "Convertit toutes les entités HTML en caractères normaux. Exemple: htmlEntityDecode('&amp;') retourne '&'"
-            replace:  "Remplace toutes les occurrences dans une chaîne. Exemple: replace('world', 'there', 'Hello world') retourne 'Hello there'"
-            utf8encode:  "Encode une chaîne ISO-8859-1 en UTF-8. Exemple: utf8encode('Hello') convertit en UTF-8"
-            utf8decode:  "Décode une chaîne UTF-8 en ISO-8859-1. Exemple: utf8decode('Hello') convertit en ISO-8859-1"
-            htmlentities:  "Convertit les caractères spéciaux en entités HTML. Exemple: htmlentities('<') retourne '&lt;'"
-            htmlspecialchars:  "Convertit les caractères spéciaux en entités HTML tout en conservant les entités HTML déjà encodées. Exemple: htmlspecialchars('A & B') retourne 'A &amp; B'"
-            strlen:  "Retourne la longueur d'une chaîne. Exemple: strlen('Hello') retourne 5"
-            urlencode:  "Encode une chaîne pour l'utilisation dans une URL. Exemple: urlencode('Hello World') retourne 'Hello%20World'"
-            chr:  "Retourne un caractère à partir de son code ASCII. Exemple: chr(65) retourne 'A'"
-            json_decode:  "Décode une chaîne JSON en une valeur PHP. Exemple: json_decode('{\"name\":\"John\"}') retourne un objet avec la propriété 'name'"
-            json_encode:  "Retourne la représentation JSON d'une valeur. Exemple: json_encode(['name' => 'John']) retourne '{\"name\":\"John\"}'"
-            getValueFromArray:  "Retourne une valeur d'un tableau en utilisant une clé. Exemple: getValueFromArray('name', '{\"name\":\"John\"}') retourne 'John'"
+        text:
+            trim: "trim($string) / Supprime les espaces (ou d'autres caractères) en début et fin de chaîne. Exemple: trim(' Hello World ') retourne 'Hello World'"
+            ltrim: "ltrim($string [, $characters]) / Supprime les espaces (ou d'autres caractères) en début de chaîne. Exemple: ltrim('   Hello') retourne 'Hello'"
+            rtrim: "rtrim($string [, $characters]) / Supprime les espaces (ou d'autres caractères) en fin de chaîne. Exemple: rtrim('Hello   ') retourne 'Hello'"
+            lower: "lower($string) / Met tous les caractères en minuscules. Exemple: lower('Hello World') retourne 'hello world'"
+            upper: "upper($string) / Met tous les caractères en majuscules. Exemple: upper('Hello World') retourne 'HELLO WORLD'"
+            substr: "substr($string, $start [, $length]) / Retourne un segment de chaîne. Exemple: substr('Hello World', 0, 5) retourne 'Hello'"
+            striptags: "striptags($string [, $allowable_tags]) / Supprime les balises HTML et PHP d'une chaîne. Exemple: striptags('<p>Hello</p>') retourne 'Hello'"
+            changeValue: "changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple: changeValue({FIELD}, '('active':'1', 'inactive':'0')') convertit 'active' en '1'"
+            htmlEntityDecode: "htmlEntityDecode($string) / Convertit toutes les entités HTML en caractères normaux. Exemple: htmlEntityDecode('&amp;') retourne '&'"
+            replace: "replace($search, $replace, $subject) / Remplace toutes les occurrences dans une chaîne. Exemple: replace('world', 'there', 'Hello world') retourne 'Hello there'"
+            utf8encode: "utf8encode($string) / Encode une chaîne ISO-8859-1 en UTF-8. Exemple: utf8encode('Hello') convertit en UTF-8"
+            utf8decode: "utf8decode($string) / Décode une chaîne UTF-8 en ISO-8859-1. Exemple: utf8decode('Hello') convertit en ISO-8859-1"
+            htmlentities: "htmlentities($string) / Convertit les caractères spéciaux en entités HTML. Exemple: htmlentities('<') retourne '&lt;'"
+            htmlspecialchars: "htmlspecialchars($string) / Convertit les caractères spéciaux en entités HTML tout en conservant les entités HTML déjà encodées. Exemple: htmlspecialchars('A & B') retourne 'A &amp; B'"
+            strlen: "strlen($string) / Retourne la longueur d'une chaîne. Exemple: strlen('Hello') retourne 5"
+            urlencode: "urlencode($string) / Encode une chaîne pour l'utilisation dans une URL. Exemple: urlencode('Hello World') retourne 'Hello%20World'"
+            chr: "chr($ascii) / Retourne un caractère à partir de son code ASCII. Exemple: chr(65) retourne 'A'"
+            json_decode: "json_decode($string) / Décode une chaîne JSON en une valeur PHP. Exemple: json_decode('{\"name\":\"John\"}') retourne un objet avec la propriété 'name'"
+            json_encode: "json_encode($value) / Retourne la représentation JSON d'une valeur. Exemple: json_encode(['name' => 'John']) retourne '{\"name\":\"John\"}'"
+            getValueFromArray: "getValueFromArray($key, $array) / Retourne une valeur d'un tableau en utilisant une clé. Exemple: getValueFromArray('name', '{\"name\":\"John\"}') retourne 'John'"
             lookup: "C'est ce que nous utilisons maintenant à la place de la relation de règle. Vous obtenez une certaine valeur d'un champ qui appartient à une autre règle. Exemple: lookup({name}, '677f9171e6851') retourne la valeur du champ name d'un document produit par la règle qui a un id de 677f9171e6851"
         mathematical:
-            round:  "Arrondit un nombre flottant à une précision spécifiée. Exemple: round(3.14159, 2) retourne 3.14"
-            ceil:  "Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
-            abs:  "Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
+            round: "round($number [, $precision]) / Arrondit un nombre flottant à une précision spécifiée. Exemple: round(3.14159, 2) retourne 3.14"
+            ceil: "ceil($number) / Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
+            abs: "abs($number) / Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
         date:
-            date:  "Définit une date/heure (date et heure courante). Exemple: date() retourne la date et l'heure courante"
-            microtime:  "Retourne le timestamp Unix actuel avec les microsecondes. Exemple: microtime() retourne le timestamp Unix actuel avec les microsecondes, tel que 1717536000.123456"
-            changeTimeZone:  "Change le fuseau horaire de la date précédente. Exemple: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') retourne '2024-01-01 00:00:00'"
-            changeFormatDate:  "Convertit la date précédente dans le format spécifié. Exemple: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') retourne '2024/01/01'"
+            date: "Set a date/local time (current date and time). Example: date() returns the current date and time"
+            microtime: "Return the current Unix timestamp with the microseconds. Example: microtime() returns the current Unix timestamp with the microseconds, such as 1717536000.123456"
+            changeTimeZone: "changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter. Example: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') returns '2024-01-01 00:00:00'"
+            changeFormatDate: "changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter. Example: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') returns '2024/01/01'"
         constant:
             mdw_no_send_field: Ne pas envoyer le champ
             mdw_cancel_document: Annuler le document
@@ -772,25 +774,25 @@ solution:
         login: Utilisateur
         username: Utilisateur
         password: Mot de passe
-        accesskey: Access key
-        accesstoken: Access token
+        accesskey: Clé d'accès
+        accesstoken: Jeton d'accès
         url: Url
         token: Jeton
-        useraccesstoken: Token utilisateur
         tokensecret: Secret jeton
+        useraccesstoken: Token utilisateur
         consumerkey: Clé consommateur
-        consumersecret: Secret consommateur 
+        consumersecret: Secret consommateur
         apikey: Clé api
         projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
-        mail_gotomeeting: Mail GotoMeeting 
+        mail_gotomeeting: Mail GotoMeeting
         accountid: Identifiant de compte
         clientid: Client ID
         clientsecret: Client secret
         instance: Numéro d'instance (Entrez 0 si vous n'en avez pas)
         company: Company ID
-        user: User ID        
+        user: User ID
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
         file: Fichier
@@ -808,13 +810,17 @@ solution:
         hashkey: Clé de hachage
         id_auth: Id auth
         authid: Id auth
-        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
-        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
-    params: 
+        user_custom_fields: User custom fields (shortname separated by coma)
+        course_custom_fields: Course custom fields (shortname separated by coma)
+        tenant_id: Tenant ID
+        client_id: Client ID
+        client_secret: Client Secret
+        environment: Environment
+    params:
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
         active: Activation
-        delete: Suppression de données (délais de suppression des documents dans Myddleware) 
+        delete: Suppression de données (délais de suppression des documents dans Myddleware)
         activate: Activé
         desactivate: Désactivé
         description: Description
@@ -853,16 +859,16 @@ error:
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
         delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
         delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
-        update: Impossible d'éditer la règle. 
+        update: Impossible d'éditer la règle.
     account:
         language_change: "Impossible de modifier le langage :"
     template:
         creation: Erreur lors de le génération des règles du modèle. N'hésitez pas à demander de l'aide sur notre forum <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">https://github.com/Myddleware/myddleware/issues</a>
     connector:
-        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle 
+        remove_with_rule: Impossible de supprimer le connecteur car il est utilisé dans une règle. Supprimez premièrement la règle
     document:
-        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware. 
-        
+        deleted_flag: Ce flux de données est indiqué comme supprimé. Il n'est donc pas pris en compte dans tous les calculs de relation fait par Myddleware.
+
 title:
     account:
         view: Mon compte
@@ -881,7 +887,7 @@ title:
         create: Création d'un connecteur
         edit: Edition du connecteur
         list: Connecteurs
-    flux: 
+    flux:
         list: Documents
         view: Fiche du document
     task:
@@ -893,7 +899,6 @@ title:
         view: Achats d'interventions
     workflow:
         list: Liste des workflows
-
 
 menu:
     index: Accueil
@@ -911,27 +916,27 @@ menu:
         list: Connecteurs
     flux:
         title: Documents
-        list: Liste   
+        list: Liste
     variable:
         title: Documents
-        list: Variables      
+        list: Variables
     job:
         title: Tâches
         list: Liste
     support: Support
-        
     workflow:
         list: Workflows
     task:
         title: Tâches
         stopall: Arrêter toutes les tâches
     nav_history: Historique Navigation
+
 breadcrumb:
     rule_list: Liste des règles
     transfert_list: Liste des documents
     task_list: Liste des tâches
     connector_list: Liste des connecteurs
-                                
+
 menu_user:
     account: Mon compte
     jobscheduler: Planificateur de tâche
@@ -939,16 +944,16 @@ menu_user:
     management_smtp: Configuration SMTP
     logout: Déconnexion
     user_manager: Gestion utilisateur
-    
+
 help:
     title: Aide
     viewrule:
         info: >
-                Dans cette page, vous trouvez les informations générales de votre règle. Ici vous pouvez activer la synchronisation automatique de votre règle en passant le bouton d'activation à ON.  
+                Dans cette page, vous trouvez les informations générales de votre règle. Ici vous pouvez activer la synchronisation automatique de votre règle en passant le bouton d'activation à ON.
                 Si votre règle est activée, une tâche viendra exécuter votre règle toutes les 5 minutes. Cependant vous pouvez exécuter votre règle manuellement en cliquant sur "Exécuter la règle" même si la synchronisation automatique n'est pas activée.
                 Si vous souhaitez modifier plus de paramètres de votre règle, rendez-vous dans l'onglet paramètre de cette page.
         mapping: >
-                Dans cette page vous trouvez l'ensemble des champs de vos applications source et cible utilisés dans votre règle. Vous y trouvez également les formules de transformation de données. 
+                Dans cette page vous trouvez l'ensemble des champs de vos applications source et cible utilisés dans votre règle. Vous y trouvez également les formules de transformation de données.
                 Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
         relate: >
                 Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
@@ -958,37 +963,37 @@ help:
                 Le nombre de jours pour la suppression des données indique le nombre de jours de stockage de vos données dans Myddleware. Même si vos données sont cryptées dans Myddleware, nous n'autorisons pas une sauvegarde de plus de 60 jours. Vous pouvez réduire ce nombre de jours, cependant sachez que nous ne pourrons pas faire de support sur des données supprimées.
     rule:
         fields: >
-                Ici vous pouvez choisir la correspondance entre les champs de vos 2 modules par un simple glisser-déposer. 
-                Par exemple, vous pouvez choisir de mettre le nom d'un contact Sugar dans le nom d'un compte Salesforce, 
-                pour cela il vous suffit de prendre le champ "name" de votre module source et de le mettre dans le champ "name" de votre solution cible. 
-                Pour supprimer un champ déjà placé, il vous suffit de double-cliquer dessus. 
-                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formule, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.  
+                Ici vous pouvez choisir la correspondance entre les champs de vos 2 modules par un simple glisser-déposer.
+                Par exemple, vous pouvez choisir de mettre le nom d'un contact Sugar dans le nom d'un compte Salesforce,
+                pour cela il vous suffit de prendre le champ "name" de votre module source et de le mettre dans le champ "name" de votre solution cible.
+                Pour supprimer un champ déjà placé, il vous suffit de double-cliquer dessus.
+                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formule, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
                 Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.
         simulate: >
-                Ici vous pouvez simuler le résultat des règles que vous avez mises en oeuvre dans l'étape précédente. 
-                En cliquant sur le bouton "Tester les données", Myddleware ira lire une donnée de votre application source pour vous indiquer comment elle serait envoyée dans votre application cible. 
+                Ici vous pouvez simuler le résultat des règles que vous avez mises en oeuvre dans l'étape précédente.
+                En cliquant sur le bouton "Tester les données", Myddleware ira lire une donnée de votre application source pour vous indiquer comment elle serait envoyée dans votre application cible.
         relate: >
-                Cet onglet vous permet de définir les relations que vous souhaitez mettre en oeuvre dans votre interface. Vous pouvez ainsi lier plusieurs règles ensemble. 
+                Cet onglet vous permet de définir les relations que vous souhaitez mettre en oeuvre dans votre interface. Vous pouvez ainsi lier plusieurs règles ensemble.
                 Par exemple, il vous est possible de transférer la relation entre un contact et un compte pour qu'ils soient aussi liés dans la solution cible.
-                Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les relations</a>
+                Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
         filter: >
                 Cet onglet vous permet de filtrer les champs de votre application source à la lecture.
                 Par exemple, vous pouvez choisir de prendre tous les contacts dont le pays est égal à "France".
                 Plus d'informations sur les filtres à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">Voir la page sur les filtres</a>
         validate: >
-                Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle. 
+                Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle.
                 Par exemple, pour une application CRM, vous pouvez dé-doublonner tous les contacts par leur mail. Ainsi Myddleware ira vérifier si l'enregistrement existe déjà dans votre solution cible avant de le créer. S'il n'existe pas, Myddleware le créera sinon il ne fera que le mettre à jour.
-                Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.                     
+                Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.
         duplicate: >
                 Sur cette page, vous avez la possibilité de dupliquer une de vos règles en modifiant le nom et les connecteurs.
+
 session:
     task:
         msglink: Vous venez de lancer une nouvelle tâche. Vous pouvez vous rendre sur la page de cette tâche en cliquant sur ce lien
         msginfo: Si vous souhaitez suivre l'évolution de cette tâche vous pouvez rafraichir votre page jusqu'à son passage au statut 'end'.
-
 twitter:
     tweets:
-        ref: > 
+        ref: >
              Entrez ALL pour tous les Tweets, vide pour les 200 derniers et un id de Tweet pour tous les tweets plus récents que ce dernier
     favoris:
         ref: >
@@ -996,14 +1001,14 @@ twitter:
 
 messages:
     rule:
-        failed_running_job: Erreur lors du lancement de la tâche. 
-        failed_get_task_id: Impossible de récupérer l'identifiant de la tâche. 
+        failed_running_job: Erreur lors du lancement de la tâche.
+        failed_get_task_id: Impossible de récupérer l'identifiant de la tâche.
         open_running_task: Vous pouvez ouvrir la tâche en cours en cliquant ici.
         another_task_running: Impossible de créer la tâche car une autre tâche est en cours. Veuillez attendre la fin de son exécution ou vous pouvez l'arrêter.
         failed_create_directory: Erreur lors de la création du repertoire temporaire.
     template:
         nb_rule: "Nombre de règle générées: "
-        help: "Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href='http://community.myddleware.com/index.php/how-to-use-a-template/' target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>."
+        help: 'Nous vous recommandons de lire ce tutoriel pour vous aider à activer vos règles : <a href="http://community.myddleware.com/index.php/how-to-use-a-template/" target=_blank>http://community.myddleware.com/index.php/how-to-use-a-template/</a>.'
 email_sendinblue:
     subject: Myddleware - Test de configuration email Sendinblue
     content: >
@@ -1015,25 +1020,25 @@ email_validation:
     error: Envoi du message échoué !
 email_notification:
     subject: Notification Myddleware
-    hello: Bonjour, 
+    hello: Bonjour,
     introduction: "Voici les statistiques des 24 dernières heures dans Myddleware:"
     transfer_success: "- Nombre de documents envoyés avec succès: "
     transfer_error: "- Nombre de documents en erreur: "
     transfer_open: "- Nombre de documents ouverts: "
     transfer_cancel: "- Nombre de documents annulés: "
     active_rule: "Vos règles actives dans Myddleware sont: "
-    no_active_rule: Vous n'avez pas de règle active dans Myddleware. 
+    no_active_rule: Vous n'avez pas de règle active dans Myddleware.
     100_first_erros: "Voici les 100 premières erreurs: "
     error_list: "Voici la liste des erreurs: "
-    best_regards: Bien cordialement, 
+    best_regards: Bien cordialement,
     signature: L'équipe Myddleware
 email_alert:
+    subject: Alerte Myddleware
     introduction: "Une tâche a excédé la limite que vous avez défini : "
-    minute: minutes. 
-    job_start: La tâche a démarré à 
+    minute: minutes.
+    job_start: La tâche a démarré à
     job_id: ". ID de cette tâche : "
     recommandation: Vérifiez que la tâche est toujours en train de transférer des données. Si ce n'est pas le cas, nous vous recommandons de l'arrêter manuellement en ouvrant la tâche et en cliquant sur le bouton "Arrêter la tâche".
-    subject: Alerte Myddleware
     body: |
         Bonjour,
         <p>Une tâche en cours a dépassé la limite que vous avez autorisée : %min% minutes<br/>
@@ -1048,9 +1053,11 @@ email_alert_same_doc_reference:
     body: |
         Bonjour,
         <p>Il existe plusieurs documents avec la même date de référence %reference_date% dans la même règle. Veuillez vérifier la règle %rule_id% ou la tâche %job_id%.</p>
+
         %base_uri%
 
         Bien cordialement,
+
 jobscheduler:
     id: Id
     command: Commande
@@ -1065,16 +1072,16 @@ jobscheduler:
     period: Période
     job_order: Ordre job
     date_modified: Date modifié
+    total : Total
     create_by : créé par
     modified_by : modifié par
     paramName1 : Paramètre 1
     paramValue1 : Paramètre valeur 1
     paramName2 : Paramètre 2
     paramValue2 : Paramètre valeur 2
-    total : Total
     actions: Action
-    update: Mise à jour
     new: Création
+    update: Mise à jour
     cancel: Annuler
     action:
         new_jobscheduler : Nouvelle commande
@@ -1082,12 +1089,12 @@ jobscheduler:
         show : Vue détaillée
     description:
         top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>Plus d'information ici.</a>
-        bottom : > 
+        bottom : >
                  Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:jobScheduler --env=background <BR>
                  Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
                    */5 * * * * cd <myddleware_directory>; php bin/console myddleware:jobScheduler --env=background > /dev/null 2>&1
 management_smtp:
-    submit : Enregistrer configuration SMTP
+    submit :  Enregistrer configuration SMTP
     cancel: Annuler
     title : Configuration SMTP
     description : "Vous pouvez configurez l'envoi des emails ici. Vous trouverez de la documentation ici : <a href='https://symfony.com/doc/4.4/email.html' target=_blank>https://symfony.com/doc/4.4/email.html</a>"
@@ -1098,7 +1105,7 @@ management_smtp:
     api_key_too_short: La clé API est trop courte. Est-ce bien une clé API BREVO ? Attention au remplissage automatique de votre navigateur.
 management_smtp_sendmail:
     subject: Myddleware - Test de configuration email
-    textMail: Ce message de test a été envoyé par Myddleware. 
+    textMail: Ce message de test a été envoyé par Myddleware.
 
 login:
     title: Connexion
@@ -1132,11 +1139,10 @@ form:
 
 fr: 'Français'
 en: 'Anglais'
-
-flash: 
+flash:
     password:
         reset:
-            success: 'Your password has been succesfully reset'
+            success: 'Votre mot de passe a été réinitialisé avec succès'
 
 password_reset:
     title: Modifier mon mot de passe
@@ -1154,32 +1160,29 @@ password_reset:
 
 install:
     title: Installation de Myddleware
-    database_setup : Configuration de la base de données
+    database_setup: Configuration de la base de données
     test_button: Se connecter à la base de données
-    user_setup: Création de vos identifiants utilisateur Myddleware
-    role_admin: Ces identifiants Myddleware auront les droits administrateur
+    requirements_checker: Vérification des paramètres nécessaires pour installer Myddleware
     system_status_ready: Votre système est prêt à utiliser Myddleware
     system_status_not_ready: Votre système n'est pas encore prêt à faire tourner Myddleware
-    requirements_checker: Vérification des paramètres nécessaires pour installer Myddleware
-    requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
+    user_setup: Création de vos identifiants utilisateur Myddleware
+    next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
+    role_admin: Ces identifiants Myddleware auront les droits administrateur
     check_button: Vérifier
     next: Suivant
     setup_database_button: Configurer la base de données
     previous: Précédent
-    next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
+    requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
     php_ini_error: ATTENTION ! Le fichier de configuration PHP (php.ini) n'a pas été trouvé!
-    php_ini_path_sentence:  PHP utilise le fichier php.ini suivant 
+    php_ini_path_sentence:  PHP utilise le fichier php.ini suivant
     php_version_not_found: ATTENTION ! Impossible de trouver votre version de PHP
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
     database_already_exists: Une base de données existe déjà dans le fichier .env.local. Veuillez la supprimer pour continuer l'installation.
-
 crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
-    see_results: Résultats Crontab
-    hide_results: Fermer Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
     command: Commande
     period: Périodes
@@ -1187,25 +1190,25 @@ crontab:
     description: Description
     running: Instance en cours
     max_instance: Max instance
-    max_instances: Max instances
-    running_instances: Running instances
-    results: Résultats
     lastUse: Last use
     nextRun: Next run
     enable: Enable
     number: Nombres
-    success: Votre calendrier des tâches a bien été créé 
+    success: Votre calendrier des tâches a bien été créé
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     correct: Vos crontabs ont été désactivés
     disableAllCrons: Vos crontabs ont été désactivés
     enableAllCrons: Vos crontabs ont été activés
     create: Créer crontab
+    running_instances: Running instances
+    max_instances: Max instances
+    results: Résultats
     massdisable: Désactiver toutes les tâches
     massenable: Activer toutes les tâches
     enableCron: On
     disableCron: Off
-    title_cronjobresult: Résultats Crontab   
-    column_id: Identifiant
+    title_cronjobresult: Résultats Crontab
+    column_id: ID
     column_cronjob_id: Tâche Cron
     column_run_at: Exécuté le
     column_run_time: Durée d'exécution
@@ -1213,11 +1216,13 @@ crontab:
     column_output: Sortie
     column_created_at: Créé le
     column_updated_at: Mis à jour le
+    see_results: Voir les résultats Crontab
+    hide_results: Masquer les résultats Crontab
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
-    help: > 
-             Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:cronrun --env=background <BR>
-             Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
+    help:  >
+            Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:cronrun --env=background <BR>
+            Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
                */5 * * * * cd <myddleware_directory>; php bin/console myddleware:cronrun --env=background
 duplicate_rule:
     duplicate: Dupliquer
@@ -1234,8 +1239,8 @@ variable:
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   edit: Modification de la variable
   back_to_list: Retour à la liste des variables
-  editing: Modification de la variable
   save: Enregistrer
+  editing: Modification de la variable
   total: Total des Variables
   btn:
     edit: Modifier
@@ -1249,13 +1254,13 @@ variable:
   table_headers:
     name: Nom
     value: Valeur
-    actions: Actions
     created_by: Créé par
+    actions: Actions
     description: Description
 premium:
     upgrade:
         title_main: "Passer à la version Premium"
-        title: "Débloquer les fonctionnalités exclusives et recevoir un support personnalisé"
+        title: "Débloquer les fonctionnalités exclusives"
         description: "Accédez à des fonctionnalités avancées et bénéficiez d'un support personnalisé en passant à la version Premium de Myddleware."
         button: "Acheter la version Premium"
         benefits:
@@ -1302,8 +1307,126 @@ account:
   profile:
     updated_successfully: "Profil mis à jour avec succès."
   twofa:
-    updated_successfully: "Paramètres de l’authentification à deux facteurs mis à jour avec succès."
-    smtp_required: "L’authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
+    updated_successfully: "Paramètres de l'authentification à deux facteurs mis à jour avec succès."
+    smtp_required: "L'authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
   password:
     success: "Mot de passe mis à jour avec succès."
     danger: "Une erreur est survenue lors de la mise à jour du mot de passe."
+
+edit: Modifier
+delete: Supprimer
+
+smtp_config:
+    "choose_transport": "- Choisir le transport -"
+    "choose_auth_mode": "- Choisir le mode d'authentification -"
+    "choose_encryption": "- Choisir le chiffrement -"
+    "cram-md5": "Cram-md5"
+    "plain": "Plain"
+    "login": "Login"
+    "oauth": "OAuth"
+    "tls": "TLS"
+    "ssl": "SSL"
+    "transport": "Transport"
+    smtp: "SMTP"
+    gmail: "Gmail"
+    sendmail: "Sendmail"
+    sendinblue: "Sendinblue"
+    "host": "Hôte"
+    "api_key": "Clé api"
+    "port": "Port"
+    "auth_mode": "Mode d'authentification"
+    "encryption": "Chiffrement"
+    "user": "Utilisateur"
+    "password": "Mot de passe"
+
+
+rule_list_view:
+    save: Enregistrer
+
+
+#rule detail
+rule_detail_view:
+    id: Id
+    edit: Modifier
+rule_execute_by_id:
+    separate: séparez les ids avec des virgules, pas d'espace
+    id: id
+    edit: Modifier
+
+new_workflow_view:
+    save: Enregistrer
+
+#edit workflow
+view_edit_workflow:
+    create: Créer un workflow
+    workflow_name: Nom du workflow
+    Rule: Règle
+    Description: Description
+    Order: Ordre
+    Active: Actif
+    Yes: Oui
+    No: Non
+    Condition: Condition
+
+view_edit_workflow_action:
+    action_name: Nom de l'action
+    workflow: Workflow
+    select_workflow: Sélectionner un workflow
+    description: Description
+    action: Action
+    select_action: Sélectionner une action
+    updateStatus: updateStatus
+    generateDocument: generateDocument
+    sendNotification: sendNotification
+    transformDocument: transformDocument
+    rerun: rerun
+    changeData: changeData
+    updateType: updateType
+    order: Ordre
+    multiple_runs: Multiple Runs
+    yes: Oui
+    no: Non
+    status: Statut
+    select_status: Sélectionner un statut
+    new: Nouveau
+    predecessor_ok: Predecessor_OK
+    relate_ok: Relate_OK
+    transformed: Transformé
+    ready_to_send: Ready_to_send
+    filter_ok: Filter_OK
+    send: Envoyer
+    filter: Filtre
+    no_send: No_send
+    error_expected: Error_expected
+    cancel: Annuler
+    create_ko: Create_KO
+    filter_ko: Filter_KO
+    predecessor_ko: Predecessor_KO
+    relate_ko: Relate_KO
+    error_transformed: Error_transformed
+    error_checking: Error_checking
+    error_sending: Error_sending
+    found: Trouvé
+    not_found: Not_found
+    active: Actif
+    to: À
+    subject: Sujet
+    message: Message
+    generating_rule: Règle de génération
+    select_rule: Sélectionner une règle
+    matching_field_from_generating_rule: Champ correspondant de la règle de génération
+    select_field: Sélectionner un champ
+    my_value: ma_valeur
+    name: Nom
+    id: id
+    contacts_engages: contacts-engages
+    deleted: supprimé
+    matching_field_from_current_rule: Champ correspondant de la règle courante
+    rerun_label: Réexécuter
+    document_type: Type de document
+    select_type: Sélectionner un type
+    type_c: C
+    type_u: U
+    type_d: D
+    type_s: S
+    target_field: Champ cible
