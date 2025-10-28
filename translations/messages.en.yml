@@ -1371,3 +1371,66 @@ view_edit_workflow:
     Yes: Yes
     No: No
     Condition: Condition
+
+view_edit_workflow_action:
+    action_name: Action Name
+    workflow: Workflow
+    select_workflow: Select a workflow
+    description: Description
+    action: Action
+    select_action: Select an action
+    updateStatus: updateStatus
+    generateDocument: generateDocument
+    sendNotification: sendNotification
+    transformDocument: transformDocument
+    rerun: rerun
+    changeData: changeData
+    updateType: updateType
+    order: Order
+    multiple_runs: Multiple Runs
+    yes: Yes
+    no: No
+    status: Status
+    select_status: Select a status
+    new: New
+    predecessor_ok: Predecessor_OK
+    relate_ok: Relate_OK
+    transformed: Transformed
+    ready_to_send: Ready_to_send
+    filter_ok: Filter_OK
+    send: Send
+    filter: Filter
+    no_send: No_send
+    error_expected: Error_expected
+    cancel: Cancel
+    create_ko: Create_KO
+    filter_ko: Filter_KO
+    predecessor_ko: Predecessor_KO
+    relate_ko: Relate_KO
+    error_transformed: Error_transformed
+    error_checking: Error_checking
+    error_sending: Error_sending
+    found: Found
+    not_found: Not_found
+    active: Active
+    to: To
+    subject: Subject
+    message: Message
+    generating_rule: Generating Rule
+    select_rule: Select a rule
+    matching_field_from_generating_rule: Matching Field from Generating Rule
+    select_field: Select a field
+    my_value: my_value
+    name: Name
+    id: id
+    contacts_engages: contacts-engages
+    deleted: deleted
+    matching_field_from_current_rule: Matching Field from Current Rule
+    rerun_label: Rerun
+    document_type: Document Type
+    select_type: Select a type
+    type_c: C
+    type_u: U
+    type_d: D
+    type_s: S
+    target_field: Target Field
