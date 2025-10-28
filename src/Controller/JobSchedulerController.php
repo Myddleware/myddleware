@@ -9,6 +9,7 @@ use App\Entity\JobScheduler;
 use App\Form\JobSchedulerType;
 use App\Form\JobSchedulerCronType;
 use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use App\Manager\JobSchedulerManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
@@ -397,25 +398,28 @@ class JobSchedulerController extends AbstractController
 
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
-		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
         //Check the user timezone
-        if ($timezone = '') {
-            $timezone = 'UTC';
-        } else {
-            $timezone = $this->getUser()->getTimezone();
-        }
+        $timezone = $this->getUser() && $this->getUser()->getTimezone()
+                ? $this->getUser()->getTimezone()
+                : 'UTC';
 
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
 
+        $searchLimit = (int) $searchLimitConfig->getValue();
         // Pagination for cron_job_result
         $query = $this->entityManager->createQuery(
             'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
-        );
-    
-        $adapter = new QueryAdapter($query);
+        )->setMaxResults($searchLimit);
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
         $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(10);
+        $pager->setMaxPerPage(3);
         $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
@@ -615,28 +619,41 @@ class JobSchedulerController extends AbstractController
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
         }
-
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        $query = $this->entityManager->createQuery(
-            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c WHERE c.cronJob = :cronJob ORDER BY c.runAt DESC'
-        )->setParameter('cronJob', $id);
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
-        $adapter = new QueryAdapter($query);
-        $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(10);
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
+
+        $searchLimit = (int) $searchLimitConfig->getValue();
+        $query = $this->entityManager->createQuery(
+            'SELECT c
+            FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c
+            WHERE c.cronJob = :cronJob
+            ORDER BY c.runAt DESC'
+        )
+        ->setParameter('cronJob', $id)
+        ->setMaxResults($searchLimit);
+
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
+        $pager   = new \Pagerfanta\Pagerfanta($adapter);
+        $pager->setMaxPerPage(3);
         $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
-            'pager' => $pager,
+            'pager'  => $pager,
         ]);
     }
-
-    
+        
     /**
      * Disables all cron jobs.
      *
@@ -793,13 +810,22 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $query = $this->entityManager->createQuery(
-            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
-        );
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
-        $adapter = new QueryAdapter($query);
-        $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(25);
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
+
+        $searchLimit = (int) $searchLimitConfig->getValue();
+        $query = $this->entityManager->createQuery(
+            'SELECT c
+            FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c
+            ORDER BY c.runAt DESC')->setMaxResults($searchLimit);
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
+        $pager   = new \Pagerfanta\Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
         $pager->setCurrentPage($request->query->getInt('page', 1));
 
         return $this->render('JobScheduler/_crontab_results_table.html.twig', [

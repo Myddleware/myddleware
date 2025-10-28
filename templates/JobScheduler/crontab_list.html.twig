@@ -141,14 +141,13 @@
 		</div>
 		<div class="text-center m-3 p-3">
 			<div id="crontab-results-container">
-				<button id="toggle-crontab-result"
-					class="btn btn-outline-primary"
-					data-url="{{ path('crontab_results_partial') }}"
-					data-show-label="{{ 'crontab.see_results'|trans }}"
-					data-hide-label="{{ 'crontab.hide_results'|trans }}">
-				{{ 'crontab.see_results'|trans }}
-			</button>
+				<button id="toggle-crontab-result" class="btn btn-outline-primary" data-url="{{ path('crontab_results_partial') }}" data-show-label="{{ 'crontab.see_results'|trans }}"	data-hide-label="{{ 'crontab.hide_results'|trans }}">
+					{{ 'crontab.see_results'|trans }}
+				</button>
 			</div>
+		</div>
+		<div class="container-fluid p-3">
+			<div id="cronjobresult_table"></div>
 		</div>
 
 		<div class="container-fluid p-3">
