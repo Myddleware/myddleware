@@ -1363,3 +1363,11 @@ separate the ids with comas, no space: separate the ids with comas, no space
 #edit workflow
 view_edit_workflow:
     create: Create workflow
+    workflow_name: Workflow name
+    Rule: Rule
+    Description: Description
+    Order: Order
+    Active: Active
+    Yes: Yes
+    No: No
+    Condition: Condition

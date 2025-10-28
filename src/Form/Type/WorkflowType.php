@@ -36,14 +36,14 @@ class WorkflowType extends AbstractType
 
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Workflow Name',
+                'label' => 'view_edit_workflow.workflow_name',
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                     ],
             ]);
             $builder->add('description', TextareaType::class, [
-                'label' => 'Description',
+                'label' => 'view_edit_workflow.Description',
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 3  // This will make the textarea 3 rows tall
@@ -62,7 +62,7 @@ class WorkflowType extends AbstractType
                     ],
             ]);
             $builder->add('active', ChoiceType::class, [
-                'label' => 'Active',
+                'label' => 'view_edit_workflow.Active',
                 'choices' => [
                     'Yes' => 1,
                     'No' => 0,
@@ -72,7 +72,7 @@ class WorkflowType extends AbstractType
                 ],
             ]);
             $builder->add('order', IntegerType::class, [
-                'label' => 'Order',
+                'label' => 'view_edit_workflow.Order',
                 'constraints' => [
                     new Range([
                         'min' => 0,
@@ -85,7 +85,7 @@ class WorkflowType extends AbstractType
                     ],
                 ]);
                 $builder->add('condition', TextareaType::class, [
-                    'label' => 'Condition',
+                    'label' => 'view_edit_workflow.Condition',
                     'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
                     'constraints' => [
                         new Callback([
