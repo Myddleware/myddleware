@@ -1322,6 +1322,11 @@ smtp_config:
     "choose_auth_mode": "- Choose auth mode -"
     "choose_encryption": "- Choose encryption -"
     "cram-md5": "Cram-md5"
+    "plain": "Plain"
+    "login": "Login"
+    "oauth": "OAuth"
+    "tls": "TLS"
+    "ssl": "SSL"
 
 
 # smtp config
@@ -1340,17 +1345,9 @@ Api key: Api key
 Port: Port
 Auth mode: Auth mode
 "- Choose auth mode -" : "- Choose auth mode -"
-plain: Plain
-oauth: OAuth
-Plain: Plain
-Login: Login
-OAuth: OAuth
+
 Encryption: Encryption
 "- Choose encryption -" : "- Choose encryption -"
-tls: TLS
-ssl: SSL
-TLS: TLS
-SSL: SSL
 User: User
 Password: Password
 

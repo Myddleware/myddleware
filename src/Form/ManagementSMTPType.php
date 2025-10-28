@@ -36,10 +36,10 @@ class ManagementSMTPType extends AbstractType
         $builder->add('auth_mode', ChoiceType::class, [
             'empty_data' => null,
             'choices' => [
-                'Plain' => 'plain',
-                'Login' => 'login',
+                'smtp_config.plain' => 'plain',
+                'smtp_config.login' => 'login',
                 'smtp_config.cram-md5' => 'cram-md5',
-                'OAuth' => 'oauth',
+                'smtp_config.oauth' => 'oauth',
             ],
             'placeholder' => 'smtp_config.choose_auth_mode',
             'required' => false,
@@ -49,8 +49,8 @@ class ManagementSMTPType extends AbstractType
         $builder->add('encryption', ChoiceType::class, [
             'empty_data' => null,
             'choices' => [
-                'TLS' => 'tls',
-                'SSL' => 'ssl',
+                'smtp_config.tls' => 'tls',
+                'smtp_config.ssl' => 'ssl',
             ],
             'placeholder' => 'smtp_config.choose_encryption',
             'required' => false,
