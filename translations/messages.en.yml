@@ -1317,8 +1317,14 @@ account:
 edit: edit
 delete: delete
 
+smtp_config:
+    "choose_transport": "- Choose transport -"
+    "choose_auth_mode": "- Choose auth mode -"
+    "choose_encryption": "- Choose encryption -"
+    "cram-md5": "Cram-md5"
 
-# smpt config
+
+# smtp config
 Transport: Transport
 "- Choose transport -" : "- Choose transport -"
 smtp: SMTP
@@ -1335,11 +1341,9 @@ Port: Port
 Auth mode: Auth mode
 "- Choose auth mode -" : "- Choose auth mode -"
 plain: Plain
-cram-md5: Cram-md5
 oauth: OAuth
 Plain: Plain
 Login: Login
-Cram-md5: Cram-md5
 OAuth: OAuth
 Encryption: Encryption
 "- Choose encryption -" : "- Choose encryption -"

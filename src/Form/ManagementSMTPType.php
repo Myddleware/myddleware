@@ -22,7 +22,7 @@ class ManagementSMTPType extends AbstractType
                 'Sendmail' => 'sendmail',
                 'Sendinblue' => 'sendinblue',
             ],
-            'placeholder' => '- Choose transport -',
+            'placeholder' => 'smtp_config.choose_transport',
             'required' => false,
             'choice_translation_domain' => 'messages',
         ]);
@@ -38,10 +38,10 @@ class ManagementSMTPType extends AbstractType
             'choices' => [
                 'Plain' => 'plain',
                 'Login' => 'login',
-                'Cram-md5' => 'cram-md5',
+                'smtp_config.cram-md5' => 'cram-md5',
                 'OAuth' => 'oauth',
             ],
-            'placeholder' => '- Choose auth mode -',
+            'placeholder' => 'smtp_config.choose_auth_mode',
             'required' => false,
             'choice_translation_domain' => 'messages',
         ]);
@@ -52,7 +52,7 @@ class ManagementSMTPType extends AbstractType
                 'TLS' => 'tls',
                 'SSL' => 'ssl',
             ],
-            'placeholder' => '- Choose encryption -',
+            'placeholder' => 'smtp_config.choose_encryption',
             'required' => false,
             'choice_translation_domain' => 'messages',
         ]);
