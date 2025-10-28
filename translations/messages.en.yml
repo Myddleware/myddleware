@@ -256,6 +256,7 @@ rule:
     select_value: Select a value
 
 rulegroup:  
+  create: "Create a rule group"
   created_successfully: "Rule group created successfully."
   updated_successfully: "Rule group updated successfully."
   deleted_successfully: "Rule group deleted successfully."
