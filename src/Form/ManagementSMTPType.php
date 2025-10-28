@@ -19,21 +19,22 @@ class ManagementSMTPType extends AbstractType
             'translation_domain' => 'messages',
             'empty_data' => null,
             'choices' => [
-                'SMTP' => 'smtp',
-                'Gmail' => 'gmail',
-                'Sendmail' => 'sendmail',
-                'Sendinblue' => 'sendinblue',
+                'smtp_config.smtp' => 'smtp',
+                'smtp_config.gmail' => 'gmail',
+                'smtp_config.sendmail' => 'sendmail',
+                'smtp_config.sendinblue' => 'sendinblue',
             ],
             'placeholder' => 'smtp_config.choose_transport',
             'required' => false,
             'choice_translation_domain' => 'messages',
         ]);
 
-        $builder->add('host', TextType::class, ['required' => false]);
-        $builder->add('port', IntegerType::class, ['required' => false]);
+        $builder->add('host', TextType::class, ['required' => false, 'label' => 'smtp_config.host']);
+        $builder->add('port', IntegerType::class, ['required' => false, 'label' => 'smtp_config.port']);
         $builder->add('ApiKey', PasswordType::class, [
             'required' => false,
-            'attr' => ['autocomplete' => 'new-password']
+            'attr' => ['autocomplete' => 'new-password'],
+            'label' => 'smtp_config.api_key'
         ]);
         $builder->add('auth_mode', ChoiceType::class, [
             'empty_data' => null,
@@ -46,6 +47,8 @@ class ManagementSMTPType extends AbstractType
             'placeholder' => 'smtp_config.choose_auth_mode',
             'required' => false,
             'choice_translation_domain' => 'messages',
+            'label' => 'smtp_config.auth_mode',
+            'translation_domain' => 'messages',
         ]);
 
         $builder->add('encryption', ChoiceType::class, [
@@ -57,10 +60,12 @@ class ManagementSMTPType extends AbstractType
             'placeholder' => 'smtp_config.choose_encryption',
             'required' => false,
             'choice_translation_domain' => 'messages',
+            'label' => 'smtp_config.encryption',
+            'translation_domain' => 'messages',
         ]);
 
-        $builder->add('user', TextType::class, ['required' => false]);
-        $builder->add('password', PasswordType ::class, ['required' => false]);
+        $builder->add('user', TextType::class, ['required' => false, 'label' => 'smtp_config.user']);
+        $builder->add('password', PasswordType::class, ['required' => false, 'label' => 'smtp_config.password']);
     }
 
     public function configureOptions(OptionsResolver $resolver)
