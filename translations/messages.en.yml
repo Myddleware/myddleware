@@ -1311,3 +1311,30 @@ account:
   password:
     success: "Password updated successfully."
     danger: "An error occurred while updating the password."
+
+# users
+edit: edit
+delete: delete
+
+
+# smpt config
+Transport: Transport
+"- Choose transport -" : "- Choose transport -"
+smtp: SMTP
+gmail: Gmail
+sendmail: Sendmail
+sendinblue: Sendinblue
+Host: Host
+Api key: Api key
+Port: Port
+Auth mode: Auth mode
+"- Choose auth mode -" : "- Choose auth mode -"
+plain: Plain
+cram-md5: Cram-md5
+oauth: oauth
+Encryption: Encryption
+" 	- Choose encryption -" : " 	- Choose encryption -"
+tls: TLS
+ssl: SSL
+User: User
+Password: Password
