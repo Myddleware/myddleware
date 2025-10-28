@@ -52,7 +52,6 @@
 					<th>{{ 'rulegroup.table.name'|trans }}</th>
 					<th>{{ 'rulegroup.table.date_created'|trans }}</th>
 					<th>{{ 'rulegroup.table.date_modified'|trans }}</th>
-					<th>{{ 'rulegroup.table.created_by'|trans }}</th>
 					<th>{{ 'rulegroup.table.modified_by'|trans }}</th>
 					<th class="rounded-table-up-right">{{ 'rulegroup.table.description'|trans }}</th>
 				</tr>
@@ -66,7 +65,6 @@
 						</td>
 						<td>{{ ruleGroup.dateCreated|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 						<td>{{ ruleGroup.dateModified|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-						<td>{{ ruleGroup.createdBy.username }}</td>
 						<td>{{ ruleGroup.modifiedBy.username }}</td>
 						<td>{{ ruleGroup.description }}</td>
 					</tr>
