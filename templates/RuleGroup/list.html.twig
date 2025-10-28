@@ -53,7 +53,8 @@
 					<th>{{ 'rulegroup.table.date_created'|trans }}</th>
 					<th>{{ 'rulegroup.table.date_modified'|trans }}</th>
 					<th>{{ 'rulegroup.table.modified_by'|trans }}</th>
-					<th class="rounded-table-up-right">{{ 'rulegroup.table.description'|trans }}</th>
+					<th>{{ 'rulegroup.table.description'|trans }}</th>
+					<th class="rounded-table-up-right"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -67,6 +68,13 @@
 						<td>{{ ruleGroup.dateModified|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
 						<td>{{ ruleGroup.modifiedBy.username }}</td>
 						<td>{{ ruleGroup.description }}</td>
+						<td>
+							<a href="{{ path('rulegroup_show', {'id': ruleGroup.id}) }}" title="{{ 'rulegroup.btn.view'|trans }}" class="btn btn-sm btn-outline-success">
+								<span class="btn-opt">
+									<i class="fa fa-eye"></i>
+								</span>
+							</a>
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
