@@ -15,6 +15,8 @@ class ManagementSMTPType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('transport', ChoiceType::class, [
+            'label' => 'smtp_config.transport',
+            'translation_domain' => 'messages',
             'empty_data' => null,
             'choices' => [
                 'SMTP' => 'smtp',
