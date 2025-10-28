@@ -1353,6 +1353,8 @@ rule_execute_by_id:
     id: id
     edit: Edit
 
+new_workflow_view:
+    save: Save
 
 #edit workflow
 view_edit_workflow:

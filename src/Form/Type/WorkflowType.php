@@ -116,7 +116,7 @@ class WorkflowType extends AbstractType
                     ],
                 ]);
             $builder->add('submit', SubmitType::class, [
-                'label' => 'Save',
+                'label' => 'new_workflow_view.save',
                 'attr' => [
                     'class' => 'mt-4  mb-4 btn btn-primary',
                     ],
