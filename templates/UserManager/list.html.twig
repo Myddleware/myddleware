@@ -59,7 +59,7 @@
                                 %}
                             <button class="btn btn-sm btn-outline-primary edit-user-btn {{ can_edit ? '' : 'disabled opacity-50' }}"
                                     data-user-id="{{ user.id }}"
-                                    title="{{ 'edit'|trans }}"
+                                    title="{{ 'user_list_view.edit'|trans }}"
                                     {% if not can_edit %}disabled{% endif %}>
                                 <span class="btn-opt">
                                     <i class="fa fa-pen" aria-hidden="true"></i>
@@ -75,7 +75,7 @@
                                     <button type="submit"
                                             class="btn btn-sm btn-outline-danger"
                                             onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"
-                                            title="{{ 'delete'|trans }}">
+                                            title="{{ 'user_list_view.delete'|trans }}">
                                         <span class="btn-opt">
                                             <i class="fa fa-trash" aria-hidden="true"></i>
                                         </span>

@@ -1313,9 +1313,9 @@ account:
     success: "Password updated successfully."
     danger: "An error occurred while updating the password."
 
-# users
-edit: edit
-delete: delete
+user_list_view:
+    edit: Edit
+    delete: Delete
 
 smtp_config:
     "choose_transport": "- Choose transport -"
