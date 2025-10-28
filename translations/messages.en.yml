@@ -1331,9 +1331,9 @@ Auth mode: Auth mode
 "- Choose auth mode -" : "- Choose auth mode -"
 plain: Plain
 cram-md5: Cram-md5
-oauth: oauth
+oauth: OAuth
 Encryption: Encryption
-" 	- Choose encryption -" : " 	- Choose encryption -"
+"- Choose encryption -" : "- Choose encryption -"
 tls: TLS
 ssl: SSL
 User: User
