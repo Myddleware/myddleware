@@ -74,6 +74,11 @@
 									<i class="fa fa-eye"></i>
 								</span>
 							</a>
+							<a href="{{ path('rulegroup_edit', {'id': ruleGroup.id}) }}" title="{{ 'rulegroup.btn.edit'|trans }}" class="btn btn-sm btn-outline-primary">
+								<span class="btn-opt">
+									<i class="fa fa-pen" aria-hidden="true"></i>
+								</span>
+							</a>
 						</td>
 					</tr>
 				{% endfor %}
