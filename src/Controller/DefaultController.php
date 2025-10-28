@@ -3318,7 +3318,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
     public function execRuleById($id, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('id', TextareaType::class)
+            ->add('id', TextareaType::class, [
+                'label' => 'rule_execute_by_id.id',
+                'translation_domain' => 'messages',
+            ])
             ->getForm();
 
         $form->handleRequest($request);
