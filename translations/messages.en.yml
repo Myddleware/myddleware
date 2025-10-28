@@ -1327,29 +1327,18 @@ smtp_config:
     "oauth": "OAuth"
     "tls": "TLS"
     "ssl": "SSL"
-
-
-# smtp config
-Transport: Transport
-"- Choose transport -" : "- Choose transport -"
-smtp: SMTP
-gmail: Gmail
-sendmail: Sendmail
-sendinblue: Sendinblue
-SMTP: SMTP
-Gmail: Gmail
-Sendmail: Sendmail
-Sendinblue: Sendinblue
-Host: Host
-Api key: Api key
-Port: Port
-Auth mode: Auth mode
-"- Choose auth mode -" : "- Choose auth mode -"
-
-Encryption: Encryption
-"- Choose encryption -" : "- Choose encryption -"
-User: User
-Password: Password
+    "transport": "Transport"
+    smtp: "SMTP"
+    gmail: "Gmail"
+    sendmail: "Sendmail"
+    sendinblue: "Sendinblue"
+    "host": "Host"
+    "api_key": "Api key"
+    "port": "Port"
+    "auth_mode": "Auth mode"
+    "encryption": "Encryption"
+    "user": "User"
+    "password": "Password"
 
 
 #in rule list
