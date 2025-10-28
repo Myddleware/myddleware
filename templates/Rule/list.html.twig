@@ -112,7 +112,7 @@
 													<form class="edit-form-name-list" action="{{ path('update_rule_name') }}" method="post">
 														<input type="text" name="ruleName" class="form-control m-2" value="{{ rule.name }}" data-rule-id="{{ rule.id }}"/>
 														<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-														<button type="submit" class="btn btn-success btn-sm">{{ 'Save' | trans }}</button>
+														<button type="submit" class="btn btn-success btn-sm">{{ 'rule_list_view.save' | trans }}</button>
 														<button type="button" class="btn btn-danger btn-sm close-button-name-list">
 															<i class="fa fa-times" aria-hidden="true"></i>
 														</button>

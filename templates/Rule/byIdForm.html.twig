@@ -13,7 +13,7 @@
     {{ form_start(formIdBatch) }}
     <div class="mb-3">
         {{ form_label(formIdBatch.id) }}
-        {{ form_widget(formIdBatch.id, {'attr' : {'placeholder': "separate the ids with comas, no space", 'class': 'form-control'}}) }}
+        {{ form_widget(formIdBatch.id, {'attr' : {'placeholder': "rule_execute_by_id.separate", 'class': 'form-control'}}) }}
         {{ form_errors(formIdBatch.id) }}
     </div>
     <button type='submit' class='btn btn-success'>{{ 'view_rule.execute_id.run'|trans }}</button>

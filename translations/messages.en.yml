@@ -1340,15 +1340,18 @@ smtp_config:
     "user": "User"
     "password": "Password"
 
-
-#in rule list
-Save: Save
+rule_list_view:
+    save: Save
 
 
 #rule detail
-Edit: Edit
-Id: Id
-separate the ids with comas, no space: separate the ids with comas, no space
+rule_detail_view:
+    id: Id
+    edit: Edit
+rule_execute_by_id:
+    separate: separate the ids with comas, no space
+    id: id
+    edit: Edit
 
 
 #edit workflow

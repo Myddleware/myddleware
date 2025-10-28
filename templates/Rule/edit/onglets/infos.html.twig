@@ -140,7 +140,7 @@
 									<input type="text" name="ruleName" class="form-control m-2" data-rule-id="{{ rule.id }}" value="{{ rule.GetName }}"/>
 									<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
 									<button type="submit" class="btn btn-success m-2">
-										{{ 'Save' | trans }}
+										{{ 'rule_list_view.save' | trans }}
 									</button>
 								</form>
 							</td>
@@ -218,7 +218,7 @@
 										{{ descriptionValue|nl2br }}
 									{% endif %}
 								</div>
-								<a href="#" class="edit-button-description me-2 mt-2 pt-2" title="{{ 'Edit' | trans }}">
+								<a href="#" class="edit-button-description me-2 mt-2 pt-2" title="{{ 'rule_detail_view.edit' | trans }}">
 									<i class="fa fa-pen" aria-hidden="true"></i>
 								</a>
 							</div>
@@ -229,7 +229,7 @@
 								</button>
 								<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ descriptionValue }}</textarea>
 								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-								<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
+								<button type="submit" class="btn btn-success m-2">{{ 'rule_list_view.save' | trans }}</button>
 							</form>
 							<a href="#" id="read-more-link"	class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
 								Read all description
