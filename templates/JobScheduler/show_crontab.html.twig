@@ -7,67 +7,67 @@
 		<div id="info" class='container'>
 			<div id="jobsceduler_table_show">
     			<div class ="table-wrapper">
-					<table class="listepager table">
+					<table class="table">
 						<tbody>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'jobscheduler.id'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.id }}</td>
+								<td class="value ps-5">{{ entity.id }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'jobscheduler.date_created'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
+								<td class="value ps-5">{{ entity.createdAt|date('Y-m-d H:i:s') }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'jobscheduler.date_modified'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.updatedAt|date('d/m/Y') }}</td>
+								<td class="value ps-5">{{ entity.updatedAt|date('d/m/Y') }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.command'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.command }}</td>
+								<td class="value ps-5">{{ entity.command }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.arguments'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.arguments }}</td>
+								<td class="value ps-5">{{ entity.arguments }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.description'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.description }}</td>
+								<td class="value ps-5">{{ entity.description }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.running'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.runningInstances }}</td>
+								<td class="value ps-5">{{ entity.runningInstances }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.max_instance'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.maxInstances }}</td>
+								<td class="value ps-5">{{ entity.maxInstances }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'crontab.number'|trans }}</strong></label>
 								</td>
-								<td class="value">{{ entity.number }}</td>
+								<td class="value ps-5">{{ entity.number }}</td>
 							</tr>
 							<tr>
-								<td class="title">
+								<td class="title text-left ps-4">
 									<label><strong>{{ 'jobscheduler.active'|trans }}</strong></label>
 								</td>
-								<td class="value">
+								<td class="value ps-5">
 									{% if entity.enable %}
 										true
 									{% else %}
@@ -80,9 +80,9 @@
 				</div>
 			</div>
 			<h4 class="mt-5">{{ 'crontab.results'|trans }}</h4>
-			<h5 class="mt-5" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
+			<h5 class="mt-5 mb-4" id="crontab-order-info">{{ "Sorting: Default" }}</h5>
 			<div id="jobschedulerresulttable">
-    			<div class ="table-wrapper">
+    			<div class ="table-wrapper pt-3">
 					<table class="listepager table" id="myTable">
 						<thead>
 							<tr>
