@@ -1324,6 +1324,10 @@ smtp: SMTP
 gmail: Gmail
 sendmail: Sendmail
 sendinblue: Sendinblue
+SMTP: SMTP
+Gmail: Gmail
+Sendmail: Sendmail
+Sendinblue: Sendinblue
 Host: Host
 Api key: Api key
 Port: Port
@@ -1332,9 +1336,15 @@ Auth mode: Auth mode
 plain: Plain
 cram-md5: Cram-md5
 oauth: OAuth
+Plain: Plain
+Login: Login
+Cram-md5: Cram-md5
+OAuth: OAuth
 Encryption: Encryption
 "- Choose encryption -" : "- Choose encryption -"
 tls: TLS
 ssl: SSL
+TLS: TLS
+SSL: SSL
 User: User
 Password: Password
