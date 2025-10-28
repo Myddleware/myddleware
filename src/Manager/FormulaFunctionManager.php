@@ -362,7 +362,7 @@ class FormulaFunctionManager
 			if (empty($data['values'])) {
 				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
 			}
-			return json_encode(current($data['values']));
+			return (object)(current($data['values']));
         } catch (\Exception $e) {
             if (!$errorIgnore) {
 				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
