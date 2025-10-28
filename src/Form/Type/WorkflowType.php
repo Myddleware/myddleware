@@ -64,8 +64,8 @@ class WorkflowType extends AbstractType
             $builder->add('active', ChoiceType::class, [
                 'label' => 'view_edit_workflow.Active',
                 'choices' => [
-                    'Yes' => 1,
-                    'No' => 0,
+                    'view_edit_workflow.Yes' => 1,
+                    'view_edit_workflow.No' => 0,
                 ],
                 'attr' => [
                     'class' => 'form-control',
