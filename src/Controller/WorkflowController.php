@@ -235,7 +235,7 @@ class WorkflowController extends AbstractController
      * @Route("/delete/{id}", name="workflow_delete", methods={"POST", "DELETE"})
      * @IsGranted("ROLE_ADMIN")
      */
-    public function WorkflowDeleteAction(string $id, Request $request)
+    public function WorkflowDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
 
         if (!$this->tools->isPremium()) {
@@ -255,7 +255,7 @@ class WorkflowController extends AbstractController
                 $workflow->setDeleted(1);
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow deleted successfully');
+                $this->addFlash('workflow.deleted.success', $translator->trans('delete_workflow_view.deleted_successfully'));
             } else {
                 $this->addFlash('error', 'Workflow not found');
             }
@@ -509,7 +509,7 @@ class WorkflowController extends AbstractController
                 // Save the workflow audit
                 $this->saveWorkflowAudit($workflow->getId());
 
-                $this->addFlash('success', 'Workflow created successfully');
+                $this->addFlash('workflow.create.success', $translator->trans('new_workflow_view.created_successfully'));
 
                 return $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
             }

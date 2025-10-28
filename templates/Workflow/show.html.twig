@@ -36,6 +36,8 @@
         </form>
     </div>
 
+    {% include '_notifications.html.twig' with { filter_prefix: 'workflow.' } %}
+
     <div>
         {% for message in app.flashes('success') %}
             <div class="alert alert-success" role="alert">{{ message }}</div>

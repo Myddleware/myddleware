@@ -1355,6 +1355,10 @@ rule_execute_by_id:
 
 new_workflow_view:
     save: Save
+    created_successfully: Workflow created successfully.
+
+delete_workflow_view:
+    deleted_successfully: Workflow deleted successfully.
 
 #edit workflow
 view_edit_workflow:
