@@ -50,6 +50,7 @@ class WorkflowType extends AbstractType
                 ]
             ]);
             $builder->add('Rule', EntityType::class, [
+                'label' => 'view_edit_workflow.Rule',
                 'class' => Rule::class,
                 'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['deleted' => 0]),
                 'choice_label' => 'name',
