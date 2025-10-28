@@ -320,8 +320,7 @@ class FormulaFunctionManager
                 return $result;
             }
         } catch (\Exception $e) {
-            $this->message .= 'Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->id.' - '.$this->message);
+            return null;
         }
         return null;
     }
@@ -365,8 +364,7 @@ class FormulaFunctionManager
 			}
 			return json_encode(current($data['values']));
         } catch (\Exception $e) {
-            $this->logger->error('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-			if (!$errorIgnore) {
+            if (!$errorIgnore) {
 				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			}
         }
@@ -413,9 +411,7 @@ class FormulaFunctionManager
             $c = (($solution->connexion_valide) ? true : false);
 			return array('connexion_valide' => $c, 'solution' => $solution);	 
 		} catch (\Exception $e) {
-			$error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$this->logger->error($error);
-			throw new \Exception($error);
+			throw new \Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}	
 		return $connexion_valide;		
 	}
