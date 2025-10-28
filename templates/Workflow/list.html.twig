@@ -57,6 +57,9 @@
 				{{ message }}
 			</div>
 		{% endfor %}
+
+		{% include '_notifications.html.twig' with { filter_prefix: 'workflow.' } %}
+
 		{% if nb_workflow > 0 %}
 			<div class="container d-flex justify-content-center align-items-center">
 				<div class="col-md-6">
