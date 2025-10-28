@@ -1348,3 +1348,18 @@ TLS: TLS
 SSL: SSL
 User: User
 Password: Password
+
+
+#in rule list
+Save: Save
+
+
+#rule detail
+Edit: Edit
+Id: Id
+separate the ids with comas, no space: separate the ids with comas, no space
+
+
+#edit workflow
+view_edit_workflow:
+    create: Create workflow
