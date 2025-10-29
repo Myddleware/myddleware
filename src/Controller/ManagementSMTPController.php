@@ -126,11 +126,9 @@ class ManagementSMTPController extends AbstractController
                 $this->putMailerConfig($form);
                 if (!empty($isMailSent)) {
                     if ($isMailSent === true) {
-                        $success = $this->translator->trans('email_validation.success');
-                        $this->addFlash('success', $success);
+                        $this->addFlash('smtp.create.success', $this->translator->trans('email_validation.success'));
                     } else if ($isMailSent === false) {
-                        $failed = $this->translator->trans('email_validation.error');
-                        $this->addFlash('error', $failed);
+                        $this->addFlash('smtp.create.danger', $this->translator->trans('email_validation.error'));
                     }
                 }
                 return $this->redirect($this->generateUrl('management_smtp_index'));
@@ -175,12 +173,12 @@ class ManagementSMTPController extends AbstractController
             $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
             if (!$isLenOfApiKeyFromTheFormOver70chars) {
                 // put a message in the session to inform the user that the api key is already in the .env
-                $this->addFlash('error', $this->translator->trans('management_smtp.api_key_too_short'));
+                $this->addFlash('smtp.envMailerDsn.danger', $this->translator->trans('management_smtp.api_key_too_short'));
                 return;
             }
             if ($apiKeyFromEnv === $apiKeyFromTheForm) {
                 // put a message in the session to inform the user that the api key is already in the .env
-                $this->addFlash('success', $this->translator->trans('management_smtp.api_key_already_in_env'));
+                $this->addFlash('smtp.envMailerDsn.success', $this->translator->trans('management_smtp.api_key_already_in_env'));
                 return;
             }
             if ($apiKeyFromEnv !== $apiKeyFromTheForm && $isLenOfApiKeyFromTheFormOver70chars) {
@@ -442,11 +440,11 @@ class ManagementSMTPController extends AbstractController
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
 
             // add flash success message
-            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
+            $this->addFlash('smtp.putMailerConfig.success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             // add flash error message
-            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
+            $this->addFlash('smtp.putMailerConfig.danger', $this->translator->trans('management_smtp.error'));
         }
     }
 
@@ -462,10 +460,10 @@ class ManagementSMTPController extends AbstractController
             $envFile .= "\nBREVO_APIKEY=" . $apiKey;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
             // add flash success message
-            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
+            $this->addFlash('smtp.putApiKey.success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
             // add flash error message
-            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
+            $this->addFlash('smtp.putApiKey.danger', $this->translator->trans('management_smtp.error'));
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
@@ -576,18 +574,18 @@ class ManagementSMTPController extends AbstractController
 
                 // Set a user-friendly error message using the controller's flash message helper
                 $error = $this->translator->trans('management_smtp.sendtestmail_error') . ' (' . $e->getMessage() . ')';
-                $this->addFlash('error', $error);
-                
+                $this->addFlash('smtp.test.danger', $error);
+
                 $isRegularEmailSent = false;
             }
         }
 
         if ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
              $failed = $this->translator->trans('email_validation.error');
-             $this->addFlash('error', $failed);
+             $this->addFlash('smtp.test.danger', $failed);
         } elseif ($isRegularEmailSent === false && $form->get('transport')->getData() !== "sendinblue") {
             $failed = $this->translator->trans('email_validation.error');
-            $this->addFlash('error', $failed);
+            $this->addFlash('smtp.test.danger', $failed);
         }
 
 

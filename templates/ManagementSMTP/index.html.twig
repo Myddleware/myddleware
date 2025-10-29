@@ -8,19 +8,12 @@
 	{{ 'management_smtp.title'| trans }}
 {% endblock titlesm %}
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'smtp.' } %}
+
     <div class="container p-5">
         <div class="row justify-content-md-center ">
             <div class="col-8">
-{% for message in app.flashes('success') %}
-	<div class="alert alert-success">
-		{{ message }}
-	</div>
-{% endfor %}
-{% for message in app.flashes('error') %}
-	<div class="alert alert-danger">
-		{{ message }}
-	</div>
-{% endfor %}
 
                 <h3 class="title-smtp">{{ 'management_smtp.title'| trans }}</h3>
                 <p class="text-smtp">{{'management_smtp.description'|trans|raw}}</p>
