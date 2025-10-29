@@ -259,7 +259,7 @@ class WorkflowActionController extends AbstractController
                 $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
                 $em->persist($workflowAction);
                 $em->flush();
-                $this->addFlash('success', 'Workflow Action updated successfully');
+                $this->addFlash('workflowaction.success', $translator->trans('view_workflow_action.updated_successfully'));
             } else {
                 $this->addFlash('error', 'Workflow Action not found');
             }

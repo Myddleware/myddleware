@@ -682,6 +682,7 @@ view_workflow_action:
     back: Back to the workflow
     save: Save
     cancel: Cancel
+    updated_successfully: Workflow action updated successfully
 view_account:
     title: My information
     user_info: My Information
