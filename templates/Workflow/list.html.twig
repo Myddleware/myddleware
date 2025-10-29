@@ -52,11 +52,6 @@
 	</div>
 
 	<div>
-		{% for message in app.flashes('success') %}
-			<div class="alert alert-success" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
 
 		{% include '_notifications.html.twig' with { filter_prefix: 'workflow.' } %}
 

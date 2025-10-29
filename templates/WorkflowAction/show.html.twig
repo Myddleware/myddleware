@@ -35,11 +35,6 @@
 		</div>
 
 		<div>
-			{% for message in app.flashes('success') %}
-				<div class="alert alert-success" role="alert">
-					{{ message }}
-				</div>
-			{% endfor %}
 
 			{% if workflow is not null %}
 				<div class="container text-left pt-3">

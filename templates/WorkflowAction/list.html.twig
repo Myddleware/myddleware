@@ -49,10 +49,6 @@
 		</div>
 
 		<div>
-			{% for message in app.flashes('success') %}
-				<div class="alert alert-success" role="alert">
-					{{ message }}
-				</div>
 			{% endfor %}
 			{% if nb_workflow > 0 %}
 				<table class="listepager table container">
