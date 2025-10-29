@@ -547,6 +547,9 @@ class ConnectorController extends AbstractController
                     $connector->setDeleted(1);
                     $this->entityManager->persist($connector);
                     $this->entityManager->flush();
+
+                    $this->addFlash('connector.delete.success', $this->translator->trans('delete_connector.success'));
+
                 }
             } catch (\Doctrine\DBAL\DBALException $e) {
                 $session->set('error', [$e->getPrevious()->getMessage()]);

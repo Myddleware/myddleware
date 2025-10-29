@@ -414,6 +414,12 @@ view_connector:
     help:
         link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
 
+edit_connector:
+    saved_successfully: Connector saved successfully
+
+delete_connector:
+        success: Connector deleted successfully
+
 list_flux:
     start: Start
     end: End
