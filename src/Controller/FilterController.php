@@ -345,8 +345,8 @@ public function removeFilter(Request $request): JsonResponse
             } catch (\Throwable $th) {
                 // redirect to the list page
                 // add a flash errore message that says there are not enough results for pagination
-                $this->addFlash('error', 'Pagination error, return to page 1');
-                return $this->redirectToRoute('document_list');
+                $this->addFlash('filter.document.danger', 'Pagination error, return to page 1');
+                return $this->redirectToRoute('document_empty_search');
             }
             
             // If everything is ok with the pagination

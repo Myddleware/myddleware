@@ -36,16 +36,7 @@
 {% endblock titlesm %}
 {% block body %}
 
-
-{% for type, messages in app.flashes %}
-    {% if type != 'success_unlock' %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }}" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endfor %}
+{% include '_notifications.html.twig' with { filter_prefix: 'filter.' } %}
 
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5 mb-1 py-1 mt-5">
