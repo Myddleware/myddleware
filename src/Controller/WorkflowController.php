@@ -257,7 +257,7 @@ class WorkflowController extends AbstractController
                 $em->flush();
                 $this->addFlash('workflow.deleted.success', $translator->trans('delete_workflow_view.deleted_successfully'));
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('workflow.deleted.danger', 'Workflow not found');
             }
 
             return $this->redirectToRoute('workflow_list');
@@ -344,9 +344,9 @@ class WorkflowController extends AbstractController
                 $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow updated successfully');
+                $this->addFlash('workflow.active.success', 'Workflow updated successfully');
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('workflow.active.danger', 'Workflow not found');
             }
 
             return $this->redirectToRoute('workflow_list');
@@ -375,9 +375,9 @@ class WorkflowController extends AbstractController
                 $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
                 $em->persist($workflow);
                 $em->flush();
-                $this->addFlash('success', 'Workflow updated successfully');
+                $this->addFlash('workflow.activeShow.success', 'Workflow updated successfully');
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('workflow.activeShow.danger', 'Workflow not found');
             }
 
             return $this->redirectToRoute('workflow_show', ['id' => $id]);
@@ -443,7 +443,7 @@ class WorkflowController extends AbstractController
                 // check if the workflow name already exists
                 $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
                 if ($workflowExists) {
-                    $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                    $this->addFlash('workflow.createFromRule.danger', $translator->trans('edit_workflow.name_already_exists'));
                     return $this->redirectToRoute('workflow_create_from_rule', ['rule_id' => $rule_id]);
                 }
                 $workflow->setCreatedBy($this->getUser());
@@ -454,7 +454,7 @@ class WorkflowController extends AbstractController
                 // Save the workflow audit
                 $this->saveWorkflowAudit($workflow->getId());
 
-                $this->addFlash('success', 'Workflow created successfully');
+                $this->addFlash('workflow.createFromRule.success', 'Workflow created successfully');
 
                 return $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
             }
@@ -498,7 +498,7 @@ class WorkflowController extends AbstractController
                 // check if the workflow name already exists
                 $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
                 if ($workflowExists) {
-                    $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                    $this->addFlash('workflow.create.danger', $translator->trans('edit_workflow.name_already_exists'));
                     return $this->redirectToRoute('workflow_create');
                 }
                 $workflow->setCreatedBy($this->getUser());
@@ -584,7 +584,7 @@ class WorkflowController extends AbstractController
                         'error' => 'Workflow not found'
                     ]);
                 }
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('workflow.showLogs.danger', 'Workflow not found');
                 return $this->redirectToRoute('workflow_list');
             }
 
@@ -670,7 +670,7 @@ class WorkflowController extends AbstractController
                     $workflow->setDateModified(new \DateTime());
                     $em->persist($workflow);
                     $em->flush();
-                    $this->addFlash('success', 'Workflow updated successfully');
+                    $this->addFlash('workflow.edit.success', 'Workflow updated successfully');
 
                     $this->saveWorkflowAudit($workflow->getId());
 
@@ -685,7 +685,7 @@ class WorkflowController extends AbstractController
                     ]
                 );
             } else {
-                $this->addFlash('error', 'Workflow not found');
+                $this->addFlash('workflow.edit.danger', 'Workflow not found');
 
                 return $this->redirectToRoute('workflow_list');
             }
