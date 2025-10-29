@@ -31,6 +31,9 @@
   {% endif %}
 {% endblock titlesm %} 
 {% block body %} 
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'task.' } %}
+
 	<div id="task" >
 <a href="{{ path('task_stopall') }}">
     <button class="btn btn-danger mb-3 mt-4">

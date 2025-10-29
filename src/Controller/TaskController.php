@@ -210,8 +210,8 @@ class TaskController extends AbstractController
         }
 
         // Add a flash message of success to say that all the tasks have been stopped
-        $this->addFlash('success', 'All the tasks have been stopped');
-        
+        $this->addFlash('task.stopAll.success', 'All the tasks have been stopped');
+
         return $this->redirect($this->generateUrl('task_list'));
 
     }
