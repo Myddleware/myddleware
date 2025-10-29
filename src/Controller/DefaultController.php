@@ -507,8 +507,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
                         // Save the new rule in the database
                         $this->entityManager->persist($newRule);
                         $this->entityManager->flush();
-                        $success = $translator->trans('duplicate_rule.success_duplicate');
-                        $this->addFlash('success', $success);
+                        $this->addFlash('rule.duplicate.success', $translator->trans('duplicate_rule.success_duplicate'));
                     }
 
                     $this->duplicateWorkflows($id, $newRule);

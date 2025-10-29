@@ -37,6 +37,9 @@
 	</div>
 {% endblock titlesm %}
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'rule.' } %}
+
 	{# success message if the rule has been duplicated  #}
 	{% for flash in app.flashes('success') %}
 		<div class="alert alert-success alert-dismissible fade show">
