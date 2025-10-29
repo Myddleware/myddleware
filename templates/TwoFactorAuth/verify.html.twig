@@ -30,20 +30,14 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 {% endblock %}
 {% set body_class = 'login' %}
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'twofa.' } %}
+
     <div id="myd_login-container" class="d-flex">
         <!-- Verification form -->
         <div class="col-md-6 login-box p-5">
             <div class="login-logo"></div>
             <h2 class="login-title">Verification Required</h2>
-            
-            {% for label, messages in app.flashes %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ label == 'error' ? 'danger' : label }} d-flex justify-content-start align-content-start" role="alert">
-                        <i class="fas fa-{{ label == 'error' ? 'times' : 'check' }}"></i>
-                        <p class="ms-2">{{ message }}</p>
-                    </div>
-                {% endfor %}
-            {% endfor %}
             
             <div class="verification-method mb-3">
                 <p>A verification code has been sent to your 

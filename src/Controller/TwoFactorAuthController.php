@@ -123,11 +123,11 @@ class TwoFactorAuthController extends AbstractController
                 return $this->redirectToRoute('regle_panel');
             } else {
                 // Code is invalid
-                $this->addFlash('error', 'Invalid verification code. Please try again.');
+                $this->addFlash('twofa.verify.danger', 'Invalid verification code. Please try again.');
 
                 // If the user is blocked, show a message
                 if ($twoFactorAuth->isBlocked()) {
-                    $this->addFlash('error', 'Too many failed attempts. Please try again in 1 minute.');
+                    $this->addFlash('twofa.verify.danger', 'Too many failed attempts. Please try again in 1 minute.');
                 }
             }
         } else if (!$form->isSubmitted()) {
@@ -168,15 +168,15 @@ class TwoFactorAuthController extends AbstractController
 
         // Check if the user is blocked
         if ($twoFactorAuth->isBlocked()) {
-            $this->addFlash('error', 'Too many failed attempts. Please try again in 1 minute.');
+            $this->addFlash('twofa.resend.danger', 'Too many failed attempts. Please try again in 1 minute.');
             return $this->redirectToRoute('two_factor_auth_verify');
         }
 
         // Send a new verification code
         if ($this->twoFactorAuthService->sendVerificationCode($twoFactorAuth)) {
-            $this->addFlash('success', 'A new verification code has been sent.');
+            $this->addFlash('twofa.resend.success', 'A new verification code has been sent.');
         } else {
-            $this->addFlash('error', 'Failed to send verification code. Please try again.');
+            $this->addFlash('twofa.resend.danger', 'Failed to send verification code. Please try again.');
         }
 
         return $this->redirectToRoute('two_factor_auth_verify');
@@ -209,13 +209,13 @@ class TwoFactorAuthController extends AbstractController
 
         // Check if the method is valid
         if (!in_array($method, ['email', 'sms'])) {
-            $this->addFlash('error', 'Invalid verification method.');
+            $this->addFlash('twofa.switchMethod.danger', 'Invalid verification method.');
             return $this->redirectToRoute('two_factor_auth_verify');
         }
 
         // If switching to SMS, check if the user has a phone number
         if ($method === 'sms' && !$twoFactorAuth->getPhoneNumber()) {
-            $this->addFlash('error', 'You need to set up a phone number in your account settings first.');
+            $this->addFlash('twofa.switchMethod.danger', 'You need to set up a phone number in your account settings first.');
             return $this->redirectToRoute('two_factor_auth_verify');
         }
 
@@ -225,9 +225,9 @@ class TwoFactorAuthController extends AbstractController
 
         // Send a new verification code
         if ($this->twoFactorAuthService->sendVerificationCode($twoFactorAuth)) {
-            $this->addFlash('success', 'Verification method switched to ' . strtoupper($method) . '. A new code has been sent.');
+            $this->addFlash('twofa.switchMethod.success', 'Verification method switched to ' . strtoupper($method) . '. A new code has been sent.');
         } else {
-            $this->addFlash('error', 'Failed to send verification code. Please try again.');
+            $this->addFlash('twofa.switchMethod.danger', 'Failed to send verification code. Please try again.');
         }
 
         return $this->redirectToRoute('two_factor_auth_verify');

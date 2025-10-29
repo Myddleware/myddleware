@@ -5,6 +5,9 @@
 {% endblock %}
 {% block title %}{% endblock %}
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'install.' } %}
+
 <div id="myd_top"></div>
 <div class="container-fluid">
     <div class="row main-requirements-box">
