@@ -5,6 +5,9 @@
 {% endblock %}
 {% block body %}
 
+	{% include '_notifications.html.twig' with { filter_prefix: 'jobscheduler.' } %}
+
+
 	<div class="text-center mt-5">
 		<h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
 		{% for entityCron in entitiesCron %}

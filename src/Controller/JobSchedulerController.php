@@ -352,7 +352,7 @@ class JobSchedulerController extends AbstractController
             $maxInstances     = $form->get('maxInstances')->getData();
 
             if ($command === '' || $period === '') {
-                $this->addFlash('error', $translator->trans('crontab.incorrect'));
+                $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
                 return $this->render('JobScheduler/crontab.html.twig', [
                     'entity' => $entity,
                     'form' => $form->createView(),
@@ -373,10 +373,10 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($crontab);
                 $this->entityManager->flush();
 
-                $this->addFlash('success', $translator->trans('crontab.success'));
+                $this->addFlash('jobscheduler.create.success', $translator->trans('crontab.success'));
                 return $this->redirectToRoute('jobscheduler_cron_list');
             } catch (\Throwable $e) {
-                $this->addFlash('error', $translator->trans('crontab.incorrect'));
+                $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
             }
         }
         return $this->render('JobScheduler/crontab.html.twig', [
@@ -543,8 +543,8 @@ class JobSchedulerController extends AbstractController
 
             // Validation: runningInstances should never be greater than maxInstances
             if ($newRunningInstances > $newMaxInstances) {
-                $this->addFlash('error', 'Running instances cannot be greater than max instances.');
-        
+                $this->addFlash('jobscheduler.edit.danger', 'Running instances cannot be greater than max instances.');
+
                 return $this->render('JobScheduler/edit_crontab.html.twig', [
                     'entity' => $entity,
                     'edit_form' => $editForm->createView(),
@@ -674,7 +674,7 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.disableAll.danger', $failure);
 
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
@@ -700,7 +700,7 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.enableAll.danger', $failure);
 
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
@@ -727,12 +727,11 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
-            $success = $translator->trans('crontab.disableAllCrons');
-            $this->addFlash('success', $success);
+            $this->addFlash('jobscheduler.disableAllCrons.success', $translator->trans('crontab.disableAllCrons'));
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.disableAllCrons.danger', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
@@ -755,12 +754,11 @@ class JobSchedulerController extends AbstractController
             }
             $this->entityManager->flush();
             // Message success
-            $success = $translator->trans('crontab.enableAllCrons');
-            $this->addFlash('success', $success);
+            $this->addFlash('jobscheduler.enableAllCrons.success', $translator->trans('crontab.enableAllCrons'));
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.enableAllCrons.danger', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
