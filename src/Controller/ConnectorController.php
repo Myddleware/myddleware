@@ -637,7 +637,7 @@ class ConnectorController extends AbstractController
                         $this->entityManager->commit();
                         
                         // Add success message
-                        $request->getSession()->getFlashBag()->add('success', 'Connector saved successfully');
+                        $this->addFlash('connector.edit.success', $this->translator->trans('edit_connector.saved_successfully'));
                         
                         // Redirect to detail view after successful edit
                         return $this->redirect($this->generateUrl('connector_detail', ['id' => $id]));
