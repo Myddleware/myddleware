@@ -1,49 +1,32 @@
-{# templates/Rule/create/_sync.html.twig #}
-<section class="mb-5 d-none" id="step-3">
-  <h2 class="h3 fw-bold mb-4">
-    {{ 'create_rule.step3.title'|trans({'default': 'Sync options'}) }}
-  </h2>
+<section class="mb-5 d-none" id="step-3" data-path-duplicate="{{ path('regle_list_duplicate_fields') }}">
 
-  <div class="row gy-4 align-items-start">
-    <div class="col-12 col-lg-6">
-      <label for="sync-type" class="form-label mb-2">
-        {{ 'create_rule.step3.syncdata.label'|trans({'default': 'Synchronization type'}) }}
-      </label>
-      <select id="sync-type" name="sync_type" class="form-select form-select-lg">
-        <option value="create_update">
-          {{ 'create_rule.step3.syncdata.create_update'|trans({'default': 'Create and update data'}) }}
-        </option>
-        <option value="create_only">
-          {{ 'create_rule.step3.syncdata.create_only'|trans({'default': 'Create only'}) }}
-        </option>
-        <option value="update_only">
-          {{ 'create_rule.step3.syncdata.update_only'|trans({'default': 'Update only'}) }}
-        </option>
-        <option value="delete">
-          {{ 'create_rule.step3.deletion.yes'|trans({'default': 'Delete'}) }}
-        </option>
+  <div class="section-chevron" aria-hidden="true">
+    <a href="#step-3" class="section-chevron">
+      <i class="fa-solid fa-circle-chevron-down"></i>
+    </a> 
+  </div>
+
+  <h3 class="section-create-rule fw-bold mb-4 fw-bold mb-4">
+    {{ 'create_rule.step3.syncdata.title'|trans({'default': 'Sync options'}) }}
+  </h3>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-12 col-md-6">
+      <label class="form-label">{{ 'create_rule.step3.sync_type'|trans({'default':'Synchronization type'}) }}</label>
+      <select id="sync-mode" class="form-select form-select-lg" disabled>
+        <option value="" selected disabled>—</option>
+        <option value="C">Create only</option>
+        <option value="U">Update only</option>
+        <option value="CU">Create and update data</option>
       </select>
-      <div class="form-text">
-        {{ 'create_rule.step3.syncdata.help'|trans({'default': 'Choose how Myddleware must behave when data already exists.'}) }}
-      </div>
+      <div id="sync-mode-feedback" class="form-text"></div>
     </div>
 
-    <div class="col-12 col-lg-6">
-      <label for="duplicate-field" class="form-label mb-2">
-        {{ 'create_rule.step3.duplicate.label'|trans({'default': 'Duplicate field'}) }}
-      </label>
-      <select id="duplicate-field" name="duplicate_field" class="form-select form-select-lg">
-        <option value="">
-          — {{ 'create_rule.step3.duplicate.none'|trans({'default': 'No duplicate control'}) }}
-        </option>
-        {# plus tard : rempli dynamiquement selon le module cible #}
-        <option value="email_lastname">Email, Lastname</option>
-        <option value="email">Email</option>
-        <option value="name">Name</option>
+    <div class="col-12 col-md-6">
+      <label class="form-label">{{ 'create_rule.step3.duplicate_field'|trans({'default':'Duplicate field'}) }}</label>
+      <select id="duplicate-field" class="form-select form-select-lg" disabled>
+        <option value="" selected disabled>—</option>
       </select>
-      <div class="form-text">
-        {{ 'create_rule.step3.duplicate.help'|trans({'default': 'Field(s) used to detect duplicates.'}) }}
-      </div>
     </div>
   </div>
 </section>

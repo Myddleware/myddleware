@@ -3,9 +3,16 @@
   data-path-connection-check="{{ path('regle_inputs') }}"
   data-path-connectors="{{ path('regle_list_connectors') }}"
 >
-  <h2 class="h3 fw-bold mb-4">
+
+  <div class="section-chevron" aria-hidden="true">
+    <a href="#step-2" class="section-chevron">
+      <i class="fa-solid fa-circle-chevron-down"></i>
+    </a> 
+  </div>
+
+  <h3 class="section-create-rule fw-bold mb-4">
     {{ 'animate.ruleconnection'|trans({'default':'Rule Connection'}) }}
-  </h2>
+  </h3>
 
   <div class="row gy-5">
     {# --------- SOURCE --------- #}

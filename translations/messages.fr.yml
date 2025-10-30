@@ -94,6 +94,7 @@ create_rule:
         previous: Etape précédente
         next: Etape suivante
         syncdata:
+            title: Options de synchronisation
             label: Type de synchronisation
             create_modify: Création et modification de données
             create_only: Création de données seulement
@@ -343,6 +344,7 @@ list_rulegroup:
 actions: "Actions"
 
 animate:
+    ruleconnection: Règle connection
     rulename: Nom de votre règle 
     wait: Veuillez patienter...
     title: Détail de la règle

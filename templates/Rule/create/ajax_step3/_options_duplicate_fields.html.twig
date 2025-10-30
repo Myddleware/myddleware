@@ -1,0 +1,12 @@
+{% if duplicates is not empty %}
+  <option value="" disabled selected>—</option>
+  {% for key, label in duplicates %}
+    {% if label is iterable %}
+      <option value="{{ key }}">{{ key }}</option>
+    {% else %}
+      <option value="{{ key }}">{{ label }}</option>
+    {% endif %}
+  {% endfor %}
+{% else %}
+  <option value="" disabled selected>—</option>
+{% endif %}

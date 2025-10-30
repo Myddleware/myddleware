@@ -94,6 +94,7 @@ create_rule:
         previous: Previous step
         next: Next step       
         syncdata:
+            title: Sync options
             label: Synchronization type
             create_modify: Create and update data
             create_only: Create data only
@@ -345,6 +346,7 @@ actions: "Actions"
 
 
 animate:
+    ruleconnection: Rule connection
     rulename: Name of your rule
     title: Rule Details
     wait: Please wait...

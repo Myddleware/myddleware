@@ -1040,3 +1040,15 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 #step-2:not(.d-none)[style=""] {
 	opacity: 1; 
 } 
+
+.section-create-rule{
+	padding-top: 1em;
+    border-top: #00000024 solid 0.5px;
+}
+
+.section-chevron{
+	font-size: xxx-large;
+    color: #05bfe6;
+    margin-left: 310px;
+    padding: 50px 0px 50px 0px;
+}

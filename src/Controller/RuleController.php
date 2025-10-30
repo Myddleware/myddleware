@@ -974,7 +974,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                             ],
                         ]);
 
-                        return $this->render('Rule/create/ajax_step1/result_liste_inputs.html.twig', [
+                        //Connector create DON'T REMOVE
+                        return $this->render('Ajax/result_liste_inputs.html.twig', [
                             'form' => $form->createView(),
                             'parent' => $parent,
                         ]);
@@ -1065,9 +1066,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                         }
 
                         return new JsonResponse(['success' => false, 'message' => $this->translator->trans($result['error'])]); // Erreur de connexion
-
                         exit;
-
                         return $this->render('Ajax/result_connexion.html.twig', []
                         );
                     }
@@ -1177,6 +1176,33 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
             'modules' => $modules,
+        ]);
+    }
+
+    #[Route('/create/list-duplicate-fields', name: 'regle_list_duplicate_fields', methods: ['GET'])]
+    public function listDuplicateFields(Request $request): Response
+    {
+        $connectorId = $request->query->getInt('connector_id');
+        $module      = trim((string) $request->query->get('module', ''));
+
+        if ($connectorId <= 0 || $module === '') {
+            return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
+                'duplicates' => [],
+            ]);
+        }
+        $connector = $this->entityManager->getRepository(Connector::class)->find($connectorId);
+        if (!$connector || !$connector->getSolution()) {
+            return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
+                'duplicates' => [],
+            ]);
+        }
+
+        $solutionName = strtolower($connector->getSolution()->getName());
+        $solution     = $this->solutionManager->get($solutionName);
+        $duplicates = $solution->getFieldsDuplicate($module) ?? [];
+
+        return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
+            'duplicates' => $duplicates,
         ]);
     }
 
@@ -1360,7 +1386,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
         throw $this->createNotFoundException('Error');
     }
-
+    
     // /**
     //  * CREATION - STEP THREE - CHOIX DES CHAMPS - MAPPING DES CHAMPS.
     //  * @return RedirectResponse|Response
@@ -2715,42 +2741,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     //             </tbody>
     //         </table>');
     //     }
-    // }
-
-//     /**
-//      * LISTE DES MODULES
-//      * @throws Exception
-//      */
-//    #[Route('/create/step1', name: 'regle_stepone_animation_save', methods: ['POST'])]
-//     public function ruleStepOneAnimationSave(Request $request): JsonResponse
-//     {
-//         $payload = json_decode($request->getContent(), true) ?? [];
-//         $name = trim($payload['name'] ?? '');
-//         $description = trim($payload['description'] ?? '');
-
-//         if ($name === '' || mb_strlen($name) < 3 || mb_strlen($name) > 40) {
-//             return new JsonResponse(['ok'=>false,'errors'=>['rulename'=>'3–40 caractères']], 400);
-//         }
-
-//         $key = $this->sessionService->getParamRuleLastKey();
-//         $this->sessionService->setParamRuleName($key, $name);
-//         $this->sessionService->setParamRuleDescription($key, $description);
-
-//         $this->getInstanceBdd();
-//         $solutionSource = $this->entityManager->getRepository(Solution::class)
-//             ->solutionConnector('source', $this->getUser()->isAdmin(), $this->getUser()->getId());
-//         $solutionTarget = $this->entityManager->getRepository(Solution::class)
-//             ->solutionConnector('target', $this->getUser()->isAdmin(), $this->getUser()->getId());
-
-//         $html = $this->renderView('Rule/create/_connection.html.twig', [
-//             'source' => $solutionSource,
-//             'target' => $solutionTarget,
-//         ]);
-
-//         return new JsonResponse(['ok'=>true,'html'=>$html]);
-//     }
-
-    
+    // }    
 
     /* ******************************************************
         * METHODES PRATIQUES

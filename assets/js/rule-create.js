@@ -6,10 +6,10 @@
   const feedback     = document.getElementById('rulename-feedback');
   const spinner      = document.getElementById('rulename-spinner');
   const step2Section = document.getElementById('step-2');
+
   if (!inputName || !feedback) return;
 
   let debounceTimer = null;
-  let isNameValid   = false;
   let lastValueSent = '';
   let step2Shown    = false;
 
@@ -23,7 +23,6 @@
   }
   function setError(msg) {
     hideSpinner();
-    isNameValid = false;
     inputName.classList.remove('is-valid');
     inputName.classList.add('is-invalid');
     feedback.className = 'form-text text-danger';
@@ -31,7 +30,6 @@
   }
   function setSuccess(msg) {
     hideSpinner();
-    isNameValid = true;
     inputName.classList.remove('is-invalid');
     inputName.classList.add('is-valid');
     feedback.className = 'form-text text-success';
@@ -98,7 +96,6 @@
   inputName.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     setNeutral();
-    isNameValid = false;
 
     const v = inputName.value.trim();
     if (v.length === 0) { hideSpinner(); return; }
@@ -115,7 +112,6 @@
 
     if (v === lastValueSent && inputName.classList.contains('is-valid')) {
       hideSpinner();
-      isNameValid = true;
       revealStep2();
       return;
     }
@@ -129,13 +125,13 @@
 })();
 
 /* ===========================================
- * STEP 2 — CONNECTORS / MODULES (stateless)
+ * STEP 2 + 3 — CONNECTORS / MODULES / SYNC
  * =========================================== */
 (function () {
   const step2 = document.getElementById('step-2');
   if (!step2) return;
 
-  // URLs
+  // URLs step 2
   const pathListConnectors = step2.getAttribute('data-path-connectors');
   const pathListModule     = step2.getAttribute('data-path-module');
 
@@ -153,55 +149,54 @@
   const tgtSpin  = document.getElementById('target-connector-spinner');
   const tgtFeed  = document.getElementById('target-connector-feedback');
 
+  // STEP 3
+  const step3        = document.getElementById('step-3');
+  const duplicateSel = step3 ? document.getElementById('duplicate-field') : null;
+  const syncSel      = step3 ? document.getElementById('sync-mode') : null;
+  const pathDup      = step3 ? step3.getAttribute('data-path-duplicate') : null;
+
+  // helpers ---------------
   function resetSelect(selectEl, placeholder = '—') {
     if (!selectEl) return;
     selectEl.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
     selectEl.disabled = true;
   }
 
-  function clearFeedback(side) {
+  function setFeed(side, msg, isError = false) {
     const el = side === 'source' ? srcFeed : tgtFeed;
-    if (el) {
-      el.className = 'form-text';
-      el.textContent = '';
-    }
+    if (!el) return;
+    el.className = 'form-text' + (isError ? ' text-danger' : '');
+    el.textContent = msg || '';
   }
 
-  // ----- charge les connecteurs -----
+  // charge les connecteurs pour une solution
   async function loadConnectorsFor(side, solutionId) {
     const selectEl  = side === 'source' ? srcConn : tgtConn;
     const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
 
     resetSelect(selectEl);
-    clearFeedback(side);
+    setFeed(side, '');
 
     if (!pathListConnectors || !solutionId) return;
 
     try {
       spinnerEl?.classList.remove('d-none');
-
       const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       const html = await res.text();
-
-      // on injecte UNIQUEMENT des <option>
       selectEl.innerHTML = html || '<option value="" disabled selected>—</option>';
       selectEl.disabled = false;
     } catch (e) {
       resetSelect(selectEl);
       selectEl.disabled = false;
-      const el = side === 'source' ? srcFeed : tgtFeed;
-      if (el) {
-        el.className = 'form-text text-danger';
-        el.textContent = 'Impossible de charger les connecteurs.';
-      }
+      setFeed(side, 'Impossible de charger les connecteurs.', true);
     } finally {
       spinnerEl?.classList.add('d-none');
     }
   }
 
-  // ----- charge les modules -----
+  // charge les modules pour un connecteur
   async function loadModulesFor(side, connectorId) {
     const selectEl = side === 'source' ? srcMod : tgtMod;
     resetSelect(selectEl);
@@ -221,7 +216,56 @@
     }
   }
 
-  // ===== listeners =====
+  // ---- STEP 3 : conditions pour afficher ----
+  function bothModulesSelected() {
+    
+    console.log(srcMod)
+    console.log(srcMod.value)
+    console.log(tgtMod.value)
+    console.log(tgtMod)
+    return !!(srcMod && srcMod.value && tgtMod && tgtMod.value);
+  }
+
+  function revealStep3() {
+    if (!step3) return;
+    step3.classList.remove('d-none');
+  }
+
+  // charge les duplicate fields dispo pour le module cible
+  async function loadDuplicateFields() {
+    console.log(duplicateSel)
+    console.log(step3)
+    if (!step3 || !duplicateSel) return;
+    if (!pathDup) return;
+    if (!tgtConn?.value || !tgtMod?.value) {
+      duplicateSel.innerHTML = '<option value="" disabled selected>—</option>';
+      duplicateSel.disabled = true;
+      return;
+    }
+
+    const url = `${pathDup}?connector_id=${encodeURIComponent(tgtConn.value)}&module=${encodeURIComponent(tgtMod.value)}`;
+
+    try {
+      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const html = await res.text();
+      duplicateSel.innerHTML = html || '<option value="" disabled selected>—</option>';
+      duplicateSel.disabled = false;
+      if (syncSel) syncSel.disabled = false;
+    } catch (e) {
+      duplicateSel.innerHTML = '<option value="" disabled selected>—</option>';
+      duplicateSel.disabled = true;
+    }
+  }
+
+  function tryRevealStep3() {
+    if (!step3) return;
+    if (bothModulesSelected()) {
+      revealStep3();
+      loadDuplicateFields();
+    }
+  }
+
+  // listeners step 2 ----------
   srcSol?.addEventListener('change', () => {
     resetSelect(srcConn);
     resetSelect(srcMod);
@@ -240,19 +284,11 @@
 
   tgtConn?.addEventListener('change', () => {
     loadModulesFor('cible', tgtConn.value);
+    if (tgtMod && tgtMod.value) {
+      tryRevealStep3();
+    }
   });
+
+  srcMod?.addEventListener('change', tryRevealStep3);
+  tgtMod?.addEventListener('change', tryRevealStep3);
 })();
-
-const step3 = document.getElementById('step-3');
-
-function tryRevealStep3() {
-  if (!step3) return;
-  const hasSourceModule = srcMod && srcMod.value;
-  const hasTargetModule = tgtMod && tgtMod.value;
-  if (hasSourceModule && hasTargetModule) {
-    step3.classList.remove('d-none');
-  }
-}
-
-srcMod?.addEventListener('change', tryRevealStep3);
-tgtMod?.addEventListener('change', tryRevealStep3);
