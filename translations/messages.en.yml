@@ -302,6 +302,7 @@ rulegroup:
     rules: "Rules"
     rule_removed_successfully: "Rule removed successfully"
     no_rules: "No rules in this group"
+    options: "Options"
     rule:
       name: "Name"
       module_source: "Source module"
