@@ -70,6 +70,13 @@ class ManagementSMTPController extends AbstractController
             $form = $this->getParametersFromMailerDsn($form, $mailerDsnFromEnv);
         }
         }
+
+        // Load MAILER_FROM value if it exists
+        $mailerFromEnv = $this->checkIfMailerFromInEnv();
+        if ($mailerFromEnv !== false) {
+            $form->get('sender')->setData($mailerFromEnv);
+        }
+
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
@@ -104,6 +111,54 @@ class ManagementSMTPController extends AbstractController
             }
         }
         return $apiKeyEnv;
+    }
+
+    public function checkIfMailerFromInEnv()
+    {
+        error_log('checkIfMailerFromInEnv');
+        $mailerFromEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $mailerFromEnv = $_ENV['MAILER_FROM'] ?? false;
+            if (!(isset($mailerFromEnv) && $mailerFromEnv !== '' && $mailerFromEnv !== false)) {
+                $mailerFromEnv = false;
+            }
+        }
+        return $mailerFromEnv;
+    }
+
+    public function removeMailerFromEnv()
+    {
+        // Finds the MAILER_FROM and removes it
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        $linesEnv = explode("\n", $envFile);
+        $lineCounter = 0;
+        foreach ($linesEnv as $line) {
+            if (strpos($line, "MAILER_FROM") !== false) {
+                unset($linesEnv[$lineCounter]);
+            }
+            $lineCounter++;
+        }
+        $envFileFinal = implode("\n", $linesEnv);
+        // Clears the .env
+        $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
+        fclose($clearContentOfDotEnv);
+        // Refills the content with everything but the MAILER_FROM
+        file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+    }
+
+    public function putMailerFromInDotEnv($sender)
+    {
+        // Remove existing MAILER_FROM if it exists
+        $this->removeMailerFromEnv();
+
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        // Ensure a newline separates the existing content (if any) and the new line
+        if (!empty($envFile) && substr($envFile, -1) !== "\n") {
+            $envFile .= "\n";
+        }
+        $envFile .= "MAILER_FROM=" . $sender;
+        file_put_contents(self::LOCAL_ENV_FILE, $envFile);
     }
 
     // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
@@ -167,6 +222,12 @@ class ManagementSMTPController extends AbstractController
     // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer dsn
     public function envMailerDsnVsApiKey($form)
     {
+        // Save MAILER_FROM regardless of transport type
+        $sender = $form->get('sender')->getData();
+        if (!empty($sender)) {
+            $this->putMailerFromInDotEnv($sender);
+        }
+
         if ($form->get('transport')->getData() === 'sendinblue') {
             $apiKeyFromTheForm = $form->get('ApiKey')->getData();
             $isLenOfApiKeyFromTheFormOver70chars = strlen($apiKeyFromTheForm) > 70;

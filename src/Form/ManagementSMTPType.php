@@ -66,6 +66,7 @@ class ManagementSMTPType extends AbstractType
 
         $builder->add('user', TextType::class, ['required' => false, 'label' => 'smtp_config.user']);
         $builder->add('password', PasswordType::class, ['required' => false, 'label' => 'smtp_config.password']);
+        $builder->add('sender', TextType::class, ['required' => true, 'label' => 'sender']);
     }
 
     public function configureOptions(OptionsResolver $resolver)
