@@ -1108,18 +1108,51 @@ $result = [];
      */
     public function fluxMassCancelAction(?Request $request = null)
     {
+        $this->logger->critical('🔷 [TRACE] fluxMassCancelAction CALLED');
+        $this->logger->critical('🔷 [TRACE] Request method: ' . $request->getMethod());
+        $this->logger->critical('🔷 [TRACE] POST data: ' . json_encode($_POST));
+        $this->logger->critical('🔷 [TRACE] REQUEST data: ' . json_encode($request->request->all()));
 
         // if we are not premium, then return
-        if (!$this->toolsManager->isPremium()) {
+        $isPremium = $this->toolsManager->isPremium();
+        $this->logger->critical('🔷 [TRACE] Premium check result: ' . ($isPremium ? 'true' : 'false'));
+
+        if (!$isPremium) {
+            $this->logger->critical('❌ [ERROR] System is NOT premium. Exiting without response');
             exit;
         }
 
+        $this->logger->critical('✅ [SUCCESS] Premium check passed');
+
+        $idsFromPost = $_POST['ids'] ?? [];
+        $this->logger->critical('🔷 [TRACE] IDs from $_POST:', ['ids' => $idsFromPost]);
+        $this->logger->critical('🔷 [TRACE] Number of IDs: ' . (is_array($idsFromPost) ? count($idsFromPost) : 0));
+
         if (isset($_POST['ids']) && count($_POST['ids']) > 0) {
-            $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
-            // Return the task ID so the frontend can create a direct link
-            return new JsonResponse(['taskId' => $taskId]);
+            $this->logger->critical('🔷 [TRACE] IDs present and valid, count: ' . count($_POST['ids']));
+            $this->logger->critical('🔷 [TRACE] Calling jobManager->actionMassTransfer(cancel, document, ids)');
+
+            try {
+                $taskId = $this->jobManager->actionMassTransfer('cancel', 'document', $_POST['ids']);
+                $this->logger->critical('✅ [SUCCESS] actionMassTransfer returned taskId: ' . ($taskId ?? 'null'));
+
+                // Return the task ID so the frontend can create a direct link
+                $response = new JsonResponse(['taskId' => $taskId]);
+                $this->logger->critical('🔷 [TRACE] Returning JSON response with taskId: ' . ($taskId ?? 'null'));
+                return $response;
+            } catch (\Exception $e) {
+                $this->logger->critical('❌ [ERROR] Exception in actionMassTransfer: ' . $e->getMessage());
+                $this->logger->critical('❌ [ERROR] Stack trace: ' . $e->getTraceAsString());
+                throw $e;
+            }
         }
 
+        $this->logger->critical('❌ [ERROR] No IDs provided or POST ids is empty');
+        $this->logger->critical('🔷 [TRACE] isset($_POST[ids]): ' . (isset($_POST['ids']) ? 'true' : 'false'));
+        if (isset($_POST['ids'])) {
+            $this->logger->critical('🔷 [TRACE] count($_POST[ids]): ' . count($_POST['ids']));
+        }
+        $this->logger->critical('🔷 [TRACE] Exiting without returning response');
         exit;
     }
 

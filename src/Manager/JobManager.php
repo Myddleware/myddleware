@@ -376,15 +376,26 @@ class JobManager
     // Permet d'exécuter des jobs manuellement depuis Myddleware
     public function actionMassTransfer($event, $datatype, $param)
     {
+        $this->logger->critical('🔷 [TRACE] actionMassTransfer CALLED');
+        $this->logger->critical('🔷 [TRACE] event: ' . $event);
+        $this->logger->critical('🔷 [TRACE] datatype: ' . $datatype);
+        $this->logger->critical('🔷 [TRACE] param count: ' . (is_array($param) ? count($param) : 0));
+        $this->logger->critical('🔷 [TRACE] param values: ' . json_encode($param));
+
         if (in_array($event, ['rerun', 'cancel'])) {
+            $this->logger->critical('🔷 [TRACE] Event is valid: ' . $event);
             // Pour ces 2 actions, l'event est le premier paramètre, le type de donnée est le deuxième
             // et ce sont les ids des documents ou règles qui sont envoyés dans le $param
             $paramJob[] = $event;
             $paramJob[] = $datatype;
             $paramJob[] = implode(',', $param);
 
-            return $this->runBackgroundJob('massaction', $paramJob);
+            $this->logger->critical('🔷 [TRACE] paramJob prepared for runBackgroundJob:', $paramJob);
+            $result = $this->runBackgroundJob('massaction', $paramJob);
+            $this->logger->critical('✅ [SUCCESS] runBackgroundJob returned: ' . ($result ?? 'null'));
+            return $result;
         } else {
+            $this->logger->critical('❌ [ERROR] Unknown event: ' . $event);
             return 'Action '.$event.' unknown. Failed to run this action. ';
         }
     }
@@ -397,13 +408,19 @@ class JobManager
      */
     public function runBackgroundJob($job, $param)
     {
+        $this->logger->critical('🔷 [TRACE] runBackgroundJob CALLED');
+        $this->logger->critical('🔷 [TRACE] job: ' . $job);
+        $this->logger->critical('🔷 [TRACE] param:', $param);
+
         try {
             // Création d'un fichier temporaire
             $guid = uniqid();
+            $this->logger->critical('🔷 [TRACE] Generated GUID: ' . $guid);
             $params = '';
 
             // If cancel job, we force the Y (used for super admin because the cancel button is also diplayed for the closed documents)
             if ('cancel' == $param[0]) {
+                $this->logger->critical('🔷 [TRACE] Cancel action detected, adding Y parameter');
                 $param[] = 'Y';
             }
             // Formatage des paramètres
@@ -412,35 +429,59 @@ class JobManager
                     $params .= $valueParam.' ';
                 }
             }
+            $this->logger->critical('🔷 [TRACE] Formatted params string: ' . trim($params));
+
             // Get the php executable
             $php = $this->toolsManager->getPhpVersion();
+            $this->logger->critical('🔷 [TRACE] PHP executable: ' . $php);
 
             //Create your own folder in the cache directory
             $fileTmp = $this->parameterBagInterface->get('kernel.cache_dir').'/myddleware/job/'.$guid.'.txt';
+            $this->logger->critical('🔷 [TRACE] Temp file path: ' . $fileTmp);
+
             $fs = new Filesystem();
             try {
                 $fs->mkdir(dirname($fileTmp));
+                $this->logger->critical('🔷 [TRACE] Temp directory created successfully');
             } catch (IOException $e) {
+                $this->logger->critical('❌ [ERROR] IOException creating directory: ' . $e->getMessage());
                 throw new Exception('An error occurred while creating your directory');
             }
-            exec($php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &');
+
+            // Build and execute command
+            $command = $php.' '.__DIR__.'/../../bin/console myddleware:'.$job.' '.$params.' --env='.$this->env.'  > '.$fileTmp.' &';
+            $this->logger->critical('🔷 [TRACE] Executing command: ' . $command);
+            exec($command);
+            $this->logger->critical('🔷 [TRACE] Command executed');
+
             $cpt = 0;
             // Boucle tant que le fichier n'existe pas
+            $this->logger->critical('🔷 [TRACE] Waiting for temp file to be created...');
             while (!file_exists($fileTmp)) {
                 if ($cpt >= 29) {
+                    $this->logger->critical('❌ [ERROR] Timeout waiting for temp file, cpt: ' . $cpt);
                     throw new Exception('Failed to run the job.');
                 }
                 sleep(1);
                 ++$cpt;
+                if ($cpt % 5 == 0) {
+                    $this->logger->critical('🔷 [TRACE] Still waiting for temp file... attempt: ' . $cpt);
+                }
             }
+            $this->logger->critical('✅ [SUCCESS] Temp file created after ' . $cpt . ' attempts');
 
             // Boucle tant que l id du job n'est pas dans le fichier (écris en premier)
+            $this->logger->critical('🔷 [TRACE] Reading temp file to extract job ID...');
             $file = fopen($fileTmp, 'r');
             // Massaction returns "1;" + the job ID
             $idJob = substr(fread($file, 25), -23);
             fclose($file);
+            $this->logger->critical('🔷 [TRACE] First read attempt, idJob: ' . ($idJob ?? 'empty'));
+
+            $readAttempt = 0;
             while (empty($idJob)) {
                 if ($cpt >= 29) {
+                    $this->logger->critical('❌ [ERROR] Timeout reading job ID, attempts: ' . $readAttempt);
                     throw new Exception('No task id given.');
                 }
                 sleep(1);
@@ -448,31 +489,45 @@ class JobManager
                 $idJob = substr(fread($file, 25), -23);
                 fclose($file);
                 ++$cpt;
+                ++$readAttempt;
+                $this->logger->critical('🔷 [TRACE] Read attempt ' . $readAttempt . ', idJob: ' . ($idJob ?? 'empty'));
             }
+            $this->logger->critical('✅ [SUCCESS] Job ID extracted: ' . $idJob);
 
             // Renvoie du message en session
             if (!empty($this->requestStack->getCurrentRequest())) {
-            // Get the request from RequestStack
-            $session = $this->requestStack->getSession();
-        }
+                $this->logger->critical('🔷 [TRACE] Request stack has current request, processing session message');
+                // Get the request from RequestStack
+                $session = $this->requestStack->getSession();
 
-        $isCancelHistory = false;
-        if ($_POST && isset($_POST['action']) && $_POST['action'] === 'cancel-history') {
-            $isCancelHistory = true;
-        }
+                $isCancelHistory = false;
+                if ($_POST && isset($_POST['action']) && $_POST['action'] === 'cancel-history') {
+                    $isCancelHistory = true;
+                    $this->logger->critical('🔷 [TRACE] This is a cancel-history action, suppressing session message');
+                }
 
-        if ($isCancelHistory == false) {
-            $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
-        }
+                if ($isCancelHistory == false) {
+                    $this->logger->critical('🔷 [TRACE] Setting session info message for task');
+                    $session->set('info', ['<a href="'.$this->router->generate('task_view', ['id' => $idJob]).'" target="_blank">'.$this->toolsManager->getTranslation(['session', 'task', 'msglink']).'</a>. '.$this->toolsManager->getTranslation(['session', 'task', 'msginfo'])]);
+                }
+            } else {
+                $this->logger->critical('⚠️ [WARN] No current request in request stack, skipping session message');
+            }
 
-
+            $this->logger->critical('✅ [SUCCESS] runBackgroundJob returning taskId: ' . $idJob);
             return $idJob;
         } catch (Exception $e) {
+            $this->logger->critical('❌ [ERROR] Exception in runBackgroundJob: ' . $e->getMessage());
+            $this->logger->critical('❌ [ERROR] Stack trace: ' . $e->getTraceAsString());
+
             if (!empty($this->requestStack->getCurrentRequest())) {
-            // Get the request from RequestStack
-            $session = $this->requestStack->getSession();
-        }
-            $session->set('info', [$e->getMessage()]); // Vous venez de lancer une nouvelle longue tâche. Elle est en cours de traitement.
+                $this->logger->critical('🔷 [TRACE] Setting error message in session');
+                // Get the request from RequestStack
+                $session = $this->requestStack->getSession();
+                $session->set('info', [$e->getMessage()]);
+            } else {
+                $this->logger->critical('⚠️ [WARN] No current request in request stack, cannot set session error');
+            }
 
             return false;
         }

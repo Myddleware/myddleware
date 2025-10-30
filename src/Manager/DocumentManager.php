@@ -518,22 +518,35 @@ class DocumentManager
 
     // Set the document lock
     protected function setLock() {
+        $this->logger->critical('🔷 [TRACE] setLock CALLED for document: ' . $this->id . ', jobId: ' . $this->jobId);
+
         try {
 			// Get the job lock on the document
             $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+            $this->logger->critical('🔷 [TRACE] Executing query to check document lock status');
             $stmt = $this->connection->prepare($documentQuery);
             $stmt->bindValue(':doc_id', $this->id);
             $documentResult = $stmt->executeQuery();
             $documentData = $documentResult->fetchAssociative(); // 1 row
 
+            if (!$documentData) {
+                $this->logger->critical('❌ [ERROR] Document not found: ' . $this->id);
+                return array('success' => false, 'error' => 'Document not found');
+            }
+
+            $this->logger->critical('🔷 [TRACE] Document job_lock field value: ' . ($documentData['job_lock'] ?? 'NULL/empty'));
+            $this->logger->critical('🔷 [TRACE] Current jobId: ' . $this->jobId);
+
             // If document already lock by the current job, we return true;
             if ($documentData['job_lock'] == $this->jobId) {
+                $this->logger->critical('✅ [SUCCESS] Document already locked by current job, returning success');
                 return array('success' => true);
             // If document not locked, we lock it.
             } elseif (empty($documentData['job_lock'])) {
+                $this->logger->critical('🔷 [TRACE] Document not locked, attempting to lock it with jobId: ' . $this->jobId);
                 $now = gmdate('Y-m-d H:i:s');
-                $query = '	UPDATE document 
-                                SET 
+                $query = '	UPDATE document
+                                SET
                                     date_modified = :now,
                                     job_lock = :job_id
                                 WHERE
@@ -544,12 +557,20 @@ class DocumentManager
                 $stmt->bindValue(':job_id', $this->jobId);
                 $stmt->bindValue(':id', $this->id);
                 $result = $stmt->executeQuery();
+                $this->logger->critical('✅ [SUCCESS] Document locked successfully, query result: ' . ($result ? 'true' : 'false'));
                 return array('success' => true);
             // Error for all other cases
             } else {
+                $lockedJobId = $documentData['job_lock'];
+                $this->logger->critical('❌ [ERROR] Document is locked by another task: ' . $lockedJobId);
+                $this->logger->critical('🔷 [TRACE] Current jobId: ' . $this->jobId . ', Locked by jobId: ' . $lockedJobId);
                 return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
             }
         } catch (\Exception $e) {
+            $this->logger->critical('❌ [ERROR] Exception in setLock: ' . $e->getMessage());
+            $this->logger->critical('❌ [ERROR] Exception file: ' . $e->getFile());
+            $this->logger->critical('❌ [ERROR] Exception line: ' . $e->getLine());
+            $this->logger->critical('❌ [ERROR] Stack trace: ' . $e->getTraceAsString());
             // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
@@ -2264,22 +2285,34 @@ class DocumentManager
      */
     public function documentCancel()
     {
+        $this->logger->critical('🔷 [TRACE] documentCancel CALLED for document: ' . $this->id . ', jobId: ' . $this->jobId);
+
         // Search if the document has child documents
         $childDocuments = $this->getChildDocuments();
+        $this->logger->critical('🔷 [TRACE] Found ' . (is_array($childDocuments) ? count($childDocuments) : 0) . ' child documents');
+
         if (!empty($childDocuments)) {
+            $this->logger->critical('🔷 [TRACE] Processing child documents...');
             // We cancel each child, but a child document can be a parent document too, so we make a recursive call
-            foreach ($childDocuments as $childDocument) {
+            foreach ($childDocuments as $index => $childDocument) {
+                $this->logger->critical('🔷 [TRACE] Processing child document ' . ($index + 1) . ': ' . $childDocument['id'] . ', status: ' . $childDocument['global_status']);
                 // We don't Cancel a document if it has been already cancelled
                 if ('Cancel' != $childDocument['global_status']) {
+                    $this->logger->critical('🔷 [TRACE] Child document ' . $childDocument['id'] . ' not yet cancelled, recursively cancelling it');
                     $param['id_doc_myddleware'] = $childDocument['id'];
                     $param['jobId'] = $this->jobId;
                     $docChild = clone $this;
                     $docChild->setParam($param, true);
                     $docChild->documentCancel();
+                } else {
+                    $this->logger->critical('🔷 [TRACE] Child document ' . $childDocument['id'] . ' already cancelled, skipping');
                 }
             }
         }
+
+        $this->logger->critical('🔷 [TRACE] Updating document status to Cancel for document: ' . $this->id);
         $this->updateStatus('Cancel');
+        $this->logger->critical('✅ [SUCCESS] Document ' . $this->id . ' marked as Cancel');
     }
 
     /**
