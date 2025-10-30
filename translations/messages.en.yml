@@ -1347,6 +1347,7 @@ smtp_config:
     "encryption": "Encryption"
     "user": "User"
     "password": "Password"
+    "sender": "Sender"
 
 rule_list_view:
     save: Save
