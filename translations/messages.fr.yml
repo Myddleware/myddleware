@@ -682,6 +682,8 @@ view_workflow_action:
     back: Retour au workflow
     save: Sauvegarder
     cancel: Annuler
+    updated_successfully: Workflow action mise à jour avec succès
+    created_successfully: Workflow action créée avec succès
 view_account:
     title: Mon compte
     user_info: Mes informations

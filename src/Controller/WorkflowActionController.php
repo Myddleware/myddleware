@@ -800,7 +800,7 @@ class WorkflowActionController extends AbstractController
 
                     $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
 
-                    $this->addFlash('success', 'Action updated successfully');
+                    $this->addFlash('workflowaction.create.success', $this->translator->trans('view_workflow_action.created_successfully'));
 
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
