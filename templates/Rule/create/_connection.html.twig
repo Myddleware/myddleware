@@ -1,43 +1,87 @@
-<section class="mb-5">
-  <h2 class="h3 fw-bold mb-4">{{ 'animate.ruleconnection'|trans({'default':'Rule Connection'}) }}</h2>
+<section class="mb-5 d-none" id="step-2"
+  data-path-module="{{ path('regle_list_module') }}"
+  data-path-connection-check="{{ path('regle_inputs') }}"
+  data-path-connectors="{{ path('regle_list_connectors') }}"
+>
+  <h2 class="h3 fw-bold mb-4">
+    {{ 'animate.ruleconnection'|trans({'default':'Rule Connection'}) }}
+  </h2>
 
   <div class="row gy-5">
+    {# --------- SOURCE --------- #}
     <div class="col-12 col-lg-6">
-      <h3 class="h5 mb-3">Source</h3>
+      <h3 class="h5 mb-3">{{ 'animate.solution.source'|trans({'default':'Source'}) }}</h3>
+
       <div class="row g-3">
         <div class="col-12">
-          <label class="form-label">Connector</label>
-          <select id="source-connector" class="form-select form-select-lg">
-            {% for s in source %}
-              <option value="{{ s.id }}">{{ s.name }}</option>
+          <label class="form-label">Solution</label>
+          <select id="source-solution" class="form-select form-select-lg" required>
+            <option value="" selected disabled>—</option>
+            {% for sol in solutions|default([]) %}
+              {# value = ID (recommandé), slug en data #}
+              <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
             {% endfor %}
           </select>
         </div>
+
         <div class="col-12">
-          <label class="form-label">Object</label>
-          <select id="source-object" class="form-select form-select-lg">
+          <label class="form-label">Connector</label>
+          <div class="position-relative">
+            {# IMPORTANT : id correct, vide au chargement (AJAX remplira les <option>) #}
+            <select id="source-connector" class="form-select form-select-lg" disabled required>
+              <option value="" selected disabled>—</option>
+            </select>
+            <div id="source-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div id="source-connector-feedback" class="form-text"></div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Module</label>
+          <select id="source-module" class="form-select form-select-lg" disabled required>
             <option value="" disabled selected>—</option>
           </select>
+          <div id="source-module-feedback" class="form-text"></div>
         </div>
       </div>
     </div>
 
+    {# --------- TARGET --------- #}
     <div class="col-12 col-lg-6">
-      <h3 class="h5 mb-3">Target</h3>
+      <h3 class="h5 mb-3">{{ 'animate.solution.target'|trans({'default':'Target'}) }}</h3>
+
       <div class="row g-3">
         <div class="col-12">
-          <label class="form-label">Connector</label>
-          <select id="target-connector" class="form-select form-select-lg">
-            {% for t in target %}
-              <option value="{{ t.id }}">{{ t.name }}</option>
+          <label class="form-label">Solution</label>
+          <select id="target-solution" class="form-select form-select-lg" required>
+            <option value="" selected disabled>—</option>
+            {% for sol in solutions|default([]) %}
+              <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
             {% endfor %}
           </select>
         </div>
+
         <div class="col-12">
-          <label class="form-label">Object</label>
-          <select id="target-object" class="form-select form-select-lg">
+          <label class="form-label">Connector</label>
+          <div class="position-relative">
+            <select id="target-connector" class="form-select form-select-lg" disabled required>
+              <option value="" selected disabled>—</option>
+            </select>
+            <div id="target-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div id="target-connector-feedback" class="form-text"></div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Module</label>
+          <select id="target-module" class="form-select form-select-lg" disabled required>
             <option value="" disabled selected>—</option>
           </select>
+          <div id="target-module-feedback" class="form-text"></div>
         </div>
       </div>
     </div>

@@ -1,0 +1,7 @@
+{% if modules is not empty %}
+  {% for key, label in modules %}
+    <option value="{{ key|e('html_attr') }}">{{ label }}</option>
+  {% endfor %}
+{% else %}
+  <option value="" disabled selected>—</option>
+{% endif %}

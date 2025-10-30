@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ parent() }} | {{ 'title.rule.create'|trans }}{% endblock %}
+{% block titlesm %}{{ 'title.rule.create'|trans }}{% endblock %}
+
+{% block body %}
+
+  <div class="container py-4" id="rule-create">
+
+    {# --- SECTION 1 : Rule Details  --- #}
+    {% include 'Rule/create/_details.html.twig' %}
+
+    {# --- SECTION 2 : Rule Connection --- #}
+    {% include 'Rule/create/_connection.html.twig' %}
+
+    {# --- SECTION 3 : Synch Options --- #}
+    {% include 'Rule/create/_sync.html.twig' %}
+
+  </div>
+
+{% endblock %}
