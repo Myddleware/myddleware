@@ -303,6 +303,7 @@ rulegroup:
     rule_removed_successfully: "Règle supprimée avec succès"
     no_rules: "Aucune règle dans ce groupe"
     options: "Options"
+    name_cannot_be_empty: "Le nom du group de règeles ne peut pas être vide"
     rule:
       name: "Nom"
       module_source: "Module source"

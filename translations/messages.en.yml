@@ -281,6 +281,7 @@ rulegroup:
   list: "Rule groups"
   create_new: "Create a rule group"
   rulegroup_name : Rule Group Name
+  name_cannot_be_empty: "The name of the Rule group cannot be empty"
   table:
     id: "ID"
     name: "Name"
