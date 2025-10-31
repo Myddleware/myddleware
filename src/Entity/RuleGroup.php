@@ -30,6 +30,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table()
@@ -47,6 +48,10 @@ class RuleGroup
 	
     /**
      * @ORM\Column(name="name", type="text", nullable=false)
+     * @Assert\NotBlank(
+     *     message="rulegroup.name_cannot_be_empty",
+     *     normalizer="trim"
+     * )
      */
     private string $name;
     /**
@@ -181,7 +186,7 @@ class RuleGroup
 	    
 	public function setName($name): self
     {
-        $this->name = $name;
+        $this->name = trim((string) $name);
         return $this;
     }
 

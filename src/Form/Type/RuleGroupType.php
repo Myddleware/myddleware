@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
@@ -20,6 +21,12 @@ class RuleGroupType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'rulegroup.rulegroup_name',
                 'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'rulegroup.name_cannot_be_empty',
+                        'normalizer' => 'trim',
+                    ]),
+                ],
                 'attr' => [
                     'class' => 'form-control',
                 ],
