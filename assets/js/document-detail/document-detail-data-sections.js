@@ -93,23 +93,15 @@ export class DocumentDetailDataSections {
      * @param {Object} permissions - Optional user permissions object
      */
     static generateDocumentHistory(rows = [], permissions = {}) {
-        console.log('🔷 [TRACE] generateDocumentHistory CALLED with', rows.length, 'rows');
-        console.log('🔷 [TRACE] permissions object:', permissions);
-
-        if (!rows.length) {
-            console.log('🔷 [TRACE] No rows provided, returning empty string');
-            return ``;
-        }
+        if (!rows.length) return ``;
 
         // Get current document ID from URL
         const currentDocumentId = window.location.pathname.split('/').pop();
-        console.log('🔷 [TRACE] currentDocumentId:', currentDocumentId);
 
         // Check if user is super admin
         const isSuperAdmin = permissions.is_super_admin ||
                            permissions.roles?.includes('ROLE_SUPER_ADMIN') ||
                            false;
-        console.log('🔷 [TRACE] isSuperAdmin:', isSuperAdmin, 'is_super_admin:', permissions.is_super_admin, 'roles:', permissions.roles);
 
         // build each row's <tr>…
         const body = rows
@@ -174,7 +166,6 @@ export class DocumentDetailDataSections {
         })
         .join(``);
 
-        console.log('🔷 [TRACE] Creating history HTML, isSuperAdmin:', isSuperAdmin);
         const historyHtml = `
         <div class="data-wrapper custom-section">
             <div class="custom-header">
@@ -209,13 +200,10 @@ export class DocumentDetailDataSections {
         `;
 
         // Set up event listener for the cancel history button after a small delay
-        console.log('🔷 [TRACE] Scheduling setupCancelHistoryButton with 100ms delay');
         setTimeout(() => {
-            console.log('🔷 [TRACE] 100ms timeout fired, calling setupCancelHistoryButton');
             DocumentDetailDataSections.setupCancelHistoryButton();
         }, 100);
 
-        console.log('🔷 [TRACE] generateDocumentHistory COMPLETE, returning historyHtml');
         return historyHtml;
     }
 
@@ -1161,34 +1149,13 @@ export class DocumentDetailDataSections {
      * Sets up the event listener for the cancel history button
      */
     static setupCancelHistoryButton() {
-        console.log('🔷 [TRACE] setupCancelHistoryButton CALLED');
         const cancelButton = document.getElementById('cancel-history-btn');
-        console.log('🔷 [TRACE] cancelButton element found:', !!cancelButton);
-
-        if (!cancelButton) {
-            console.error('❌ [ERROR] cancel-history-btn element NOT FOUND in DOM!');
-            return;
-        }
-
-        console.log('🔷 [TRACE] cancelButton attributes:', {
-            id: cancelButton.id,
-            class: cancelButton.className,
-            dataAction: cancelButton.dataset.action
-        });
-
-        const hasListener = cancelButton.hasAttribute('data-listener-attached');
-        console.log('🔷 [TRACE] Already has listener attached:', hasListener);
-
-        if (!hasListener) {
-            console.log('🔷 [TRACE] Attaching click event listener to cancel button');
+        if (cancelButton && !cancelButton.hasAttribute('data-listener-attached')) {
             cancelButton.addEventListener('click', () => {
-                console.log('🔷 [TRACE] Cancel history button CLICKED');
                 DocumentDetailDataSections.cancelHistoryDocuments();
             });
             cancelButton.setAttribute('data-listener-attached', 'true');
-            console.log('✅ [SUCCESS] Cancel history button event listener attached');
-        } else {
-            console.log('⚠️ [WARN] Listener already attached, skipping');
+            // console.log('✅ Cancel history button event listener attached');
         }
     }
 
@@ -1196,62 +1163,47 @@ export class DocumentDetailDataSections {
      * Cancels all documents in the history table using mass action
      */
     static cancelHistoryDocuments() {
-        console.log('🔷 [TRACE] cancelHistoryDocuments METHOD STARTED');
         try {
             // Get all document IDs from the history table
-            console.log('🔷 [TRACE] Looking for history table (.custom-table tbody)');
             const historyTable = document.querySelector('.custom-table tbody');
             if (!historyTable) {
-                console.error('❌ [ERROR] History table (.custom-table tbody) not found');
-                this.showErrorNotification('History table not found. Cannot proceed.');
+                console.error('❌ History table not found');
                 return;
             }
 
-            console.log('🔷 [TRACE] History table found, extracting rows');
             const documentIds = [];
             const rows = historyTable.querySelectorAll('tr');
-            console.log('🔷 [TRACE] Found', rows.length, 'rows in history table');
 
-            rows.forEach((row, rowIndex) => {
-                console.log(`🔷 [TRACE] Processing row ${rowIndex}`);
+            rows.forEach(row => {
                 // Get the status from the last td's span element
                 // Note: The span class uses a special Unicode character (‑) instead of a regular hyphen
                 const statusSpan = row.querySelector('td:last-child span[class*="status"]');
                 const status = statusSpan ? statusSpan.textContent.trim().toLowerCase() : '';
-                console.log(`🔷 [TRACE] Row ${rowIndex} status:`, status);
 
                 // Define cancel statuses (matching the same logic from generateDocumentHistory)
                 const isCancelStatus = ['cancel'].includes(status);
-                console.log(`🔷 [TRACE] Row ${rowIndex} isCancelStatus:`, isCancelStatus);
 
                 // Only collect IDs of documents NOT already in cancel status
                 if (!isCancelStatus) {
                     const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
                     if (docIdLink) {
                         const docId = docIdLink.textContent.trim();
-                        console.log(`🔷 [TRACE] Row ${rowIndex} extracted docId:`, docId);
                         if (docId) {
                             documentIds.push(docId);
                         }
-                    } else {
-                        console.log(`🔷 [TRACE] Row ${rowIndex} docId link not found at td:nth-child(2) a.doc-id`);
                     }
-                } else {
-                    console.log(`🔷 [TRACE] Row ${rowIndex} skipped (already in cancel status)`);
                 }
             });
 
-            console.log('🔷 [TRACE] Document ID extraction complete');
-            console.log('📋 [INFO] Found', documentIds.length, 'documents to cancel:', documentIds);
-
             if (documentIds.length === 0) {
-                console.warn('⚠️ [WARN] No documents to cancel (all documents are already in cancel status or table is empty)');
+                console.warn('⚠️ No documents to cancel (all documents are already in cancel status or table is empty)');
                 this.showErrorNotification('All documents are already in cancel status. Nothing to cancel.');
                 return;
             }
 
+            console.log('📋 Found document IDs to cancel:', documentIds);
+
             // Get base URL for the API call
-            console.log('🔷 [TRACE] Building API URL');
             const pathParts = window.location.pathname.split('/');
             const publicIndex = pathParts.indexOf('public');
             let baseUrl = window.location.origin;
@@ -1263,37 +1215,24 @@ export class DocumentDetailDataSections {
             }
 
             const apiUrl = `${baseUrl}/rule/flux/masscancel`;
-            console.log('🔷 [TRACE] API URL constructed:', apiUrl);
-            console.log('🔷 [TRACE] baseUrl:', baseUrl);
+            console.log('test 870 7:', apiUrl);
 
             // Prepare the payload for mass cancel (form data format)
-            console.log('🔷 [TRACE] Building FormData payload');
             const formData = new FormData();
-            documentIds.forEach((id, idx) => {
-                console.log(`🔷 [TRACE] Adding document ${idx} to formData: ${id}`);
+            documentIds.forEach(id => {
                 formData.append('ids[]', id);
             });
 
-            // Add action info from the button (if available)
-            const cancelBtn = document.getElementById('cancel-history-btn');
-            if (cancelBtn) {
-                const action = cancelBtn.dataset.action;
-                console.log('🔷 [TRACE] Adding action to formData:', action);
-                formData.append('action', action);
-            } else {
-                console.log('⚠️ [WARN] Cancel button not found for action info');
-            }
+        // Add action info from the button (if available)
+        const cancelBtn = document.getElementById('cancel-history-btn');
+        if (cancelBtn) {
+            formData.append('action', cancelBtn.dataset.action);
+        }
 
-            console.log('🔷 [TRACE] FormData payload complete, making fetch call');
-            console.log('🚀 [API-CALL] Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
+
+            // console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
 
             // Make the API call
-            console.log('🔷 [TRACE] Fetch request details:');
-            console.log('  Method: POST');
-            console.log('  URL:', apiUrl);
-            console.log('  Headers: X-Requested-With: XMLHttpRequest');
-            console.log('  Body: FormData with', documentIds.length, 'document IDs');
-
             fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -1303,66 +1242,46 @@ export class DocumentDetailDataSections {
                 body: formData
             })
             .then(async response => {
-                console.log('🔷 [TRACE] Fetch response received');
-                console.log('🔷 [TRACE] Response status:', response.status, response.statusText);
-                console.log('🔷 [TRACE] Response ok:', response.ok);
-
                 if (!response.ok) {
-                    console.error('❌ [ERROR] HTTP response NOT ok:', response.status, response.statusText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                console.log('✅ [SUCCESS] HTTP response OK');
+                // console.log('test 870 2 ✅ Mass cancel API response OK:', response);
 
                 // Check if response has content before trying to parse JSON
                 const text = await response.text();
-                console.log('🔷 [TRACE] Response body text received, length:', text.length);
-                console.log('🔷 [TRACE] Response body text:', text);
-
                 if (!text || text.trim() === '') {
-                    console.log('🔷 [TRACE] Response is empty, returning taskId: null');
+                    // console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
                     return { taskId: null };
                 }
 
                 try {
-                    const parsed = JSON.parse(text);
-                    console.log('✅ [SUCCESS] Response parsed as JSON:', parsed);
-                    return parsed;
+                    return JSON.parse(text);
                 } catch (e) {
-                    console.warn('⚠️ [WARN] Response is not valid JSON:', text);
-                    console.error('❌ [ERROR] JSON parse error:', e.message);
+                    console.warn('⚠️ Response is not valid JSON:', text);
                     return { taskId: null };
                 }
             })
             .then(data => {
-                console.log('🔷 [TRACE] Processing response data:', data);
+                // console.log('test 870 3 Mass cancel completed successfully');
 
                 // Extract the task ID from the JSON response (might be null)
                 const taskId = data.taskId || null;
-                console.log('🔷 [TRACE] Extracted taskId:', taskId);
-
                 if (taskId) {
-                    console.log('✅ [SUCCESS] Task created with ID:', taskId);
+                    // console.log('📋 Task ID:', taskId);
                 } else {
-                    console.log('⚠️ [WARN] No task ID returned (backend may not support task ID in response)');
+                    // console.log('⚠️ No task ID returned (backend may not support task ID in response)');
                 }
 
                 // Show styled notification (works with or without task ID)
-                console.log('🔷 [TRACE] Calling showTaskNotification with documentCount:', documentIds.length, 'taskId:', taskId);
                 this.showTaskNotification(documentIds.length, taskId, baseUrl);
-                console.log('✅ [SUCCESS] Notification displayed');
             })
             .catch(error => {
-                console.error('❌ [ERROR] Exception in fetch chain:', error);
-                console.error('❌ [ERROR] Error message:', error.message);
-                console.error('❌ [ERROR] Error stack:', error.stack);
+                console.error('❌ Error 4 calling mass action API:', error);
                 this.showErrorNotification('Error initiating mass cancel action. Please try again.');
             });
 
         } catch (error) {
-            console.error('❌ [ERROR] Exception in cancelHistoryDocuments method:', error);
-            console.error('❌ [ERROR] Error message:', error.message);
-            console.error('❌ [ERROR] Error stack:', error.stack);
+            console.error('❌ Error 5 in cancelHistoryDocuments:', error);
             this.showErrorNotification('Error initiating mass cancel action. Please check the console for details.');
         }
     }
