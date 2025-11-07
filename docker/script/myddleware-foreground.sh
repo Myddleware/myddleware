@@ -15,6 +15,7 @@ echo "--"
 ## Start cron daemon
 echo "====[ START CRON DAEMON ]===="
 service cron start
+service rsyslog start
 
 ## Start Apache
 echo "====[ START APACHE ]===="
