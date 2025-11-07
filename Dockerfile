@@ -42,7 +42,15 @@ RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf
 
 # Copy cron jobs to /etc/cron.d (system crontab directory)
 COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware
-RUN chmod 644 /etc/cron.d/myddleware
+RUN chmod 644 /etc/cron.d/myddleware && \
+    echo "" && \
+    echo "=== Cron configuration ===" && \
+    echo "Cron file location: /etc/cron.d/myddleware" && \
+    echo "Cron file contents:" && \
+    cat /etc/cron.d/myddleware && \
+    echo "Cron file permissions:" && \
+    ls -la /etc/cron.d/myddleware && \
+    echo "=== End cron configuration ==="
 
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
