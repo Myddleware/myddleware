@@ -37,12 +37,12 @@ RUN yarn run build
 RUN apt-get update && apt-get install -y --no-install-recommends cron rsyslog && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
-RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && \
-    rm -fr /etc/cron.* && \
-    mkdir -p /etc/cron.d
+# Configure rsyslog to log cron output
+RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf
 
-COPY docker/etc/crontab /etc/
-RUN chmod 600 /etc/crontab
+# Copy cron jobs to /etc/cron.d (system crontab directory)
+COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware
+RUN chmod 644 /etc/cron.d/myddleware
 
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
