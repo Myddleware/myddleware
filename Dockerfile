@@ -34,9 +34,11 @@ RUN yarn install
 RUN yarn run build
 
 ## Setup Cronjob
-# RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
-# COPY docker/etc/crontab /etc/
-# RUN chmod 600 /etc/crontab
+RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
+COPY docker/etc/crontab /etc/
+RUN chmod 600 /etc/crontab
+
+RUN apt-get update && apt-get install -y cron rsyslog
 
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh

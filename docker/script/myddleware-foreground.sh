@@ -12,6 +12,10 @@ cat hosts >> /etc/hosts
 cat /etc/hosts
 echo "--"
 
+## Start cron daemon
+echo "====[ START CRON DAEMON ]===="
+service cron start
+
 ## Start Apache
 echo "====[ START APACHE ]===="
 apache2-foreground "$@"
