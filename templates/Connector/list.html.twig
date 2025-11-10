@@ -131,7 +131,12 @@
 				</div>
 				<div class="d-flex justify-content-center">
 					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'regle_connector_page'}) }}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {
+							'routeName': 'regle_connector_page',
+							'proximity': 2,
+							'prev_message': 'pagination.previous'|trans,
+							'next_message': 'pagination.next'|trans
+						})|raw }}
 					{% endif %}
 				</div>
 			{% else %}

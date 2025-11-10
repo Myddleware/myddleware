@@ -144,7 +144,12 @@ $('#actions-' + id).toggle();
 				</script>
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_list'}) }}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {
+							'routeName': 'workflow_list',
+							'proximity': 2,
+							'prev_message': 'pagination.previous'|trans,
+							'next_message': 'pagination.next'|trans
+						})|raw }}
 					{% endif %}
 				</div>
 			{% else %}

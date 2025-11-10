@@ -113,8 +113,14 @@
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
 						{{ pagerfanta(
-							pager, 'twitter_bootstrap4',{ 'routeName': 'crontab_show_page', 'routeParams': { 'id': entity.id }, 'proximity': 2 }
-						) }}
+							pager, 'twitter_bootstrap4', {
+								'routeName': 'crontab_show_page',
+								'routeParams': { 'id': entity.id },
+								'proximity': 2,
+								'prev_message': 'pagination.previous'|trans,
+								'next_message': 'pagination.next'|trans
+							}
+						)|raw }}
 					{% endif %}
 				</div>
 

@@ -91,7 +91,12 @@
 		
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'variable_list_page'}) }}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {
+							'routeName': 'variable_list_page',
+							'proximity': 2,
+							'prev_message': 'pagination.previous'|trans,
+							'next_message': 'pagination.next'|trans
+						})|raw }}
 					{% endif %}
 				</div>
 	</div>

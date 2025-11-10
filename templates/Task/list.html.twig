@@ -124,7 +124,13 @@
 			</div>
 				<div class="container task-pagination pt-4" >
 				{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', {
+												'routeName': 'task_list_page',
+												'routeParams': {'page': app.request.get('page', 1)},
+												'proximity': 2,
+												'prev_message': 'pagination.previous'|trans,
+												'next_message': 'pagination.next'|trans
+											})|raw }}
 											
 											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
 												<div class="form-group" required style="width: 15em;">
