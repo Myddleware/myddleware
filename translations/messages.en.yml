@@ -576,6 +576,7 @@ view_flux:
 list_task:
     total: Total of tasks
     empty: No tasks
+    stop_all_tasks: Stop all the Tasks
     th:
         id: Id
         status: Status

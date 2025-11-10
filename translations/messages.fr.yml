@@ -576,6 +576,7 @@ view_flux:
 list_task:
     total: Total de tâches
     empty: Aucune tâche
+    stop_all_tasks: Arrêter toutes les tâches
     th:
         id: Identifiant
         status: Statut
