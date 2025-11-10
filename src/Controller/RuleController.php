@@ -1113,17 +1113,20 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     }
 
     /**
-     * PAGE CREATE (Step 1 + Step 2)
+     * PAGE CREATE (Step 1 + Step 2 + Step 4)
      */
     #[Route('/create', name: 'regle_stepone_animation', methods: ['GET'])]
     public function create(): Response
     {
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
+        $ruleKey = $this->sessionService->getParamRuleLastKey();
 
         return $this->render('Rule/create/index.html.twig', [
             'solutions' => $solutions,
+            'ruleKey'   => $ruleKey,
         ]);
     }
+
 
 
     #[Route('/create/list-connectors', name: 'regle_list_connectors', methods: ['GET'])]
@@ -1139,23 +1142,26 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         ]);
     }
 
-    #[Route('/create/list-module', name: 'regle_list_module', methods: ['GET'])]
+   #[Route('/create/list-module', name: 'regle_list_module', methods: ['GET'])]
     public function listModules(Request $request): Response
     {
         $connectorId = $request->query->getInt('id');
-        $type        = $request->query->get('type', 'source'); // 'source' ou 'cible'
+        $type        = $request->query->get('type', 'source');
 
         $connector = $this->entityManager->getRepository(Connector::class)->find($connectorId);
         if (!$connector || !$connector->getSolution()) {
             return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
-                'modules' => [],
+                'modules'       => [],
+                'modulesFields' => [],
             ]);
         }
 
         $solutionName = $connector->getSolution()->getName();
         $solution     = $this->solutionManager->get(strtolower($solutionName));
 
-        $connectorParams = $this->entityManager->getRepository(ConnectorParam::class)->findBy(['connector' => $connector]);
+        $connectorParams = $this->entityManager
+            ->getRepository(ConnectorParam::class)
+            ->findBy(['connector' => $connector]);
 
         $params = [];
         foreach ($connectorParams as $p) {
@@ -1165,17 +1171,171 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         try {
             $solution->login($params);
         } catch (\Throwable $e) {
-            // TODO: MESSAGE ERREUR DYNAMIQUE
+            // TODO: message d’erreur
             return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
-                'modules' => [],
+                'modules'       => [],
+                'modulesFields' => [],
             ]);
         }
 
         $direction = ($type === 'cible') ? 'target' : 'source';
         $modules   = $solution->get_modules($direction) ?? [];
+        $modulesFields = [];
+
+        foreach ($modules as $moduleName => $moduleLabel) {
+            try {
+                $fields = $solution->get_module_fields($moduleName, $direction);
+
+                if (!is_array($fields)) {
+                    $fields = [];
+                }
+                $simpleFields = [];
+                foreach ($fields as $fieldName => $def) {
+                    $simpleFields[$fieldName] = $def['label'] ?? $fieldName;
+                }
+
+                $modulesFields[$moduleName] = $simpleFields;
+            } catch (\Throwable $e) {
+                $this->logger->error('get_module_fields failed for module '.$moduleName.' : '.$e->getMessage());
+                $modulesFields[$moduleName] = [];
+            }
+        }
 
         return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
-            'modules' => $modules,
+            'modules'       => $modules,
+            'modulesFields' => $modulesFields,
+        ]);
+    }
+
+
+    #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
+    public function ruleStepFilters(Request $request): Response
+    {
+        $ruleKey = $this->sessionService->getParamRuleLastKey();
+        $fieldsGrouped = [
+            'Source Fields'   => [],
+            'Target Fields'   => [],
+            'Relation Fields' => [],
+        ];
+
+        $operators = [
+            $this->translator->trans('filter.content')    => 'content',
+            $this->translator->trans('filter.notcontent') => 'notcontent',
+            $this->translator->trans('filter.begin')      => 'begin',
+            $this->translator->trans('filter.end')        => 'end',
+            $this->translator->trans('filter.gt')         => 'gt',
+            $this->translator->trans('filter.lt')         => 'lt',
+            $this->translator->trans('filter.equal')      => 'equal',
+            $this->translator->trans('filter.different')  => 'different',
+            $this->translator->trans('filter.gteq')       => 'gteq',
+            $this->translator->trans('filter.lteq')       => 'lteq',
+            $this->translator->trans('filter.in')         => 'in',
+            $this->translator->trans('filter.notin')      => 'notin',
+        ];
+
+        $filters = [];
+
+        if (!$ruleKey || !$this->sessionService->isParamRuleExist($ruleKey)) {
+            return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+                'fieldsGrouped' => $fieldsGrouped,
+                'operators'     => $operators,
+                'filters'       => $filters,
+                'ruleKey'       => $ruleKey,
+            ]);
+        }
+
+        // 1) Récupérer ce que le JS envoie (solutions + modules)
+        $sourceSolutionName = $request->query->get('src_solution_id')
+            ?: $this->sessionService->getParamRuleSourceSolution($ruleKey);
+
+        $targetSolutionName = $request->query->get('tgt_solution_id')
+            ?: $this->sessionService->getParamRuleCibleSolution($ruleKey);
+
+        $sourceModule = $request->query->get('src_module')
+            ?: $this->sessionService->getParamRuleSourceModule($ruleKey);
+
+        $targetModule = $request->query->get('tgt_module')
+            ?: $this->sessionService->getParamRuleCibleModule($ruleKey);
+
+        // 2) Essayer d'abord la session
+        $sourceFields = $this->sessionService->getParamRuleSourceFields($ruleKey) ?? [];
+        $targetFields = $this->sessionService->getParamRuleTargetFields($ruleKey) ?? [];
+
+        // 3) Si c’est vide, on reconstruit comme dans l’ancienne step 3
+        if ((empty($sourceFields) || empty($targetFields))
+            && $sourceSolutionName && $targetSolutionName && $sourceModule && $targetModule
+        ) {
+            try {
+                $solutionSource = $this->solutionManager->get($sourceSolutionName);
+                $solutionTarget = $this->solutionManager->get($targetSolutionName);
+
+                $paramsSource = $this->decrypt_params(
+                    $this->sessionService->getParamRuleSource($ruleKey)
+                );
+                $paramsTarget = $this->decrypt_params(
+                    $this->sessionService->getParamRuleCible($ruleKey)
+                );
+
+                $solutionSource->login($paramsSource);
+                $solutionTarget->login($paramsTarget);
+
+                // On protège les appels pour ne pas se reprendre le TypeError
+                try {
+                    $sourceFieldsTmp = $solutionSource->get_module_fields($sourceModule, 'source');
+                } catch (\Throwable $e) {
+                    $sourceFieldsTmp = [];
+                    $this->logger->error('get_module_fields source failed: '.$e->getMessage());
+                }
+
+                try {
+                    $targetFieldsTmp = $solutionTarget->get_module_fields($targetModule, 'target');
+                } catch (\Throwable $e) {
+                    $targetFieldsTmp = [];
+                    $this->logger->error('get_module_fields target failed: '.$e->getMessage());
+                }
+
+                if (is_array($sourceFieldsTmp)) {
+                    $sourceFields = $sourceFieldsTmp;
+                    $this->sessionService->setParamRuleSourceFields($ruleKey, $sourceFieldsTmp);
+                }
+
+                if (is_array($targetFieldsTmp)) {
+                    $targetFields = $targetFieldsTmp;
+                    $this->sessionService->setParamRuleTargetFields($ruleKey, $targetFieldsTmp);
+                }
+
+            } catch (\Throwable $e) {
+                $this->logger->error('Error rebuilding fields for filters: '.$e->getMessage());
+            }
+        }
+
+        if (!empty($sourceFields)) {
+            foreach ($sourceFields as $key => $value) {
+                $label = $value['label'] ?? $key;
+                $fieldsGrouped['Source Fields'][$key] = $label;
+
+                if (!empty($value['relate'])) {
+                    $fieldsGrouped['Relation Fields'][$key] = $label;
+                }
+            }
+        }
+
+        if (!empty($targetFields)) {
+            foreach ($targetFields as $key => $value) {
+                $fieldsGrouped['Target Fields'][$key] = $value['label'] ?? $key;
+            }
+        }
+
+        // 5) Filtres existants (édition)
+        $filters = $this->entityManager
+            ->getRepository(\App\Entity\RuleFilter::class)
+            ->findBy(['rule' => $ruleKey]);
+
+        return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+            'fieldsGrouped' => $fieldsGrouped,
+            'operators'     => $operators,
+            'filters'       => $filters,
+            'ruleKey'       => $ruleKey,
         ]);
     }
 
@@ -1387,656 +1547,71 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         throw $this->createNotFoundException('Error');
     }
     
-    // /**
-    //  * CREATION - STEP THREE - CHOIX DES CHAMPS - MAPPING DES CHAMPS.
-    //  * @return RedirectResponse|Response
-    //  */
-    // #[Route('/create/step3/{id}', name: 'regle_stepthree', defaults: ['id' => 0])]
-    // public function ruleStepThree(Request $request)
+    // #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
+    // public function ruleStepFilters(Request $request): Response
     // {
-    //     $this->getInstanceBdd();
-    //     $ruleKey = $request->get('id');
-
-    //     // Test que l'ordre des étapes
-    //     if (!$this->sessionService->isParamRuleExist($ruleKey)) {
-    //         $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.order'));
-
-    //         return $this->redirect($this->generateUrl('regle_stepone_animation'));
-    //         exit;
-    //     }
-
-    //     // Contrôle si la nouvelle règle peut-être valide
-    //     if ($this->sessionService->isRuleNameLessThanXCharacters($ruleKey, 3)) {
-    //         $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.valid'));
-
-    //         return $this->redirect($this->generateUrl('regle_stepone_animation'));
-    //         exit;
-    //     }
-
-    //     try {
-    //         // ---- Mode update ----
-    //         if (!$this->sessionService->isParamRuleSourceModuleExist($ruleKey) && !$this->sessionService->isParamRuleCibleModuleExist($ruleKey)) {
-    //             // RELOAD : Chargement des données d'une règle en édition
-    //             $this->sessionService->setParamRuleSourceModule($ruleKey, $request->request->get('source_module'));
-    //             $this->sessionService->setParamRuleCibleModule($ruleKey, $request->request->get('cible_module'));
-    //         }
-    //         // ---- Mode update ----
-
-    //         // Get all data from the target solution first
-    //         $solution_cible = $this->solutionManager->get($this->sessionService->getParamRuleCibleSolution($ruleKey));
-
-    //         // TARGET ------------------------------------------------------------------
-    //         // We retriev first all data from the target application and the from the source application
-    //         // We can't do both solution in the same time because we could have a bug when these 2 solutions are the same (service are shared by default in Symfony)
-    //         $targetConnection = $solution_cible->login($this->decrypt_params($this->sessionService->getParamRuleCible($ruleKey)));
-
-    //         if (false == $solution_cible->connexion_valide) {
-    //             $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.target_module_connect').' '.(!empty($targetConnection['error']) ? $targetConnection['error'] : 'No message returned by '.$this->sessionService->getParamRuleCibleSolution($ruleKey)));
-
-    //             return $this->redirect($this->generateUrl('regle_stepone_animation'));
-    //             exit;
-    //         }
-
-    //         if ($request->request->get('cible_module')) {
-    //             $module['cible'] = $request->request->get('cible_module'); // mode create <<----
-    //         } else {
-    //             $module['cible'] = $this->sessionService->getParamRuleCibleModule($ruleKey); // mode update <<----
-    //         }
-
-    //         // Récupère la liste des paramètres cible
-    //         $ruleParamsTarget = $solution_cible->getFieldsParamUpd('target', $module['cible']);
-
-    //         // Récupère la liste des champs cible
-    //         $ruleFieldsTarget = $solution_cible->get_module_fields($module['cible'], 'target');
-
-    //         // Récupération de tous les modes de règle possibles pour la cible et la source
-    //         $targetMode = $solution_cible->getRuleMode($module['cible'], 'target');
-
-    //         $fieldMappingAdd = $solution_cible->getFieldMappingAdd($module['cible']);
-
-    //         $allowParentRelationship = $solution_cible->allowParentRelationship($this->sessionService->getParamRuleCibleModule($ruleKey));
-
-    //         // Champs pour éviter les doublons
-    //         $fieldsDuplicateTarget = $solution_cible->getFieldsDuplicate($this->sessionService->getParamRuleCibleModule($ruleKey));
-
-    //         // SOURCE ------------------------------------------------------------------
-    //         // Connexion au service de la solution source
-    //         $solution_source = $this->solutionManager->get($this->sessionService->getParamRuleSourceSolution($ruleKey));
-    //         $sourceConnection = $solution_source->login($this->decrypt_params($this->sessionService->getParamRuleSource($ruleKey)));
-
-    //         // Contrôle que la connexion est valide
-    //         if (false == $solution_source->connexion_valide) {
-    //             $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.source_module_connect').' '.(!empty($sourceConnection['error']) ? $sourceConnection['error'] : 'No message returned by '.$this->sessionService->getParamRuleSourceSolution($ruleKey)));
-
-    //             return $this->redirect($this->generateUrl('regle_stepone_animation'));
-    //             exit;
-    //         }
-    //         $modules = $solution_source->get_modules('source');
-    //         if ($request->request->get('source_module')) {
-    //             $module['source'] = $request->request->get('source_module'); // mode create <<----
-    //         } else {
-    //             $module['source'] = $this->sessionService->getParamRuleSourceModule($ruleKey); // mode update <<----
-    //         }
-
-    //         // Met en mémoire la façon de traiter la date de référence
-    //         $this->sessionService->setParamRuleSourceDateReference($ruleKey, $solution_source->referenceIsDate($module['source']));
-
-    //         // Ajoute des champs source pour la validation
-    //         $ruleParamsSource = $solution_source->getFieldsParamUpd('source', $module['source']);
-
-    //         // Add parameters to be able to read rules linked
-    //         $param['connectorSourceId'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
-    //         $param['connectorTargetId'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
-    //         $param['ruleName'] = $this->sessionService->getParamRuleName($ruleKey);
-
-    //         // Récupère la liste des champs source
-    //         $ruleFieldsSource = $solution_source->get_module_fields($module['source'], 'source', $param);
-
-    //         if ($ruleFieldsSource) {
-    //             $this->sessionService->setParamRuleSourceFields($ruleKey, $ruleFieldsSource);
-
-    //             // Erreur champs, pas de données sources (Exemple: GotoWebinar)
-
-    //             if ($this->sessionService->isParamRuleSourceFieldsErrorExist($ruleKey) && null != $this->sessionService->getParamRuleSourceFieldsError($ruleKey)) {
-    //                 $this->sessionService->setCreateRuleError($ruleKey, $this->sessionService->getParamRuleSourceFieldsError($ruleKey));
-
-    //                 return $this->redirect($this->generateUrl('regle_stepone_animation'));
-    //                 exit;
-    //             }
-
-    //             foreach ($ruleFieldsSource as $t => $k) {
-    //                 $source['table'][$module['source']][$t] = $k['label'];
-    //             }
-    //             // Tri des champs sans tenir compte de la casse
-    //             ksort($source['table'][$module['source']], SORT_NATURAL | SORT_FLAG_CASE);
-    //         }
-
-    //         // SOURCE ----- Récupère la liste des champs source
-
-    //         // Type de synchronisation
-    //         // Récupération de tous les modes de règle possibles pour la source
-    //         $sourceMode = $solution_source->getRuleMode($module['source'], 'source');
-    //         // Si la target à le type S (search) alors on l'ajoute à la source pour qu'il soit préservé par l'intersection
-    //         if (array_key_exists('S', $targetMode)) {
-    //             $sourceMode['S'] = 'search_only';
-    //         }
-    //         $intersectMode = array_intersect($targetMode, $sourceMode);
-    //         // Si jamais l'intersection venait à être vide (ce qui ne devrait jamais arriver) on met par défaut le mode CREATE
-    //         if (empty($intersectMode)) {
-    //             $intersectMode['C'] = 'create_only';
-    //         }
-    //         // If duplicate field exist for the target solution, we allow search rule type
-    //         if (!empty($fieldsDuplicateTarget)) {
-    //             $intersectMode['S'] = 'search_only';
-    //         }
-    //         $this->sessionService->setParamRuleCibleMode($ruleKey, $intersectMode);
-
-    //         // Préparation des champs cible
-    //         $cible['table'] = [];
-
-    //         if ($ruleFieldsTarget) {
-    //             $this->sessionService->setParamRuleTargetFields($ruleKey, $ruleFieldsTarget);
-
-    //             $tmp = $ruleFieldsTarget;
-
-    //             $normal = [];
-    //             $required = [];
-    //             foreach ($ruleFieldsTarget as $t => $k) {
-    //                 if (isset($k['required']) && true == $k['required']) {
-    //                     $required[] = $t;
-    //                 } else {
-    //                     $normal[] = $t;
-    //                 }
-    //             }
-
-    //             asort($required);
-    //             asort($normal);
-
-    //             $alpha = array_merge($required, $normal);
-    //             $field_target_alpha = [];
-    //             foreach ($alpha as $name_fields) {
-    //                 $field_target_alpha[$name_fields] = $tmp[$name_fields]['required'];
-    //             }
-
-    //             $cible['table'][$module['cible']] = $field_target_alpha;
-    //         } else {
-    //             $cible['table'][$module['cible']] = []; // rev 1.1.1
-    //         }
-
-    //         // On ajoute des champs personnalisés à notre mapping
-    //         if ($fieldMappingAdd && $this->sessionService->isParamRuleLastVersionIdExist($ruleKey)) {
-    //             $ruleFields = $this->entityManager
-    //                 ->getRepository(RuleField::class)
-    //                 ->findBy(['rule' => $this->sessionService->getParamRuleLastId($ruleKey)]);
-
-    //             $tmp = [];
-    //             foreach ($ruleFields as $fields) {
-    //                 $tmp[$fields->getTarget()] = 0;
-    //             }
-
-    //             foreach ($cible['table'][$module['cible']] as $k => $value) {
-    //                 $tmp[$k] = $value;
-    //             }
-
-    //             $cible['table'][$module['cible']] = $tmp;
-
-    //             ksort($cible['table'][$module['cible']]);
-    //         }
-
-    //         // -------------------	TARGET
-    //         $lst_relation_target = [];
-    //         $lst_relation_target_alpha = [];
-    //         if ($ruleFieldsTarget) {
-    //             foreach ($ruleFieldsTarget as $key => $value) {
-    //                 // Only relationship fields
-    //                 if (empty($value['relate'])) {
-    //                     continue;
-    //                 }
-    //                 $lst_relation_target[] = $key;
-    //             }
-
-    //             asort($lst_relation_target);
-
-    //             foreach ($lst_relation_target as $name_relate) {
-    //                 $lst_relation_target_alpha[$name_relate]['required'] = (!empty($ruleFieldsTarget[$name_relate]['required_relationship']) ? 1 : 0);
-    //                 $lst_relation_target_alpha[$name_relate]['name'] = $name_relate;
-    //                 $lst_relation_target_alpha[$name_relate]['label'] = (!empty($ruleFieldsTarget[$name_relate]['label']) ? $ruleFieldsTarget[$name_relate]['label'] : $name_relate);
-    //             }
-    //         }
-
-    //         // -------------------	SOURCE
-    //         // Liste des relations SOURCE
-    //         $lst_relation_source = [];
-    //         $lst_relation_source_alpha = [];
-    //         $choice_source = [];
-    //         if ($ruleFieldsSource) {
-    //             foreach ($ruleFieldsSource as $key => $value) {
-    //                 if (empty($value['relate'])) {
-    //                     continue;	// We keep only relationship fields
-    //                 }
-    //                 $lst_relation_source[] = $key;
-    //             }
-
-    //             asort($lst_relation_source);
-    //             foreach ($lst_relation_source as $name_relate) {
-    //                 $lst_relation_source_alpha[$name_relate]['label'] = $ruleFieldsSource[$name_relate]['label'];
-    //             }
-
-    //             // préparation de la liste en html
-    //             foreach ($lst_relation_source_alpha as $key => $value) {
-    //                 $choice_source[$key] = (!empty($value['label']) ? $value['label'] : $key);
-    //             }
-    //         }
-
-    //         if (!isset($source['table'])) {
-    //             $source['table'][$this->sessionService->getParamRuleSourceModule($ruleKey)] = [];
-    //         }
-
-    //         // -- Relation
-    //         // Rule list with the same connectors (both directions) to get the relate ones
-    //         $ruleRepo = $this->entityManager->getRepository(Rule::class);
-    //         $ruleListRelation = $ruleRepo->createQueryBuilder('r')
-    //             ->select('r.id, r.name, r.moduleSource')
-    //             ->where('(
-    //                                         r.connectorSource= ?1 
-    //                                     AND r.connectorTarget= ?2
-    //                                     AND r.name != ?3
-    //                                     AND r.deleted = 0
-    //                                 )
-    //                             OR (
-    //                                         r.connectorTarget= ?1
-    //                                     AND r.connectorSource= ?2
-    //                                     AND r.name != ?3
-    //                                     AND r.deleted = 0
-    //                             )')
-    //             ->setParameter(1, (int) $this->sessionService->getParamRuleConnectorSourceId($ruleKey))
-    //             ->setParameter(2, (int) $this->sessionService->getParamRuleConnectorCibleId($ruleKey))
-    //             ->setParameter(3, $this->sessionService->getParamRuleName($ruleKey))
-    //             ->getQuery()
-    //             ->getResult();
-
-    //         //Verson 1.1.1 : possibilité d'ajouter des relations custom en fonction du module source
-    //         $ruleListRelationSourceCustom = $solution_source->get_rule_custom_relationship($this->sessionService->getParamRuleSourceModule($ruleKey), 'source');
-    //         if (!empty($ruleListRelationSourceCustom)) {
-    //             $ruleListRelation = array_merge($ruleListRelation, $ruleListRelationSourceCustom);
-    //         }
-
-    //         $choice = [];
-    //         $control = [];
-
-    //         foreach ($ruleListRelation as $key => $value) {
-    //             if (!in_array($value['name'], $control)) {
-    //                 $choice[$value['id']] = $value['name'];
-    //                 $control[] = $value['name'];
-    //             }
-    //         }
-    //         asort($choice);
-
-    //         // -------------------	Parent relation
-    //         // Search if we can send document merged with the target solution
-    //         $lstParentFields = [];
-    //         if ($allowParentRelationship) {
-    //             if (!empty($ruleListRelation)) {
-    //                 // We get all relate fields from every source module
-    //                 foreach ($ruleListRelation as $ruleRelation) {
-    //                     // Get the relate fields from the source module of related rules
-    //                     $ruleFieldsSource = $solution_source->get_module_fields($ruleRelation['moduleSource'], 'source');
-    //                     if (!empty($ruleFieldsSource)) {
-    //                         foreach ($ruleFieldsSource as $key => $sourceRelateField) {
-    //                             if (empty($sourceRelateField['relate'])) {
-    //                                 continue;	// Only relationship fields
-    //                             }
-    //                             $lstParentFields[$key] = $ruleRelation['name'].' - '.$sourceRelateField['label'];
-    //                         }
-    //                     }
-    //                 }
-    //                 // We allow  to search by the id of the module
-    //                 $lstParentFields['Myddleware_element_id'] = $this->translator->trans('create_rule.step3.relation.record_id');
-    //             }
-    //             // No parent relation if no rule to link or no fields related
-    //             if (empty($lstParentFields)) {
-    //                 $allowParentRelationship = false;
-    //             }
-    //         }
-
-    //         // On récupére l'EntityManager
-    //         $this->getInstanceBdd();
-
-    //         // Récupère toutes les catégories
-    //         $lstCategory = $this->entityManager->getRepository(FuncCat::class)
-    //             ->findAll();
-
-    //         // Récupère toutes les functions
-    //         $lstFunctions = $this->entityManager->getRepository(Functions::class)
-    //             ->findAll();
-
-    //         // Les filtres
-    //         $lst_filter = [
-    //             $this->translator->trans('filter.content') => 'content',
-    //             $this->translator->trans('filter.notcontent') => 'notcontent',
-    //             $this->translator->trans('filter.begin') => 'begin',
-    //             $this->translator->trans('filter.end') => 'end',
-    //             $this->translator->trans('filter.gt') => 'gt',
-    //             $this->translator->trans('filter.lt') => 'lt',
-    //             $this->translator->trans('filter.equal') => 'equal',
-    //             $this->translator->trans('filter.different') => 'different',
-    //             $this->translator->trans('filter.gteq') => 'gteq',
-    //             $this->translator->trans('filter.lteq') => 'lteq',
-    //             $this->translator->trans('filter.in') => 'in',
-    //             $this->translator->trans('filter.notin') => 'notin',
-    //         ];
-            
-
-    //         //Behavior filters
-    //         $lst_errorMissing = [
-    //             '0' => $this->translator->trans('create_rule.step3.relation.no'),
-    //             '1' => $this->translator->trans('create_rule.step3.relation.yes'),
-    //         ];
-
-    //         $lst_errorEmpty = [
-    //             '0' => $this->translator->trans('create_rule.step3.relation.no'),
-    //             '1' => $this->translator->trans('create_rule.step3.relation.yes'),
-    //         ];
-    //         // paramètres de la règle
-    //         $rule_params = array_merge($ruleParamsSource, $ruleParamsTarget);
-
-    //         // récupération des champs de type liste --------------------------------------------------
-
-    //         // -----[ SOURCE ]-----
-    //         if ($this->sessionService->isParamRuleSourceFieldsExist($ruleKey)) {
-    //             foreach ($this->sessionService->getParamRuleSourceFields($ruleKey) as $field => $fields_tab) {
-    //                 if (array_key_exists('option', $fields_tab)) {
-    //                     $formule_list['source'][$field] = $fields_tab;
-    //                 }
-    //             }
-    //         }
-
-    //         if (isset($formule_list['source']) && count($formule_list['source']) > 0) {
-    //             foreach ($formule_list['source'] as $field => $fields_tab) {
-    //                 foreach ($fields_tab['option'] as $field_name => $fields) {
-    //                     if (!empty($fields)) {
-    //                         $formule_list['source'][$field]['option'][$field_name] = $field_name.' ( '.$fields.' )';
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         $html_list_source = '';
-    //         if (isset($formule_list['source'])) {
-    //             foreach ($formule_list['source'] as $field => $fields_tab) {
-    //                 $html_list_source .= '<optgroup label="'.$field.'">';
-    //                 $html_list_source .= ToolsManager::composeListHtml($fields_tab['option']);
-    //                 $html_list_source .= '</optgroup>';
-    //             }
-    //         }
-
-
-    //         // -----[ TARGET ]-----
-    //         if ($this->sessionService->isParamRuleTargetFieldsExist($ruleKey)) {
-    //             foreach ($this->sessionService->getParamRuleTargetFields($ruleKey) as $field => $fields_tab) {
-    //                 if (array_key_exists('option', $fields_tab)) {
-    //                     $formule_list['target'][$field] = $fields_tab;
-    //                 }
-    //             }
-    //         }
-
-    //         if (isset($formule_list['target']) && count($formule_list['target']) > 0) {
-    //             foreach ($formule_list['target'] as $field => $fields_tab) {
-    //                 foreach ($fields_tab['option'] as $field_name => $fields) {
-    //                     if (!empty($fields)) {
-    //                         $formule_list['target'][$field]['option'][$field_name] = $field_name.' ( '.$fields.' )';
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         $html_list_target = '';
-    //         if (isset($formule_list['target'])) {
-    //             foreach ($formule_list['target'] as $field => $fields_tab) {
-    //                 $html_list_target .= '<optgroup label="'.$field.'">';
-    //                 $html_list_target .= ToolsManager::composeListHtml($fields_tab['option']);
-    //                 $html_list_target .= '</optgroup>';
-    //             }
-    //         }
-
-    //         // récupération des champs de type liste --------------------------------------------------
-
-    //         // Type de synchronisation de données rev 1.06 --------------------------
-    //         if ($this->sessionService->isParamRuleCibleModuleExist($ruleKey)) {
-    //             $mode_translate = [];
-    //             foreach ($this->sessionService->getParamRuleCibleMode($ruleKey) as $key => $value) {
-    //                 $mode_translate[$key] = $this->translator->trans('create_rule.step3.syncdata.'.$value);
-    //             }
-
-    //             $mode =
-    //                 [
-    //                     [
-    //                         'id' => 'mode',
-    //                         'name' => 'mode',
-    //                         'required' => false,
-    //                         'type' => 'option',
-    //                         'label' => $this->translator->trans('create_rule.step3.syncdata.label'),
-    //                         'option' => $mode_translate,
-    //                     ],
-    //                 ];
-
-    //             $rule_params = array_merge($rule_params, $mode);
-    //         }
-    //         // Type de synchronisation de données rev 1.06 --------------------------
-
-    //         //  rev 1.07 --------------------------
-    //         $bidirectional_params['connector']['source'] = $this->sessionService->getParamRuleConnectorSourceId($ruleKey);
-    //         $bidirectional_params['connector']['cible'] = $this->sessionService->getParamRuleConnectorCibleId($ruleKey);
-    //         $bidirectional_params['module']['source'] = $module['source'];
-    //         $bidirectional_params['module']['cible'] = $module['cible'];
-
-    //         $bidirectional = RuleManager::getBidirectionalRules($this->connection, $bidirectional_params, $solution_source, $solution_cible);
-    //         if ($bidirectional) {
-    //             $rule_params = array_merge($rule_params, $bidirectional);
-    //         }
-
-    //         // Add param to allow deletion (need source and target application ok to enable deletion)
-    //         if (
-    //             true == $solution_source->getReadDeletion($module['source'])
-    //             and true == $solution_cible->getSendDeletion($module['cible'])
-    //         ) {
-    //             $deletion = [
-    //                 [
-    //                     'id' => 'deletion',
-    //                     'name' => 'deletion',
-    //                     'required' => false,
-    //                     'type' => 'option',
-    //                     'label' => $this->translator->trans('create_rule.step3.deletion.label'),
-    //                     'option' => [0 => '', 1 => $this->translator->trans('create_rule.step3.deletion.yes')],
-    //                 ],
-    //             ];
-    //             $rule_params = array_merge($rule_params, $deletion);
-    //         } else {
-    //             // If the deletion is disable (database in source OK but target application non OK), we remove the deletion list field of database connector
-    //             $keyDeletionField = array_search('deletionField', array_column($rule_params, 'id'));
-    //             if (!empty($keyDeletionField)) {
-    //                 unset($rule_params[$keyDeletionField]);
-    //             }
-    //         }
-
-    //         // get the array of array $ruleFieldsSource and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
-    //         $listOfSourceFieldsLabels = [
-    //             'Source Fields' => [],
-    //             'Target Fields' => [],
+    //     die("test");
+    //     $ruleKey = $this->sessionService->getParamRuleLastKey();
+
+    //     // valeurs par défaut si rien en session
+    //     $fieldsGrouped = [
+    //         'Source Fields'   => [],
+    //         'Target Fields'   => [],
+    //         'Relation Fields' => [],
+    //     ];
+
+    //     $operators = [
+    //         $this->translator->trans('filter.content')    => 'content',
+    //         $this->translator->trans('filter.notcontent') => 'notcontent',
+    //         $this->translator->trans('filter.begin')      => 'begin',
+    //         $this->translator->trans('filter.end')        => 'end',
+    //         $this->translator->trans('filter.gt')         => 'gt',
+    //         $this->translator->trans('filter.lt')         => 'lt',
+    //         $this->translator->trans('filter.equal')      => 'equal',
+    //         $this->translator->trans('filter.different')  => 'different',
+    //         $this->translator->trans('filter.gteq')       => 'gteq',
+    //         $this->translator->trans('filter.lteq')       => 'lteq',
+    //         $this->translator->trans('filter.in')         => 'in',
+    //         $this->translator->trans('filter.notin')      => 'notin',
+    //     ];
+
+    //     $filters = [];
+
+    //     if ($ruleKey && $this->sessionService->isParamRuleExist($ruleKey)) {
+
+    //         $sourceFields = $this->sessionService->getParamRuleSourceFields($ruleKey) ?? [];
+    //         $targetFields = $this->sessionService->getParamRuleTargetFields($ruleKey) ?? [];
+
+    //         // on reconstruit comme dans l'ancien code
+    //         $fieldsGrouped = [
+    //             'Source Fields'   => [],
+    //             'Target Fields'   => [],
     //             'Relation Fields' => [],
     //         ];
-    //         foreach ($ruleFieldsSource as $key => $value) {
-    //             $listOfSourceFieldsLabels['Source Fields'][$key] = $value['label'];
-    //         }
 
-    //         // get the array of array $ruleFieldsTarget and for each value, get the label only and add it to the array $listOfSourceFieldsLabels
-    //         foreach ($ruleFieldsTarget as $key => $value) {
-    //             $listOfSourceFieldsLabels['Target Fields'][$key] = $value['label'];
-    //         }
-
-    //         foreach ($lst_relation_source_alpha as $key => $value) {
-    //             $listOfSourceFieldsLabels['Relation Fields'][$key] = $value['label'];
-    //         }
-            
-
-    //         $form_all_related_fields = $this->createForm(RelationFilterType::class, null, [
-    //             'field_choices' => $listOfSourceFieldsLabels,
-    //             'another_field_choices' => $lst_filter
-    //         ]);
-            
-    //         $filters = $this->entityManager->getRepository(RuleFilter::class)
-    //                 ->findBy(['rule' => $ruleKey]);
-
-    //         // we want to make a request that fetches all the rule names and ids, so we can display them in the form
-    //         $ruleRepo = $this->entityManager->getRepository(Rule::class);
-    //         $ruleListRelation = $ruleRepo->createQueryBuilder('r')
-    //             ->select('r.id, r.name, r.moduleSource')
-    //             ->where('(
-    //                                         r.connectorSource= ?1 
-    //                                     AND r.connectorTarget= ?2
-    //                                     AND r.name != ?3
-    //                                     AND r.deleted = 0
-    //                                 )
-    //                             OR (
-    //                                         r.connectorTarget= ?1
-    //                                     AND r.connectorSource= ?2
-    //                                     AND r.name != ?3
-    //                                     AND r.deleted = 0
-    //                             )')
-    //             ->setParameter(1, (int) $this->sessionService->getParamRuleConnectorSourceId($ruleKey))
-    //             ->setParameter(2, (int) $this->sessionService->getParamRuleConnectorCibleId($ruleKey))
-    //             ->setParameter(3, $this->sessionService->getParamRuleName($ruleKey))
-    //             ->getQuery()
-    //             ->getResult();
-
-    //         // from the result ruleListRelation we create an array with the rule name as the key and the rule id as the value
-    //         $ruleListRelation = array_reduce($ruleListRelation, function ($carry, $item) {
-    //             $carry[$item['name']] = $item['id'];
-    //             return $carry;
-    //         }, []);
-
-    //         $html_list_rules = '';
-    //         if (!empty($ruleListRelation)) {
-    //             foreach ($ruleListRelation as $ruleName => $ruleId) {
-    //                 $html_list_rules .= '<option value="'.$ruleId.'">'.$ruleName.'</option>';
+    //         die( $fieldsGrouped);
+    //         foreach ($sourceFields as $key => $value) {
+    //             $fieldsGrouped['Source Fields'][$key] = $value['label'] ?? $key;
+    //             // si c’est un champ “relate”, on le met aussi dans relations
+    //             if (!empty($value['relate'])) {
+    //                 $fieldsGrouped['Relation Fields'][$key] = $value['label'] ?? $key;
     //             }
     //         }
 
-    //         // get the full rule object
-    //         $rule = $this->entityManager->getRepository(Rule::class)->find($ruleKey);
-
-    //         //  rev 1.07 --------------------------
-    //         $result = [
-    //             'rule' => $rule,
-    //             'filters' => $filters,
-    //             'source' => $source['table'],
-    //             'cible' => $cible['table'],
-    //             'rule_params' => $rule_params,
-    //             'lst_relation_target' => $lst_relation_target_alpha,
-    //             'lst_relation_source' => $choice_source,
-    //             'lst_rule' => $choice,
-    //             'lst_category' => $lstCategory,
-    //             'lst_functions' => $lstFunctions,
-    //             'lst_filter' => $lst_filter,
-    //             'form_all_related_fields' => $form_all_related_fields->createView(),
-    //             'lst_errorMissing' => $lst_errorMissing,
-    //             'lst_errorEmpty' => $lst_errorEmpty,
-    //             'params' => $this->sessionService->getParamRule($ruleKey),
-    //             'duplicate_target' => $fieldsDuplicateTarget,
-    //             'opt_target' => $html_list_target,
-    //             'opt_source' => $html_list_source,
-    //             'html_list_rules' => $html_list_rules,
-    //             'fieldMappingAddListType' => $fieldMappingAdd,
-    //             'parentRelationships' => $allowParentRelationship,
-    //             'lst_parent_fields' => $lstParentFields,
-    //             'regleId' => $ruleKey,
-    //             'simulationQueryField' => $this->simulationQueryField,
-    //         ];
-
-    //         foreach ($result['source'] as $module => $fields) {
-    //             foreach ($fields as $fieldNameEncoded => $fieldValue) {
-    //                 // Decode the field name
-    //                 $fieldNameDecoded = urldecode($fieldNameEncoded);
-
-    //                 // Optionally, clean up the field name by removing or replacing unwanted characters
-    //                 $fieldNameCleaned = $fieldNameDecoded; // Adjust as needed
-
-    //                 // Clean the field value
-    //                 // Example: Trim whitespace and remove special characters
-    //                 // Adjust the cleaning logic as per your requirements
-    //                 $fieldValueCleaned = trim($fieldValue); // Trimming whitespace
-    //                 // For more aggressive cleaning, uncomment and adjust the following line
-    //                 // $fieldValueCleaned = preg_replace('/[^\x20-\x7E]/', '', $fieldValueCleaned);
-
-    //                 // Check if any cleaning was necessary for the field name
-    //                 if ($fieldNameCleaned !== $fieldNameEncoded || $fieldValue !== $fieldValueCleaned) {
-    //                     // Remove the old key
-    //                     unset($result['source'][$module][$fieldNameEncoded]);
-
-    //                     // Add the cleaned field name with its cleaned value
-    //                     $result['source'][$module][$fieldNameCleaned] = $fieldValueCleaned;
-    //                 }
-    //             }
+    //         foreach ($targetFields as $key => $value) {
+    //             $fieldsGrouped['Target Fields'][$key] = $value['label'] ?? $key;
     //         }
 
-    //         $result = $this->tools->beforeRuleEditViewRender($result);
-
-    //         // Formatage des listes déroulantes :
-    //         $result['lst_relation_source'] = ToolsManager::composeListHtml($result['lst_relation_source'], $this->translator->trans('create_rule.step3.relation.fields'));
-    //         $result['lst_parent_fields'] = ToolsManager::composeListHtml($result['lst_parent_fields'], ' ');
-    //         $result['lst_rule'] = ToolsManager::composeListHtml($result['lst_rule'], $this->translator->trans('create_rule.step3.relation.fields'));
-    //         $result['lst_filter'] = ToolsManager::composeListHtml($result['lst_filter'], $this->translator->trans('create_rule.step3.relation.fields'));
-    //         $result['lst_errorMissing'] = ToolsManager::composeListHtml($result['lst_errorMissing'], '', '1');
-    //         $result['lst_errorEmpty'] = ToolsManager::composeListHtml($result['lst_errorEmpty'], '', '0');
-
-    //         // Modify this section where $html_list_source is built
-    //         $source_groups = [];
-    //         $source_values = [];
-    //         if (isset($formule_list['source'])) {
-    //             foreach ($formule_list['source'] as $field => $fields_tab) {
-    //                 // Store group names
-    //                 $source_groups[$field] = $field;
-                    
-    //                 // Store values for each group
-    //                 $source_values[$field] = [];
-    //                 foreach ($fields_tab['option'] as $value => $label) {
-    //                     $source_values[$field][$value] = $label;
-    //                 }
-    //             }
-    //         }
-
-    //         // Pass these to the template instead of $html_list_source
-    //         $result['source_groups'] = $source_groups;
-    //         $result['source_values'] = $source_values;
-
-    //         // Do the same for target
-    //         $target_groups = [];
-    //         $target_values = [];
-    //         if (isset($formule_list['target'])) {
-    //             foreach ($formule_list['target'] as $field => $fields_tab) {
-    //                 // Store group names
-    //                 $target_groups[$field] = $field;
-                    
-    //                 // Store values for each group
-    //                 $target_values[$field] = [];
-    //                 foreach ($fields_tab['option'] as $value => $label) {
-    //                     $target_values[$field][$value] = $label;
-    //                 }
-    //             }
-    //         }
-
-    //         // Pass target data to template
-    //         $result['target_groups'] = $target_groups;
-    //         $result['target_values'] = $target_values;
-
-    //         return $this->render('Rule/create/step3.html.twig', $result);
-
-    //         // ----------------
-    //     } catch (Exception $e) {
-    //         $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
-    //         $this->sessionService->setCreateRuleError($ruleKey, $this->translator->trans('error.rule.mapping').' : '.$e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
-    //         return $this->redirect($this->generateUrl('regle_stepone_animation'));
+    //         // filtres déjà existants (édition)
+    //         $filters = $this->entityManager->getRepository(\App\Entity\RuleFilter::class)->findBy(['rule' => $ruleKey]);
     //     }
+
+    //     return $this->render('Rule/create/_filters.html.twig', [
+    //         'fieldsGrouped' => $fieldsGrouped,
+    //         'operators'     => $operators,
+    //         'filters'       => $filters,
+    //         'ruleKey'       => $ruleKey,
+    //     ]);
     // }
 
      /**

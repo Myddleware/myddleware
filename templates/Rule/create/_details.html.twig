@@ -1,32 +1,26 @@
-<section class="mb-4" id="step-1">
+<section class="mb-4 mt-4" id="step-1">
   <h2 class="section-title">
     {{ 'animate.title'|trans }}
   </h2>
+
+  <button id="nav-create-rule-detail" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+        <i class="fa-solid fa-list-ul"></i>
+  </button>
 
   <form id="step1-form" novalidate>
     <div class="row g-4">
       <div class="col-12 col-lg-6">
         <label for="rulename" class="form-label">
-          {{ 'animate.rulename'|trans({'default': 'Name of your rule'}) }}
+          {{ 'animate.rulename'| trans }}
         </label>
 
         <div class="position-relative">
-          <input id="rulename"
-                 type="text"
-                 class="form-control"
-                 placeholder="{{ 'animate.rulename'|trans({'default': 'Name here'}) }}"
-                 maxlength="40"
-                 autocomplete="off"
-                 required
-                 data-check-url="{{ path('regle_inputs_name_unique') }}"
-          >
+          <input id="rulename" type="text" class="form-control" placeholder="{{ 'animate.rulename'|trans({'default': 'Name here'}) }}" maxlength="40" autocomplete="off" required data-check-url="{{ path('regle_inputs_name_unique') }}">
 
-          <div id="rulename-spinner"
-               class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+          <div id="rulename-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
             <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
           </div>
         </div>
-
         <div id="rulename-feedback" class="form-text"></div>
       </div>
 

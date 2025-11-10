@@ -14,7 +14,76 @@
 
     {# --- SECTION 3 : Synch Options --- #}
     {% include 'Rule/create/_sync.html.twig' %}
+    
+    {# --- SECTION 4 : Synch Options --- #}
+    {% include 'Rule/create/_filters.html.twig' %}
+    
+    {# --- SECTION 5 : Synch Options --- #}
+    {% include 'Rule/create/_mapping.html.twig' %}
 
   </div>
 
+<!-- Offcanvas gauche -->
+<div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="ruleCreateNav" aria-labelledby="ruleCreateNavLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="ruleCreateNavLabel">Créer une règle</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+
+    <!-- Menu -->
+    <nav class="list-group list-group-flush">
+      <a class="list-group-item list-group-item-action" href="#step-1" data-bs-dismiss="offcanvas">
+        {{ 'animate.rulename'| trans }}
+      </a>
+      <a class="list-group-item list-group-item-action" href="#step-2" data-bs-dismiss="offcanvas">
+        {{ 'animate.ruleconnection'| trans }}
+      </a>
+      <a class="list-group-item list-group-item-action" href="#step-3" data-bs-dismiss="offcanvas">
+        {{ 'create_rule.step3.syncdata.title' | trans }}
+      </a>
+      <a class="list-group-item list-group-item-action" href="#step-4" data-bs-dismiss="offcanvas">
+        {{ 'create_rule.step4.title' | trans }}
+      </a>
+      <a class="list-group-item list-group-item-action" href="#step-5" data-bs-dismiss="offcanvas">
+        {{ 'create_rule.step5.title' | trans }}
+      </a>
+    </nav>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // on récupère l’offcanvas Bootstrap
+    const offcanvasEl = document.getElementById('ruleCreateNav');
+    const bsOffcanvas = offcanvasEl ? bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl) : null;
+
+    // on écoute les clics sur les liens internes
+    document.addEventListener('click', function (e) {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link) return;
+
+      const targetSelector = link.getAttribute('href');
+      const target = document.querySelector(targetSelector);
+      if (!target) return;
+
+      // si le lien est dans l’offcanvas → on le ferme d’abord
+      const isInsideOffcanvas = link.closest('.offcanvas') !== null;
+
+      e.preventDefault();
+
+      if (isInsideOffcanvas && bsOffcanvas) {
+        // on attend la fermeture pour scroller
+        const handleHidden = function () {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          offcanvasEl.removeEventListener('hidden.bs.offcanvas', handleHidden);
+        };
+        offcanvasEl.addEventListener('hidden.bs.offcanvas', handleHidden);
+        bsOffcanvas.hide();
+      } else {
+        // lien normal dans la page
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
 {% endblock %}

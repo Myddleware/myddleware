@@ -150,7 +150,11 @@ create_rule:
         params:
             duplicate: Champs pour éviter les doublons
             sync: Synchronisation bidirectionnelle
-        save_wait: Veuillez patienter... 
+        save_wait: Veuillez patienter...         
+    step4:
+        title: Filtre
+    step5:
+        title: Mappage des champs
 
 filter:
     content: contient

@@ -147,6 +147,10 @@ create_rule:
             yes: Yes
             no : No
             behavior: Behavior
+    step4:
+        title: Filter
+    step5:
+        title: Mapping field
             
         params:
             duplicate: Fields to avoid duplicates

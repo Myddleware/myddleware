@@ -1,8 +1,7 @@
 <section class="mb-5 d-none" id="step-2"
   data-path-module="{{ path('regle_list_module') }}"
   data-path-connection-check="{{ path('regle_inputs') }}"
-  data-path-connectors="{{ path('regle_list_connectors') }}"
->
+  data-path-connectors="{{ path('regle_list_connectors') }}">
 
   <div class="section-chevron" aria-hidden="true">
     <a href="#step-2" class="section-chevron">
@@ -11,8 +10,12 @@
   </div>
 
   <h3 class="section-create-rule fw-bold mb-4">
-    {{ 'animate.ruleconnection'|trans({'default':'Rule Connection'}) }}
+    {{ 'animate.ruleconnection'| trans }}
   </h3>
+  
+  <button id="nav-create-rule-connection" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+        <i class="fa-solid fa-list-ul"></i>
+  </button>
 
   <div class="row gy-5">
     {# --------- SOURCE --------- #}
