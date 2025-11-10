@@ -350,6 +350,7 @@ pagination:
     previous: Précédent
     next: Suivant
     go_to_page: Aller à la page
+    page_number: Numéro de page
 
 animate:
     rulename: Nom de votre règle

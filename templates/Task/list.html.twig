@@ -129,7 +129,7 @@
 											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
 												<div class="form-group" required style="width: 15em;">
 													<label for="page" class="sr-only">Page</label>
-													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
+													<input type="number" name="page" id="page" class="form-control" placeholder="{{ 'pagination.page_number'|trans }}" min="1" required>
 												</div>
 												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >{{ 'pagination.go_to_page'|trans }}</button>
 											</form>
