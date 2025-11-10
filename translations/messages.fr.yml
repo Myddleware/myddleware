@@ -346,6 +346,10 @@ list_rulegroup:
 
 actions: "Actions"
 
+pagination:
+    previous: Précédent
+    next: Suivant
+    go_to_page: Aller à la page
 
 animate:
     rulename: Nom de votre règle
