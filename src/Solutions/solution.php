@@ -26,6 +26,7 @@
 namespace App\Solutions;
 
 use App\Manager\DocumentManager;
+use App\Manager\ToolsManager;
 use App\Manager\FormulaManager;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleRelationShipRepository;
@@ -82,6 +83,7 @@ class solution
     protected DocumentRepository $documentRepository;
     protected RuleRelationShipRepository $ruleRelationshipsRepository;
     protected FormulaManager $formulaManager;
+	protected ?ToolsManager $tools;
     protected array $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
 
     public function __construct(
@@ -91,7 +93,8 @@ class solution
         EntityManagerInterface $entityManager,
         DocumentRepository $documentRepository,
         RuleRelationShipRepository $ruleRelationshipsRepository,
-        FormulaManager $formulaManager
+        FormulaManager $formulaManager,
+		ToolsManager $tools = null
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -100,6 +103,7 @@ class solution
         $this->documentRepository = $documentRepository;
         $this->ruleRelationshipsRepository = $ruleRelationshipsRepository;
         $this->formulaManager = $formulaManager;
+		$this->tools = $tools;
     }
 
     // Fonction permettant de se loguer à la solution
@@ -152,11 +156,11 @@ class solution
 		$chlidEntityManager->clear();
 		// Call the right class documentManager
 		if (class_exists('App\Custom\Manager\DocumentManagerCustom')) {
-            $this->documentManager = new \App\Custom\Manager\DocumentManagerCustom($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+            $this->documentManager = new \App\Custom\Manager\DocumentManagerCustom($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface, $this->tools);
         }elseif (class_exists('App\Premium\Manager\DocumentManagerPremium')) {
-            $this->documentManager = new \App\Premium\Manager\DocumentManagerPremium($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+            $this->documentManager = new \App\Premium\Manager\DocumentManagerPremium($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface, $this->tools);
         } else {
-            $this->documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface);
+            $this->documentManager = new DocumentManager($this->logger, $this->connection, $chlidEntityManager, $this->formulaManager, null, $this->parameterBagInterface, $this->tools);
         }
 	}
 
