@@ -51,6 +51,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Illuminate\Encryption\Encrypter;
 
 /**
  * @Route("/rule")
@@ -700,6 +701,9 @@ class ConnectorController extends AbstractController
                 return $this->json(['success' => false, 'message' => 'Connector not found'], 404);
             }
 
+            // Initialize encrypter for decryption
+            $encrypter = new Encrypter(substr($this->getParameter('secret'), -16));
+
             // Build response data
             $data = [
                 'success' => true,
@@ -707,9 +711,19 @@ class ConnectorController extends AbstractController
                 'params' => []
             ];
 
-            // Add connector parameters
+            // Add connector parameters (decrypted)
             foreach ($connector->getConnectorParams() as $param) {
-                $data['params'][$param->getName()] = $param->getValue();
+                $value = $param->getValue();
+                // Try to decrypt the value
+                if (!empty($value)) {
+                    try {
+                        $value = $encrypter->decrypt($value);
+                    } catch (Exception $e) {
+                        // If decryption fails, use the original value
+                        // Some parameters might not be encrypted
+                    }
+                }
+                $data['params'][$param->getName()] = $value;
             }
 
             return $this->json($data);
