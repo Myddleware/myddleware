@@ -42,7 +42,7 @@ class TwoFactorAuth
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=User::class, cascade={"remove"})
+     * @ORM\OneToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $user;
