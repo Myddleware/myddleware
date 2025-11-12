@@ -673,6 +673,52 @@ class ConnectorController extends AbstractController
         ]);
     }
 
+    /**
+     * Get connector data from database as JSON.
+     * Used to populate form fields from database values.
+     *
+     * @Route("/api/connector/get-data/{id}", name="connector_get_data", methods={"GET"})
+     */
+    public function getConnectorData($id): Response
+    {
+        try {
+            // Load connector with proper permissions check
+            $qb = $this->entityManager->getRepository(Connector::class)->createQueryBuilder('c');
+            $qb->select('c', 'cp')->leftjoin('c.connectorParams', 'cp');
+
+            if ($this->getUser()->isAdmin()) {
+                $qb->where('c.id = :id AND c.deleted = 0')->setParameter('id', $id);
+            } else {
+                $qb->where('c.id = :id and c.createdBy = :createdBy AND c.deleted = 0')
+                   ->setParameter('id', $id)
+                   ->setParameter('createdBy', $this->getUser()->getId());
+            }
+
+            $connector = $qb->getQuery()->getOneOrNullResult();
+
+            if (!$connector) {
+                return $this->json(['success' => false, 'message' => 'Connector not found'], 404);
+            }
+
+            // Build response data
+            $data = [
+                'success' => true,
+                'name' => $connector->getName(),
+                'params' => []
+            ];
+
+            // Add connector parameters
+            foreach ($connector->getConnectorParams() as $param) {
+                $data['params'][$param->getName()] = $param->getValue();
+            }
+
+            return $this->json($data);
+        } catch (Exception $e) {
+            $this->logger->error('Error fetching connector data: ' . $e->getMessage());
+            return $this->json(['success' => false, 'message' => 'Error fetching connector data'], 500);
+        }
+    }
+
     /* ******************************************************
      * ANIMATION
      ****************************************************** */

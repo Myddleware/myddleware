@@ -28,6 +28,79 @@ const $ = require('jquery');
 // AS TO WHY THE ROUTING & PATHS ARE WRONG SINCE WE'VE CHANGED WEBPACK BUILD PARAMETERS 
 
 $( function() {
+	// Get data from database
+	$('#get_from_database').on('click', function(){
+		// Get the connector ID from the form action URL
+		const form = $('form[method="POST"]');
+		const actionUrl = form.attr('action');
+		const connectorId = actionUrl.match(/\/(\d+)$/)[1];
+		console.log('Connector ID:', connectorId);
+
+		// get the window location
+		const windowLocation = window.location.href;
+		console.log('Window Location:', windowLocation);
+
+		// Create the API URL based on the connector ID and the window location
+		const apiUrl = windowLocation.replace(/\/connector\/view\/\d+$/, '/api/connector/get-data/' + connectorId);
+		console.log('API URL:', apiUrl);
+		// const apiUrlModel = "http://localhost/myddleware_NORMAL/public/rule/api/connector/get-data/11"
+		// console.log('API URL Model:', apiUrlModel);
+
+		$.ajax({
+			type: "GET",
+			url: apiUrl,
+			dataType: 'json',
+			beforeSend: function() {
+				// Show loading state
+				$('#get_from_database').prop('disabled', true).text('Loading...');
+			},
+			success: function(data){
+				if(data.success) {
+					// Populate the connector name field
+					$('#connector_name, #label').val(data.name);
+
+					// Populate connector parameters
+					$.each(data.params, function(paramName, paramValue) {
+						// Find the input field by data-param attribute
+						const paramInput = $('input[data-param="' + paramName + '"], textarea[data-param="' + paramName + '"], input[type="password"][data-param="' + paramName + '"]');
+						if (paramInput.length > 0) {
+							paramInput.val(paramValue);
+						}
+					});
+
+					// Show success message
+					const alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+						'Connector data loaded successfully from database' +
+						'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+					'</div>';
+					$('#get_from_database').before(alertHtml);
+				} else {
+					// Show error message
+					const alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+						'Error: ' + data.message +
+						'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+					'</div>';
+					$('#get_from_database').before(alertHtml);
+				}
+			},
+			error: function(xhr, status, error){
+				// Show error message
+				const errorMsg = xhr.status === 404 ? 'Connector not found' : 'Error loading connector data';
+				const alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+					errorMsg +
+					'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+				'</div>';
+				$('#get_from_database').before(alertHtml);
+			},
+			complete: function() {
+				// Restore button state
+				$('#get_from_database').prop('disabled', false).text('Get from database');
+			}
+		});
+
+		return false;
+	});
+
 	// Test connexion
 	$('#connexion').on('click', function(){
 
