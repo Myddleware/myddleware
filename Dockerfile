@@ -33,6 +33,12 @@ COPY --chown=www-data:www-data . .
 RUN yarn install
 RUN yarn run build
 
+## Create Myddleware cache and job directories with proper permissions
+RUN mkdir -p /var/www/html/var/cache/dev/myddleware/job \
+    /var/www/html/var/cache/prod/myddleware/job && \
+    chown -R www-data:www-data /var/www/html/var/cache && \
+    chmod -R 775 /var/www/html/var/cache
+
 ## Setup Cronjob
 RUN apt-get update && apt-get install -y --no-install-recommends cron rsyslog && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
