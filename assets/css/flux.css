@@ -546,6 +546,7 @@ li span {
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: default;
+    min-height: 20px;
 }
 
 .field-value:hover, .field-value.expanded {
