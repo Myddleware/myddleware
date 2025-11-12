@@ -13,9 +13,19 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Psr\Log\LoggerInterface;
+
 
 class UserManagerController extends AbstractController
 {
+
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/rule/user_manager', name: 'user_manager')]
     public function index(UserRepository $userRepository): Response
     {
@@ -111,6 +121,7 @@ class UserManagerController extends AbstractController
 
             $this->addFlash('user_manager.delete.success', $translator->trans('success_deleted_user'));
         } catch (\Throwable $e) {
+            $this->logger->critical("Error deleting user ID {$user->getId()}: " . $e->getMessage());
             $this->addFlash('user_manager.delete.danger', $translator->trans('failed_deleted_user'));
         }
         return $this->redirectToRoute('user_manager');
