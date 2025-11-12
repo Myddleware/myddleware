@@ -1113,7 +1113,7 @@ management_smtp:
     submit :  Save SMTP config
     cancel: Cancel
     title : SMTP Management
-    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
+    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/6.4/mailer.html" target=_blank>https://symfony.com/doc/6.4/mailer.html</a>'
     sendtestmail: Send test mail
     success: SMTP config saved successfully
     error: Failed to save SMTP config
