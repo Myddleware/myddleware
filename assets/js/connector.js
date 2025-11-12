@@ -29,7 +29,14 @@ const $ = require('jquery');
 
 $( function() {
 	// Get data from database
+	let isLoadingData = false;
+
 	$('#get_from_database').on('click', function(){
+		// Prevent multiple simultaneous requests
+		if (isLoadingData) {
+			return false;
+		}
+
 		// Get the connector ID from the form action URL
 		const form = $('form[method="POST"]');
 		const actionUrl = form.attr('action');
@@ -46,12 +53,33 @@ $( function() {
 		// const apiUrlModel = "http://localhost/myddleware_NORMAL/public/rule/api/connector/get-data/11"
 		// console.log('API URL Model:', apiUrlModel);
 
+		function showAlert(message, isSuccess) {
+			// Remove any existing alerts
+			$('#get_from_database').siblings('.alert').remove();
+
+			// Create new alert
+			const alertClass = isSuccess ? 'alert-success' : 'alert-danger';
+			const alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+				message +
+				'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+			'</div>';
+			$('#get_from_database').before(alertHtml);
+
+			// Auto-dismiss after 500ms
+			setTimeout(function() {
+				$('#get_from_database').siblings('.alert').fadeOut(300, function() {
+					$(this).remove();
+				});
+			}, 500);
+		}
+
 		$.ajax({
 			type: "GET",
 			url: apiUrl,
 			dataType: 'json',
 			beforeSend: function() {
 				// Show loading state
+				isLoadingData = true;
 				$('#get_from_database').prop('disabled', true).text('Loading...');
 			},
 			success: function(data){
@@ -69,31 +97,20 @@ $( function() {
 					});
 
 					// Show success message
-					const alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-						'Connector data loaded successfully from database' +
-						'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-					'</div>';
-					$('#get_from_database').before(alertHtml);
+					showAlert('Connector data loaded successfully from database', true);
 				} else {
 					// Show error message
-					const alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-						'Error: ' + data.message +
-						'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-					'</div>';
-					$('#get_from_database').before(alertHtml);
+					showAlert('Error: ' + data.message, false);
 				}
 			},
 			error: function(xhr, status, error){
 				// Show error message
 				const errorMsg = xhr.status === 404 ? 'Connector not found' : 'Error loading connector data';
-				const alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-					errorMsg +
-					'<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-				'</div>';
-				$('#get_from_database').before(alertHtml);
+				showAlert(errorMsg, false);
 			},
 			complete: function() {
 				// Restore button state
+				isLoadingData = false;
 				$('#get_from_database').prop('disabled', false).text('Get from database');
 			}
 		});
