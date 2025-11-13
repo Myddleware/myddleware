@@ -1120,10 +1120,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
         $ruleKey = $this->sessionService->getParamRuleLastKey();
+        $lstFunctions = $this->entityManager->getRepository(Functions::class)->findAll();
 
         return $this->render('Rule/create/index.html.twig', [
             'solutions' => $solutions,
             'ruleKey'   => $ruleKey,
+            'lst_functions' => $lstFunctions,
         ]);
     }
 

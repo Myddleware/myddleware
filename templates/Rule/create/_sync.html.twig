@@ -7,7 +7,7 @@
   </div>
 
   <h3 class="section-create-rule fw-bold mb-4 fw-bold mb-4">
-    {{ 'create_rule.step3.syncdata.title'|trans({'default': 'Sync options'}) }}
+    {{ 'create_rule.step3.syncdata.title'|trans }}
   </h3>
 
   <button id="nav-create-rule-sync" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
@@ -16,20 +16,20 @@
 
   <div class="row g-4 align-items-start">
     <div class="col-12 col-md-6">
-      <label class="form-label">{{ 'create_rule.step3.sync_type'|trans({'default':'Synchronization type'}) }}</label>
+      <label class="form-label">{{ 'create_rule.step3.syncdata.label'|trans}}</label>
       <select id="sync-mode" class="form-select form-select-lg" disabled>
         <option value="" selected disabled>—</option>
-        <option value="C">Create only</option>
-        <option value="U">Update only</option>
-        <option value="CU">Create and update data</option>
+        <option value="C">{{ 'create_rule.step3.syncdata.create_only'|trans}}</option>
+        <option value="U">{{ 'create_rule.step3.syncdata.update_only'|trans}}</option>
+        <option value="CU">{{ 'create_rule.step3.syncdata.create_modify'|trans}}</option>
       </select>
       <div id="sync-mode-feedback" class="form-text"></div>
     </div>
 
     <div class="col-12 col-md-6">
-      <label class="form-label">{{ 'create_rule.step3.duplicate_field'|trans({'default':'Duplicate field'}) }}</label>
+      <label class="form-label">{{ 'create_rule.step5.params.duplicate'|trans }}</label>
       <select id="duplicate-field" class="form-select form-select-lg" disabled>
-        <option value="" selected disabled>—</option>
+        <option value="" selected disabled placeholder="..."></option>
       </select>
     </div>
   </div>

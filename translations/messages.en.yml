@@ -149,9 +149,23 @@ create_rule:
             behavior: Behavior
     step4:
         title: Filter
+        filters:
+            field: "Field"
+            choose_field: "Choose a field"
+            operator: "Operator"
+            choose_operator: "Choose an operator"
+            value: "Value"
+            current: "Current filters"
+            empty: "No filters have been defined yet."
     step5:
-        title: Mapping field
-            
+        title: Mapping field    
+        formula:
+            title: Compose your formula
+            selected_field: Selected fields
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Close
+            save: Save     
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization

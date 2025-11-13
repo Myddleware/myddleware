@@ -1,9 +1,5 @@
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-body">
-    <h4 class="h6 fw-bold mb-3">
-      {{ 'create_rule.step4.filters.title'|trans }}
-    </h4>
-
     <div class="row g-3 align-items-end">
       <div class="col-12 col-md-4">
         <label class="form-label">
@@ -46,7 +42,7 @@
         <input id="rule-filter-value" type="text" class="form-control" placeholder="...">
       </div>
 
-      <div class="col-12 col-md-2 d-grid">
+      <div class="col-12 col-md-2">
         <button class="btn btn-primary" id="rule-filter-add" type="button">
           <i class="fa-solid fa-plus"></i>
         </button>
@@ -79,7 +75,7 @@
         </ul>
       {% else %}
         <p class="text-muted mb-0">
-          {{ 'create_rule.step4.filters.empty'|trans }}
+          {{ 'create_rule.step4.filters.empty' | trans }}
         </p>
       {% endif %}
     </div>

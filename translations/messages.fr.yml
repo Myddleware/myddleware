@@ -152,9 +152,24 @@ create_rule:
             sync: Synchronisation bidirectionnelle
         save_wait: Veuillez patienter...         
     step4:
-        title: Filtre
+        title: "Filtres"
+        filters:
+            field: "Champ"
+            choose_field: "Choisir un champ"
+            operator: "Opérateur"
+            choose_operator: "Choisir un opérateur"
+            value: "Valeur"
+            current: "Filtres actuels"
+            empty: "Aucun filtre n'a encore été défini."
     step5:
         title: Mappage des champs
+        formula:
+            title: Composer votre formule
+            selected_field: Champs sélectionnés
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Fermer
+            save: Confirmer
 
 filter:
     content: contient
