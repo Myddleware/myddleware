@@ -539,13 +539,19 @@ class ManagementSMTPController extends AbstractController
         $isApiEmailSent = null; // Initialize to null
         $isRegularEmailSent = null; // Initialize to null
 
+        $this->logger->critical('===== TEST MAIL CONFIGURATION STARTED =====');
+        $this->logger->critical('Transport: ' . $form->get('transport')->getData());
+
         if ($form->get('transport')->getData() === "sendinblue") {
+            $this->logger->critical('TESTMAIL: Using Sendinblue API transport');
             $isApiEmailSent = $this->sendinblueSendMailByApiKey($form);
+            $this->logger->critical('TESTMAIL: Sendinblue API result: ' . ($isApiEmailSent ? 'TRUE' : 'FALSE'));
         } else {
+            $this->logger->critical('TESTMAIL: Using regular SMTP transport');
             $user_email = null;
             $user = $this->getUser();
             // Ensure we have the correct user type before getting email
-            if ($user instanceof \App\Entity\User) { 
+            if ($user instanceof \App\Entity\User) {
                  $user_email = $user->getEmail();
             }
             // Use null-safe operator and check below
@@ -556,19 +562,25 @@ class ManagementSMTPController extends AbstractController
                     throw new Exception('No email address found for the current user to send the test email.');
                 }
 
+                $this->logger->critical('TESTMAIL: User email: ' . $user_email);
+
                 // 1. Try to get DSN from environment first
                 $dsn = $this->checkIfmailerDsnInEnv();
+                $this->logger->critical('TESTMAIL: DSN from env: ' . ($dsn !== false ? 'FOUND' : 'NOT FOUND'));
 
                 // 2. If no DSN in env, build it from the form (allows testing unsaved config)
                 if ($dsn === false) {
+                    $this->logger->critical('TESTMAIL: Building DSN from form');
                     $host = $form->get('host')->getData();
                     $port = $form->get('port')->getData();
                     $user = $form->get('user')->getData();
                     $auth_mode = $form->get('auth_mode')->getData();
                     $encryption = $form->get('encryption')->getData();
                     // IMPORTANT: Get password from form ONLY if building DSN from form
-                    $password = $form->get('password')->getData(); 
+                    $password = $form->get('password')->getData();
                     $transportType = $form->get('transport')->getData();
+
+                    $this->logger->critical('TESTMAIL: Form data - Host: ' . $host . ', Port: ' . $port . ', User: ' . $user . ', Transport: ' . $transportType . ', Encryption: ' . $encryption . ', Auth Mode: ' . $auth_mode);
 
                     // Basic check for essential parts if building from form
                     if (empty($transportType) || empty($host)) {
@@ -594,6 +606,10 @@ class ManagementSMTPController extends AbstractController
                     if (!empty($queryParams)) {
                         $dsn .= '?' . http_build_query($queryParams);
                     }
+
+                    $this->logger->critical('TESTMAIL: Built DSN: ' . $dsn);
+                } else {
+                    $this->logger->critical('TESTMAIL: Using DSN from .env');
                 }
 
                 // Ensure DSN is valid before proceeding
@@ -601,12 +617,15 @@ class ManagementSMTPController extends AbstractController
                      throw new Exception('Could not determine a valid Mailer DSN for testing.');
                  }
 
+                $this->logger->critical('TESTMAIL: Creating Transport from DSN');
 
                 // Create the Transport using the determined DSN
                 $transport = Transport::fromDsn($dsn);
+                $this->logger->critical('TESTMAIL: Transport created successfully');
 
                 // Create the Mailer
                 $mailer = new Mailer($transport);
+                $this->logger->critical('TESTMAIL: Mailer created successfully');
 
                 $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . "\n";
                 $textMail .= $this->translator->trans('email_notification.best_regards') . "\n" . $this->translator->trans('email_notification.signature');
@@ -617,6 +636,7 @@ class ManagementSMTPController extends AbstractController
                      $emailFrom = 'no-reply@myddleware.com'; // Default fallback
                  }
 
+                $this->logger->critical('TESTMAIL: Email From: ' . $emailFrom);
 
                 // Create the email
                 $email = (new Email())
@@ -625,13 +645,16 @@ class ManagementSMTPController extends AbstractController
                     ->subject($this->translator->trans('management_smtp_sendmail.subject'))
                     ->text($textMail);
 
+                $this->logger->critical('TESTMAIL: Email object created, attempting to send');
+
                 // Send the email
                 $mailer->send($email);
+                $this->logger->critical('TESTMAIL: Email sent successfully');
                 $isRegularEmailSent = true;
 
             } catch (Exception $e) {
                 // Log the detailed error for debugging
-                 $this->logger->error('Email Test Error: ' . $e->getMessage() . ' DSN used: ' . (is_string($dsn) ? $dsn : 'N/A') . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+                 $this->logger->critical('TESTMAIL EXCEPTION: ' . $e->getMessage() . ' DSN used: ' . (is_string($dsn) ?? false ? $dsn : 'N/A') . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
 
                 // Set a user-friendly error message using the controller's flash message helper
                 $error = $this->translator->trans('management_smtp.sendtestmail_error') . ' (' . $e->getMessage() . ')';
@@ -641,6 +664,9 @@ class ManagementSMTPController extends AbstractController
             }
         }
 
+        $this->logger->critical('TESTMAIL: isApiEmailSent = ' . ($isApiEmailSent === null ? 'NULL' : ($isApiEmailSent ? 'TRUE' : 'FALSE')));
+        $this->logger->critical('TESTMAIL: isRegularEmailSent = ' . ($isRegularEmailSent === null ? 'NULL' : ($isRegularEmailSent ? 'TRUE' : 'FALSE')));
+
         if ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
              $failed = $this->translator->trans('email_validation.error');
              $this->addFlash('smtp.test.danger', $failed);
@@ -649,9 +675,11 @@ class ManagementSMTPController extends AbstractController
             $this->addFlash('smtp.test.danger', $failed);
         }
 
+        $result = ($isApiEmailSent === true || $isRegularEmailSent === true);
+        $this->logger->critical('===== TEST MAIL CONFIGURATION RESULT: ' . ($result ? 'SUCCESS' : 'FAILED') . ' =====');
 
         // Return overall success status
-        return ($isApiEmailSent === true || $isRegularEmailSent === true);
+        return $result;
     }
 
     protected function sendinblueSendMailByApiKey($form)
@@ -660,11 +688,19 @@ class ManagementSMTPController extends AbstractController
             $apiKey = $this->checkIfApiKeyInEnv();
             $user_email = $this->getUser()->getEmail();
 
+            // CRITICAL LOG: API Key check
+            $this->logger->critical('SENDINBLUE API TEST: Checking API Key');
+            $this->logger->critical('SENDINBLUE API TEST: API Key present: ' . (!empty($apiKey) ? 'YES' : 'NO'));
+            $this->logger->critical('SENDINBLUE API TEST: User email: ' . $user_email);
+
             // Prepare the email data
+            $emailFrom = !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com';
+
+            $this->logger->critical('SENDINBLUE API TEST: Email From: ' . $emailFrom);
 
             $emailData = [
                 'sender' => [
-                    'email' => !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'
+                    'email' => $emailFrom
                 ],
                 'to' => [
                     [
@@ -677,7 +713,17 @@ class ManagementSMTPController extends AbstractController
                                $this->translator->trans('email_notification.signature')
             ];
 
+            $this->logger->critical('SENDINBLUE API TEST: Email data prepared: ' . json_encode([
+                'sender' => $emailData['sender'],
+                'to' => $emailData['to'],
+                'subject' => $emailData['subject']
+            ]));
+
             $curl = curl_init();
+
+            // Check if cURL extension is available
+            $this->logger->critical('SENDINBLUE API TEST: cURL extension available: ' . (extension_loaded('curl') ? 'YES' : 'NO'));
+
             curl_setopt_array($curl, [
                 CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
                 CURLOPT_RETURNTRANSFER => true,
@@ -692,19 +738,69 @@ class ManagementSMTPController extends AbstractController
                     "api-key: " . $apiKey,
                     "content-type: application/json"
                 ],
+                // Add SSL verification logging
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSL_VERIFYPEER => true,
             ]);
+
+            $this->logger->critical('SENDINBLUE API TEST: cURL request initialized, about to execute');
+
             $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             $err = curl_error($curl);
+            $errno = curl_errno($curl);
+            $connectTime = curl_getinfo($curl, CURLINFO_CONNECT_TIME);
+            $totalTime = curl_getinfo($curl, CURLINFO_TOTAL_TIME);
+            $nameResolutionTime = curl_getinfo($curl, CURLINFO_NAMELOOKUP_TIME);
+            $preTransferTime = curl_getinfo($curl, CURLINFO_PRETRANSFER_TIME);
+
+            // CRITICAL LOGS: Response details with detailed timing info
+            $this->logger->critical('SENDINBLUE API TEST: cURL error: ' . ($err ? $err : 'NONE'));
+            $this->logger->critical('SENDINBLUE API TEST: cURL errno: ' . $errno);
+            $this->logger->critical('SENDINBLUE API TEST: HTTP Status Code: ' . $httpCode);
+            $this->logger->critical('SENDINBLUE API TEST: DNS Lookup Time: ' . $nameResolutionTime . 's');
+            $this->logger->critical('SENDINBLUE API TEST: Pre-transfer Time (SSL): ' . $preTransferTime . 's');
+            $this->logger->critical('SENDINBLUE API TEST: Connection Time: ' . $connectTime . 's');
+            $this->logger->critical('SENDINBLUE API TEST: Total Time: ' . $totalTime . 's');
+            $this->logger->critical('SENDINBLUE API TEST: Response Length: ' . strlen((string)$response) . ' bytes');
+            $this->logger->critical('SENDINBLUE API TEST: Raw Response: ' . substr((string)$response, 0, 1000));
+
+            // Log errno meanings for Docker debugging
+            if ($errno !== 0) {
+                $this->logger->critical('SENDINBLUE API TEST: cURL Error Code ' . $errno . ' details: See cURL error codes (0=CURLM_CALL_MULTI_PERFORM, 52=EMPTY_REPLY_FROM_SERVER, 60=SSL_CERTIFICATE, etc.)');
+            }
+
             curl_close($curl);
+
+            // Check for cURL errors first
             if ($err) {
+                $this->logger->critical('SENDINBLUE API TEST: FAILED - cURL error occurred');
                 $session = $this->requestStack->getSession();
                 $session->set('error', [$this->translator->trans('management_smtp.error')]);
                 return false;
-            } else {
-                return true;
             }
+
+            // Check HTTP status code - 2xx means success
+            if ($httpCode < 200 || $httpCode >= 300) {
+                $this->logger->critical('SENDINBLUE API TEST: FAILED - HTTP ' . $httpCode . ' returned');
+
+                // Try to parse error from response
+                $responseData = json_decode($response, true);
+                if (json_last_error() === JSON_ERROR_NONE && isset($responseData['message'])) {
+                    $this->logger->critical('SENDINBLUE API TEST: API Error Message: ' . $responseData['message']);
+                }
+
+                $session = $this->requestStack->getSession();
+                $session->set('error', [$this->translator->trans('management_smtp.error') . ' (HTTP ' . $httpCode . ')']);
+                return false;
+            }
+
+            // All checks passed
+            $this->logger->critical('SENDINBLUE API TEST: SUCCESS - Email sent via API');
+            return true;
+
         } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->critical('SENDINBLUE API TEST: EXCEPTION - ' . $e->getMessage() . ' ' . $e->getFile() . ' Line: ' . $e->getLine());
             return false;
         }
     }
