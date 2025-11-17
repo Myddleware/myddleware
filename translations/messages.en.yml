@@ -388,6 +388,7 @@ create_connector:
     upload_delete: Deleting file
     params_error: An error occurred while saving the settings
     form_error : Cannot get connector data (solution, fields & parent) 
+    duplicate_name: A connector already has that name.
 
 list_connector:
     empty: You do not have any connectors yet !

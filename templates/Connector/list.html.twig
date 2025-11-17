@@ -42,6 +42,8 @@
 		</div>
 	{% endfor %}
 
+	{% include '_notifications.html.twig' with { filter_prefix: 'connector.' } %}
+
 	{# error message for permission denied #}
 	{% for flash in app.flashes('error-permission') %}
 		<div class="alert alert-danger alert-dismissible fade show">

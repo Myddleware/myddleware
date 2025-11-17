@@ -400,8 +400,8 @@ class ConnectorController extends AbstractController
 
                     $name = trim((string) $connector->getName());
                     if ($this->entityManager->getRepository(Connector::class)->existsActiveName($name)) {
-                        $this->addFlash('error', $this->translator->trans('create_rule.error_name'));
-                        return $this->redirect($this->generateUrl('connector_open'));
+                        $this->addFlash('connector.create.danger', $this->translator->trans('create_connector.duplicate_name'));
+                        return $this->redirect($this->generateUrl('regle_connector_list'));
                     }
 
                     $connectorParams = $connector->getConnectorParams();
@@ -627,7 +627,7 @@ class ConnectorController extends AbstractController
                         $name = trim((string) $connector->getName());
 
                         if ($this->entityManager->getRepository(Connector::class)->existsActiveName($name, $connector->getId())) {
-                                $this->addFlash('danger', $this->translator->trans('create_rule.error_name'));
+                                $this->addFlash('connector.create.danger', $this->translator->trans('create_connector.duplicate_name'));
                                 return $this->render('Connector/edit/fiche.html.twig', [
                                 'connector' => $connector,
                                 'form' => $form->createView(),
