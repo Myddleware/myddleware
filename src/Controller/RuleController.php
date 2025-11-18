@@ -1209,16 +1209,16 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         ]);
     }
 
-
     #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
     public function ruleStepFilters(Request $request): Response
     {
-        $ruleKey = $this->sessionService->getParamRuleLastKey();
-        $fieldsGrouped = [
-            'Source Fields'   => [],
-            'Target Fields'   => [],
-            'Relation Fields' => [],
-        ];
+        $srcSolIdOrName  = $request->query->get('src_solution_name') ?? $request->query->get('src_solution_id');
+        $tgtSolIdOrName  = $request->query->get('tgt_solution_name') ?? $request->query->get('tgt_solution_id');
+        $srcConnectorId  = $request->query->get('src_connector_id');
+        $tgtConnectorId  = $request->query->get('tgt_connector_id');
+        $srcModule       = $request->query->get('src_module');
+        $tgtModule       = $request->query->get('tgt_module');
+        $ruleId          = $request->query->get('rule_id');
 
         $operators = [
             $this->translator->trans('filter.content')    => 'content',
@@ -1235,109 +1235,115 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->translator->trans('filter.notin')      => 'notin',
         ];
 
-        $filters = [];
+        $fieldsGrouped = [
+            'Source Fields'   => [],
+            'Target Fields'   => [],
+            'Relation Fields' => [],
+        ];
 
-        if (!$ruleKey || !$this->sessionService->isParamRuleExist($ruleKey)) {
+        $filters = [];
+        if (!empty($ruleId)) {
+            $filters = $this->entityManager
+                ->getRepository(\App\Entity\RuleFilter::class)
+                ->findBy(['rule' => $ruleId]);
+        }
+
+        if (!$srcSolIdOrName || !$tgtSolIdOrName || !$srcConnectorId || !$tgtConnectorId || !$srcModule || !$tgtModule) {
             return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
                 'fieldsGrouped' => $fieldsGrouped,
                 'operators'     => $operators,
                 'filters'       => $filters,
-                'ruleKey'       => $ruleKey,
+                'ruleKey'       => $ruleId,
             ]);
         }
 
-        // 1) Récupérer ce que le JS envoie (solutions + modules)
-        $sourceSolutionName = $request->query->get('src_solution_id')
-            ?: $this->sessionService->getParamRuleSourceSolution($ruleKey);
+        $srcSolutionName = $this->resolveSolutionName($srcSolIdOrName);
+        $tgtSolutionName = $this->resolveSolutionName($tgtSolIdOrName);
 
-        $targetSolutionName = $request->query->get('tgt_solution_id')
-            ?: $this->sessionService->getParamRuleCibleSolution($ruleKey);
+        if (!$srcSolutionName || !$tgtSolutionName) {
+            $this->logger->warning('Filters step: unknown solution name(s)', [
+                'src' => $srcSolIdOrName, 'tgt' => $tgtSolIdOrName
+            ]);
+            return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+                'fieldsGrouped' => $fieldsGrouped,
+                'operators'     => $operators,
+                'filters'       => $filters,
+                'ruleKey'       => $ruleId,
+            ]);
+        }
 
-        $sourceModule = $request->query->get('src_module')
-            ?: $this->sessionService->getParamRuleSourceModule($ruleKey);
+        $srcParams = $this->resolveConnectorParams($srcConnectorId);
+        $tgtParams = $this->resolveConnectorParams($tgtConnectorId);
 
-        $targetModule = $request->query->get('tgt_module')
-            ?: $this->sessionService->getParamRuleCibleModule($ruleKey);
+        if (!is_array($srcParams) || !is_array($tgtParams)) {
+            $this->logger->warning('Filters step: missing connector params', [
+                'srcConnectorId' => $srcConnectorId,
+                'tgtConnectorId' => $tgtConnectorId,
+            ]);
+            return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+                'fieldsGrouped' => $fieldsGrouped,
+                'operators'     => $operators,
+                'filters'       => $filters,
+                'ruleKey'       => $ruleId,
+            ]);
+        }
 
-        // 2) Essayer d'abord la session
-        $sourceFields = $this->sessionService->getParamRuleSourceFields($ruleKey) ?? [];
-        $targetFields = $this->sessionService->getParamRuleTargetFields($ruleKey) ?? [];
+        try {
+            $solutionSource = $this->solutionManager->get($srcSolutionName);
+            $solutionTarget = $this->solutionManager->get($tgtSolutionName);
 
-        // 3) Si c’est vide, on reconstruit comme dans l’ancienne step 3
-        if ((empty($sourceFields) || empty($targetFields))
-            && $sourceSolutionName && $targetSolutionName && $sourceModule && $targetModule
-        ) {
+            $solutionSource->login($srcParams);
+            $solutionTarget->login($tgtParams);
+
             try {
-                $solutionSource = $this->solutionManager->get($sourceSolutionName);
-                $solutionTarget = $this->solutionManager->get($targetSolutionName);
-
-                $paramsSource = $this->decrypt_params(
-                    $this->sessionService->getParamRuleSource($ruleKey)
-                );
-                $paramsTarget = $this->decrypt_params(
-                    $this->sessionService->getParamRuleCible($ruleKey)
-                );
-
-                $solutionSource->login($paramsSource);
-                $solutionTarget->login($paramsTarget);
-
-                // On protège les appels pour ne pas se reprendre le TypeError
-                try {
-                    $sourceFieldsTmp = $solutionSource->get_module_fields($sourceModule, 'source');
-                } catch (\Throwable $e) {
-                    $sourceFieldsTmp = [];
-                    $this->logger->error('get_module_fields source failed: '.$e->getMessage());
-                }
-
-                try {
-                    $targetFieldsTmp = $solutionTarget->get_module_fields($targetModule, 'target');
-                } catch (\Throwable $e) {
-                    $targetFieldsTmp = [];
-                    $this->logger->error('get_module_fields target failed: '.$e->getMessage());
-                }
-
-                if (is_array($sourceFieldsTmp)) {
-                    $sourceFields = $sourceFieldsTmp;
-                    $this->sessionService->setParamRuleSourceFields($ruleKey, $sourceFieldsTmp);
-                }
-
-                if (is_array($targetFieldsTmp)) {
-                    $targetFields = $targetFieldsTmp;
-                    $this->sessionService->setParamRuleTargetFields($ruleKey, $targetFieldsTmp);
-                }
-
+                $sourceFields = $solutionSource->get_module_fields($srcModule, 'source') ?? [];
             } catch (\Throwable $e) {
-                $this->logger->error('Error rebuilding fields for filters: '.$e->getMessage());
+                $sourceFields = [];
+                $this->logger->error('get_module_fields (source) failed: '.$e->getMessage(), [
+                    'solution' => $srcSolutionName, 'module' => $srcModule,
+                ]);
             }
-        }
 
-        if (!empty($sourceFields)) {
-            foreach ($sourceFields as $key => $value) {
-                $label = $value['label'] ?? $key;
-                $fieldsGrouped['Source Fields'][$key] = $label;
+            try {
+                $targetFields = $solutionTarget->get_module_fields($tgtModule, 'target') ?? [];
+            } catch (\Throwable $e) {
+                $targetFields = [];
+                $this->logger->error('get_module_fields (target) failed: '.$e->getMessage(), [
+                    'solution' => $tgtSolutionName, 'module' => $tgtModule,
+                ]);
+            }
+            if (!empty($sourceFields) && is_array($sourceFields)) {
+                foreach ($sourceFields as $key => $value) {
+                    // $value peut être ['label' => '...', 'relate' => bool, ...] selon tes connecteurs
+                    $label = is_array($value) ? ($value['label'] ?? $key) : (string)$key;
+                    $fieldsGrouped['Source Fields'][$key] = $label;
 
-                if (!empty($value['relate'])) {
-                    $fieldsGrouped['Relation Fields'][$key] = $label;
+                    if (is_array($value) && !empty($value['relate'])) {
+                        $fieldsGrouped['Relation Fields'][$key] = $label;
+                    }
                 }
             }
-        }
 
-        if (!empty($targetFields)) {
-            foreach ($targetFields as $key => $value) {
-                $fieldsGrouped['Target Fields'][$key] = $value['label'] ?? $key;
+            if (!empty($targetFields) && is_array($targetFields)) {
+                foreach ($targetFields as $key => $value) {
+                    $label = is_array($value) ? ($value['label'] ?? $key) : (string)$key;
+                    $fieldsGrouped['Target Fields'][$key] = $label;
+                }
             }
+
+        } catch (\Throwable $e) {
+            $this->logger->error('ruleStepFilters fatal: '.$e->getMessage(), [
+                'srcSolution' => $srcSolutionName,
+                'tgtSolution' => $tgtSolutionName,
+                'srcModule'   => $srcModule,
+                'tgtModule'   => $tgtModule,
+            ]);
         }
-
-        // 5) Filtres existants (édition)
-        $filters = $this->entityManager
-            ->getRepository(\App\Entity\RuleFilter::class)
-            ->findBy(['rule' => $ruleKey]);
-
         return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
             'fieldsGrouped' => $fieldsGrouped,
             'operators'     => $operators,
             'filters'       => $filters,
-            'ruleKey'       => $ruleKey,
+            'ruleKey'       => $ruleId,
         ]);
     }
 
@@ -1368,187 +1374,454 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         ]);
     }
 
-    /**
-     * CREATION - STEP THREE - SIMULATION DES DONNEES.
-     *
-     * @return Response
-     */
     #[Route('/create/step3/simulation/', name: 'regle_simulation', methods: ['POST'])]
     public function ruleSimulation(Request $request): Response
     {
-        $ruleKey = $this->sessionService->getParamRuleLastKey();
+        $ruleKey = null;
+        try {
+            $ruleKey = $this->sessionService->getParamRuleLastKey();
+        } catch (\Throwable $e) {
+            $ruleKey = null;
+        }
 
-        if ('POST' == $request->getMethod() && $this->sessionService->isParamRuleExist($ruleKey)) {
-            // retourne un tableau prêt à l'emploi
-            $target = $this->createListeParamsRule(
-                $request->request->get('champs'),   // Fields
-                $request->request->get('formules'), // Formula
-                ''                                  // Params flux
-            );
+        $rawFields   = $request->request->all('champs');
+        $rawFormulas = $request->request->all('formules');
 
-            $solution_source_nom = $this->sessionService->getParamRuleSourceSolution($ruleKey);
-            $solution_source = $this->solutionManager->get($solution_source_nom);
-            $solution_source->login($this->sessionService->getParamRuleSource($ruleKey));
-            $tab_simulation = [];
-            $sourcesfields = [];
-
-            // récupération de tous les champs
-            if (isset($target['fields']) && count($target['fields']) > 0) {
-                foreach ($target['fields'] as $f) {
-                    if (isset($f)) {
-                        foreach ($f as $name_fields_target => $k) {
-                            if (isset($k['champs'])) {
-                                $sourcesfields = array_merge($k['champs'], $sourcesfields);
-                            }
-                        }
-                    }
-                }
-            } else {
-                // ici pour les règles avec des relations uniquement
-                return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
-                    'before' => [], // source
-                    'after'  => [], // target
-                    'data_source' => false,
-                ]);
-            }
-
-            // Add rule param if exist (the aren't exist in rule creation)
-            $ruleParams = [];
-            $ruleParamsResult = $this->entityManager->getRepository(RuleParam::class)->findBy(['rule' => $ruleKey]);
-            if (!empty($ruleParamsResult)) {
-                foreach ($ruleParamsResult as $ruleParamsObj) {
-                    $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
-                }
-            }
-            // The mode is empty when we create the rule, so we set a default value
-            if (empty($ruleParams['ruleParams']['mode'])) {
-                $ruleParams['mode'] = '0';
-            }
-
-            // Get result from AJAX request in regle.js
-            $form = $request->request->all();
-            if (isset($form['query'])) {
-                $this->simulationQueryField = $form['query'];
-            }
-
-            // Avoid sending query on specific record ID if the user didn't actually input something
-            if (empty($this->simulationQueryField)) {
-                // Get source data
-                $source = $solution_source->readData([
-                    'module'     => $this->sessionService->getParamRuleSourceModule($ruleKey),
-                    'fields'     => $sourcesfields,
-                    'date_ref'   => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
-                    'limit'      => 1,
-                    'ruleParams' => $ruleParams,
-                    'call_type'  => 'simulation',
-                ]);
-            } else {
-                // Get source data
-                $source = $solution_source->readData([
-                    'module'     => $this->sessionService->getParamRuleSourceModule($ruleKey),
-                    'fields'     => $sourcesfields,
-                    'date_ref'   => '1970-01-01 00:00:00',  // date_ref is required for some application like Prestashop
-                    'limit'      => 1,
-                    'ruleParams' => $ruleParams,
-                    'query'      => [(!empty($ruleParams['fieldId']) ? $ruleParams['fieldId'] : 'id') => $this->simulationQueryField],
-                    'call_type'  => 'simulation',
-                ]);
-
-                // In case of wrong record ID input from user
-                if (!empty($source['error'])) {
-                    return $this->render('Rule/create/onglets/invalidrecord.html.twig');
-                }
-            }
-
-            $before = [];
-            $after  = [];
-            if (!empty($source['values'])) {
-                $record = current($source['values']); // Remove a dimension to the array because we need only one record
-                if (!empty($record)) {
-                    foreach ($target['fields'] as $f) {
-                        foreach ($f as $name_fields_target => $k) {
-                            $r['after'] = [];
-                            // Préparation pour transformation
-                            $name = trim($name_fields_target);
-                            $target_fields = [
-                                'target_field_name' => $name,
-                                'source_field_name' => ((isset($k['champs'])) ? implode(';', $k['champs']) : 'my_value'),
-                                'formula'           => ((isset($k['formule'][0]) ? $k['formule'][0] : '')),
-                                'related_rule'      => '',
-                            ];
-
-                            // Add rule id for simulation purpose when using lookup function
-                            $this->documentManager->setRuleId($ruleKey);
-                            // Add variables for simulation purpose
-                            $variablesEntity = $this->entityManager->getRepository(Variable::class)->findAll();
-                            if (!empty($variablesEntity)) {
-                                foreach ($variablesEntity as $variable) {
-                                    $variables[$variable->getName()] = $variable->getvalue();
-                                }
-                                $this->documentManager->setParam(array('variables' => $variables));
-                            }
-                            // Fix the document type for the simulation 
-                            $this->documentManager->setDocumentType('C');
-                            // Transformation
-                            $response = $this->documentManager->getTransformValue($record, $target_fields);
-                            if (!isset($response['message'])) {
-                                $r['after'][$name_fields_target] = $this->documentManager->getTransformValue($record, $target_fields);
-                            }
-                            // If error during transformation, we send back the error
-                            if (null == $r['after'][$name_fields_target] and !empty($response['message'])) {
-                                $r['after'][$name_fields_target] = $response['message'];
-                            }
-
-                            $k['fields'] = [];
-                            if (empty($k['champs'])) {
-                                $k['fields']['Formula'] = ((isset($k['formule'][0]) ? $k['formule'][0] : ''));
-                            } else {
-                                foreach ($k['champs'] as $fields) {
-                                    // Fields couldn't be return. For example Magento return only field not empty
-                                    if (!empty($record[$fields])) {
-                                        $k['fields'][$fields] = $record[$fields];
-                                    } else {
-                                        $k['fields'][$fields] = '';
-                                    }
-                                }
-                            }
-
-                            $tab_simulation[] = [
-                                'after'  => $r['after'],
-                                'before' => $k['fields'],
-                            ];
-                        }
-                    }
-                    $after = [];
-                    // Préparation pour tableau template
-                    foreach ($tab_simulation as $key => $value) {
-                        foreach ($value as $k => $v) {
-                            if ('before' == $k) {
-                                $before[] = $v;
-                            } else {
-                                foreach ($v as $key => $value) {
-                                    // if value does not contains the substring "mdw_no_send_field"
-                                    if (strpos($value, 'mdw_no_send_field') === false) {
-                                        $after[] = $v;
-                                    }
-                                }
-                            }
-                        }
+        if (empty($rawFields)) {
+            $legacyFields = $request->request->get('champs');
+            if (is_string($legacyFields) && $legacyFields !== '') {
+                $rawFields = [];
+                foreach (explode(';', $legacyFields) as $pair) {
+                    [$tgt, $src] = array_pad(explode('[=]', $pair, 2), 2, null);
+                    if ($tgt && $src && $src !== 'my_value') {
+                        $rawFields[$tgt][] = $src;
                     }
                 }
             }
+        }
+        if (empty($rawFormulas)) {
+            $legacyFormulas = $request->request->get('formules');
+            if (is_string($legacyFormulas) && $legacyFormulas !== '') {
+                $rawFormulas = [];
+                foreach (explode(';', $legacyFormulas) as $pair) {
+                    [$tgt, $f] = array_pad(explode('[=]', $pair, 2), 2, null);
+                    if ($tgt && $f !== null && $f !== '') {
+                        $rawFormulas[$tgt][] = $f;
+                    }
+                }
+            }
+        }
 
+        $target = ['fields' => ['name' => []]];
+        if (is_array($rawFields)) {
+            foreach ($rawFields as $tgt => $srcs) {
+                if (!isset($target['fields']['name'][$tgt])) $target['fields']['name'][$tgt] = [];
+                $target['fields']['name'][$tgt]['champs'] = array_values(array_unique(array_filter((array)$srcs)));
+            }
+        }
+        if (is_array($rawFormulas)) {
+            foreach ($rawFormulas as $tgt => $fl) {
+                if (!isset($target['fields']['name'][$tgt])) $target['fields']['name'][$tgt] = [];
+                $target['fields']['name'][$tgt]['formule'] = array_values(array_filter((array)$fl, fn($v) => $v !== ''));
+            }
+        }
+
+        if (empty($target['fields']['name'])) {
             return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
-                'before' => $before, // source
-                'after'  => $after,  // target
-                'data_source' => (!empty($record) ? true : false),
-                'params' => $this->sessionService->getParamRule($ruleKey),
-                'simulationQueryField' => $this->simulationQueryField,
+                'before' => [], 'after' => [], 'data_source' => false,
             ]);
         }
-        throw $this->createNotFoundException('Error');
+
+        $solutionSourceName = $request->request->get('src_solution_name');
+        if (empty($solutionSourceName)) {
+            $solutionSourceName = $this->resolveSolutionName($request->request->get('src_solution_id'));
+        }
+        if (empty($solutionSourceName)) {
+            return new Response(json_encode(['error' => 'Missing source solution for simulation.']), 400, ['Content-Type' => 'application/json']);
+        }
+
+        try {
+            $solution_source = $this->solutionManager->get((string)$solutionSourceName);
+        } catch (\Throwable $e) {
+            return new Response(json_encode(['error' => 'Unknown source solution: '.$solutionSourceName]), 400, ['Content-Type' => 'application/json']);
+        }
+
+        $connectorId = $request->request->get('src_connector_id');
+        $loginParam  = $this->resolveConnectorParams($connectorId);
+        if (!is_array($loginParam) || empty($loginParam)) {
+            return new Response(json_encode(['error' => 'Missing source connection for simulation.']), 400, ['Content-Type' => 'application/json']);
+        }
+        $solution_source->login($loginParam);
+
+        $sourcesfields = [];
+        foreach ($target['fields']['name'] as $cfg) {
+            if (!empty($cfg['champs']) && is_array($cfg['champs'])) {
+                $sourcesfields = array_merge($sourcesfields, $cfg['champs']);
+            }
+        }
+        $sourcesfields = array_values(array_unique($sourcesfields));
+        if (empty($sourcesfields)) {
+            return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
+                'before' => [], 'after' => [], 'data_source' => false,
+            ]);
+        }
+
+        $ruleParams = ['mode' => '0'];
+        $queryVal   = $request->request->get('query');
+        if (!empty($queryVal)) {
+            $this->simulationQueryField = $queryVal;
+        }
+
+        $sourceModule = $request->request->get('src_module');
+        if (empty($sourceModule)) {
+            return new Response(json_encode(['error' => 'Missing source module for simulation.']), 400, ['Content-Type' => 'application/json']);
+        }
+
+        /* -------- 6) Lecture source -------- */
+        if (empty($this->simulationQueryField)) {
+            $source = $solution_source->readData([
+                'module'     => $sourceModule,
+                'fields'     => $sourcesfields,
+                'date_ref'   => '1970-01-01 00:00:00',
+                'limit'      => 1,
+                'ruleParams' => $ruleParams,
+                'call_type'  => 'simulation',
+            ]);
+        } else {
+            $fieldId = !empty($ruleParams['fieldId']) ? $ruleParams['fieldId'] : 'id';
+            $source = $solution_source->readData([
+                'module'     => $sourceModule,
+                'fields'     => $sourcesfields,
+                'date_ref'   => '1970-01-01 00:00:00',
+                'limit'      => 1,
+                'ruleParams' => $ruleParams,
+                'query'      => [$fieldId => $this->simulationQueryField],
+                'call_type'  => 'simulation',
+            ]);
+            if (!empty($source['error'])) {
+                return $this->render('Rule/create/onglets/invalidrecord.html.twig');
+            }
+        }
+
+        /* -------- 7) Transformation -------- */
+        $before = [];
+        $after  = [];
+        $record = null;
+
+        if (!empty($source['values'])) {
+            $record = current($source['values']);
+
+            if (!empty($record)) {
+                if (!empty($ruleKey)) {
+                    $this->documentManager->setRuleId($ruleKey);
+                }
+
+                // variables (optionnelles)
+                $variablesEntity = $this->entityManager->getRepository(Variable::class)->findAll();
+                if (!empty($variablesEntity)) {
+                    $variables = [];
+                    foreach ($variablesEntity as $variable) {
+                        $variables[$variable->getName()] = $variable->getValue();
+                    }
+                    $this->documentManager->setParam(['variables' => $variables]);
+                }
+
+                $this->documentManager->setDocumentType('C');
+
+                $tab_simulation = [];
+                foreach ($target['fields']['name'] as $tgtName => $cfg) {
+                    $tgtName = trim((string)$tgtName);
+
+                    $target_fields = [
+                        'target_field_name' => $tgtName,
+                        'source_field_name' => (!empty($cfg['champs']) ? implode(';', (array)$cfg['champs']) : 'my_value'),
+                        'formula'           => (!empty($cfg['formule'][0]) ? $cfg['formule'][0] : ''),
+                        'related_rule'      => '',
+                    ];
+
+                    $response = $this->documentManager->getTransformValue($record, $target_fields);
+                    $afterVal = (!isset($response['message']))
+                        ? $this->documentManager->getTransformValue($record, $target_fields)
+                        : $response['message'];
+
+                    $fieldsBefore = [];
+                    if (empty($cfg['champs'])) {
+                        $fieldsBefore['Formula'] = (!empty($cfg['formule'][0]) ? $cfg['formule'][0] : '');
+                    } else {
+                        foreach ((array)$cfg['champs'] as $fld) {
+                            $fieldsBefore[$fld] = $record[$fld] ?? '';
+                        }
+                    }
+
+                    $tab_simulation[] = [
+                        'after'  => [$tgtName => $afterVal],
+                        'before' => $fieldsBefore,
+                    ];
+                }
+
+                foreach ($tab_simulation as $row) {
+                    if (!empty($row['before'])) $before[] = $row['before'];
+                    if (!empty($row['after'])) {
+                        $valid = true;
+                        foreach ($row['after'] as $val) {
+                            if (strpos((string)$val, 'mdw_no_send_field') !== false) { $valid = false; break; }
+                        }
+                        if ($valid) $after[] = $row['after'];
+                    }
+                }
+            }
+        }
+
+        $targetSolutionName = $request->request->get('tgt_solution_name')
+            ?: $this->resolveSolutionName($request->request->get('tgt_solution_id'));
+        $targetModule = $request->request->get('tgt_module');
+
+        $paramsForView = [
+            'source' => [
+                'solution' => (string) ($solutionSourceName ?? ''), // ex: "moodle"
+                'module'   => (string) ($sourceModule ?? ''),       // ex: "users"
+            ],
+            'cible' => [
+                'solution' => (string) ($targetSolutionName ?? ''), // ex: "suitecrm"
+                'module'   => (string) ($targetModule ?? ''),       // ex: "Accounts"
+            ],
+        ];
+
+        return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
+            'before' => $before,
+            'after'  => $after,
+            'data_source' => !empty($record),
+            'params' => $paramsForView, // <<<<<< ICI : plus un tableau vide
+            'simulationQueryField' => $this->simulationQueryField,
+        ]);
     }
-    
+
+    /* ===========================
+    * Helpers privés AV -> services !
+    * =========================== */
+
+    /**
+     * $val peut être un ID (ex: "10") ou déjà un nom (ex: "moodle").
+     * Retourne le nom technique attendu par SolutionManager->get().
+     */
+    private function resolveSolutionName($val): ?string
+    {
+        if (!$val) return null;
+        if (!is_numeric($val)) return (string) $val;
+
+        $id = (int) $val;
+        $solution = $this->entityManager->getRepository(Solution::class)->find($id);
+        if (!$solution) return null;
+
+        if (method_exists($solution, 'getName') && $solution->getName()) {
+            return (string) $solution->getName();
+        }
+        return null;
+    }
+
+    /**
+     * Construit un ARRAY de paramètres de connexion pour login() à partir d’un connector_id envoyé par le front.
+     * 1) utilise un éventuel getter global sur Connector
+     * 2) sinon reconstruit via ConnectorParam (name/value)
+     * 3) sinon tente quelques getters unitaires
+     */
+    private function resolveConnectorParams($connectorId): ?array
+    {
+        if (empty($connectorId)) return null;
+
+        $id = is_numeric($connectorId) ? (int) $connectorId : $connectorId;
+        $connector = $this->entityManager->getRepository(Connector::class)->find($id);
+        if (!$connector) return null;
+
+        // 1) Getter global éventuel
+        foreach (['getParameters', 'getParams', 'getParamConnexion', 'toArray'] as $m) {
+            if (method_exists($connector, $m)) {
+                $params = $connector->{$m}();
+                if (is_array($params) && !empty($params)) {
+                    return $params;
+                }
+            }
+        }
+
+        // 2) Reconstruction via ConnectorParam
+        $params = [];
+        $paramRepo = $this->entityManager->getRepository(ConnectorParam::class);
+        $rows = $paramRepo->findBy(['connector' => $connector]);
+        foreach ($rows as $row) {
+            $k = null; $v = null;
+            if (method_exists($row, 'getName'))  { $k = $row->getName(); }
+            if (method_exists($row, 'getKey'))   { $k = $k ?? $row->getKey(); }
+            if (method_exists($row, 'getValue')) { $v = $row->getValue(); }
+            if ($k !== null) $params[(string)$k] = $v;
+        }
+        if (!empty($params)) return $params;
+
+        // 3) Filet : getters unitaires
+        $map = [
+            'getUrl'           => 'url',
+            'getToken'         => 'token',
+            'getLogin'         => 'login',
+            'getPassword'      => 'password',
+            'getReferenceDate' => 'date_ref',
+        ];
+        foreach ($map as $getter => $key) {
+            if (method_exists($connector, $getter)) {
+                $val = $connector->{$getter}();
+                if ($val !== null && $val !== '') {
+                    $params[$key] = $val;
+                }
+            }
+        }
+
+        return !empty($params) ? $params : null;
+    }
+
+    #[Route('/rule/create/save', name: 'rule_create_save', methods: ['POST'])]
+    public function ruleCreateSave(Request $request): Response
+    {
+        $name           = trim((string) $request->request->get('name'));
+        $srcConnectorId = (int) $request->request->get('src_connector_id');
+        $tgtConnectorId = (int) $request->request->get('tgt_connector_id');
+        $srcModule      = (string) $request->request->get('src_module');
+        $tgtModule      = (string) $request->request->get('tgt_module');
+        $syncMode       = (string) $request->request->get('sync_mode', '0');
+
+        $rawFields   = $request->request->all('champs')   ?? [];
+        $rawFormulas = $request->request->all('formules') ?? [];
+
+        $filters = [];
+        $filtersJson = $request->request->get('filters');
+        if (is_string($filtersJson) && $filtersJson !== '') {
+            try { $filters = json_decode($filtersJson, true) ?: []; } catch (\Throwable $e) {}
+        }
+
+        if ($name === '' || !$srcConnectorId || !$tgtConnectorId || $srcModule === '' || $tgtModule === '') {
+            return new JsonResponse(['error' => 'Missing required fields.'], 400);
+        }
+        if (empty($rawFields) && empty($rawFormulas)) {
+            return new JsonResponse(['error' => 'Please define at least one mapping row.'], 400);
+        }
+
+        $ruleId   = substr(uniqid('', true), 0, 13);
+        $now      = (new \DateTimeImmutable());
+        $nowStr   = $now->format('Y-m-d H:i:s');
+        $midnight = $now->setTime(0, 0)->format('Y-m-d 00:00:00');
+
+        $tmp = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
+        $nameSlug = strtolower(preg_replace('~[^a-zA-Z0-9]+~', '_', $tmp)) ?: 'rule';
+
+        $userId = (int) ($this->getUser()?->getId() ?? 1);
+
+        try {
+            // Utilise le mode transactionnel intégré : pas besoin d’appeler commit/rollback
+            $this->connection->transactional(function (\Doctrine\DBAL\Connection $conn) use (
+                $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
+                $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
+                $rawFields, $rawFormulas, $filters, $syncMode
+            ) {
+                // 1) rule
+                $conn->insert('rule', [
+                    'id'              => $ruleId,
+                    'conn_id_source'  => $srcConnectorId,
+                    'conn_id_target'  => $tgtConnectorId,
+                    'created_by'      => $userId,
+                    'modified_by'     => $userId,
+                    'group_id'        => null,
+                    'date_created'    => $nowStr,
+                    'date_modified'   => $nowStr,
+                    'module_source'   => $srcModule,
+                    'module_target'   => $tgtModule,
+                    'active'          => 0,
+                    'deleted'         => 0,
+                    'name'            => $name,
+                    'name_slug'       => $nameSlug,
+                    'read_job_lock'   => null,
+                ]);
+
+                // 2) rulefield
+                foreach ($rawFields as $targetField => $srcs) {
+                    $srcs    = array_values(array_unique(array_filter((array)$srcs)));
+                    $formula = (!empty($rawFormulas[$targetField][0])) ? (string)$rawFormulas[$targetField][0] : '';
+
+                    $conn->insert('rulefield', [
+                        'rule_id'           => $ruleId,
+                        'target_field_name' => (string) $targetField,
+                        'source_field_name' => implode(';', $srcs) ?: 'my_value',
+                        'formula'           => $formula !== '' ? $formula : null,
+                        'comment'           => null,
+                    ]);
+                }
+
+                // 3) rulefilter
+                foreach ($filters as $f) {
+                    $field = (string)($f['field'] ?? '');
+                    $op    = (string)($f['operator'] ?? '');
+                    $val   = (string)($f['value'] ?? '');
+                    if ($field === '' || $op === '') continue;
+
+                    $conn->insert('rulefilter', [
+                        'rule_id' => $ruleId,
+                        'target'  => $field,
+                        'type'    => $op,
+                        'value'   => $val,
+                    ]);
+                }
+
+                // 4) ruleorder — colonne réservée `order` => on passe par SQL explicite
+                $conn->executeStatement(
+                    'INSERT INTO `ruleorder` (`rule_id`, `order`) VALUES (?, ?)',
+                    [$ruleId, 1]
+                );
+
+                // 5) ruleparam
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit',        'value' => '100']);
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference','value' => $midnight]);
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode',         'value' => (string)$syncMode]);
+
+                // 6) ruleaudit (JSON sérialisé)
+                $contentFields = ['name' => []];
+                foreach ($rawFields as $tgt => $srcs) {
+                    $contentFields['name'][(string)$tgt]['champs'] = array_values((array)$srcs);
+                }
+                $auditPayload = [
+                    'ruleName'      => $nameSlug,
+                    'limit'         => '100',
+                    'datereference' => $midnight,
+                    'content'       => [
+                        'fields' => ['name' => $contentFields['name']],
+                        'params' => ['mode' => (int)$syncMode],
+                    ],
+                    'filters'       => array_values(array_map(function ($f) {
+                        return [
+                            'target' => (string)($f['field'] ?? ''),
+                            'filter' => (string)($f['operator'] ?? ''),
+                            'value'  => (string)($f['value'] ?? ''),
+                        ];
+                    }, $filters)),
+                    'relationships' => null,
+                ];
+                $json = json_encode($auditPayload, JSON_UNESCAPED_UNICODE);
+                $ser  = serialize($json);
+
+                $conn->insert('ruleaudit', [
+                    'rule_id'      => $ruleId,
+                    'created_by'   => $userId,
+                    'date_created' => $nowStr,
+                    'data'         => $ser,
+                ]);
+            });
+
+            return new JsonResponse([
+                'ok'       => true,
+                'id'       => $ruleId,
+                'redirect' => $this->generateUrl('regle_open', ['id' => $ruleId]),
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
+
     // #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
     // public function ruleStepFilters(Request $request): Response
     // {
@@ -2324,49 +2597,96 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         * METHODES PRATIQUES
         ****************************************************** */
 
-    // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
-    private function createListeParamsRule($fields, $formula, $params): array
-    {
-        $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
-        $tab = [];
+// CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
+private function createListeParamsRule($fields, $formula, $params): array
+{
+    $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
 
-        // FIELDS ------------------------------------------
-        if ($fields) {
-            $champs = explode(';', $fields);
-            foreach ($champs as $champ) {
-                $chp = explode('[=]', $champ);
+    // Structure de sortie initialisée pour éviter les "undefined index"
+    $tab = [
+        'fields' => [
+            'name' => []   // attendue par le reste du code: ['fields']['name'][<target>]['champs'| 'formule']
+        ],
+        'params' => []
+    ];
 
-                if ($chp[0]) {
-                    if ($phrase_placeholder != $chp[1] && 'my_value' != $chp[1]) {
-                        $tab['fields']['name'][$chp[0]]['champs'][] = $chp[1];
-                    }
+    // ---------- NORMALISATION DES ENTREES ----------
+    // 1) $fields peut être: (a) string "tgt[=]src;tgt2[=]src2" (legacy) ou (b) array ['tgt'=>['src1','src2']]
+    $fieldsMap = []; // ['target' => ['src1','src2']]
+    if (is_string($fields) && $fields !== '') {
+        $pairs = explode(';', $fields);
+        foreach ($pairs as $pair) {
+            $chp = explode('[=]', $pair, 2);
+            $tgt = $chp[0] ?? '';
+            $src = $chp[1] ?? '';
+            if ($tgt !== '' && $src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+                $fieldsMap[$tgt][] = $src;
+            }
+        }
+    } elseif (is_array($fields)) {
+        // format nouveau: champs[target][]=src
+        foreach ($fields as $tgt => $arr) {
+            if (!is_array($arr)) { continue; }
+            foreach ($arr as $src) {
+                if ($src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+                    $fieldsMap[$tgt][] = $src;
                 }
             }
         }
-
-        // FORMULA -----------------------------------------
-        if ($formula) {
-            $formules = explode(';', $formula);
-
-            foreach ($formules as $formule) {
-                $chp = explode('[=]', $formule);
-                if ($chp[0]) {
-                    if (!empty($chp[1])) {
-                        $tab['fields']['name'][$chp[0]]['formule'][] = $chp[1];
-                    }
-                }
-            }
-        }
-
-        // PARAMS -----------------------------------------
-        if ($params) {
-            foreach ($params as $k => $p) {
-                $tab['params'][$k] = $p;
-            }
-        }
-
-        return $tab;
     }
+
+    // 2) $formula peut être: (a) string "tgt[=]expr;tgt2[=]expr2" (legacy) ou (b) array ['tgt'=>['expr']]
+    $formulaMap = []; // ['target' => ['expr1','expr2']]
+    if (is_string($formula) && $formula !== '') {
+        $pairs = explode(';', $formula);
+        foreach ($pairs as $pair) {
+            $chp = explode('[=]', $pair, 2);
+            $tgt = $chp[0] ?? '';
+            $exp = $chp[1] ?? '';
+            if ($tgt !== '' && $exp !== '') {
+                $formulaMap[$tgt][] = $exp;
+            }
+        }
+    } elseif (is_array($formula)) {
+        foreach ($formula as $tgt => $arr) {
+            if (!is_array($arr)) { continue; }
+            foreach ($arr as $exp) {
+                if ($exp !== '') {
+                    $formulaMap[$tgt][] = $exp;
+                }
+            }
+        }
+    }
+
+    // ---------- CONSTRUCTION DE LA STRUCTURE DE SORTIE ----------
+    foreach ($fieldsMap as $tgt => $srcList) {
+        if (!isset($tab['fields']['name'][$tgt])) {
+            $tab['fields']['name'][$tgt] = [];
+        }
+        if (!empty($srcList)) {
+            $tab['fields']['name'][$tgt]['champs'] = array_values($srcList);
+        }
+    }
+
+    foreach ($formulaMap as $tgt => $expList) {
+        if (!isset($tab['fields']['name'][$tgt])) {
+            $tab['fields']['name'][$tgt] = [];
+        }
+        if (!empty($expList)) {
+            $tab['fields']['name'][$tgt]['formule'] = array_values($expList);
+        }
+    }
+
+    // ---------- PARAMS (inchangé, mais safe) ----------
+    if (is_array($params)) {
+        foreach ($params as $k => $p) {
+            $tab['params'][$k] = $p;
+        }
+    }
+
+    return $tab;
+}
+
 
     #[Route('/rule/update_description', name: 'update_rule_description', methods: ['POST'])]
     public function updateDescription(Request $request, EntityManagerInterface $em): JsonResponse

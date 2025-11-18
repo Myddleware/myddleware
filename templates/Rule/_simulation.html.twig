@@ -1,0 +1,64 @@
+<div class="modal fade"
+     id="mapping-simulation"
+     tabindex="-1"
+     aria-labelledby="mappingSimulationLabel"
+     aria-hidden="true"
+     data-endpoint-run="{{ path('regle_simulation') }}"
+     data-endpoint-count="">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="mappingSimulationLabel">
+          {{ 'create_rule.step5.simulation'|trans }}
+        </h2>
+        <span class="badge text-bg-secondary ms-2 d-none" id="sim-count-badge"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+      
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="sim-record-id">
+              {{ 'create_rule.step3.manual_data_simulation_choose_id'|trans }}
+            </label>
+            <input id="sim-record-id"
+                   class="form-control"
+                   type="text"
+                   inputmode="numeric"
+                   placeholder="example: 5"
+                   aria-describedby="sim-id-help">
+            <div id="sim-id-help" class="form-text">
+              {{ 'create_rule.step3.manual_data_simulation_help_text'|trans }}
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
+            <button type="button" class="btn btn-outline-success" id="sim-run-manual">
+              <i class="fa fa-keyboard me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data_manual'|trans }}
+            </button>
+            <button type="button" class="btn btn-outline-success" id="sim-run-simple">
+              <i class="fa fa-bolt me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data'|trans }}
+            </button>
+          </div>
+        </div>
+
+        <div class="alert d-none" role="alert" id="sim-alert"></div>
+
+        {# ——— Résultats ——— #}
+        <div id="sim-result" class="border rounded p-3" style="min-height:180px;">
+          <div class="text-center text-muted" id="sim-empty">
+            {{ 'create_rule.step3.empty_simulate'|trans }}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+          {{ 'create_rule.step5.formula.close'|trans }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

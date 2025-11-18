@@ -37,6 +37,9 @@
       </div>
 
       <div class="d-flex justify-content-end">
+        <button class="btn btn-outline-primary me-3" id="rule-mapping-simulation" type="button" data-bs-toggle="modal" data-bs-target="#mapping-simulation">
+          <i class="fa fa-play" aria-hidden="true"></i>
+        </button>
         <button class="btn btn-primary" id="rule-mapping-add" type="button">
           <i class="fa-solid fa-plus"></i>
         </button>
@@ -48,5 +51,14 @@
     {# --- POP UP : FORMULA --- #}
     {% include 'Rule/create/_formula.html.twig' %}
 
-    {# --- POP UP : SIMULATION  ???--- #}
-    {# {% include 'Rule/create/_sync.html.twig' %} #}
+    {# --- POP UP : SIMULATION --- #}
+    {% include 'Rule/_simulation.html.twig' %}
+
+<button
+  id="rule-save"
+  type="button"
+  class="btn btn-primary text-center"
+  data-path-save="{{ path('rule_create_save') }}"
+>
+  <i class="fa fa-save me-2"></i> {{ 'rule.save'|trans({'%default%':'Save rule'}) }}
+</button>

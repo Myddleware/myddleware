@@ -640,7 +640,6 @@
   srcMod?.addEventListener('change', () => {
     resetStep3AndBelow();
     tryRevealStep3();
-    logModuleFields(srcMod, 'SOURCE MODULE');
     buildFilterFieldOptions();
     if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
       window.mydLoadRuleFilters(); filtersLoaded = true;
@@ -650,7 +649,6 @@
   tgtMod?.addEventListener('change', () => {
     resetStep3AndBelow();
     tryRevealStep3();
-    logModuleFields(tgtMod, 'TARGET MODULE');
     buildFilterFieldOptions();
     if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
       window.mydLoadRuleFilters(); filtersLoaded = true;
@@ -671,19 +669,13 @@
   });
 
   srcConn?.addEventListener('change', () => {
-    logConnector(srcConn, 'SOURCE CONNECTOR (change)');
     loadModulesFor('source', srcConn.value);
   });
 
   tgtConn?.addEventListener('change', () => {
-    logConnector(tgtConn, 'TARGET CONNECTOR (change)');
     loadModulesFor('cible', tgtConn.value);
     if (tgtMod && tgtMod.value) tryRevealStep3();
   });
-
-  // log au chargement de la page si déjà pré-sélectionné
-  logConnector(srcConn, 'SOURCE CONNECTOR (onload)');
-  logConnector(tgtConn, 'TARGET CONNECTOR (onload)');
 
   initMappingUI();
 })();
@@ -936,3 +928,410 @@ $(function () {
   }
   mappingFormulaModal.on('hidden.bs.modal', resetFunctionWizard);
 });
+
+/* ===========================================
+ * SIMULATION
+ * =========================================== */
+
+(function () {
+  const modal   = document.getElementById('mapping-simulation');
+  if (!modal) return;
+
+  const runUrl  = modal.getAttribute('data-endpoint-run') || '';
+  const countUrl= modal.getAttribute('data-endpoint-count') || '';
+  const result  = modal.querySelector('#sim-result');
+  const alertEl = modal.querySelector('#sim-alert');
+  const emptyEl = modal.querySelector('#sim-empty');
+  const idInput = modal.querySelector('#sim-record-id');
+  const btnManual = modal.querySelector('#sim-run-manual');
+  const btnSimple = modal.querySelector('#sim-run-simple');
+  const btnRerun  = modal.querySelector('#sim-rerun');
+  const badgeCount= modal.querySelector('#sim-count-badge');
+
+  let lastRun = { mode: null, id: null };
+
+  function showAlert(type, msg) {
+    alertEl.className = `alert alert-${type}`;
+    alertEl.textContent = msg || '';
+    alertEl.classList.remove('d-none');
+  }
+  function hideAlert() {
+    alertEl.classList.add('d-none');
+    alertEl.textContent = '';
+  }
+
+  function lockButtons(lock) {
+    [btnManual, btnSimple, btnRerun].forEach(b => b && (b.disabled = !!lock));
+  }
+
+  function showSkeleton() {
+    emptyEl?.classList.add('d-none');
+    result.innerHTML = `
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <div class="skeleton mb-2"></div><div class="skeleton mb-2"></div><div class="skeleton mb-2"></div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="skeleton mb-2"></div><div class="skeleton mb-2"></div><div class="skeleton mb-2"></div>
+        </div>
+      </div>`;
+  }
+
+  // Sérialise le tableau de mapping en structure champs[] / formules[]
+  function collectMappingPayload() {
+    const tbody = document.getElementById('rule-mapping-body');
+    const rows  = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+    const champs   = {};   // champs[target] = [src1, src2, ...]
+    const formules = {};   // formules[target] = [formula]
+
+    rows.forEach(tr => {
+      const target = tr.querySelector('.rule-mapping-target')?.value?.trim();
+      if (!target) return;
+
+      const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
+        .map(b => b.dataset.field).filter(Boolean);
+
+      const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
+
+      if (!champs[target]) champs[target] = [];
+      if (!formules[target]) formules[target] = [];
+
+      // si pas de sources → on envoie quand même un placeholder côté back (“my_value” est géré)
+      if (srcBadges.length) champs[target].push(...srcBadges);
+
+      if (formula) formules[target].push(formula);
+    });
+
+    console.groupCollapsed('[SIM] collectMappingPayload');
+console.log('targets comptés =', new Set([
+  ...Object.keys(champs),
+  ...Object.keys(formules)
+]).size);
+console.log('champs (source→target):', champs);
+console.log('formules (target):', formules);
+console.groupEnd();
+    return { champs, formules };
+  }
+
+  async function runSimulation(useManualId) {
+    hideAlert();
+    if (!runUrl) {
+      showAlert('danger', 'Simulation endpoint missing.');
+      return;
+    }
+
+    const { champs, formules } = collectMappingPayload();
+    // Si aucun target mappé
+    if (!Object.keys(champs).length && !Object.keys(formules).length) {
+      showAlert('warning', '{{ "create_rule.step3.empty_simulate"|trans }}');
+      return;
+    }
+
+    const fd = new FormData();
+    const _selInfo = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return { value: '', label: '', dataSolution: '' };
+  const opt = el.options?.[el.selectedIndex];
+  return {
+    value: el.value || '',
+    label: opt ? opt.text : '',
+    dataSolution: opt?.dataset?.solution || ''
+  };
+};
+
+const srcSolInfo  = _selInfo('source-solution');
+const tgtSolInfo  = _selInfo('target-solution');
+const srcConnInfo = _selInfo('source-connector');
+const tgtConnInfo = _selInfo('target-connector');
+const srcModInfo  = _selInfo('source-module');
+const tgtModInfo  = _selInfo('target-module');
+// ...
+
+// On envoie l'ID (comme avant) + le nom lisible par le back
+if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
+if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
+
+// priorité au data-solution (si tu l’as sur <option>), sinon fallback sur le label
+const srcSolName = srcSolInfo.dataSolution || (srcSolInfo.label || '').trim().toLowerCase();
+const tgtSolName = tgtSolInfo.dataSolution || (tgtSolInfo.label || '').trim().toLowerCase();
+
+if (srcSolName) fd.append('src_solution_name', srcSolName);
+if (tgtSolName) fd.append('tgt_solution_name', tgtSolName);
+
+// On envoie ce qu’on a, sans validation bloquante
+if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
+if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
+if (srcConnInfo.value) fd.append('src_connector_id', srcConnInfo.value);
+if (tgtConnInfo.value) fd.append('tgt_connector_id', tgtConnInfo.value);
+if (srcModInfo.value)  fd.append('src_module',       srcModInfo.value);
+if (tgtModInfo.value)  fd.append('tgt_module',       tgtModInfo.value);
+
+// ---- LOGS : contexte + FormData envoyée
+console.groupCollapsed('[SIM] contexte sélection courante');
+console.log('runUrl =', runUrl);
+console.table({
+  'source-solution': srcSolInfo,
+  'target-solution': tgtSolInfo,
+  'source-connector': srcConnInfo,
+  'target-connector': tgtConnInfo,
+  'source-module': srcModInfo,
+  'target-module': tgtModInfo
+});
+console.groupEnd();
+
+console.groupCollapsed('[SIM] FormData envoyée');
+for (const [k,v] of fd.entries()) console.log(k, '=>', v);
+console.groupEnd();
+    // champs[target][]=...
+    Object.entries(champs).forEach(([tgt, arr]) => {
+      arr.forEach(v => fd.append(`champs[${tgt}][]`, v));
+    });
+    // formules[target][]=...
+    Object.entries(formules).forEach(([tgt, arr]) => {
+      arr.forEach(v => fd.append(`formules[${tgt}][]`, v));
+    });
+
+    let chosenId = null;
+    if (useManualId) {
+      chosenId = (idInput.value || '').trim();
+      if (!chosenId) {
+        showAlert('warning', 'Please provide a record id.');
+        return;
+      }
+      fd.append('query', chosenId);
+    }
+
+    lockButtons(true);
+    showSkeleton();
+
+   try {
+  console.time('[SIM] fetch run');
+  const res  = await fetch(runUrl, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    body: fd
+  });
+  console.timeEnd('[SIM] fetch run');
+  console.log('[SIM] HTTP status:', res.status, res.statusText);
+
+  const html = await res.text();
+  console.log('[SIM] response preview:', html.slice(0, 400));
+
+  if (html.startsWith('{') && html.includes('"error"')) {
+    const j = JSON.parse(html);
+    console.error('[SIM] backend error JSON:', j);
+    throw new Error(j.error || 'Simulation error');
+  }
+
+  result.innerHTML = html || '<div class="text-muted">No content.</div>';
+  lastRun = { mode: useManualId ? 'manual' : 'simple', id: chosenId };
+} catch (e) {
+  console.error('[SIM] catch:', e);
+  result.innerHTML = '';
+  emptyEl?.classList.remove('d-none');
+  showAlert('danger', e.message || 'Network error');
+} finally {
+  lockButtons(false);
+}
+
+  }
+
+  // Charger le compteur (vue Détail)
+  async function loadCount() {
+    if (!countUrl) return;
+    try {
+      const res = await fetch(countUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const txt = await res.text();
+      if (txt && !isNaN(+txt)) {
+        badgeCount.textContent = txt;
+        badgeCount.classList.remove('d-none');
+      }
+    } catch {}
+  }
+
+  // Events
+  btnManual?.addEventListener('click', () => runSimulation(true));
+  btnSimple?.addEventListener('click', () => runSimulation(false));
+  btnRerun?.addEventListener('click', () => runSimulation(lastRun.mode === 'manual'));
+
+  modal.addEventListener('shown.bs.modal', () => {
+    hideAlert();
+    loadCount();
+    // focus auto sur l’ID
+    idInput?.focus();
+  console.groupCollapsed('[SIM] modal open snapshot');
+  const snap = (id) => {
+    const el = document.getElementById(id);
+    const opt = el?.options?.[el.selectedIndex];
+    return { id, value: el?.value || '', label: opt ? opt.text : '' };
+  };
+  console.table([
+    snap('source-solution'),
+    snap('target-solution'),
+    snap('source-connector'),
+    snap('target-connector'),
+    snap('source-module'),
+    snap('target-module')
+  ]);
+  console.groupEnd();
+});
+})();
+
+(function () {
+  const saveBtn = document.getElementById('rule-save');
+  if (!saveBtn) return;
+
+  function collectMappingPayload() {
+    const tbody = document.getElementById('rule-mapping-body');
+    const rows  = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+    const champs   = {};
+    const formules = {};
+
+    rows.forEach(tr => {
+      const target = tr.querySelector('.rule-mapping-target')?.value?.trim();
+      if (!target) return;
+
+      const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
+        .map(b => b.dataset.field).filter(Boolean);
+
+      const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
+
+      if (!champs[target]) champs[target] = [];
+      if (!formules[target]) formules[target] = [];
+
+      if (srcBadges.length) champs[target].push(...srcBadges);
+      if (formula)         formules[target].push(formula);
+    });
+
+    return { champs, formules };
+  }
+
+  function collectFiltersPayload() {
+    const listWrap = document.getElementById('rule-filters-list');
+    const rules = [];
+    if (!listWrap) return rules;
+
+    const items = listWrap.querySelectorAll('li.list-group-item');
+    items.forEach(li => {
+      // On parse la ligne affichée : <strong>field</strong> <small>(OP)</small> = value
+      const strong = li.querySelector('strong');
+      const small  = li.querySelector('small');
+      const text   = li.querySelector('span')?.textContent || '';
+
+      const field  = strong?.textContent?.trim();
+      const op     = small?.textContent?.replace(/[()]/g,'').trim();
+      let  value   = '';
+      const m = text.match(/=\s*(.*)$/);
+      if (m) value = m[1].trim();
+
+      if (field && op && value !== '') {
+        rules.push({ field, operator: op, value });
+      }
+    });
+    return rules;
+  }
+
+  function currentSelections() {
+    const getSel = id => {
+      const el = document.getElementById(id);
+      if (!el) return { value:'', label:'', dataSolution:'' };
+      const opt = el.options[el.selectedIndex] || {};
+      return {
+        value: el.value || '',
+        label: opt.text || '',
+        dataSolution: opt.getAttribute('data-solution') || ''
+      };
+    };
+    return {
+      name: (document.getElementById('rulename')?.value || '').trim(),
+      sourceSolution: getSel('source-solution'),
+      targetSolution: getSel('target-solution'),
+      sourceConnector: getSel('source-connector'),
+      targetConnector: getSel('target-connector'),
+      sourceModule: getSel('source-module'),
+      targetModule: getSel('target-module'),
+      duplicateField: document.getElementById('duplicate-field')?.value || '',
+      syncMode: document.getElementById('sync-mode')?.value || '',
+    };
+  }
+
+  async function saveRule() {
+    const url = saveBtn.getAttribute('data-path-save');
+    if (!url) return alert('Save endpoint missing');
+
+    const sel = currentSelections();
+    const { champs, formules } = collectMappingPayload();
+    const filters = collectFiltersPayload();
+
+    // gardes minimales
+    if (!sel.name)      return alert('Veuillez saisir un nom de règle.');
+    if (!sel.sourceSolution.value || !sel.targetSolution.value) return alert('Veuillez choisir les solutions.');
+    if (!sel.sourceConnector.value || !sel.targetConnector.value) return alert('Veuillez choisir les connecteurs.');
+    if (!sel.sourceModule.value || !sel.targetModule.value) return alert('Veuillez choisir les modules.');
+    if (!Object.keys(champs).length && !Object.keys(formules).length) return alert('Veuillez définir le mapping.');
+
+    const fd = new FormData();
+    fd.append('name', sel.name);
+
+    // solutions: on envoie à la fois id et nom (comme pour la simulation)
+    fd.append('src_solution_id', sel.sourceSolution.value);
+    fd.append('tgt_solution_id', sel.targetSolution.value);
+    fd.append('src_solution_name', sel.sourceSolution.label.toLowerCase());
+    fd.append('tgt_solution_name', sel.targetSolution.label.toLowerCase());
+
+    fd.append('src_connector_id', sel.sourceConnector.value);
+    fd.append('tgt_connector_id', sel.targetConnector.value);
+    fd.append('src_module', sel.sourceModule.value);
+    fd.append('tgt_module', sel.targetModule.value);
+    fd.append('duplicate_field', sel.duplicateField);
+    fd.append('sync_mode', sel.syncMode);
+
+    // filtres (JSON)
+    fd.append('filters', JSON.stringify(filters));
+
+    // mapping
+    Object.entries(champs).forEach(([tgt, arr]) => {
+      arr.forEach(v => fd.append(`champs[${tgt}][]`, v));
+    });
+    Object.entries(formules).forEach(([tgt, arr]) => {
+      arr.forEach(v => fd.append(`formules[${tgt}][]`, v));
+    });
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-Requested-With':'XMLHttpRequest' },
+        body: fd
+      });
+
+      const text = await res.text();
+      if (!res.ok) {
+        try { 
+          const j = JSON.parse(text);
+          throw new Error(j.error || 'Save failed');
+        } catch {
+          throw new Error(text || 'Save failed');
+        }
+      }
+
+      let payload = {};
+      try { payload = JSON.parse(text); } catch {}
+      if (payload.redirect) {
+        window.location.assign(payload.redirect);
+      } else {
+        alert('Rule saved.');
+      }
+    } catch (e) {
+      console.error('[SAVE] failed', e);
+      alert(e.message || 'Save failed');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fa fa-save me-2"></i>Save rule';
+    }
+  }
+
+  saveBtn.addEventListener('click', saveRule);
+})();
