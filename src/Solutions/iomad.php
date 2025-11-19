@@ -114,10 +114,15 @@ class iomad extends moodle
 	{
 		// Call Moodle function
 		$result = parent::createData($param);
-		if ($param['module'] != 'users') {
+		if (!in_array($param['module'], array('users','courses'))) {
 			return $result;
 		}
+		// Stop the process if no result.
 		if (empty($result)) {
+			return $result;
+		}
+		// If the creation return an error, we stop the process and return the error too
+		if (!empty($result['error'])) {
 			return $result;
 		}
 		// Enroll the new user in the company of the user linked to the token
@@ -139,12 +144,16 @@ class iomad extends moodle
 				}
 			}
 		}
+		// Assign the user/course to the company
 		$parameters = [];
-		// Enrol the user to the company
-		foreach($result as $idDoc => $record) {		
-			$parameters['users'][0]['userid'] = current($record['id']);
-			$parameters['users'][0]['companyid'] = $this->currentUserCompanyId;		
-			$functionName = 'block_iomad_company_admin_assign_users';
+		foreach($result as $idDoc => $record) {	
+			if ($param['module'] == 'users') {
+				$parameters[$param['module']][0]['userid'] = current($record['id']);
+			} else {
+				$parameters[$param['module']][0]['courseid'] = current($record['id']);
+			}
+			$parameters[$param['module']][0]['companyid'] = $this->currentUserCompanyId;		
+			$functionName = 'block_iomad_company_admin_assign_'.$param['module'];
 			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
 			$response = $this->moodleClient->post($serverurl, $parameters);
 			$xml = $this->formatResponse('read', $response, $param);
