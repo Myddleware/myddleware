@@ -1205,7 +1205,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	left: 225px;
     bottom: -5px;
 }
-#rulename-spinner, #source-connector-spinner, #target-connector-spinner{
+#rulename-spinner, #source-connector-spinner, #target-connector-spinner, #target-module-spinner, #source-module-spinner{
     color: #05bfe6;
 }
 

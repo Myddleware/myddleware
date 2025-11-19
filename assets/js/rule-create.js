@@ -144,6 +144,7 @@
   const srcMod   = document.getElementById('source-module');
   const srcSpin  = document.getElementById('source-connector-spinner');
   const srcFeed  = document.getElementById('source-connector-feedback');
+  const srcModSpin  = document.getElementById('source-module-spinner');
 
   // Target
   const tgtSol   = document.getElementById('target-solution');
@@ -151,6 +152,7 @@
   const tgtMod   = document.getElementById('target-module');
   const tgtSpin  = document.getElementById('target-connector-spinner');
   const tgtFeed  = document.getElementById('target-connector-feedback');
+  const tgtModSpin  = document.getElementById('target-module-spinner');
 
   // STEP 3
   const step3        = document.getElementById('step-3');
@@ -187,80 +189,84 @@
   }
 
   async function loadConnectorsFor(side, solutionId) {
-  const selectEl  = side === 'source' ? srcConn : tgtConn;
-  const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
+    const selectEl  = side === 'source' ? srcConn : tgtConn;
+    const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
 
-  resetSelect(selectEl);
-  setFeed(side, '');
-
-  if (!pathListConnectors || !solutionId) return;
-
-  try {
-    spinnerEl?.classList.remove('d-none');
-    const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    const html = await res.text();
-    selectEl.innerHTML = '';
-
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    placeholder.textContent = '';
-    selectEl.appendChild(placeholder);
-
-    if (html) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      tmp.querySelectorAll('option').forEach(opt => {
-        selectEl.appendChild(opt);
-      });
-    }
-    selectEl.disabled = false;
-  } catch {
     resetSelect(selectEl);
-    selectEl.disabled = false;
-    setFeed(side, 'Impossible de charger les connecteurs.', true);
-  } finally {
-    spinnerEl?.classList.add('d-none');
-  }
-}
+    setFeed(side, '');
 
-async function loadModulesFor(side, connectorId) {
-  const selectEl = side === 'source' ? srcMod : tgtMod;
-  resetSelect(selectEl);
+    if (!pathListConnectors || !solutionId) return;
 
-  if (!pathListModule || !connectorId) return;
-
-  const type = side === 'source' ? 'source' : 'cible';
-  const url  = `${pathListModule}?id=${encodeURIComponent(connectorId)}&type=${encodeURIComponent(type)}`;
-
-  try {
-    const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    const html = await res.text();
-    selectEl.innerHTML = '';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    placeholder.textContent = '';
-    selectEl.appendChild(placeholder);
-
-    if (html) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      tmp.querySelectorAll('option').forEach(opt => {
-        selectEl.appendChild(opt);
+    try {
+      spinnerEl?.classList.remove('d-none');
+      const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
+      const html = await res.text();
+      selectEl.innerHTML = '';
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      placeholder.textContent = '';
+      selectEl.appendChild(placeholder);
+
+      if (html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        tmp.querySelectorAll('option').forEach(opt => {
+          selectEl.appendChild(opt);
+        });
+      }
+      selectEl.disabled = false;
+    } catch {
+      resetSelect(selectEl);
+      selectEl.disabled = false;
+      setFeed(side, 'Impossible de charger les connecteurs.', true);
+    } finally {
+      spinnerEl?.classList.add('d-none');
     }
-
-    selectEl.disabled = false;
-  } catch {
-    resetSelect(selectEl);
   }
-}
 
+  async function loadModulesFor(side, connectorId) {
+    const selectEl  = side === 'source' ? srcMod : tgtMod;
+    const spinnerEl = side === 'source' ? srcModSpin : tgtModSpin;
+
+    resetSelect(selectEl);
+
+    if (!pathListModule || !connectorId) return;
+
+    const type = side === 'source' ? 'source' : 'cible';
+    const url  = `${pathListModule}?id=${encodeURIComponent(connectorId)}&type=${encodeURIComponent(type)}`;
+
+    try {
+      spinnerEl?.classList.remove('d-none');
+      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const html = await res.text();
+      selectEl.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      placeholder.textContent = '';
+      selectEl.appendChild(placeholder);
+
+      if (html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        tmp.querySelectorAll('option').forEach(opt => {
+          selectEl.appendChild(opt);
+        });
+      }
+
+      selectEl.disabled = false;
+    } catch {
+      resetSelect(selectEl);
+    } finally {
+      spinnerEl?.classList.add('d-none');
+    }
+  }
 
   function bothModulesSelected() {
     return !!(srcMod && srcMod.value && tgtMod && tgtMod.value);
@@ -483,7 +489,7 @@ async function loadModulesFor(side, connectorId) {
     actions.className = 'mapping-actions d-flex align-items-center';
     const formulaSlot = document.createElement('div');
     formulaSlot.className = 'formula-slot is-empty';
-    formulaSlot.textContent = '';
+    formulaSlot.textContent = '...';
     const formBtn = document.createElement('button');
     formBtn.type  = 'button';
     formBtn.setAttribute('data-bs-toggle', 'modal');
