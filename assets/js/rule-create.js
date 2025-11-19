@@ -2,6 +2,7 @@
  * STEP 1 — NAME VALIDATION
  * ========================= */
 (function () {
+  const isEdit       = !!window.__EDIT_MODE__;
   const inputName    = document.getElementById('rulename');
   const feedback     = document.getElementById('rulename-feedback');
   const spinner      = document.getElementById('rulename-spinner');
@@ -21,27 +22,13 @@
     feedback.className = 'form-text';
     feedback.textContent = '';
   }
+
   function setError(msg) {
     hideSpinner();
     inputName.classList.remove('is-valid');
     inputName.classList.add('is-invalid');
     feedback.className = 'form-text text-danger';
     feedback.textContent = msg || '';
-  }
-  function setSuccess(msg) {
-    hideSpinner();
-    inputName.classList.remove('is-invalid');
-    inputName.classList.add('is-valid');
-    feedback.className = 'form-text text-success';
-    feedback.textContent = msg || '';
-    revealStep2();
-  }
-  function basicCheck(v) {
-    if (v.length < 3) {
-      setError(window.transRuleNameTooShort || 'Please enter at least 3 characters.');
-      return false;
-    }
-    return true;
   }
 
   function revealStep2() {
@@ -54,24 +41,38 @@
     step2Section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function setSuccess(msg) {
+    hideSpinner();
+    inputName.classList.remove('is-invalid');
+    inputName.classList.add('is-valid');
+    feedback.className = 'form-text text-success';
+    feedback.textContent = msg || '';
+    revealStep2();
+  }
+
+  function basicCheck(v) {
+    if (v.length < 3) {
+      setError(window.transRuleNameTooShort || 'Please enter at least 3 characters.');
+      return false;
+    }
+    return true;
+  }
+
   async function checkUniqueness(nameVal) {
     const url = inputName.getAttribute('data-check-url');
     if (!url) return setError('Validation URL missing.');
-
     try {
       const res  = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest',
+          'X-Requested-With': 'XMLHttpRequest'
         },
         body: new URLSearchParams({ name: nameVal })
       });
-
       const text = await res.text();
       let existsFlag;
       try { existsFlag = JSON.parse(text); } catch { existsFlag = text; }
-
       if (existsFlag === 0 || existsFlag === '0') {
         setSuccess(window.transRuleNameAvailable || 'Name is available.');
       } else {
@@ -82,6 +83,10 @@
     }
   }
 
+  window.__revealStep2 = window.__revealStep2 || revealStep2;
+  if (isEdit) return;
+
+  // Mode création : listeners de validation
   inputName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -125,13 +130,11 @@
 
 /* ===========================================
  * STEP 2 + 3 + 4 + 5
- * CONNECTORS / MODULES / SYNC / FILTERS / MAPPING
  * =========================================== */
 (function () {
   const step2 = document.getElementById('step-2');
   if (!step2) return;
 
-  // URLs step 2
   const pathListConnectors = step2.getAttribute('data-path-connectors');
   const pathListModule     = step2.getAttribute('data-path-module');
 
@@ -159,10 +162,9 @@
   const step4Section = document.getElementById('step-4');
   const step5Section = document.getElementById('step-5');
   const step4Body    = document.getElementById('step-4-body');
-  let filtersLoaded = false;
+  let filtersLoaded  = false;
 
-  // helpers ---------------
-  function resetSelect(selectEl, placeholder = '—') {
+  function resetSelect(selectEl, placeholder = '') {
     if (!selectEl) return;
     selectEl.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
     selectEl.disabled = true;
@@ -184,55 +186,86 @@
     try { return JSON.parse(fieldsStr); } catch { return null; }
   }
 
-  // connecteurs pour une solution
   async function loadConnectorsFor(side, solutionId) {
-    const selectEl  = side === 'source' ? srcConn : tgtConn;
-    const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
+  const selectEl  = side === 'source' ? srcConn : tgtConn;
+  const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
 
-    resetSelect(selectEl);
-    setFeed(side, '');
-    if (!pathListConnectors || !solutionId) return;
+  resetSelect(selectEl);
+  setFeed(side, '');
 
-    try {
-      spinnerEl?.classList.remove('d-none');
-      const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  if (!pathListConnectors || !solutionId) return;
+
+  try {
+    spinnerEl?.classList.remove('d-none');
+    const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const html = await res.text();
+    selectEl.innerHTML = '';
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = '';
+    selectEl.appendChild(placeholder);
+
+    if (html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      tmp.querySelectorAll('option').forEach(opt => {
+        selectEl.appendChild(opt);
       });
-      const html = await res.text();
-      selectEl.innerHTML = html || '<option value="" disabled selected>—</option>';
-      selectEl.disabled = false;
-    } catch {
-      resetSelect(selectEl);
-      selectEl.disabled = false;
-      setFeed(side, 'Impossible de charger les connecteurs.', true);
-    } finally {
-      spinnerEl?.classList.add('d-none');
     }
-  }
-
-  // modules pour un connecteur
-  async function loadModulesFor(side, connectorId) {
-    const selectEl = side === 'source' ? srcMod : tgtMod;
+    selectEl.disabled = false;
+  } catch {
     resetSelect(selectEl);
-    if (!pathListModule || !connectorId) return;
-
-    const type = side === 'source' ? 'source' : 'cible';
-    const url  = `${pathListModule}?id=${encodeURIComponent(connectorId)}&type=${encodeURIComponent(type)}`;
-
-    try {
-      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      const html = await res.text();
-      selectEl.innerHTML = html || '<option value="" disabled selected>—</option>';
-      selectEl.disabled = false;
-    } catch {
-      resetSelect(selectEl);
-    }
+    selectEl.disabled = false;
+    setFeed(side, 'Impossible de charger les connecteurs.', true);
+  } finally {
+    spinnerEl?.classList.add('d-none');
   }
+}
 
-  // STEP 3 logic
+async function loadModulesFor(side, connectorId) {
+  const selectEl = side === 'source' ? srcMod : tgtMod;
+  resetSelect(selectEl);
+
+  if (!pathListModule || !connectorId) return;
+
+  const type = side === 'source' ? 'source' : 'cible';
+  const url  = `${pathListModule}?id=${encodeURIComponent(connectorId)}&type=${encodeURIComponent(type)}`;
+
+  try {
+    const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const html = await res.text();
+    selectEl.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = '';
+    selectEl.appendChild(placeholder);
+
+    if (html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      tmp.querySelectorAll('option').forEach(opt => {
+        selectEl.appendChild(opt);
+      });
+    }
+
+    selectEl.disabled = false;
+  } catch {
+    resetSelect(selectEl);
+  }
+}
+
+
   function bothModulesSelected() {
     return !!(srcMod && srcMod.value && tgtMod && tgtMod.value);
   }
+
   function revealStep3() {
     if (!step3) return;
     step3.classList.remove('d-none');
@@ -245,15 +278,17 @@
       duplicateSel.disabled = true;
       return;
     }
+
     const url = `${pathDup}?connector_id=${encodeURIComponent(tgtConn.value)}&module=${encodeURIComponent(tgtMod.value)}`;
+
     try {
       const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       const html = await res.text();
-      duplicateSel.innerHTML = html || '<option value="" disabled selected>—</option>';
+      duplicateSel.innerHTML = html || '<option value="" disabled selected></option>';
       duplicateSel.disabled = false;
       if (syncSel) syncSel.disabled = false;
     } catch {
-      duplicateSel.innerHTML = '<option value="" disabled selected>—</option>';
+      duplicateSel.innerHTML = '<option value="" disabled selected></option>';
       duplicateSel.disabled = true;
     }
   }
@@ -266,12 +301,10 @@
     }
   }
 
-  /* ===========================================
-   * STEP 4 — FILTERS
-   * =========================================== */
+  /* STEP 4 — FILTERS */
   function buildFilterFieldOptions() {
     const filterSelect = document.getElementById('rule-filter-field');
-    if (!filterSelect) return; // HTML injecté en AJAX
+    if (!filterSelect) return;
 
     const placeholderText = filterSelect.querySelector('option[value=""]')?.textContent || '';
     filterSelect.innerHTML = '';
@@ -279,7 +312,6 @@
     placeholder.value = '';
     placeholder.textContent = placeholderText;
     filterSelect.appendChild(placeholder);
-
     const srcFields = getFieldsFromModuleSelect(srcMod);
     const tgtFields = getFieldsFromModuleSelect(tgtMod);
 
@@ -288,7 +320,8 @@
       og.label = 'Source Fields';
       Object.entries(srcFields).forEach(([name, label]) => {
         const opt = document.createElement('option');
-        opt.value = name; opt.textContent = label;
+        opt.value = name;
+        opt.textContent = label;
         og.appendChild(opt);
       });
       filterSelect.appendChild(og);
@@ -299,7 +332,8 @@
       og.label = 'Target Fields';
       Object.entries(tgtFields).forEach(([name, label]) => {
         const opt = document.createElement('option');
-        opt.value = name; opt.textContent = label;
+        opt.value = name;
+        opt.textContent = label;
         og.appendChild(opt);
       });
       filterSelect.appendChild(og);
@@ -309,7 +343,7 @@
   function initFiltersUI() {
     const fieldSelect = document.getElementById('rule-filter-field');
     const opSelect    = document.getElementById('rule-filter-operator');
-       const valueInput  = document.getElementById('rule-filter-value');
+    const valueInput  = document.getElementById('rule-filter-value');
     const addBtn      = document.getElementById('rule-filter-add');
     const listWrap    = document.getElementById('rule-filters-list');
 
@@ -323,6 +357,7 @@
       const opVal      = opSelect.value;
       const opLabel    = opSelect.options[opSelect.selectedIndex]?.text || opVal;
       const value      = valueInput.value.trim();
+
       if (!fieldVal || !opVal || !value) return;
 
       const emptyP = listWrap.querySelector('p.text-muted');
@@ -337,10 +372,8 @@
 
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
-
       const span = document.createElement('span');
       span.innerHTML = `<strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${value}`;
-
       const delBtn = document.createElement('button');
       delBtn.type = 'button';
       delBtn.className = 'btn btn-sm text-danger';
@@ -358,30 +391,27 @@
       li.appendChild(span);
       li.appendChild(delBtn);
       ul.appendChild(li);
-
       fieldSelect.value = '';
       opSelect.value    = '';
       valueInput.value  = '';
     });
   }
 
-  /* ===========================================
-   * STEP 5 — MAPPING FIELDS
-   * =========================================== */
-
+  /* STEP 5 — MAPPING */
   function createMappingSelect(fieldsObj, placeholderText) {
     const select = document.createElement('select');
     select.className = 'form-select';
 
     const optEmpty = document.createElement('option');
     optEmpty.value = '';
-    optEmpty.textContent = placeholderText || '—';
+    optEmpty.textContent = placeholderText || '';
     select.appendChild(optEmpty);
 
     if (fieldsObj && Object.keys(fieldsObj).length) {
       Object.entries(fieldsObj).forEach(([name, label]) => {
         const opt = document.createElement('option');
-        opt.value = name; opt.textContent = label;
+        opt.value = name;
+        opt.textContent = label;
         select.appendChild(opt);
       });
     }
@@ -389,12 +419,12 @@
   }
 
   function genRowId() {
-    if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+    if (window.crypto?.getRandomValues) {
       const buf = new Uint8Array(16);
       window.crypto.getRandomValues(buf);
       buf[6] = (buf[6] & 0x0f) | 0x40;
       buf[8] = (buf[8] & 0x3f) | 0x80;
-      const toHex = n => n.toString(16).padStart(2,'0');
+      const toHex = n => n.toString(16).padStart(2, '0');
       const hex = Array.from(buf, toHex).join('');
       return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
     }
@@ -404,25 +434,18 @@
   function addMappingRow(tbody) {
     const srcFields = getFieldsFromModuleSelect(srcMod);
     const tgtFields = getFieldsFromModuleSelect(tgtMod);
-
-    const tr  = document.createElement('tr');
-    const tdTgt  = document.createElement('td'); tdTgt.className  = 'cell-target';
-    const tdSrc  = document.createElement('td'); tdSrc.className  = 'cell-source';
-    const tdAct  = document.createElement('td'); tdAct.className  = 'cell-actions';
-    const tdDel  = document.createElement('td'); tdDel.className  = 'cell-delete text-end';
-
-    // Target select
-    const tgtSelect = createMappingSelect(tgtFields, '—');
+    const tr    = document.createElement('tr');
+    const tdTgt = document.createElement('td'); tdTgt.className = 'cell-target';
+    const tdSrc = document.createElement('td'); tdSrc.className = 'cell-source';
+    const tdAct = document.createElement('td'); tdAct.className = 'cell-actions';
+    const tdDel = document.createElement('td'); tdDel.className = 'cell-delete text-end';
+    const tgtSelect = createMappingSelect(tgtFields, '');
     tgtSelect.classList.add('rule-mapping-target');
-
-    // Source wrapper (badges AU-DESSUS + select)
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
-
     const srcBadgesContainer = document.createElement('div');
     srcBadgesContainer.className = 'mapping-src-badges';
-
-    const srcSelect = createMappingSelect(srcFields, '—');
+    const srcSelect = createMappingSelect(srcFields, '');
     srcSelect.classList.add('rule-mapping-source-picker');
 
     srcSelect.addEventListener('change', () => {
@@ -433,6 +456,7 @@
         srcSelect.value = '';
         return;
       }
+
       const badge = document.createElement('span');
       badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
       badge.dataset.field = value;
@@ -455,15 +479,11 @@
 
     srcWrapper.appendChild(srcSelect);
     srcWrapper.appendChild(srcBadgesContainer);
-
-    // Actions: slot + bouton
     const actions = document.createElement('div');
     actions.className = 'mapping-actions d-flex align-items-center';
-
     const formulaSlot = document.createElement('div');
     formulaSlot.className = 'formula-slot is-empty';
-    formulaSlot.textContent = '—';
-
+    formulaSlot.textContent = '';
     const formBtn = document.createElement('button');
     formBtn.type  = 'button';
     formBtn.setAttribute('data-bs-toggle', 'modal');
@@ -474,7 +494,6 @@
     actions.appendChild(formulaSlot);
     actions.appendChild(formBtn);
 
-    // hidden (stockage formule)
     const hidden = document.createElement('input');
     hidden.type = 'hidden';
     hidden.className = 'rule-mapping-formula-input';
@@ -499,13 +518,13 @@
 
     tbody.appendChild(tr);
 
-    // Ouverture modale → remplir chips & lier la ligne + préremplir textarea
     formBtn.addEventListener('click', () => {
       const container = document.getElementById('formula-selected-fields');
       if (!container) return;
 
       container.innerHTML = '';
       const srcBadges = tr.querySelectorAll('.mapping-src-badge');
+
       srcBadges.forEach((b) => {
         const label = b.querySelector('.mapping-src-badge-label')?.textContent || b.dataset.field;
         const chip  = document.createElement('span');
@@ -514,6 +533,7 @@
         if (b.dataset.field) chip.dataset.field = b.dataset.field;
         container.appendChild(chip);
       });
+
       if (!container.children.length) {
         const span = document.createElement('span');
         span.className = 'text-muted';
@@ -539,12 +559,10 @@
     if (!addBtn || !tbody) return;
     if (addBtn.dataset.mydMappingBound === '1') return;
     addBtn.dataset.mydMappingBound = '1';
-
     addBtn.addEventListener('click', () => addMappingRow(tbody));
     if (!tbody.querySelector('tr')) addMappingRow(tbody);
   }
 
-  // RESET steps 3,4,5
   function resetStep3AndBelow() {
     if (duplicateSel) {
       duplicateSel.innerHTML = '<option value="" disabled selected></option>';
@@ -557,12 +575,10 @@
     }
     if (step4Body) step4Body.innerHTML = '';
     filtersLoaded = false;
-
     const mappingBody = document.getElementById('rule-mapping-body');
     if (mappingBody) mappingBody.innerHTML = '';
   }
 
-  // STEP 4 + 5 — logique générale
   function step3IsComplete() {
     return !!(syncSel && syncSel.value);
   }
@@ -571,8 +587,8 @@
     const step4 = document.getElementById('step-4');
     if (!step4) return;
 
-    const step4BodyLocal  = document.getElementById('step-4-body');
-    const pathFilter      = step4.getAttribute('data-path-filters');
+    const step4BodyLocal = document.getElementById('step-4-body');
+    const pathFilter     = step4.getAttribute('data-path-filters');
 
     async function loadFiltersUI() {
       if (!pathFilter || !step4BodyLocal) return;
@@ -591,6 +607,10 @@
       if (tgtMod?.value)  params.append('tgt_module', tgtMod.value);
       if (srcConn?.value) params.append('src_connector_id', srcConn.value);
       if (tgtConn?.value) params.append('tgt_connector_id', tgtConn.value);
+
+      const qp  = new URLSearchParams(location.search);
+      const rid = qp.get('rule_id');
+      if (rid) params.append('rule_id', rid);
 
       const url = params.toString() ? `${pathFilter}?${params.toString()}` : pathFilter;
 
@@ -624,25 +644,25 @@
     }
   }
 
-  // STEP 3 listeners
   if (duplicateSel) {
     duplicateSel.addEventListener('change', () => {
       if (step3IsComplete()) revealStep4and5();
     });
   }
+
   if (syncSel) {
     syncSel.addEventListener('change', () => {
       if (step3IsComplete()) revealStep4and5();
     });
   }
 
-  // Changement de modules → reset + reload
   srcMod?.addEventListener('change', () => {
     resetStep3AndBelow();
     tryRevealStep3();
     buildFilterFieldOptions();
     if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
-      window.mydLoadRuleFilters(); filtersLoaded = true;
+      window.mydLoadRuleFilters();
+      filtersLoaded = true;
     }
   });
 
@@ -651,11 +671,11 @@
     tryRevealStep3();
     buildFilterFieldOptions();
     if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
-      window.mydLoadRuleFilters(); filtersLoaded = true;
+      window.mydLoadRuleFilters();
+      filtersLoaded = true;
     }
   });
 
-  // listeners step 2 ----------
   srcSol?.addEventListener('change', () => {
     resetSelect(srcConn);
     resetSelect(srcMod);
@@ -677,7 +697,254 @@
     if (tgtMod && tgtMod.value) tryRevealStep3();
   });
 
-  initMappingUI();
+  window.loadConnectorsFor       = loadConnectorsFor;
+  window.loadModulesFor          = loadModulesFor;
+  window.buildFilterFieldOptions = buildFilterFieldOptions;
+  window.initMappingUI           = initMappingUI;
+  window.addMappingRow           = addMappingRow;
+  window.tryRevealStep3          = tryRevealStep3;
+  window.loadDuplicateFields     = loadDuplicateFields;
+})();
+
+/* ===========================================
+ * EDIT BOOTSTRAP 
+ * =========================================== */
+(function () {
+  const ruleData = window.initialRule || null;
+
+  if (!ruleData || ruleData.mode !== 'edit') {
+    return;
+  }
+
+  window.__EDIT_MODE__ = true;
+
+  const step2   = document.getElementById('step-2');
+  const step3   = document.getElementById('step-3');
+  const step4   = document.getElementById('step-4');
+  const step5   = document.getElementById('step-5');
+  const srcSol  = document.getElementById('source-solution');
+  const tgtSol  = document.getElementById('target-solution');
+  const srcConn = document.getElementById('source-connector');
+  const tgtConn = document.getElementById('target-connector');
+  const srcMod  = document.getElementById('source-module');
+  const tgtMod  = document.getElementById('target-module');
+  const duplicateSel = document.getElementById('duplicate-field');
+  const syncSel      = document.getElementById('sync-mode');
+  const nameInput    = document.getElementById('rulename');
+  const loadConnectorsFor       = window.loadConnectorsFor;
+  const loadModulesFor          = window.loadModulesFor;
+  const loadDuplicateFields     = window.loadDuplicateFields;
+  const buildFilterFieldOptions = window.buildFilterFieldOptions;
+  const initMappingUI           = window.initMappingUI;
+  const addMappingRow           = window.addMappingRow;
+  const mydLoadRuleFilters      = window.mydLoadRuleFilters;
+
+  function hydrateFiltersFromJson(filters) {
+    if (!filters || !filters.length) return;
+
+    const listWrap    = document.getElementById('rule-filters-list');
+    const fieldSelect = document.getElementById('rule-filter-field');
+    const opSelect    = document.getElementById('rule-filter-operator');
+
+    if (!listWrap || !fieldSelect || !opSelect) return;
+
+    const emptyP = listWrap.querySelector('p.text-muted');
+    if (emptyP) emptyP.remove();
+
+    let ul = listWrap.querySelector('ul');
+    if (!ul) {
+      ul = document.createElement('ul');
+      ul.className = 'list-group';
+      listWrap.appendChild(ul);
+    }
+
+    const getFieldLabel = (field) => {
+      const opt = fieldSelect.querySelector(`option[value="${CSS.escape(field)}"]`);
+      return opt ? opt.textContent : field;
+    };
+
+    const getOpLabel = (op) => {
+      const opt = Array.from(opSelect.options).find(o => o.value === op);
+      return opt ? opt.textContent : op;
+    };
+
+    filters.forEach(f => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      const fieldLabel = getFieldLabel(f.field);
+      const opLabel    = getOpLabel(f.operator);
+      const span = document.createElement('span');
+      span.innerHTML = `<strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${f.value}`;
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'btn btn-sm text-danger';
+      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      delBtn.addEventListener('click', () => {
+        li.remove();
+        if (!ul.querySelector('li')) {
+          const p = document.createElement('p');
+          p.className = 'text-muted mb-0';
+          p.textContent = 'No filters have been defined yet.';
+          listWrap.appendChild(p);
+        }
+      });
+
+      li.appendChild(span);
+      li.appendChild(delBtn);
+      ul.appendChild(li);
+    });
+  }
+
+  function hydrateMappingFromJson(mapping) {
+    if (!mapping || !mapping.length) return;
+    const tbody = document.getElementById('rule-mapping-body');
+    if (!tbody || typeof addMappingRow !== 'function') return;
+
+    tbody.innerHTML = '';
+
+    mapping.forEach(row => {
+      addMappingRow(tbody);
+      const tr = tbody.lastElementChild;
+      if (!tr) return;
+
+      const tgtSelect       = tr.querySelector('.rule-mapping-target');
+      const srcSelect       = tr.querySelector('.rule-mapping-source-picker');
+      const badgesContainer = tr.querySelector('.mapping-src-badges');
+      const formulaInput    = tr.querySelector('.rule-mapping-formula-input');
+      const formulaSlot     = tr.querySelector('.formula-slot');
+
+      if (tgtSelect && row.target) {
+        tgtSelect.value = row.target;
+      }
+
+      if (srcSelect && badgesContainer && row.source) {
+        const sources = Array.isArray(row.source)
+          ? row.source
+          : String(row.source).split(';').map(s => s.trim()).filter(Boolean);
+
+        sources.forEach(field => {
+          const opt   = srcSelect.querySelector(`option[value="${CSS.escape(field)}"]`);
+          const label = opt ? opt.textContent : field;
+          const badge = document.createElement('span');
+          badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+          badge.dataset.field = field;
+          const badgeLabel = document.createElement('span');
+          badgeLabel.className = 'mapping-src-badge-label';
+          badgeLabel.textContent = label;
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'p-0 ms-2 mapping-src-badge-remove';
+          removeBtn.innerHTML = '&times;';
+          removeBtn.addEventListener('click', () => badge.remove());
+          badge.appendChild(badgeLabel);
+          badge.appendChild(removeBtn);
+          badgesContainer.appendChild(badge);
+        });
+      }
+
+      if (formulaInput && typeof row.formula === 'string') {
+        const f = row.formula.trim();
+        formulaInput.value = f;
+        if (formulaSlot) {
+          if (f) {
+            formulaSlot.classList.remove('is-empty');
+            formulaSlot.textContent = f;
+          } else {
+            formulaSlot.classList.add('is-empty');
+            formulaSlot.textContent = '';
+          }
+        }
+      }
+    });
+  }
+
+  async function hydrateEditFromJson() {
+    try {
+      if (nameInput) {
+        nameInput.value = ruleData.name || '';
+        nameInput.classList.add('is-valid');
+      }
+
+      if (typeof window.__revealStep2 === 'function') {
+        window.__revealStep2();
+      } else if (step2) {
+        step2.classList.remove('d-none');
+      }
+
+      if (srcSol && ruleData.connection?.source?.solutionId && typeof loadConnectorsFor === 'function') {
+        srcSol.value = String(ruleData.connection.source.solutionId);
+        await loadConnectorsFor('source', srcSol.value);
+      }
+
+      if (tgtSol && ruleData.connection?.target?.solutionId && typeof loadConnectorsFor === 'function') {
+        tgtSol.value = String(ruleData.connection.target.solutionId);
+        await loadConnectorsFor('cible', tgtSol.value);
+      }
+
+      if (srcConn && ruleData.connection?.source?.connectorId && typeof loadModulesFor === 'function') {
+        srcConn.value = String(ruleData.connection.source.connectorId);
+        await loadModulesFor('source', srcConn.value);
+      }
+
+      if (tgtConn && ruleData.connection?.target?.connectorId && typeof loadModulesFor === 'function') {
+        tgtConn.value = String(ruleData.connection.target.connectorId);
+        await loadModulesFor('cible', tgtConn.value);
+      }
+
+      if (srcMod && ruleData.connection?.source?.module) {
+        srcMod.value = ruleData.connection.source.module;
+      }
+      if (tgtMod && ruleData.connection?.target?.module) {
+        tgtMod.value = ruleData.connection.target.module;
+      }
+
+      if (step3) {
+        step3.classList.remove('d-none');
+      }
+
+      if (duplicateSel && ruleData.syncOptions?.duplicateField) {
+        duplicateSel.disabled = false;
+        duplicateSel.value = ruleData.syncOptions.duplicateField;
+      }
+
+      if (syncSel && ruleData.syncOptions?.type) {
+        syncSel.disabled = false;
+        syncSel.value = ruleData.syncOptions.type;
+      }
+
+      if (step4) {
+        step4.classList.remove('d-none');
+      }
+
+      if (typeof mydLoadRuleFilters === 'function') {
+        await mydLoadRuleFilters();
+      }
+
+      if (typeof buildFilterFieldOptions === 'function') {
+        buildFilterFieldOptions();
+      }
+
+      hydrateFiltersFromJson(ruleData.filters || []);
+
+      if (step5) {
+        step5.classList.remove('d-none');
+      }
+
+      if (typeof initMappingUI === 'function') {
+        initMappingUI();
+      }
+
+      hydrateMappingFromJson(ruleData.mapping || []);
+    } catch (e) {
+      console && console.error && console.error('hydrateEditFromJson error', e);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrateEditFromJson, { once: true });
+  } else {
+    hydrateEditFromJson();
+  }
 })();
 
 /* ===========================================
@@ -698,7 +965,6 @@ $(function () {
   let currentTooltip   = '';
   let selectedFunction = '';
 
-  // helper insertion
   function insertAtCursor($textarea, text) {
     const el = $textarea[0];
     if (!el) return;
@@ -712,7 +978,6 @@ $(function () {
     el.focus();
   }
 
-  // chips “Selected fields”
   $('#formula-selected-fields').on('click', '.badge-formula', function () {
     const fieldName = $(this).data('field') || $(this).text().trim();
     if (!fieldName) return;
@@ -721,7 +986,6 @@ $(function () {
     if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
   });
 
-  // bouton ? (tooltip)
   $('#toggle-tooltip').on('click', function () {
     tooltipVisible = !tooltipVisible;
     if (tooltipVisible) {
@@ -733,7 +997,6 @@ $(function () {
     }
   });
 
-  // changement de fonction
   functionSelect.on('change', function () {
     const selectedOption = $(this).find('option:selected');
     selectedFunction = $(this).val();
@@ -747,8 +1010,11 @@ $(function () {
       $('#function-parameter').show();
     }
 
-    if (currentTooltip && tooltipVisible && selectedFunction) tooltipBox.text(currentTooltip).show();
-    else tooltipBox.hide();
+    if (currentTooltip && tooltipVisible && selectedFunction) {
+      tooltipBox.text(currentTooltip).show();
+    } else {
+      tooltipBox.hide();
+    }
 
     $('#round-precision-input').toggle(selectedFunction === 'round');
 
@@ -775,7 +1041,6 @@ $(function () {
     }
   });
 
-  // insertion de la fonction
   insertFunctionBtn.on('click', function () {
     if (!selectedFunction) return;
 
@@ -783,30 +1048,39 @@ $(function () {
     const areaInsert       = $('#area_insert');
     const content          = areaInsert.val();
     const position         = areaInsert[0]?.selectionStart ?? content.length;
-
-    let functionCall = '';
+    let functionCall       = '';
 
     if (selectedFunction === 'round') {
       const parameterValue = functionParameter.val().trim();
       const precision      = parseInt(roundPrecisionInput.val(), 10);
+
       if (isNaN(precision) || precision < 1 || precision > 100) {
         roundPrecisionInput.addClass('is-invalid');
         return;
       }
+
       roundPrecisionInput.removeClass('is-invalid');
       functionCall = `round(${parameterValue}, ${precision})`;
-      functionParameter.val(''); roundPrecisionInput.val('');
+      functionParameter.val('');
+      roundPrecisionInput.val('');
     } else if (selectedFunction.startsWith('mdw_')) {
       functionCall = `"${selectedFunction}"`;
     } else {
       const parameterValue = functionParameter.val().trim();
       if (parameterValue) {
         switch (functionCategory) {
-          case 1: functionCall = `${selectedFunction}(${parameterValue})`; break;
+          case 1:
+            functionCall = `${selectedFunction}(${parameterValue})`;
+            break;
           case 2:
-          case 3: functionCall = `${selectedFunction}("${parameterValue}")`; break;
-          case 4: functionCall = `${selectedFunction}()`; break;
-          default:functionCall = `${selectedFunction}("${parameterValue}")`;
+          case 3:
+            functionCall = `${selectedFunction}("${parameterValue}")`;
+            break;
+          case 4:
+            functionCall = `${selectedFunction}()`;
+            break;
+          default:
+            functionCall = `${selectedFunction}("${parameterValue}")`;
         }
       } else {
         functionCall = `${selectedFunction}()`;
@@ -822,7 +1096,6 @@ $(function () {
     if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
   });
 
-  // lookup : règle sélectionnée → charger champs à partir des badges
   lookupRule.on('change', function () {
     const selectedRule = $(this).val();
     if (selectedRule) {
@@ -837,7 +1110,6 @@ $(function () {
     }
   });
 
-  // submit lookup
   $('#submit-lookup').on('click', function () {
     const val = lookupField.val();
     if (!val) return;
@@ -845,13 +1117,10 @@ $(function () {
     const fieldName = String(val).split(' (')[0];
     const errorEmpty    = $('#lookup-error-empty').is(':checked') ? 1 : 0;
     const errorNotFound = $('#lookup-error-not-found').is(':checked') ? 1 : 0;
-
     const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound})`;
-
     const areaInsert = $('#area_insert');
     const content    = areaInsert.val();
     const position   = areaInsert[0]?.selectionStart ?? content.length;
-
     const before = content.substring(0, position);
     const after  = content.substring(position);
     areaInsert.val(before + lookupFormula + after);
@@ -860,7 +1129,6 @@ $(function () {
     if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
   });
 
-  // validation live précision
   roundPrecisionInput.on('input', function () {
     const sanitized = this.value.replace(/[^0-9]/g, '');
     if (sanitized !== this.value) this.value = sanitized;
@@ -868,51 +1136,16 @@ $(function () {
     $(this).toggleClass('is-invalid', isNaN(n) || n < 1 || n > 100);
   });
 
-  // SAVE: remplit la .formula-slot + hidden; la fermeture se fait via data-bs-dismiss="modal" sur le bouton
   $('#mapping-formula-save').off('click').on('click', function () {
     const modalEl = document.getElementById('mapping-formula');
-    const rowId = modalEl?.dataset?.currentRowId;
+    const rowId   = modalEl?.dataset?.currentRowId;
     if (!rowId) return;
 
     const tr = document.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
     if (!tr) return;
 
     const formula = ($('#area_insert').val() || '').trim();
-
-    // hidden
-    let hidden = tr.querySelector('.rule-mapping-formula-input');
-    if (!hidden) {
-      hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.className = 'rule-mapping-formula-input';
-      hidden.name = 'mapping_formula[]';
-      tr.querySelector('.cell-actions')?.appendChild(hidden);
-    }
-    hidden.value = formula;
-
-    // slot aperçu
-    let slot = tr.querySelector('.formula-slot');
-    if (!slot) {
-      slot = document.createElement('div');
-      slot.className = 'formula-slot';
-      (tr.querySelector('.mapping-actions') || tr.querySelector('.cell-actions'))?.prepend(slot);
-    }
-
-    const escaped = formula
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;');
-
-    if (formula) {
-      slot.classList.remove('is-empty');
-      slot.innerHTML = `<code>${escaped}</code>`;
-      slot.setAttribute('title', formula);
-    } else {
-      slot.classList.add('is-empty');
-      slot.textContent = '—';
-      slot.removeAttribute('title');
-    }
-    // (Pas de hide JS ici: mets data-bs-dismiss="modal" sur #mapping-formula-save dans le HTML)
+    window.setRowFormula(tr, formula);
   });
 
   function resetFunctionWizard() {
@@ -926,27 +1159,27 @@ $(function () {
     currentTooltip   = '';
     selectedFunction = '';
   }
+
   mappingFormulaModal.on('hidden.bs.modal', resetFunctionWizard);
 });
 
 /* ===========================================
  * SIMULATION
  * =========================================== */
-
 (function () {
-  const modal   = document.getElementById('mapping-simulation');
+  const modal    = document.getElementById('mapping-simulation');
   if (!modal) return;
 
-  const runUrl  = modal.getAttribute('data-endpoint-run') || '';
-  const countUrl= modal.getAttribute('data-endpoint-count') || '';
-  const result  = modal.querySelector('#sim-result');
-  const alertEl = modal.querySelector('#sim-alert');
-  const emptyEl = modal.querySelector('#sim-empty');
-  const idInput = modal.querySelector('#sim-record-id');
-  const btnManual = modal.querySelector('#sim-run-manual');
-  const btnSimple = modal.querySelector('#sim-run-simple');
-  const btnRerun  = modal.querySelector('#sim-rerun');
-  const badgeCount= modal.querySelector('#sim-count-badge');
+  const runUrl   = modal.getAttribute('data-endpoint-run') || '';
+  const countUrl = modal.getAttribute('data-endpoint-count') || '';
+  const result   = modal.querySelector('#sim-result');
+  const alertEl  = modal.querySelector('#sim-alert');
+  const emptyEl  = modal.querySelector('#sim-empty');
+  const idInput  = modal.querySelector('#sim-record-id');
+  const btnManual= modal.querySelector('#sim-run-manual');
+  const btnSimple= modal.querySelector('#sim-run-simple');
+  const btnRerun = modal.querySelector('#sim-rerun');
+  const badgeCount = modal.querySelector('#sim-count-badge');
 
   let lastRun = { mode: null, id: null };
 
@@ -955,6 +1188,7 @@ $(function () {
     alertEl.textContent = msg || '';
     alertEl.classList.remove('d-none');
   }
+
   function hideAlert() {
     alertEl.classList.add('d-none');
     alertEl.textContent = '';
@@ -977,39 +1211,29 @@ $(function () {
       </div>`;
   }
 
-  // Sérialise le tableau de mapping en structure champs[] / formules[]
   function collectMappingPayload() {
     const tbody = document.getElementById('rule-mapping-body');
     const rows  = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
-    const champs   = {};   // champs[target] = [src1, src2, ...]
-    const formules = {};   // formules[target] = [formula]
+    const champs   = {};
+    const formules = {};
 
     rows.forEach(tr => {
       const target = tr.querySelector('.rule-mapping-target')?.value?.trim();
       if (!target) return;
 
       const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
-        .map(b => b.dataset.field).filter(Boolean);
+        .map(b => b.dataset.field)
+        .filter(Boolean);
 
       const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
 
-      if (!champs[target]) champs[target] = [];
+      if (!champs[target])   champs[target]   = [];
       if (!formules[target]) formules[target] = [];
 
-      // si pas de sources → on envoie quand même un placeholder côté back (“my_value” est géré)
       if (srcBadges.length) champs[target].push(...srcBadges);
-
-      if (formula) formules[target].push(formula);
+      if (formula)          formules[target].push(formula);
     });
 
-    console.groupCollapsed('[SIM] collectMappingPayload');
-console.log('targets comptés =', new Set([
-  ...Object.keys(champs),
-  ...Object.keys(formules)
-]).size);
-console.log('champs (source→target):', champs);
-console.log('formules (target):', formules);
-console.groupEnd();
     return { champs, formules };
   }
 
@@ -1021,75 +1245,50 @@ console.groupEnd();
     }
 
     const { champs, formules } = collectMappingPayload();
-    // Si aucun target mappé
     if (!Object.keys(champs).length && !Object.keys(formules).length) {
       showAlert('warning', '{{ "create_rule.step3.empty_simulate"|trans }}');
       return;
     }
 
     const fd = new FormData();
+
     const _selInfo = (id) => {
-  const el = document.getElementById(id);
-  if (!el) return { value: '', label: '', dataSolution: '' };
-  const opt = el.options?.[el.selectedIndex];
-  return {
-    value: el.value || '',
-    label: opt ? opt.text : '',
-    dataSolution: opt?.dataset?.solution || ''
-  };
-};
+      const el = document.getElementById(id);
+      if (!el) return { value: '', label: '', dataSolution: '' };
+      const opt = el.options?.[el.selectedIndex];
+      return {
+        value: el.value || '',
+        label: opt ? opt.text : '',
+        dataSolution: opt?.dataset?.solution || ''
+      };
+    };
 
-const srcSolInfo  = _selInfo('source-solution');
-const tgtSolInfo  = _selInfo('target-solution');
-const srcConnInfo = _selInfo('source-connector');
-const tgtConnInfo = _selInfo('target-connector');
-const srcModInfo  = _selInfo('source-module');
-const tgtModInfo  = _selInfo('target-module');
-// ...
+    const srcSolInfo  = _selInfo('source-solution');
+    const tgtSolInfo  = _selInfo('target-solution');
+    const srcConnInfo = _selInfo('source-connector');
+    const tgtConnInfo = _selInfo('target-connector');
+    const srcModInfo  = _selInfo('source-module');
+    const tgtModInfo  = _selInfo('target-module');
 
-// On envoie l'ID (comme avant) + le nom lisible par le back
-if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
-if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
+    if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
+    if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
 
-// priorité au data-solution (si tu l’as sur <option>), sinon fallback sur le label
-const srcSolName = srcSolInfo.dataSolution || (srcSolInfo.label || '').trim().toLowerCase();
-const tgtSolName = tgtSolInfo.dataSolution || (tgtSolInfo.label || '').trim().toLowerCase();
+    const srcSolName = srcSolInfo.dataSolution || (srcSolInfo.label || '').trim().toLowerCase();
+    const tgtSolName = tgtSolInfo.dataSolution || (tgtSolInfo.label || '').trim().toLowerCase();
+    if (srcSolName) fd.append('src_solution_name', srcSolName);
+    if (tgtSolName) fd.append('tgt_solution_name', tgtSolName);
 
-if (srcSolName) fd.append('src_solution_name', srcSolName);
-if (tgtSolName) fd.append('tgt_solution_name', tgtSolName);
+    if (srcConnInfo.value) fd.append('src_connector_id', srcConnInfo.value);
+    if (tgtConnInfo.value) fd.append('tgt_connector_id', tgtConnInfo.value);
+    if (srcModInfo.value)  fd.append('src_module',       srcModInfo.value);
+    if (tgtModInfo.value)  fd.append('tgt_module',       tgtModInfo.value);
 
-// On envoie ce qu’on a, sans validation bloquante
-if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
-if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
-if (srcConnInfo.value) fd.append('src_connector_id', srcConnInfo.value);
-if (tgtConnInfo.value) fd.append('tgt_connector_id', tgtConnInfo.value);
-if (srcModInfo.value)  fd.append('src_module',       srcModInfo.value);
-if (tgtModInfo.value)  fd.append('tgt_module',       tgtModInfo.value);
-
-// ---- LOGS : contexte + FormData envoyée
-console.groupCollapsed('[SIM] contexte sélection courante');
-console.log('runUrl =', runUrl);
-console.table({
-  'source-solution': srcSolInfo,
-  'target-solution': tgtSolInfo,
-  'source-connector': srcConnInfo,
-  'target-connector': tgtConnInfo,
-  'source-module': srcModInfo,
-  'target-module': tgtModInfo
-});
-console.groupEnd();
-
-console.groupCollapsed('[SIM] FormData envoyée');
-for (const [k,v] of fd.entries()) console.log(k, '=>', v);
-console.groupEnd();
-    // champs[target][]=...
-    Object.entries(champs).forEach(([tgt, arr]) => {
-      arr.forEach(v => fd.append(`champs[${tgt}][]`, v));
-    });
-    // formules[target][]=...
-    Object.entries(formules).forEach(([tgt, arr]) => {
-      arr.forEach(v => fd.append(`formules[${tgt}][]`, v));
-    });
+    Object.entries(champs).forEach(([tgt, arr]) =>
+      arr.forEach(v => fd.append(`champs[${tgt}][]`, v))
+    );
+    Object.entries(formules).forEach(([tgt, arr]) =>
+      arr.forEach(v => fd.append(`formules[${tgt}][]`, v))
+    );
 
     let chosenId = null;
     if (useManualId) {
@@ -1104,39 +1303,30 @@ console.groupEnd();
     lockButtons(true);
     showSkeleton();
 
-   try {
-  console.time('[SIM] fetch run');
-  const res  = await fetch(runUrl, {
-    method: 'POST',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    body: fd
-  });
-  console.timeEnd('[SIM] fetch run');
-  console.log('[SIM] HTTP status:', res.status, res.statusText);
+    try {
+      const res  = await fetch(runUrl, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd
+      });
+      const html = await res.text();
 
-  const html = await res.text();
-  console.log('[SIM] response preview:', html.slice(0, 400));
+      if (html.startsWith('{') && html.includes('"error"')) {
+        const j = JSON.parse(html);
+        throw new Error(j.error || 'Simulation error');
+      }
 
-  if (html.startsWith('{') && html.includes('"error"')) {
-    const j = JSON.parse(html);
-    console.error('[SIM] backend error JSON:', j);
-    throw new Error(j.error || 'Simulation error');
+      result.innerHTML = html || '<div class="text-muted">No content.</div>';
+      lastRun = { mode: useManualId ? 'manual' : 'simple', id: chosenId };
+    } catch (e) {
+      result.innerHTML = '';
+      emptyEl?.classList.remove('d-none');
+      showAlert('danger', e.message || 'Network error');
+    } finally {
+      lockButtons(false);
+    }
   }
 
-  result.innerHTML = html || '<div class="text-muted">No content.</div>';
-  lastRun = { mode: useManualId ? 'manual' : 'simple', id: chosenId };
-} catch (e) {
-  console.error('[SIM] catch:', e);
-  result.innerHTML = '';
-  emptyEl?.classList.remove('d-none');
-  showAlert('danger', e.message || 'Network error');
-} finally {
-  lockButtons(false);
-}
-
-  }
-
-  // Charger le compteur (vue Détail)
   async function loadCount() {
     if (!countUrl) return;
     try {
@@ -1146,10 +1336,10 @@ console.groupEnd();
         badgeCount.textContent = txt;
         badgeCount.classList.remove('d-none');
       }
-    } catch {}
+    } catch {
+    }
   }
 
-  // Events
   btnManual?.addEventListener('click', () => runSimulation(true));
   btnSimple?.addEventListener('click', () => runSimulation(false));
   btnRerun?.addEventListener('click', () => runSimulation(lastRun.mode === 'manual'));
@@ -1157,26 +1347,13 @@ console.groupEnd();
   modal.addEventListener('shown.bs.modal', () => {
     hideAlert();
     loadCount();
-    // focus auto sur l’ID
     idInput?.focus();
-  console.groupCollapsed('[SIM] modal open snapshot');
-  const snap = (id) => {
-    const el = document.getElementById(id);
-    const opt = el?.options?.[el.selectedIndex];
-    return { id, value: el?.value || '', label: opt ? opt.text : '' };
-  };
-  console.table([
-    snap('source-solution'),
-    snap('target-solution'),
-    snap('source-connector'),
-    snap('target-connector'),
-    snap('source-module'),
-    snap('target-module')
-  ]);
-  console.groupEnd();
-});
+  });
 })();
 
+/* ===========================================
+ * SAVE
+ * =========================================== */
 (function () {
   const saveBtn = document.getElementById('rule-save');
   if (!saveBtn) return;
@@ -1192,19 +1369,41 @@ console.groupEnd();
       if (!target) return;
 
       const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
-        .map(b => b.dataset.field).filter(Boolean);
+        .map(b => b.dataset.field)
+        .filter(Boolean);
 
       const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
 
-      if (!champs[target]) champs[target] = [];
+      if (!champs[target])   champs[target]   = [];
       if (!formules[target]) formules[target] = [];
 
       if (srcBadges.length) champs[target].push(...srcBadges);
-      if (formula)         formules[target].push(formula);
+      if (formula)          formules[target].push(formula);
     });
 
     return { champs, formules };
   }
+
+  // Utilisé par le wizard pour appliquer la formule sur une ligne
+  window.setRowFormula = function (tr, formula) {
+    if (!tr) return;
+
+    const hidden = tr.querySelector('.rule-mapping-formula-input');
+    const slot   = tr.querySelector('.formula-slot');
+    const f      = (formula || '').trim();
+
+    if (hidden) hidden.value = f;
+
+    if (slot) {
+      if (f) {
+        slot.classList.remove('is-empty');
+        slot.textContent = f;
+      } else {
+        slot.classList.add('is-empty');
+        slot.textContent = '';
+      }
+    }
+  };
 
   function collectFiltersPayload() {
     const listWrap = document.getElementById('rule-filters-list');
@@ -1212,15 +1411,15 @@ console.groupEnd();
     if (!listWrap) return rules;
 
     const items = listWrap.querySelectorAll('li.list-group-item');
+
     items.forEach(li => {
-      // On parse la ligne affichée : <strong>field</strong> <small>(OP)</small> = value
       const strong = li.querySelector('strong');
       const small  = li.querySelector('small');
       const text   = li.querySelector('span')?.textContent || '';
+      const field = strong?.textContent?.trim();
+      const op    = small?.textContent?.replace(/[()]/g, '').trim();
 
-      const field  = strong?.textContent?.trim();
-      const op     = small?.textContent?.replace(/[()]/g,'').trim();
-      let  value   = '';
+      let value = '';
       const m = text.match(/=\s*(.*)$/);
       if (m) value = m[1].trim();
 
@@ -1234,7 +1433,7 @@ console.groupEnd();
   function currentSelections() {
     const getSel = id => {
       const el = document.getElementById(id);
-      if (!el) return { value:'', label:'', dataSolution:'' };
+      if (!el) return { value: '', label: '', dataSolution: '' };
       const opt = el.options[el.selectedIndex] || {};
       return {
         value: el.value || '',
@@ -1242,74 +1441,70 @@ console.groupEnd();
         dataSolution: opt.getAttribute('data-solution') || ''
       };
     };
+
     return {
       name: (document.getElementById('rulename')?.value || '').trim(),
-      sourceSolution: getSel('source-solution'),
-      targetSolution: getSel('target-solution'),
-      sourceConnector: getSel('source-connector'),
-      targetConnector: getSel('target-connector'),
-      sourceModule: getSel('source-module'),
-      targetModule: getSel('target-module'),
-      duplicateField: document.getElementById('duplicate-field')?.value || '',
-      syncMode: document.getElementById('sync-mode')?.value || '',
+      sourceSolution:   getSel('source-solution'),
+      targetSolution:   getSel('target-solution'),
+      sourceConnector:  getSel('source-connector'),
+      targetConnector:  getSel('target-connector'),
+      sourceModule:     getSel('source-module'),
+      targetModule:     getSel('target-module'),
+      duplicateField:   document.getElementById('duplicate-field')?.value || '',
+      syncMode:         document.getElementById('sync-mode')?.value || ''
     };
   }
 
   async function saveRule() {
     const url = saveBtn.getAttribute('data-path-save');
-    if (!url) return alert('Save endpoint missing');
+    if (!url) {
+      alert('Save endpoint missing');
+      return;
+    }
 
     const sel = currentSelections();
     const { champs, formules } = collectMappingPayload();
     const filters = collectFiltersPayload();
-
-    // gardes minimales
-    if (!sel.name)      return alert('Veuillez saisir un nom de règle.');
-    if (!sel.sourceSolution.value || !sel.targetSolution.value) return alert('Veuillez choisir les solutions.');
-    if (!sel.sourceConnector.value || !sel.targetConnector.value) return alert('Veuillez choisir les connecteurs.');
-    if (!sel.sourceModule.value || !sel.targetModule.value) return alert('Veuillez choisir les modules.');
-    if (!Object.keys(champs).length && !Object.keys(formules).length) return alert('Veuillez définir le mapping.');
-
     const fd = new FormData();
-    fd.append('name', sel.name);
 
-    // solutions: on envoie à la fois id et nom (comme pour la simulation)
+    fd.append('name', sel.name);
     fd.append('src_solution_id', sel.sourceSolution.value);
     fd.append('tgt_solution_id', sel.targetSolution.value);
     fd.append('src_solution_name', sel.sourceSolution.label.toLowerCase());
     fd.append('tgt_solution_name', sel.targetSolution.label.toLowerCase());
-
     fd.append('src_connector_id', sel.sourceConnector.value);
     fd.append('tgt_connector_id', sel.targetConnector.value);
     fd.append('src_module', sel.sourceModule.value);
     fd.append('tgt_module', sel.targetModule.value);
     fd.append('duplicate_field', sel.duplicateField);
     fd.append('sync_mode', sel.syncMode);
-
-    // filtres (JSON)
     fd.append('filters', JSON.stringify(filters));
 
-    // mapping
-    Object.entries(champs).forEach(([tgt, arr]) => {
-      arr.forEach(v => fd.append(`champs[${tgt}][]`, v));
-    });
-    Object.entries(formules).forEach(([tgt, arr]) => {
-      arr.forEach(v => fd.append(`formules[${tgt}][]`, v));
-    });
+    Object.entries(champs).forEach(([tgt, arr]) =>
+      arr.forEach(v => fd.append(`champs[${tgt}][]`, v))
+    );
+    Object.entries(formules).forEach(([tgt, arr]) =>
+      arr.forEach(v => fd.append(`formules[${tgt}][]`, v))
+    );
+
+    // Mode édition : on envoie aussi le rule_id
+    if (window.initialRule && window.initialRule.mode === 'edit' && window.initialRule.id) {
+      fd.append('rule_id', window.initialRule.id);
+    }
 
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
 
     try {
-      const res = await fetch(url, {
+      const res  = await fetch(url, {
         method: 'POST',
-        headers: { 'X-Requested-With':'XMLHttpRequest' },
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
         body: fd
       });
-
       const text = await res.text();
+
       if (!res.ok) {
-        try { 
+        try {
           const j = JSON.parse(text);
           throw new Error(j.error || 'Save failed');
         } catch {
@@ -1332,6 +1527,5 @@ console.groupEnd();
       saveBtn.innerHTML = '<i class="fa fa-save me-2"></i>Save rule';
     }
   }
-
   saveBtn.addEventListener('click', saveRule);
 })();

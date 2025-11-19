@@ -1055,7 +1055,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .rule-mapping-formula{
     color: #05bfe6 !important;
 }
-#rule-mapping-add, #rule-filter-add{
+#rule-mapping-add, #rule-filter-add, #rule-mapping-add{
 	border-color: #05bfe6 !important;
 	background-color: #05bfe6 !important;
 }
@@ -1178,7 +1178,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 #rule-mapping-simulation {
 	color: #05bfe6 !important;
 	border-color: #05bfe6 !important;
-	background-color: #fff;
+	background-color: #fff !important;
 }
 
 #rule-mapping-simulation:hover{
@@ -1199,4 +1199,20 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 }
 @keyframes sk { 
 	0%{background-position:200% 0} 100%{background-position:-200% 0} 
+}
+
+#rulename-spinner{
+	left: 225px;
+    bottom: -5px;
+}
+#rulename-spinner, #source-connector-spinner, #target-connector-spinner{
+    color: #05bfe6;
+}
+
+#nav-create-rule-detail:hover, 
+#nav-create-rule-mapping:hover,
+#nav-create-rule-connection:hover, 
+#nav-create-rule-filter:hover,
+#nav-create-rule-sync:hover{
+	color: #ffffff !important;
 }

@@ -26,7 +26,7 @@
         <div class="col-12">
           <label class="form-label">Solution</label>
           <select id="source-solution" class="form-select form-select-lg" required>
-            <option value="" selected disabled>—</option>
+            <option value="" selected disabled></option>
             {% for sol in solutions|default([]) %}
               {# value = ID (recommandé), slug en data #}
               <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
@@ -39,9 +39,9 @@
           <div class="position-relative">
             {# IMPORTANT : id correct, vide au chargement (AJAX remplira les <option>) #}
             <select id="source-connector" class="form-select form-select-lg" disabled required>
-              <option value="" selected disabled>—</option>
+              <option value="" selected disabled></option>
             </select>
-            <div id="source-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+            <div id="source-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">
               <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
             </div>
           </div>
@@ -51,7 +51,7 @@
         <div class="col-12">
           <label class="form-label">Module</label>
           <select id="source-module" class="form-select form-select-lg" disabled required>
-            <option value="" disabled selected>—</option>
+            <option value="" disabled selected></option>
           </select>
           <div id="source-module-feedback" class="form-text"></div>
         </div>
@@ -66,7 +66,7 @@
         <div class="col-12">
           <label class="form-label">Solution</label>
           <select id="target-solution" class="form-select form-select-lg" required>
-            <option value="" selected disabled>—</option>
+            <option value="" selected disabled></option>
             {% for sol in solutions|default([]) %}
               <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
             {% endfor %}
@@ -77,9 +77,9 @@
           <label class="form-label">Connector</label>
           <div class="position-relative">
             <select id="target-connector" class="form-select form-select-lg" disabled required>
-              <option value="" selected disabled>—</option>
+              <option value="" selected disabled></option>
             </select>
-            <div id="target-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+            <div id="target-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">
               <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
             </div>
           </div>
@@ -89,7 +89,7 @@
         <div class="col-12">
           <label class="form-label">Module</label>
           <select id="target-module" class="form-select form-select-lg" disabled required>
-            <option value="" disabled selected>—</option>
+            <option value="" disabled selected></option>
           </select>
           <div id="target-module-feedback" class="form-text"></div>
         </div>

@@ -54,8 +54,11 @@ panel:
         title: Documents history
     graph_job_histo:
         title: Jobs history
+edit_rule:
+    success: Your rule has been successfully edited.
 create_rule:
     error_name: A connector already has that name.
+    success: Your rule has been successfully created
     tabs:
         one: Connection
         two: Modules selection
@@ -158,6 +161,8 @@ create_rule:
             current: "Current filters"
             empty: "No filters have been defined yet."
     step5:
+        back: back to list
+        simulation: Simulation
         title: Mapping field    
         formula:
             title: Compose your formula

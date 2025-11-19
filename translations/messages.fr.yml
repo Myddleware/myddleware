@@ -54,7 +54,10 @@ panel:
         title: Historique des documents
     graph_job_histo:
         title: Historique des jobs
+edit_rule:
+    success: Votre règle a été modifiée avec succès.
 create_rule:
+    success: Votre règle a été créée avec succès
     error_name: Un connecteur porte déjà ce nom.
     tabs:
         one: Connexion
@@ -162,6 +165,8 @@ create_rule:
             current: "Filtres actuels"
             empty: "Aucun filtre n'a encore été défini."
     step5:
+        back: Retour à la liste
+        simulation: Simulation
         title: Mappage des champs
         formula:
             title: Composer votre formule

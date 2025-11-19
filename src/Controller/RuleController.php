@@ -596,180 +596,88 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     /**
      * EDIT MODE FOR A RULE.
      */
-    #[Route('/edit/{id}', name: 'regle_edit')]
-    public function ruleEditAction(Request $request, Rule $rule): RedirectResponse
+    #[Route('/{id}/edit', name: 'rule_edit', methods: ['GET'])]
+    public function edit(Rule $rule): Response
     {
-        $session = $request->getSession();
-
-        try {
-            // First, checking that the rule has no document open or in error
-            $docErrorOpen = $this->entityManager
-                ->getRepository(Document::class)
-                ->findOneBy([
-                    'rule' => $rule,
-                    'deleted' => 0,
-                    'globalStatus' => ['Open', 'Error'],
-                ]);
-            // Return to the rule detail view if a document is open or in error
-            if (!empty($docErrorOpen)) {
-                if ($this->authorizationChecker->isGranted('ROLE_SUPER_ADMIN')) {
-                    $session->set('warning', [$this->translator->trans('error.rule.edit_document_error_open_admin')]);
-                } else {
-                    $session->set('error', [$this->translator->trans('error.rule.edit_document_error_open')]);
-
-                    return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
-                }
-            }
-
-            $this->sessionService->setParamRuleLastKey($rule->getId());
-            $key = $this->sessionService->getParamRuleLastKey();
-            // If a session already exists, remove it
-            if ($this->sessionService->isParamRuleExist($key)) {
-                $this->sessionService->removeParamRule($key);
-            }
-
-            // Prepare session data
-            if (!empty($rule->getDeleted())) {
-                $session->set('error', [$this->translator->trans('error.rule.edit_rule_deleted')]);
-                return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
-            }
-
-            // Build session data
-            $this->sessionService->setParamRuleNameValid($key, true);
-            $this->sessionService->setParamRuleName($key, $rule->getName());
-            $this->sessionService->setParamRuleConnectorSourceId($key, (string) $rule->getConnectorSource()->getId());
-            $this->sessionService->setParamRuleConnectorCibleId($key, (string) $rule->getConnectorTarget()->getId());
-            $this->sessionService->setParamRuleLastId($key, $rule->getId());
-
-            // Connector source -------------------
-            $connectorParamsSource = $this->entityManager
-                ->getRepository(ConnectorParam::class)
-                ->findByConnector([$rule->getConnectorSource()]);
-
-            $this->sessionService->setParamRuleSourceSolution($key, $rule->getConnectorSource()->getSolution()->getName());
-
-            foreach ($connectorParamsSource as $connector) {
-                $this->sessionService->setParamRuleSourceConnector($key, $connector->getName(), $connector->getValue());
-            }
-            // Connector source -------------------
-
-            // Connector target -------------------
-            $connectorParamsTarget = $this->entityManager
-                ->getRepository(ConnectorParam::class)
-                ->findByConnector([$rule->getConnectorTarget()]);
-
-            $this->sessionService->setParamRuleCibleSolution($key, $rule->getConnectorTarget()->getSolution()->getName());
-
-            foreach ($connectorParamsTarget as $connector) {
-                $this->sessionService->setParamRuleCibleConnector($key, $connector->getName(), $connector->getValue());
-            }
-            // Connector target -------------------
-
-            // Rule parameters
-            if ($rule->getParams()->count()) {
-                $params = [];
-                foreach ($rule->getParams() as $ruleParamsObj) {
-                    $params[] = [
-                        'name' => $ruleParamsObj->getName(),
-                        'value' => $ruleParamsObj->getValue(),
-                    ];
-                }
-                $this->sessionService->setParamRuleReloadParams($key, $params);
-            }
-
-            // Modules --
-            $this->sessionService->setParamRuleSourceModule($key, $rule->getModuleSource());
-            $this->sessionService->setParamRuleCibleModule($key, $rule->getModuletarget());
-            // Modules --
-
-            // Reload ----------------
-            $ruleFields = $rule->getFields();
-
-            // Get source module fields for field ID / label association (ticket 548)
-            $solution_source_nom = $this->sessionService->getParamRuleSourceSolution($key);
-            $solution_source = $this->solutionManager->get($solution_source_nom);
-
-            $login = $solution_source->login($this->decrypt_params($this->sessionService->getParamRuleSource($key)));
-            if (empty($solution_source->connexion_valide)) {
-                throw new Exception('failed to login to the source application .' . (!empty($login['error']) ? $login['error'] : ''));
-            }
-
-            // SOURCE ----- Retrieve the list of source fields
-            $sourceModule = $rule->getModuleSource();
-            $sourceFieldsInfo = $solution_source->get_module_fields($sourceModule);
-
-            // Fields and formulas of a rule
-            if ($ruleFields) {
-                $fields = array();
-                foreach ($ruleFields as $ruleFieldsObj) {
-                    $array = [
-                        'target' => $ruleFieldsObj->getTarget(),
-                        'source' => [],
-                        'formula' => $ruleFieldsObj->getFormula(),
-                    ];
-                    $fields_source = explode(';', $ruleFieldsObj->getSource());
-
-                    if (!empty($fields_source)) {
-                        foreach ($fields_source as $field_source) {
-                            if ('my_value' == $field_source) {
-                                $array['source'][$field_source] = 'my_value';
-                            } elseif (isset($sourceFieldsInfo[$field_source])) {
-                                $array['source'][$field_source] = $sourceFieldsInfo[$field_source]['label'];
-                            } else {
-                                if (!empty($sourceFieldsInfo)) {
-                                    foreach ($sourceFieldsInfo as $multiModule) {
-                                        if (isset($multiModule[$field_source])) {
-                                            $array['source'][$field_source] = $multiModule[$field_source]['label'];
-                                        }
-                                    }
-                                }
-                            }
-                            if (!isset($array['source'][$field_source])) {
-                                throw new Exception('failed to get the field ' . $field_source);
-                            }
-                        }
-                        $fields[] = $array;
-                    }
-                }
-                $this->sessionService->setParamRuleReloadFields($key, $fields);
-            }
-
-            // Rule relationships
-            if ($rule->getRelationsShip()->count()) {
-                foreach ($rule->getRelationsShip() as $ruleRelationShipsObj) {
-                    $relate[] = [
-                        'source' => $ruleRelationShipsObj->getFieldNameSource(),
-                        'target' => $ruleRelationShipsObj->getFieldNameTarget(),
-                        'errorMissing' => (!empty($ruleRelationShipsObj->getErrorMissing()) ? '1' : '0'),
-                        'errorEmpty' => (!empty($ruleRelationShipsObj->getErrorEmpty()) ? '1' : '0'),
-                        'id' => $ruleRelationShipsObj->getFieldId(),
-                        'parent' => $ruleRelationShipsObj->getParent(),
-                    ];
-                }
-                $this->sessionService->setParamRuleReloadRelate($key, $relate);
-            }
-
-            // Rule filters
-            if ($rule->getFilters()->count()) {
-                foreach ($rule->getFilters() as $ruleFilters) {
-                    $filter[] = [
-                        'target' => $ruleFilters->getTarget(),
-                        'type' => $ruleFilters->getType(),
-                        'value' => $ruleFilters->getValue(),
-                    ];
-                }
-            }
-
-            $this->sessionService->setParamRuleReloadFilter($key, ((isset($filter)) ? $filter : []));
-
-            // Reload complete, redirect to step three
-            return $this->redirect($this->generateUrl('regle_stepthree', ['id' => $rule->getId()]));
-        } catch (Exception $e) {
-            $this->sessionService->setCreateRuleError($key, $this->translator->trans('error.rule.update') . ' ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
-            $session->set('error', [$this->translator->trans('error.rule.update') . ' ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine()]);
-
-            return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
+        if ($rule->getDeleted()) {
+            throw $this->createNotFoundException(sprintf('Rule "%s" has been deleted', $rule->getId()));
         }
+
+        // --- 1. Connexions source / target ---------------------------------
+        $sourceConnector = $rule->getConnectorSource();
+        $targetConnector = $rule->getConnectorTarget();
+
+        $connection = [
+            'source' => [
+                'solutionId'  => method_exists($sourceConnector, 'getSolution')
+                    ? $sourceConnector->getSolution()->getId()
+                    : null,
+                'connectorId' => $sourceConnector?->getId(),
+                'module'      => $rule->getModuleSource(),
+            ],
+            'target' => [
+                'solutionId'  => method_exists($targetConnector, 'getSolution')
+                    ? $targetConnector->getSolution()->getId()
+                    : null,
+                'connectorId' => $targetConnector?->getId(),
+                'module'      => $rule->getModuleTarget(),
+            ],
+        ];
+
+        // --- 2. Params (limit, datereference, mode, etc.) ------------------
+        // Helper déjà dans l’entité Rule
+        $params = $rule->getParamsValues(); // ex: ['limit' => '100', 'datereference' => '...', 'mode' => 'CU']
+
+        $syncOptions = [
+            'type'          => $params['mode']            ?? null, // <select id="sync-mode">
+            'duplicateField'=> $params['duplicate_field'] ?? null, // si tu as ce param
+            'limit'         => $params['limit']           ?? null,
+            'datereference' => $params['datereference']   ?? null,
+        ];
+
+        // --- 3. Filtres (RuleFilter) --------------------------------------
+        $filters = [];
+        foreach ($rule->getFilters() as $filter) {
+            $filters[] = [
+                'field'    => $filter->getTarget(),   // nom technique du champ
+                'operator' => $filter->getType(),     // opérateur ( =, !=, etc.)
+                'value'    => $filter->getValue(),
+            ];
+        }
+
+        // --- 4. Mapping (RuleField) ---------------------------------------
+        $mapping = [];
+        foreach ($rule->getFields() as $field) {
+            $mapping[] = [
+                'target'  => $field->getTarget(),      // target_field_name
+                'source'  => $field->getSource(),      // source_field_name (peut contenir des ;)
+                'formula' => $field->getFormula(),
+                'comment' => $field->getComment(),
+            ];
+        }
+
+        // --- 5. Construction du JSON pour le JS ---------------------------
+        $initialRule = [
+            'mode' => 'edit',
+            'id'   => $rule->getId(),
+            'name' => $rule->getName(),
+
+            'connection' => $connection,
+            'syncOptions'=> $syncOptions,
+            'filters'    => $filters,
+            'mapping'    => $mapping,
+        ];
+
+        $lst_functions = $this->entityManager->getRepository(Functions::class)->findAll();
+        $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
+        $initialRuleJson = json_encode($initialRule, JSON_THROW_ON_ERROR);
+
+        return $this->render('Rule/create/index.html.twig', [
+            'initialRuleJson' => $initialRuleJson,
+            'rule'            => $rule,
+            'lst_functions'   => $lst_functions,
+            'solutions'       => $solutions,
+        ]);
     }
 
     /**
@@ -1677,7 +1585,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     }
 
     #[Route('/rule/create/save', name: 'rule_create_save', methods: ['POST'])]
-    public function ruleCreateSave(Request $request): Response
+    public function ruleCreateSave(Request $request, TranslatorInterface $translator): Response
     {
         $name           = trim((string) $request->request->get('name'));
         $srcConnectorId = (int) $request->request->get('src_connector_id');
@@ -1685,6 +1593,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         $srcModule      = (string) $request->request->get('src_module');
         $tgtModule      = (string) $request->request->get('tgt_module');
         $syncMode       = (string) $request->request->get('sync_mode', '0');
+        $ruleIdFromRequest = (string) $request->request->get('rule_id', '');
+        $isEdit = $ruleIdFromRequest !== '';
 
         $rawFields   = $request->request->all('champs')   ?? [];
         $rawFormulas = $request->request->all('formules') ?? [];
@@ -1702,7 +1612,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             return new JsonResponse(['error' => 'Please define at least one mapping row.'], 400);
         }
 
-        $ruleId   = substr(uniqid('', true), 0, 13);
+        $ruleId   = $isEdit ? $ruleIdFromRequest : substr(uniqid('', true), 0, 13);
         $now      = (new \DateTimeImmutable());
         $nowStr   = $now->format('Y-m-d H:i:s');
         $midnight = $now->setTime(0, 0)->format('Y-m-d 00:00:00');
@@ -1713,32 +1623,53 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         $userId = (int) ($this->getUser()?->getId() ?? 1);
 
         try {
-            // Utilise le mode transactionnel intégré : pas besoin d’appeler commit/rollback
             $this->connection->transactional(function (\Doctrine\DBAL\Connection $conn) use (
                 $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
                 $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
-                $rawFields, $rawFormulas, $filters, $syncMode
+                $rawFields, $rawFormulas, $filters, $syncMode, $isEdit
             ) {
-                // 1) rule
-                $conn->insert('rule', [
-                    'id'              => $ruleId,
-                    'conn_id_source'  => $srcConnectorId,
-                    'conn_id_target'  => $tgtConnectorId,
-                    'created_by'      => $userId,
-                    'modified_by'     => $userId,
-                    'group_id'        => null,
-                    'date_created'    => $nowStr,
-                    'date_modified'   => $nowStr,
-                    'module_source'   => $srcModule,
-                    'module_target'   => $tgtModule,
-                    'active'          => 0,
-                    'deleted'         => 0,
-                    'name'            => $name,
-                    'name_slug'       => $nameSlug,
-                    'read_job_lock'   => null,
-                ]);
+                if ($isEdit) {
+                    $conn->update('rule', [
+                        'conn_id_source'  => $srcConnectorId,
+                        'conn_id_target'  => $tgtConnectorId,
+                        'modified_by'     => $userId,
+                        'date_modified'   => $nowStr,
+                        'module_source'   => $srcModule,
+                        'module_target'   => $tgtModule,
+                        'name'            => $name,
+                        'name_slug'       => $nameSlug,
+                    ], [
+                        'id' => $ruleId,
+                    ]);
 
-                // 2) rulefield
+                    $conn->delete('rulefield', ['rule_id' => $ruleId]);
+                    $conn->delete('rulefilter', ['rule_id' => $ruleId]);
+                    $conn->delete('ruleparam', ['rule_id' => $ruleId]);
+                } else {
+                    $conn->insert('rule', [
+                        'id'              => $ruleId,
+                        'conn_id_source'  => $srcConnectorId,
+                        'conn_id_target'  => $tgtConnectorId,
+                        'created_by'      => $userId,
+                        'modified_by'     => $userId,
+                        'group_id'        => null,
+                        'date_created'    => $nowStr,
+                        'date_modified'   => $nowStr,
+                        'module_source'   => $srcModule,
+                        'module_target'   => $tgtModule,
+                        'active'          => 0,
+                        'deleted'         => 0,
+                        'name'            => $name,
+                        'name_slug'       => $nameSlug,
+                        'read_job_lock'   => null,
+                    ]);
+
+                    $conn->executeStatement(
+                        'INSERT INTO `ruleorder` (`rule_id`, `order`) VALUES (?, ?)',
+                        [$ruleId, 1]
+                    );
+                }
+
                 foreach ($rawFields as $targetField => $srcs) {
                     $srcs    = array_values(array_unique(array_filter((array)$srcs)));
                     $formula = (!empty($rawFormulas[$targetField][0])) ? (string)$rawFormulas[$targetField][0] : '';
@@ -1752,7 +1683,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ]);
                 }
 
-                // 3) rulefilter
                 foreach ($filters as $f) {
                     $field = (string)($f['field'] ?? '');
                     $op    = (string)($f['operator'] ?? '');
@@ -1767,18 +1697,10 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                     ]);
                 }
 
-                // 4) ruleorder — colonne réservée `order` => on passe par SQL explicite
-                $conn->executeStatement(
-                    'INSERT INTO `ruleorder` (`rule_id`, `order`) VALUES (?, ?)',
-                    [$ruleId, 1]
-                );
-
-                // 5) ruleparam
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit',        'value' => '100']);
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference','value' => $midnight]);
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode',         'value' => (string)$syncMode]);
 
-                // 6) ruleaudit (JSON sérialisé)
                 $contentFields = ['name' => []];
                 foreach ($rawFields as $tgt => $srcs) {
                     $contentFields['name'][(string)$tgt]['champs'] = array_values((array)$srcs);
@@ -1811,6 +1733,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 ]);
             });
 
+            $this->addFlash($isEdit ? 'rule.edit.success' : 'rule.create.success', $translator->trans($isEdit ? 'edit_rule.success' : 'create_rule.success'));
+
             return new JsonResponse([
                 'ok'       => true,
                 'id'       => $ruleId,
@@ -1821,74 +1745,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
-
-    // #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
-    // public function ruleStepFilters(Request $request): Response
-    // {
-    //     die("test");
-    //     $ruleKey = $this->sessionService->getParamRuleLastKey();
-
-    //     // valeurs par défaut si rien en session
-    //     $fieldsGrouped = [
-    //         'Source Fields'   => [],
-    //         'Target Fields'   => [],
-    //         'Relation Fields' => [],
-    //     ];
-
-    //     $operators = [
-    //         $this->translator->trans('filter.content')    => 'content',
-    //         $this->translator->trans('filter.notcontent') => 'notcontent',
-    //         $this->translator->trans('filter.begin')      => 'begin',
-    //         $this->translator->trans('filter.end')        => 'end',
-    //         $this->translator->trans('filter.gt')         => 'gt',
-    //         $this->translator->trans('filter.lt')         => 'lt',
-    //         $this->translator->trans('filter.equal')      => 'equal',
-    //         $this->translator->trans('filter.different')  => 'different',
-    //         $this->translator->trans('filter.gteq')       => 'gteq',
-    //         $this->translator->trans('filter.lteq')       => 'lteq',
-    //         $this->translator->trans('filter.in')         => 'in',
-    //         $this->translator->trans('filter.notin')      => 'notin',
-    //     ];
-
-    //     $filters = [];
-
-    //     if ($ruleKey && $this->sessionService->isParamRuleExist($ruleKey)) {
-
-    //         $sourceFields = $this->sessionService->getParamRuleSourceFields($ruleKey) ?? [];
-    //         $targetFields = $this->sessionService->getParamRuleTargetFields($ruleKey) ?? [];
-
-    //         // on reconstruit comme dans l'ancien code
-    //         $fieldsGrouped = [
-    //             'Source Fields'   => [],
-    //             'Target Fields'   => [],
-    //             'Relation Fields' => [],
-    //         ];
-
-    //         die( $fieldsGrouped);
-    //         foreach ($sourceFields as $key => $value) {
-    //             $fieldsGrouped['Source Fields'][$key] = $value['label'] ?? $key;
-    //             // si c’est un champ “relate”, on le met aussi dans relations
-    //             if (!empty($value['relate'])) {
-    //                 $fieldsGrouped['Relation Fields'][$key] = $value['label'] ?? $key;
-    //             }
-    //         }
-
-    //         foreach ($targetFields as $key => $value) {
-    //             $fieldsGrouped['Target Fields'][$key] = $value['label'] ?? $key;
-    //         }
-
-    //         // filtres déjà existants (édition)
-    //         $filters = $this->entityManager->getRepository(\App\Entity\RuleFilter::class)->findBy(['rule' => $ruleKey]);
-    //     }
-
-    //     return $this->render('Rule/create/_filters.html.twig', [
-    //         'fieldsGrouped' => $fieldsGrouped,
-    //         'operators'     => $operators,
-    //         'filters'       => $filters,
-    //         'ruleKey'       => $ruleKey,
-    //     ]);
-    // }
-
      /**
      * Indique des informations concernant le champ envoyé en paramètre.
      */

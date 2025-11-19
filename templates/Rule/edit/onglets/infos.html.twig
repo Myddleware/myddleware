@@ -60,6 +60,7 @@
 		{% endif %}
 	</div>
 
+	{% include '_notifications.html.twig' with { filter_prefix: 'rule.create.' } %}
 	<div class="container-fluid px-4">
 		<div class="custom-row gx-4 gy-4 rule-panel-wrapper">
 			<div
@@ -75,7 +76,7 @@
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">	
-										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
+										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">

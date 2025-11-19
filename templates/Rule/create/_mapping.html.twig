@@ -46,6 +46,13 @@
       </div>
     </div>
   </div>
+
+  <button id="rule-save" type="button" class="btn btn-success mt-4" data-path-save="{{ path('rule_create_save') }}">
+    {{ 'create_rule.step5.formula.save'|trans }}
+  </button>
+    <button id="rule-create-back" type="button" class="btn btn-outline-danger mt-4" data-path-save="{{ path('regle_list_page') }}">
+    {{ 'create_rule.step5.back'|trans }}
+  </button>
 </section>
 
     {# --- POP UP : FORMULA --- #}
@@ -53,12 +60,3 @@
 
     {# --- POP UP : SIMULATION --- #}
     {% include 'Rule/_simulation.html.twig' %}
-
-<button
-  id="rule-save"
-  type="button"
-  class="btn btn-primary text-center"
-  data-path-save="{{ path('rule_create_save') }}"
->
-  <i class="fa fa-save me-2"></i> {{ 'rule.save'|trans({'%default%':'Save rule'}) }}
-</button>
