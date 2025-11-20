@@ -37,18 +37,7 @@
 	</div>
 {% endblock titlesm %}
 {% block body %}
-	{# success message if the rule has been duplicated 
-	{% for label, flashes in app.session.flashbag.all %}
-		{% for flash in flashes %}
-			{% if ( label == 'success' ) %}
-				<div class="alert alert-success alert-dismissible fade show">
-					{{ flash }}
-				</div>
-			{% endif %}
-		{% endfor %}
-	{% endfor %} #}
 	{% include '_notifications.html.twig' with { filter_prefix: 'rule.' } %}
-
 	<div id="rule">
 		{% if nb_rule > 0 %}
 			<div class="row justify-content-center align-items-center my-4 me-5 mt-5">

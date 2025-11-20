@@ -59,6 +59,7 @@ edit_rule:
 create_rule:
     error_name: A connector already has that name.
     success: Your rule has been successfully created
+    loading: Loading rule...
     tabs:
         one: Connection
         two: Modules selection

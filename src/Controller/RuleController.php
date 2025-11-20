@@ -625,8 +625,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         ];
 
         // --- 2. Params (limit, datereference, mode, etc.) ------------------
-        // Helper déjà dans l’entité Rule
-        $params = $rule->getParamsValues(); // ex: ['limit' => '100', 'datereference' => '...', 'mode' => 'CU']
+        $params = $rule->getParamsValues();
 
         $syncOptions = [
             'type'          => $params['mode']            ?? null, // <select id="sync-mode">

@@ -59,6 +59,7 @@ edit_rule:
 create_rule:
     success: Votre règle a été créée avec succès
     error_name: Un connecteur porte déjà ce nom.
+    loading: Chargement de la règle...
     tabs:
         one: Connexion
         two: Choix des modules

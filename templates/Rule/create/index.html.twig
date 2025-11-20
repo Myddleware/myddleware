@@ -4,96 +4,158 @@
 
 {% block body %}
 
+  {# --- OVERLAY DE CHARGEMENT (utilisé surtout en mode EDIT) --- #}
+  <div id="rule-loading-overlay"
+       class="rule-loading-overlay {% if initialRuleJson is not defined %}d-none{% endif %}">
+    <div class="rule-loading-overlay__content">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading…</span>
+      </div>
+      <div class="mt-3">
+        {{ 'create_rule.loading'|trans|default('Loading rule…') }}
+      </div>
+    </div>
+  </div>
+
   <div class="container py-4" id="rule-create">
+    {# On cache le builder en EDIT tant que tout n’est pas prêt #}
+    <div id="rule-builder"
+         class="{% if initialRuleJson is defined %}d-none{% endif %}">
 
-    {# --- SECTION 1 : Rule Details  --- #}
-    {% include 'Rule/create/_details.html.twig' %}
+      {# --- SECTION 1 : Rule Details  --- #}
+      {% include 'Rule/create/_details.html.twig' %}
 
-    {# --- SECTION 2 : Rule Connection --- #}
-    {% include 'Rule/create/_connection.html.twig' %}
+      {# --- SECTION 2 : Rule Connection --- #}
+      {% include 'Rule/create/_connection.html.twig' %}
 
-    {# --- SECTION 3 : Synch Options --- #}
-    {% include 'Rule/create/_sync.html.twig' %}
-    
-    {# --- SECTION 4 : Synch Options --- #}
-    {% include 'Rule/create/_filters.html.twig' %}
-    
-    {# --- SECTION 5 : Synch Options --- #}
-    {% include 'Rule/create/_mapping.html.twig' %}
+      {# --- SECTION 3 : Synch Options --- #}
+      {% include 'Rule/create/_sync.html.twig' %}
+      
+      {# --- SECTION 4 : Filters --- #}
+      {% include 'Rule/create/_filters.html.twig' %}
+      
+      {# --- SECTION 5 : Mapping --- #}
+      {% include 'Rule/create/_mapping.html.twig' %}
 
-<div id="rule-page"
-     data-mode="{{ initialRuleJson is defined ? 'edit' : 'create' }}">
-</div>
+      <div id="rule-page"
+          data-mode="{{ initialRuleJson is defined ? 'edit' : 'create' }}">
+      </div>
 
-{% if initialRuleJson is defined %}
-<script>
-  window.initialRule = {{ initialRuleJson|raw }};
-</script>
-{% endif %}
-
+      {% if initialRuleJson is defined %}
+        <script>
+          window.initialRule = {{ initialRuleJson|raw }};
+        </script>
+      {% endif %}
+    </div>
   </div>
 
-<!-- Offcanvas gauche -->
-<div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="ruleCreateNav" aria-labelledby="ruleCreateNavLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="ruleCreateNavLabel">{{ 'title.rule.create'|trans }}</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+  {# Offcanvas gauche (inchangé) #}
+  <div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="ruleCreateNav" aria-labelledby="ruleCreateNavLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="ruleCreateNavLabel">{{ 'title.rule.create'|trans }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+
+      <!-- Menu -->
+      <nav class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-1" data-bs-dismiss="offcanvas">
+          {{ 'animate.rulename'| trans }}
+        </a>
+        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-2" data-bs-dismiss="offcanvas">
+          {{ 'animate.ruleconnection'| trans }}
+        </a>
+        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-3" data-bs-dismiss="offcanvas">
+          {{ 'create_rule.step3.syncdata.title' | trans }}
+        </a>
+        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-4" data-bs-dismiss="offcanvas">
+          {{ 'create_rule.step4.title' | trans }}
+        </a>
+        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-5" data-bs-dismiss="offcanvas">
+          {{ 'create_rule.step5.title' | trans }}
+        </a>
+      </nav>
+    </div>
   </div>
-  <div class="offcanvas-body p-0">
 
-    <!-- Menu -->
-    <nav class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" href="#step-1" data-bs-dismiss="offcanvas">
-        {{ 'animate.rulename'| trans }}
-      </a>
-      <a class="list-group-item list-group-item-action" href="#step-2" data-bs-dismiss="offcanvas">
-        {{ 'animate.ruleconnection'| trans }}
-      </a>
-      <a class="list-group-item list-group-item-action" href="#step-3" data-bs-dismiss="offcanvas">
-        {{ 'create_rule.step3.syncdata.title' | trans }}
-      </a>
-      <a class="list-group-item list-group-item-action" href="#step-4" data-bs-dismiss="offcanvas">
-        {{ 'create_rule.step4.title' | trans }}
-      </a>
-      <a class="list-group-item list-group-item-action" href="#step-5" data-bs-dismiss="offcanvas">
-        {{ 'create_rule.step5.title' | trans }}
-      </a>
-    </nav>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // on récupère l’offcanvas Bootstrap
-    const offcanvasEl = document.getElementById('ruleCreateNav');
-    const bsOffcanvas = offcanvasEl ? bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl) : null;
+  <script>
+    // Hook global pour ton JS : tu l’appelles quand TOUT est prêt
+    window.ruleInitDone = function () {
+      const overlay = document.getElementById('rule-loading-overlay');
+      const builder = document.getElementById('rule-builder');
 
-    // on écoute les clics sur les liens internes
-    document.addEventListener('click', function (e) {
-      const link = e.target.closest('a[href^="#"]');
-      if (!link) return;
-
-      const targetSelector = link.getAttribute('href');
-      const target = document.querySelector(targetSelector);
-      if (!target) return;
-
-      // si le lien est dans l’offcanvas → on le ferme d’abord
-      const isInsideOffcanvas = link.closest('.offcanvas') !== null;
-
-      e.preventDefault();
-
-      if (isInsideOffcanvas && bsOffcanvas) {
-        // on attend la fermeture pour scroller
-        const handleHidden = function () {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          offcanvasEl.removeEventListener('hidden.bs.offcanvas', handleHidden);
-        };
-        offcanvasEl.addEventListener('hidden.bs.offcanvas', handleHidden);
-        bsOffcanvas.hide();
-      } else {
-        // lien normal dans la page
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (overlay) {
+        overlay.classList.add('d-none');
       }
+      if (builder) {
+        builder.classList.remove('d-none');
+      }
+
+      // On met aussi à jour l’état des liens du menu
+      if (typeof window.updateRuleNavLinks === 'function') {
+        window.updateRuleNavLinks();
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const offcanvasEl  = document.getElementById('ruleCreateNav');
+      const bsOffcanvas  = offcanvasEl ? bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl) : null;
+
+      function updateRuleNavLinks() {
+        const links = document.querySelectorAll('.rule-nav-link');
+
+        links.forEach(link => {
+          const targetSelector = link.getAttribute('href');
+          if (!targetSelector || !targetSelector.startsWith('#')) return;
+
+          const section = document.querySelector(targetSelector);
+          if (!section) return;
+
+          const isHidden = section.classList.contains('d-none');
+
+          if (isHidden) {
+            link.classList.add('disabled');
+            link.setAttribute('aria-disabled', 'true');
+            link.setAttribute('tabindex', '-1');
+          } else {
+            link.classList.remove('disabled');
+            link.removeAttribute('aria-disabled');
+            link.removeAttribute('tabindex');
+          }
+        });
+      }
+
+      window.updateRuleNavLinks = updateRuleNavLinks;
+      updateRuleNavLinks();
+
+      document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link) return;
+
+        if (link.classList.contains('disabled')) {
+          e.preventDefault();
+          return;
+        }
+
+        const targetSelector = link.getAttribute('href');
+        const target = document.querySelector(targetSelector);
+        if (!target) return;
+
+        const isInsideOffcanvas = link.closest('.offcanvas') !== null;
+
+        e.preventDefault();
+
+        if (isInsideOffcanvas && bsOffcanvas) {
+          const handleHidden = function () {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            offcanvasEl.removeEventListener('hidden.bs.offcanvas', handleHidden);
+          };
+          offcanvasEl.addEventListener('hidden.bs.offcanvas', handleHidden);
+          bsOffcanvas.hide();
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
-  });
-</script>
+  </script>
 {% endblock %}

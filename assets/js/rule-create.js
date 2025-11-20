@@ -39,6 +39,8 @@
     step2Section.style.transition = 'opacity .25s ease';
     requestAnimationFrame(() => { step2Section.style.opacity = 1; });
     step2Section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
   function setSuccess(msg) {
@@ -275,6 +277,7 @@
   function revealStep3() {
     if (!step3) return;
     step3.classList.remove('d-none');
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
   async function loadDuplicateFields() {
@@ -569,6 +572,56 @@
     if (!tbody.querySelector('tr')) addMappingRow(tbody);
   }
 
+function ensureDuplicateMappingRow(targetField) {
+  if (!targetField) return;
+
+  const tbody = document.getElementById('rule-mapping-body');
+  if (!tbody) return;
+
+  if (typeof initMappingUI === 'function') {
+    initMappingUI();
+  }
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
+  // Si une ligne existe déjà pour ce target → on ne touche à rien
+  const existingRow = rows.find(tr => {
+    const sel = tr.querySelector('.rule-mapping-target');
+    return sel && sel.value === targetField;
+  });
+  if (existingRow) return;
+
+  // Chercher d'abord une ligne avec target vide
+  let row = rows.find(tr => {
+    const sel = tr.querySelector('.rule-mapping-target');
+    return sel && !sel.value;
+  });
+
+  // Sinon on ajoute une nouvelle ligne
+  if (!row && typeof addMappingRow === 'function') {
+    addMappingRow(tbody);
+    row = tbody.lastElementChild;
+  }
+  if (!row) return;
+
+  const tgtSelect = row.querySelector('.rule-mapping-target');
+  if (!tgtSelect) return;
+
+  let option = tgtSelect.querySelector(`option[value="${CSS.escape(targetField)}"]`);
+
+  if (!option) {
+    const lower = targetField.toLowerCase();
+    option = Array.from(tgtSelect.options).find(o =>
+      o.value.toLowerCase() === lower ||
+      o.textContent.trim().toLowerCase() === lower
+    );
+  }
+
+  if (option) {
+    tgtSelect.value = option.value;
+  }
+}
+
   function resetStep3AndBelow() {
     if (duplicateSel) {
       duplicateSel.innerHTML = '<option value="" disabled selected></option>';
@@ -648,13 +701,27 @@
       step5Section.classList.remove('d-none');
       initMappingUI();
     }
+
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
-  if (duplicateSel) {
-    duplicateSel.addEventListener('change', () => {
-      if (step3IsComplete()) revealStep4and5();
-    });
-  }
+if (duplicateSel) {
+  duplicateSel.addEventListener('change', () => {
+    if (step3IsComplete()) {
+      revealStep4and5();
+    }
+
+    const selectedOption = duplicateSel.options[duplicateSel.selectedIndex];
+    if (!selectedOption) return;
+
+    // on utilise le texte affiché : "email", "username", etc.
+    const label = (selectedOption.textContent || '').trim();
+    if (!label) return;
+
+    ensureDuplicateMappingRow(label);
+  });
+}
+
 
   if (syncSel) {
     syncSel.addEventListener('change', () => {
@@ -718,8 +785,18 @@
 (function () {
   const ruleData = window.initialRule || null;
 
-  if (!ruleData || ruleData.mode !== 'edit') {
+  // Debug : voir si on reçoit bien quelque chose
+  console.log('[EDIT] window.initialRule = ', window.initialRule);
+
+  if (!ruleData) {
+    if (typeof window.ruleInitDone === 'function') {
+      window.ruleInitDone();
+    }
     return;
+  }
+
+  if (!ruleData.mode) {
+    ruleData.mode = 'edit';
   }
 
   window.__EDIT_MODE__ = true;
@@ -739,7 +816,6 @@
   const nameInput    = document.getElementById('rulename');
   const loadConnectorsFor       = window.loadConnectorsFor;
   const loadModulesFor          = window.loadModulesFor;
-  const loadDuplicateFields     = window.loadDuplicateFields;
   const buildFilterFieldOptions = window.buildFilterFieldOptions;
   const initMappingUI           = window.initMappingUI;
   const addMappingRow           = window.addMappingRow;
@@ -865,6 +941,8 @@
   }
 
   async function hydrateEditFromJson() {
+    console.log('[EDIT] hydrateEditFromJson() with ruleData = ', ruleData);
+
     try {
       if (nameInput) {
         nameInput.value = ruleData.name || '';
@@ -943,6 +1021,10 @@
       hydrateMappingFromJson(ruleData.mapping || []);
     } catch (e) {
       console && console.error && console.error('hydrateEditFromJson error', e);
+    } finally {
+      if (typeof window.ruleInitDone === 'function') {
+        window.ruleInitDone();
+      }
     }
   }
 
@@ -1530,7 +1612,7 @@ $(function () {
       alert(e.message || 'Save failed');
     } finally {
       saveBtn.disabled = false;
-      saveBtn.innerHTML = '<i class="fa fa-save me-2"></i>Save rule';
+      saveBtn.innerHTML = 'Save rule';
     }
   }
   saveBtn.addEventListener('click', saveRule);
