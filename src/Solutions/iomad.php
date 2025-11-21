@@ -147,6 +147,10 @@ class iomad extends moodle
 		// Assign the user/course to the company
 		$parameters = [];
 		foreach($result as $idDoc => $record) {	
+			// Do not trys to assign a record not created
+			if (!empty($record['error'])) {
+				continue;
+			}
 			if ($param['module'] == 'users') {
 				$parameters[$param['module']][0]['userid'] = current($record['id']);
 			} else {
