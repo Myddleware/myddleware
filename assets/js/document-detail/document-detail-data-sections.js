@@ -122,6 +122,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -239,8 +243,12 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker
-                baseUrl += "/index.php";
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
 
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
@@ -342,6 +350,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -445,6 +457,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -561,6 +577,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -706,10 +726,14 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                        baseUrl += "/index.php";
+                    }
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-                
+
                 const referenceUrl = `${baseUrl}/rule/flux/modern/${reference}`;
                 referenceLink = `<a href="${referenceUrl}" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a>`;
             }
@@ -724,10 +748,14 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                        baseUrl += "/index.php";
+                    }
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-                
+
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
@@ -1212,6 +1240,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
