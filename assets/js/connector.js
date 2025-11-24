@@ -41,15 +41,14 @@ $( function() {
 		const form = $('form[method="POST"]');
 		const actionUrl = form.attr('action');
 		const connectorId = actionUrl.match(/\/(\d+)$/)[1];
-		console.log('Connector ID:', connectorId);
 
 		// get the window location
 		const windowLocation = window.location.href;
-		console.log('Window Location:', windowLocation);
+		// console.log('Window Location:', windowLocation);
 
 		// Create the API URL based on the connector ID and the window location
 		const apiUrl = windowLocation.replace(/\/connector\/view\/\d+$/, '/api/connector/get-data/' + connectorId);
-		console.log('API URL:', apiUrl);
+		// console.log('API URL:', apiUrl);
 		// const apiUrlModel = "http://localhost/myddleware_NORMAL/public/rule/api/connector/get-data/11"
 		// console.log('API URL Model:', apiUrlModel);
 
@@ -65,16 +64,16 @@ $( function() {
 			'</div>';
 			$('#get_from_database').before(alertHtml);
 
-			// Auto-dismiss after 500ms
+			// Auto-dismiss after 5000ms
 			setTimeout(function() {
 				$('#get_from_database').siblings('.alert').fadeOut(300, function() {
 					$(this).remove();
 				});
-			}, 500);
+			}, 5000);
 		}
 
 		$.ajax({
-			type: "GET",
+			type: "POST",
 			url: apiUrl,
 			dataType: 'json',
 			beforeSend: function() {

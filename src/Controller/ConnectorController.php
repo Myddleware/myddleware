@@ -678,7 +678,7 @@ class ConnectorController extends AbstractController
      * Get connector data from database as JSON.
      * Used to populate form fields from database values.
      *
-     * @Route("/api/connector/get-data/{id}", name="connector_get_data", methods={"GET"})
+     * @Route("/api/connector/get-data/{id}", name="connector_get_data", methods={"POST"})
      * @IsGranted("ROLE_ADMIN")
      */
     public function getConnectorData($id): Response
