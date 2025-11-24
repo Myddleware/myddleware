@@ -1240,10 +1240,6 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
