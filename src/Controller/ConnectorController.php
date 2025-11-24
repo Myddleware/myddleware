@@ -691,15 +691,13 @@ class ConnectorController extends AbstractController
             if ($this->getUser()->isAdmin()) {
                 $qb->where('c.id = :id AND c.deleted = 0')->setParameter('id', $id);
             } else {
-                $qb->where('c.id = :id and c.createdBy = :createdBy AND c.deleted = 0')
-                   ->setParameter('id', $id)
-                   ->setParameter('createdBy', $this->getUser()->getId());
+                return $this->json(['success' => false, 'message' => 'User not admin'], 500);
             }
 
             $connector = $qb->getQuery()->getOneOrNullResult();
 
             if (!$connector) {
-                return $this->json(['success' => false, 'message' => 'Connector not found'], 404);
+                return $this->json(['success' => false, 'message' => 'Connector not found'], 500);
             }
 
             // Initialize encrypter for decryption
@@ -720,8 +718,7 @@ class ConnectorController extends AbstractController
                     try {
                         $value = $encrypter->decrypt($value);
                     } catch (Exception $e) {
-                        // If decryption fails, use the original value
-                        // Some parameters might not be encrypted
+                       return $this->json(['success' => false, 'message' => 'Error with the Decryption'], 500);
                     }
                 }
                 $data['params'][$param->getName()] = $value;
