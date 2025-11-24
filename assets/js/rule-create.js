@@ -453,7 +453,7 @@
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
     const srcBadgesContainer = document.createElement('div');
-    srcBadgesContainer.className = 'mapping-src-badges';
+    srcBadgesContainer.className = 'mapping-src-badges pt-1';
     const srcSelect = createMappingSelect(srcFields, '');
     srcSelect.classList.add('rule-mapping-source-picker');
 
@@ -891,7 +891,7 @@ if (duplicateSel) {
 
       const tgtSelect       = tr.querySelector('.rule-mapping-target');
       const srcSelect       = tr.querySelector('.rule-mapping-source-picker');
-      const badgesContainer = tr.querySelector('.mapping-src-badges');
+      const badgesContainer = tr.querySelector('.mapping-src-badges pt-1');
       const formulaInput    = tr.querySelector('.rule-mapping-formula-input');
       const formulaSlot     = tr.querySelector('.formula-slot');
 

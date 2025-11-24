@@ -86,10 +86,6 @@
 
 /*#cible ul li li::before{ content:"Formule : "; }*/
 
-#choix fieldset {
-	border: 0px;
-}
-
 .clr {
 	clear:both;
 }
@@ -211,15 +207,7 @@ input[type="text"] {
 	width: 40px;
 }
 
-#champs #catalog {
-	/* max-height: 870px; */
-	overflow: auto;
-	/* max-width: 300px; */
-}
-
-
 /*  Manual rule simulation buttons and input  -- ESTELLE TODO : check whether this is still relevant */
-
 
 .manual-simulation, .simulation-buttons {
 	width: 65vw;

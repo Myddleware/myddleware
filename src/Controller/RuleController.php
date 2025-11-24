@@ -1334,7 +1334,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
 
         if (empty($target['fields']['name'])) {
-            return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
+            return $this->render('Rule/_simulation_tab.html.twig', [
                 'before' => [], 'after' => [], 'data_source' => false,
             ]);
         }
@@ -1368,7 +1368,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
         $sourcesfields = array_values(array_unique($sourcesfields));
         if (empty($sourcesfields)) {
-            return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
+            return $this->render('Rule/_simulation_tab.html.twig', [
                 'before' => [], 'after' => [], 'data_source' => false,
             ]);
         }
@@ -1494,11 +1494,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             ],
         ];
 
-        return $this->render('Rule/create/onglets/simulation_tab.html.twig', [
+        return $this->render('Rule/_simulation_tab.html.twig', [
             'before' => $before,
             'after'  => $after,
             'data_source' => !empty($record),
-            'params' => $paramsForView, // <<<<<< ICI : plus un tableau vide
+            'params' => $paramsForView,
             'simulationQueryField' => $this->simulationQueryField,
         ]);
     }
@@ -1744,56 +1744,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
-     /**
-     * Indique des informations concernant le champ envoyé en paramètre.
-     */
-    #[Route('/info/{type}/{field}/', name: 'path_info_field')]
-    #[Route('/info', name: 'path_info_field_not_param')]
-    public function infoField(Request $request, $field, $type): Response
-    {
-        $session = $request->getSession();
-        $myddlewareSession = $session->get('myddlewareSession');
-        // We always add data again in session because these data are removed after the call of the get
-        $session->set('myddlewareSession', $myddlewareSession);
-        if (isset($field) && !empty($field) && isset($myddlewareSession['param']['rule']) && 'my_value' != $field) {
-            if (isset($myddlewareSession['param']['rule'][0][$type]['fields'][$field])) {
-                return $this->render('Rule/create/onglets/info.html.twig', [
-                    'field' => $myddlewareSession['param']['rule'][0][$type]['fields'][$field],
-                    'name' => htmlentities(trim($field)),
-                ]
-                );
-            // SuiteCRM connector uses this structure instead
-            } elseif (isset($myddlewareSession['param']['rule']['key'])) {
-                $ruleKey = $myddlewareSession['param']['rule']['key'];
-
-                return $this->render('Rule/create/onglets/info.html.twig', [
-                    'field' => $myddlewareSession['param']['rule'][$ruleKey][$type]['fields'][$field],
-                    'name' => htmlentities(trim($field)),
-                ]
-                );
-            } else {
-                // Possibilité de Mutlimodules
-                foreach ($myddlewareSession['param']['rule'][0][$type]['fields'] as $subModule) { // Ce foreach fonctionnera toujours
-                    if (isset($subModule[$field])) { // On teste si ça existe pour éviter une erreur PHP éventuelle
-                        return $this->render('Rule/create/onglets/info.html.twig', [
-                            'field' => $subModule[$field],
-                            'name' => htmlentities(trim($field)),
-                        ]
-                        );
-                    }
-                }
-            }
-            // On retourne vide si on l'a pas trouvé précédemment
-            return $this->render('Rule/create/onglets/info.html.twig', [
-                'field' => '',
-            ]
-            );
-        }
-        return $this->render('Rule/create/onglets/info.html.twig', [
-            'field' => '',
-        ]
-        );
-    }
 
     /**
      * CREATION - STEP THREE - VERIF DES FORMULES.
@@ -1803,8 +1753,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
     {
         if ('POST' == $request->getMethod()) {
             // Mise en place des variables
-            $this->formuleManager->init($request->request->get('formula')); // mise en place de la règle dans la classe
-            $this->formuleManager->generateFormule(); // Genère la nouvelle formule à la forme PhP
+            $this->formuleManager->init($request->request->get('formula'));
+            $this->formuleManager->generateFormule();
 
             return new JsonResponse($this->formuleManager->parse['error']);
         }
@@ -2452,95 +2402,95 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         * METHODES PRATIQUES
         ****************************************************** */
 
-// CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
-private function createListeParamsRule($fields, $formula, $params): array
-{
-    $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
+    // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
+    private function createListeParamsRule($fields, $formula, $params): array
+    {
+        $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
 
-    // Structure de sortie initialisée pour éviter les "undefined index"
-    $tab = [
-        'fields' => [
-            'name' => []   // attendue par le reste du code: ['fields']['name'][<target>]['champs'| 'formule']
-        ],
-        'params' => []
-    ];
+        // Structure de sortie initialisée pour éviter les "undefined index"
+        $tab = [
+            'fields' => [
+                'name' => []   // attendue par le reste du code: ['fields']['name'][<target>]['champs'| 'formule']
+            ],
+            'params' => []
+        ];
 
-    // ---------- NORMALISATION DES ENTREES ----------
-    // 1) $fields peut être: (a) string "tgt[=]src;tgt2[=]src2" (legacy) ou (b) array ['tgt'=>['src1','src2']]
-    $fieldsMap = []; // ['target' => ['src1','src2']]
-    if (is_string($fields) && $fields !== '') {
-        $pairs = explode(';', $fields);
-        foreach ($pairs as $pair) {
-            $chp = explode('[=]', $pair, 2);
-            $tgt = $chp[0] ?? '';
-            $src = $chp[1] ?? '';
-            if ($tgt !== '' && $src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
-                $fieldsMap[$tgt][] = $src;
-            }
-        }
-    } elseif (is_array($fields)) {
-        // format nouveau: champs[target][]=src
-        foreach ($fields as $tgt => $arr) {
-            if (!is_array($arr)) { continue; }
-            foreach ($arr as $src) {
-                if ($src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+        // ---------- NORMALISATION DES ENTREES ----------
+        // 1) $fields peut être: (a) string "tgt[=]src;tgt2[=]src2" (legacy) ou (b) array ['tgt'=>['src1','src2']]
+        $fieldsMap = []; // ['target' => ['src1','src2']]
+        if (is_string($fields) && $fields !== '') {
+            $pairs = explode(';', $fields);
+            foreach ($pairs as $pair) {
+                $chp = explode('[=]', $pair, 2);
+                $tgt = $chp[0] ?? '';
+                $src = $chp[1] ?? '';
+                if ($tgt !== '' && $src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
                     $fieldsMap[$tgt][] = $src;
                 }
             }
-        }
-    }
-
-    // 2) $formula peut être: (a) string "tgt[=]expr;tgt2[=]expr2" (legacy) ou (b) array ['tgt'=>['expr']]
-    $formulaMap = []; // ['target' => ['expr1','expr2']]
-    if (is_string($formula) && $formula !== '') {
-        $pairs = explode(';', $formula);
-        foreach ($pairs as $pair) {
-            $chp = explode('[=]', $pair, 2);
-            $tgt = $chp[0] ?? '';
-            $exp = $chp[1] ?? '';
-            if ($tgt !== '' && $exp !== '') {
-                $formulaMap[$tgt][] = $exp;
-            }
-        }
-    } elseif (is_array($formula)) {
-        foreach ($formula as $tgt => $arr) {
-            if (!is_array($arr)) { continue; }
-            foreach ($arr as $exp) {
-                if ($exp !== '') {
-                    $formulaMap[$tgt][] = $exp;
+        } elseif (is_array($fields)) {
+            // format nouveau: champs[target][]=src
+            foreach ($fields as $tgt => $arr) {
+                if (!is_array($arr)) { continue; }
+                foreach ($arr as $src) {
+                    if ($src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+                        $fieldsMap[$tgt][] = $src;
+                    }
                 }
             }
         }
-    }
 
-    // ---------- CONSTRUCTION DE LA STRUCTURE DE SORTIE ----------
-    foreach ($fieldsMap as $tgt => $srcList) {
-        if (!isset($tab['fields']['name'][$tgt])) {
-            $tab['fields']['name'][$tgt] = [];
+        // 2) $formula peut être: (a) string "tgt[=]expr;tgt2[=]expr2" (legacy) ou (b) array ['tgt'=>['expr']]
+        $formulaMap = []; // ['target' => ['expr1','expr2']]
+        if (is_string($formula) && $formula !== '') {
+            $pairs = explode(';', $formula);
+            foreach ($pairs as $pair) {
+                $chp = explode('[=]', $pair, 2);
+                $tgt = $chp[0] ?? '';
+                $exp = $chp[1] ?? '';
+                if ($tgt !== '' && $exp !== '') {
+                    $formulaMap[$tgt][] = $exp;
+                }
+            }
+        } elseif (is_array($formula)) {
+            foreach ($formula as $tgt => $arr) {
+                if (!is_array($arr)) { continue; }
+                foreach ($arr as $exp) {
+                    if ($exp !== '') {
+                        $formulaMap[$tgt][] = $exp;
+                    }
+                }
+            }
         }
-        if (!empty($srcList)) {
-            $tab['fields']['name'][$tgt]['champs'] = array_values($srcList);
-        }
-    }
 
-    foreach ($formulaMap as $tgt => $expList) {
-        if (!isset($tab['fields']['name'][$tgt])) {
-            $tab['fields']['name'][$tgt] = [];
+        // ---------- CONSTRUCTION DE LA STRUCTURE DE SORTIE ----------
+        foreach ($fieldsMap as $tgt => $srcList) {
+            if (!isset($tab['fields']['name'][$tgt])) {
+                $tab['fields']['name'][$tgt] = [];
+            }
+            if (!empty($srcList)) {
+                $tab['fields']['name'][$tgt]['champs'] = array_values($srcList);
+            }
         }
-        if (!empty($expList)) {
-            $tab['fields']['name'][$tgt]['formule'] = array_values($expList);
-        }
-    }
 
-    // ---------- PARAMS (inchangé, mais safe) ----------
-    if (is_array($params)) {
-        foreach ($params as $k => $p) {
-            $tab['params'][$k] = $p;
+        foreach ($formulaMap as $tgt => $expList) {
+            if (!isset($tab['fields']['name'][$tgt])) {
+                $tab['fields']['name'][$tgt] = [];
+            }
+            if (!empty($expList)) {
+                $tab['fields']['name'][$tgt]['formule'] = array_values($expList);
+            }
         }
-    }
 
-    return $tab;
-}
+        // ---------- PARAMS (inchangé, mais safe) ----------
+        if (is_array($params)) {
+            foreach ($params as $k => $p) {
+                $tab['params'][$k] = $p;
+            }
+        }
+
+        return $tab;
+    }
 
 
     #[Route('/rule/update_description', name: 'update_rule_description', methods: ['POST'])]

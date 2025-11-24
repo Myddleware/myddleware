@@ -1,10 +1,4 @@
-<div class="modal fade"
-     id="mapping-simulation"
-     tabindex="-1"
-     aria-labelledby="mappingSimulationLabel"
-     aria-hidden="true"
-     data-endpoint-run="{{ path('regle_simulation') }}"
-     data-endpoint-count="">
+<div class="modal fade" id="mapping-simulation" tabindex="-1" aria-labelledby="mappingSimulationLabel" aria-hidden="true" data-endpoint-run="{{ path('regle_simulation') }}" data-endpoint-count="">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -22,12 +16,7 @@
             <label class="form-label" for="sim-record-id">
               {{ 'create_rule.step3.manual_data_simulation_choose_id'|trans }}
             </label>
-            <input id="sim-record-id"
-                   class="form-control"
-                   type="text"
-                   inputmode="numeric"
-                   placeholder="example: 5"
-                   aria-describedby="sim-id-help">
+            <input id="sim-record-id" class="form-control" type="text" inputmode="numeric" placeholder="example: 5" aria-describedby="sim-id-help">
             <div id="sim-id-help" class="form-text">
               {{ 'create_rule.step3.manual_data_simulation_help_text'|trans }}
             </div>

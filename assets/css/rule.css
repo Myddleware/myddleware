@@ -133,14 +133,6 @@
 #rule .vignette, #connector .vignette, #jobscheduler .vignette {
 	width: 50px;
 }
-
-/* relate */
-
-#rule_mapping #relation #relate input.title {
-	border: none;
-	min-width: 250px;
-}
-
 /*  fields mapping */
 
 .source { 
@@ -1234,4 +1226,85 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .rule-loading-overlay__content {
   text-align: center;
+}
+
+.simulate-wrapper {
+  align-items: stretch;
+}
+
+.simulate-card {
+  border-radius: 1rem;
+}
+
+.simulate-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 999px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 0 0 3px rgba(13,110,253,.1);
+}
+
+.simulate-title {
+  font-weight: 600;
+}
+
+.simulate-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #ced4da;
+  position: relative;
+}
+
+.simulate-radio::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+}
+
+.simulate-radio--source::after {
+  background: #fd7e14; /* orange */
+}
+
+.simulate-radio--target::after {
+  background: #0d6efd; /* bleu Bootstrap */
+}
+
+.simulate-list {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.simulate-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.simulate-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: .25rem .6rem;
+  border-radius: 999px;
+  background-color: #f8f9fa;
+  font-size: .875rem;
+  border: 1px solid #e9ecef;
+}
+
+.simulate-tag-name {
+  font-weight: 500;
+  margin-right: .15rem;
+}
+
+.simulate-tag-value {
+  margin-left: .15rem;
+}
+
+.simulate-arrow {
+  font-size: .8rem;
+  color: #6c757d;
 }
