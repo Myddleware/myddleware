@@ -54,6 +54,7 @@ panel:
         title: Historique des documents
     graph_job_histo:
         title: Historique des jobs
+    rule_deleted: Cette règle a été supprimée. Elle ne peut plus être utilisée.
 create_rule:
     error_name: Un connecteur porte déjà ce nom.
     tabs:

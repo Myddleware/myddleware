@@ -37,6 +37,9 @@
 	{{rule.getName}}
 {% endblock titlesm %}
 {% block body %}
+
+        {% include '_notifications.html.twig' with { filter_prefix: 'rule.' } %}
+
 	<div id="rule">
 		<div class="myd-tab-wrapper position-relative">
 			<button class="myd-tab-scroll myd-tab-scroll-left" aria-label="Scroll left">
