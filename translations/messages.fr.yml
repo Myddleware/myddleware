@@ -369,6 +369,8 @@ list_rulegroup:
 actions: "Actions"
 
 animate:
+    template:
+        title: Template
     ruleconnection: Règle connection
     rulename: Nom de votre règle 
     wait: Veuillez patienter...

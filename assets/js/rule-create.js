@@ -222,6 +222,10 @@
         });
       }
       selectEl.disabled = false;
+
+      if (window.makeSelectSearchable) {
+        window.makeSelectSearchable(selectEl);
+      }
     } catch {
       resetSelect(selectEl);
       selectEl.disabled = false;
@@ -263,6 +267,11 @@
       }
 
       selectEl.disabled = false;
+
+      // ➜ Search sur les modules
+      if (window.makeSelectSearchable) {
+        window.makeSelectSearchable(selectEl);
+      }
     } catch {
       resetSelect(selectEl);
     } finally {
@@ -296,6 +305,10 @@
       duplicateSel.innerHTML = html || '<option value="" disabled selected></option>';
       duplicateSel.disabled = false;
       if (syncSel) syncSel.disabled = false;
+
+      if (window.makeSelectSearchable) {
+        window.makeSelectSearchable(duplicateSel);
+      }
     } catch {
       duplicateSel.innerHTML = '<option value="" disabled selected></option>';
       duplicateSel.disabled = true;
@@ -346,6 +359,10 @@
         og.appendChild(opt);
       });
       filterSelect.appendChild(og);
+    }
+
+    if (window.makeSelectSearchable) {
+      window.makeSelectSearchable(filterSelect);
     }
   }
 
@@ -450,12 +467,20 @@
     const tdDel = document.createElement('td'); tdDel.className = 'cell-delete text-end';
     const tgtSelect = createMappingSelect(tgtFields, '');
     tgtSelect.classList.add('rule-mapping-target');
+    if (window.makeSelectSearchable) {
+      window.makeSelectSearchable(tgtSelect);
+    }
+
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
     const srcBadgesContainer = document.createElement('div');
     srcBadgesContainer.className = 'mapping-src-badges pt-1';
+
     const srcSelect = createMappingSelect(srcFields, '');
     srcSelect.classList.add('rule-mapping-source-picker');
+    if (window.makeSelectSearchable) {
+      window.makeSelectSearchable(srcSelect);
+    }
 
     srcSelect.addEventListener('change', () => {
       const value = srcSelect.value;
@@ -572,55 +597,55 @@
     if (!tbody.querySelector('tr')) addMappingRow(tbody);
   }
 
-function ensureDuplicateMappingRow(targetField) {
-  if (!targetField) return;
+  function ensureDuplicateMappingRow(targetField) {
+    if (!targetField) return;
 
-  const tbody = document.getElementById('rule-mapping-body');
-  if (!tbody) return;
+    const tbody = document.getElementById('rule-mapping-body');
+    if (!tbody) return;
 
-  if (typeof initMappingUI === 'function') {
-    initMappingUI();
+    if (typeof initMappingUI === 'function') {
+      initMappingUI();
+    }
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Si une ligne existe déjà pour ce target → on ne touche à rien
+    const existingRow = rows.find(tr => {
+      const sel = tr.querySelector('.rule-mapping-target');
+      return sel && sel.value === targetField;
+    });
+    if (existingRow) return;
+
+    // Chercher d'abord une ligne avec target vide
+    let row = rows.find(tr => {
+      const sel = tr.querySelector('.rule-mapping-target');
+      return sel && !sel.value;
+    });
+
+    // Sinon on ajoute une nouvelle ligne
+    if (!row && typeof addMappingRow === 'function') {
+      addMappingRow(tbody);
+      row = tbody.lastElementChild;
+    }
+    if (!row) return;
+
+    const tgtSelect = row.querySelector('.rule-mapping-target');
+    if (!tgtSelect) return;
+
+    let option = tgtSelect.querySelector(`option[value="${CSS.escape(targetField)}"]`);
+
+    if (!option) {
+      const lower = targetField.toLowerCase();
+      option = Array.from(tgtSelect.options).find(o =>
+        o.value.toLowerCase() === lower ||
+        o.textContent.trim().toLowerCase() === lower
+      );
+    }
+
+    if (option) {
+      tgtSelect.value = option.value;
+    }
   }
-
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-
-  // Si une ligne existe déjà pour ce target → on ne touche à rien
-  const existingRow = rows.find(tr => {
-    const sel = tr.querySelector('.rule-mapping-target');
-    return sel && sel.value === targetField;
-  });
-  if (existingRow) return;
-
-  // Chercher d'abord une ligne avec target vide
-  let row = rows.find(tr => {
-    const sel = tr.querySelector('.rule-mapping-target');
-    return sel && !sel.value;
-  });
-
-  // Sinon on ajoute une nouvelle ligne
-  if (!row && typeof addMappingRow === 'function') {
-    addMappingRow(tbody);
-    row = tbody.lastElementChild;
-  }
-  if (!row) return;
-
-  const tgtSelect = row.querySelector('.rule-mapping-target');
-  if (!tgtSelect) return;
-
-  let option = tgtSelect.querySelector(`option[value="${CSS.escape(targetField)}"]`);
-
-  if (!option) {
-    const lower = targetField.toLowerCase();
-    option = Array.from(tgtSelect.options).find(o =>
-      o.value.toLowerCase() === lower ||
-      o.textContent.trim().toLowerCase() === lower
-    );
-  }
-
-  if (option) {
-    tgtSelect.value = option.value;
-  }
-}
 
   function resetStep3AndBelow() {
     if (duplicateSel) {
@@ -705,23 +730,22 @@ function ensureDuplicateMappingRow(targetField) {
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
-if (duplicateSel) {
-  duplicateSel.addEventListener('change', () => {
-    if (step3IsComplete()) {
-      revealStep4and5();
-    }
+  if (duplicateSel) {
+    duplicateSel.addEventListener('change', () => {
+      if (step3IsComplete()) {
+        revealStep4and5();
+      }
 
-    const selectedOption = duplicateSel.options[duplicateSel.selectedIndex];
-    if (!selectedOption) return;
+      const selectedOption = duplicateSel.options[duplicateSel.selectedIndex];
+      if (!selectedOption) return;
 
-    // on utilise le texte affiché : "email", "username", etc.
-    const label = (selectedOption.textContent || '').trim();
-    if (!label) return;
+      // on utilise le texte affiché : "email", "username", etc.
+      const label = (selectedOption.textContent || '').trim();
+      if (!label) return;
 
-    ensureDuplicateMappingRow(label);
-  });
-}
-
+      ensureDuplicateMappingRow(label);
+    });
+  }
 
   if (syncSel) {
     syncSel.addEventListener('change', () => {
@@ -784,10 +808,6 @@ if (duplicateSel) {
  * =========================================== */
 (function () {
   const ruleData = window.initialRule || null;
-
-  // Debug : voir si on reçoit bien quelque chose
-  console.log('[EDIT] window.initialRule = ', window.initialRule);
-
   if (!ruleData) {
     if (typeof window.ruleInitDone === 'function') {
       window.ruleInitDone();
@@ -891,7 +911,7 @@ if (duplicateSel) {
 
       const tgtSelect       = tr.querySelector('.rule-mapping-target');
       const srcSelect       = tr.querySelector('.rule-mapping-source-picker');
-      const badgesContainer = tr.querySelector('.mapping-src-badges pt-1');
+      const badgesContainer = tr.querySelector('.mapping-src-badges.pt-1, .mapping-src-badges'); // petit fallback
       const formulaInput    = tr.querySelector('.rule-mapping-formula-input');
       const formulaSlot     = tr.querySelector('.formula-slot');
 
@@ -982,6 +1002,18 @@ if (duplicateSel) {
         tgtMod.value = ruleData.connection.target.module;
       }
 
+      // Désactivation des selects en mode édition (y compris selectize si présent)
+      if (window.__EDIT_MODE__) {
+        const toDisable = [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod];
+        toDisable.forEach(el => {
+          if (!el) return;
+          el.disabled = true;
+          if (el.selectize && typeof el.selectize.disable === 'function') {
+            el.selectize.disable();
+          }
+        });
+      }
+
       if (step3) {
         step3.classList.remove('d-none');
       }
@@ -989,6 +1021,9 @@ if (duplicateSel) {
       if (duplicateSel && ruleData.syncOptions?.duplicateField) {
         duplicateSel.disabled = false;
         duplicateSel.value = ruleData.syncOptions.duplicateField;
+        if (window.makeSelectSearchable) {
+          window.makeSelectSearchable(duplicateSel);
+        }
       }
 
       if (syncSel && ruleData.syncOptions?.type) {
@@ -1617,3 +1652,38 @@ $(function () {
   }
   saveBtn.addEventListener('click', saveRule);
 })();
+
+/* ===========================================
+ * SELECT SEARCH (Selectize wrapper)
+ * =========================================== */
+window.makeSelectSearchable = function (selectEl) {
+  if (!selectEl) return;
+
+  if (!window.$ || !$.fn.selectize) {
+    console.warn('[makeSelectSearchable] jQuery ou Selectize non disponible pour', selectEl.id);
+    return;
+  }
+
+  const $sel = $(selectEl);
+
+  // Détruire proprement une éventuelle instance existante
+  var existing = $sel[0].selectize || $sel.data('selectize');
+  if (existing && typeof existing.destroy === 'function') {
+    existing.destroy();
+  }
+
+  const instance = $sel.selectize({
+    // ce qui nous intéresse vraiment pour la recherche :
+    searchField: ['text', 'value'],  // on cherche sur le label et la value
+    sortField: 'text',
+    allowEmptyOption: true,
+    dropdownParent: 'body',
+    create: false,
+    openOnFocus: true,
+    selectOnTab: false,
+    closeAfterSelect: false
+  })[0].selectize;
+
+  // Petit log pour vérifier que c'est bien passé
+  console.log('[makeSelectSearchable] Selectize initialisé sur', selectEl.id, instance);
+};

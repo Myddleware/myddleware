@@ -370,6 +370,8 @@ actions: "Actions"
 
 
 animate:
+    template:
+        title: Template
     ruleconnection: Rule connection
     rulename: Name of your rule
     title: Rule Details

@@ -1047,7 +1047,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .rule-mapping-formula{
     color: #05bfe6 !important;
 }
-#rule-mapping-add, #rule-filter-add, #rule-mapping-add{
+#rule-mapping-add, #rule-filter-add, #create-rule-template{
 	border-color: #05bfe6 !important;
 	background-color: #05bfe6 !important;
 }
@@ -1166,16 +1166,10 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 }
 
 .mapping-src-badge-remove:hover,
-#toggle-tooltip,
-#rule-mapping-simulation {
+#toggle-tooltip{
 	color: #05bfe6 !important;
 	border-color: #05bfe6 !important;
 	background-color: #fff !important;
-}
-
-#rule-mapping-simulation:hover{
-	color: #fff;
-	background-color: #05bfe6;
 }
 
 #sim-result { 
@@ -1307,4 +1301,8 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .simulate-arrow {
   font-size: .8rem;
   color: #6c757d;
+}
+
+#template-rule-create{
+	display: contents;
 }

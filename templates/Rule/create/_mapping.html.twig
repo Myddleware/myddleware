@@ -5,18 +5,12 @@
     </a>
   </div>
 
+  <button id="nav-create-rule-mapping"  class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+    <i class="fa-solid fa-list-ul"></i>
+  </button>
   <h3 class="section-create-rule fw-bold mb-4">
     {{ 'create_rule.step5.title'|trans }}
   </h3>
-
-  <button id="nav-create-rule-mapping"
-          class="nav-create-rule btn btn-outline-primary mb-3"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#ruleCreateNav"
-          aria-controls="ruleCreateNav">
-    <i class="fa-solid fa-list-ul"></i>
-  </button>
 
   <div class="card border-0 shadow-sm">
     <div class="card-body">
@@ -37,7 +31,7 @@
       </div>
 
       <div class="d-flex justify-content-end">
-        <button class="btn btn-outline-primary me-3" id="rule-mapping-simulation" type="button" data-bs-toggle="modal" data-bs-target="#mapping-simulation">
+        <button class="btn btn-outline-success me-3" id="rule-mapping-simulation" type="button" data-bs-toggle="modal" data-bs-target="#mapping-simulation">
           <i class="fa fa-play" aria-hidden="true"></i>
         </button>
         <button class="btn btn-primary" id="rule-mapping-add" type="button">
@@ -50,9 +44,9 @@
   <button id="rule-save" type="button" class="btn btn-success mt-4" data-path-save="{{ path('rule_create_save') }}">
     {{ 'create_rule.step5.formula.save'|trans }}
   </button>
-    <button id="rule-create-back" type="button" class="btn btn-outline-danger mt-4" data-path-save="{{ path('regle_list_page') }}">
+  <a href="{{ path('regle_list_page') }}" id="rule-create-back" class="btn btn-outline-danger mt-4">
     {{ 'create_rule.step5.back'|trans }}
-  </button>
+  </a>
 </section>
 
     {# --- POP UP : FORMULA --- #}

@@ -1595,6 +1595,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         $ruleIdFromRequest = (string) $request->request->get('rule_id', '');
         $isEdit = $ruleIdFromRequest !== '';
 
+        $bidirectionalId = trim((string) $request->request->get('bidirectional', ''));
+
         $rawFields   = $request->request->all('champs')   ?? [];
         $rawFormulas = $request->request->all('formules') ?? [];
 
@@ -1625,7 +1627,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->connection->transactional(function (\Doctrine\DBAL\Connection $conn) use (
                 $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
                 $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
-                $rawFields, $rawFormulas, $filters, $syncMode, $isEdit
+                $rawFields, $rawFormulas, $filters, $syncMode, $isEdit,
+                $bidirectionalId
             ) {
                 if ($isEdit) {
                     $conn->update('rule', [
@@ -1699,6 +1702,45 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit',        'value' => '100']);
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference','value' => $midnight]);
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode',         'value' => (string)$syncMode]);
+
+                $conn->delete('ruleparam', [
+                    'name'  => 'bidirectional',
+                    'value' => $ruleId,
+                ]);
+
+                if ($bidirectionalId !== '') {
+                    // 1) On crée le paramètre sur la règle courante : rule_id = A, value = B
+                    $conn->insert('ruleparam', [
+                        'rule_id' => $ruleId,
+                        'name'    => 'bidirectional',
+                        'value'   => $bidirectionalId,
+                    ]);
+
+                    // 2) On s’assure que la règle opposée a bien un paramètre qui pointe vers cette règle
+                    //    (rule_id = B, value = A)
+                    $opposite = $conn->fetchAssociative(
+                        'SELECT id, value FROM ruleparam WHERE rule_id = ? AND name = ?',
+                        [$bidirectionalId, 'bidirectional']
+                    );
+
+                    if ($opposite === false) {
+                        // Aucun paramètre bidirectional sur la règle opposée => on le crée
+                        $conn->insert('ruleparam', [
+                            'rule_id' => $bidirectionalId,
+                            'name'    => 'bidirectional',
+                            'value'   => $ruleId,
+                        ]);
+                    } else {
+                        // Il existe déjà, on met à jour la value si besoin
+                        if ($opposite['value'] !== $ruleId) {
+                            $conn->update('ruleparam', [
+                                'value' => $ruleId,
+                            ], [
+                                'id' => $opposite['id'],
+                            ]);
+                        }
+                    }
+                }
 
                 $contentFields = ['name' => []];
                 foreach ($rawFields as $tgt => $srcs) {

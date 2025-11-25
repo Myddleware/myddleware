@@ -1,11 +1,15 @@
 <section class="mb-4 mt-4" id="step-1">
-  <h2 class="section-title">
-    {{ 'animate.title'|trans }}
-  </h2>
-
   <button id="nav-create-rule-detail" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
         <i class="fa-solid fa-list-ul"></i>
   </button>
+  <div>
+    <h2 class="section-title" id="template-rule-create">
+      {{ 'animate.title'|trans }}
+    </h2>
+    <button id="create-rule-template" class="btn btn-primary mb-3 ms-3" type="button">
+      {{ 'animate.template.title'|trans }}
+    </button>
+  </div>
 
   <form id="step1-form" novalidate>
     <div class="row g-4">
@@ -28,7 +32,7 @@
         <label for="ruledescription" class="form-label">
           {{ 'animate.choice.description'|trans({'default': 'Description'}) }}
         </label>
-        <textarea id="ruledescription" class="form-control" rows="4" placeholder="{{ 'animate.choice.description'|trans({'default': 'Description here'}) }}"></textarea>
+        <textarea id="ruledescription" class="form-control" rows="4" placeholder="{{ 'animate.choice.description'|trans({'default': 'Description here'}) }}"> </textarea>
       </div>
     </div>
   </form>
