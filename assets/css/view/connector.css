@@ -33,6 +33,20 @@
 	padding:8px;
 }
 
+/* Style for status icon to keep it inline with buttons */
+.status {
+	display: inline-block;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+/* Prevent button row from wrapping */
+#connector .col[style*="margin-right: 10rem;"] {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+	align-items: center;
+}
 
 /* Updates after SF4 upgrade */
 

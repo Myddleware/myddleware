@@ -162,6 +162,7 @@ public function emptySearchAction(Request $request): Response
         'timezone' => $timezone,
         'csvdocumentids' => '',
         'nbDocuments' => 0,
+        'clearStorageScript' => null,
     ]);
 }
 
@@ -189,8 +190,13 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        $clearStorageScript = null;
 
         if ($request->query->has('source_id')) {
+            // remove all the filters first
+            $this->sessionService->removeAllFluxFilters();
+            // get the script to clear localStorage and pass it to the template
+            $clearStorageScript = $this->sessionService->getClearStoredFluxFiltersScript();
             // set the session service source_id
             $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
         }
@@ -339,8 +345,8 @@ public function removeFilter(Request $request): JsonResponse
             } catch (\Throwable $th) {
                 // redirect to the list page
                 // add a flash errore message that says there are not enough results for pagination
-                $this->addFlash('error', 'Pagination error, return to page 1');
-                return $this->redirectToRoute('document_list');
+                $this->addFlash('filter.document.danger', 'Pagination error, return to page 1');
+                return $this->redirectToRoute('document_empty_search');
             }
             
             // If everything is ok with the pagination
@@ -384,6 +390,7 @@ public function removeFilter(Request $request): JsonResponse
             'timezone' => $timezone,
             'csvdocumentids' => $csvdocumentids,
             'nbDocuments' => $nbDocuments,
+            'clearStorageScript' => $clearStorageScript,
         ]);
     }
 

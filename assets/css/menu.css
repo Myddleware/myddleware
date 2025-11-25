@@ -177,6 +177,7 @@ header{
     font-size: 1rem !important;
     color: #3a3a3a !important;
     border-radius: 0.5rem !important;
+    margin-left: -6rem !important;
 }
 
 .icon_navbar {

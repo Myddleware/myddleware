@@ -70,6 +70,13 @@ class ManagementSMTPController extends AbstractController
             $form = $this->getParametersFromMailerDsn($form, $mailerDsnFromEnv);
         }
         }
+
+        // Load MAILER_FROM value if it exists
+        $mailerFromEnv = $this->checkIfMailerFromInEnv();
+        if ($mailerFromEnv !== false) {
+            $form->get('sender')->setData($mailerFromEnv);
+        }
+
         return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
@@ -106,6 +113,54 @@ class ManagementSMTPController extends AbstractController
         return $apiKeyEnv;
     }
 
+    public function checkIfMailerFromInEnv()
+    {
+        error_log('checkIfMailerFromInEnv');
+        $mailerFromEnv = false;
+        if (file_exists(__DIR__ . '/../../.env.local')) {
+            (new Dotenv())->load(__DIR__ . '/../../.env.local');
+            $mailerFromEnv = $_ENV['MAILER_FROM'] ?? false;
+            if (!(isset($mailerFromEnv) && $mailerFromEnv !== '' && $mailerFromEnv !== false)) {
+                $mailerFromEnv = false;
+            }
+        }
+        return $mailerFromEnv;
+    }
+
+    public function removeMailerFromEnv()
+    {
+        // Finds the MAILER_FROM and removes it
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        $linesEnv = explode("\n", $envFile);
+        $lineCounter = 0;
+        foreach ($linesEnv as $line) {
+            if (strpos($line, "MAILER_FROM") !== false) {
+                unset($linesEnv[$lineCounter]);
+            }
+            $lineCounter++;
+        }
+        $envFileFinal = implode("\n", $linesEnv);
+        // Clears the .env
+        $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
+        fclose($clearContentOfDotEnv);
+        // Refills the content with everything but the MAILER_FROM
+        file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+    }
+
+    public function putMailerFromInDotEnv($sender)
+    {
+        // Remove existing MAILER_FROM if it exists
+        $this->removeMailerFromEnv();
+
+        $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+        // Ensure a newline separates the existing content (if any) and the new line
+        if (!empty($envFile) && substr($envFile, -1) !== "\n") {
+            $envFile .= "\n";
+        }
+        $envFile .= "MAILER_FROM=" . $sender;
+        file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+    }
+
     // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
     // Is called if you click on the Save SMTP config button OR the Send test mail button.
 
@@ -126,11 +181,9 @@ class ManagementSMTPController extends AbstractController
                 $this->putMailerConfig($form);
                 if (!empty($isMailSent)) {
                     if ($isMailSent === true) {
-                        $success = $this->translator->trans('email_validation.success');
-                        $this->addFlash('success', $success);
+                        $this->addFlash('smtp.create.success', $this->translator->trans('email_validation.success'));
                     } else if ($isMailSent === false) {
-                        $failed = $this->translator->trans('email_validation.error');
-                        $this->addFlash('error', $failed);
+                        $this->addFlash('smtp.create.danger', $this->translator->trans('email_validation.error'));
                     }
                 }
                 return $this->redirect($this->generateUrl('management_smtp_index'));
@@ -169,18 +222,24 @@ class ManagementSMTPController extends AbstractController
     // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer dsn
     public function envMailerDsnVsApiKey($form)
     {
+        // Save MAILER_FROM regardless of transport type
+        $sender = $form->get('sender')->getData();
+        if (!empty($sender)) {
+            $this->putMailerFromInDotEnv($sender);
+        }
+
         if ($form->get('transport')->getData() === 'sendinblue') {
             $apiKeyFromTheForm = $form->get('ApiKey')->getData();
             $isLenOfApiKeyFromTheFormOver70chars = strlen($apiKeyFromTheForm) > 70;
             $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
             if (!$isLenOfApiKeyFromTheFormOver70chars) {
                 // put a message in the session to inform the user that the api key is already in the .env
-                $this->addFlash('error', $this->translator->trans('management_smtp.api_key_too_short'));
+                $this->addFlash('smtp.envMailerDsn.danger', $this->translator->trans('management_smtp.api_key_too_short'));
                 return;
             }
             if ($apiKeyFromEnv === $apiKeyFromTheForm) {
                 // put a message in the session to inform the user that the api key is already in the .env
-                $this->addFlash('success', $this->translator->trans('management_smtp.api_key_already_in_env'));
+                $this->addFlash('smtp.envMailerDsn.success', $this->translator->trans('management_smtp.api_key_already_in_env'));
                 return;
             }
             if ($apiKeyFromEnv !== $apiKeyFromTheForm && $isLenOfApiKeyFromTheFormOver70chars) {
@@ -442,11 +501,11 @@ class ManagementSMTPController extends AbstractController
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
 
             // add flash success message
-            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
+            $this->addFlash('smtp.putMailerConfig.success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
             // add flash error message
-            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
+            $this->addFlash('smtp.putMailerConfig.danger', $this->translator->trans('management_smtp.error'));
         }
     }
 
@@ -462,10 +521,10 @@ class ManagementSMTPController extends AbstractController
             $envFile .= "\nBREVO_APIKEY=" . $apiKey;
             file_put_contents(self::LOCAL_ENV_FILE, $envFile);
             // add flash success message
-            $this->addFlash('success', $this->translator->trans('management_smtp.success'));
+            $this->addFlash('smtp.putApiKey.success', $this->translator->trans('management_smtp.success'));
         } catch (Exception $e) {
             // add flash error message
-            $this->addFlash('error', $this->translator->trans('management_smtp.error'));
+            $this->addFlash('smtp.putApiKey.danger', $this->translator->trans('management_smtp.error'));
             $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
         }
     }
@@ -486,7 +545,7 @@ class ManagementSMTPController extends AbstractController
             $user_email = null;
             $user = $this->getUser();
             // Ensure we have the correct user type before getting email
-            if ($user instanceof \App\Entity\User) { 
+            if ($user instanceof \App\Entity\User) {
                  $user_email = $user->getEmail();
             }
             // Use null-safe operator and check below
@@ -508,7 +567,7 @@ class ManagementSMTPController extends AbstractController
                     $auth_mode = $form->get('auth_mode')->getData();
                     $encryption = $form->get('encryption')->getData();
                     // IMPORTANT: Get password from form ONLY if building DSN from form
-                    $password = $form->get('password')->getData(); 
+                    $password = $form->get('password')->getData();
                     $transportType = $form->get('transport')->getData();
 
                     // Basic check for essential parts if building from form
@@ -542,7 +601,6 @@ class ManagementSMTPController extends AbstractController
                      throw new Exception('Could not determine a valid Mailer DSN for testing.');
                  }
 
-
                 // Create the Transport using the determined DSN
                 $transport = Transport::fromDsn($dsn);
 
@@ -558,7 +616,6 @@ class ManagementSMTPController extends AbstractController
                      $emailFrom = 'no-reply@myddleware.com'; // Default fallback
                  }
 
-
                 // Create the email
                 $email = (new Email())
                     ->from($emailFrom)
@@ -572,27 +629,28 @@ class ManagementSMTPController extends AbstractController
 
             } catch (Exception $e) {
                 // Log the detailed error for debugging
-                 $this->logger->error('Email Test Error: ' . $e->getMessage() . ' DSN used: ' . (is_string($dsn) ? $dsn : 'N/A') . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+                 $this->logger->critical('TESTMAIL EXCEPTION: ' . $e->getMessage() . ' DSN used: ' . (is_string($dsn) ?? false ? $dsn : 'N/A') . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
 
                 // Set a user-friendly error message using the controller's flash message helper
                 $error = $this->translator->trans('management_smtp.sendtestmail_error') . ' (' . $e->getMessage() . ')';
-                $this->addFlash('error', $error);
-                
+                $this->addFlash('smtp.test.danger', $error);
+
                 $isRegularEmailSent = false;
             }
         }
 
         if ($isApiEmailSent === false && $form->get('transport')->getData() === "sendinblue") {
              $failed = $this->translator->trans('email_validation.error');
-             $this->addFlash('error', $failed);
+             $this->addFlash('smtp.test.danger', $failed);
         } elseif ($isRegularEmailSent === false && $form->get('transport')->getData() !== "sendinblue") {
             $failed = $this->translator->trans('email_validation.error');
-            $this->addFlash('error', $failed);
+            $this->addFlash('smtp.test.danger', $failed);
         }
 
+        $result = ($isApiEmailSent === true || $isRegularEmailSent === true);
 
         // Return overall success status
-        return ($isApiEmailSent === true || $isRegularEmailSent === true);
+        return $result;
     }
 
     protected function sendinblueSendMailByApiKey($form)
@@ -602,10 +660,11 @@ class ManagementSMTPController extends AbstractController
             $user_email = $this->getUser()->getEmail();
 
             // Prepare the email data
+            $emailFrom = !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com';
 
             $emailData = [
                 'sender' => [
-                    'email' => !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com'
+                    'email' => $emailFrom
                 ],
                 'to' => [
                     [
@@ -619,6 +678,7 @@ class ManagementSMTPController extends AbstractController
             ];
 
             $curl = curl_init();
+
             curl_setopt_array($curl, [
                 CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
                 CURLOPT_RETURNTRANSFER => true,
@@ -633,19 +693,40 @@ class ManagementSMTPController extends AbstractController
                     "api-key: " . $apiKey,
                     "content-type: application/json"
                 ],
+                // Add SSL verification logging
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSL_VERIFYPEER => true,
             ]);
+
             $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             $err = curl_error($curl);
+            $errno = curl_errno($curl);
+
             curl_close($curl);
+
+            // Check for cURL errors first
             if ($err) {
                 $session = $this->requestStack->getSession();
                 $session->set('error', [$this->translator->trans('management_smtp.error')]);
                 return false;
-            } else {
-                return true;
             }
+
+            // Check HTTP status code - 2xx means success
+            if ($httpCode < 200 || $httpCode >= 300) {
+                // Try to parse error from response
+                $responseData = json_decode($response, true);
+
+                $session = $this->requestStack->getSession();
+                $session->set('error', [$this->translator->trans('management_smtp.error') . ' (HTTP ' . $httpCode . ')']);
+                return false;
+            }
+
+            // All checks passed
+            return true;
+
         } catch (Exception $e) {
-            $this->logger->error('Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )');
+            $this->logger->critical('SENDINBLUE API TEST: EXCEPTION - ' . $e->getMessage() . ' ' . $e->getFile() . ' Line: ' . $e->getLine());
             return false;
         }
     }

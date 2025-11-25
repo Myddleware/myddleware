@@ -36,20 +36,21 @@ class WorkflowType extends AbstractType
 
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Workflow Name',
+                'label' => 'view_edit_workflow.workflow_name',
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                     ],
             ]);
             $builder->add('description', TextareaType::class, [
-                'label' => 'Description',
+                'label' => 'view_edit_workflow.Description',
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 3  // This will make the textarea 3 rows tall
                 ]
             ]);
             $builder->add('Rule', EntityType::class, [
+                'label' => 'view_edit_workflow.Rule',
                 'class' => Rule::class,
                 'choices' => $options['entityManager']->getRepository(Rule::class)->findBy(['deleted' => 0]),
                 'choice_label' => 'name',
@@ -62,17 +63,17 @@ class WorkflowType extends AbstractType
                     ],
             ]);
             $builder->add('active', ChoiceType::class, [
-                'label' => 'Active',
+                'label' => 'view_edit_workflow.Active',
                 'choices' => [
-                    'Yes' => 1,
-                    'No' => 0,
+                    'view_edit_workflow.Yes' => 1,
+                    'view_edit_workflow.No' => 0,
                 ],
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ]);
             $builder->add('order', IntegerType::class, [
-                'label' => 'Order',
+                'label' => 'view_edit_workflow.Order',
                 'constraints' => [
                     new Range([
                         'min' => 0,
@@ -85,7 +86,7 @@ class WorkflowType extends AbstractType
                     ],
                 ]);
                 $builder->add('condition', TextareaType::class, [
-                    'label' => 'Condition',
+                    'label' => 'view_edit_workflow.Condition',
                     'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
                     'constraints' => [
                         new Callback([
@@ -115,7 +116,7 @@ class WorkflowType extends AbstractType
                     ],
                 ]);
             $builder->add('submit', SubmitType::class, [
-                'label' => 'Save',
+                'label' => 'new_workflow_view.save',
                 'attr' => [
                     'class' => 'mt-4  mb-4 btn btn-primary',
                     ],

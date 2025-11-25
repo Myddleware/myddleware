@@ -3,6 +3,9 @@
 	{{ 'crontab.title'|trans }}
 {% endblock %}
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'jobscheduler.' } %}
+
 	<div class="container">
 		<div class="row">
 			<div class="col">

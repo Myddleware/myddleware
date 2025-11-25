@@ -12,22 +12,8 @@
 {% block body %}
 <div id="user-manager-wrapper" class="d-flex">
     <div id="user-table-container" class="flex-grow-1 transition-width">
-    <div class="container mt-5">
-	    {% for message in app.flashes('success_deleted_user') %}
-			<div class="alert alert-success" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
-        {% for message in app.flashes('success_create_user') %}
-            <div class="alert alert-success" role="alert">
-                <i class="fa fa-check-circle me-2"></i> {{ message }}
-            </div>
-        {% endfor %}
-        {% for message in app.flashes('success_update_user') %}
-            <div class="alert alert-primary" role="alert">
-                <i class="fa fa-edit me-2"></i> {{ message }}
-            </div>
-        {% endfor %}
+    <div class="container mt-5"> 
+        {% include '_notifications.html.twig' with { filter_prefix: 'user_manager.' } %}
     	<div id="user-manager-list">
             <div>
                 <button class="btn btn-primary mt-4 mb-4" id="create-user-btn" data-url="{{ path('user_manager_create') }}">
@@ -73,7 +59,7 @@
                                 %}
                             <button class="btn btn-sm btn-outline-primary edit-user-btn {{ can_edit ? '' : 'disabled opacity-50' }}"
                                     data-user-id="{{ user.id }}"
-                                    title="{{ 'edit'|trans }}"
+                                    title="{{ 'user_list_view.edit'|trans }}"
                                     {% if not can_edit %}disabled{% endif %}>
                                 <span class="btn-opt">
                                     <i class="fa fa-pen" aria-hidden="true"></i>
@@ -84,20 +70,33 @@
                                 ('ROLE_ADMIN' in app.user.roles and 'ROLE_SUPER_ADMIN' not in user.roles)
                             ) %}
 
-                            <a class="btn btn-sm btn-outline-danger {{ can_delete ? '' : 'disabled opacity-50' }}"
-                            href="{{ can_delete ? path('user_manager_delete', {'id': user.id}) : '#' }}"
-                            title="{{ 'delete'|trans }}"
-                            {% if not can_delete %}onclick="return false;"{% else %}onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"{% endif %}>
-                                <span class="btn-opt">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </span>
-                            </a>
+                            {% if can_delete %}
+                                <form method="post" action="{{ path('user_manager_delete', {'id': user.id}) }}" style="display: inline;">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('{{ 'user_manager.confirm_delete'|trans }}');"
+                                            title="{{ 'user_list_view.delete'|trans }}">
+                                        <span class="btn-opt">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </span>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger disabled opacity-50"
+                                        title="{{ 'delete'|trans }}"
+                                        disabled>
+                                    <span class="btn-opt">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            {% endif %}
                         </td>
 
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="6" class="text-center">Aucun utilisateur</td>
+                        <td colspan="6" class="text-center">{{ 'user_manager.no_user'|trans }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

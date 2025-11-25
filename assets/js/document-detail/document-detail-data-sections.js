@@ -122,6 +122,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -239,6 +243,12 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
+            } else {
+                baseUrl = window.location.origin + "/index.php";
             }
 
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
@@ -340,6 +350,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -443,6 +457,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -559,6 +577,10 @@ export class DocumentDetailDataSections {
             if (publicIndex !== -1) {
                 const baseParts = pathParts.slice(0, publicIndex + 1);
                 baseUrl = window.location.origin + baseParts.join('/');
+                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                    baseUrl += "/index.php";
+                }
             } else {
                 baseUrl = window.location.origin + "/index.php";
             }
@@ -704,10 +726,14 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                        baseUrl += "/index.php";
+                    }
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-                
+
                 const referenceUrl = `${baseUrl}/rule/flux/modern/${reference}`;
                 referenceLink = `<a href="${referenceUrl}" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a>`;
             }
@@ -722,10 +748,14 @@ export class DocumentDetailDataSections {
                 if (publicIndex !== -1) {
                     const baseParts = pathParts.slice(0, publicIndex + 1);
                     baseUrl = window.location.origin + baseParts.join('/');
+                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
+                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                        baseUrl += "/index.php";
+                    }
                 } else {
                     baseUrl = window.location.origin + "/index.php";
                 }
-                
+
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
@@ -1175,21 +1205,33 @@ export class DocumentDetailDataSections {
             const rows = historyTable.querySelectorAll('tr');
 
             rows.forEach(row => {
-                const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
-                if (docIdLink) {
-                    const docId = docIdLink.textContent.trim();
-                    if (docId) {
-                        documentIds.push(docId);
+                // Get the status from the last td's span element
+                // Note: The span class uses a special Unicode character (‑) instead of a regular hyphen
+                const statusSpan = row.querySelector('td:last-child span[class*="status"]');
+                const status = statusSpan ? statusSpan.textContent.trim().toLowerCase() : '';
+
+                // Define cancel statuses (matching the same logic from generateDocumentHistory)
+                const isCancelStatus = ['cancel'].includes(status);
+
+                // Only collect IDs of documents NOT already in cancel status
+                if (!isCancelStatus) {
+                    const docIdLink = row.querySelector('td:nth-child(2) a.doc-id');
+                    if (docIdLink) {
+                        const docId = docIdLink.textContent.trim();
+                        if (docId) {
+                            documentIds.push(docId);
+                        }
                     }
                 }
             });
 
             if (documentIds.length === 0) {
-                console.warn('⚠️ No document IDs found in history table');
+                console.warn('⚠️ No documents to cancel (all documents are already in cancel status or table is empty)');
+                this.showErrorNotification('All documents are already in cancel status. Nothing to cancel.');
                 return;
             }
 
-            console.log('📋 Found document IDs:', documentIds);
+            console.log('📋 Found document IDs to cancel:', documentIds);
 
             // Get base URL for the API call
             const pathParts = window.location.pathname.split('/');

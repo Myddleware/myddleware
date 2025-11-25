@@ -26,6 +26,15 @@
 {% block body %} 
     <div style="height: 600px;" class="card">
 		<div id="connexion_connector" class="card-body" >
+		{% for label, messages in app.flashes %}
+			{% set bs = (label in ['error']) ? 'danger' : label %}
+				{% for message in messages %}
+					<div class="alert alert-{{ bs }} alert-dismissible fade show" role="alert">
+					{{ message|trans }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				{% endfor %}
+		{% endfor %}
 			<h1 class="display-6 card-title">{{'create_connector.title'|trans}} </h1>
 			{% include "Connector/connexion.html.twig" with{'solutions':solutions} only %}
 		</div>

@@ -183,7 +183,7 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
-
+            $this->addFlash('account.profile.success', $translator->trans('account.profile.updated_successfully'));
             return $this->redirectToRoute('my_account_old');
         }
         
@@ -191,9 +191,9 @@ class AccountController extends AbstractController
             // If SMTP is not configured, disable 2FA
             if (!$smtpConfigured && $twoFactorAuth->isEnabled()) {
                 $twoFactorAuth->setEnabled(false);
-                $this->addFlash('error', 'Two-factor authentication requires email configuration. Please configure either SMTP settings or Sendinblue API key first.');
+                $this->addFlash('account.twofa.danger', $translator->trans('account.twofa.smtp_required'));
             } else {
-                $this->addFlash('success', 'Two-factor authentication settings updated successfully.');
+                $this->addFlash('account.twofa.success', $translator->trans('account.twofa.updated_successfully'));
             }
             
             $this->entityManager->flush();
@@ -233,13 +233,11 @@ class AccountController extends AbstractController
                 $user->setPassword($newHashedPassword);
                 $em->persist($user);
                 $em->flush();
-                $success = $translator->trans('password_reset.success');
-                $this->addFlash('success', $success);
+                $this->addFlash('account.password.success', $translator->trans('password_reset.success'));
 
                 return $this->redirectToRoute('account_modern');
             } else {
-                $failure = $translator->trans('password_reset.incorrect_password');
-                $this->addFlash('error', $failure);
+                 $this->addFlash('account.password.danger', $translator->trans('password_reset.incorrect_password'));
             }
         }
 

@@ -655,7 +655,8 @@ class moodle extends solution
     protected function getFunctionName($param): string
     {
 		if (
-				$param['call_type'] == 'history'
+				!empty($param['call_type'])
+			AND $param['call_type'] == 'history'
 			AND in_array($param['module'], array('manual_enrol_users', 'manual_unenrol_users'))
 		) {
 			return 'local_myddleware_search_enrolment';

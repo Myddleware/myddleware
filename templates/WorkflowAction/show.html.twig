@@ -12,6 +12,9 @@
 {% endblock titlesm %}
 
 {% block body %}
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'workflowaction.' } %}
+
 	<div id="workflows">
 		<div class="link-help-view text-end mb-4 mx-4">
 			<a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=workflowaction">
@@ -32,11 +35,6 @@
 		</div>
 
 		<div>
-			{% for message in app.flashes('success') %}
-				<div class="alert alert-success" role="alert">
-					{{ message }}
-				</div>
-			{% endfor %}
 
 			{% if workflow is not null %}
 				<div class="container text-left pt-3">

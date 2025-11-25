@@ -1,3 +1,6 @@
+
+{% include '_notifications.html.twig' with { filter_prefix: 'user_manager.create' } %}
+
 {{ form_start(form, {
     action: path('user_manager_create'),
     method: 'POST',

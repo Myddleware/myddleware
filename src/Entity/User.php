@@ -128,6 +128,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
      */
     protected string $date_format = 'd/m/Y';
 
+    /**
+     * @ORM\OneToOne(targetEntity=TwoFactorAuth::class, mappedBy="user", cascade={"remove"})
+     */
+    private ?TwoFactorAuth $twoFactorAuth = null;
+
     public function __construct()
     {
         $this->enabled = false;
@@ -560,6 +565,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
     public function setDateFormat(string $date_format): self
     {
         $this->date_format = $date_format;
+
+        return $this;
+    }
+
+    public function getTwoFactorAuth(): ?TwoFactorAuth
+    {
+        return $this->twoFactorAuth;
+    }
+
+    public function setTwoFactorAuth(?TwoFactorAuth $twoFactorAuth): self
+    {
+        $this->twoFactorAuth = $twoFactorAuth;
 
         return $this;
     }

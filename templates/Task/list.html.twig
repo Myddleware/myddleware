@@ -31,20 +31,18 @@
   {% endif %}
 {% endblock titlesm %} 
 {% block body %} 
+
+	{% include '_notifications.html.twig' with { filter_prefix: 'task.' } %}
+
 	<div id="task" >
 <a href="{{ path('task_stopall') }}">
     <button class="btn btn-danger mb-3 mt-4">
         <i class="fa fa-ban" aria-hidden="true"></i>
-        {{'Stop all the Tasks'}}
+        {{'list_task.stop_all_tasks'|trans}}
     </button>
 </a>
 
 <div>
-	{% for message in app.flashes('success') %}
-		<div class="alert alert-success" role="alert">
-			{{ message }}
-		</div>
-	{% endfor %}
 			{% if nb > 0 %}
 				<div class="table-wrapper table-wrapper-task">
 					<table class="listepager table container shadow-table">
@@ -126,14 +124,20 @@
 			</div>
 				<div class="container task-pagination pt-4" >
 				{% if pager.haveToPaginate %}
-											{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'task_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
+											{{ pagerfanta(pager, 'twitter_bootstrap4', {
+												'routeName': 'task_list_page',
+												'routeParams': {'page': app.request.get('page', 1)},
+												'proximity': 2,
+												'prev_message': 'pagination.previous'|trans,
+												'next_message': 'pagination.next'|trans
+											})|raw }}
 											
 											<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
 												<div class="form-group" required style="width: 15em;">
 													<label for="page" class="sr-only">Page</label>
-													<input type="number" name="page" id="page" class="form-control" placeholder="Page number" min="1" required>
+													<input type="number" name="page" id="page" class="form-control" placeholder="{{ 'pagination.page_number'|trans }}" min="1" required>
 												</div>
-												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >Go to page</button>
+												<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;" >{{ 'pagination.go_to_page'|trans }}</button>
 											</form>
 										
 											<script>

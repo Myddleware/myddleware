@@ -88,7 +88,7 @@ class JobManager
 
     private UpgradeManager $upgrade;
 
-    private EntityManagerInterface $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     private JobRepository $jobRepository;
 
@@ -1622,6 +1622,23 @@ class JobManager
 						$this->setMessage('Running instance : set value  '.$newRunningInstances.' to cronjon '.$cronJob->getId().' ('.$cronJob->getCommand().') ');
 					}
 				}
+        } catch (Exception $e) {
+            $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            return false;
+        }
+        return true;
+    }
+	
+	
+	// Export data to monitoring tool
+    public function monitoring()
+    {
+        try {
+			//Check if the parameter is a rule group 
+			if (!$this->toolsManager->isPremium()) {
+				throw new Exception('The monitoring is a premium feature. Please contact us to get the premium package.');
+			}
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

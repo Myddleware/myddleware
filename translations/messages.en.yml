@@ -55,6 +55,7 @@ panel:
     graph_job_histo:
         title: Jobs history
 create_rule:
+    error_name: A connector already has that name.
     tabs:
         one: Connection
         two: Modules selection
@@ -170,6 +171,9 @@ behavior_filters:
     error_empty: Error if empty
 
 view_rule:
+    execute_id:
+        title: Execute a rule by id
+        run: Run the rule with these ids
     go_connector: Go to connector
     action:
         exec_all: Execute all active rules
@@ -251,56 +255,102 @@ rule:
     select_group: Select a group
     select_value: Select a value
 
-rulegroup:
-    list: Rule groups
-    title: Rule groups
-    create: Create a new rule group
-    back: Back to the list
-    title_one: Rule group
-    details: Details
-    name: Name
-    description: Description
-    status: Status
-    create_by: Created by
-    modified_by: Modified by
-    delete: Delete
-    edit: Editing of a Rule Group
-    updated_successfully: Rule group updated successfully
-    rules: Rules
-    rule_removed_successfully: Rule removed successfully
-    no_rules: No rules in this group
+rulegroup:  
+  create: "Create a rule group"
+  created_successfully: "Rule group created successfully."
+  updated_successfully: "Rule group updated successfully."
+  deleted_successfully: "Rule group deleted successfully."
+  not_found: "Rule group not found."
+  no_available_rules: "No available rules to add to this group."
+  rule_removed_successfully: "Rule removed from the group successfully."
+  rule_added_successfully: "Rule added to the group successfully."
+  confirm_transfer_title: "Confirm rule transfer"
+  confirm_transfer_text: "This rule already belongs to another group. Do you want to transfer it to this group?"
+  title_one: "Rule group"
+  back: "Back to list"
+  edit: "Edit a rule group"
+  delete: "Delete"
+  name: "Name"
+  create_by: "Created by"
+  description: "Description"
+  rules: "Rules"
+  no_rules: "No rules in this group"
+  add_rule: "Add a rule"
+  confirm_delete: "Are you sure you want to delete the rule group \"%name%\"?"
+  remove_rule: "Remove the rule from the group"
+  list: "Rule groups"
+  create_new: "Create a rule group"
+  rulegroup_name : Rule Group Name
+  name_cannot_be_empty: "The name of the Rule group cannot be empty"
+  table:
+    id: "ID"
+    name: "Name"
+    date_created: "Creation date"
+    date_modified: "Modification date"
+    created_by: "Created by"
+    modified_by: "Modified by"
+    description: "Description"
+    title: "Rule groups"
+    create: "Create a new rule group"
+    back: "Back to list"
+    title_one: "Rule group"
+    details: "Details"
+    status: "Status"
+    create_by: "Created by"
+    delete: "Delete"
+    edit: "Edit a rule group"
+    updated_successfully: "Rule group updated successfully"
+    rules: "Rules"
+    rule_removed_successfully: "Rule removed successfully"
+    no_rules: "No rules in this group"
+    options: "Options"
     rule:
-        name: Name
-        module_source: Source module
-        module_target: Target module
-        active: Active
-        confirm_remove_rule: Are you sure you want to remove this rule from the group?
-    add_rule: 'Add Rule'
-    select_rule: 'Select Rule'
-    rule_added_successfully: 'Rule added successfully'
-    confirm_transfer_title: 'Confirm Rule Transfer'
-    confirm_transfer_message: 'The rule "%rule%" is currently in group "%currentGroup%". Do you want to move it to "%newGroup%"?'
-    confirm_transfer: 'Yes, transfer rule'
-    confirm_transfer_final: 'Confirm and transfer rule'
-    cancel: 'Cancel'
-    no_available_rules: 'No available rules'
+      name: "Name"
+      module_source: "Source module"
+      module_target: "Target module"
+      active: "Active"
+      confirm_remove_rule: "Are you sure you want to remove this rule from the group?"
+    add_rule: "Add a rule"
+    select_rule: "Select a rule"
+    rule_added_successfully: "Rule added successfully"
+    confirm_transfer_title: "Confirm rule transfer"
+    confirm_transfer_message: "The rule \"%rule%\" is currently in the group \"%currentGroup%\". Do you want to transfer it to \"%newGroup%\"?"
+    confirm_transfer: "Yes, transfer the rule"
+    cancel: "Cancel"
+    no_available_rules: "No available rules"
+    confirm_transfer_final: "Confirm and transfer the rule"
 
 list_rule:
-    title: Rules
-    total: Number of rules
-    empty: You do not have any rules yet !
-    delete: Are you sure you want to delete this rule?
-    create_first_rule:  You can create your first rule
-    th: 
-        name: Name
-        version: Version
-        active: Activation
-        date_created: Creation date
-        option: Options
-    btn:
-        delete: Delete
-        edit: Edit
-        view: Refer to the form
+  title: "Rules"
+  total: "Number of rules"
+  empty: "You don't have any rules yet!"
+  delete: "Are you sure you want to delete this rule?"
+  save: "Save"
+  create_first_rule: "You can create your first rule"
+  th:
+    name: "Name"
+    version: "Version"
+    active: "Active"
+    date_created: "Creation date"
+    option: "Options"
+  btn:
+    delete: "Delete"
+    edit: "Edit"
+    view: "View"
+
+list_rulegroup:
+  empty: "You don't have any rule group yet!"
+  th:
+    name: "Name"
+    description: "Description"
+
+actions: "Actions"
+
+pagination:
+    previous: Previous
+    next: Next
+    go_to_page: Go to page
+    page_number: Page number
 
 animate:
     rulename: Name of your rule 
@@ -338,6 +388,7 @@ create_connector:
     upload_delete: Deleting file
     params_error: An error occurred while saving the settings
     form_error : Cannot get connector data (solution, fields & parent) 
+    duplicate_name: A connector already has that name.
 
 list_connector:
     empty: You do not have any connectors yet !
@@ -370,6 +421,12 @@ view_connector:
         link_help: Click here to have more information on this connector
     help:
         link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
+
+edit_connector:
+    saved_successfully: Connector saved successfully
+
+delete_connector:
+        success: Connector deleted successfully
 
 list_flux:
     start: Start
@@ -525,6 +582,7 @@ view_flux:
 list_task:
     total: Total of tasks
     empty: No tasks
+    stop_all_tasks: Stop all the Tasks
     th:
         id: Id
         status: Status
@@ -633,6 +691,8 @@ view_workflow_action:
     back: Back to the workflow
     save: Save
     cancel: Cancel
+    updated_successfully: Workflow action updated successfully
+    created_successfully: Workflow action created successfully
 view_account:
     title: My information
     user_info: My Information
@@ -1054,7 +1114,7 @@ management_smtp:
     submit :  Save SMTP config
     cancel: Cancel
     title : SMTP Management
-    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
+    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/6.4/mailer.html" target=_blank>https://symfony.com/doc/6.4/mailer.html</a>'
     sendtestmail: Send test mail
     success: SMTP config saved successfully
     error: Failed to save SMTP config
@@ -1190,6 +1250,9 @@ duplicate_rule:
     success_duplicate: Your rule has been well duplicated
 banner: Crontab is disabled
 variable:
+  created_successfully: "Variable created successfully."
+  updated_successfully: "Variable updated successfully."
+  deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
   edit: Editing of a variable
   back_to_list: Back to the list
@@ -1224,6 +1287,7 @@ premium:
             benefit3: "Benefit 3 description"
 user_manager:
     list: Users
+    no_user: No user
     table:
         username: Username
         email: Email
@@ -1234,7 +1298,157 @@ user_manager:
     create: Create user
     edit: Edit user
     password: Password
+    confirm_delete: Are you sure you want to delete this user?
 success_create_user: User created successfully.
 success_update_user: User updated successfully.
 success_deleted_user: User deleted successfully.
+failed_deleted_user: Failed to delete user
+not_found_user: User not found
 error_generic: An error occurred.
+document:
+  filters:
+    label: "Filters"
+    default: "- Select your filters -"
+    reference: "Reference"
+    date_modif_start: "Date of modification (start)"
+    date_modif_end: "Date of modification (end)"
+    module_source: "Source module"
+    module_target: "Target module"
+    target: "Target ID"
+    status: "Status"
+    type: "Type"
+    source_content: "Source content"
+    target_content: "Target content"
+    message: "Message"
+account:
+  profile:
+    updated_successfully: "Profile updated successfully."
+  twofa:
+    updated_successfully: "Two-factor authentication settings updated successfully."
+    smtp_required: "Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first."
+  password:
+    success: "Password updated successfully."
+    danger: "An error occurred while updating the password."
+
+user_list_view:
+    edit: Edit
+    delete: Delete
+
+smtp_config:
+    "choose_transport": "- Choose transport -"
+    "choose_auth_mode": "- Choose auth mode -"
+    "choose_encryption": "- Choose encryption -"
+    "cram-md5": "Cram-md5"
+    "plain": "Plain"
+    "login": "Login"
+    "oauth": "OAuth"
+    "tls": "TLS"
+    "ssl": "SSL"
+    "transport": "Transport"
+    smtp: "SMTP"
+    gmail: "Gmail"
+    sendmail: "Sendmail"
+    sendinblue: "Sendinblue"
+    "host": "Host"
+    "api_key": "Api key"
+    "port": "Port"
+    "auth_mode": "Auth mode"
+    "encryption": "Encryption"
+    "user": "User"
+    "password": "Password"
+    "sender": "Sender"
+
+rule_list_view:
+    save: Save
+
+
+#rule detail
+rule_detail_view:
+    id: Id
+    edit: Edit
+rule_execute_by_id:
+    separate: separate the ids with comas, no space
+    id: id
+    edit: Edit
+
+new_workflow_view:
+    save: Save
+    created_successfully: Workflow created successfully.
+
+delete_workflow_view:
+    deleted_successfully: Workflow deleted successfully.
+
+#edit workflow
+view_edit_workflow:
+    create: Create workflow
+    workflow_name: Workflow name
+    Rule: Rule
+    Description: Description
+    Order: Order
+    Active: Active
+    Yes: Yes
+    No: No
+    Condition: Condition
+
+view_edit_workflow_action:
+    action_name: Action Name
+    workflow: Workflow
+    select_workflow: Select a workflow
+    description: Description
+    action: Action
+    select_action: Select an action
+    updateStatus: updateStatus
+    generateDocument: generateDocument
+    sendNotification: sendNotification
+    transformDocument: transformDocument
+    rerun: rerun
+    changeData: changeData
+    updateType: updateType
+    order: Order
+    multiple_runs: Multiple Runs
+    yes: Yes
+    no: No
+    status: Status
+    select_status: Select a status
+    new: New
+    predecessor_ok: Predecessor_OK
+    relate_ok: Relate_OK
+    transformed: Transformed
+    ready_to_send: Ready_to_send
+    filter_ok: Filter_OK
+    send: Send
+    filter: Filter
+    no_send: No_send
+    error_expected: Error_expected
+    cancel: Cancel
+    create_ko: Create_KO
+    filter_ko: Filter_KO
+    predecessor_ko: Predecessor_KO
+    relate_ko: Relate_KO
+    error_transformed: Error_transformed
+    error_checking: Error_checking
+    error_sending: Error_sending
+    found: Found
+    not_found: Not_found
+    active: Active
+    to: To
+    subject: Subject
+    message: Message
+    generating_rule: Generating Rule
+    select_rule: Select a rule
+    matching_field_from_generating_rule: Matching Field from Generating Rule
+    select_field: Select a field
+    my_value: my_value
+    name: Name
+    id: id
+    contacts_engages: contacts-engages
+    deleted: deleted
+    matching_field_from_current_rule: Matching Field from Current Rule
+    rerun_label: Rerun
+    document_type: Document Type
+    select_type: Select a type
+    type_c: C
+    type_u: U
+    type_d: D
+    type_s: S
+    target_field: Target Field

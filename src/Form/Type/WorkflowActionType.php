@@ -26,7 +26,7 @@ class WorkflowActionType extends AbstractType
         $entityManager = $options['entityManager'];
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Action Name',
+                'label' => 'view_edit_workflow_action.action_name',
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',

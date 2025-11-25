@@ -1,7 +1,10 @@
 /.idea/
 /.vscode/
 /docker/
-!/docker/etc/crontab
+!/docker/etc/
+!/docker/etc/cron.d/
+!/docker/etc/cron.d/myddleware
+!/docker/script/
 !/docker/script/myddleware-*.sh
 /var/
 .git

@@ -167,7 +167,7 @@ class SecurityController extends AbstractController
                 /** @var User|null $user */
                 $user = $this->userRepository->findOneBy(['email' => $email]);
                 if (!$user) {
-                    $this->addFlash('danger-reset-password', 'No user with this email was found.');
+                    $this->addFlash('security.reset.danger', 'No user with this email was found.');
                     return $this->redirectToRoute('resetting_request');
                 }
 
@@ -176,10 +176,10 @@ class SecurityController extends AbstractController
 
                 try {
                     $this->notificationManager->resetPassword($user);
-                    $this->addFlash('success-reset-password', 'An email has been sent to ' . $user->getEmail() . ' with a password reset link.');
+                    $this->addFlash('security.reset.success', 'An email has been sent to ' . $user->getEmail() . ' with a password reset link.');
                     return $this->redirectToRoute('resetting_request');
                 } catch (Exception $e) {
-                    $this->addFlash('danger', 'Unable to send email. ' . $e->getMessage());
+                    $this->addFlash('security.reset.danger', 'Unable to send email. ' . $e->getMessage());
                     return $this->redirectToRoute('resetting_request');
                 }
             }
@@ -205,7 +205,7 @@ class SecurityController extends AbstractController
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            $this->addFlash('success', 'Password has been successfully reset.');
+            $this->addFlash('security.reset.success', 'Password has been successfully reset.');
             return $this->redirectToRoute('login');
         }
 

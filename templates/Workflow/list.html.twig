@@ -47,16 +47,14 @@
 		</div>
 
 		<div>
-			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'Create new workflow'|trans }}</a>
+			<a href="{{ path('workflow_create') }}" class="btn btn-primary mt-4">{{ 'view_edit_workflow.create'|trans }}</a>
 		</div>
 	</div>
 
 	<div>
-		{% for message in app.flashes('success') %}
-			<div class="alert alert-success" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
+
+		{% include '_notifications.html.twig' with { filter_prefix: 'workflow.' } %}
+
 		{% if nb_workflow > 0 %}
 			<div class="container d-flex justify-content-center align-items-center">
 				<div class="col-md-6">
@@ -85,7 +83,12 @@
 			</div>
 			<div class="d-flex justify-content-center mt-4">
 				{% if pager_workflow_list.haveToPaginate %}
-					{{ pagerfanta(pager_workflow_list, 'twitter_bootstrap4', {'routeName': 'workflow_list_page'}) }}
+					{{ pagerfanta(pager_workflow_list, 'twitter_bootstrap4', {
+						'routeName': 'workflow_list_page',
+						'proximity': 2,
+						'prev_message': 'pagination.previous'|trans,
+						'next_message': 'pagination.next'|trans
+					})|raw }}
 				{% endif %}
 			</div>
 		{% else %}

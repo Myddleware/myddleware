@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
@@ -18,21 +19,27 @@ class RuleGroupType extends AbstractType
         $entityManager = $options['entityManager'];
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Rule Group Name',
+                'label' => 'rulegroup.rulegroup_name',
                 'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'rulegroup.name_cannot_be_empty',
+                        'normalizer' => 'trim',
+                    ]),
+                ],
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ])
             ->add('description', TextType::class, [
-                'label' => 'Description',
+                'label' => 'rulegroup.table.description',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                 ],
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Save',
+                'label' => 'list_rule.save',
                 'attr' => [
                     'class' => 'mt-2 btn btn-primary',
                     ],

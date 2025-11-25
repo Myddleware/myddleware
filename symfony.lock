@@ -224,9 +224,6 @@
             "./config/packages/lexik_jwt_authentication.yaml"
         ]
     },
-    "mautic/api-library": {
-        "version": "2.16.1"
-    },
     "monolog/monolog": {
         "version": "1.26.1"
     },

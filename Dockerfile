@@ -33,10 +33,30 @@ COPY --chown=www-data:www-data . .
 RUN yarn install
 RUN yarn run build
 
+## Create Myddleware cache and job directories with proper permissions
+RUN mkdir -p /var/www/html/var/cache/dev/myddleware/job \
+    /var/www/html/var/cache/prod/myddleware/job && \
+    chown -R www-data:www-data /var/www/html/var/cache && \
+    chmod -R 775 /var/www/html/var/cache
+
 ## Setup Cronjob
-# RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf && rm -fr /etc/cron.* && mkdir /etc/cron.d
-# COPY docker/etc/crontab /etc/
-# RUN chmod 600 /etc/crontab
+RUN apt-get update && apt-get install -y --no-install-recommends cron rsyslog && \
+    apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
+
+# Configure rsyslog to log cron output
+RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf
+
+# Copy cron jobs to /etc/cron.d (system crontab directory)
+COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware
+RUN chmod 644 /etc/cron.d/myddleware && \
+    echo "" && \
+    echo "=== Cron configuration ===" && \
+    echo "Cron file location: /etc/cron.d/myddleware" && \
+    echo "Cron file contents:" && \
+    cat /etc/cron.d/myddleware && \
+    echo "Cron file permissions:" && \
+    ls -la /etc/cron.d/myddleware && \
+    echo "=== End cron configuration ==="
 
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh

@@ -1,0 +1,72 @@
+.mdw-alert{
+  position: relative;
+  display:flex; align-items:center; gap:.6rem;
+  padding:.75rem 2.25rem .75rem .9rem;
+  border-radius:.5rem;
+  font:500 14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+.mdw-alert__bar{
+    position:absolute; 
+    left:0; top:6px; 
+    bottom:6px; width:6px; 
+    border-radius:6px;
+}
+.mdw-alert__icon{
+    font-size:14px; 
+    opacity:.9;
+}
+.mdw-alert__content{
+    flex:1;
+}
+.mdw-alert__close{
+  position:absolute; right:.45rem; top:50%; transform:translateY(-50%);
+  border:0; background:transparent; cursor:pointer; font-size:14px; opacity:.8;
+}
+.mdw-alert__close:hover{
+    opacity:1
+}
+
+.mdw-alert--success{ 
+    background:#eaf7ee; 
+    color:#257a3e 
+}
+.mdw-alert--success .mdw-alert__bar, .mdw-alert--success .mdw-alert__icon, .mdw-alert--success .mdw-alert__close{ 
+    color:#39b66a; 
+    background:transparent 
+}
+.mdw-alert--success .mdw-alert__bar{ 
+    background:#39b66a 
+}
+
+.mdw-alert--info{ 
+    background:#e9f3ff; 
+    color:#165996 
+}
+.mdw-alert--info .mdw-alert__bar{ 
+    background:#56a3ff 
+}
+.mdw-alert--info .mdw-alert__icon, .mdw-alert--info .mdw-alert__close{ 
+    color:#56a3ff 
+}
+
+.mdw-alert--warning{ 
+    background:#fff6e5; 
+    color:#7a4b15 
+}
+.mdw-alert--warning .mdw-alert__bar{ 
+    background:#ffb84d 
+}
+.mdw-alert--warning .mdw-alert__icon, .mdw-alert--warning .mdw-alert__close{ 
+    color:#ffb84d 
+}
+
+.mdw-alert--danger{ 
+    background:#ffe5e7; 
+    color:#b4232b 
+}
+.mdw-alert--danger .mdw-alert__bar{ 
+    background:#ff6b73 
+}
+.mdw-alert--danger .mdw-alert__icon, .mdw-alert--danger .mdw-alert__close{ 
+    color:#ff6b73 
+}

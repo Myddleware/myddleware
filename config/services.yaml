@@ -76,3 +76,10 @@ services:
   # Register Twig extension for date compensation
   App\Twig\DateCompensationExtension:
     tags: ['twig.extension']
+
+  # Register Myddleware cache warmer to create job directory
+  App\CacheWarmer\MyddlewareCacheWarmer:
+    arguments:
+      $cacheDir: '%kernel.cache_dir%'
+    tags:
+      - kernel.cache_warmer

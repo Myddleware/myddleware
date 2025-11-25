@@ -56,15 +56,21 @@
 
 {% if pager.haveToPaginate %}
     <div id="logs-pagination">
-        {{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'workflow_show_logs_page', 'routeParams': {'id': workflow.id}}) }}
+        {{ pagerfanta(pager, 'twitter_bootstrap4', {
+            'routeName': 'workflow_show_logs_page',
+            'routeParams': {'id': workflow.id},
+            'proximity': 2,
+            'prev_message': 'pagination.previous'|trans,
+            'next_message': 'pagination.next'|trans
+        })|raw }}
     </div>
 
     <form id="logs-page-form" method="get" class="form-inline mt-3" onsubmit="goToLogsPage(event)">
         <div class="form-group" required style="width: 15em;">
             <label for="logs-page-input" class="sr-only">Page</label>
-            <input type="number" name="page" id="logs-page-input" class="form-control" placeholder="Page number" min="1" required>
+            <input type="number" name="page" id="logs-page-input" class="form-control" placeholder="{{ 'pagination.page_number'|trans }}" min="1" required>
         </div>
-        <button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">Go to page</button>
+        <button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">{{ 'pagination.go_to_page'|trans }}</button>
     </form>
 
     <script>

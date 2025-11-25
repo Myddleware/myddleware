@@ -83,6 +83,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\RuleGroup;
 use App\Repository\VariableRepository;
 use Symfony\Component\Yaml\Yaml;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
     /**
      * @Route("/rule")
@@ -179,6 +180,15 @@ use Symfony\Component\Yaml\Yaml;
     {
         try {
             $ruleName = $request->query->get('rule_name');
+
+            // get the session and display the flash messages if any
+            $session = $request->getSession();
+
+            foreach ($session->getFlashBag()->all() as $label => $flashes) {
+                foreach ($flashes as $flash) {
+                    $this->addFlash($label, $flash);
+                }
+            }
             
             // Initialize compact array early
             $compact = [
@@ -236,7 +246,8 @@ use Symfony\Component\Yaml\Yaml;
         /**
          * SUPPRESSION D'UNE REGLE.
          *
-         * @Route("/delete/{id}", name="regle_delete")
+         * @Route("/delete/{id}", name="regle_delete", methods={"DELETE","POST"})
+         * @IsGranted("ROLE_ADMIN")
          */
         public function deleteRule(Request $request, $id): RedirectResponse
         {
@@ -496,8 +507,7 @@ use Symfony\Component\Yaml\Yaml;
                         // Save the new rule in the database
                         $this->entityManager->persist($newRule);
                         $this->entityManager->flush();
-                        $success = $translator->trans('duplicate_rule.success_duplicate');
-                        $this->addFlash('success', $success);
+                        $this->addFlash('rule.duplicate.success', $translator->trans('duplicate_rule.success_duplicate'));
                     }
 
                     $this->duplicateWorkflows($id, $newRule);
@@ -669,7 +679,8 @@ use Symfony\Component\Yaml\Yaml;
         /**
          * DELETE ALL TRANSFERS FOR ONE RULE.
          *
-         * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers")
+         * @Route("/view/delete/documents/{id}", name="rule_delete_all_transfers", methods={"DELETE","POST"})
+         * @IsGranted("ROLE_ADMIN")
          */
         public function deleteRuleTransfers($id)
         {
@@ -1274,7 +1285,13 @@ use Symfony\Component\Yaml\Yaml;
                             $nonRequiredFields = $this->getNonRequiredFields();
 
                             // Vérification du nombre de champs
-                            if (isset($param) && (count($param) == count($solution->getFieldsLogin()) || count($param) == count($solution->getFieldsLogin()) - count($nonRequiredFields))) {
+                            // Special exception for Moodle: allow connection if $param has 3 elements but $solution->getFieldsLogin() has 4
+                            $isValidFieldCount = count($param) == count($solution->getFieldsLogin()) || count($param) == count($solution->getFieldsLogin()) - count($nonRequiredFields);
+                            if ($classe === "moodle" && count($param) == 3 && count($solution->getFieldsLogin()) == 4) {
+                                $isValidFieldCount = true;
+                            }
+
+                            if (isset($param) && $isValidFieldCount) {
                                 $result = $solution->login($param);
                                 $r = $solution->connexion_valide;
 
@@ -3300,7 +3317,10 @@ use Symfony\Component\Yaml\Yaml;
     public function execRuleById($id, Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('id', TextareaType::class)
+            ->add('id', TextareaType::class, [
+                'label' => 'rule_execute_by_id.id',
+                'translation_domain' => 'messages',
+            ])
             ->getForm();
 
         $form->handleRequest($request);

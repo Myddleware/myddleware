@@ -16,7 +16,7 @@ class ManagerCompilerPass implements CompilerPassInterface
 									'RuleManager' => 'standard', 
 									'FormulaFunctionManager' => 'standard', 
 									'FormulaManager' => 'standard', 
-									'JobManager' => 'standard', 
+									'JobManager' => 'premium', 
 									'LoadExternalListManager' => 'standard', 
 									'NotificationManager' => 'standard', 
 									'TemplateManager' => 'standard', 

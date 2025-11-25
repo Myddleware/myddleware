@@ -259,7 +259,7 @@ class WorkflowActionController extends AbstractController
                 $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
                 $em->persist($workflowAction);
                 $em->flush();
-                $this->addFlash('success', 'Workflow Action updated successfully');
+                $this->addFlash('workflowaction.success', $translator->trans('view_workflow_action.updated_successfully'));
             } else {
                 $this->addFlash('error', 'Workflow Action not found');
             }
@@ -377,7 +377,7 @@ class WorkflowActionController extends AbstractController
 
                 $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                         ->add('name', TextType::class, [
-                            'label'      => 'Action Name',
+                            'label'      => 'view_edit_workflow_action.action_name',
                             'required'   => true,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -390,7 +390,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('description', TextareaType::class, [
-                            'label'      => 'Description',
+                            'label'      => 'view_edit_workflow_action.description',
                             'row_attr'   => [
                                 'class' => 'mb-3'
                             ],
@@ -407,7 +407,7 @@ class WorkflowActionController extends AbstractController
                             'choice_label' => 'name',
                             'choice_value' => 'id',
                             'constraints'  => [new NotBlank()],
-                            'label'        => 'Workflow',
+                            'label'        => 'view_edit_workflow_action.workflow',
                             'row_attr'     => [
                                 'class' => 'mb-3'
                             ],
@@ -417,18 +417,18 @@ class WorkflowActionController extends AbstractController
                             'attr'         => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'  => 'Select a workflow',
+                            'placeholder'  => 'view_edit_workflow_action.select_workflow',
                         ])
                         ->add('action', ChoiceType::class, [
-                            'label'      => 'Action',
+                            'label'      => 'view_edit_workflow_action.action',
                             'choices'    => [
-                                'updateStatus'     => 'updateStatus',
-                                'generateDocument' => 'generateDocument',
-                                'sendNotification' => 'sendNotification',
-                                'transformDocument'=> 'transformDocument',
-                                'rerun'            => 'rerun',
-                                'changeData'       => 'changeData',
-                                'updateType'       => 'updateType',
+                                'view_edit_workflow_action.updateStatus'     => 'updateStatus',
+                                'view_edit_workflow_action.generateDocument' => 'generateDocument',
+                                'view_edit_workflow_action.sendNotification' => 'sendNotification',
+                                'view_edit_workflow_action.transformDocument'=> 'transformDocument',
+                                'view_edit_workflow_action.rerun'            => 'rerun',
+                                'view_edit_workflow_action.changeData'       => 'changeData',
+                                'view_edit_workflow_action.updateType'       => 'updateType',
                             ],
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -439,7 +439,7 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select an action',
+                            'placeholder'=> 'view_edit_workflow_action.select_action',
                         ])
                         ->add('ruleChangeData', EntityType::class, [
                             'class'        => Rule::class,
@@ -466,8 +466,8 @@ class WorkflowActionController extends AbstractController
                             'choice_label' => 'name',
                             'choice_value' => 'id',
                             'required'     => false,
-                            'label'        => 'Generating Rule',
-                            'placeholder'  => 'Select a rule',
+                            'label'        => 'view_edit_workflow_action.generating_rule',
+                            'placeholder'  => 'view_edit_workflow_action.select_rule',
                             'attr'         => [
                                 'id' => 'form_ruleGenerate',
                                 'class' => 'form-select'
@@ -481,7 +481,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('status', ChoiceType::class, [
-                            'label'      => 'Status',
+                            'label'      => 'view_edit_workflow_action.status',
                             'choices'    => $StringStatus,
                             'required'   => false,
                             'row_attr'   => [
@@ -493,11 +493,11 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select a status',
+                            'placeholder'=> 'view_edit_workflow_action.select_status',
                         ])
                         ->add('to', TextType::class, [
-                            'label'      => 'To',
-                            'mapped'     => false,
+                            'label'      => 'view_edit_workflow_action.to',
+                            'mapped'     => true,
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -510,8 +510,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('subject', TextType::class, [
-                            'label'      => 'Subject',
-                            'mapped'     => false,
+                            'label'      => 'view_edit_workflow_action.subject',
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -524,7 +523,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('message', TextareaType::class, [
-                            'label'      => 'Message',
+                            'label'      => 'view_edit_workflow_action.message',
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -538,7 +537,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('searchField', ChoiceType::class, [
-                            'label'      => 'Matching Field from Generating Rule',
+                            'label'      => 'view_edit_workflow_action.matching_field_from_generating_rule',
                             'choices'    => $sourceSearchValue,
                             'required'   => false,
                             'row_attr'   => [
@@ -550,10 +549,10 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select a field',
+                            'placeholder'=> 'view_edit_workflow_action.select_field',
                         ])
                         ->add('searchValue', ChoiceType::class, [
-                            'label'      => 'Matching Field from Current Rule',
+                            'label'      => 'view_edit_workflow_action.matching_field_from_current_rule',
                             'choices'    => $sourceFields,
                             'required'   => false,
                             'row_attr'   => [
@@ -565,13 +564,13 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select a field',
+                            'placeholder'=> 'view_edit_workflow_action.select_field',
                         ])
                         ->add('rerun', ChoiceType::class, [
-                            'label'      => 'Rerun',
+                            'label'      => 'view_edit_workflow_action.rerun_label',
                             'choices'    => [
-                                'Yes' => true,
-                                'No' => false
+                                'view_edit_workflow_action.yes' => true,
+                                'view_edit_workflow_action.no' => false
                             ],
                             'required'   => false,
                             'row_attr'   => [
@@ -585,12 +584,12 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('documentType', ChoiceType::class, [
-                            'label'      => 'Document Type',
+                            'label'      => 'view_edit_workflow_action.document_type',
                             'choices'    => [
-                                'C' => 'C',
-                                'U' => 'U',
-                                'D' => 'D',
-                                'S' => 'S'
+                                'view_edit_workflow_action.type_c' => 'C',
+                                'view_edit_workflow_action.type_u' => 'U',
+                                'view_edit_workflow_action.type_d' => 'D',
+                                'view_edit_workflow_action.type_s' => 'S'
                             ],
                             'mapped'     => false,
                             'required'   => false,
@@ -603,10 +602,10 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select a type',
+                            'placeholder'=> 'view_edit_workflow_action.select_type',
                         ])
                         ->add('targetField', ChoiceType::class, [
-                            'label'      => 'Target Field',
+                            'label'      => 'view_edit_workflow_action.target_field',
                             'choices'    => [],
                             'required'   => false,
                             'mapped'     => false,
@@ -619,7 +618,7 @@ class WorkflowActionController extends AbstractController
                             'attr'       => [
                                 'class' => 'form-select'
                             ],
-                            'placeholder'=> 'Select a field',
+                            'placeholder'=> 'view_edit_workflow_action.select_field',
                         ])
                         ->add('targetFieldValues', CollectionType::class, [
                             'entry_type'    => TextType::class,
@@ -643,7 +642,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('order', IntegerType::class, [
-                            'label'      => 'Order',
+                            'label'      => 'view_edit_workflow_action.order',
                             'constraints'=> [new Range([
                                 'min' => 0, 'max' => 50,
                                 'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
@@ -659,10 +658,10 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('active', ChoiceType::class, [
-                            'label'      => 'Active',
+                            'label'      => 'view_edit_workflow_action.active',
                             'choices'    => [
-                                'Yes' => 1,
-                                'No' => 0
+                                'view_edit_workflow_action.yes' => 1,
+                                'view_edit_workflow_action.no' => 0
                             ],
                             'row_attr'   => [
                                 'class' => 'mb-3'
@@ -675,10 +674,10 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('multipleRuns', ChoiceType::class, [
-                            'label'      => 'Multiple Runs',
+                            'label'      => 'view_edit_workflow_action.multiple_runs',
                             'choices'    => [
-                                'Yes' => 1,
-                                'No' => 0
+                                'view_edit_workflow_action.yes' => 1,
+                                'view_edit_workflow_action.no' => 0
                             ],
                             'required'   => false,
                             'row_attr'   => [
@@ -801,7 +800,7 @@ class WorkflowActionController extends AbstractController
 
                     $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
 
-                    $this->addFlash('success', 'Action updated successfully');
+                    $this->addFlash('workflowaction.create.success', $this->translator->trans('view_workflow_action.created_successfully'));
 
                     return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
@@ -1054,7 +1053,7 @@ class WorkflowActionController extends AbstractController
 
                 $form = $this->createFormBuilder($formData, ['allow_extra_fields' => true])
                     ->add('name', TextType::class, [
-                        'label'      => 'Action Name',
+                        'label'      => 'view_edit_workflow_action.action_name',
                         'required'   => true,
                         'label_attr' => [
                             'class' => 'form-label'
@@ -1067,7 +1066,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('description', TextareaType::class, [
-                        'label'      => 'Description',
+                        'label'      => 'view_edit_workflow_action.description',
                         'label_attr' => [
                             'class' => 'form-label'
                         ],
@@ -1085,6 +1084,7 @@ class WorkflowActionController extends AbstractController
                         'choice_label' => 'name',
                         'choice_value' => 'id',
                         'constraints'  => [new NotBlank()],
+                        'label'        => 'view_edit_workflow_action.workflow',
                         'label_attr'   => [
                             'class' => 'form-label'
                         ],
@@ -1096,15 +1096,15 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('action', ChoiceType::class, [
-                        'label'      => 'Action',
+                        'label'      => 'view_edit_workflow_action.action',
                         'choices'    => [
-                            'updateStatus'     => 'updateStatus',
-                            'generateDocument' => 'generateDocument',
-                            'sendNotification' => 'sendNotification',
-                            'transformDocument'=> 'transformDocument',
-                            'rerun'            => 'rerun',
-                            'changeData'       => 'changeData',
-                            'updateType'       => 'updateType',
+                            'view_edit_workflow_action.updateStatus'     => 'updateStatus',
+                            'view_edit_workflow_action.generateDocument' => 'generateDocument',
+                            'view_edit_workflow_action.sendNotification' => 'sendNotification',
+                            'view_edit_workflow_action.transformDocument'=> 'transformDocument',
+                            'view_edit_workflow_action.rerun'            => 'rerun',
+                            'view_edit_workflow_action.changeData'       => 'changeData',
+                            'view_edit_workflow_action.updateType'       => 'updateType',
                         ],
                         'label_attr' => [
                             'class' => 'form-label'
@@ -1159,8 +1159,8 @@ class WorkflowActionController extends AbstractController
                         'choice_label' => 'name',
                         'choice_value' => 'id',
                         'required'     => false,
-                        'label'        => 'Generating Rule',
-                        'placeholder'  => 'Select a rule',
+                        'label'        => 'view_edit_workflow_action.generating_rule',
+                        'placeholder'  => 'view_edit_workflow_action.select_rule',
                         'data'         => !empty($arguments['ruleId'])
                                             ? $em->getRepository(Rule::class)->find($arguments['ruleId'])
                                             : null,
@@ -1177,7 +1177,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('status', ChoiceType::class, [
-                        'label'      => 'Status',
+                        'label'      => 'view_edit_workflow_action.status',
                         'choices'    => $StringStatus,
                         'required'   => false,
                         'label_attr' => [
@@ -1191,9 +1191,9 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('to', TextareaType::class, [
-                        'label'      => 'To',
+                        'label'      => 'view_edit_workflow_action.to',
                         'required'   => false,
-                        'mapped'     => false,
+                        'mapped'   => true,
                         'label_attr' => [
                             'class' => 'form-label'
                         ],
@@ -1207,7 +1207,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('subject', TextType::class, [
-                        'label'      => 'Subject',
+                        'label'      => 'view_edit_workflow_action.subject',
                         'required'   => false,
                         'label_attr' => [
                             'class' => 'form-label'
@@ -1221,7 +1221,7 @@ class WorkflowActionController extends AbstractController
                     ])
                     ->add('message', TextareaType::class, [
                         'required'   => false,
-                        'label'      => 'Message',
+                        'label'      => 'view_edit_workflow_action.message',
                         'label_attr' => [
                             'class' => 'form-label'
                         ],
@@ -1235,7 +1235,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('searchField', ChoiceType::class, [
-                        'label'      => 'Matching Field from Generating Rule',
+                        'label'      => 'view_edit_workflow_action.matching_field_from_generating_rule',
                         'choices'    => $sourceSearchValue,
                         'required'   => false,
                         'label_attr' => [
@@ -1249,7 +1249,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('searchValue', ChoiceType::class, [
-                        'label'      => 'Matching field From Current Rule',
+                        'label'      => 'view_edit_workflow_action.matching_field_from_current_rule',
                         'choices'    => $sourceFields,
                         'required'   => false,
                         'label_attr' => [
@@ -1263,10 +1263,10 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('rerun', ChoiceType::class, [
-                        'label'      => 'Rerun',
+                        'label'      => 'view_edit_workflow_action.rerun_label',
                         'choices'    => [
-                            'Yes' => true,
-                            'No'  => false,
+                            'view_edit_workflow_action.yes' => true,
+                            'view_edit_workflow_action.no'  => false,
                         ],
                         'required'   => false,
                         'label_attr' => [
@@ -1280,12 +1280,12 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('documentType', ChoiceType::class, [
-                        'label'      => 'Document Type',
+                        'label'      => 'view_edit_workflow_action.document_type',
                         'choices'    => [
-                            'C' => 'C',
-                            'U' => 'U',
-                            'D' => 'D',
-                            'S' => 'S',
+                            'view_edit_workflow_action.type_c' => 'C',
+                            'view_edit_workflow_action.type_u' => 'U',
+                            'view_edit_workflow_action.type_d' => 'D',
+                            'view_edit_workflow_action.type_s' => 'S',
                         ],
                         'mapped'     => true,
                         'required'   => false,
@@ -1335,7 +1335,7 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('order', IntegerType::class, [
-                        'label'       => 'Order',
+                        'label'       => 'view_edit_workflow_action.order',
                         'constraints' => [
                             new Range([
                                 'min'               => 0,
@@ -1354,10 +1354,10 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('active', ChoiceType::class, [
-                        'label'      => 'Active',
+                        'label'      => 'view_edit_workflow_action.active',
                         'choices'    => [
-                            'Yes' => 1,
-                            'No'  => 0,
+                            'view_edit_workflow_action.yes' => 1,
+                            'view_edit_workflow_action.no'  => 0,
                         ],
                         'label_attr' => [
                             'class' => 'form-label'
@@ -1370,10 +1370,10 @@ class WorkflowActionController extends AbstractController
                         ],
                     ])
                     ->add('multipleRuns', ChoiceType::class, [
-                        'label'      => 'Multiple Runs',
+                        'label'      => 'view_edit_workflow_action.multiple_runs',
                         'choices'    => [
-                            'Yes' => 1,
-                            'No'  => 0,
+                            'view_edit_workflow_action.yes' => 1,
+                            'view_edit_workflow_action.no'  => 0,
                         ],
                         'required'   => false,
                         'label_attr' => [

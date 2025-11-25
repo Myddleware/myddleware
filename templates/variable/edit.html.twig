@@ -10,13 +10,7 @@
             <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2"> {{ 'variable.back_to_list'|trans }}</a>
         </div>
 
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
+{% include '_notifications.html.twig' with { filter_prefix: 'variable.edit' } %}
         
         {{ form_start(form) }}
         <div class="mb-3">

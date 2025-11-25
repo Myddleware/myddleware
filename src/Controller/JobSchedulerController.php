@@ -9,6 +9,7 @@ use App\Entity\JobScheduler;
 use App\Form\JobSchedulerType;
 use App\Form\JobSchedulerCronType;
 use App\Repository\UserRepository;
+use App\Repository\ConfigRepository;
 use App\Manager\JobSchedulerManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
@@ -29,6 +30,7 @@ use App\Command\SynchroCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -250,7 +252,8 @@ class JobSchedulerController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/delete", name="jobscheduler_delete", methods={"GET", "DELETE"})
+     * @Route("/{id}/delete", name="jobscheduler_delete", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
@@ -349,7 +352,7 @@ class JobSchedulerController extends AbstractController
             $maxInstances     = $form->get('maxInstances')->getData();
 
             if ($command === '' || $period === '') {
-                $this->addFlash('error', $translator->trans('crontab.incorrect'));
+                $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
                 return $this->render('JobScheduler/crontab.html.twig', [
                     'entity' => $entity,
                     'form' => $form->createView(),
@@ -370,10 +373,10 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($crontab);
                 $this->entityManager->flush();
 
-                $this->addFlash('success', $translator->trans('crontab.success'));
+                $this->addFlash('jobscheduler.create.success', $translator->trans('crontab.success'));
                 return $this->redirectToRoute('jobscheduler_cron_list');
             } catch (\Throwable $e) {
-                $this->addFlash('error', $translator->trans('crontab.incorrect'));
+                $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
             }
         }
         return $this->render('JobScheduler/crontab.html.twig', [
@@ -395,25 +398,28 @@ class JobSchedulerController extends AbstractController
 
         //Check if crontab is enabled 
         $entitiesCron = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
-		$searchLimit = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit'])->getValue();
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
         //Check the user timezone
-        if ($timezone = '') {
-            $timezone = 'UTC';
-        } else {
-            $timezone = $this->getUser()->getTimezone();
-        }
+        $timezone = $this->getUser() && $this->getUser()->getTimezone()
+                ? $this->getUser()->getTimezone()
+                : 'UTC';
 
         $entity = $this->entityManager->getRepository(CronJob::class)->findAll();
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
 
+        $searchLimit = (int) $searchLimitConfig->getValue();
         // Pagination for cron_job_result
         $query = $this->entityManager->createQuery(
             'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
-        );
-    
-        $adapter = new QueryAdapter($query);
+        )->setMaxResults($searchLimit);
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
         $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(10);
+        $pager->setMaxPerPage(3);
         $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/crontab_list.html.twig', [
@@ -427,7 +433,8 @@ class JobSchedulerController extends AbstractController
     /**
      * Deletes a Crontab entity.
      *
-     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"GET", "DELETE"})
+     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"POST", "DELETE"})
+     * @IsGranted("ROLE_ADMIN")
      */
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
@@ -536,8 +543,8 @@ class JobSchedulerController extends AbstractController
 
             // Validation: runningInstances should never be greater than maxInstances
             if ($newRunningInstances > $newMaxInstances) {
-                $this->addFlash('error', 'Running instances cannot be greater than max instances.');
-        
+                $this->addFlash('jobscheduler.edit.danger', 'Running instances cannot be greater than max instances.');
+
                 return $this->render('JobScheduler/edit_crontab.html.twig', [
                     'entity' => $entity,
                     'edit_form' => $editForm->createView(),
@@ -612,28 +619,41 @@ class JobSchedulerController extends AbstractController
         if (!$this->tools->isPremium()) {
             return $this->redirectToRoute('premium_list');
         }
-
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
+
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find crontab entity.');
         }
 
-        $query = $this->entityManager->createQuery(
-            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c WHERE c.cronJob = :cronJob ORDER BY c.runAt DESC'
-        )->setParameter('cronJob', $id);
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
-        $adapter = new QueryAdapter($query);
-        $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(10);
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
+
+        $searchLimit = (int) $searchLimitConfig->getValue();
+        $query = $this->entityManager->createQuery(
+            'SELECT c
+            FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c
+            WHERE c.cronJob = :cronJob
+            ORDER BY c.runAt DESC'
+        )
+        ->setParameter('cronJob', $id)
+        ->setMaxResults($searchLimit);
+
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
+        $pager   = new \Pagerfanta\Pagerfanta($adapter);
+        $pager->setMaxPerPage(3);
         $pager->setCurrentPage($page);
 
         return $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
-            'pager' => $pager,
+            'pager'  => $pager,
         ]);
     }
-
-    
+        
     /**
      * Disables all cron jobs.
      *
@@ -654,7 +674,7 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.disableAll.danger', $failure);
 
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
@@ -680,7 +700,7 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.enableAll.danger', $failure);
 
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
@@ -707,12 +727,11 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
-            $success = $translator->trans('crontab.disableAllCrons');
-            $this->addFlash('success', $success);
+            $this->addFlash('jobscheduler.disableAllCrons.success', $translator->trans('crontab.disableAllCrons'));
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.disableAllCrons.danger', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
@@ -735,12 +754,11 @@ class JobSchedulerController extends AbstractController
             }
             $this->entityManager->flush();
             // Message success
-            $success = $translator->trans('crontab.enableAllCrons');
-            $this->addFlash('success', $success);
+            $this->addFlash('jobscheduler.enableAllCrons.success', $translator->trans('crontab.enableAllCrons'));
             return $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
-            $this->addFlash('error', $failure);
+            $this->addFlash('jobscheduler.enableAllCrons.danger', $failure);
             return $this->redirectToRoute('jobscheduler_cron_list');
         }
     }
@@ -790,13 +808,22 @@ class JobSchedulerController extends AbstractController
             return $this->redirectToRoute('premium_list');
         }
 
-        $query = $this->entityManager->createQuery(
-            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
-        );
+        $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
 
-        $adapter = new QueryAdapter($query);
-        $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(25);
+        if (!$searchLimitConfig) {
+            throw $this->createNotFoundException('Missing config "search_limit"');
+        }
+
+        $searchLimit = (int) $searchLimitConfig->getValue();
+        $query = $this->entityManager->createQuery(
+            'SELECT c
+            FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c
+            ORDER BY c.runAt DESC')->setMaxResults($searchLimit);
+        $limitedResults = $query->getResult();
+
+        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
+        $pager   = new \Pagerfanta\Pagerfanta($adapter);
+        $pager->setMaxPerPage(10);
         $pager->setCurrentPage($request->query->getInt('page', 1));
 
         return $this->render('JobScheduler/_crontab_results_table.html.twig', [

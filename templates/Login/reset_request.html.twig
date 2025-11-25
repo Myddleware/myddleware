@@ -32,16 +32,7 @@
 
 {% block body %}
 	<div id="reset_password">
-		{% for message in app.flashes('success-reset-password') %}
-			<div class="alert alert-success">
-				{{ message }}
-			</div>
-		{% endfor %}
-		{% for message in app.flashes('danger-reset-password') %}
-			<div class="alert alert-danger">
-				{{ message }}
-			</div>
-		{% endfor %}
+		{% include '_notifications.html.twig' with { filter_prefix: 'security.' } %}
 		{{ form_start(form) }}
 		<div class="input-group">
 			<label for="transport" class="col-sm-2 col-form-label">

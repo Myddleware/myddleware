@@ -362,7 +362,13 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', {
+											'routeParams': { 'id': doc.getId },
+											'routeName': 'flux_modern',
+											'proximity': 2,
+											'prev_message': 'pagination.previous'|trans,
+											'next_message': 'pagination.next'|trans
+										})|raw }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -541,7 +547,13 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex justify-content-center">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', {
+											'routeParams': { 'id': doc.getId },
+											'routeName': 'flux_modern',
+											'proximity': 2,
+											'prev_message': 'pagination.previous'|trans,
+											'next_message': 'pagination.next'|trans
+										})|raw }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -625,7 +637,13 @@
 							{% if pager.haveToPaginate %}
 								<div class="d-flex justify-content-center">
 									{% if pager.haveToPaginate %}
-										{{ pagerfanta(pager, 'twitter_bootstrap4', { 'routeParams' : { 'id': doc.getId }, 'routeName': 'flux_modern' } ) }}
+										{{ pagerfanta(pager, 'twitter_bootstrap4', {
+											'routeParams': { 'id': doc.getId },
+											'routeName': 'flux_modern',
+											'proximity': 2,
+											'prev_message': 'pagination.previous'|trans,
+											'next_message': 'pagination.next'|trans
+										})|raw }}
 									{% endif %}
 								</div>
 							{% endif %}
@@ -635,11 +653,6 @@
 
 
 				{# ------------- MESSAGE ------------- #}
-				{% for message in app.flashes('success') %}
-					<div class="alert alert-success">
-						{{ message }}
-					</div>
-				{% endfor %}
 
 
 				<div class="nbr_and_comment d-flex flex-row justify-content-safe m-2">
