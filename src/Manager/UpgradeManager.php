@@ -232,6 +232,7 @@ class UpgradeManager
         $arguments = [
             'command' => 'doctrine:schema:update',
             '--force' => true,
+            '--complete' => true,
             '--env' => $this->env,
         ];
 
