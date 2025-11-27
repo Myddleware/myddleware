@@ -27,12 +27,17 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Filesystem\Filesystem;
 
 class suitecrm extends solution
 {
     protected int $limitCall = 100;
     protected string $urlSuffix = '/service/v4_1/rest.php';
 
+    protected ?array $cachedSession = null;
+    protected ?int $sessionCacheTime = null;
+    protected int $sessionCacheTTL = 1200; // 20 minutes in seconds
+    protected ?string $cookieFilePath = null;
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
     protected bool $sendDeletion = true;
@@ -110,6 +115,21 @@ class suitecrm extends solution
     {
         parent::login($paramConnexion);
         try {
+            // Initialize cookie file path based on credentials
+            $this->initializeCookieFile();
+
+            // Generate cache key based on login credentials and URL
+            $cacheKey = md5($this->paramConnexion['login'] . $this->paramConnexion['password'] . $this->paramConnexion['url']);
+
+            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+
+            $this->paramConnexion['url'] .= $this->urlSuffix;
+
+            if ($this->isCacheValid($cacheKey)) {
+                $this->session = $this->cachedSession['session_id'];
+                $this->connexion_valide = true;
+                return;
+            }
             $login_paramaters = [
                 'user_auth' => [
                     'user_name' => $this->paramConnexion['login'],
@@ -118,10 +138,6 @@ class suitecrm extends solution
                 ],
                 'application_name' => 'myddleware',
             ];
-            // remove index.php in the url
-            $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
-            // Add the suffix with rest parameters to the url
-            $this->paramConnexion['url'] .= $this->urlSuffix;
 
             $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
 
@@ -131,6 +147,8 @@ class suitecrm extends solution
                 }
 
                 $this->session = $result->id;
+                // Cache the session
+                $this->cacheSession($cacheKey, $result->id);
                 $this->connexion_valide = true;
             } else {
                 throw new \Exception('Please check url');
@@ -149,12 +167,90 @@ class suitecrm extends solution
             $logout_parameters = ['session' => $this->session];
             $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
 
+            // Clear the cached session and cookie file
+            $this->cachedSession = null;
+            $this->sessionCacheTime = null;
+            $this->clearCookieFile();
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Error logout REST '.$e->getMessage());
 
             return false;
         }
+    }
+
+    /**
+     * Clear the cookie file
+     */
+    protected function clearCookieFile(): void
+    {
+        if ($this->cookieFilePath !== null && file_exists($this->cookieFilePath)) {
+            $fs = new Filesystem();
+            $fs->remove($this->cookieFilePath);
+            $this->cookieFilePath = null;
+        }
+    }
+
+    /**
+     * Initialize the cookie file path for this session
+     */
+    protected function initializeCookieFile(): void
+    {
+        if ($this->cookieFilePath !== null) {
+            return; // Already initialized
+        }
+
+        $cacheKey = md5($this->paramConnexion['login'] . $this->paramConnexion['password'] . $this->paramConnexion['url']);
+        $cookieDir = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/solutions/suitecrm';
+        $this->cookieFilePath = $cookieDir . '/cookies_' . $cacheKey . '.txt';
+
+
+        // Create directory if it doesn't exist
+        $fs = new Filesystem();
+        $fs->mkdir($cookieDir);
+
+    }
+
+    /**
+     * Cache the session ID with current timestamp
+     */
+    protected function cacheSession(string $cacheKey, string $sessionId): void
+    {
+
+        $this->cachedSession = [
+            'cache_key' => $cacheKey,
+            'session_id' => $sessionId,
+        ];
+        $this->sessionCacheTime = time(); // current moment
+
+    }
+
+    /**
+     * Check if cached session is still valid (not expired)
+     */
+    protected function isCacheValid(string $cacheKey): bool
+    {
+
+        if ($this->cachedSession === null || $this->sessionCacheTime === null) {
+            return false; // cache not created
+        }
+
+        // Check if cache key matches
+        if ($this->cachedSession['cache_key'] !== $cacheKey) {
+            return false; // cache created but for different credentials
+        }
+
+        // Check if cache has expired (TTL exceeded)
+        $currentTime = time();
+        $cacheAge = $currentTime - $this->sessionCacheTime;
+
+        if ($cacheAge > $this->sessionCacheTTL) { // if cache is too old because its age is superior to TTL
+            $this->cachedSession = null;
+            $this->sessionCacheTime = null;
+            return false;
+        }
+
+        return true;
     }
 
     public function getFieldsLogin(): array
@@ -968,6 +1064,12 @@ class suitecrm extends solution
     {
         try {
             ob_start();
+
+            // we check if we have a cookie file to manage the session
+            if ($this->cookieFilePath && file_exists($this->cookieFilePath)) {
+                $cookieContent = file_get_contents($this->cookieFilePath);
+            }
+
             $curl_request = curl_init();
             curl_setopt($curl_request, CURLOPT_URL, $this->paramConnexion['url']);
             curl_setopt($curl_request, CURLOPT_POST, 1);
@@ -977,6 +1079,11 @@ class suitecrm extends solution
             curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
 
+            // If the cookie is found, we use it for the curl request
+            if ($this->cookieFilePath !== null) {
+                curl_setopt($curl_request, CURLOPT_COOKIEJAR, $this->cookieFilePath);
+                curl_setopt($curl_request, CURLOPT_COOKIEFILE, $this->cookieFilePath);
+            }
             $jsonEncodedData = json_encode($parameters);
             $post = [
                 'method' => $method,
@@ -991,8 +1098,11 @@ class suitecrm extends solution
             if (empty($result)) {
                 return false;
             }
+            // Extract headers and body
             $result = explode("\r\n\r\n", $result, 2);
-            $response = json_decode($result[1]);
+
+            $response = json_decode($result[1] ?? ''); // we add ?? '' to avoid error if index 1 does not exists
+
             ob_end_flush();
 
             return $response;
