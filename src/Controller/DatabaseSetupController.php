@@ -256,6 +256,7 @@ class DatabaseSetupController extends AbstractController
             $input = new ArrayInput([
                 'command' => 'doctrine:schema:update',
                 '--force' => true,
+                '--complete' => true,
                 '--env' => $env,
             ]);
             $output = new BufferedOutput();
