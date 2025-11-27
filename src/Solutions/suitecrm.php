@@ -127,6 +127,7 @@ class suitecrm extends solution
 
             if ($this->isCacheValid($cacheKey)) {
                 $this->session = $this->cachedSession['session_id'];
+                $this->logger->critical("got the cache !");
                 $this->connexion_valide = true;
                 return;
             }
@@ -140,7 +141,6 @@ class suitecrm extends solution
             ];
 
             $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
-            $this->logger->critical("login called with cache changes");
 
             if (false != $result) {
                 if (empty($result->id)) {
