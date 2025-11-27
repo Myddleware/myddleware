@@ -1779,7 +1779,9 @@ class DocumentManager
 						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
 					}
 					// Manage getRecord formula by adding parameters
-					if (strpos($f, 'getRecord') !== false ) {
+					if (strpos($f, 'getRecords') !== false ) {
+						$f = str_replace('getRecords(', 'getRecords($entityManager, $connection, $solutionManager, ', $f);
+					} elseif (strpos($f, 'getRecord') !== false ) {
 						$f = str_replace('getRecord(', 'getRecord($entityManager, $connection, $solutionManager, ', $f);
 					}
                     try {
@@ -1864,6 +1866,7 @@ class DocumentManager
 		if (
 				strpos($formula, 'lookup') !== false
 			 or strpos($formula, 'getRecord') !== false
+			 or strpos($formula, 'getRecords') !== false
 		) {
 			return true;
 		}

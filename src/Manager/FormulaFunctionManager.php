@@ -29,7 +29,7 @@ use App\Entity\DocumentRelationship as DocumentRelationship;
 
 class FormulaFunctionManager
 {
-    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup','getRecord'];
+    protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup','getRecord','getRecords'];
     protected string $path = "App\Manager\FormulaFunctionManager::";
 	
     public function getNamesFunctions(): array
@@ -52,7 +52,7 @@ class FormulaFunctionManager
     {
         if (!empty($this->names)) {
             foreach ($this->names as $name) {
-                $formula = str_replace($name, $this->path.$name, $formula);
+                $formula = str_replace($name.'(', $this->path.$name.'(', $formula);
             }
         }
 
@@ -363,6 +363,55 @@ class FormulaFunctionManager
 				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
 			}
 			return (object)(current($data['values']));
+        } catch (\Exception $e) {
+            if (!$errorIgnore) {
+				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			}
+        }
+		return null;
+	}
+	
+	public static function getRecords($entityManager, $connection, $solutionManager, $connectorId, $module, $field, $searchValue, $searchField = 'id', $errorIgnore = false)
+	{
+		try {
+			// Connect to the application using the connector
+			$connectionSolution = self::connectionSolution($entityManager, $connection, $solutionManager, $connectorId);
+			if (empty($connectionSolution['connexion_valide'])) {
+				throw new \Exception('getRecord : Failed to connect to the solution to read record '.$module.' with value '.$searchValue.'.');
+			}
+			// Prepare parameters t read the data
+			$read['module'] = $module;
+			$read['fields'] = [$field,'id']; // Add id in field list, required for read function
+			$read['offset'] = 0;
+			$read['limit'] = 1000;
+			// Get all the searchFields and searchValues (we can have several search filter separated by commas)
+			$searchFields = explode(',',$searchField);
+			$searchValues = explode(',',$searchValue);
+			// Error if the number of filters is different than the number od values
+			if (count($searchFields) != count($searchValues)) {
+				throw new \Exception('Number of search fields and search values has to be the same. You have '.count($searchFields).' searchFields and '.count($searchValues).' searchValues.');
+			}
+			// Build the query criteria
+			if (!empty($searchFields)) {
+				foreach($searchFields as $key => $value) {
+					$read['query'][$value] = $searchValues[$key];				
+				}
+			}
+			$read['fields'] = array_unique(array_merge($read['fields'], $searchFields));
+			$read['call_type'] = 'getRecords';
+			$read['ruleParams']['mode'] = '0';
+			$read['ruleParams']['fieldId'] = $searchField[0];
+			// Not used because query is used but required for some solutions 
+			$read['ruleParams']['fieldDateRef'] = $searchField[0]; 
+			// Read data from the solution
+			$data = $connectionSolution['solution']->readData($read);
+			if (empty($data['values'])) {
+				throw new \Exception('getRecord : Failed to find the record with calue '.$searchValue.' in the module '.$module.'.');
+			}
+			foreach($data['values'] as $key => $record) {
+				$result[] = $record[$field];
+			}
+			return $result;
         } catch (\Exception $e) {
             if (!$errorIgnore) {
 				new \Exception('Error searchRelateDocumentByStatus  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
