@@ -7,7 +7,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 SHELL=/bin/bash
 
 # Run Myddleware cron every 5 minutes
-*/5 * * * * www-data /usr/local/bin/myddleware-cron.sh >> /var/log/myddleware-cron.log 2>&1
+*/5 * * * * www-data cd /var/www/html && /usr/local/bin/myddleware-cron.sh >> /var/log/myddleware-cron.log 2>&1
 
 # Monitor running jobs every minute
 * * * * * root /usr/local/bin/myddleware-monitor.sh >> /var/log/myddleware-monitor.log 2>&1
