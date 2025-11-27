@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_FILE="var/log/prod.log"
+LOG_FILE="var/log/dev.log"
 TEMP_FILE="${LOG_FILE}.tmp"
 
 # Check if the log file exists
