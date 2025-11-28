@@ -1186,6 +1186,7 @@ install:
     user_setup: Création de vos identifiants utilisateur Myddleware
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     role_admin: Ces identifiants Myddleware auront les droits administrateur
+    super_admin: Faire de cet utilisateur un Super Admin
     check_button: Vérifier
     next: Suivant
     setup_database_button: Configurer la base de données
