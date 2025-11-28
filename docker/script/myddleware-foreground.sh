@@ -27,7 +27,7 @@ mkdir -p /var/log
   ## Cron logs directly to /var/log/myddleware-cron.log instead
   echo "[INFO] Rsyslog not needed (cron logs directly to file)"
 
-  ## Start cron daemon
+  ## Start cron daemon with logging
   echo "[START] Starting cron daemon..."
   if service cron start >> /tmp/cron-start.log 2>&1; then
     echo "[OK] Cron daemon started"
@@ -35,6 +35,18 @@ mkdir -p /var/log
     echo "[ERROR] Cron daemon failed to start"
     cat /tmp/cron-start.log
   fi
+
+  ## Enable cron daemon logging
+  echo "[START] Enabling cron daemon logging..."
+  # Use sed to enable debug logging if available
+  if [ -f /etc/default/cron ]; then
+    sed -i 's/^#EXTRA_OPTS.*/EXTRA_OPTS="-L 2"/' /etc/default/cron || true
+  fi
+
+  ## Reload/verify cron to pick up configuration files
+  echo "[START] Reloading cron daemon..."
+  sleep 1
+  service cron reload 2>/dev/null || true
 
   ## Verify cron configuration
   echo "[VERIFY] Cron configuration..."
@@ -44,14 +56,14 @@ mkdir -p /var/log
   echo "Checking /etc/cron.d/ directory:"
   ls -la /etc/cron.d/
 
+  echo "Cron file contents:"
+  cat /etc/cron.d/myddleware || echo "[WARN] Myddleware cron file not found"
+
   echo "Cron file permissions:"
   ls -la /etc/cron.d/myddleware || echo "[WARN] Myddleware cron file not found"
 
   echo "Cron daemon process:"
   pgrep -l cron || echo "[WARN] No cron process found"
-
-  echo "Cron logs:"
-  tail -20 /var/log/cron.log 2>/dev/null || echo "[INFO] Cron log not yet created"
 
   sleep 2
   echo "[OK] Cron daemon initialized"
