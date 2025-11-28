@@ -28,7 +28,6 @@ require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
-require('./js/connector.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/historique.js')
@@ -94,6 +93,10 @@ require('./js/jobscheduler.js')
 
 if (window.location.href.includes('rule/managementsmtp')) {
     require('./js/smtp.js')
+}
+
+if (window.location.href.includes('rule/connector/create') || window.location.href.match(/rule\/connector\/\d+\/detail/)) {
+    require('./js/connector.js')
 }
 
 if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
