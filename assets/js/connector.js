@@ -41,7 +41,18 @@ $( function() {
 		// Get the connector ID from the form action URL
 		const form = $('form[method="POST"]');
 		const actionUrl = form.attr('action');
-		const connectorId = actionUrl.match(/\/(\d+)$/)[1];
+
+		// If form or action URL is missing, exit early
+		if (!actionUrl) {
+			return false;
+		}
+
+		const connectorMatch = actionUrl.match(/\/(\d+)$/);
+		if (!connectorMatch) {
+			return false;
+		}
+
+		const connectorId = connectorMatch[1];
 
 		// get the window location
 		const windowLocation = window.location.href;
