@@ -37,7 +37,7 @@ if (window.location.href.includes('rule/create/step3') || window.location.href.i
 require('./js/mappingRule.js')
 }
 
-if (!(window.location.href.includes('install'))) {
+if (!(window.location.href.includes('install')) || window.location.href.includes('register')) {
 require('./js/historique.js')
 }
 
