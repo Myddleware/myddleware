@@ -30,13 +30,17 @@ require('./js/animation.js')
 require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
-require('./js/historique.js')
 require('./js/rule-group.js')
 require('./js/notifications.js')
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
 }
+
+if (!(window.location.href.includes('install'))) {
+require('./js/historique.js')
+}
+
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
