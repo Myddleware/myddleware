@@ -59,6 +59,12 @@ class RegistrationController extends AbstractController
             );
 
                 $user->addRole('ROLE_ADMIN');
+
+                // promote to super admin if checkbox is checked
+                if ($form->get('superAdmin')->getData()) {
+                    $user->addRole('ROLE_SUPER_ADMIN');
+                }
+
                 // allows user to login to Myddleware
                 $user->setEnabled(true);
                 $user->setUsernameCanonical($user->getUsername());

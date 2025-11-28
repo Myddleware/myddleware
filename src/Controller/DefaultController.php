@@ -1069,6 +1069,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
                 throw $this->createNotFoundException('Couldn\'t find specified rule in database');
             }
 
+            // if the rule is deleted, then add a warning flash message saying that it is deleted
+            if (!empty($rule->getDeleted())) {
+                $this->addFlash('rule.detail.warning', $this->translator->trans('panel.rule_deleted'));
+            }
+
             // Liste des relations
             $rule_relationships = $rule->getRelationsShip();
             $solution_cible_nom = $rule->getConnectorTarget()->getSolution()->getName();

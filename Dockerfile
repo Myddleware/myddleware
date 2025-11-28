@@ -40,15 +40,17 @@ RUN mkdir -p /var/www/html/var/cache/dev/myddleware/job \
     chmod -R 775 /var/www/html/var/cache
 
 ## Setup Cronjob
-RUN apt-get update && apt-get install -y --no-install-recommends cron rsyslog && \
+RUN apt-get update && apt-get install -y --no-install-recommends cron && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
-# Configure rsyslog to log cron output
-RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf
+# Note: rsyslog is not installed because it requires systemd which is not available in Docker
+# Cron jobs output directly to log files instead
 
 # Copy cron jobs to /etc/cron.d (system crontab directory)
 COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware
 RUN chmod 644 /etc/cron.d/myddleware && \
+    mkdir -p /var/log && \
+    chmod 777 /var/log && \
     echo "" && \
     echo "=== Cron configuration ===" && \
     echo "Cron file location: /etc/cron.d/myddleware" && \
@@ -56,11 +58,16 @@ RUN chmod 644 /etc/cron.d/myddleware && \
     cat /etc/cron.d/myddleware && \
     echo "Cron file permissions:" && \
     ls -la /etc/cron.d/myddleware && \
+    echo "Log directory permissions:" && \
+    ls -la /var/log && \
     echo "=== End cron configuration ==="
 
 ## Entrypoint and scripts
 COPY ./docker/script/myddleware-foreground.sh /usr/local/bin/myddleware-foreground.sh
 COPY ./docker/script/myddleware-cron.sh /usr/local/bin/myddleware-cron.sh
+COPY ./docker/script/myddleware-health-check.sh /usr/local/bin/myddleware-health-check.sh
+COPY ./docker/script/test-cron.sh /usr/local/bin/test-cron.sh
+COPY ./docker/script/verify-cron-execution.sh /usr/local/bin/verify-cron-execution.sh
 
-RUN chmod +x /usr/local/bin/myddleware-*.sh
+RUN chmod +x /usr/local/bin/myddleware-*.sh /usr/local/bin/test-cron.sh /usr/local/bin/verify-cron-execution.sh
 CMD ["myddleware-foreground.sh"]
