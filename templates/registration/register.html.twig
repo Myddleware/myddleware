@@ -31,8 +31,11 @@
                                         <div class="mb-2 text-left">
                                             {{ form_row(registrationForm.plainPassword, {
                                                 label: 'Password'
-                                                }) 
+                                                })
                                             }}
+                                        </div>
+                                        <div class="mb-3 form-check">
+                                            {{ form_row(registrationForm.superAdmin) }}
                                         </div>
                                     <div class="d-grid mt-4">
                                         <button type="submit" class="btn btn-primary btn-lg">Register</button>

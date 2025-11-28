@@ -51,6 +51,14 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('superAdmin', CheckboxType::class, [
+                'label' => 'Make this user a Super Admin',
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-check-input',
+                ],
+            ])
         ;
     }
 
