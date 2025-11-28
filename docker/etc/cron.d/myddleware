@@ -4,5 +4,8 @@ SHELL=/bin/bash
 # Run Myddleware cron every minute - output directly to log (rsyslog not available in Docker)
 # */1 * * * * www-data /usr/local/bin/myddleware-cron.sh >> /var/log/myddleware-cron.log 2>&1
 
+# Synchronization task every 5 minutes
+#*/5 * * * * cd /var/www/html && /usr/local/bin/php bin/console myddleware:synchro ALL --env=background >> /var/log/cron.log 2>&1
+
 # Monitor running jobs every minute - disabled until myddleware-monitor.sh is implemented
 # * * * * * root /usr/local/bin/myddleware-monitor.sh >> /var/log/myddleware-monitor.log 2>&1
