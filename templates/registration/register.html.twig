@@ -35,7 +35,8 @@
                                             }}
                                         </div>
                                         <div class="mb-3 form-check">
-                                            {{ form_row(registrationForm.superAdmin) }}
+                                            {{ form_widget(registrationForm.superAdmin) }}
+                                            {{ form_label(registrationForm.superAdmin, 'Make this user a Super Admin', { label_attr: { class: 'form-check-label' } }) }}
                                         </div>
                                     <div class="d-grid mt-4">
                                         <button type="submit" class="btn btn-primary btn-lg">Register</button>
