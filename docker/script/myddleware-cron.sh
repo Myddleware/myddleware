@@ -1,16 +1,43 @@
 #!/bin/bash
 
-mkdir -p var/cache var/log
-chmod -R 700 var/cache
-chown -R www-data:www-data var/cache
-chmod -R 700 var/log
-chown -R www-data:www-data var/log
+# Myddleware cron execution script
+# This script is called by the cron daemon every minute
 
-## Extend Hosts
-echo "====[ UPDATE HOSTS ]===="
-cat hosts >> /etc/hosts
-cat /etc/hosts
-echo "--"
+set -e
 
-## Start job
-php bin/console myddleware:cronrun --env=background
+# Ensure we're in the correct directory
+if [ ! -f "bin/console" ]; then
+  cd /var/www/html || exit 1
+fi
+
+# Log function
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
+# Error handling
+on_error() {
+  log "ERROR: Cron job failed with exit code $?"
+  exit 1
+}
+
+trap on_error ERR
+
+log "Starting Myddleware cron job"
+
+# Verify directory permissions
+if [ ! -d "var/cache" ] || [ ! -d "var/log" ]; then
+  log "Creating cache and log directories..."
+  mkdir -p var/cache var/log
+  chmod -R 700 var/cache
+  chmod -R 700 var/log
+  chown -R www-data:www-data var/cache var/log
+fi
+
+# Run the cron command
+log "Executing: php bin/console myddleware:cronrun --env=background"
+if php bin/console myddleware:cronrun --env=background 2>&1; then
+  log "Cron job completed successfully"
+else
+  log "Cron job finished with warnings or errors"
+fi
