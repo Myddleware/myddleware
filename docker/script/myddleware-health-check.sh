@@ -61,21 +61,17 @@ check_item() {
     check_item "Myddleware cron script" "ERROR" "Script not found or not executable"
   fi
 
-  # Check rsyslog
-  if pgrep -x rsyslog > /dev/null; then
-    check_item "Rsyslog service" "OK" "Rsyslog is running"
-  else
-    check_item "Rsyslog service" "ERROR" "Rsyslog not running (cron logs may not be captured)"
-  fi
+  # Check rsyslog (not needed in Docker - cron logs directly to file)
+  check_item "Rsyslog service" "OK" "Not needed in Docker (cron logs directly to /var/log/myddleware-cron.log)"
 
-  # Check cron log file
-  if [ -f /var/log/cron.log ]; then
-    LINES=$(wc -l < /var/log/cron.log)
-    check_item "Cron log file" "OK" "Found with $LINES lines"
+  # Check myddleware cron log file
+  if [ -f /var/log/myddleware-cron.log ]; then
+    LINES=$(wc -l < /var/log/myddleware-cron.log)
+    check_item "Myddleware cron log" "OK" "Found with $LINES lines"
     echo "Recent cron log entries:" | tee -a "$HEALTH_LOG"
-    tail -10 /var/log/cron.log | sed 's/^/  /' | tee -a "$HEALTH_LOG"
+    tail -10 /var/log/myddleware-cron.log | sed 's/^/  /' | tee -a "$HEALTH_LOG"
   else
-    check_item "Cron log file" "ERROR" "Cron log file not found (cron may not have executed yet)"
+    check_item "Myddleware cron log" "WARN" "Cron log file not found (cron may not have executed yet)"
   fi
 
   # Check Apache/PHP

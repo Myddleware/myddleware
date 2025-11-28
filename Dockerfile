@@ -40,11 +40,11 @@ RUN mkdir -p /var/www/html/var/cache/dev/myddleware/job \
     chmod -R 775 /var/www/html/var/cache
 
 ## Setup Cronjob
-RUN apt-get update && apt-get install -y --no-install-recommends cron rsyslog && \
+RUN apt-get update && apt-get install -y --no-install-recommends cron && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
-# Configure rsyslog to log cron output
-RUN echo "cron.* /var/log/cron.log" >> /etc/rsyslog.conf
+# Note: rsyslog is not installed because it requires systemd which is not available in Docker
+# Cron jobs output directly to log files instead
 
 # Copy cron jobs to /etc/cron.d (system crontab directory)
 COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware

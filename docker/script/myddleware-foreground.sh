@@ -23,14 +23,9 @@ mkdir -p /var/log
     echo "[WARN] No hosts file found"
   fi
 
-  ## Start logging services
-  echo "[START] Starting rsyslog service..."
-  if service rsyslog start >> /tmp/rsyslog.log 2>&1; then
-    echo "[OK] Rsyslog started"
-  else
-    echo "[ERROR] Rsyslog failed to start"
-    cat /tmp/rsyslog.log
-  fi
+  ## Note: rsyslog is not used in Docker (requires systemd)
+  ## Cron logs directly to /var/log/myddleware-cron.log instead
+  echo "[INFO] Rsyslog not needed (cron logs directly to file)"
 
   ## Start cron daemon
   echo "[START] Starting cron daemon..."
