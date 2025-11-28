@@ -49,6 +49,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends cron && \
 # Copy cron jobs to /etc/cron.d (system crontab directory)
 COPY docker/etc/cron.d/myddleware /etc/cron.d/myddleware
 RUN chmod 644 /etc/cron.d/myddleware && \
+    mkdir -p /var/log && \
+    chmod 777 /var/log && \
     echo "" && \
     echo "=== Cron configuration ===" && \
     echo "Cron file location: /etc/cron.d/myddleware" && \
@@ -56,6 +58,8 @@ RUN chmod 644 /etc/cron.d/myddleware && \
     cat /etc/cron.d/myddleware && \
     echo "Cron file permissions:" && \
     ls -la /etc/cron.d/myddleware && \
+    echo "Log directory permissions:" && \
+    ls -la /var/log && \
     echo "=== End cron configuration ==="
 
 ## Entrypoint and scripts
