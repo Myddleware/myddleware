@@ -1191,7 +1191,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	left: 225px;
     bottom: -5px;
 }
-#rulename-spinner, #source-connector-spinner, #target-connector-spinner, #target-module-spinner, #source-module-spinner{
+#rulename-spinner, #source-connector-spinner, #target-connector-spinner, #target-module-spinner, #source-module-spinner, .spinner-template{
     color: #05bfe6;
 }
 
@@ -1305,4 +1305,12 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 #template-rule-create{
 	display: contents;
+}
+
+.badge-rule-template{	
+    font-size: smaller;
+    border-radius: 20px;
+    background-color: #fff;
+    color: #000000;
+    border: 2px dashed #03c4eb;
 }

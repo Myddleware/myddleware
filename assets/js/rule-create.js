@@ -1687,3 +1687,256 @@ window.makeSelectSearchable = function (selectEl) {
   // Petit log pour vérifier que c'est bien passé
   console.log('[makeSelectSearchable] Selectize initialisé sur', selectEl.id, instance);
 };
+/* ===========================================
+ * TEMPLATE MODE SWITCH
+ * =========================================== */
+(function () {
+  const switchEl = document.getElementById('template-mode-switch');
+  if (!switchEl) return;
+
+  const ruleCreate       = document.getElementById('rule-create');
+  const step1            = document.getElementById('step-1');
+  const step3            = document.getElementById('step-3');
+  const step4            = document.getElementById('step-4');
+  const step5            = document.getElementById('step-5');
+  const srcModuleGroup   = document.getElementById('source-module-group');
+  const tgtModuleGroup   = document.getElementById('target-module-group');
+  const stepTemplates    = document.getElementById('step-templates');
+
+  function clearWizardExceptStep1() {
+    if (!ruleCreate || !step1) return;
+
+    const fields = ruleCreate.querySelectorAll('input, textarea, select');
+    fields.forEach(el => {
+      if (step1.contains(el)) return;
+
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else {
+        el.value = '';
+      }
+
+      el.classList?.remove('is-valid', 'is-invalid');
+    });
+
+    const filtersList = document.getElementById('rule-filters-list');
+    if (filtersList) {
+      filtersList.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
+    }
+
+    const mappingBody = document.getElementById('rule-mapping-body');
+    if (mappingBody) {
+      mappingBody.innerHTML = '';
+    }
+  }
+
+  function applyTemplateMode(isTemplate) {
+    clearWizardExceptStep1();
+
+    if (isTemplate) {
+      srcModuleGroup && srcModuleGroup.classList.add('d-none');
+      tgtModuleGroup && tgtModuleGroup.classList.add('d-none');
+
+      stepTemplates && stepTemplates.classList.remove('d-none');
+
+      step3 && step3.classList.add('d-none');
+      step4 && step4.classList.add('d-none');
+      step5 && step5.classList.add('d-none');
+    } else {
+      srcModuleGroup && srcModuleGroup.classList.remove('d-none');
+      tgtModuleGroup && tgtModuleGroup.classList.remove('d-none');
+      stepTemplates && stepTemplates.classList.add('d-none');
+      step3 && step3.classList.add('d-none');
+      step4 && step4.classList.add('d-none');
+      step5 && step5.classList.add('d-none');
+    }
+
+    if (typeof window.updateRuleNavLinks === 'function') {
+      window.updateRuleNavLinks();
+    }
+  }
+  switchEl.addEventListener('change', function () {
+    applyTemplateMode(this.checked);
+  });
+})();
+/* ===========================================
+ * TEMPLATE LIST LOADER
+ * =========================================== */
+(function () {
+  const step2        = document.getElementById('step-2');
+  if (!step2) return;
+
+  const templatesUrl = step2.getAttribute('data-path-templates');
+  const templateZone = document.getElementById('rule-template-zone');
+  const srcSol       = document.getElementById('source-solution');
+  const tgtSol       = document.getElementById('target-solution');
+  const switchEl     = document.getElementById('template-mode-switch');
+
+  if (!templatesUrl || !templateZone || !srcSol || !tgtSol || !switchEl) {
+    return;
+  }
+
+  function loadTemplates() {
+    if (!switchEl.checked) return;
+
+    const srcOpt = srcSol.options[srcSol.selectedIndex];
+    const tgtOpt = tgtSol.options[tgtSol.selectedIndex];
+
+    const srcSlug = srcOpt ? srcOpt.getAttribute('data-solution-slug') : '';
+    const tgtSlug = tgtOpt ? tgtOpt.getAttribute('data-solution-slug') : '';
+
+    if (!srcSlug || !tgtSlug) {
+      templateZone.innerHTML =
+        '<p class="text-muted mb-0">Select a source and target solution to see the available templates</p>';
+      return;
+    }
+
+    const params = new URLSearchParams({
+      src_solution: srcSlug,
+      tgt_solution: tgtSlug
+    });
+
+    templateZone.innerHTML = `
+      <div class="text-center py-4">
+        <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+      </div>`;
+
+    fetch(`${templatesUrl}?${params.toString()}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(res => res.text())
+      .then(html => {
+        templateZone.innerHTML = html || '<p class="text-muted mb-0">No templates available for this combination.</p>';
+      })
+      .catch(() => {
+        templateZone.innerHTML = '<p class="text-danger mb-0">Error loading templates</p>';
+      });
+  }
+
+  switchEl.addEventListener('change', function () {
+    if (this.checked) {
+      loadTemplates();
+    }
+  });
+
+  srcSol.addEventListener('change', loadTemplates);
+  tgtSol.addEventListener('change', loadTemplates);
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.js-template-choose');
+    if (!btn) return;
+
+    const card = btn.closest('.template-card');
+    if (!card) return;
+
+    document.querySelectorAll('.template-card.is-selected')
+      .forEach(c => c.classList.remove('is-selected'));
+    card.classList.add('is-selected');
+
+    let hidden = document.getElementById('selected-template-name');
+    if (!hidden) {
+      hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.id = 'selected-template-name';
+      hidden.name = 'selected_template_name';
+      document.getElementById('step-1')?.appendChild(hidden);
+    }
+    hidden.value = btn.dataset.templateName || '';
+  });
+})();
+
+/* ===========================================
+ * TEMPLATE — SAVE RULE FROM TEMPLATE
+ * =========================================== */
+(function () {
+  const btnTemplateSave = document.getElementById('rule-save-template');
+  const switchEl        = document.getElementById('template-mode-switch');
+  if (!btnTemplateSave || !switchEl) return;
+
+  const rulenameInput   = document.getElementById('rulename');
+  const srcConnSelect   = document.getElementById('source-connector');
+  const tgtConnSelect   = document.getElementById('target-connector');
+
+  function getSelectedTemplateName() {
+    const hidden = document.getElementById('selected-template-name');
+    return hidden ? (hidden.value || '').trim() : '';
+  }
+
+  btnTemplateSave.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!switchEl.checked) {
+      alert('Le mode template n\'est pas activé.');
+      return;
+    }
+
+    const ruleName   = (rulenameInput?.value || '').trim();
+    const template   = getSelectedTemplateName();
+    const srcConnId  = srcConnSelect?.value || '';
+    const tgtConnId  = tgtConnSelect?.value || '';
+    const endpoint   = btnTemplateSave.getAttribute('data-path-template-apply') || '';
+
+    if (!endpoint) {
+      alert('Missing template backup endpoint');
+      return;
+    }
+    if (!ruleName) {
+      alert('Please enter a rule name');
+      return;
+    }
+    if (!template) {
+      alert('Please select a template');
+      return;
+    }
+    if (!srcConnId || !tgtConnId) {
+      alert('Please select a source connector and a target connector');
+      return;
+    }
+
+    const payload = {
+      ruleName: ruleName,
+      templateName: template,
+      connectorSourceId: srcConnId,
+      connectorTargetId: tgtConnId
+    };
+
+    btnTemplateSave.disabled = true;
+    const originalLabel = btnTemplateSave.innerHTML;
+    btnTemplateSave.innerHTML = '<span class="spinner-template spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+
+    fetch(endpoint, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  },
+  body: JSON.stringify(payload)
+})
+  .then(async (res) => {
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error('La réponse du serveur n\'est pas un JSON');
+    }
+
+    if (!data || data.success !== true) {
+      throw new Error(data && data.message ? data.message : 'Save failed');
+    }
+
+    if (data.redirect) {
+      window.location.assign(data.redirect);
+    } else {
+    }
+  })
+  .catch(err => {
+    alert(err.message || 'Error');
+  })
+  .finally(() => {
+    btnTemplateSave.disabled = false;
+    btnTemplateSave.innerHTML = originalLabel;
+  });
+
+  });
+})();

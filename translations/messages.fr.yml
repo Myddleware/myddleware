@@ -371,6 +371,10 @@ actions: "Actions"
 animate:
     template:
         title: Template
+        success: Votre template a fonctionné avec succès
+        rule: règles
+        other_rule: autre règle
+        use: Utilisez ce template
     ruleconnection: Règle connection
     rulename: Nom de votre règle 
     wait: Veuillez patienter...

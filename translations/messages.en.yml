@@ -372,6 +372,10 @@ actions: "Actions"
 animate:
     template:
         title: Template
+        success: Your template worked successfully
+        rule: rules
+        other_rule: other rule
+        use: Use this template
     ruleconnection: Rule connection
     rulename: Name of your rule
     title: Rule Details
