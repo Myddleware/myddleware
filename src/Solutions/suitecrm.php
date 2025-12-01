@@ -462,7 +462,7 @@ class suitecrm extends solution
 			}
             return $this->moduleFields;
         } catch (\Exception $e) {
-            return false;
+            return [];
         }
     }
 
