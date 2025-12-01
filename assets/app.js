@@ -99,7 +99,16 @@ if (window.location.href.includes('rule/managementsmtp')) {
     require('./js/smtp.js')
 }
 
-if (window.location.href.includes('rule/connector/create') || window.location.href.match(/rule\/connector\/\d+\/detail/)) {
+if (
+    (
+        window.location.href.includes('rule/connector/create') ||
+        window.location.href.match(/rule\/connector\/\d+\/detail/)
+    )
+    && 
+    !(window.location.href.includes('install')) 
+    && 
+    !(window.location.href.includes('register'))
+) {
     require('./js/connector.js')
 }
 
@@ -110,12 +119,6 @@ if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
 if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
     require('./js/workflowActionSearchFields.js')
 }
-
-
-if (!(window.location.href.includes('install'))) {
-    require('./js/historique.js')
-}
-
 
 if (window.location.href.includes('flux')) {
     require('./js/imagemousehoverbutton.js')
