@@ -1,4 +1,4 @@
-FROM php:8.2-apache-bookworm
+FROM php:8.5-apache-bookworm
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
