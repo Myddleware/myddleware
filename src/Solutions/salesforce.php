@@ -411,7 +411,7 @@ class salesforce extends solution {
 								$row['date_modified'] = $record[$key];
 							}
 							// Manage relationship fields stored in a sub array
-							elseif(
+							if(
 									$key != 'attributes'
 								AND	is_array($record[$key])
 							) {
