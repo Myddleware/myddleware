@@ -251,6 +251,7 @@ class suitecrm extends solution
         // Check if cache key matches
         if ($this->cachedSession['cache_key'] !== $cacheKey) {
             $this->logger->critical("wrong credentials");
+            $this->clearCookieFile(); // because the cache wrong or corrupted, clear the file
             return false; // cache created but for different credentials
         }
 
