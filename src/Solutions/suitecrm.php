@@ -127,7 +127,7 @@ class suitecrm extends solution
 
             if ($this->isCacheValid($cacheKey)) {
                 $this->session = $this->cachedSession['session_id'];
-                $this->logger->critical("got the cache !");
+                $this->logger->critical("cache is valid, skipping login");
                 $this->connexion_valide = true;
                 return;
             }
@@ -168,10 +168,6 @@ class suitecrm extends solution
             $logout_parameters = ['session' => $this->session];
             $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
 
-            // Clear the cached session and cookie file
-            $this->cachedSession = null;
-            $this->sessionCacheTime = null;
-            $this->clearCookieFile();
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Error logout REST '.$e->getMessage());
@@ -231,13 +227,30 @@ class suitecrm extends solution
      */
     protected function isCacheValid(string $cacheKey): bool
     {
-
+        // If class variables are null, check if the session file exists on disk
         if ($this->cachedSession === null || $this->sessionCacheTime === null) {
-            return false; // cache not created
+            $cookieFilePath = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/solutions/suitecrm/cookies_' . $cacheKey . '.txt';
+
+            if (file_exists($cookieFilePath)) {
+                // Session file exists, extract session ID from cookie file
+                $sessionId = $this->extractSessionIdFromCookieFile($cookieFilePath);
+                if (empty($sessionId)) {
+                    return false;
+                }
+
+                // Load it into class variables and validate
+                $this->cookieFilePath = $cookieFilePath;
+                $this->cachedSession = ['cache_key' => $cacheKey, 'session_id' => $sessionId];
+                $this->sessionCacheTime = filemtime($cookieFilePath);
+                $this->logger->critical("session file found on disk, loading from file");
+            } else {
+                return false; // cache not used
+            }
         }
 
         // Check if cache key matches
         if ($this->cachedSession['cache_key'] !== $cacheKey) {
+            $this->logger->critical("wrong credentials");
             return false; // cache created but for different credentials
         }
 
@@ -248,10 +261,56 @@ class suitecrm extends solution
         if ($cacheAge > $this->sessionCacheTTL) { // if cache is too old because its age is superior to TTL
             $this->cachedSession = null;
             $this->sessionCacheTime = null;
+            $this->clearCookieFile(); // because the cache is too old, empty the file
+            $this->logger->critical("expired cache");
+            return false;
+        }
+
+        // Check if the session file still exists
+        if ($this->cookieFilePath === null || !file_exists($this->cookieFilePath)) {
+            $this->cachedSession = null;
+            $this->sessionCacheTime = null;
+            $this->logger->critical("session file not found");
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Extract session ID from the Netscape cookie file
+     */
+    protected function extractSessionIdFromCookieFile(string $filePath): ?string
+    {
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (empty($lines)) {
+            return null;
+        }
+
+        foreach ($lines as $line) {
+            // Skip comment lines
+            if (strpos($line, 'LEGACYSESSID') === 0) {
+                continue;
+            }
+
+            // Parse Netscape cookie format: domain, flag, path, secure, expiration, name, value
+            $parts = preg_split('/\t+/', trim($line));
+            if (count($parts) >= 7) {
+                $cookieName = $parts[5];
+                $cookieValue = $parts[6];
+
+                // Look for LEGACYSESSID cookie
+                if ($cookieName === 'LEGACYSESSID') {
+                    return $cookieValue;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function getFieldsLogin(): array
@@ -1081,7 +1140,7 @@ class suitecrm extends solution
             curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
 
             // If the cookie is found, we use it for the curl request
-            if ($this->cookieFilePath !== null) {
+            if ($this->cookieFilePath !== null && $method == 'login') {
                 curl_setopt($curl_request, CURLOPT_COOKIEJAR, $this->cookieFilePath);
                 curl_setopt($curl_request, CURLOPT_COOKIEFILE, $this->cookieFilePath);
             }
