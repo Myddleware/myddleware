@@ -56,4 +56,4 @@ security:
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/rulegroup/, role: ROLE_USER }
         - { path: ^/workflow/, role: ROLE_USER }
-        - { path: ^/variables/, role: ROLE_USER }
+        - { path: ^/variables, role: ROLE_USER }
